@@ -1,0 +1,126 @@
+# PB_site_architecture — ГЛИБИНА award-ЖК сайту: як її будувати свідомо ★★★
+> МАЙСТЕР-ДОК. Синтез живого розбору 5 Vide Infra сайтів (ERA · AIR · Springs · Silver Pinewood · Ever), 2026-06-09.
+> Відповідає на питання: «їхні сайти ВЕЛИКІ й продумані, їхня глибина відрізняється від нашої — як створювати ТАКУ Ж глибину коли хочеш?»
+> Деталі по кожному: [[D_ERA_architecture]] [[D_AIR_architecture]] [[D_Springs_architecture]] [[D_SilverPinewood_architecture]] [[D_Ever_architecture]]. Системи: [[PB_visual_search]] [[PB_interactive_map]].
+
+---
+
+## 0. ГОЛОВНА ТЕЗА (чому їх сайти «глибші» за наші лендінги)
+Наш сайт = 1 сторінка з ~8 секцій. Їхній = **десятки-сотні SSR-сторінок** АБО **один скрол із 17+ редакторських секцій**. Але глибина — це НЕ «більше роботи руками». Це **3 множники**, кожен дешевий, якщо закладений у систему:
+```
+ГЛИБИНА = (page-types × section-types) × data-generated-inventory
+```
+1. **Мала множина page-type** (5 типів сторінок) — рекомбінуються.
+2. **Мала множина section-type** (~10 блоків) — рекомбінуються в кожну сторінку.
+3. **Інвентар генерується з ДАНИХ** (1 датасет квартир → сотні URL), а не пишеться руками.
+Опануй цю систему — і робиш «глибину» дозовано: хочеш лендінг → 1 сторінка з 8 section-types; хочеш повний ЖК → +catalog +visual-search +200 unit-сторінок із того самого датасету.
+
+---
+
+## 1. ДВІ СТРАТЕГІЇ ГЛИБИНИ (обери свідомо)
+| | A. INVENTORY-depth | B. ATMOSPHERE-depth |
+|---|---|---|
+| Приклади | ERA(270 URL) · AIR(120) · Ever(400) | Silver Pinewood(1 скрол, 17 секцій) · Springs(109, тонкий) |
+| Суть | багато SSR-сторінок, генерованих із датасету | одна довга редакторська сторінка |
+| Має | /flats каталог + /visual-search + unit-сторінки + progress | НЕ має visual-search/flats; усе в скролі |
+| Коли | реальний ЖК на продаж (треба обирати квартиру) | малий luxury-проєкт, продаж атмосферою |
+| Наш кейс | майбутні великі ЖК (Quadro-scale +) | nahirna (вілла — 1 обʼєкт, B пасує) |
+**Урок:** глибина ≠ завжди багато сторінок. Silver Pinewood «виглядає» на 9 сторінок, а це 1 документ із 17 секцій + SEO deep-link якорі (history-плагін переписує URL при скролі). Можна симулювати глибину щільністю.
+
+---
+
+## 2. СЛОВНИК PAGE-TYPES (5 типів — з них збирається будь-який ЖК-сайт)
+1. **STORY page** — кінематографічний скрол-наратив. 6-14 themed-секцій, тема ui-dark↔ui-light чергується, закінчується крос-лінк-меню до сусідніх story. (home, about, architecture, location, territory, design...)
+2. **CATALOG** — фільтрований список квартир. Range-слайдери (square/price/floor) + rooms/building checkboxes + sort + on-sale/exclude-reserved. Ajax-гідрейт із API/JSON, live-count, load-more.
+3. **SPATIAL SELECTOR (visual-search)** — SVG drill-down complex→building→floor→unit. Статуси available/sold/reserved. → [[PB_visual_search]]
+4. **DATA-DETAIL (unit page)** — 1 квартира: план, м², поверх, дата здачі, ціна(+знижка), plan-tabs(furnished|unfurnished), mini-plan, breadcrumbs, CTA reserve+favourite, «similar units» карусель. URL = unit code (/flat/EV-5-5-12).
+5. **TRUST/LEGAL/NEWS** — developer, documents, how-to-buy(+mortgage калькулятор), contacts, news, privacy.
+> Стандартний набір nav ЖК (з 5 сайтів): About · Architecture · Location · Infrastructure/Territory · Gallery · Flats · Visual-search · Parking · Progress · How-to-buy/Mortgage · Developer/Team · Documents · News · Contacts. **~14 пунктів** — ось «глибина» проти нашого 1-pager.
+
+---
+
+## 3. СЛОВНИК SECTION-TYPES (~12 блоків — з них збирається будь-яка story-page)
+Кожна story-page = 6-14 цих блоків у різному порядку. Опануй 12 — будуєш безкінечно:
+1. **Hero** — H1 + 1 поетичне речення, sticky-pin, багатошаровий parallax (ERA 6 шарів)
+2. **Manifesto/statement** — велике речення + reveal (1 думка на екран)
+3. **Frame-sequence scrub** — scroll-scrubbed секвенція кадрів (ERA 149 frames архітектури; Ever ~1333 progress). НАШ no-WebGL: canvas-2D scrub (як hero Quadro)
+4. **Carousel** — варіанти: simple · `cursor`(custom drag) · `Sync`(2 звʼязані) · Owl. Лічильник «1/3»
+5. **Sticky-card-over-parallax-bg** — картка пінниться над рухомим фоном
+6. **Clip-reveal image pair** — 2 зображення розкриваються clip-path
+7. **Image-slider with counter** — 1/2 слайдер, sticky
+8. **Sticky interactive map** — inline-SVG район + POI + фільтр → [[PB_interactive_map]]
+9. **Before/after comparison** — drag-слайдер (Ever apartments). Обгорни scroll-ignore щоб drag не скролив
+10. **Tabbed content** — таби свопають зображення/текст (Nature/Play/Chill/Sport)
+11. **Self-drawing lines / counters** — SVG stroke-draw, count-up чисел
+12. **CTA + lead-form** — фінальний блок + favourites + footer
+**+ крос-лінк-меню** наприкінці кожної story (ERA visualizationLinesMenu) — сторінки = кільце, не глухий кут.
+
+---
+
+## 4. ДВИГУН (як це технічно тримається — однаковий на всіх 5)
+```
+SSR HTML (EJS-шаблони, дані inline або з /api)
+  + Barba.js              ← SPA-переходи між сторінками (data-barba, namespace)
+  + Smooth-scroll         ← Locomotive (AIR/Springs/SP/Ever) АБО custom rAF (ERA)
+  + data-plugin реєстр    ← кожен інтерактив = data-plugin="reveal|parallax|plan|carousel|tabs|popover|map..."
+  + per-section ui-theme   ← ui-dark/ui-light/ui-brown чергування = ритм скролу
+  + favourites shortlist   ← cross-page, біндить «інтерес» до unit-ID, PDF-експорт
+  + ease cubic-bezier(.25,.74,.22,.99)  ← ПІДПИС Vide Infra, 0.4-0.8s (= наш "air")
+```
+**КЛЮЧ:** «глибина» тримається на **малому реєстрі data-plugin** + **Barba-переходах** + **per-section темі**. Не на важкому фреймворку. 4 з 5 = jQuery-era. 0 React. WebGL лише точково (1 момент на сайт максимум, часто 0).
+
+### Наш стек-переклад (Next.js + GSAP + Lenis, NO WebGL)
+| Їхнє | Наше |
+|---|---|
+| Barba.js page-transitions | Next App Router + view-transitions / GSAP curtain |
+| Locomotive/custom scroll | Lenis (вже маємо) |
+| data-plugin реєстр | React-компоненти (Reveal, Parallax, Plan, CrossfadeMedia — вже маємо) |
+| EJS data-plan-plans inline | JSON у lib/ + map по data-nr (вже патерн) |
+| frame-sequence (WebGL/canvas) | canvas-2D scrub (hero Quadro — вже маємо) |
+| WebGL 3D-обліт/Zeus | pre-rendered frame-sequence або статичні ракурси crossfade |
+| ease .25,.74,.22,.99 | "air" CustomEase (вже вкрали) |
+
+---
+
+## 5. ЯК ПОБУДУВАТИ ГЛИБИНУ ПОКРОКОВО (рецепт)
+```
+1. ОБЕРИ стратегію: A inventory-depth (реальний ЖК) чи B atmosphere-depth (вілла/малий проєкт).
+2. СПРОЄКТУЙ page-map: які з 5 page-types треба. Лендінг = тільки STORY. Повний ЖК = всі 5.
+3. ДЛЯ КОЖНОЇ story-page: вибери 6-14 section-types зі словника §3, розклади у дугу,
+   чергуй ui-dark/ui-light, завершуй крос-лінк-меню.
+4. ДАНІ ПЕРШІ: якщо A — зроби 1 JSON-датасет квартир {code,building,floor,square,price,rooms,status,planSrc}.
+   З нього генеруються: catalog cards + visual-search regions + unit-сторінки + counts. НЕ дублюй руками.
+5. SVG-ПЛИТИ: художник малює building/floor/unit плити у Figma, 1 path = 1 unit, data-nr=code. → [[PB_visual_search]]
+6. ОДИН plan-примітив: параметризуй типом (apartment-status / poi-category / parking). Reuse скрізь.
+7. ВОРОНКА: 2 on-ramps (catalog раціональний + visual-search просторовий) → 1 unit-page → favourites → 1 callback.
+   Форма авто-чіпляє currentPageLink (з якої квартири лід).
+8. ПЕРЕХОДИ: Barba/router м'які, з preloader-curtain. Кожна сторінка лінкабельна+SEO.
+9. ТЕМП: ease .25,.74,.22,.99, durations 0.4-0.8s (luxury до 1.6s), reveal-delay на герої.
+10. WebGL дозовано: 0-1 момент на сайт. Решта SVG+WebP+CSS-parallax.
+```
+
+---
+
+## 6. ПОРІВНЯЛЬНА ТАБЛИЦЯ ГЛИБИНИ (орієнтир масштабу)
+| Сайт | URL | Home-секцій | Visual-search | Стратегія | Підпис |
+|---|---|---|---|---|---|
+| **ERA** | ~270 | 9 | ✅ 3-level + 3d-map(WebGL) | A inventory | 149-frame scrub, self-draw lines, 2 каруселі sync |
+| **AIR** | 120 | 11 | ✅ + per-office pages | A inventory | pinned counter-slideshow, named-parallax реєстр |
+| **Ever** | ~400 | 7 | ✅ dual list↔plan + parking | A inventory | before/after slider, krpano tour, найбагатший датасет |
+| **Springs** | ~109 | 12 | ✅ дані-inline (4.4MB) | A тонкий + B | 3 WebGL-сцени (tree/nature/wellness), поетика |
+| **Silver Pinewood** | 1 doc | 17 | ❌ нема | B atmosphere | 1 скрол, gravity-well, 1 WebGL Zeus, мапа на якорі |
+**Висновок:** діапазон величезний (1 документ → 400 URL). Обирай під проєкт. Спільне: ОДНА компонентна система + ОДИН ease + favourites-воронка + WebGL дозовано.
+
+---
+
+## 7. ЧЕК-ЛИСТ «ГЛИБОКОГО» ЖК-САЙТУ
+- [ ] обрана стратегія A/B свідомо
+- [ ] page-map із 5 page-types (мінімум STORY; для продажу +CATALOG +SELECTOR +DETAIL)
+- [ ] кожна story = 6-14 section-types зі словника, ui-flip, крос-лінк-меню в кінці
+- [ ] 1 JSON-датасет → генерує catalog+selector+unit-pages+counts (не руками)
+- [ ] 1 plan-примітив reused (apartment/poi/parking) → [[PB_visual_search]]
+- [ ] 2 on-ramps → 1 unit-page → favourites shortlist (PDF) → 1 callback (currentPageLink)
+- [ ] Barba/router переходи + preloader-curtain, кожна сторінка SEO-лінкабельна
+- [ ] ease .25,.74,.22,.99, 0.4-0.8s; reveal-delay на герої
+- [ ] WebGL 0-1 момент; решта SVG+WebP+CSS
+- [ ] favourites/lang-switch/mortgage-калькулятор якщо повний ЖК

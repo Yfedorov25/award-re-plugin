@@ -1,0 +1,144 @@
+# PB_visual_search — інтерактивний вибір квартири (available / sold / reserved) ✅
+> Як award-ЖК показують ДОСТУПНІСТЬ квартир: будинок → поверх → квартира, зі статусами.
+> Джерело: ЖИВИЙ зонд (curl + DOM/SVG/CSS) ERA, AIR, Ever, Silver Pinewood — 2026-06-08.
+> ГОЛОВНЕ ВІДКРИТТЯ: ERA / AIR / Ever / Silver Pinewood = ОДИН рушій Vide Infra. Той самий
+> `plan` + `plan-marker` + EJS-шаблон + inline-SVG живить І вибір квартир, І карту локації.
+> Наш стек: 100% відтворюється БЕЗ WebGL (чистий SVG + CSS-класи + JS-join). Тільки 3D-обліт
+> будинку в ERA — WebGL (Three.js), і його ми замінюємо (див. §АЛЬТЕРНАТИВА).
+
+---
+
+## 1. АРХІТЕКТУРА (3 рівні drill-down)
+```
+/visual-search                     ← рівень 0: генплан (усі будинки)
+/visual-search/building/2          ← рівень 1: фасад будинку, вибір ПОВЕРХУ
+/visual-search/building/2/floor/29 ← рівень 2: план поверху, вибір КВАРТИРИ
+                                      → клік → картка квартири (план, м², ціна, статус, CTA)
+```
+URL-схема — REST-ієрархія (building/N/floor/M). Перехід між рівнями — **Barba.js** (`data-barba`,
+`data-barba-namespace`) → SPA-плавність без перезавантаження. Кожен рівень = SSR-HTML + свій
+`visual-search-{building|floor}.js` + `.css`.
+
+## 2. КЛЮЧОВИЙ МЕХАНІЗМ — як кодується статус ★★★
+Кожна одиниця (квартира/поверх/будинок) = **SVG `<path>`** з:
+- `data-nr="N"` — НОМЕР одиниці (єдиний join-ключ між геометрією і даними)
+- `class="plan__svg__hoverable"` — базовий клікабельний полігон
+- парний `class="plan__svg__anchor"` — невидимий якір (мала 10×10 фігура) у фіксованій точці,
+  до якої кріпиться маркер/попап/лейбл
+- `vector-effect="non-scaling-stroke"` — обведення НЕ товщає при зумі плану
+
+Статус НЕ в SVG. Сервер (EJS: `<%- item.stateClass %>`) ДОДАЄ модифікатор-клас до одиниці за
+даними CRM. JS join'ить `data-nr` → статус → клас. ВСЯ візуалізація доступності = CSS на цих класах.
+
+### Модифікатори статусу (точні, з живого CSS ERA)
+| Клас | Стан | Вигляд |
+|---|---|---|
+| `.plan__svg__hoverable` | база (доступна) | `fill:var(--t-primary); opacity:0; cursor:pointer` — НЕВИДИМА поки не наведеш |
+| `:hover` / `--active` | доступна, фокус | `opacity:.3`, `fill:var(--t-primary)` — підсвічується контур |
+| `--disabled` | **ПРОДАНА** | `fill:var(--c-blue); opacity:.5; pointer-events:none` — глуха, не клікається |
+| `--reserved` | заброньована | `fill:var(--c-blue); opacity:.5; pointer-events:auto` — клікабельна (запит), hover → `--c-brick` |
+| `--styled-disabled` | недоступна (контекст) | `fill:var(--t-text); opacity:.5; cursor:default` |
+| `--clickable` | явно клікабельна | `cursor:pointer` |
+
+На рівні ГЕНПЛАНУ (`.plan--main`) продане = `fill:#95a3ae` (сланцево-сіре). У ПАРКІНГУ — заливка
+`rgba(primary,.3)`, hover `.7`. Тобто: **колір статусу = CSS-змінна теми** (`--c-blue` продано,
+`--c-brick` hover-увага, `--t-primary` доступно), легко переколорувати під бренд.
+
+### Перехід (та сама "air" сигнатура, що ми вже вкрали)
+```css
+.plan__svg__hoverable{
+  transition-duration:.4s;                 /* hover */
+  transition-property:opacity,fill,stroke;
+  transition-timing-function:cubic-bezier(.25,.74,.22,.99);  /* = наш "air" ease */
+}
+/* поява плану: opacity 0→1 за .8s тим самим ease */
+```
+
+## 3. АКТИВИ (що реально лежить на сервері)
+```
+/assets/images/apartments/visual-plan/buildings/2.svg   ← плита будинку (вибір поверху)
+/assets/images/apartments/visual-plan/floors/2/2_13.svg ← плита поверху (вибір квартири), 737 path
+/assets/javascripts/visual-search-floor.js              ← join статусів + інтеракції
+/assets/stylesheets/visual-search-floor.css             ← правила кольору статусів
+```
+SVG-плити — **намальовані вручну** (Figma → export), кожна одиниця = окремий `<path data-nr>`.
+Ever: `building-5.svg` = 66 path, кожна квартира має `.hoverable` + `.anchor` пару, `fill="#AC7E65"`
+(копір). ERA копір-обведення `#CF8F7D`. Тобто базовий fill = тепла бренд-барва, прозорість керує
+видимістю.
+
+## 4. ПОДВІЙНИЙ ВИГЛЯД (Ever — list ↔ plan)
+`/flats` = каталог-список із фільтрами: **range-слайдери** square / price / floor + rooms + sort
+(151 згадка square, 143 filter, 101 sort, 72 rooms, 69 price). **Tab-перемикач** list ↔ visual-search
+(45 tab, 27 toggle). Той самий датасет квартир живить обидва види; статус (reserved/disabled)
+однаковий. Картка-результат: план + м² + ціна + статус + CTA. Hover на одиниці = popover
+(`data-popover-trigger`, 35 шт) з міні-карткою.
+
+## 5. КАРТА ЛОКАЦІЇ = ТОЙ САМИЙ РУШІЙ (Silver Pinewood /infrastructure)
+**0 Mapbox/Google/Leaflet. 1906 згадок svg.** Намальований inline-SVG план району (як AIR location →
+див. [[PB_interactive_map]]). POI = ті самі `plan-marker` з категоріями-модифікаторами:
+`plan-marker--metro / --park(place) / --point / --street / --river`, EJS `item.class + item.stateClass`.
+- `.plan-marker__content` + `.plan-marker__text` = лейбл (назва · відстань)
+- tooltips `tooltip--map-info`, `tooltip--map-house` = hover-картки
+- категорійний фільтр = sticky-nav (`l-location-map-nav-wrapper`) → фільтрує клас маркерів (fade .6s)
+- маркери з `data-parallax-*` → легкий parallax при скролі
+**Висновок:** один `plan/plan-marker` примітив обслуговує І вибір квартир, І карту району. Будуй ОДИН
+компонент-плиту, параметризуй типом (apartment-status vs poi-category).
+
+## 6. ВІДТВОРЮВАНІСТЬ — НАШ РЕЦЕПТ (🟢 без WebGL)
+```
+1. Художник малює SVG-плити (генплан, фасад-по-поверхах, план кожного поверху) у Figma.
+   Кожна одиниця = <path data-nr="N" class="unit"> + парний <rect class="anchor"> для лейбла.
+2. Дані: масив { nr, status: 'available'|'sold'|'reserved', area, price, rooms, floor, planSrc }.
+   (Статика JSON для лендінга; для живого ЖК — фетч із CRM/API.)
+3. JS-join: для кожного <path data-nr> → знайти статус → додати клас .unit--{status}.
+4. CSS: .unit{fill:transparent;opacity:0;transition:.4s cubic-bezier(.25,.74,.22,.99)}
+        .unit:hover,.unit--active{opacity:.35;fill:var(--accent)}
+        .unit--sold{fill:var(--muted);opacity:.4;pointer-events:none}
+        .unit--reserved{fill:var(--muted);opacity:.4} .unit--reserved:hover{fill:var(--warn)}
+5. Hover → popover (DOM, абсолютно позиціонований до .anchor getBBox center): № · м² · ціна · статус.
+6. Клік доступної → drill-down (Barba/router) або модалка картки.
+7. ЛЕГЕНДА (обовʼязково!): кольоровий ключ available/sold/reserved — інакше колір нечитабельний.
+8. Список+план як два види одного датасету; range-фільтри звужують обидва.
+```
+Інструменти: чистий SVG + GSAP (fade/clip) + Lenis. Без Three. Mobile: плита у `width:50vw`+,
+pinch/pan через CSS transform на обгортці; на дуже малих — список замість плану.
+
+## 7. АЛЬТЕРНАТИВА 3D-обльоту (ERA building = Three.js 🔴 → 🟢)
+ERA крутить 3D-будинок у WebGL (у нас console-error без WebGL — отже контент за ним ховається = крихко).
+НАШ аналог: **pre-rendered секвенція кадрів** будинку, що обертається (як hero Quadro — canvas 2D
+scrub) АБО кілька статичних ракурсів із crossfade. Поверхові SVG-плити лягають оверлеєм поверх
+будь-якого бекдропу. 80% враження, 0 WebGL, не ламається.
+
+## 7b. ВАРІАЦІЇ ПО 5 САЙТАХ (живий зонд 2026-06-09 — обери модель під проєкт)
+Усі = той самий рушій, але 5 різних реалізацій статусу/даних/виду. Деталі: [[D_ERA_architecture]] [[D_AIR_architecture]] [[D_Springs_architecture]] [[D_SilverPinewood_architecture]] [[D_Ever_architecture]].
+
+| Сайт | Геометрія unit | Статус-енкодинг | Кольори (avail / sold / reserved) | Дані | Особливість |
+|---|---|---|---|---|---|
+| **ERA** | `<path data-nr class="plan__svg__hoverable" stroke="#CF8F7D">` | CSS-modifier `--disabled/--reserved`, marker join по data-nr | brick `#cf8f7d` / blue `#051936` .5 / blue clickable | `/api/flats` (fetch) | 4 скоупи `.plan--main/building/floor/parking`; +3d-map WebGL on-ramp |
+| **AIR** | SVG + JSON `data-plan-plans`, EJS-маркери | `state:{hoverable,clickable}`, clickable=count>0; `disabled` свопить тег a↔div | per-floor: «X offices» або «no offices» | inline JSON 71 items | floor-рівень = «скільки офісів/areaMin-Max», не unit-рівень |
+| **Springs** | `<g class="plan-hoverable--clickable" data-hoverable mix-blend-mode:multiply>` + `data-anchor` | JS `state:{active/clickable/disabled/hoverable}`; CSS `--disabled` | brown `#583e23` / muddy `rgba(70,73,63,.5)` / inverted+`.plan-marker__lock` icon | **inline 888KB JSON** (no API, 4.4MB page) | marker-pill badge `--apartment`; 360° pano у модалці; sold має lock-іконку |
+| **Ever** ★ | paired `<path data-nr class="plan__svg__hoverable" fill="#AC7E65">` + `<path data-nr class="plan__svg__anchor" fill="#000002">` | CSS `--clickable/--disabled/--styled-disabled/--styled-opacity` | terracotta `#ac7e65` / grey `#95a3ae` dead / grey no-click / **filtered=pale `#dce2eb` .5** | `/api/apartments` (212), `isReserved` bool | **DUAL VIEW list↔plan** один датасет; Popper.js до __anchor; filtered-out dimming |
+| **Silver Pinewood** | — (НЕМАЄ visual-search) | — | — | — | малий luxury → продаж атмосферою, тільки карта |
+
+### Що з цього брати НАМ (рекомендація)
+- **Базова геометрія → Ever-модель:** paired `.hoverable`+`.anchor` з тим самим `data-nr`. `.anchor` = стабільна точка для popover (Popper/власний). Найчистіше.
+- **4 стани (не 3) → Ever:** available · sold(dead grey) · reserved(visible grey no-click) · **filtered-out(pale .5)** — останній критичний для dual-view (фільтр приглушує, а не ховає).
+- **Dual-view list↔plan → Ever:** один датасет, `selector__link` toggle, фільтр-state драйвить обидва. Це найсильніший конверсійний патерн.
+- **Дані:** малий проєкт → inline JSON (Springs-стиль, простіше); великий ЖК → fetch /api (ERA/Ever, не роздуває сторінку).
+- **Колір під бренд:** заміни їхні теракоти/сині на токени проєкту (Quadro: avail=`--accent #e0a96d`, sold=`--muted` сіро-синій, reserved=warm). Завжди ДОДАЙ легенду.
+
+## 8. ЧОМУ ЦЕ ВАЖЛИВО (бізнес)
+Вибір квартири = конверсійне ЯДРО ЖК-сайту: показує наявність → створює дефіцит ("лишилось N") →
+веде до ліда. «Продано» поруч із «доступно» = соц-доказ + терміновість. Це не декор — це двигун
+продажів. У P_realestate — обовʼязковий блок поряд із локацією. Dual-view (Ever) = найвища конверсія.
+
+## 9. ЧЕК-ЛИСТ ЯКОСТІ
+- [ ] data-nr на КОЖНІЙ одиниці; статус НЕ хардкодиться в геометрію (join через клас)
+- [ ] 3 чіткі стани: available (тепла бренд-барва на hover) / sold (глухе, не клікається) / reserved (клікабельне, інший hover)
+- [ ] ЛЕГЕНДА кольорів видима
+- [ ] hover-popover: № · м² · ціна · поверх
+- [ ] перехід рівнів плавний (router/Barba), не reload
+- [ ] mobile: список як fallback плану
+- [ ] ease = cubic-bezier(.25,.74,.22,.99), 0.4–0.8s
+- [ ] БЕЗ WebGL (3D-обліт → frame-sequence/crossfade)
+- [ ] той самий plan-примітив перевикористаний для карти району ([[PB_interactive_map]])

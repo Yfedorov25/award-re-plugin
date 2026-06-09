@@ -1,0 +1,59 @@
+# PB_variants_prototyping — ВАРІАНТИ-ПРОТОТИПИ (показати способи, обрати найкращий) ★★★
+> Плагін НЕ дає один шлях. Для кожної секції пропонує кілька перевірених VI-варіантів + візуалізує → user обирає. 2026-06-09.
+> Споріднено: [[_TECHNIQUE_REGISTRY]] (меню прийомів) [[PB_motion_score]] [[PB_site_architecture]] [[_PLUGIN_BLUEPRINT]].
+
+## 0. ПРИНЦИП
+«Я хочу бачити які є різні варіанти для нашого проєкту, як їх візуалізувати, щоб обрати найкращі.» Плагін знає 100% прийомів VI ([[_TECHNIQUE_REGISTRY]]) і для КОЖНОЇ секції дістає 2-4 кандидати, показує варіанти, дає обрати. Не імпровізація, не один шаблон — палітра перевірених VI-способів під конкретний проєкт.
+
+## 1. КОЛИ (де в потоці)
+Усередині ФАЗИ 1.5 (motion-score, [[PB_motion_score]]): після того як визначено арку й секцію, ПЕРЕД фінальною побудовою. Працює в Guided-режимі (user обирає) і Autopilot (плагін сам обирає за критеріями + показує що обрав).
+
+## 2. ЯК ГЕНЕРУВАТИ ВАРІАНТИ
+Для секції (напр. Hero):
+1. Дістати з [[_TECHNIQUE_REGISTRY]] усі прийоми придатні цій ролі (hero → frame-sequence-scrub / video-loop / split-hero-hover / clip-in still / ken-burns still).
+2. Відсіяти 🔴 WebGL (узяти їх no-WebGL переклад) і несумісні з брендом/перфом.
+3. Сформувати 2-4 ВАРІАНТИ, кожен = {прийом + як виглядає + тон + перф-кост + VI-приклад-джерело}.
+4. Узгодити з motion-score константами (ease/тема) — варіанти різняться ПРИЙОМОМ, не ламають систему.
+
+## 3. ЯК ВІЗУАЛІЗУВАТИ (показати, не лише описати)
+Каскад від дешевого до повного:
+- **A. Текст-розкадровка** — таблиця варіантів (прийом / вигляд / тон / кост / звідки у VI). Завжди.
+- **B. ASCII/layout-мокап** — груба схема композиції варіанту (через AskUserQuestion preview).
+- **C. HTML-прототип** — клікабельний standalone HTML кожного варіанту (реальний рух, ще без контенту проєкту). Як design-engineer `/prototype`. Для ключових секцій (hero, visual-search, map).
+- **D. Скрін/порівняння** — якщо вже є рендери, показати варіант на реальному медіа.
+Рівень візуалізації під важливість секції: hero/visual-search → C; прохідні → A.
+
+## 4. ЯК ОБИРАТИ
+- **Guided:** AskUserQuestion з 2-4 варіантами (label+опис+preview-мокап) → user обирає → запис у motion-score.md.
+- **Autopilot:** плагін обирає за критеріями (бренд-тон з brand.md + перф + A1-критерії) і ПОКАЗУЄ обране + 1 альтернативу («обрав A бо…, є ще B»).
+- Обране фіксується в motion-score.md (рядок секції) → section-builder будує строго його.
+
+## 5. ПРИКЛАД (Hero, no-WebGL)
+| Варіант | Прийом | Вигляд | Кост | VI-джерело |
+|---|---|---|---|---|
+| A | frame-sequence scrub (canvas-2D) | будівля обертається/день→ніч на скролі | сер (кадри) | ERA 149-frame, наш Quadro hero |
+| B | video-loop bg | живий кадр, muted autoplay | низ | Ever ever_intro.mp4 |
+| C | still + ken-burns + clip-in | статичний рендер дихає+wipe-reveal | низ | SP parallax-image-zoom |
+| D | split-hover | курсор-X свопить день/ніч | низ | Ever intro --1/--2 |
+Усі: ease+тема з motion-score, заголовок Fedoriv (кілька копі-варіантів, [[PB_discovery_strategy]] §6).
+
+## 6. ВАРІАНТИ ПО КЛЮЧОВИХ СЕКЦІЯХ (стартовий набір з реєстру)
+- **Hero:** A-D вище.
+- **Architecture:** pinned window-reveal / frame-scrub / clip-reveal-pair / carousel-sync.
+- **Section reveal:** fade-rise / image-clip wipe(L/R) / ken-burns-zoom / slide-bottom span.
+- **Між-секційний перехід:** sticky-clip-stacking / sectionToSticky-release / theme-flip-overlap.
+- **Visual-search:** SVG-плита-drill / dual-view list↔plan / 3D-orbit-frames (no-WebGL).
+- **Map:** inline-SVG-draw (svgLength) / 2-layer-anchor / category-filter варіанти.
+- **Preloader:** split-panel / liquid-fill-logo / palette-cycle / counter-rule.
+- **Cursor:** ring-trail / label-disc / directional zoom / parallax-magnetic.
+Кожен — з [[_TECHNIQUE_REGISTRY]], no-WebGL.
+
+## 7. ПРАВИЛА
+- Варіанти різняться ПРИЙОМОМ, не ламають motion-score константи (один ease/тема/scroll).
+- Завжди ≥2, ≤4 (не параліч вибору).
+- Кожен варіант = реальний VI-прийом (цитата джерела), не вигадка.
+- 🔴 WebGL → лише no-WebGL переклад.
+- Обране → motion-score.md → section-builder.
+
+## 8. ЧЕК
+☐ для секції дістано 2-4 кандидати з _TECHNIQUE_REGISTRY ☐ 🔴 замінені no-WebGL перекладом ☐ візуалізовано (A текст завжди; C HTML для hero/visual-search/map) ☐ узгоджено з motion-score константами ☐ user обрав (Guided) АБО показано обране+альтернативу (Autopilot) ☐ записано в motion-score.md ☐ кожен варіант має VI-джерело.

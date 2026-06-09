@@ -1,0 +1,289 @@
+# PB_interactive_map — Інтерактивна карта району (real-estate «що поряд») ★★★
+> Майстер-клас: як побудувати art-directed карту локації 1-в-1, як на **aircenter.space/location#map** (студія Vide Infra).
+> Еталон для НЕРУХОМОСТІ / ЖК / девелоперів. Це той самий блок, що продає «життя навколо дому», не координати.
+> Джерело: живий розбір aircenter.space (Claude in Chrome, заміряно DOM+стилі+механіку). Тека: library/playbooks/.
+> 🔗 СПОРІДНЕНО: [[PB_visual_search]] — ТОЙ САМИЙ рушій Vide Infra (`plan` + `plan-marker` + EJS + inline-SVG)
+>    обслуговує І цю карту, І вибір квартир. Silver Pinewood /infrastructure підтвердив: 1906 svg, 0 Mapbox;
+>    POI = `plan-marker--metro/--place/--point/--river/--street` із категорійним фільтром (sticky-nav, fade .6s).
+
+---
+
+## 0. ГОЛОВНИЙ ВИСНОВОК (чому це преміально)
+AIR **не використовує Google Maps / Mapbox / Leaflet / Yandex — жодної мап-бібліотеки, жодного canvas, жодних tile.**
+Карта — це **намальований власноруч SVG-план району** (монохром бренду) + **маркери як DOM-елементи** поверх нього + **SVG-спрайт іконок** + фільтри-категорії.
+
+> ПРАВИЛО: справжня преміальність карти = відмова від Google-чрому. Google/Mapbox тягнуть чужі кольори, лейбли, копірайт-плашку, рекламні POI — це миттєво «здешевлює». Art-directed SVG-карта дає 100% контроль кольору, типографіки, того ЩО показано і ЩО приховано. Це і є різниця між $500 і $10k картою.
+
+**Що це дає нам:** відтворюється на 95% (🟢). Єдиний арт-актив, який треба зробити, — сам SVG-план району (один раз, у Figma/Illustrator). Решта — чистий код (DOM + CSS + GSAP). Бібліотека не потрібна.
+
+---
+
+## 1. АРХІТЕКТУРА AIR (заміряно, точно)
+
+### Шарова будова (3 рівні в `#map`):
+```
+#map.location-location-map-wrapper        ← контейнер 1280×684 (≈100vw × майже 100vh)
+├── .plan.location-location-map           ← площина карти (position:relative, transform-origin: center)
+│    ├── .plan__layer--svg                ← ЗУМ/ПАН шар: тут базовий SVG, transform-origin: 640px 341px (центр)
+│    │    └── <svg class="svg-fix" viewBox="0 0 1460 780">  ← намальований план: 14 paths, fill:#fff (вулиці/квартали)
+│    └── (маркер-шар)                      ← 57 DOM-маркерів поверх
+├── #popover-map-filters                   ← панель фільтрів «ІНФРАСТРУКТУРА» (blur-фон)
+└── .location-location-nav                 ← моб-навігація
+```
+
+### База карти (візуал):
+- Inline `<svg viewBox="0 0 1460 780">`, **14 paths, усі `fill: #ffffff`**, `stroke:none`.
+- Рендер: **дарк-монохром** — тонкі світлі лінії-вулиці (hairline ~0.5–1px) + ледь світліші за фон сірі заливки кварталів + органічні плями парків. Фон чорний. Нуль лейблів, нуль Google-хрому.
+- Естетика = строго бренд AIR (чорно-біле, як весь сайт). Виглядає як архітектурне креслення району.
+
+### Маркери (POI) — 57 шт, заміряно:
+| Тип (`.plan-marker--*`) | К-сть | Що це |
+|---|---|---|
+| `main` | 1 | сама будівля AIR (великий кастомний пін 102×73 з градієнтом) |
+| `metro` | 12 | станції метро |
+| `street` | 7 | підписи вулиць |
+| `pin` | 37 | усі POI категорій (парки/спорт/банки/маркети/сервіси/кафе) |
+
+**Анатомія одного маркера:**
+```
+.plan-marker (position:absolute; left:0; top:0; transform:translate(Xpx,Ypx))
+├── .plan-marker__icon   ← SVG 22×22, іконка через <use href="#icon-map-park"> (спрайт)
+└── .plan-marker__text   ← текстовий підпис (leading-trim)
+```
+- **Позиціонування: НЕ через left/top, а через `transform: translate(Xpx, Ypx)`** у координатах viewBox (1460×780). Це GPU-дешево і дає плавний пан/зум.
+- **Приховування (фільтр вимкнено):** маркер паркується на `transform: translate(-2000px, 0)` + `opacity:0`. Тобто йде за екран і зникає — не впливає на hit-test.
+- **Перехід:** `opacity 0.6s cubic-bezier(0.25, 0.74, 0.22, 0.99)` — м'який кастомний fade при ввімкненні/вимкненні категорії.
+
+### Іконки = SVG-спрайт:
+- `<symbol>`-спрайт + 49 `<use>`. Категорії: `icon-map-metro-grey`, `icon-map-park`, `icon-map-sport`, `icon-map-bank`, `icon-map-supermarket`, `icon-map-service`, `icon-map-restaurant`, `icon-map-cafe`.
+- Hero-пін будівлі: окремий SVG 102×73 з єдиним `<linearGradient>` (2 stops) — щоб AIR-будівля «світилася» серед сірих POI.
+
+### Зум/пан:
+- Шар `.plan__layer--svg`: `transform-origin: center` (640px 341px), `transition: all`. Зум = `transform: scale()` навколо центру, пан = translate. **Кнопок +/− немає** — зум колесом/пінчем (або фіксований вид з паном).
+- Сайт-врапер: `body{overflow:hidden}` + кастомний transform-скрол (як уся AIR) → карта не «з'їжджає», вона — окрема керована сцена.
+
+### Фільтри:
+- Панель «INFRASTRUCTURE»: **Parks · Sport · Banks · Supermarkets · Consumer services · Restaurants and coffee**.
+- Активна категорія — білий текст, неактивна — сірий. Клік → fade відповідних маркерів (0.6s).
+
+---
+
+## 2. РЕЦЕПТ ВІДТВОРЕННЯ 1-в-1 (наш стек: HTML + CSS + GSAP)
+
+### Крок 1. Зроби базовий SVG-план району (єдиний арт-актив)
+Це твій район, не AIR — тож малюєш свій. Шляхи:
+- **Швидко й точно:** експортуй фрагмент району з OpenStreetMap → у Figma (плагін «Map» / або SVG з maperitive/qgis) → перефарбуй у монохром бренду (вулиці = hairline-stroke, квартали = subtle fill, парки = інший відтінок) → Export SVG.
+- **Художньо:** обведи район вручну у Figma/Illustrator поверх Google-скрину (трасування) → стилізуй. Дає найунікальніший «дорогий» вигляд.
+- Тримай **один `viewBox`** (напр. `0 0 1460 780`) — це твоя система координат для маркерів.
+- Спрости: ПРИБЕРИ дрібні вулиці, лейбли, сміття. Залиш магістралі + квартали + парки + воду. Менше = дорожче.
+
+### Крок 2. Розмітка
+```html
+<section class="loc-map" id="map">
+  <!-- ЗУМ/ПАН шар -->
+  <div class="loc-map__plane" data-plane>
+    <div class="loc-map__layer" data-zoom>
+      <!-- базовий план району (твій SVG) -->
+      <svg class="loc-map__base" viewBox="0 0 1460 780" preserveAspectRatio="xMidYMid slice">
+        <!-- ...твої <path> вулиць/кварталів/парків... fill:var(--map-block); stroke:var(--map-road) -->
+      </svg>
+
+      <!-- шар маркерів (координати = простір viewBox 1460×780) -->
+      <div class="loc-map__markers" data-markers>
+        <!-- HERO: сама будівля/ЖК -->
+        <button class="mk mk--main" style="transform:translate(720px,360px)">
+          <svg class="mk__icon mk__icon--building" viewBox="0 0 102 73"><use href="#i-building"/></svg>
+          <span class="mk__text">ЖК «Назва»</span>
+        </button>
+
+        <!-- POI: data-cat = категорія для фільтра -->
+        <button class="mk mk--pin" data-cat="park" style="transform:translate(300px,520px)">
+          <svg class="mk__icon" viewBox="0 0 22 22"><use href="#i-park"/></svg>
+          <span class="mk__text">Парк Перемоги · 5 хв</span>
+        </button>
+        <button class="mk mk--pin" data-cat="metro" style="transform:translate(880px,300px)">
+          <svg class="mk__icon" viewBox="0 0 22 22"><use href="#i-metro"/></svg>
+          <span class="mk__text">М «Центральна»</span>
+        </button>
+        <!-- ...решта POI... -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ФІЛЬТРИ -->
+  <aside class="loc-map__filters">
+    <p class="loc-map__filters-title">Інфраструктура</p>
+    <button class="filter is-active" data-cat="park">Парки</button>
+    <button class="filter is-active" data-cat="sport">Спорт</button>
+    <button class="filter is-active" data-cat="bank">Банки</button>
+    <button class="filter is-active" data-cat="market">Супермаркети</button>
+    <button class="filter is-active" data-cat="service">Сервіси</button>
+    <button class="filter is-active" data-cat="food">Кафе й ресторани</button>
+  </aside>
+
+  <!-- SVG-СПРАЙТ іконок (один раз, hidden) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-park" viewBox="0 0 22 22"><!-- path іконки парку --></symbol>
+    <symbol id="i-metro" viewBox="0 0 22 22"><!-- ... --></symbol>
+    <symbol id="i-sport" viewBox="0 0 22 22"></symbol>
+    <symbol id="i-bank" viewBox="0 0 22 22"></symbol>
+    <symbol id="i-market" viewBox="0 0 22 22"></symbol>
+    <symbol id="i-service" viewBox="0 0 22 22"></symbol>
+    <symbol id="i-food" viewBox="0 0 22 22"></symbol>
+    <symbol id="i-building" viewBox="0 0 102 73"></symbol>
+  </svg>
+</section>
+```
+
+### Крок 3. Стилі (монохром-бренд + AIR-механіка маркерів)
+```css
+.loc-map{ position:relative; width:100%; height:100svh; overflow:hidden;
+  background:var(--map-bg, #0a0a0a); --map-road:rgba(255,255,255,.22); --map-block:rgba(255,255,255,.05);
+  --map-park:rgba(255,255,255,.09); }
+
+.loc-map__plane{ position:absolute; inset:0; }
+.loc-map__layer{ position:absolute; inset:0; transform-origin:center center; will-change:transform; }
+.loc-map__base{ width:100%; height:100%; display:block; }
+.loc-map__base path{ vector-effect:non-scaling-stroke; }     /* лінії не товщають при зумі */
+
+.loc-map__markers{ position:absolute; inset:0; }              /* той самий простір, що viewBox */
+
+/* МАРКЕР — позиція тільки через translate (інлайн style), стан через opacity */
+.mk{ position:absolute; left:0; top:0; display:flex; align-items:center; gap:6px;
+  padding:4px 9px 4px 4px; border-radius:999px;
+  background:rgba(20,20,20,.6); backdrop-filter:blur(6px);
+  color:#f5f5f0; white-space:nowrap; cursor:pointer;
+  transition:opacity .6s cubic-bezier(.25,.74,.22,.99), transform .6s cubic-bezier(.25,.74,.22,.99);
+  /* translate(x,y) приходить інлайном; counter-scale додає JS при зумі */ }
+.mk__icon{ width:22px; height:22px; flex:none; }
+.mk__text{ font:500 12px/1 var(--font-ui); letter-spacing:.01em; }
+
+.mk--main{ background:transparent; }                          /* hero-пін будівлі — без пігулки */
+.mk--main .mk__icon--building{ width:102px; height:73px; filter:drop-shadow(0 6px 24px rgba(0,0,0,.5)); }
+
+/* приховано фільтром: AIR-трюк — fade + паркування за екран */
+.mk.is-off{ opacity:0; pointer-events:none; }
+
+/* ФІЛЬТРИ */
+.loc-map__filters{ position:absolute; top:0; right:0; height:100%; width:clamp(260px,24vw,360px);
+  padding:48px 40px; display:flex; flex-direction:column; justify-content:center;
+  background:rgba(255,255,255,.04); backdrop-filter:blur(12px); }
+.loc-map__filters-title{ font:500 11px/1 var(--font-ui); letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.5); margin-bottom:auto; }
+.filter{ font:400 clamp(22px,1.9vw,30px)/1.25 var(--font-display); letter-spacing:-.01em;
+  text-transform:uppercase; color:rgba(255,255,255,.4); text-align:left; transition:color .4s ease; }
+.filter.is-active{ color:#fff; }
+.filter:hover{ color:rgba(255,255,255,.75); }
+
+@media (max-width:768px){
+  .loc-map__filters{ width:100%; height:auto; right:0; bottom:0; top:auto; flex-direction:row; flex-wrap:wrap;
+    gap:8px 16px; padding:20px; justify-content:flex-start; }
+  .filter{ font-size:15px; }
+}
+```
+
+### Крок 4. Логіка фільтрів (toggle категорій)
+```js
+const map = document.querySelector('.loc-map');
+map.querySelectorAll('.filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('is-active');
+    const cat = btn.dataset.cat;
+    const on  = btn.classList.contains('is-active');
+    map.querySelectorAll(`.mk[data-cat="${cat}"]`).forEach(mk => mk.classList.toggle('is-off', !on));
+  });
+});
+// (за бажанням як AIR: для is-off ще й зсувати за екран — лишай opacity-варіант, він чистіший)
+```
+
+### Крок 5. Пан + зум (GSAP Draggable + колесо), з counter-scale маркерів
+```js
+import { gsap } from "gsap";
+import { Draggable } from "gsap/Draggable";
+import { InertiaPlugin } from "gsap/InertiaPlugin"; // інерція (Club GSAP; без неї — type без inertia)
+gsap.registerPlugin(Draggable, InertiaPlugin);
+
+const layer   = map.querySelector('[data-zoom]');
+const markers = map.querySelectorAll('.mk');
+let scale = 1;
+
+// ПАН (перетягування)
+Draggable.create(layer, {
+  type: "x,y", inertia: true, dragResistance: .15,
+  // bounds можна задати рамкою-обгорткою, щоб не відтягували в порожнечу
+});
+
+// ЗУМ колесом навколо центру
+map.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  scale = gsap.utils.clamp(1, 2.4, scale + (e.deltaY < 0 ? .12 : -.12));
+  gsap.to(layer, { scale, transformOrigin:"center center", duration:.6, ease:"power3.out" });
+  // маркери лишаються читабельними: контр-масштаб іконок/пігулок
+  gsap.to(markers, { scale: 1/scale, duration:.6, ease:"power3.out" });
+}, { passive:false });
+```
+
+### Крок 6. Координати маркерів — як ставити
+- x,y маркера = точка в системі **viewBox (1460×780)**. Став їх «на око» поверх свого SVG у Figma (зчитай X/Y точки) або:
+- **З реального гео (lat/lng → SVG):** лінійна інтерполяція по двох опорних точках:
+```js
+const px = (lng - lng0) / (lng1 - lng0) * 1460;
+const py = (lat0 - lat)  / (lat0 - lat1) * 780;   // y інвертовано
+el.style.transform = `translate(${px}px, ${py}px)`;
+```
+
+### Крок 7. Поява маркерів на скролі (опц.)
+Коли секція входить — маркери проявляються каскадом (stagger), а не разом:
+```js
+gsap.from('.mk', {
+  opacity:0, y:8, duration:.6, ease:"power2.out", stagger:0.03,
+  scrollTrigger:{ trigger:'#map', start:'top 70%' }
+});
+```
+
+---
+
+## 3. ВАРІАНТИ (під різні бюджети/ніші)
+- **A. Дарк-монохром-арт (як AIR)** — найдорожчий вигляд. ЖК преміум, бізнес-центри. (рекоменд.)
+- **B. Світла мінімал-карта** — крем/беж фон, темні hairline-вулиці. М'якший luxury (як ERA-палітра).
+- **C. Без пану/зуму** — фіксований стилізований план + маркери + фільтри. Найпростіше, 90% враження за день. Підходить для більшості ЖК.
+- **D. Ізометрія/3D-план** — обернений ЖК у центрі (як hero-пін AIR, але об'ємний). Дорожче, тільки якщо є 3D-актив.
+- **E. Гібрид:** стилізована SVG-карта + при кліку POI відкривається фото/час пішки. Підсилює «що поряд».
+
+## 4. ПОМИЛКИ ДЖУНІОРА (чому виходить дешево)
+- ❌ Вставити Google Maps iframe → чужі кольори, лейбли, копірайт-плашка, рекламні пины. Миттєво −$9k вигляду.
+- ❌ Позиціонувати маркери через `left/top` + анімувати їх → reflow, «желе» при зумі. Треба `transform:translate` (GPU).
+- ❌ Маркери товщають/дрібнішають при зумі → забули **counter-scale** (`scale:1/scale`) і `vector-effect:non-scaling-stroke` на лініях.
+- ❌ Перевантажена карта (усі вулиці, лейбли, сміття) → каша. Прибирай усе зайве, лиши магістралі+парки+квартали.
+- ❌ Показувати «координати/адресу» замість «життя»: підпис маркера = вигода («Парк · 5 хв пішки»), не назва вулиці.
+- ❌ Різкий показ/ховання категорій (display:none) → смикається. Треба `opacity .6s` fade (як AIR).
+- ❌ Карта «з'їжджає» зі скролом сторінки → винеси в окрему керовану сцену (як AIR), або pin через ScrollTrigger.
+
+## 5. КОПІРАЙТ КАРТИ (real-estate регістр)
+- Заголовок секції — про життя, не про гео: «П'ять хвилин до всього, що любиш», не «Розташування на мапі».
+- Підписи POI = вигода + час: «Парк · 5 хв», «Школа · 7 хв пішки», «Метро · 3 хв».
+- Категорії — людською мовою: «Кафе й ресторани», не «Заклади харчування (HoReCa)».
+- Тон під преміум: спокійний, конкретний, нуль AI-кліше (див. _ANTISLOP_ukrainian_hard).
+
+## 6. ЧЕКЛИСТ (карта готова, коли)
+1. Жодного Google/Mapbox-хрому — лише власний SVG у кольорах бренду?
+2. Маркери позиціоновані `transform:translate`, не left/top?
+3. Лінії карти `vector-effect:non-scaling-stroke` (не товщають при зумі)?
+4. Маркери counter-scale при зумі (іконки/підписи лишаються читабельні)?
+5. Фільтри категорій fade `opacity .6s`, активна=біла / неактивна=сіра?
+6. Hero-пін будівлі виразніший за POI (градієнт/розмір/тінь)?
+7. Підписи = вигода+час пішки, не адреси?
+8. Мобільна версія: фільтри внизу горизонтально, пан тачем, карта не ламає скрол сторінки?
+9. Перфоманс: SVG оптимізований (SVGO), маркери — DOM (не перемальовуються), нуль reflow?
+
+## 7. ВІДТВОРЮВАНІСТЬ: 🟢 95%
+- Стек: чистий HTML + CSS + GSAP (Draggable+Inertia для пану). Без мап-бібліотек, без canvas, без WebGL.
+- Єдиний арт-актив: SVG-план району (Figma/Illustrator, один раз).
+- Час: фіксована карта без зуму — 1 день; з паном/зумом+фільтрами — 2-3 дні.
+- Інструменти: Figma (план+іконки) → SVGO (оптимізація) → GSAP (Draggable, ScrollTrigger).
+
+## 8. ЗВ'ЯЗКИ
+- Інтегрується в **P_realestate** як обов'язкова секція «Локація / Що поряд».
+- Іконки-спрайт → див. PB_microinteractions (hover-стани маркерів).
+- Плавність шару → PB_scroll_smoothness (transform-only, will-change).
+- Копірайт підписів → meaning-copy-system + _ANTISLOP_ukrainian_hard.
+- Джерело-розбір: D_AIR (aircenter.space, Vide Infra).

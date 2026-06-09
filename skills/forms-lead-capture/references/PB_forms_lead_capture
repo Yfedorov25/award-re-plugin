@@ -1,0 +1,52 @@
+# PB_forms_lead_capture — ФОРМИ / ЗБІР ЛІДІВ award-RE (конверсійне ядро) ★★★
+> НОВИЙ. Конверсія = бізнес-серце ЖК-сайту. З живого зонду 5 VI + бойовий Quadro/Nahirna Telegram-патерн. 2026-06-09.
+> Споріднено: [[PB_cta]] [[PB_nav]] [[PB_site_architecture]] [[D_Springs_architecture]] [[D_AIR_architecture]] [[D_Ever_architecture]].
+
+## 0. ПРИНЦИП
+Увесь сайт веде до ОДНОГО: лід. VI роблять це невидимо до моменту наміру — не тиснуть формами, а тихо ловлять КОНКРЕТНИЙ інтерес (яка квартира зацікавила). 3 механізми збору, усі no-WebGL.
+
+## 1. ТРИ МЕХАНІЗМИ ЗБОРУ ЛІДІВ (VI)
+### A. Callback-модалка (головна, 5/5)
+- Тригер: «Замовити дзвінок» (sticky-хедер + CTA-секція + всюди).
+- Поля МІНІМУМ: `name` + `phone` (+ опц. `email`, `time`, `message`).
+- **Приховані поля:** `currentPageLink` (з якої сторінки/квартири лід ★), `utm`, `group`, `keywords` — форма знає КОНТЕКСТ.
+- Захист: reCAPTCHA. Трекінг дзвінків: Comagic (VI) / наш аналог.
+- Success-стан: «Дякуємо!» інлайн (не редірект).
+
+### B. Favourites-shortlist (cross-page, 4/5) ★ найсильніший RE-патерн
+- Серце на КОЖНІЙ квартирі/секції → лічильник у хедері (`favourite-btn__counter`) → сторінка обраного.
+- Звідти: submit `favouriteForm` АБО **експорт PDF обраних** (`/api/favourite/pdf/mail`).
+- Біндить розмитий «інтерес» до КОНКРЕТНИХ unit-ID. Персистентний між сесіями (localStorage).
+
+### C. Mortgage-калькулятор (2/5, AIR/Ever)
+- Слайдери: `mortgage_price` / `mortgage_payment` / `mortgage_years`, N `data-rate` програм, trade-in блок.
+- Сам по собі lead-magnet: порахував → «отримати розрахунок» → лід.
+
+## 2. ДОСТАВКА ЛІДА (бойовий Quadro/Nahirna патерн — ПЕРЕВІРЕНО на проді)
+- **Telegram-бот:** форма → API-route → `sendLead` → Telegram (бот-токен + chat-id). Повертає ok ТІЛЬКИ на реальну відправку (не фейк-success).
+- Креди: `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` у env (gitignored) + Vercel Production env vars.
+- Той самий патерн працює на eruhomist/quadro/nahirna — реюзати.
+- Альтернатива/додатково: email (резерв), CRM-вебхук.
+
+## 3. ЗГОДА (PDPL — обовʼязково в UA)
+- **Required consent-чекбокс** на персональні дані (PDPL) — без нього не сабмітити.
+- Лінк на privacy-policy. Бойовий приклад: quadro/nahirna мають це на проді.
+
+## 4. INVISIBLE-FUNNEL (Springs-урок)
+0 tel/mailto на сторінці — єдиний шлях = форма. Це НЕ завжди (ERA показує телефон). Рішення під клієнта: luxury → невидима воронка; масовий ЖК → видимий телефон ОК. Якщо телефон порожній (як nahirna зараз) — кнопка дзвінка text-only до отримання реального.
+
+## 5. UX/ТЕХ
+- Форма = DOM, no-WebGL. Валідація інлайн, людські меседжі ([[copywriting]] microcopy: «Введіть номер телефону», не «Помилка поля 2»).
+- Кнопка сабміту: дієслово+результат, loading-стан, success-стан.
+- Модалка: focus-trap, Esc-закриття, scroll-lock body, aria.
+- Маска телефону (inputMask).
+- Мобіл: full-width, тип клавіатури `tel`, тап ≥44px.
+
+## 6. КОПІ (Fedoriv, [[copywriting]])
+Жива розмовна мова. CTA-дієслово. Кілька варіантів заголовка модалки → найсильніший. Antislop (zero em-dash). Success-копі тепле, людське.
+
+## 7. ПОМИЛКИ
+форма-простирадло (>4 видимих полів) · нема прихованого currentPageLink (не знаємо звідки лід) · фейк-success без реальної відправки · відсутній PDPL-consent (юр-ризик) · favourites без персистентності · калькулятор без lead-capture в кінці · backdrop-blur на модалці над скрол-контентом (perf — interaction-only ОК) · success = редірект (краще інлайн).
+
+## 8. ЧЕК
+☐ callback-модалка: name+phone (+приховані currentPageLink/utm) + reCAPTCHA ☐ favourites cross-page + лічильник + PDF-експорт ☐ mortgage-калькулятор як lead-magnet (якщо доречно) ☐ доставка через Telegram-бот (перевірено, ok лише на реальну відправку) ☐ PDPL-consent required + privacy-лінк ☐ DOM-форма, focus-trap, маска, інлайн-валідація людськими меседжами ☐ копі Fedoriv + antislop + кілька варіантів ☐ success інлайн «Дякуємо» ☐ мобіл full-width tel-keyboard ≥44px.

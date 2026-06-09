@@ -1,0 +1,16 @@
+{
+  "description": "award-re plugin hooks: inject plugin root path + project state on each prompt so commands can locate skills/references and detect resume.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/start-state.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
