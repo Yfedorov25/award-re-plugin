@@ -22,6 +22,13 @@
 ## 5. ВАРІАНТИ-ПРОТОТИПИ
 - Для ключових секцій показати 2-4 перевірені VI-варіанти (з `_TECHNIQUE_REGISTRY`) + візуалізувати (текст/мокап/HTML-прототип) → user обирає → motion-score.md. Не один шлях.
 
+## 5b. АРТ-ДИРЕКЦІЯ КАДРУ (★ урок Phoenix — correct ≠ crafted)
+- ПЕРЕД написанням будь-якого site .css/.html — пройти `re-art-direction` skill: прочитати `_ANTISLOP_design` + `_COMPOSITION_CRITIQUE`, вивести **Design Intent** на кожну секцію в `.award-re/design-intent.md`. Design-grounding hook ХАРД-БЛОКУЄ запис UI-файлів поки цього нема.
+- **FULL-BLEED за замовчуванням:** секція з медіа = `100vw/100vh` edge-to-edge, текст ВПЕЧЕНИЙ у зображення з scrim. НЕ медіа-в-колонці-боксі (це провал Phoenix).
+- **≥3 pinned scrollytelling** секції. **Асиметрія** обовʼязково (не `1fr 1fr`, не центрування body).
+- **ХАРД-БАНИ дизайну** (потрібне явне «чому»): cream+orange, чисті #000/#fff, інфра-шрифти, display без кирилиці для UA, gradient-text, glassmorphism, центрування контенту, медіа-в-рамці-замість-full-bleed.
+- eval-brain має ОКРЕМУ композиційну лінзу (<6/10 = не випускати).
+
 ## 6. СТЕК = ВИБІР ПІД ЗАДАЧУ
 - Next/React АБО vanilla+Barba+Locomotive (як VI) АБО інше — обрати найкращий спосіб під задачу. Константа лише: award-рівень VI + NO WebGL.
 

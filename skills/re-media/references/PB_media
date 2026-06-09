@@ -85,10 +85,18 @@
 4. **Hero-рух** → muted autoplay loop `.mp4` (Ever) АБО canvas frame-sequence (ERA). Для рендер-орбіти sequence читається «архітектурніше»; для готової будівлі відео-луп дешевше.
 5. **Ken-Burns на кожному стілі** → `scale(1.05-1.25)` за scroll-pinned тривалість = «все ледь живе» без 3D.
 
+## ★ 11.0 FULL-BLEED — НАЙВАЖЛИВІШЕ ПРАВИЛО (провал Phoenix vs VI)
+Дельта Phoenix(4) vs VI(9) майже ВСЯ тут. VI: усі секції медіа = **full-bleed `100vw/100vh` edge-to-edge**, текст ВПЕЧЕНИЙ у зображення з scrim. Phoenix: `100vw`=0 разів, медіа в `max-width`-колонці як `aspect-ratio` бордер-бокс radius:3px = мініатюра-марка в океані порожнечі.
+- ✅ ДЕФОЛТ: секція з медіа = `width:100vw; height:100vh; object-fit:cover` edge-to-edge.
+- ❌ ЗАБОРОНА: медіа в `max-width:1320px` колонці + clamp-боки + бордер-бокс (це Phoenix-провал).
+- ✅ Текст НА медіа з градієнт-scrim (hero+≥3 секції), НЕ «фото-колонка+текст-колонка».
+- Виняток (framed) лише: gallery-тайли, дрібні product-thumbnails — і то зі свідомою причиною.
+→ детальніше [[_ANTISLOP_design]] §1, [[_COMPOSITION_CRITIQUE]] ЛІНЗА 4.
+
 ## 11. ПРАВИЛА ОБРОБКИ (копіюй)
 - Кожне зображення у фіксованому `aspect-ratio`-слоті; плейсхолдер тримає; реальний URL через `data-src` (JS lazy); hero = eager + fetchpriority=high.
 - `object-fit:cover` для фото; `contain` лише plans/logos.
-- Full-bleed для hero+bg; framed (square-corner, легкий/0 radius) для gallery/cards.
+- **Full-bleed за замовчуванням** для hero+section-bg (§11.0); framed (square-corner) ЛИШЕ для gallery-тайлів зі свідомою причиною.
 - Scrim лише де текст, alpha .1-.3.
 - Parallax-zoom: container overflow:hidden + img 120% зсув -16.6%, рух на скролі.
 - Reveal: scale(1.25)→1 та/або clip-path curtain/iris на вхід.

@@ -1,5 +1,5 @@
 {
-  "description": "award-re plugin hooks: inject plugin root path + project state on each prompt so commands can locate skills/references and detect resume.",
+  "description": "award-re plugin hooks: (1) inject plugin root + project state on each prompt; (2) design-grounding gate that blocks writing site UI files until art-direction intent exists (the fix for the Phoenix correct-but-cheap failure).",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -7,6 +7,18 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/start-state.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/design-grounding.js",
             "timeout": 5
           }
         ]
