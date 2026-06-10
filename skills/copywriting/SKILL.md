@@ -7,9 +7,20 @@ license: MIT
 
 # copywriting
 
-Живі розмовні речення як Fedoriv, довжина вільна, КІЛЬКА hero-варіантів→найсильніший. Antislop: zero em-dash, без кліше, ялинки, активний стан. RE: емоція місця не мʼ².
+Живі розмовні речення як Fedoriv, довжина вільна, КІЛЬКА hero-варіантів→найсильніший. RE: емоція місця, не мʼб.
 
-## References
-- [_RESEARCH_fedoriv_method](./references/_RESEARCH_fedoriv_method.md) + [_ANTISLOP_ukrainian_hard](./references/_ANTISLOP_ukrainian_hard.md) + [niche-profiles](./references/niche-profiles.md) + [ukrainian-school](./references/ukrainian-school.md) + [microcopy-ux](./references/microcopy-ux.md).
+## ⛔ ЗАЛІЗНЕ ПРАВИЛО (урок smarts: «копірайт дивний, не людський»)
+Перед написанням БУДЬ-ЯКОГО рядка копі — прочитати ВСІ 10 reference-файлів нижче ПОВНІСТЮ, не лише antislop. Один банлист без методу дає мертвий текст. Фінальний текст проганяється через anti-slop-detector І тест «прочитай вголос — жива людина так скаже?».
 
-Підкоряйся `../../CLAUDE.md`. Усі прийоми — з reference-файлів, не вигадані. NO WebGL (🔴 → no-WebGL переклад).
+## References (усі 10 — обовʼязкові)
+- [voice-foundations](./references/voice-foundations.md) — фундамент голосу (база, з неї починати)
+- [_RESEARCH_fedoriv_method](./references/_RESEARCH_fedoriv_method.md) — метод Федоріва
+- [ukrainian-school](./references/ukrainian-school.md) — українська школа копі
+- [world-masters](./references/world-masters.md) — світові майстри (прийоми)
+- [niche-profiles](./references/niche-profiles.md) + [niche-profiles-realestate-addendum](./references/niche-profiles-realestate-addendum.md) — регістр ніші
+- [real-estate-ua](./references/real-estate-ua.md) — нерухомість УКР специфіка
+- [microcopy-ux](./references/microcopy-ux.md) — кнопки/форми/стани
+- [_ANTISLOP_ukrainian_hard](./references/_ANTISLOP_ukrainian_hard.md) — банлист (фінальний фільтр)
+- [anti-slop-detector](./references/anti-slop-detector.md) — детектор-чек перед публікацією
+
+Підкоряйся `../../CLAUDE.md`. Усі прийоми — з reference-файлів, не вигадані.
