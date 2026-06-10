@@ -25,5 +25,9 @@ Substitute `${AWARD_RE_PLUGIN_ROOT}`. Read & obey `${AWARD_RE_PLUGIN_ROOT}/CLAUD
 ## Output
 A prioritized report: P0 (breaks award level / perf) / P1 / P2, each with file:line or screenshot evidence and a concrete fix. In Guided mode, present findings one cluster at a time; in Autopilot, a single summary. Offer to apply fixes (or route to `/award-re:section` for rebuilds).
 
+
+## DNA-comparison (5x-режим)
+Для глибокого порівняння з рівнем Vide Infra: заповни анкету сайту за `${AWARD_RE_PLUGIN_ROOT}/skills/teardowns/references/vi-dataset/_SCHEMA.md` → порівняй проти таблиць T1-T5 у `vi-dataset/VI_DNA_MASTER.md` (ДНК 19 сайтів: типографіка/колір/рух/копі/структура) → суди осі за методом `skills/award-criteria/references/EXAMPLE_5X_AUDIT.md`. Ключові інваріанти: display = гігантський розмір × ЛЕГКА вага (400-500, 0/19 декоративних) · хедлайни ~70% прості/описові, гра слів ≤1 і лише в hero · один house-ease з великою частотою · visual-search = пункт меню 1-го рівня · Progress-сторінка обовʼязкова для ЖК.
+
 ## Note
 This is the command that's useful RIGHT NOW on the existing Quadro / Nahirna sites — point it at their prod URLs.
