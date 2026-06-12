@@ -10,10 +10,10 @@
 
 | Шар | Що це | Приклади прийомів (T-ID після міграції реєстру) |
 |---|---|---|
-| L1 BASE-MEDIA | чим зайнятий кадр | full-bleed still · frame-scrub canvas · відео · SVG-план · реальний фасад · повноекранний дек з лічильником + line-ticks (SAISEI) |
-| L2 MEDIA-OVERLAY | що живе ПОВЕРХ медіа | scrim-градієнт · паралакс-у-рамці · day→night dissolve · ghost-цифра · світло/glow |
-| L3 TEXT-CHOREO | як заходить текст | split-line .ln>span · act-слово clip · counter · титри-секвенція · text-shelf · scatter→assemble літер (SAISEI) · text-photo interleave у display-рядках (SAISEI) · тришаровий лейбл (ієрогліф+ромадзі+переклад) |
-| L4 MICRO | дрібна жизнь | self-draw лінії · пілюлі-якорі · бейджі · курсор-режими · ховер-стани |
+| L1 BASE-MEDIA | чим зайнятий кадр | full-bleed still · frame-scrub canvas · відео · SVG-план · реальний фасад · повноекранний дек з лічильником + line-ticks (SAISEI) · rounded-canvas «полотно-картка» (11TANJUNG) · facilities-акордеон вертикальних смуг (11TANJUNG) |
+| L2 MEDIA-OVERLAY | що живе ПОВЕРХ медіа | scrim-градієнт · паралакс-у-рамці · day→night dissolve · ghost-цифра · світло/glow · бренд-3D-обʼєкт наскрізний (AIR спіраль/сфера) · color-zone overlays на реальному аеро + хв-картки (AIR) · логотип-оверлей поверх hero (11TANJUNG) · blur→sharp reveal (11TANJUNG) |
+| L3 TEXT-CHOREO | як заходить текст | split-line .ln>span · act-слово clip · counter · титри-секвенція · text-shelf · scatter→assemble літер (SAISEI) · text-photo interleave у display-рядках (SAISEI) · тришаровий лейбл (ієрогліф+ромадзі+переклад) · spread-row заголовок: слова розведені по ширині, зʼїжджаються скролом (AIR, системний act-розділювач) · kinetic nav-letters з країв вʼюпорта (AIR) · фразова естафета глав (11TANJUNG) · кільця-тріо radial-fill як зміст (11TANJUNG) |
+| L4 MICRO | дрібна жизнь | self-draw лінії · пілюлі-якорі · бейджі · курсор-режими · ховер-стани · sound-тумблер default-OFF (11TANJUNG) · гігантське число-факт у lifestyle-слайді (AIR: 400 STORES, 3 MIN) |
 | L5 SEAM-IN / SEAM-OUT | як секція приходить і віддає естафету | theme-flip · light-шов · sticky-under · нитка · спільний елемент |
 
 **Формула (закон C1):**
@@ -45,14 +45,16 @@
 |---|---|---|
 | hero | відео/scrub + титри-секвенція + тиха CTA + scrim | smarts hero · quadro day→night |
 | manifesto/задум | пін-скраб або світла декларація + великі тези | smarts §02 |
-| visual-search | реальний фасад + SVG-зони + пілюлі-якорі + закріплений попавер + FLIP-дріл (закон C13) | Ever · smarts §units |
-| локація/карта | проєкція реальних даних + кінетика часу + маршрут-малювання (закон F8) | smarts §loc |
+| visual-search | реальний фасад + SVG-зони + пілюлі-якорі + закріплений попавер + FLIP-дріл (закон C13); РОЗШИРЕННЯ З ВІДЕО AIR: драбинка-стек поверхів зліва · попавер юніта з МІНІ-ПЛАНОМ · select-multiple · 3D-ізометрія master plan · similar-грід з планами-превʼю · list-view зі слайдер-фільтрами і сердечками | Ever · smarts §units · D_AIR_video |
+| локація/карта | проєкція реальних даних + кінетика часу + маршрут-малювання (закон F8). ПІДТВЕРДЖЕНО ЖИВИМ VI: AIR робить точно це (клік POI → маршрут малюється + число РОСТЕ синхронно) + real-aerial з color-zone overlays | smarts §loc · D_AIR_video |
 | trust/процес | будівництво-за-скрол + живий лічильник + віхи (закон F5) | smarts §kt |
 | інтер'єр | warm-колаж + штора day/night + lightbox-stories | smarts §iv |
 | CTA-форма | чисте полотно + underline-поля self-draw + чіп обраного юніта + success-wipe | smarts §cta |
 | проєкти/типи-дек | повноекранні слайди + лічильник N/M + line-ticks + PREV/NEXT | SAISEI /project |
 | сторінка сутності | hero-назва → INFO+фото → DETAILS-таблиця → цитата → awards/press → NEXT-handoff | SAISEI yama-house |
 | філософія-вставка | full-bleed dark кадр + один поетичний абзац = медійний text-breath | SAISEI 一期一会 |
+| types-карусель | картка типу: фото + назва + площа + спеки + FLOOR PLAN CTA; prev/next | 11TANJUNG Types of Villas |
+| invest-переваги | 3 темні картки з ховер-розкриттям тексту | AIR /investment |
 | (поповнюється відео-тірдаунами) | | |
 
 ## 5. ПРОЦЕДУРА КОМПОЗИЦІЇ СЕКЦІЇ (виконати, не прочитати)
