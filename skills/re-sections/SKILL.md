@@ -7,7 +7,7 @@ license: MIT
 
 # re-sections
 
-Будуй секцію за канон-аркою + rhythm (theme-flip, важке/легке чергування, 1 hero-момент, естафета). Кожна секція = свій прийом з motion-score.
+Будуй секцію за канон-аркою + rhythm (theme-flip, важке/легке чергування, 1 hero-момент, естафета). Кожна секція = свій СТЕК ШАРІВ з motion-score (T-ID, закон C1).
 
 ## References
 - [P_realestate](./references/P_realestate.md) — канон-арка + повний ЖК-чек-ліст + rhythm-rules.

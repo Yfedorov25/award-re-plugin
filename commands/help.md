@@ -22,6 +22,7 @@ award-re будує award-winning сайти НЕРУХОМОСТІ рівня �
 | `/award-re:build` | Будує сайт: page-map + канон-арка під ЦА/болі → мотіон-партитура (єдині константи + прийом-на-секцію) → секції за партитурою → perf + 50 критеріїв |
 | `/award-re:section` | Одна секція з варіантами-прототипами (показує 2-4 VI-способи, ти обираєш) |
 | `/award-re:visual-search` | Вибір квартир: SVG-плити building→floor→unit, статуси available/sold/reserved |
+| `/award-re:learn` | Петля навчання: failure-запис того ж дня · video-bug розбір запису юзера · video-teardown еталонного сайту |
 | `/award-re:audit` | Ревʼю готового за 50 award-критеріями + perf-guard (no-WebGL, scroll-jank) + узгодженість |
 | `/award-re:help` | Ця довідка |
 

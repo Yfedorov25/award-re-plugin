@@ -20,3 +20,13 @@ fi
 
 echo "AWARD_RE_PLUGIN_ROOT: ${ROOT}"
 echo "AWARD_RE_PROJECT_STATE: ${STATE}"
+
+# v1: tool-check — чесно кажемо, чого бракує (закон §0 Самодостатність)
+MISSING=""
+command -v ffmpeg >/dev/null 2>&1 || MISSING="$MISSING ffmpeg"
+command -v node >/dev/null 2>&1 || MISSING="$MISSING node"
+node -e "require.resolve('playwright')" >/dev/null 2>&1 || ls ./node_modules/playwright >/dev/null 2>&1 || MISSING="$MISSING playwright(verify.mjs)"
+command -v vercel >/dev/null 2>&1 || ls ./node_modules/.bin/vercel >/dev/null 2>&1 || ls ../quadro/node_modules/.bin/vercel >/dev/null 2>&1 || MISSING="$MISSING vercel-cli"
+[ -n "$MISSING" ] && echo "AWARD_RE_TOOLCHECK: відсутні —$MISSING (Higgsfield MCP перевір у /mcp; sharp ставиться npm-ом за потреби)"
+# v1: нагадування про журнал провалів (закон H1)
+[ -f .award-re/FAILURES-LOG.md ] && echo "AWARD_RE_FAILURES: прочитай .award-re/FAILURES-LOG.md перед побудовою (закон A11/H1)"

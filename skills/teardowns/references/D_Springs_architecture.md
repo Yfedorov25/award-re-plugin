@@ -1,5 +1,5 @@
 # D_Springs_architecture — springs.estate ПОВНА АРХІТЕКТУРА ✅
-> Vide Infra «luxury poetry». Живий зонд curl, 2026-06-09. Доповнює [[D_Springs]] + [PB_visual_search](../../re-visual-search/references/PB_visual_search) + [PB_site_architecture](../../re-architecture/references/PB_site_architecture).
+> Vide Infra «luxury poetry». Живий зонд curl, 2026-06-09. Доповнює D_Springs (повний розбір: D_Springs_architecture + D_SPRINGS_video) + [PB_visual_search](../../re-visual-search/references/PB_visual_search) + [PB_site_architecture](../../re-architecture/references/PB_site_architecture).
 > Стек: webpack jQuery-плагіни ($.fn.plan/visualSearch/cursor) + Barba.js + Locomotive-style virtual-scroll + **Three.js + OGL** (3 шейдер-сцени). ~109 URL.
 
 ## 1. ГЛИБИНА (~109 URL, sitemap 404)

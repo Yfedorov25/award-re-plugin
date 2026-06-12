@@ -1,5 +1,5 @@
 # PB_cta — CTA/ФІНАЛ award-RE (VI-grounded, конверсійний) ★★
-> Переписано з живого зонду 5 VI. 2026-06-09. Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_forms_lead_capture](PB_forms_lead_capture) [P_realestate](../../re-sections/references/P_realestate.md) [D_Springs_architecture](../../re-architecture/references/D_Springs_architecture.md) [[copywriting]].
+> Переписано з живого зонду 5 VI. 2026-06-09. Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_forms_lead_capture](PB_forms_lead_capture) [P_realestate](../../re-sections/references/P_realestate.md) [D_Springs_architecture](../../re-architecture/references/D_Springs_architecture.md) [copywriting](../../copywriting/SKILL.md).
 
 ## 0. РОЛЬ
 Остання секція (5/5 завжди остання). Конвертує накопичену емоцію в дію. У VI-RE це НЕ просто «велика кнопка» — це **єдина чітка конверсія + ехо hero-наративу**.
@@ -17,7 +17,7 @@
 4. Форма/модалка: name + phone + PDPL-consent (мінімум полів). → [PB_forms_lead_capture](PB_forms_lead_capture).
 5. Темна тема (`ui-dark`) — фінал day→night.
 
-## 3. КОПІ (з [[copywriting]] / Fedoriv)
+## 3. КОПІ (з [copywriting](../../copywriting/SKILL.md) / Fedoriv)
 Живе розмовне речення, не канцелярит. CTA-кнопка = наказове дієслово + результат («Записатися на перегляд», «Замовити дзвінок»). Кілька варіантів → обрати найсильніший. Antislop-фільтр (zero em-dash).
 
 ## 4. НОРМИ

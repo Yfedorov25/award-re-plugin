@@ -32,7 +32,7 @@ process.stdin.on("end", () => {
 
   const rep = path.join(root, ".award-re", "state", "verify-report.json");
   if (!fs.existsSync(rep)) {
-    console.error("ЗАКОН A8/A10: деплой без verify-report. Прожени scripts/verify.mjs (DOM-факти: рендер маршрутів, консоль, overflow, обидва шляхи даних) — звіт у .award-re/state/verify-report.json — і тоді деплой відкриється.");
+    console.error("ЗАКОН A8/A10: деплой без verify-report. Прожени scripts/verify.mjs (DOM-факти: рендер маршрутів, консоль, overflow, кліпінг; шляхи даних/стани анімацій — ручними DOM-фактами за section.md§7) — звіт у .award-re/state/verify-report.json — і тоді деплой відкриється.");
     process.exit(2);
   }
   const age = (Date.now() - fs.statSync(rep).mtimeMs) / 60000;

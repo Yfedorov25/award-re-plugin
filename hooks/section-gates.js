@@ -55,10 +55,21 @@ process.stdin.on("end", () => {
   // яка секція? грубий матч імені файла з імʼям state-файла
   const base = path.basename(fp).toLowerCase().replace(/\.\w+$/, "");
   const states = fs.readdirSync(stateDir).filter((f) => f.endsWith(".yaml"));
+  // design-intent per-section: якщо пишемо секцію з state-файлом — у design-intent.md
+  // мусить бути блок-заголовок цієї секції (зміст, а не розмір файла)
+  const diPath = path.join(root, ".award-re", "design-intent.md");
   for (const sf of states) {
     const key = sf.replace(/^section-/, "").replace(/\.yaml$/, "").toLowerCase();
     if (!key || !base.includes(key.replace(/^\d+-/, ""))) continue;
     const y = fs.readFileSync(path.join(stateDir, sf), "utf-8");
+    if (fs.existsSync(diPath)) {
+      const di = fs.readFileSync(diPath, "utf-8").toLowerCase();
+      const k = key.replace(/^\d+-/, "");
+      if (!di.includes(k)) {
+        console.error(`ЗАКОН A3: у design-intent.md нема блоку секції «${k}» (Лінзи 1-5 + 4 тести) — додай ПЕРЕД кодом.`);
+        process.exit(2);
+      }
+    }
     const passed = /user-choice:\s*\S+/.test(y) || /stage:\s*(integrate|verify-dom|rollback-point|deploy|prod-check|log|done)/.test(y);
     if (!passed) {
       console.error(`ЗАКОН A6/A7: секція «${key}» ще не пройшла прототипи+вибір юзера (state/${sf} без user-choice). Збудуй 2-4 прототипи на локальному порту, дай юзеру обрати, запиши вибір у motion-score і state — тоді інтеграція відкриється.`);

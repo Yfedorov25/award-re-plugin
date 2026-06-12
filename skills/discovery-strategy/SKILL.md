@@ -7,7 +7,7 @@ license: MIT
 
 # Discovery / Strategy (Phase 0)
 
-Метод — у `references/PB_discovery_strategy`. Прочитай його повністю й виконуй. Підкоряйся `../../CLAUDE.md` (§3 стратегія перед дизайном, §7 Fedoriv, §8 не вигадувати).
+Метод — у `references/PB_discovery_strategy`. Прочитай його повністю й виконуй. Підкоряйся `../../CLAUDE.md` (§0 стратегія перед дизайном, розділ E Fedoriv, розділ F не вигадувати).
 
 ## Reference
 - [PB_discovery_strategy](./references/PB_discovery_strategy) — повний 5-крок метод (research→інтерв'ю→позиц→бренд→копі), 7 блоків інтерв'ю, artefacts.

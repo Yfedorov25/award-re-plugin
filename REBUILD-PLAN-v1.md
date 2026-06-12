@@ -109,6 +109,10 @@ DoD-чекліст + схема звіту З ДОКАЗАМИ (file:line / DOM-
 - Заборона залежати від інших плагінів/скілів у RE-флоу: все потрібне (verify.mjs,
   frame-extract.sh, compress-budget.mjs, gen-pages шаблон, prerender-шаблон,
   Telegram-lead шаблон, OSM-проєкція gen.py) їде в `scripts/` плагіна.
+  *Статус rc1:* verify.mjs ✓, frames.sh ✓, compress-budget.mjs ✓. Чотири шаблони
+  сайт-стека (gen-pages / prerender / Telegram-lead / OSM-проєкція) — СВІДОМИЙ
+  scope-cut: бойові еталони живуть у apps/smarts (eruhomist repo), портуються
+  в плагін на першому використанні у новому проєкті (v1.1).
 - Шаблони проєкту: `.award-re/` скелет (motion-score.md, FAILURES-LOG.md,
   CLIENT-BACKLOG.md, media-plan.md, design-intent.md, state/) створюється онбордингом.
 

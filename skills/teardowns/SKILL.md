@@ -14,3 +14,5 @@ license: MIT
 - D_* teardowns (./references/) — глибокі розбори award-сайтів.
 
 Підкоряйся `../../CLAUDE.md`. Усі прийоми — з reference-файлів, не вигадані. NO WebGL (🔴 → no-WebGL переклад).
+
+v1: структурований довідник прийомів — [../grammar/references/_REGISTRY_TID.md](../grammar/references/_REGISTRY_TID.md); живі відео-тірдауни: D_*_video.md у references/.

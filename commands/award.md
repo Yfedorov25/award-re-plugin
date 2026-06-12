@@ -30,11 +30,11 @@ Before every AskUserQuestion, end the chat message with an empty spacer line.
 3. Scaffold `.award-re/config.yaml` via Bash (heredoc) with: `mode`, `project_type`, `niche: realestate`, `constraints: { webgl: false }`, empty `brand:` block, the canonical `arc:` (hero, manifesto, architecture, lifestyle, nature, location, interiors, trust, units, cta). No `resume:` yet.
 3b. Scaffold the FULL `.award-re/` skeleton from `${AWARD_RE_PLUGIN_ROOT}/templates/`:
    copy `FAILURES-LOG.md`, `CLIENT-BACKLOG.md`, `motion-score.md`, `media-plan.md`,
-   `ROLLBACK.md` and the `state/` dir into `.award-re/`. These are LAW artifacts
+   `ROLLBACK.md`, `design-intent.md` and the `state/` dir into `.award-re/`. These are LAW artifacts
    (constitution A2/A11/H1/H3/H4/G) — every build phase reads/writes them; gates
    refuse to pass while they are missing.
 4. Route to the recommended next step:
-   - New ЖК/вілла → **strongly recommend `/award-re:discovery`** (strategy MUST come before design — CLAUDE.md §3). Offer to run it now.
+   - New ЖК/вілла → **strongly recommend `/award-re:discovery`** (strategy MUST come before design — CLAUDE.md §0 «Стратегія перед дизайном»). Offer to run it now.
    - Existing → ask: review / implement-section / add-feature → route to the matching command.
 
 ## Command menu (show when returning, or on request)

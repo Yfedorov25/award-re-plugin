@@ -1,6 +1,6 @@
 # 🎛️ _TECHNIQUE_REGISTRY — 100% прийомів Vide Infra (5 сайтів, exhaustive sweep)
 > Повний реєстр КОЖНОГО прийому/анімації/переходу/візуалізації з живого зонду ERA·AIR·Springs·SilverPinewood·Ever (CSS/JS bundles). 2026-06-09.
-> Мета: плагін має знати 100% і пропонувати ВАРІАНТИ. Раніше мали ~25 — реально 150+. Споріднено: [PB_motion_score](../../motion-score/references/PB_motion_score) [[_PLUGIN_BLUEPRINT]] [PB_variants_prototyping](../../variants-prototyping/references/PB_variants_prototyping).
+> Мета: плагін має знати 100% і пропонувати ВАРІАНТИ. Раніше мали ~25 — реально 150+. Споріднено: [PB_motion_score](../../motion-score/references/PB_motion_score) (блюпринт v0.1, історичний) [PB_variants_prototyping](../../variants-prototyping/references/PB_variants_prototyping).
 > Колонка **NW** = наше no-WebGL покриття: ✅ маємо/тривіально · 🔶 треба дописати рецепт · 🔴 WebGL→потрібен переклад.
 
 ## 0. РУШІЙ (спільний для всіх 5)
@@ -37,7 +37,7 @@ Vanilla **jQuery-plugin система** (`$.fn.X` ↔ `data-plugin="X"`, кіл
 - **WebGL Zeus GLTF** (SP illustrationZeus) — 🔴 DRACO+AVIF, fov:12 long-lens, mouse-tracked shadow-light, multi-rate scroll-parallax груп (0.5/0.25/−1×), camera-orbit applyAxisAngle, easeInOutExpo intro, CSS film-grain (`noise-animation` keyframe). → 🔴 ПЕРЕКЛАД: pre-rendered orbit frames (canvas-2D) + статичні ракурси crossfade.
 - **WebGL revolves-carousel** (AIR about) — 🔴 shader rounded-corners(discard) + UV-distortion on scroll. Має DOM-fallback `aboutRevolvesMobileCarousel`. → 🔶 CSS clip + scale crossfade.
 - **Hero ring shader** (ERA preloader) — 🔴 half-ring Fresnel. → 🔶 SVG/canvas arc draw.
-- **3d-map** (ERA) — 🔴 GLTF+OrbitControls+Raycaster+OutlinePass+Bloom+TWEEN fly-to. → 🔴 pre-rendered orbit (наш [[quadro-phase5-map-decision]] вердикт) АБО SVG-карта.
+- **3d-map** (ERA) — 🔴 GLTF+OrbitControls+Raycaster+OutlinePass+Bloom+TWEEN fly-to. → 🔴 pre-rendered orbit (наш (бойове рішення quadro: карта DOM-only 2.5D, без WebGL/R3F; вердикт) АБО SVG-карта.
 - **inline-SVG plan/map** (всі) — 2-шар (artwork.svg + anchor.svg з data-anchor rects), data-plan-plans JSON, plan-marker--{type}, Floating-UI/Popper тултіпи, категорійний фільтр. ✅ → [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map) [PB_visual_search](../../re-visual-search/references/PB_visual_search).
 - **svgLength self-draw** (ERA 266, SP 72) — getTotalLength→`--path-length`→stroke-dashoffset draw-on. ✅ (= DrawAccent/HairlineDivider).
 - **Counters** — count-up на reveal (numbers-in). ✅
@@ -75,4 +75,4 @@ Vanilla **jQuery-plugin система** (`$.fn.X` ↔ `data-plugin="X"`, кіл
 inline-keyframe-parallax (не лише named) · `appear` decode+reveal gate · `contentAnimation` controller (counter/sticky/height/timer) · `svgLength` self-draw · custom-cursor spring-режими · sticky-clip-path stacking · gravity-well+snap · `deco` parallax-шар · `themed`/`changeTheme` IntersectionObserver theme-swap · button clone-content+outline · range власний слайдер · before/after spring · mouse-slider · Keen/Owl carousel + custom fade/loop ефекти · FLIP · precisescroll · palette-cycle/liquid-fill preloader варіанти · Barba modal-in transition · per-site ease (SP ≠ air) · anticipation ease `.47,.04,.5,-.06` · 44-69 named-parallax-patterns per site · WebGL-shader internals (для no-WebGL перекладу).
 
 ## 9. ПРИНЦИП ВИКОРИСТАННЯ (плагін)
-Цей реєстр = меню прийомів. Для кожної секції motion-score обирає 2-4 КАНДИДАТИ звідси → [PB_variants_prototyping](../../variants-prototyping/references/PB_variants_prototyping) показує варіанти → user обирає. 🔴-прийоми ЗАВЖДИ через no-WebGL переклад (колонка NW). Жоден прийом не «вигаданий» — усе зняте з живих VI.
+v1: СТРУКТУРОВАНИЙ канон тепер ../../grammar/references/_REGISTRY_TID.md (109 T-ID + 22 архетипи + комбінації) — стеки складай ЗВІДТИ; цей файл = першоджерельна проза. Старе: «реєстр = меню прийомів». Для кожної секції motion-score обирає 2-4 КАНДИДАТИ звідси → [PB_variants_prototyping](../../variants-prototyping/references/PB_variants_prototyping) показує варіанти → user обирає. 🔴-прийоми ЗАВЖДИ через no-WebGL переклад (колонка NW). Жоден прийом не «вигаданий» — усе зняте з живих VI.

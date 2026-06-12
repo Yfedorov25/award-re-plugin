@@ -23,7 +23,7 @@ If `.award-re/config.yaml` is missing, tell the user to run `/award-re:award` fi
 `research` / `interview` / `positioning` / `brand` / `copy` → jump to that step. Else run the full sequence.
 
 ## Sequence (per discovery-strategy SKILL)
-1. **Research** (research-engine): competitors (3-7), their pricing/messaging/weak spots, audience signals, pains — via WebSearch+WebFetch (always), browse/Chrome for deep competitor probes, Apify/scrape for mass review-mining, Higgsfield for visual refs. CLAUDE.md §1: competitors → SENSES ONLY, never visual. Cite every source, invent nothing.
+1. **Research** (research-engine): competitors (3-7), their pricing/messaging/weak spots, audience signals, pains — via WebSearch+WebFetch (always), browse/Chrome for deep competitor probes, Apify/scrape for mass review-mining, Higgsfield for visual refs. CLAUDE.md §0: competitors → SENSES ONLY, never visual. Cite every source, invent nothing.
 2. **Interview** — deep Fedoriv-style conversation (the 7 question blocks in the skill). Open questions, dig "why", record the client's VERBATIM phrasing (it becomes copy). Guided: AskUserQuestion batches of ≤4. Autopilot: ask the critical ones, infer the rest from research, flag assumptions.
 3. **Positioning** — 4 dimensions (audience / category / difference / Big Idea) + map each pain to a future section.
 4. **Brand platform** — essence, promise, tone, archetype, 2-4 signature words, emotional arc.
