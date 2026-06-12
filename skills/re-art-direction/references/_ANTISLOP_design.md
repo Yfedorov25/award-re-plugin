@@ -1,6 +1,6 @@
 # Design Anti-Slop каталог — чому сайт виглядає ДЕШЕВО (award-RE)
 > Відбитки AI-дешевого дизайну. Адаптовано з design-engineer anti-patterns + дельта-аналізу Phoenix vs Vide Infra. КОЖЕН пункт = місце де агент поставив дефолт замість рішення.
-> Це БЛОКУЮЧИЙ фільтр: жодна секція не виходить, поки не пройде. Споріднено: [[_COMPOSITION_CRITIQUE]] [[PB_media]] [[PB_color]] [[PB_motion_score]].
+> Це БЛОКУЮЧИЙ фільтр: жодна секція не виходить, поки не пройде. Споріднено: [_COMPOSITION_CRITIQUE](_COMPOSITION_CRITIQUE.md) [PB_media](../../re-media/references/PB_media) [PB_color](../../re-color/references/PB_color.md) [PB_motion_score](../../motion-score/references/PB_motion_score).
 
 ## 0. ТЕСТ AI-SLOP (головний)
 Покажи сайт незнайомцю і скажи «це зробив AI». Якщо він одразу вірить — це провал. Award-сайт змушує спитати «як це зроблено?», не «який AI це зробив?». **Pass:** є точка зору, можна вказати на конкретні рішення (full-bleed кадр, асиметрія, палітра) що належать ЦЬОМУ проєкту. **Fail:** заміна будь-якого елемента на найпоширеніший варіант пройшла б непоміченою.

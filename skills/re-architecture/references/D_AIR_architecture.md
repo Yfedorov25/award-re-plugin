@@ -1,6 +1,6 @@
 # D_AIR_architecture — aircenter.space ПОВНА АРХІТЕКТУРА ✅
 > Vide Infra · Tekta Group бізнес-центр AIR, Москва. Живий зонд curl, 2026-06-09.
-> Доповнює [[D_AIR_location]] (карта) + [[PB_visual_search]] + [[PB_site_architecture]].
+> Доповнює [[D_AIR_location]] (карта) + [PB_visual_search](../../re-visual-search/references/PB_visual_search) + [PB_site_architecture](PB_site_architecture).
 > Стек: SSR PHP(Symfony, EJS, /ajax/*.json) + **Locomotive Scroll** (підтверджено) + Barba.js + data-plugin реєстр. БЕЗ GSAP/Lenis/React. WebGL лише 1 (image-карусель /about).
 
 ## 1. ГЛИБИНА (sitemap.xml = 120 URL)

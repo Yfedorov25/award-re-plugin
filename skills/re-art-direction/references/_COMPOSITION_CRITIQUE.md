@@ -1,6 +1,6 @@
 # Композиційна критика — «correct vs crafted» (award-RE)
 > 4-лінзова критика кадру. Адаптовано з design-engineer critique-framework + дельта Phoenix↔VI. Використовується re-art-direction (під час) + eval-brain (після).
-> Споріднено: [[_ANTISLOP_design]] [[PB_site_architecture]] [[PB_media]].
+> Споріднено: [_ANTISLOP_design](_ANTISLOP_design.md) [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_media](../../re-media/references/PB_media).
 
 ## 0. ПРІРВА correct vs crafted
 **Correct** = грід тримається, кольори не бʼються, працює. **Crafted** = хтось дбав про КОЖНЕ рішення, є присутність, усе підкоряється одному наміру. Перший вивід AI майже завжди correct, не crafted (Phoenix = correct інженерно, мертвий композиційно). Робота — зловити це ДО користувача.
@@ -26,7 +26,7 @@
 1. **Squint Test** — примруж очі: чи є чіткий фокус і ритм, чи однорідна каша? (Phoenix: каша центрованих колонок.)
 2. **Full-bleed Test** — скільки секцій медіа заповнює екран? <50% = провал. (Phoenix: 1/10.)
 3. **Text-on-media Test** — скільки секцій мають текст НА зображенні? 0 поза hero = провал. (Phoenix: 1.)
-4. **AI-Slop Test** — «це зробив AI» вірять одразу? (Phoenix: так = провал.) → [[_ANTISLOP_design]] §0.
+4. **AI-Slop Test** — «це зробив AI» вірять одразу? (Phoenix: так = провал.) → [_ANTISLOP_design](_ANTISLOP_design.md) §0.
 
 ## КОМПОЗИЦІЙНА ОЦІНКА (для eval-brain, ОКРЕМО від 50 технічних)
 Порахуй на сайті:

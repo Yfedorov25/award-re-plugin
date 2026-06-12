@@ -1,5 +1,5 @@
 # PB_footer — FOOTER award-RE (VI-grounded: sparse+функціональний+legal) ★★
-> Переписано з живого зонду 5 VI. 2026-06-09. Споріднено: [[PB_site_architecture]] [[P_realestate]] [[PB_nav]] [[D_ERA_architecture]].
+> Переписано з живого зонду 5 VI. 2026-06-09. Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [P_realestate](P_realestate.md) [PB_nav](PB_nav.md) [D_ERA_architecture](../../re-architecture/references/D_ERA_architecture.md).
 
 ## 0. РОЛЬ (VI-реальність ≠ agency «гігантське лого-marquee»)
 RE-футер VI = **sparse, функціональний, юридичний**. Не «фінальний акорд бренду з marquee» — а trust/legal-низ що закриває довіру й вимоги закону. Silver: майже лише #top + credit. ЖК-футер тримає nav-дубль + дисклеймер.
@@ -7,7 +7,7 @@ RE-футер VI = **sparse, функціональний, юридичний**.
 ## 1. РЕАЛЬНА VI-СТРУКТУРА
 - **Nav-дубль** — повна навігація-колонка (всі ~14 розділів) + selection-входи (visual-search, parking).
 - **Trust/legal колонка:** контакти, developer/забудовник, documents, news, privacy-policy, cookies, user-agreement.
-- **ЮРИДИЧНИЙ ДИСКЛЕЙМЕР** (обовʼязковий, з [[P_realestate]] чек-ліст): «не є публічною офертою; візуалізації/рендери можуть відрізнятись від фактичного». Це вимога ринку нерухомості.
+- **ЮРИДИЧНИЙ ДИСКЛЕЙМЕР** (обовʼязковий, з [P_realestate](P_realestate.md) чек-ліст): «не є публічною офертою; візуалізації/рендери можуть відрізнятись від фактичного». Це вимога ринку нерухомості.
 - **Cookie-consent** банер (5/5).
 - **© + забудовник-сутність** + «Website by Vide Infra»-стиль credit (наш аналог: тихий credit студії/автора).
 - На багатьох — back-to-top `#top`.

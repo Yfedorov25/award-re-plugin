@@ -1,6 +1,6 @@
 # PB_media — МЕДІА/ЗОБРАЖЕННЯ award-ЖК (що, як кадровано, яка обробка) ★★★
 > ЖИВИЙ зонд media-пайплайну 5 Vide Infra сайтів (ERA·AIR·Springs·Silver·Ever), 2026-06-09.
-> Відповідає: які зображення/відео/SVG потрібні ЖК-сайту, які співвідношення, яка обробка. Споріднено: [[PB_color]] [[PB_site_architecture]] [[PB_media]] [[PB_hero]].
+> Відповідає: які зображення/відео/SVG потрібні ЖК-сайту, які співвідношення, яка обробка. Споріднено: [PB_color](../../re-color/references/PB_color.md) [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_media](PB_media) [PB_hero](../../re-sections/references/PB_hero.md).
 
 ## 0. ОДИН ПАЙПЛАЙН (всі 5)
 Однаковий Vide Infra media-движок: `media/cache/{preset}_{breakpoint}/...`, папки `media/landing/N.section-name/`, брейки `@xs/@md/@xxl/@xxxl`. Тобто «медіа-словник» нижче = готовий spec.
@@ -35,7 +35,7 @@
 ## 5. SVG (переважно icon-sprite, не ілюстрація)
 - Один sprite `/assets/images/icons.svg#id`, через `<use href>`. Словник: arrow-right/left/down, favourite/heart, close, plus, play, menu, logo(left/right/mobile), phone, scroll, comparison, form-success/error.
 - Inline SVG: animated button-border (Silver `btn__outline` 36×), decor pattern, preloader-logo.
-- **Карти РАСТРОВІ, не SVG** на homepage (map-era PNG/WebP + scroll-plugin + DOM POI-піни). АЛЕ окрема /infrastructure-карта = inline-SVG (Silver — див. [[PB_interactive_map]]). Floor-plans = зображення в слоті `aspect-ratio:var(--plan-ratio)`, `object-fit:contain`.
+- **Карти РАСТРОВІ, не SVG** на homepage (map-era PNG/WebP + scroll-plugin + DOM POI-піни). АЛЕ окрема /infrastructure-карта = inline-SVG (Silver — див. [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map)). Floor-plans = зображення в слоті `aspect-ratio:var(--plan-ratio)`, `object-fit:contain`.
 
 ## 6. СПІВВІДНОШЕННЯ + КАДРУВАННЯ
 `aspect-ratio` всюди (кожен слот має locked-ratio щоб плейсхолдер тримав місце). Реальні значення:
@@ -50,7 +50,7 @@
 
 ## 7. ОБРОБКА (підписи «дорогого вигляду»)
 1. **Parallax-zoom pan (ядро-підпис):** `.parallax-image-move{overflow:hidden}` + inner `img{width:120%;height:120%;object-fit:cover;margin:-16.66%}` → повільний pan/zoom у фіксованому кропі на скролі.
-   ★ **Механізм руху = inline scroll-keyframe** (sweep, [[_TECHNIQUE_REGISTRY]] §2): VI ставлять `data-parallax-{FROM}-{TO}='{"transform":"scale(1.2)"}'`→`{"scale(1)"}` (FROM/TO = scroll-% крізь viewport-pass), значення з calc()-design-токенів (не magic-px). НАШ переклад: GSAP fromTo scrub по тих самих %.
+   ★ **Механізм руху = inline scroll-keyframe** (sweep, [_TECHNIQUE_REGISTRY](../../variants-prototyping/references/_TECHNIQUE_REGISTRY.md) §2): VI ставлять `data-parallax-{FROM}-{TO}='{"transform":"scale(1.2)"}'`→`{"scale(1)"}` (FROM/TO = scroll-% крізь viewport-pass), значення з calc()-design-токенів (не magic-px). НАШ переклад: GSAP fromTo scrub по тих самих %.
 2. **Ken-Burns scale-reveal:** `transform:scale(1.25)→scale(1)` (також 1.13/1.10/1.03) на `data-reveal` — зображення їде із зуму в нейтраль при вході.
 3. **Clip-path reveals:** curtain-wipe-up `clip-path:polygon(...)`, iris `ellipse(10%...)→ellipse(160%...)`, `inset(0)`.
 4. **Gradient-scrim для тексту:** `linear-gradient(180deg,rgba(0,0,0,.1-.3))` лише де текст. Низька alpha.
@@ -91,7 +91,7 @@
 - ❌ ЗАБОРОНА: медіа в `max-width:1320px` колонці + clamp-боки + бордер-бокс (це Phoenix-провал).
 - ✅ Текст НА медіа з градієнт-scrim (hero+≥3 секції), НЕ «фото-колонка+текст-колонка».
 - Виняток (framed) лише: gallery-тайли, дрібні product-thumbnails — і то зі свідомою причиною.
-→ детальніше [[_ANTISLOP_design]] §1, [[_COMPOSITION_CRITIQUE]] ЛІНЗА 4.
+→ детальніше [_ANTISLOP_design](../../re-art-direction/references/_ANTISLOP_design.md) §1, [_COMPOSITION_CRITIQUE](../../re-art-direction/references/_COMPOSITION_CRITIQUE.md) ЛІНЗА 4.
 
 ## 11. ПРАВИЛА ОБРОБКИ (копіюй)
 - Кожне зображення у фіксованому `aspect-ratio`-слоті; плейсхолдер тримає; реальний URL через `data-src` (JS lazy); hero = eager + fetchpriority=high.

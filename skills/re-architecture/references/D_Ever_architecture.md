@@ -1,5 +1,5 @@
 # D_Ever_architecture — ever-live-here.com ПОВНА АРХІТЕКТУРА ✅
-> Vide Infra · Tekta Group, двомовний (/en+/ru). Живий зонд curl, 2026-06-09. Доповнює [[PB_visual_search]] + [[PB_site_architecture]].
+> Vide Infra · Tekta Group, двомовний (/en+/ru). Живий зонд curl, 2026-06-09. Доповнює [PB_visual_search](../../re-visual-search/references/PB_visual_search) + [PB_site_architecture](PB_site_architecture).
 > Стек: SSR PHP(Symfony) + jQuery + Barba.js + Locomotive Scroll + Popper.js + Owl Carousel + Splitting.js + Google Maps + **krpano** (3D-tour). БЕЗ GSAP/WebGL/React. ~400+ URL.
 > EVER = НАЙКРАЩИЙ приклад dual-view (list↔plan) вибору квартир.
 
@@ -32,7 +32,7 @@ scroll-controller-section = JS pinned/horizontal-takeover (translate3d, sticky) 
 | /en/progress | 1 | **frame-sequence ~1333 img** (камера по кварталах будівництва), scrub timeline |
 | /en/parking-storage | 1 | **plan+table dual** — plan__svg (data-nr="М94") + табл. parking__row/type/number/cost (~528 рядків), parking__tabs |
 
-## 4. FLATS + VISUAL-SEARCH (dual-view ядро) → [[PB_visual_search]]
+## 4. FLATS + VISUAL-SEARCH (dual-view ядро) → [PB_visual_search](../../re-visual-search/references/PB_visual_search)
 ### (a) /en/flats — LIST
 Ajax-каталог, list порожній на SSR, гідрейт із `/en/api/apartments`. form.js-ajax-filters + js-ajax-list + js-ajax-list-count-counter + js-load-more + js-filter-reset.
 **Фільтр-параметри (server-defaults):** square[from/to] **24-144** м² · price[from/to] **8 258 400 - 52 994 550** ₽ · floor[from/to] **2-34** · rooms[] (1C студія,1,2,3,4,5) · building[] (1-6) · extras[] (balcony,terrace,bedroom,garden,windows,top-floor,whitebox) · sort · on-sale + exclude-reserved toggles. Слайдери = native `<input type=range class=sr-only>` стилізовані JS, data-range-formatter для ₽.

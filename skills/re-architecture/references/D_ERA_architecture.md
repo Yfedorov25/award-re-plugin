@@ -1,6 +1,6 @@
 # D_ERA_architecture — era.estate ПОВНА АРХІТЕКТУРА (глибина сайту) ✅
 > Vide Infra · Tekta Group «ERA», Москва. Живий зонд curl (SSR HTML/CSS/SVG), 2026-06-09.
-> Фокус: СКІЛЬКИ сторінок, СКІЛЬКИ секцій, ЯК повʼязані. Доповнює [[PB_visual_search]] + [[PB_site_architecture]].
+> Фокус: СКІЛЬКИ сторінок, СКІЛЬКИ секцій, ЯК повʼязані. Доповнює [PB_visual_search](../../re-visual-search/references/PB_visual_search) + [PB_site_architecture](PB_site_architecture).
 > Стек: БЕЗ JS-фреймворку. Custom rAF smooth-scroll (НЕ Lenis/Locomotive/GSAP) + Barba.js + Three.js (точково) + data-plugin реєстр.
 
 ## 1. ГЛИБИНА (карта URL) — ~270+ сторінок
@@ -32,7 +32,7 @@
 | /progress | 18 | 12 вбудованих відео поквартального прогресу будівництва |
 **Спинний хребет:** КОЖНА story-page закінчується `visualizationLinesMenu` — крос-лінк-меню до сусідніх сторінок (сторінки утворюють кільце, не глухий кут).
 
-## 4. VISUAL-SEARCH — 3 рівні (повний детальний розбір → [[PB_visual_search]])
+## 4. VISUAL-SEARCH — 3 рівні (повний детальний розбір → [PB_visual_search](../../re-visual-search/references/PB_visual_search))
 ```
 /visual-search → 6 buildings → /building/2 → 32 floors → /building/2/floor/29 → 10 units → /flats/ER-2-2-279
 ```

@@ -1,16 +1,16 @@
 # PB_variants_prototyping — ВАРІАНТИ-ПРОТОТИПИ (показати способи, обрати найкращий) ★★★
 > Плагін НЕ дає один шлях. Для кожної секції пропонує кілька перевірених VI-варіантів + візуалізує → user обирає. 2026-06-09.
-> Споріднено: [[_TECHNIQUE_REGISTRY]] (меню прийомів) [[PB_motion_score]] [[PB_site_architecture]] [[_PLUGIN_BLUEPRINT]].
+> Споріднено: [_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md) (меню прийомів) [PB_motion_score](../../motion-score/references/PB_motion_score) [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [[_PLUGIN_BLUEPRINT]].
 
 ## 0. ПРИНЦИП
-«Я хочу бачити які є різні варіанти для нашого проєкту, як їх візуалізувати, щоб обрати найкращі.» Плагін знає 100% прийомів VI ([[_TECHNIQUE_REGISTRY]]) і для КОЖНОЇ секції дістає 2-4 кандидати, показує варіанти, дає обрати. Не імпровізація, не один шаблон — палітра перевірених VI-способів під конкретний проєкт.
+«Я хочу бачити які є різні варіанти для нашого проєкту, як їх візуалізувати, щоб обрати найкращі.» Плагін знає 100% прийомів VI ([_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md)) і для КОЖНОЇ секції дістає 2-4 кандидати, показує варіанти, дає обрати. Не імпровізація, не один шаблон — палітра перевірених VI-способів під конкретний проєкт.
 
 ## 1. КОЛИ (де в потоці)
-Усередині ФАЗИ 1.5 (motion-score, [[PB_motion_score]]): після того як визначено арку й секцію, ПЕРЕД фінальною побудовою. Працює в Guided-режимі (user обирає) і Autopilot (плагін сам обирає за критеріями + показує що обрав).
+Усередині ФАЗИ 1.5 (motion-score, [PB_motion_score](../../motion-score/references/PB_motion_score)): після того як визначено арку й секцію, ПЕРЕД фінальною побудовою. Працює в Guided-режимі (user обирає) і Autopilot (плагін сам обирає за критеріями + показує що обрав).
 
 ## 2. ЯК ГЕНЕРУВАТИ ВАРІАНТИ
 Для секції (напр. Hero):
-1. Дістати з [[_TECHNIQUE_REGISTRY]] усі прийоми придатні цій ролі (hero → frame-sequence-scrub / video-loop / split-hero-hover / clip-in still / ken-burns still).
+1. Дістати з [_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md) усі прийоми придатні цій ролі (hero → frame-sequence-scrub / video-loop / split-hero-hover / clip-in still / ken-burns still).
 2. Відсіяти 🔴 WebGL (узяти їх no-WebGL переклад) і несумісні з брендом/перфом.
 3. Сформувати 2-4 ВАРІАНТИ, кожен = {прийом + як виглядає + тон + перф-кост + VI-приклад-джерело}.
 4. Узгодити з motion-score константами (ease/тема) — варіанти різняться ПРИЙОМОМ, не ламають систему.
@@ -35,7 +35,7 @@
 | B | video-loop bg | живий кадр, muted autoplay | низ | Ever ever_intro.mp4 |
 | C | still + ken-burns + clip-in | статичний рендер дихає+wipe-reveal | низ | SP parallax-image-zoom |
 | D | split-hover | курсор-X свопить день/ніч | низ | Ever intro --1/--2 |
-Усі: ease+тема з motion-score, заголовок Fedoriv (кілька копі-варіантів, [[PB_discovery_strategy]] §6).
+Усі: ease+тема з motion-score, заголовок Fedoriv (кілька копі-варіантів, [PB_discovery_strategy](../../discovery-strategy/references/PB_discovery_strategy) §6).
 
 ## 6. ВАРІАНТИ ПО КЛЮЧОВИХ СЕКЦІЯХ (стартовий набір з реєстру)
 - **Hero:** A-D вище.
@@ -46,7 +46,7 @@
 - **Map:** inline-SVG-draw (svgLength) / 2-layer-anchor / category-filter варіанти.
 - **Preloader:** split-panel / liquid-fill-logo / palette-cycle / counter-rule.
 - **Cursor:** ring-trail / label-disc / directional zoom / parallax-magnetic.
-Кожен — з [[_TECHNIQUE_REGISTRY]], no-WebGL.
+Кожен — з [_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md), no-WebGL.
 
 ## 7. ПРАВИЛА
 - Варіанти різняться ПРИЙОМОМ, не ламають motion-score константи (один ease/тема/scroll).

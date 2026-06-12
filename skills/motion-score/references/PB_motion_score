@@ -1,11 +1,11 @@
 # PB_motion_score — МОТИОН-ПАРТИТУРА сайту (щоб усе було ПОВʼЯЗАНО, як Vide Infra) ★★★
 > ФІЛОСОФІЯ ПЛАГІНА: ми не «робимо сайт», ми СТАЄМО Clone Vide Infra. Кожна секція продумана до дрібниць, ВСІ секції повʼязані в одну систему. Vide Infra = ЄДИНИЙ референс РІВНЯ й прийомів.
 > Проблема яку це лікує: на Quadro/Nahirna кожна секція будувалась по-своєму → неузгодженість. Vide Infra так НЕ роблять.
-> Споріднено: [[PB_site_architecture]] [[PB_color]] [[PB_media]] [[PB_motion_system]] [[PB_scroll_choreography]] [[D_ERA_architecture]] [[PB_discovery_strategy]].
+> Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_color](../../re-color/references/PB_color.md) [PB_media](../../re-media/references/PB_media) [PB_motion_system](../../motion-engine/references/PB_motion_system.md) [PB_scroll_choreography](../../motion-engine/references/PB_scroll_choreography.md) [D_ERA_architecture](../../re-architecture/references/D_ERA_architecture.md) [PB_discovery_strategy](../../discovery-strategy/references/PB_discovery_strategy).
 > Це КРОК між архітектурою і побудовою секцій у плагіні award-re («director's pass»).
 
 ## 0. ДВА ДЖЕРЕЛА (не плутати — це критично)
-- **КОНКУРЕНТИ клієнта = тільки СЕНСИ.** З них беремо: ЦА, болі, позиціонування, чим відрізнятись. НІКОЛИ не копіюємо їхній візуал/прийоми/рівень. (Фаза 0, [[PB_discovery_strategy]].)
+- **КОНКУРЕНТИ клієнта = тільки СЕНСИ.** З них беремо: ЦА, болі, позиціонування, чим відрізнятись. НІКОЛИ не копіюємо їхній візуал/прийоми/рівень. (Фаза 0, [PB_discovery_strategy](../../discovery-strategy/references/PB_discovery_strategy).)
 - **VIDE INFRA = ЄДИНИЙ референс РІВНЯ Й ПРИЙОМІВ.** Будуємо настільки ж award, продумано до дрібниць. Кожен прийом — з нашої VI-бази (D_*, PB_*). Орієнтир якості — завжди VI, не конкуренти.
 
 ## 1. ЩО ТАКЕ МОТИОН-ПАРТИТУРА
@@ -13,17 +13,17 @@
 
 ## 2. ЄДИНІ КОНСТАНТИ НА ВЕСЬ САЙТ (фіксуються РАЗ, діють скрізь)
 Vide Infra: один движок на все. Наш аналог фіксуємо в config.yaml + globals:
-- **ОДИН ease НА ПРОЄКТ** (обрати, НЕ глобальна константа — sweep довів: ERA/AIR/Ever = `cubic-bezier(.25,.74,.22,.99)` "air"; Silver Pinewood = `cubic-bezier(.25,.46,.45,.94)` easeOutQuad). Обери ОДИН під тон бренду й тримай скрізь. + вторинний `.55,0,.1,1` для повільних morph, `.47,.04,.5,-.06` для anticipation. 0.4-0.8s (block 1.6s). → [[_TECHNIQUE_REGISTRY]] §1.
-- **ОДНА токен-система:** --c-* + --t-*, тема=клас (тепла база + темна контра + 1 земляний акцент). → [[PB_color]]
-- **ОДИН scroll-движок:** Lenis lerp фіксований, dual-rate parallax. → [[PB_scroll_smoothness]]
+- **ОДИН ease НА ПРОЄКТ** (обрати, НЕ глобальна константа — sweep довів: ERA/AIR/Ever = `cubic-bezier(.25,.74,.22,.99)` "air"; Silver Pinewood = `cubic-bezier(.25,.46,.45,.94)` easeOutQuad). Обери ОДИН під тон бренду й тримай скрізь. + вторинний `.55,0,.1,1` для повільних morph, `.47,.04,.5,-.06` для anticipation. 0.4-0.8s (block 1.6s). → [_TECHNIQUE_REGISTRY](../../variants-prototyping/references/_TECHNIQUE_REGISTRY.md) §1.
+- **ОДНА токен-система:** --c-* + --t-*, тема=клас (тепла база + темна контра + 1 земляний акцент). → [PB_color](../../re-color/references/PB_color.md)
+- **ОДИН scroll-движок:** Lenis lerp фіксований, dual-rate parallax. → [PB_scroll_smoothness](../../motion-engine/references/PB_scroll_smoothness.md)
 - **ОДИН reveal-патерн:** плавний fade-rise (НЕ slideshow), однаковий стагер.
-- **ОДНА медіа-обробка:** parallax-zoom (img@120%) + Ken-Burns scale на КОЖНОМУ стілі. → [[PB_media]]
-- **ОДНА типографіка:** шкала, шрифти, UA-мікротипографіка скрізь. → [[PB_typography]]
+- **ОДНА медіа-обробка:** parallax-zoom (img@120%) + Ken-Burns scale на КОЖНОМУ стілі. → [PB_media](../../re-media/references/PB_media)
+- **ОДНА типографіка:** шкала, шрифти, UA-мікротипографіка скрізь. → [PB_typography](../../re-typography/references/PB_typography.md)
 - **ОДИН курсор, ОДИН прелоадер, ОДИН футер-патерн.**
 → Якщо хоч одна секція відступає від констант без причини — це баг узгодженості (perf/eval-guard ловить).
 
 ## 3. ПАРТИТУРА ПРИЙОМІВ (хореографія — який прийом де, щоб НЕ повторювати поспіль)
-Vide Infra розкладають прийоми як кадри фільму, чергуючи важке/легке. Наш канон (під канон-арку [[PB_site_architecture]]):
+Vide Infra розкладають прийоми як кадри фільму, чергуючи важке/легке. Наш канон (під канон-арку [PB_site_architecture](../../re-architecture/references/PB_site_architecture)):
 | Секція | Прийом (з VI-бази) | Тема | Темп |
 |---|---|---|---|
 | Hero | full-bleed + frame-sequence canvas-2D АБО відео-луп + clip-in + багатошар parallax | DARK | повільний, reveal-delay |

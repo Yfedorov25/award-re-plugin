@@ -1,6 +1,6 @@
 # PB_color — ПАЛІТРА award-ЖК (реальні системи 5 Vide Infra сайтів) ★★★
 > Перезаписано з ЖИВОГО зонду CSS 5 сайтів (ERA·AIR·Springs·Silver Pinewood·Ever), 2026-06-09.
-> Не теорія — точні hex, токени, theme-класи, alpha-рампи. Споріднено: [[PB_site_architecture]] [[PB_media]] [[D_ERA_architecture]].
+> Не теорія — точні hex, токени, theme-класи, alpha-рампи. Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_media](../../re-media/references/PB_media) [D_ERA_architecture](../../re-architecture/references/D_ERA_architecture.md).
 
 ## 0. ГОЛОВНЕ (одна система на всіх 5)
 Усі 5 = ОДНА CSS-архітектура Vide Infra. Дволанковий токен-набір:

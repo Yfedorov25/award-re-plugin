@@ -1,7 +1,7 @@
 # PB_site_architecture — ГЛИБИНА award-ЖК сайту: як її будувати свідомо ★★★
 > МАЙСТЕР-ДОК. Синтез живого розбору 5 Vide Infra сайтів (ERA · AIR · Springs · Silver Pinewood · Ever), 2026-06-09.
 > Відповідає на питання: «їхні сайти ВЕЛИКІ й продумані, їхня глибина відрізняється від нашої — як створювати ТАКУ Ж глибину коли хочеш?»
-> Деталі по кожному: [[D_ERA_architecture]] [[D_AIR_architecture]] [[D_Springs_architecture]] [[D_SilverPinewood_architecture]] [[D_Ever_architecture]]. Системи: [[PB_visual_search]] [[PB_interactive_map]].
+> Деталі по кожному: [D_ERA_architecture](D_ERA_architecture.md) [D_AIR_architecture](D_AIR_architecture.md) [D_Springs_architecture](D_Springs_architecture.md) [D_SilverPinewood_architecture](D_SilverPinewood_architecture.md) [D_Ever_architecture](D_Ever_architecture.md). Системи: [PB_visual_search](../../re-visual-search/references/PB_visual_search) [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map).
 
 ---
 
@@ -32,7 +32,7 @@
 ## 2. СЛОВНИК PAGE-TYPES (5 типів — з них збирається будь-який ЖК-сайт)
 1. **STORY page** — кінематографічний скрол-наратив. 6-14 themed-секцій, тема ui-dark↔ui-light чергується, закінчується крос-лінк-меню до сусідніх story. (home, about, architecture, location, territory, design...)
 2. **CATALOG** — фільтрований список квартир. Range-слайдери (square/price/floor) + rooms/building checkboxes + sort + on-sale/exclude-reserved. Ajax-гідрейт із API/JSON, live-count, load-more.
-3. **SPATIAL SELECTOR (visual-search)** — SVG drill-down complex→building→floor→unit. Статуси available/sold/reserved. → [[PB_visual_search]]
+3. **SPATIAL SELECTOR (visual-search)** — SVG drill-down complex→building→floor→unit. Статуси available/sold/reserved. → [PB_visual_search](../../re-visual-search/references/PB_visual_search)
 4. **DATA-DETAIL (unit page)** — 1 квартира: план, м², поверх, дата здачі, ціна(+знижка), plan-tabs(furnished|unfurnished), mini-plan, breadcrumbs, CTA reserve+favourite, «similar units» карусель. URL = unit code (/flat/EV-5-5-12).
 5. **TRUST/LEGAL/NEWS** — developer, documents, how-to-buy(+mortgage калькулятор), contacts, news, privacy.
 > Стандартний набір nav ЖК (з 5 сайтів): About · Architecture · Location · Infrastructure/Territory · Gallery · Flats · Visual-search · Parking · Progress · How-to-buy/Mortgage · Developer/Team · Documents · News · Contacts. **~14 пунктів** — ось «глибина» проти нашого 1-pager.
@@ -48,7 +48,7 @@
 5. **Sticky-card-over-parallax-bg** — картка пінниться над рухомим фоном
 6. **Clip-reveal image pair** — 2 зображення розкриваються clip-path
 7. **Image-slider with counter** — 1/2 слайдер, sticky
-8. **Sticky interactive map** — inline-SVG район + POI + фільтр → [[PB_interactive_map]]
+8. **Sticky interactive map** — inline-SVG район + POI + фільтр → [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map)
 9. **Before/after comparison** — drag-слайдер (Ever apartments). Обгорни scroll-ignore щоб drag не скролив
 10. **Tabbed content** — таби свопають зображення/текст (Nature/Play/Chill/Sport)
 11. **Self-drawing lines / counters** — SVG stroke-draw, count-up чисел
@@ -90,7 +90,7 @@ SSR HTML (EJS-шаблони, дані inline або з /api)
    чергуй ui-dark/ui-light, завершуй крос-лінк-меню.
 4. ДАНІ ПЕРШІ: якщо A — зроби 1 JSON-датасет квартир {code,building,floor,square,price,rooms,status,planSrc}.
    З нього генеруються: catalog cards + visual-search regions + unit-сторінки + counts. НЕ дублюй руками.
-5. SVG-ПЛИТИ: художник малює building/floor/unit плити у Figma, 1 path = 1 unit, data-nr=code. → [[PB_visual_search]]
+5. SVG-ПЛИТИ: художник малює building/floor/unit плити у Figma, 1 path = 1 unit, data-nr=code. → [PB_visual_search](../../re-visual-search/references/PB_visual_search)
 6. ОДИН plan-примітив: параметризуй типом (apartment-status / poi-category / parking). Reuse скрізь.
 7. ВОРОНКА: 2 on-ramps (catalog раціональний + visual-search просторовий) → 1 unit-page → favourites → 1 callback.
    Форма авто-чіпляє currentPageLink (з якої квартири лід).
@@ -118,7 +118,7 @@ SSR HTML (EJS-шаблони, дані inline або з /api)
 - [ ] page-map із 5 page-types (мінімум STORY; для продажу +CATALOG +SELECTOR +DETAIL)
 - [ ] кожна story = 6-14 section-types зі словника, ui-flip, крос-лінк-меню в кінці
 - [ ] 1 JSON-датасет → генерує catalog+selector+unit-pages+counts (не руками)
-- [ ] 1 plan-примітив reused (apartment/poi/parking) → [[PB_visual_search]]
+- [ ] 1 plan-примітив reused (apartment/poi/parking) → [PB_visual_search](../../re-visual-search/references/PB_visual_search)
 - [ ] 2 on-ramps → 1 unit-page → favourites shortlist (PDF) → 1 callback (currentPageLink)
 - [ ] Barba/router переходи + preloader-curtain, кожна сторінка SEO-лінкабельна
 - [ ] ease .25,.74,.22,.99, 0.4-0.8s; reveal-delay на герої

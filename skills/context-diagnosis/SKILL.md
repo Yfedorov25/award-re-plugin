@@ -14,7 +14,7 @@ license: MIT
 - [A3_brief_assembler](./references/A3_brief_assembler.md) — як зібрати суперТЗ.
 
 ## Суть
-1. З `.award-re/brief.md` + `brand.md` + config → визнач: project_type (ЖК/вілла/existing), стратегію глибини (A inventory vs B atmosphere — [[PB_site_architecture]]), тон/регістр (з brand), нішу-профіль (RE).
+1. З `.award-re/brief.md` + `brand.md` + config → визнач: project_type (ЖК/вілла/existing), стратегію глибини (A inventory vs B atmosphere — [PB_site_architecture](../re-architecture/references/PB_site_architecture)), тон/регістр (з brand), нішу-профіль (RE).
 2. Збери внутрішнє ТЗ для re-architecture: які болі→які секції, який масштаб (скільки сторінок), які конверсійні блоки.
 3. Передай у re-architecture.
 

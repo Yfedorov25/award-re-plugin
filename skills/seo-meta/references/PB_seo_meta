@@ -1,11 +1,11 @@
 # PB_seo_meta — SEO / МЕТА award-RE (глибина як SEO-гра) ★★
 > Глибина VI-сайтів = data-generated SSR-URL = фундаментально SEO-стратегія. З architecture sweep. 2026-06-09.
-> Споріднено: [[PB_site_architecture]] [[PB_performance]] §7 [[PB_page_transitions]] [[D_ERA_architecture]] [[D_SilverPinewood_architecture]]. A1 крит.49 (текст у DOM).
+> Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_performance](../../perf-doctrine/references/PB_performance.md) §7 [PB_page_transitions](../../preloader-transitions/references/PB_page_transitions) [D_ERA_architecture](../../re-architecture/references/D_ERA_architecture.md) [D_SilverPinewood_architecture](../../re-architecture/references/D_SilverPinewood_architecture.md). A1 крит.49 (текст у DOM).
 
 ## 0. ПРИНЦИП
 Award-вигляд НЕ має коштувати SEO. VI це поєднують: кожна квартира/секція = реальний SSR-URL що індексується. NO WebGL → текст завжди в DOM автоматично (на відміну від AT-помилки «текст у canvas = 0 SEO»).
 
-## 1. ГЛИБИНА = SEO (з [[PB_site_architecture]])
+## 1. ГЛИБИНА = SEO (з [PB_site_architecture](../../re-architecture/references/PB_site_architecture))
 - **Per-unit SSR-сторінки** = сотні індексованих URL (ERA ~151 квартир + ~89 floor; AIR 71 office; Ever 212). Кожна `/flat/{code}` лінкабельна/шерабельна/в Google. Це й робить сайт «великим» для пошуку.
 - **Canonical:** Silver Pinewood — 8 «сторінок» = 1 документ, усі `<link rel=canonical href=bare-domain>` (deep-link якорі через history-плагін). Уникає дублів. Для inventory-сайтів — кожен unit має власний canonical.
 - **History scroll-spy** (SP/ERA): `replaceState` переписує URL-hash на in-view секцію → deep-лінкабельні секції без дублікат-контенту.
@@ -27,16 +27,16 @@ Award-вигляд НЕ має коштувати SEO. VI це поєднуют�
 ## 4. ТЕКСТ У DOM (A1 крит.49 — хардове)
 - Весь контент-текст у HTML, НЕ у canvas/WebGL. NO WebGL → автоматично. (AT-антиприклад: текст у шейдері = нуль SEO.)
 - SSR/SSG (не client-only render) — Google бачить контент без JS. Next App Router SSR / vanilla SSR (як VI).
-- Lazy-зображення мають `alt` (subject-matter, [[PB_media]] §8).
+- Lazy-зображення мають `alt` (subject-matter, [PB_media](../../re-media/references/PB_media) §8).
 
-## 5. PERF = SEO ([[PB_performance]])
+## 5. PERF = SEO ([PB_performance](../../perf-doctrine/references/PB_performance.md))
 Core Web Vitals — ранкінг-фактор. LCP<2.5 (hero eager+fetchpriority), CLS<0.1 (aspect-ratio-слоти), INP<200. Шрінкнуті рендери. immutable cache.
 
-## 6. ПЕРЕХОДИ не ламають SEO ([[PB_page_transitions]])
+## 6. ПЕРЕХОДИ не ламають SEO ([PB_page_transitions](../../preloader-transitions/references/PB_page_transitions))
 Barba/View-Transitions = прогресивне покращення поверх справжніх SSR-URL. Кожна сторінка працює без JS-переходу (прямий лінк віддає повний HTML). Перехід — не залежність.
 
 ## 7. ПОМИЛКИ
 текст у canvas/WebGL (0 SEO — чому NO WebGL допомагає) · client-only render (Google не бачить) · дублікат-контент без canonical (SP-патерн обов'язковий) · per-unit без унікальних title/description · нема JSON-LD на listing · CLS від не-locked медіа · переходи що ламають прямі лінки · alt відсутні.
 
 ## 8. ЧЕК
-☐ per-unit SSR-URL, кожна індексується ☐ унікальні title/description/canonical на КОЖНІЙ ☐ OG/Twitter (+per-unit image) ☐ JSON-LD Apartment+Organization+BreadcrumbList ☐ текст у DOM (NO WebGL), SSR/SSG ☐ семантика + один h1 ☐ alt на медіа ☐ CWV (LCP/CLS/INP) — [[PB_performance]] ☐ hreflang якщо i18n ☐ sitemap/robots за рішенням ☐ переходи = прогресивне покращення (прямі лінки працюють).
+☐ per-unit SSR-URL, кожна індексується ☐ унікальні title/description/canonical на КОЖНІЙ ☐ OG/Twitter (+per-unit image) ☐ JSON-LD Apartment+Organization+BreadcrumbList ☐ текст у DOM (NO WebGL), SSR/SSG ☐ семантика + один h1 ☐ alt на медіа ☐ CWV (LCP/CLS/INP) — [PB_performance](../../perf-doctrine/references/PB_performance.md) ☐ hreflang якщо i18n ☐ sitemap/robots за рішенням ☐ переходи = прогресивне покращення (прямі лінки працюють).

@@ -26,7 +26,7 @@
 
 ---
 
-# ★ КАНОН (живий зонд 5 Vide Infra сайтів, 2026-06-09) — деталі: [[PB_site_architecture]]
+# ★ КАНОН (живий зонд 5 Vide Infra сайтів, 2026-06-09) — деталі: [PB_site_architecture](../../re-architecture/references/PB_site_architecture)
 
 ## КАНОНІЧНА ДУГА ГОЛОВНОЇ (порядок що повторюється на всіх 5)
 ```
@@ -72,7 +72,7 @@ ACT       → CTA                           (замов дзвінок)
 
 ## ПРАВИЛА РИТМУ/КОМБІНАЦІЇ (як уникають монотонності)
 1. **ОДИН hero-момент на сторінку** — рівно один full-bleed опенер; решта «підтримка».
-2. **Theme-flip dark↔light між секціями** — architecture/lobby темні+драматичні, nature/courtyard/lifestyle світлі+повітряні. Контраст кожні 1-2 секції. → [[PB_color]]
+2. **Theme-flip dark↔light між секціями** — architecture/lobby темні+драматичні, nature/courtyard/lifestyle світлі+повітряні. Контраст кожні 1-2 секції. → [PB_color](../../re-color/references/PB_color.md)
 3. **Heavy/light чергування** — heavy(full-screen media+інтерактив) → light(одне центроване речення+повітря) → heavy. Ніколи 2 heavy-інтерактиви поспіль; між ними text-«breath».
 4. **Чергування сторони медіа** — копі/зображення свопають left/right слайд-до-слайду.
 5. **Варіація висоти/формату** — full-vp pinned (hero/arch) + горизонт-слайдери «1/5» (POI/двір/інтерʼєри) + компакт stat-strip («Стеля 5.9м», «34 поверхи») як пунктуація.

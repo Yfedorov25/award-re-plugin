@@ -1,9 +1,9 @@
 # PB_page_transitions — ПЕРЕХОДИ МІЖ СТОРІНКАМИ (відчуття «одного сайту») ★★
 > Як VI роблять «не набір сторінок, а один досвід». З sweep 5 VI (Barba-механіка) + наш стек-переклад. 2026-06-09.
-> Споріднено: [[PB_preloader_transitions]] (вхід) [[_TECHNIQUE_REGISTRY]] §6 [[PB_site_architecture]] [[PB_motion_score]]. Стек=вибір ([[_PLUGIN_BLUEPRINT]] §4b).
+> Споріднено: [PB_preloader_transitions](PB_preloader_transitions.md) (вхід) [_TECHNIQUE_REGISTRY](../../variants-prototyping/references/_TECHNIQUE_REGISTRY.md) §6 [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_motion_score](../../motion-score/references/PB_motion_score). Стек=вибір ([[_PLUGIN_BLUEPRINT]] §4b).
 
 ## 0. РОЛЬ
-Глибокий ЖК-сайт = десятки SSR-сторінок. БЕЗ м'яких переходів кожен клік = білий flash + reload = «набір сторінок». VI роблять SPA-плавність через Barba → відчуття цілісного досвіду. Це pillar глибини ([[PB_site_architecture]]).
+Глибокий ЖК-сайт = десятки SSR-сторінок. БЕЗ м'яких переходів кожен клік = білий flash + reload = «набір сторінок». VI роблять SPA-плавність через Barba → відчуття цілісного досвіду. Це pillar глибини ([PB_site_architecture](../../re-architecture/references/PB_site_architecture)).
 
 ## 1. VI-РЕАЛЬНІСТЬ (Barba.js, усі 5 сайтів)
 - `<body data-barba="wrapper">` > `<main data-barba="container" data-barba-namespace="page">` — ОДИН namespace «page» (усі роути = один контейнер).
@@ -13,7 +13,7 @@
 - **Springs/SP:** preloader-curtain handoff на `once`, потім fade/slide між сторінками.
 - Prefetch на hover лінка → миттєвий перехід.
 
-## 2. ТИПИ ПЕРЕХОДІВ (меню варіантів — [[PB_variants_prototyping]])
+## 2. ТИПИ ПЕРЕХОДІВ (меню варіантів — [PB_variants_prototyping](../../variants-prototyping/references/PB_variants_prototyping))
 - **Curtain/wipe** — завіса закриває (yPercent) → нова сторінка → відкриває. Базовий, надійний.
 - **Modal-in slide** (Ever) — нова сторінка в'їжджає панеллю. Добре для drill-in (visual-search→unit).
 - **Fade/crossfade** — найм'якший, для story↔story.
@@ -30,20 +30,20 @@
 → Рішення фіксується в config.yaml/motion-score. Один підхід на проєкт (узгодженість).
 
 ## 4. НОРМИ
-- Transition 0.6-1s, ease проєкту ([[PB_motion_score]]).
-- Preloader тільки once (вхід), не на кожен перехід ([[PB_preloader_transitions]]).
+- Transition 0.6-1s, ease проєкту ([PB_motion_score](../../motion-score/references/PB_motion_score)).
+- Preloader тільки once (вхід), не на кожен перехід ([PB_preloader_transitions](PB_preloader_transitions.md)).
 - Scroll-reset на enter (нова сторінка з верху) АБО scroll-to-anchor (deep-link).
-- Кожна сторінка лишається SSR-лінкабельною/SEO (перехід — прогресивне покращення, не залежність). → [[PB_seo_meta]].
+- Кожна сторінка лишається SSR-лінкабельною/SEO (перехід — прогресивне покращення, не залежність). → [PB_seo_meta](../../seo-meta/references/PB_seo_meta).
 - Prefetch на hover (миттєвість).
 
 ## 5. ВНУТРІШНЬО-СЕКЦІЙНІ ПЕРЕХОДИ (не плутати зі сторінками)
-- **sticky cross-fade stacking** (SP) — секція в'їжджає ПІД попередню (CSS clip-path+negative-margin+:after спейсер). → [[_TECHNIQUE_REGISTRY]] §6.
+- **sticky cross-fade stacking** (SP) — секція в'їжджає ПІД попередню (CSS clip-path+negative-margin+:after спейсер). → [_TECHNIQUE_REGISTRY](../../variants-prototyping/references/_TECHNIQUE_REGISTRY.md) §6.
 - **sectionToSticky→sectionFromSticky** (AIR) — pin-then-release.
-- **clip/mask reveals** між блоками. Тема перетікає dark↔light ([[PB_color]], [[PB_motion_score]] §4).
+- **clip/mask reveals** між блоками. Тема перетікає dark↔light ([PB_color](../../re-color/references/PB_color.md), [PB_motion_score](../../motion-score/references/PB_motion_score) §4).
 - **visual-search drill** (building→floor→unit) — Barba modal-in / router push.
 
 ## 6. ПОМИЛКИ
 білий flash/reload між сторінками (не SPA) · різкі переходи рвуть досвід · preloader на КОЖЕН перехід (не лише once) · перехід ЛАМАЄ SSR/SEO (стає залежністю, не покращенням) · стек-догма (Next там де Barba простіший/навпаки) · scroll не скидається/не йде на якір · 2 різні типи переходів на сайті (неузгодженість).
 
 ## 7. ЧЕК
-☐ SPA-плавність (Barba АБО View-Transitions АБО router — вибір під задачу) ☐ ОДИН тип переходу на проєкт ☐ 0.6-1s, ease проєкту ☐ preloader лише once ([[PB_preloader_transitions]]) ☐ scroll-reset/anchor на enter ☐ prefetch на hover ☐ SSR/SEO не зламані (прогресивне покращення) ☐ shared-element FLIP для catalog→detail якщо доречно ☐ внутрішньо-секційні переходи (sticky-stack/clip) узгоджені з motion-score.
+☐ SPA-плавність (Barba АБО View-Transitions АБО router — вибір під задачу) ☐ ОДИН тип переходу на проєкт ☐ 0.6-1s, ease проєкту ☐ preloader лише once ([PB_preloader_transitions](PB_preloader_transitions.md)) ☐ scroll-reset/anchor на enter ☐ prefetch на hover ☐ SSR/SEO не зламані (прогресивне покращення) ☐ shared-element FLIP для catalog→detail якщо доречно ☐ внутрішньо-секційні переходи (sticky-stack/clip) узгоджені з motion-score.

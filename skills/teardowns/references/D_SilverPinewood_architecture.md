@@ -1,5 +1,5 @@
 # D_SilverPinewood_architecture — silver-pinewood.com ПОВНА АРХІТЕКТУРА ✅
-> Vide Infra «quiet luxury», тепла крем-палітра. Живий зонд curl, 2026-06-09. Доповнює [[D_SilverPinewood]] + [[PB_interactive_map]] + [[PB_site_architecture]].
+> Vide Infra «quiet luxury», тепла крем-палітра. Живий зонд curl, 2026-06-09. Доповнює [D_SilverPinewood](D_SilverPinewood.md) + [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map) + [PB_site_architecture](../../re-architecture/references/PB_site_architecture).
 > ГОЛОВНА ЗНАХІДКА: це НЕ багатосторінковий сайт. Це ОДНА довга scroll-сторінка з 17 секцій. 8 «story-сторінок» = БАЙТ-ІДЕНТИЧНИЙ документ (SEO deep-link на якір).
 
 ## 1. ГЛИБИНА = 2 унікальні документи (не page-count)
@@ -38,7 +38,7 @@
 /about→§2, /location→§5(мапа), /territory→§7(Courtyard), /architecture→§11-12(intro+карусель), /lobby→§13(3D Zeus), /engineering→§15, /team→§16, /infrastructure→ТЕЖ §5 (та сама мапа).
 Підпис-елементи: (a) фільтр-мапа §5, (b) architecture carousel §12, (c) WebGL Zeus §13, (d) tabbed content §8/§12, (e) gravity-well магнітний hover/parallax.
 
-## 4. INFRASTRUCTURE МАПА (критично — user питав ЯК побудована) → [[PB_interactive_map]]
+## 4. INFRASTRUCTURE МАПА (критично — user питав ЯК побудована) → [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map)
 **100% hand-built inline-SVG. 0 mapbox/google/leaflet/yandex/2gis. 14 svg, 0 iframe.**
 **Два SVG-шари (обидва viewBox 0 0 1440 1256):**
 - `5.location-map/map-image.svg` (69KB) — ВИДИМЕ артворк (27 path, 21 rect, крем-план вулиць)

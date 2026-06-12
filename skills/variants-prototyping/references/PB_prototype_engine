@@ -1,6 +1,6 @@
 # PB_prototype_engine — ГЕНЕРАЦІЯ HTML-ПРОТОТИПІВ ВАРІАНТІВ ★★
-> Як плагін реально будує клікабельні прототипи варіантів секцій (рівень C у [[PB_variants_prototyping]]). Адаптовано з design-engineer dev-prototyping патерну. 2026-06-09.
-> Споріднено: [[PB_variants_prototyping]] [[_TECHNIQUE_REGISTRY]] [[PB_motion_score]] [[PB_color]] [[PB_media]].
+> Як плагін реально будує клікабельні прототипи варіантів секцій (рівень C у [PB_variants_prototyping](PB_variants_prototyping)). Адаптовано з design-engineer dev-prototyping патерну. 2026-06-09.
+> Споріднено: [PB_variants_prototyping](PB_variants_prototyping) [_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md) [PB_motion_score](../../motion-score/references/PB_motion_score) [PB_color](../../re-color/references/PB_color.md) [PB_media](../../re-media/references/PB_media).
 
 ## 0. ПРИНЦИП
 Прототип = одно-файловий HTML (CSS+JS inline, 0 build, 0 залежностей крім CDN GSAP/Lenis) що показує РУХ варіанту наживо. Throwaway-артефакт: код може бути брудний, він для візуального вибору й як референс реальної побудови. НЕ git/НЕ tests на цьому етапі.
@@ -9,14 +9,14 @@
 DE прототипує екрани продукту. Ми — **варіанти ПРИЙОМУ для секції**: 2-4 standalone HTML, кожен = той самий контент-каркас, але інший VI-прийом (frame-scrub vs video vs ken-burns vs split-hover). Мета: побачити рух, обрати найкращий → motion-score.md.
 
 ## 2. КОЛИ (у потоці)
-Рівень C у [[PB_variants_prototyping]] — для КЛЮЧОВИХ секцій (hero, visual-search, map, головний перехід). Прохідні секції — рівень A (текст) або B (мокап), без HTML.
+Рівень C у [PB_variants_prototyping](PB_variants_prototyping) — для КЛЮЧОВИХ секцій (hero, visual-search, map, головний перехід). Прохідні секції — рівень A (текст) або B (мокап), без HTML.
 
 ## 3. PRE-FLIGHT (design-grounding — щоб НЕ AI-slop)
 ПЕРЕД генерацією HTML прочитати й застосувати:
-1. [[_TECHNIQUE_REGISTRY]] — точний прийом + його VI-механіка (data-parallax-keyframe, ease, тощо)
-2. [[PB_color]] — токени бренду проєкту (--c-/--t-, тема=клас)
-3. [[PB_media]] — обробка (parallax-zoom, aspect-ratio-слот, no-WebGL)
-4. [[PB_motion_score]] — ОБРАНИЙ ease проєкту (НЕ дефолтний air — пер-сайт!) + константи
+1. [_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md) — точний прийом + його VI-механіка (data-parallax-keyframe, ease, тощо)
+2. [PB_color](../../re-color/references/PB_color.md) — токени бренду проєкту (--c-/--t-, тема=клас)
+3. [PB_media](../../re-media/references/PB_media) — обробка (parallax-zoom, aspect-ratio-слот, no-WebGL)
+4. [PB_motion_score](../../motion-score/references/PB_motion_score) — ОБРАНИЙ ease проєкту (НЕ дефолтний air — пер-сайт!) + константи
 5. copywriting/_ANTISLOP — якщо є текст у прототипі
 Без цього прототип виглядатиме як slop і зіб'є візуальний baseline.
 

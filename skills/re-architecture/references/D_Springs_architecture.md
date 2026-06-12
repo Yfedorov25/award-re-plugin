@@ -1,5 +1,5 @@
 # D_Springs_architecture — springs.estate ПОВНА АРХІТЕКТУРА ✅
-> Vide Infra «luxury poetry». Живий зонд curl, 2026-06-09. Доповнює [[D_Springs]] + [[PB_visual_search]] + [[PB_site_architecture]].
+> Vide Infra «luxury poetry». Живий зонд curl, 2026-06-09. Доповнює [[D_Springs]] + [PB_visual_search](../../re-visual-search/references/PB_visual_search) + [PB_site_architecture](PB_site_architecture).
 > Стек: webpack jQuery-плагіни ($.fn.plan/visualSearch/cursor) + Barba.js + Locomotive-style virtual-scroll + **Three.js + OGL** (3 шейдер-сцени). ~109 URL.
 
 ## 1. ГЛИБИНА (~109 URL, sitemap 404)
@@ -33,7 +33,7 @@
 | /gallery | `y-*` | pinned desktop scroll-gallery + custom scrollbar; фільтри Architecture/Infrastructure/Residencies |
 **Дисципліна:** кожна сторінка має свій section-namespace (l-/a-/de-/lo-/i-/y-), АЛЕ спільний footer (l-callback+l-favorites) і ОДНУ моушн-мову (data-reveal, parallax, ease .25,.74,.22,.99). Однаковий скелет, різна плоть.
 
-## 4. VISUAL-SEARCH — дані ЯК АТРИБУТ (не API) → [[PB_visual_search]]
+## 4. VISUAL-SEARCH — дані ЯК АТРИБУТ (не API) → [PB_visual_search](../../re-visual-search/references/PB_visual_search)
 - Плита = **14× `data-plan-plans`** JSON inline (один блок 888KB). 4.4MB сторінка = ці дані. Рендер jQuery `$.fn.plan`.
 - 3 рівні: buildings.svg → /plans/{floor}/Floor_N.svg(~300KB) → Flat_N_n.svg(~8/поверх).
 - Hot-zones: `<g class="plan-hoverable plan-hoverable--clickable" data-hoverable="N" style="mix-blend-mode:multiply">` + sibling `data-anchor="N"`.

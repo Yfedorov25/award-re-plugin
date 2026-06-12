@@ -1,3 +1,13 @@
+# 0.3.0-dev — REBUILD Етап 0 (2026-06-12)
+- CLAUDE.md → КОНСТИТУЦІЯ v1: ~120 законів у 10 розділах (0 + A-I), кожен з
+  першоджерелом (F-01..F-28 + бойові рішення smarts/quadro/nahirna). Старі хард-правила
+  v0.2 збережені й влиті в §0.
+- 235 wiki-лінків [[…]] у references мігровано на реальні відносні шляхи (агенти
+  тепер можуть переходити за зв'язками).
+- templates/: обовʼязковий скелет .award-re/ проєкту (FAILURES-LOG, CLIENT-BACKLOG,
+  motion-score-факт, media-plan, ROLLBACK, state/) + onboarding scaffold у award.md.
+- План перебудови: REBUILD-PLAN-v1.md (6 стовпів, етапи 0-7), CONSTITUTION-v1-draft.md.
+
 # Changelog
 
 ## 0.2.0 — Art-direction gate (the Phoenix fix)

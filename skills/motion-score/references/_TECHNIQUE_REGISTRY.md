@@ -1,6 +1,6 @@
 # 🎛️ _TECHNIQUE_REGISTRY — 100% прийомів Vide Infra (5 сайтів, exhaustive sweep)
 > Повний реєстр КОЖНОГО прийому/анімації/переходу/візуалізації з живого зонду ERA·AIR·Springs·SilverPinewood·Ever (CSS/JS bundles). 2026-06-09.
-> Мета: плагін має знати 100% і пропонувати ВАРІАНТИ. Раніше мали ~25 — реально 150+. Споріднено: [[PB_motion_score]] [[_PLUGIN_BLUEPRINT]] [[PB_variants_prototyping]].
+> Мета: плагін має знати 100% і пропонувати ВАРІАНТИ. Раніше мали ~25 — реально 150+. Споріднено: [PB_motion_score](PB_motion_score) [[_PLUGIN_BLUEPRINT]] [PB_variants_prototyping](../../variants-prototyping/references/PB_variants_prototyping).
 > Колонка **NW** = наше no-WebGL покриття: ✅ маємо/тривіально · 🔶 треба дописати рецепт · 🔴 WebGL→потрібен переклад.
 
 ## 0. РУШІЙ (спільний для всіх 5)
@@ -38,7 +38,7 @@ Vanilla **jQuery-plugin система** (`$.fn.X` ↔ `data-plugin="X"`, кіл
 - **WebGL revolves-carousel** (AIR about) — 🔴 shader rounded-corners(discard) + UV-distortion on scroll. Має DOM-fallback `aboutRevolvesMobileCarousel`. → 🔶 CSS clip + scale crossfade.
 - **Hero ring shader** (ERA preloader) — 🔴 half-ring Fresnel. → 🔶 SVG/canvas arc draw.
 - **3d-map** (ERA) — 🔴 GLTF+OrbitControls+Raycaster+OutlinePass+Bloom+TWEEN fly-to. → 🔴 pre-rendered orbit (наш [[quadro-phase5-map-decision]] вердикт) АБО SVG-карта.
-- **inline-SVG plan/map** (всі) — 2-шар (artwork.svg + anchor.svg з data-anchor rects), data-plan-plans JSON, plan-marker--{type}, Floating-UI/Popper тултіпи, категорійний фільтр. ✅ → [[PB_interactive_map]] [[PB_visual_search]].
+- **inline-SVG plan/map** (всі) — 2-шар (artwork.svg + anchor.svg з data-anchor rects), data-plan-plans JSON, plan-marker--{type}, Floating-UI/Popper тултіпи, категорійний фільтр. ✅ → [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map) [PB_visual_search](../../re-visual-search/references/PB_visual_search).
 - **svgLength self-draw** (ERA 266, SP 72) — getTotalLength→`--path-length`→stroke-dashoffset draw-on. ✅ (= DrawAccent/HairlineDivider).
 - **Counters** — count-up на reveal (numbers-in). ✅
 - **before/after comparison** (Ever imageComparison) — hover→split слідує курсору (spring .5), touch→drag. 🔶 рецепт.
@@ -62,12 +62,12 @@ Vanilla **jQuery-plugin система** (`$.fn.X` ↔ `data-plugin="X"`, кіл
 - **custom cursor** (всі: Ever 77, ERA 15) — spring/lerp follow (strength .25, .9 коли clickable), режими zoom-in/left/right/clickable/button-morph, hidden-spots, parallax-follow (= магнітний). ✅ (Cursor маємо, додати режими).
 - **button** — `data-button-clone-content` клонує лейбл (hover text-swap/slide), btn__outline = 2×SVG-rect+svgLength draw-on hover, pseudo-fill slide. 🔶 рецепт.
 - **cardHover/cardsHover/principlesCards** — групований hover класами. ✅
-- **favourites** (всі) — toggle+counter-badge+list-panel+**PDF-експорт**(/api/favourite/pdf/mail)+email. Cross-page localStorage. ✅ → [[PB_forms_lead_capture]].
+- **favourites** (всі) — toggle+counter-badge+list-panel+**PDF-експорт**(/api/favourite/pdf/mail)+email. Cross-page localStorage. ✅ → [PB_forms_lead_capture](../../forms-lead-capture/references/PB_forms_lead_capture).
 - **popover/tooltip** (Ever 575+48, ERA 222) — Popper/Floating-UI, animation popover-bottom-in/top-out, trigger hover-strict/click, sync-варіанти, triangle-adjust, desktop+mobile templates. ✅ 🔶.
-- **plan-marker hover** — №·м²·ціна popover, статус-кольори. ✅ → [[PB_visual_search]].
+- **plan-marker hover** — №·м²·ціна popover, статус-кольори. ✅ → [PB_visual_search](../../re-visual-search/references/PB_visual_search).
 - **filter chips / range-sliders** (власний `range`, не noUiSlider) — handle+connector, money-formatter, price/floor/area; list↔plan `selector__link` toggle; resultSort; ajaxList+count; pushState без reload. ✅ 🔶.
 - **tabs/tabsswipe** — swipeable, animate-height, image-clip-in-left/right контент, counter, openConnectedTab. ✅
-- **forms** — inputState(floating-label)+inputMask+phonenumber(intl-tel)+choice+dynamicForm+ajaxForm+recaptcha(v2/v3)+reachGoal/Comagic/Mindbox/Calltouch. ✅ → [[PB_forms_lead_capture]].
+- **forms** — inputState(floating-label)+inputMask+phonenumber(intl-tel)+choice+dynamicForm+ajaxForm+recaptcha(v2/v3)+reachGoal/Comagic/Mindbox/Calltouch. ✅ → [PB_forms_lead_capture](../../forms-lead-capture/references/PB_forms_lead_capture).
 - **intro split-hover** (Ever) — курсор-X свопить hero-фон --1↔--2. 🔶
 - **imageZoom** (ERA click/pinch lightbox), **mortgage** калькулятор (range→monthlyPay), **accordion**, **flip class-toggle**, **scrollableIndicator** ("scroll to explore"+is-finished), **stickyBottom** CTA-бар, **cookieConsent**, **mobileScrollable**. ✅ 🔶.
 
@@ -75,4 +75,4 @@ Vanilla **jQuery-plugin система** (`$.fn.X` ↔ `data-plugin="X"`, кіл
 inline-keyframe-parallax (не лише named) · `appear` decode+reveal gate · `contentAnimation` controller (counter/sticky/height/timer) · `svgLength` self-draw · custom-cursor spring-режими · sticky-clip-path stacking · gravity-well+snap · `deco` parallax-шар · `themed`/`changeTheme` IntersectionObserver theme-swap · button clone-content+outline · range власний слайдер · before/after spring · mouse-slider · Keen/Owl carousel + custom fade/loop ефекти · FLIP · precisescroll · palette-cycle/liquid-fill preloader варіанти · Barba modal-in transition · per-site ease (SP ≠ air) · anticipation ease `.47,.04,.5,-.06` · 44-69 named-parallax-patterns per site · WebGL-shader internals (для no-WebGL перекладу).
 
 ## 9. ПРИНЦИП ВИКОРИСТАННЯ (плагін)
-Цей реєстр = меню прийомів. Для кожної секції motion-score обирає 2-4 КАНДИДАТИ звідси → [[PB_variants_prototyping]] показує варіанти → user обирає. 🔴-прийоми ЗАВЖДИ через no-WebGL переклад (колонка NW). Жоден прийом не «вигаданий» — усе зняте з живих VI.
+Цей реєстр = меню прийомів. Для кожної секції motion-score обирає 2-4 КАНДИДАТИ звідси → [PB_variants_prototyping](../../variants-prototyping/references/PB_variants_prototyping) показує варіанти → user обирає. 🔴-прийоми ЗАВЖДИ через no-WebGL переклад (колонка NW). Жоден прийом не «вигаданий» — усе зняте з живих VI.

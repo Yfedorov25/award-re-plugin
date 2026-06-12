@@ -1,7 +1,7 @@
 # PB_performance — ПЕРФОМАНС award-RE (no-WebGL, бойова doctrine) ★★★
 > Переписано VI-grounded + БОЙОВІ уроки Quadro/Nahirna (реальні Chrome-трейси на M2 8GB). 2026-06-09.
 > Швидкість + ПЛАВНІСТЬ скролу = відчуття «дорого». Лаг скролу вбиває award-враження сильніше за повільний LCP.
-> Споріднено: [[PB_media]] [[PB_scroll_smoothness]] [[PB_motion_score]] [[D_ERA_architecture]] [[D_Springs_architecture]].
+> Споріднено: [PB_media](../../re-media/references/PB_media) [PB_scroll_smoothness](../../motion-engine/references/PB_scroll_smoothness.md) [PB_motion_score](../../motion-score/references/PB_motion_score) [D_ERA_architecture](../../re-architecture/references/D_ERA_architecture.md) [D_Springs_architecture](../../re-architecture/references/D_Springs_architecture.md).
 
 ## 0. ГОЛОВНЕ
 Award-перфоманс тут = НЕ «легкий фреймворк», а ДВІ речі: (1) швидкий старт (LCP/CLS), (2) **залізно плавний скрол** (60fps без ривків). VI доводять: jQuery-era + Barba + Locomotive дають award-плавність — справа не в стеку, а в дисципліні композитора. NO WebGL (хардове правило) знімає найбільший ризик чорного екрану/важкого commit.
@@ -13,7 +13,7 @@ LCP <2.5s · INP <200ms · CLS <0.1 · **скрол стабільні 60fps (fr
 - shared.js: ERA 1.34MB, Springs 1.42MB, Ever 483KB — один великий бандл + крихітний per-page. Прийнятно бо Barba кешує між переходами.
 - Рендери/фото: ГОЛОВНИЙ кост. Quadro-урок: 8-16MB JPG = DevTools «-47MB savings» + важкий GPU-commit. Шрінкати АГРЕСИВНО (WebP, розмір під слот, не 4K у 1280-канвас).
 
-## 3. ЗОБРАЖЕННЯ (з [[PB_media]])
+## 3. ЗОБРАЖЕННЯ (з [PB_media](../../re-media/references/PB_media))
 - WebP + JPEG `<source>` fallback; PNG лише cutout; AVIF лише градієнт-текстури.
 - **Lazy = JS data-src патерн** (реальний URL у `data-src`, плейсхолдер `px.gif` тримає aspect-ratio-слот) — НЕ native `loading=lazy` (VI так роблять для контролю). Hero = eager + `fetchpriority="high"`.
 - Кожен слот = locked `aspect-ratio` → нуль CLS.
