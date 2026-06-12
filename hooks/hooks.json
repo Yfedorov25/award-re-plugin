@@ -1,5 +1,5 @@
 {
-  "description": "award-re plugin hooks: (1) inject plugin root + project state on each prompt; (2) design-grounding gate that blocks writing site UI files until art-direction intent exists (the fix for the Phoenix correct-but-cheap failure).",
+  "description": "award-re v1 hooks: state inject · design-grounding gate · section-gates (prototype-gate + ban AskUserQuestion-копі) · deploy-gate (verify-report обовʼязковий)",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -19,6 +19,26 @@
           {
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/design-grounding.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/section-gates.js",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/deploy-gate.js",
             "timeout": 5
           }
         ]

@@ -45,6 +45,7 @@ Before every AskUserQuestion, end the chat message with an empty spacer line.
 | `/award-re:section` | Зібрати/переробити одну секцію (з варіантами-прототипами) |
 | `/award-re:visual-search` | Інтерактивний вибір квартир (available/sold/reserved) |
 | `/award-re:audit` | Ревʼю за 50 award-критеріями + perf-guard |
+| `/award-re:learn` | Петля навчання: failure-запис · video-bug розбір · video-teardown еталонного сайту |
 | `/award-re:help` | Довідка + поточний стан |
 
 Recommend the next logical command based on what exists (no brief → discovery; brief but no build → build; built → audit).

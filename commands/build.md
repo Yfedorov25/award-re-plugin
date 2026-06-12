@@ -34,3 +34,11 @@ Substitute `${AWARD_RE_PLUGIN_ROOT}`. Read & obey `${AWARD_RE_PLUGIN_ROOT}/CLAUD
 
 ## Hard rules (recap)
 NO WebGL (🔴 techniques → no-WebGL translation). Build strictly to motion-score (no per-section improvisation). Never invent client data → hidden block. Stack = best fit for the task.
+
+## v1 ПРИМУС (поверх фаз вище)
+- Кожна секція йде ЧЕРЕЗ стейт-машину `/award-re:section` (state/*.yaml, гейт-хуки):
+  копі-в-чаті → прототипи-на-портах → вибір юзера → інтеграція → verify.mjs → деплой-гейт.
+- Медіа — ТІЛЬКИ через агента media-director (media-plan.md, доктрина G).
+- ПЕРЕД фазами: прочитай FAILURES-LOG проєкту; БУДЬ-ЯКИЙ провал → /award-re:learn failure.
+- Фінал build = прод-чек DOM-фактами ВСІХ маршрутів + передача юзеру на запис екрану (I1),
+  НЕ «оновити resume».

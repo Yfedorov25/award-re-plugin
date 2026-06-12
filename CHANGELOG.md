@@ -1,3 +1,22 @@
+# 1.0.0-rc1 — ПОВНА ПЕРЕБУДОВА (2026-06-13)
+Етапи 1-5 REBUILD-PLAN-v1 виконані:
+- **Граматика**: _REGISTRY_TID.md — 109 T-ID по шарах L1-L5 + 22 архетипи (A-01..A-22),
+  кожен з джерелом-тірдауном, вартістю, комбінаціями і no-WebGL перекладом; архетипні
+  стеки записані T-ID-ами. Мета-патерн експозиції з 6/6 живих сайтів.
+- **Примус**: /section = стейт-машина (state/*.yaml, 11 стадій-артефактів);
+  хуки section-gates (prototype-gate: Write у src заблокований без user-choice;
+  бан AskUserQuestion-копі) і deploy-gate (без свіжого verify-report деплой
+  не їде); scripts/verify.mjs (DOM-факти: рендер/консоль/overflow/clipping,
+  desktop+mobile, JSON-звіт) + scripts/frames.sh (розбір відео).
+- **Агенти v2**: section-builder з ВХОДОМ/БАНАМИ/DoD/схемою звіту-з-доказами;
+  copy-fedoriv факт-контракт + ДНК хедлайнів; eval-brain лічильні критерії
+  граматики (шарність/дистанції/шви/стадії); нові media-director і
+  teardown-anatomist.
+- **Ядра**: bans.yaml (розширюваний бан-лист копі) + read-gate; skill
+  higgsfield-craft (доктрина G операційно: 4K, locks, frame-QA, бюджети).
+- **Петля навчання**: /award-re:learn (failure same-day · video-bug · video-teardown
+  через teardown-anatomist) + правило промоції 2+ повторів у закон конституції.
+
 # 0.3.0-dev — REBUILD Етап 0 (2026-06-12)
 ## 0.3.0-dev · ingestion #4-6 (2026-06-13)
 - D_SPRINGS_video (351 кадр): push-over «доводчики», інтро-мозаїка дистанцій,
