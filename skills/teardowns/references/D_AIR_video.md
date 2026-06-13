@@ -64,3 +64,48 @@ AIRPORT/NORTHERN AVE/TRR/HIGHWAY/MRR). Клік POI → МАРШРУТ МАЛЮ�
   міні-планом · SELECT MULTIPLE · 3D-ізометрія master plan · similar-грід з
   планами-превʼю.
 - Архетип «invest-переваги»: 3 темні картки з ховер-розкриттям.
+
+---
+
+## AIR MOBILE
+> 90 кадрів @1fps, iPhone 1170×2532, Safari. Таймкод = аркуш N×9с + позиція (TL/TM/TR=0–2, ML/MM/MR=3–5, BL/BM/BR=6–8). Прохід: hero→momentum→towers→metal-sphere→at-center→district-числа→карта→оточення→меню→invest→калькулятори→форма→футер. AIR = «WEBSITE BY VIDE INFRA», тому це найважливіший моб-референс.
+
+### Мобільний hero (покадрово)
+- 0–2с: чистий БІЛИЙ екран, тонка вертикальна риска по центру (повітряний beat займає весь портрет).
+- 3–5с: гігантське AIR (light, широкий tracking) їде ГОРИЗОНТАЛЬНО зліва-направо — horizontal scroll-driven marquee (слово ширше за вьюпорт, протягується збоку). Десктопні «літери-по-кутах» на портреті стали біжучим рядком.
+- ≈9с: 3D-біла спіраль (абстракція веж) рендериться вгорі-праворуч фрагментом; скраб-обертання збережене.
+- Зібраний hero: ♡ + чорна капсула-бургер у правому верхньому куті; THE ARCHITECTURE / OF NEW SUCCESS зверху, розведене A I R по центру-низу поверх спіралі, CLASS (A) / PREMIUM BUSINESS / CENTER дрібним; ↓-кью; cookie-банер прилип знизу.
+
+### Desktop→Mobile трансформації
+| Прийом | Десктоп | Мобільний | Механіка |
+|---|---|---|---|
+| Hero kinetic-letters | A·I·R по 4 кутах, з'їжджаються до центру | AIR біжить горизонтально (marquee), фіксується розведеним рядком | scroll-driven translateX; розкидання-по-кутах→горизонтальний прогон |
+| 3D-біла спіраль | велика по центру, скраб-обертання | фрагмент вгорі-право, далі секція-портрет на весь екран, скраб-розкрутка | scrub-rotation 1:1, кроп/позиція адаптовані |
+| Spread-row заголовки | 2-3 слова розведені по ширині, з'їжджаються | стек у 2 рядки ВЛІВО, БЕЗ розведення: «THE MOMENTUM / TO RISE HIGHER» | spread по горизонталі ВТРАЧЕНО → лівий 2-рядк. wrap; акти розділяє ІНВЕРСІЯ ФОНУ |
+| Інтерактивна карта POI | темна карта + бічний список POI; клік→маршрут+картка-число | карта full-bleed; список POI у НИЖНЮ ТАБ-СТРІЧКУ ← PARKS ∨ → / SPORT / BANKS; tap-маркер→картка «ATM·5 MIN·0.5 KM» знизу | бічний список→нижній свайп-перемикач; кінетика числа збережена |
+| District-числа | великі числа з фото в ряд | чорні картки-числа «1 MIN WALK MALL» горизонтальна карусель (виходять за край) | desktop-row→horizontal-scroll cards |
+| Invest-калькулятор | 3 картки переваг з ховер-розкриттям | таб CASE 1/CASE 2 + OFFICE 110.6 M²; рядки UNIT PRICE/RENTAL RATE/...; підсумки ~8.2 YEARS+~553 000; нижні таби 1.RENTAL/2.RESALE | ховер→tap-таби; full-width таблиця, числа right-aligned |
+| Hover-стани | попавери поверхів/POI/карток | TAP: активний POI→картка-bubble, активна категорія-таб підсвічена | tap-замість-hover повсюдно |
+
+### Зникло на мобільному
+Spread-row рознесення слів по ширині (→ лівий 2-рядк. wrap; роль акт-розділювача забрала інверсія фону білий↔чорний); бічний список POI (→ нижня таб-стрічка); hero-розкидання по кутах (→ horizontal marquee); ховер-превʼю юнітів (запис не заходив у дріл).
+
+### Нове на мобільному
+Horizontal scroll-marquee AIR у hero; нижня sticky таб-стрічка категорій карти ← PARKS ∨ → зі стрілками; horizontal-scroll картки-числа (свайп); таб-світчер CASE 1/CASE 2 + нижні таби 1.RENTAL/2.RESALE; sticky-низ контекст-картка POI з ✕; cookie як bottom-sheet; футер-AIR розведений на всю ширину (єдине місце де spread виживає — бо літери самі = ширина екрана, дзеркало hero).
+
+### Копі на мобільному
+Тон B2B/інвестиційний, НЕ житловий (дохід/окупність/ліквідність). Act-заголовки короткі (2-4 слова): THE MOMENTUM TO RISE HIGHER, A NEW PREMIUM FORMAT, AT THE CENTER OF LIFE, KEY ADVANTAGES, INVESTMENT STRATEGIES. Body 3-5 рядків дрібний сірий версал. Калькулятор-мікрокопі: UNIT PRICE, ANNUAL RENTAL RATE 60 000/M², INDEXATION 7%, PAYBACK ~8.2 YEARS, дисклеймер «...DO NOT CONSTITUTE A PUBLIC OFFER». Форма на tap-pills (INVESTMENT GOAL/BUDGET), не дропдауни. CTA = дієслово+об'єкт: CHOOSE AN OFFICE, CHOOSE A PARKING SPOT, RESERVE. Футер: © 2026 TEKTA GROUP, WEBSITE BY VIDE INFRA.
+
+### Кольори/розміри (моб)
+Білий #FFF ↔ чорний #0A0A0A (act-ритм через інверсію). Нуль кольорового акценту — все ч/б + натур. фото, активні стани = інверсія. Гротеск light/regular, версал всюди. Hero-AIR ≈96-120pt, act-заголовки ≈28-32pt, body ≈11-12pt сірий, district-числа ≈40pt білі. Зображення ПОВСЮДИ full-bleed (нуль рамок). Бургер = чорна капсула ~52×32px право-зверху.
+
+### T-ID кандидати (моб)
+- T-M01 horizontal-marquee-hero-wordmark — гігант-wordmark протягується горизонтально (scroll translateX), потім фіксується розведеним рядком. no-WebGL ✓.
+- T-M02 bottom-tabstrip-POI-switcher — нижня sticky-стрічка ← CATEGORY ∨ → перемикає групи маркерів на full-bleed карті. no-WebGL ✓.
+- T-M03 sticky-context-card-on-tap — тап маркера → знизу міні-картка «POI·N MIN·KM» з ✕. no-WebGL ✓.
+- T-M04 horizontal-scroll-number-cards — lifestyle-числа в карусель, що виходить за край (свайп). no-WebGL ✓ (overflow-x scroll-snap).
+- T-M05 case-tab-calculator — CASE 1/CASE 2 + 1./2. таби, full-width таблиця right-aligned; заміна ховер-карток. no-WebGL ✓.
+- T-M06 tap-pill-form — форма на чіпах-pills (tap-select) замість дропдаунів. no-WebGL ✓.
+- T-M07 bg-inversion-act-divider — межі актів тримає різка інверсія фону білий↔чорний (бо spread-row гине). no-WebGL ✓.
+- T-M08 full-screen-stacked-menu — бургер→full-screen оверлей: спіраль-фрагмент + CTA-плитки + верт. стек + дрібні лінки + ✕-капсула. no-WebGL ✓.
+- T-M09 footer-wordmark-spread-survives — футер-wordmark розведений на всю ширину (дзеркало hero), єдине виживання spread. no-WebGL ✓.
