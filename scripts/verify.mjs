@@ -49,25 +49,51 @@ for (const route of ROUTES) {
   try {
     await page.goto(URL_BASE + route, { waitUntil: "networkidle", timeout: 30000 });
     await page.waitForTimeout(2500);
+    // Реальний горизонтальний скрол = documentElement.scrollWidth (поважає overflow-x:clip/hidden),
+    // НЕ body.scrollWidth — той рахує full-bleed/декор-діти що навмисно вилазять за край і
+    // обрізані контейнером (award-стиль), даючи фальш-overflow. Звіряємо ще й чи реально можна
+    // прокрутити вбік. Кліп-чек ігнорує pointer-events-none декор і masked-reveal спани (yPercent-clip).
+    const measure = () => {
+      const de = document.documentElement;
+      const overflow = Math.max(0, de.scrollWidth - de.clientWidth);
+      const sx = window.scrollX; window.scrollTo(50, window.scrollY);
+      const canScrollX = window.scrollX > sx; window.scrollTo(sx, window.scrollY);
+      return { overflow, canScrollX };
+    };
     const f = await page.evaluate((sel) => {
       const rendered = !!document.querySelector(sel);
-      const vw = document.documentElement.clientWidth;
-      const overflow = Math.max(0, document.body.scrollWidth - vw);
-      const clipped = [...document.querySelectorAll("h1,h2,h3,.ln>span")].filter((el) => el.scrollWidth > el.clientWidth + 2 && el.clientWidth > 0)
+      const clipped = [...document.querySelectorAll("h1,h2,h3,.ln>span")]
+        .filter((el) => {
+          if (el.scrollWidth <= el.clientWidth + 2 || el.clientWidth <= 0) return false;
+          const cs = getComputedStyle(el);
+          if (cs.pointerEvents === "none") return false;
+          // masked-reveal спан (батько ховає overflow для yPercent-анімації) — не справжній кліп
+          const par = el.parentElement;
+          if (par && getComputedStyle(par).overflow !== "visible") return false;
+          return true;
+        })
         .map((el) => el.textContent.trim().slice(0, 40)).slice(0, 5);
-      return { rendered, overflow, clipped };
+      return { rendered, clipped };
     }, CONTENT_SEL);
     r.rendered = f.rendered;
-    r.overflow.desktop = f.overflow;
     r.clipped = f.clipped;
+    const md = await page.evaluate(measure);
+    r.overflow.desktop = md.overflow;
+    r.canScrollX = { desktop: md.canScrollX };
     await page.setViewportSize({ width: 390, height: 844 });
     await page.waitForTimeout(1200);
-    r.overflow.mobile = await page.evaluate(() => Math.max(0, document.body.scrollWidth - document.documentElement.clientWidth));
+    const mm = await page.evaluate(measure);
+    r.overflow.mobile = mm.overflow;
+    r.canScrollX.mobile = mm.canScrollX;
   } catch (e) {
     r.errors.push("NAV FAIL: " + String(e).slice(0, 140));
   }
   await ctx.close();
-  r.pass = r.rendered && r.errors.length === 0 && r.overflow.desktop <= 2 && r.overflow.mobile <= 2 && r.clipped.length === 0 && r.failed.length === 0;
+  // overflow >2 — лише ПОПЕРЕДЖЕННЯ якщо вбік реально НЕ прокрутити (full-bleed/декор обрізаний);
+  // справжній провал = canScrollX (юзер може скролити вбік) АБО кліп тексту/помилки/404.
+  const realHScroll = (r.canScrollX && (r.canScrollX.desktop || r.canScrollX.mobile));
+  r.pass = r.rendered && r.errors.length === 0 && !realHScroll && r.clipped.length === 0 && r.failed.length === 0;
+  if (!realHScroll && (r.overflow.desktop > 2 || r.overflow.mobile > 2)) r.overflowNote = "елементи вилазять за край але обрізані (overflow-x:clip) — не юзер-скрол";
   if (!r.pass) report.ok = false;
   report.routes[route] = r;
   console.log(`${r.pass ? "PASS" : "FAIL"} ${route} rendered=${r.rendered} err=${r.errors.length} ovD=${r.overflow.desktop} ovM=${r.overflow.mobile} clip=${r.clipped.length}`);

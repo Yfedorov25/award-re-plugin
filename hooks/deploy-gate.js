@@ -20,14 +20,27 @@ process.stdin.on("end", () => {
   // деплой-команди звичайно містять cd у проєкт — спробуємо витягти шлях
   const m = cmd.match(/cd\s+([^\s&;]+)/);
   const cand = m ? m[1].replace(/^["']|["']$/g, "") : cwd;
+  // Шукаємо корінь award-re-проєкту. ВАЖЛИВО: беремо ту .award-re, де є СВІЙ verify-report
+  // (саме той артефакт деплоїться) АБО config.yaml (корінь проєкту) — інакше частковий
+  // .award-re (напр. лише CLIENT-BACKLOG.md у під-теці) затіняє справжній корінь і гейт
+  // або фальшиво пропускає, або шукає звіт не там. Перший повний збіг виграє; якщо повного
+  // немає — fallback на перший будь-який .award-re (щоб не пропустити деплой беззвітно).
+  let firstAny = null;
   for (const start of [cand, cwd]) {
     dir = start;
     for (let i = 0; i < 6 && dir && dir !== "/"; i++) {
-      if (fs.existsSync(path.join(dir, ".award-re"))) { root = dir; break; }
+      const ad = path.join(dir, ".award-re");
+      if (fs.existsSync(ad)) {
+        if (!firstAny) firstAny = dir;
+        const hasReport = fs.existsSync(path.join(ad, "state", "verify-report.json"));
+        const hasConfig = fs.existsSync(path.join(ad, "config.yaml"));
+        if (hasReport || hasConfig) { root = dir; break; }
+      }
       dir = path.dirname(dir);
     }
     if (root) break;
   }
+  if (!root) root = firstAny;
   if (!root) process.exit(0);
 
   const rep = path.join(root, ".award-re", "state", "verify-report.json");
