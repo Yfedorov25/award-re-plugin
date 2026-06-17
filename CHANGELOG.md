@@ -1,3 +1,23 @@
+# 1.2.0 — CONTROL: єдине джерело правди + кристалізація задач (2026-06-17)
+Новий крос-проєктний шар `control/` (реєстр об'єктів + задачі + БД лідів/метрик) і
+дашборд `apps/control`. Плагін отримує закони й команду, щоб ВСІ агенти ділили цей стан.
+
+**CLAUDE.md — новий розділ J. CONTROL (+5 законів):**
+- J1 читай `control/projects.yaml` + активні задачі перед роботою над об'єктом.
+- J2 онови `control/tasks/T-*.md` після значущої зміни (стадія + лог).
+- J3 `demo-pending → done` ЛИШЕ після рядка `demo-confirm:` (демо з девелопером); агент сам не закриває.
+- J4 `platform: mobile` стартує `backlog` («not-started»).
+- J5 нова задача з чату → `/award-re:task` (у файл, не «в голові»).
+
+**Нова команда `/award-re:task`** — кристалізує вільний опис у `control/tasks/T-NNNN.md`:
+заголовок (Fedoriv, без крапки), auto-проєкт із projects.yaml, web/mobile, demo-gate,
+наступний вільний ID. Slack/Telegram-вхід — фаза 2.
+
+**help.md** — додано `/award-re:task` у таблицю команд.
+
+Pipeline стадій web/mobile окремо: `backlog → in-progress → demo-pending → done`.
+demo-gate = «готово» лише після підтвердження демо юзером.
+
 # 1.1.0 — LEARN: 22 бойові закони з towns + smarts (2026-06-17)
 Перший повний цикл `/award-re:learn` після релізу: towns (27 провалів) + smarts (21)
 FAILURES-LOG + memory звірені з конституцією. NEW vs DUPLICATE розмічено, дублі відкинуто,

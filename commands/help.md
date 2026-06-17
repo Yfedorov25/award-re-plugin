@@ -24,6 +24,7 @@ award-re будує award-winning сайти НЕРУХОМОСТІ рівня �
 | `/award-re:visual-search` | Вибір квартир: SVG-плити building→floor→unit, статуси available/sold/reserved |
 | `/award-re:learn` | Петля навчання: failure-запис того ж дня · video-bug розбір запису юзера · video-teardown еталонного сайту |
 | `/award-re:audit` | Ревʼю готового за 50 award-критеріями + perf-guard (no-WebGL, scroll-jank) + узгодженість |
+| `/award-re:task` | Кристалізує задачу з чату у `control/tasks/` (єдине джерело правди): заголовок, проєкт, web/mobile, demo-gate |
 | `/award-re:help` | Ця довідка |
 
 Памʼятати треба лише `/award-re:award` — він веде до решти.
