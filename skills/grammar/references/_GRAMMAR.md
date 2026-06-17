@@ -51,6 +51,7 @@ Style). Копірайт-правило: бренд-рамка-рефрен по
 | next-handoff | внизу сторінки сутності — превʼю наступної (фото+назва), перехід без повернення в список | проєкт→проєкт, юніт→юніт | D_SAISEI_video |
 | push-over доводчик | нове медіа врізається смугою поверх і СІДАЄ з overshoot-settle | переходи актів | D_SPRINGS_video |
 | frame→fullbleed expand | рамка фото розширюється до повного кадру скролом | hero-«вдих» | D_ERA_video |
+| **slice-relay** (towns, доведено senior) | вертикальна естафета дверей (strip-2) / горизонтальний фото-wipe бронзовим лезом (strip-1) / panel-wipe (strip-3) | стик актів + локальне розкриття фото; бери 1-в-1, не винаходь (C18) | apps/towns/public/prototypes/strip-1/2/3 + slice.js/slice.css |
 | (слоти для нових — з відео-тірдаунів) | | | |
 
 ## 4. АРХЕТИПИ СЕКЦІЙ (роль → дефолтний стек)
@@ -96,3 +97,26 @@ Style). Копірайт-правило: бренд-рамка-рефрен по
 - **Копі й драматургія — 1:1.** Портрет НІЧОГО не вкорочує в текстах. Гасла ламаються по смисловій парі,
   не рвано. Меню = дзеркало футера (T-M11). Браузер-капсула знизу — частина layout (T-M12, safe-area).
 - **Чого НЕ знято (діра):** мобільна поведінка ВЛАСНИХ сайтів і моб-версії ERA/Ever/11T. Кандидати на тірдаун.
+
+## 7. АНТИ-ПРИЙОМИ (джуніор-маркери — НЕ роби; кожен коштував провалу)
+- **reveal-on-enter все одразу** → scroll-scrubbed по одному (C20). (towns F-19)
+- **ghost-гігант на фоні** (велике число/слово напівпрозоро) = шум, не глибина (C22). (towns F-20)
+- **службовий лічильник «N/M осей»** = внутрішня кухня на екрані (C22). (towns F-20)
+- **curtain-wall замість 2 окремих вікон** — дефолт генератора, ловить QC-агент (G24). (towns F-15)
+- **нічний relight = затемнений день** (сонячні плями вночі / LED увімкнений вдень / домальовані світильники) (G14-G17). (towns F-25/26/27)
+- **винайти новий перехід** замість slice-прототипу (C18). (towns F-18)
+- **text-на-кольорі для flagship** (нуль L1-медіа) = інфографіка (C23). (towns F-23)
+- **«менше скролу» = прибрати pin+шари** — ні, скорочуй дистанцію не глибину (C24). (towns F-23)
+- **top-anchor прогрес високої секції** = розкрито наперед; канон `progressThroughViewport(el)` (C21). (towns F-24)
+- **скрим лише знизу** під текстом на змінному медіа → squint на найсвітлішому кадрі (C25). (towns F-22)
+- **orchestrator пише копі з голови** → тільки copy-fedoriv агент (E15). (towns F-06)
+
+## 8. NIGHT-RELIGHT КОНТРАКТ (день↔ніч, закони G14-G19 — найбільша діра, towns F-25/26/27)
+Перед БУДЬ-ЯКОЮ нічною генерацією інтер'єру — 5 пунктів у промпт ОБОВ'ЯЗКОВО:
+1. **Нуль сонця:** «remove ALL sunlight/sun rays/bright light pools on floor+furniture — no sun exists at night».
+2. **Темна сцена:** «scene DARK, low exposure overall».
+3. **Світло тільки від ламп:** «light ONLY from interior lamps + LED cove — warm pools AROUND each source, rest falls to shadow».
+4. **Інвентар locked:** «do NOT add lamps/pendants/chandeliers not in the day reference; only EXISTING fixtures emit light; every object identical to day frame».
+5. **i2i з фінального дня** (не оригінал окремо) + night-ref як стиль-якір (G17).
+ДЕНЬ-промпт дзеркально: «daylight is the ONLY light; LED cove + all artificial OFF/unlit; no glowing strips» (G15).
+Поверх (G18): «single seamless photo, NOT diptych, no vertical seam». Камера по поверху (G19): 1-й рівень землі / 2-й вид вниз.
