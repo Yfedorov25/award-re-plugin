@@ -69,15 +69,21 @@ source: chat
 
 ---
 
-## РЕЖИМ INBOX (аргумент `inbox` або «розгреби inbox»)
+## РЕЖИМ INBOX (аргумент `inbox` або «розгреби inbox [<сесія>]»)
 Telegram-бот складає сирі задачі (голос/текст) у БД-чергу `inbox` (Vercel fs read-only,
-тож бот не пише файли). Цей режим розгрібає чергу в сесії.
+тож бот не пише файли). Бот ПИТАЄ юзера кнопками, в яку **сесію** направити задачу
+(smarts-mobile / nahirna / quadro / control / any). Цей режим розгрібає ЧЕРГУ СВОЄЇ СЕСІЇ.
 
-Потрібен `CONTROL_BOT_SECRET` (Vercel env проєкту control). Витягни його разово:
-`cd apps/control && ../quadro/node_modules/.bin/vercel env pull /tmp/c.env --environment production --scope yehor-s-projects3` — АЛЕ значення маскуються; натомість читай `/tmp/bot-secret.txt`, якщо є, або попроси юзера.
+Потрібен `CONTROL_BOT_SECRET` (Vercel env проєкту control). Читай `/tmp/bot-secret.txt`,
+якщо є; інакше попроси юзера (значення маскується на `vercel env pull`).
 
-1. **Витягни чергу:** `curl -s -X POST .../api/bot/admin -d '{"action":"inbox","secret":"<S>"}'`
-   (base = https://control-rose.vercel.app). Поле `inbox[]`: `{id, raw, project, platform, chat_id}`.
+**СЕСІЯ-МІТКА:** визнач свою мітку з контексту/хендофу (напр. нова сесія по моб-верстці =
+`smarts-mobile`; якщо юзер сказав конкретно — бери її). Розгрібай ТІЛЬКИ свою мітку.
+
+1. **Витягни СВОЮ чергу:** `curl -s -X POST .../api/bot/admin -d '{"action":"inbox","secret":"<S>","session":"<моя-мітка>"}'`
+   (base = https://control-rose.vercel.app). Повертає рядки з `session = <мітка>` АБО `any`.
+   Поле `inbox[]`: `{id, raw, project, platform, chat_id, session}`. БЕЗ `session` у запиті —
+   вся черга (для огляду/control). Рядки з `session=""` ще не направлені — НЕ чіпай їх.
 2. **Для КОЖНОГО рядка — СПЕРШУ оціни ясність:**
    - **Якщо задача НЕОДНОЗНАЧНА** (бракує даних, незрозумілий обʼєкт/прототип/ціль) —
      НЕ вигадуй. Кристалізуй у файл зі `stage: backlog` + познач у Контексті що неясно,
