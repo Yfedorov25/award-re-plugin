@@ -18,6 +18,8 @@ Bash: `test -d control && echo OK || echo "NO_CONTROL"`.
 З вільного опису юзера витягни (питай ТІЛЬКИ якщо справді неоднозначно):
 - **title** — короткий заголовок-акт, дієслово першим, БЕЗ крапки в кінці, Fedoriv-голос,
   антислоп (нуль em-dash, нуль кліше). Напр.: «Підключити GA4 до towns».
+- **track** — НАПРЯМОК (обовʼязково): `web` (сайти обʼєктів), `3d` (3D-движок/моделі),
+  `ads` (AI-відео→Meta-таргет→кампанії), `control` (платформа/дашборд/бот). Визнач з контексту.
 - **project** — авто-match до `projects.yaml.id` за іменем/контекстом (smarts/quadro/nahirna/towns/…).
   Якщо задача крос-проєктна — `project: ""`.
 - **platform** — `web` або `mobile`. За замовчуванням `web`, якщо не сказано «мобільний/застосунок».
@@ -38,6 +40,7 @@ Bash: `ls control/tasks/ | grep -oE 'T-[0-9]+' | sort | tail -1` → інкре�
 ---
 id: T-NNNN
 title: <заголовок>
+track: web|3d|ads|control
 project: <id|"">
 platform: web|mobile
 stage: backlog|in-progress
