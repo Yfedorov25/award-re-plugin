@@ -1,0 +1,63 @@
+/* ============================================================
+   PUZZLE-TEXT  ·  component.css
+   ------------------------------------------------------------
+   Word-level "assembly" reveal: a paragraph whose words start
+   scattered/displaced (x, y, scale, color) and converge into
+   their natural flow positions as the section is scrolled.
+
+   Observed in: Zera (portfolio6.zerasoftwarestudio.com) statement
+   section. Scroll-SCRUBBED and reversible (words re-scatter on
+   scroll-up), word granularity (NOT per-character).
+
+   Motion is on transform / opacity / color only. No layout
+   thrash: the words live in normal inline flow; we only ever
+   translate/scale them relative to their resting position, so
+   the final layout (line breaks, wrapping) is authored by the
+   browser, not by us. That is the whole trick — the "puzzle"
+   pieces snap to slots the browser already computed.
+   ============================================================ */
+
+/* ---- the paragraph that gets assembled --------------------- */
+.puzzle-text{
+  /* author your real type here; the effect is layout-agnostic */
+  font-family: var(--pt-font, "Helvetica Neue", Inter, system-ui, sans-serif);
+  font-size:   var(--pt-size, clamp(1.6rem, 4.6vw, 3.1rem));
+  line-height: var(--pt-leading, 1.18);
+  font-weight: var(--pt-weight, 400);
+  letter-spacing: var(--pt-tracking, -0.01em);
+  text-align:  var(--pt-align, center);
+  max-width:   var(--pt-measure, 18ch);
+  margin-inline: auto;
+  color:       var(--pt-ink, #14130F);
+
+  /* perf: hint the compositor, but only while animating (JS toggles) */
+  text-wrap: balance;        /* nicer final line breaks; harmless if unsupported */
+}
+
+/* ---- each word is an independently-transformable box -------- */
+/* inline-block so transforms apply yet it still wraps in flow.  */
+.puzzle-text .pt-word{
+  display:inline-block;
+  white-space:pre;            /* preserve the trailing space we inject */
+  will-change:transform, opacity;
+  /* start state is written by JS as inline style so SSR/no-JS
+     shows the finished, readable paragraph (progressive enhancement). */
+  backface-visibility:hidden;
+  transform-origin:50% 60%;
+}
+
+/* the injected inter-word space rides along with the word so the
+   gap never collapses mid-animation */
+.puzzle-text .pt-space{ display:inline-block; white-space:pre; }
+
+/* ---- reduced motion: no scatter, just a calm fade ---------- */
+@media (prefers-reduced-motion: reduce){
+  .puzzle-text .pt-word{
+    transform:none !important;
+    will-change:auto;
+  }
+}
+
+/* ---- optional: a faint pre-assembly tint for the scattered
+   pieces, applied via JS-set CSS var so you can theme it. ----- */
+.puzzle-text{ --pt-ghost: #B9B6AE; }

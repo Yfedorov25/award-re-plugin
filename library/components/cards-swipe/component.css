@@ -1,0 +1,173 @@
+/* ============================================================================
+   cards-swipe  —  styles for the pinned horizontal card-track
+   ----------------------------------------------------------------------------
+   The grammar (from Zera Studio): full-bleed cream cards with big rounded
+   corners, sitting in a dark gutter, swiped horizontally. A circular "stitch"
+   handle marks the seam between cards. Cards are sized to ~one viewport each.
+
+   Tokens here are deliberately minimal — override --cs-* in your :root to
+   re-skin without touching this file.
+   ============================================================================ */
+
+:root {
+  --cs-ink:    #0B0B0C;   /* gutter / page behind the cards */
+  --cs-paper:  #F4F0EA;   /* card surface */
+  --cs-mid:    #8A857C;
+  --cs-bronze: #B8946A;   /* accent / seam ring */
+
+  --cs-gap:    24px;      /* MUST match the JS `gap` option */
+  --cs-radius: 22px;      /* card corner radius */
+  --cs-inset:  18px;      /* breathing room: card vs viewport edge top/bottom */
+  --cs-pad:    clamp(28px, 5vw, 72px); /* inner card padding */
+
+  --cs-air: cubic-bezier(0.25, 0.74, 0.22, 0.99);
+}
+
+/* ---- the pinned section ---------------------------------------------------
+   100vh tall, hides the horizontal overflow of the track. The page scrolls
+   vertically; the JS pins THIS element and translates the inner track. */
+.cs-root {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--cs-ink);
+}
+
+/* ---- the horizontal row that actually translates ------------------------- */
+.cs-track {
+  display: flex;
+  gap: var(--cs-gap);
+  height: 100%;
+  align-items: center;
+  padding: 0 var(--cs-gap);
+  will-change: transform;            /* promoted: transform-only animation */
+}
+
+/* ---- a single card ------------------------------------------------------- */
+.cs-card {
+  position: relative;
+  flex: 0 0 calc(100vw - var(--cs-gap) * 2); /* ~one viewport per card */
+  height: calc(100vh - var(--cs-inset) * 2);
+  border-radius: var(--cs-radius);
+  background: var(--cs-paper);
+  color: var(--cs-ink);
+  overflow: hidden;
+  isolation: isolate;                /* keep inner blends local */
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .55);
+}
+
+/* full-bleed image inside a card (parallax target) */
+.cs-card .cs-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.cs-card .cs-media img {
+  display: block;
+  width: 112%;                       /* over-scan so parallax never shows edge */
+  height: 100%;
+  margin-left: -6%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+/* card content layer */
+.cs-card .cs-body {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: var(--cs-pad);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* editorial atoms (skin to taste) */
+.cs-eyebrow {
+  font: 500 .7rem/1 "Helvetica Neue", system-ui, sans-serif;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  opacity: .55;
+}
+.cs-title {
+  font: 400 clamp(2.6rem, 6vw, 5.5rem)/.92 "Times New Roman", Georgia, serif;
+  letter-spacing: -.02em;
+  margin: .2em 0;
+}
+.cs-text {
+  max-width: 42ch;
+  font: 400 .95rem/1.7 "Helvetica Neue", system-ui, sans-serif;
+  opacity: .8;
+}
+.cs-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  font: 500 .68rem/1 "Helvetica Neue", system-ui, sans-serif;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  opacity: .5;
+}
+
+/* subtle lift on the card currently centred */
+.cs-card { transition: box-shadow .5s var(--cs-air); }
+.cs-card.is-active { box-shadow: 0 40px 100px -28px rgba(0, 0, 0, .65); }
+
+/* ---- the stitch handle: circle that rides the seam ----------------------- */
+.cs-seam {
+  position: absolute;
+  top: 50%;
+  z-index: 30;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;           /* centre on its left/top point */
+  border-radius: 50%;
+  background: var(--cs-ink);
+  border: 1.5px solid var(--cs-bronze);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;              /* purely indicative; drag is on root */
+  will-change: transform, opacity, left;
+}
+.cs-seam svg {
+  width: 18px; height: 18px;
+  stroke: var(--cs-paper); stroke-width: 1.6; fill: none;
+}
+
+/* drag affordance */
+.cs-root { cursor: grab; }
+.cs-root.cs-dragging { cursor: grabbing; }
+.cs-root.cs-dragging .cs-track { will-change: transform; }
+
+/* ---- mobile: cards become near-full-width, smaller chrome ---------------- */
+@media (max-width: 760px) {
+  :root {
+    --cs-gap: 14px;
+    --cs-radius: 16px;
+    --cs-inset: 12px;
+    --cs-pad: 22px;
+  }
+  .cs-seam { width: 38px; height: 38px; margin: -19px 0 0 -19px; }
+  .cs-title { font-size: clamp(2.1rem, 9vw, 3.4rem); }
+}
+
+/* ---- reduced motion: stack vertically, no pin, no horizontal scroll ------ */
+.cs-reduced.cs-root { height: auto; overflow: visible; }
+.cs-reduced .cs-track {
+  flex-direction: column;
+  height: auto;
+  padding: var(--cs-gap);
+  gap: var(--cs-gap);
+}
+.cs-reduced .cs-card {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  min-height: 70vh;
+}
+.cs-reduced .cs-seam { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .cs-card .cs-media img { width: 100%; margin-left: 0; }
+}

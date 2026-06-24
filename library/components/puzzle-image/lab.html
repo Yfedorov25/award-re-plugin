@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LAB · puzzle-image — scroll-assembled photo</title>
+
+<!-- GSAP + ScrollTrigger + CustomEase via cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<!--
+================================================================================
+TECHNIQUE: puzzle-image  (id: puzzle-image)
+================================================================================
+WHAT IT IS
+  A single source image is sliced into an R×C grid of rectangular tiles using
+  pure CSS sprite math (ONE decoded image, N painted slices — zero extra image
+  requests, no <img> per tile, no canvas, no WebGL). On scroll each tile flies
+  in from a scattered/offset position (translated, small-scale, low-opacity,
+  blurred) and seats into its EXACT final cell, so the picture self-assembles
+  like a puzzle into one seamless full-bleed photo.
+
+THE CRUX — CSS SPRITE SLICING
+  Each tile is an absolutely-positioned box at its STATIC home cell
+  (left = col*tileW, top = row*tileH, width = 100/C%, height = 100/R%).
+  It paints only its own fragment of the full image:
+      background-image:    var(--img)
+      background-size:     calc(cols*100%) calc(rows*100%)
+      background-position: calc(col/(cols-1)*100%) calc(row/(rows-1)*100%)
+  NOTE the off-by-one: position uses col/(C-1), NOT col/C. With C=1 we guard
+  the division by zero (treat as 0%).
+
+THE MOTION — transform + opacity + filter ONLY (never left/top/width)
+  Home positions are STATIC. Tiles only translate FROM a scatter offset back to
+  translate(0,0). We build ONE GSAP timeline whose 0→1 IS the scroll progress
+  (scrub). Each tile's fromTo tween is added at position = tile.startP with its
+  own duration, so easing lives in the PER-TILE sub-window mapping, not in a
+  wall-clock duration. That per-tile stagger (by distance-from-center or seed)
+  is what makes it read brick-by-brick = "puzzle", not a plain fade+zoom.
+
+PHASES (scrub progress 0→1)
+  0  Setup     pieces scattered, blurred, faint, small — ~N chips on black.
+  1  Drift     0→25%   tiles fade up, blur eases, begin translating home.
+  2  Converge  25→70%  bulk of motion; staggered arrival; picture legible w/ gaps.
+  3  Seat/snap 70→90%  last tiles close gaps; brief seam-flash (the "assembled" tell).
+  4  Whole     90→100% indistinguishable from one image; clean hold; release.
+
+EASING
+  Per-tile expo.out class — cubic-bezier(0.16,1,0.30,1), or the house "air"
+  cubic-bezier(0.25,0.74,0.22,0.99). Fast close of distance, long settle = the
+  "click into place" feel. Blur + opacity ride the same ease.
+
+TRIGGER MODES
+  'scrub'  : pinned section, scrub:true, global progress drives every tile.
+  'inview' : one-shot autoplay timeline when section enters (hero use, no pin).
+
+GOTCHAS (encoded below)
+  • BLUR is the expensive part — cap N (8–24), start blur ≤20px, set filter:none
+    on seated tiles, run blur only in the first ~40% of progress.
+  • SEAM GAPS — sub-pixel hairlines ruin the seated state. Fix: seamFix outset
+    (each tile scaled to (1 + 2*seamFix/tileSizePx) at rest=1) so edges overdraw.
+  • Sprite off-by-one — col/(C-1), guard C=1.
+  • Scatter too wild = "explosion" not "puzzle". Bound offsets to ~1–2.5 tile-
+    widths and keep scaleFrom ≥0.5 so the picture is recognizable mid-assembly.
+  • Stagger is mandatory — without it, plain fade+zoom.
+  • reduced-motion → render seated state instantly, no blur.
+  • Decode the source image BEFORE building the timeline or tiles flash empty.
+
+REUSABLE PARAMS — see CONFIG block in the script (clearly named).
+================================================================================
+-->
+
+<style>
+:root{
+  /* ---- grade ---- */
+  --ink:#0B0B0C;
+  --paper:#F4F0EA;
+  --mid:#8A857C;
+  --bronze:#B8946A;
+
+  --mx:64px;
+
+  --serif:"PP Editorial New","Times New Roman",Georgia,serif;
+  --sans:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
+
+  /* the only ease — house "air" (also registered as CustomEase) */
+  --air:cubic-bezier(0.25,0.74,0.22,0.99);
+
+  /* === PUZZLE STAGE — reusable CSS vars (mirror JS CONFIG) === */
+  --stage-aspect: 16 / 10;     /* aspectRatio of the final frame */
+  --stage-max: 78vmin;         /* visual size of the stage */
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+
+.eyebrow{
+  font-family:var(--sans);font-size:.72rem;letter-spacing:.34em;
+  text-transform:uppercase;opacity:.6;font-weight:500;
+}
+.serif{font-family:var(--serif);font-weight:400;line-height:.94;letter-spacing:-.02em}
+
+/* grain (SVG fractalNoise) — over the black plate only, never the scrubbed tiles */
+.grain{
+  position:absolute;inset:0;pointer-events:none;z-index:6;opacity:.05;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* ---- intro lead-in section (so the pin has somewhere to start) ---- */
+.lead{
+  min-height:60vh;display:flex;flex-direction:column;justify-content:center;
+  padding:0 var(--mx);position:relative;z-index:2;
+}
+.lead .eyebrow{margin-bottom:1.2rem}
+.lead h1{
+  font-family:var(--serif);font-weight:400;letter-spacing:-.02em;line-height:.94;
+  font-size:clamp(2.4rem,7vw,6rem);max-width:16ch;
+}
+.lead p{margin-top:1.4rem;max-width:46ch;opacity:.7;line-height:1.6;font-size:1rem}
+.scrollhint{margin-top:2.4rem;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;opacity:.5}
+
+/* ============================================================
+   PUZZLE SECTION  (pinned during scrub)
+   DOM: section.puzzle > .puzzle__stage > .puzzle__grid > N×.puzzle__tile
+   Headline/caption are siblings of the stage, NOT children of the grid.
+   ============================================================ */
+.puzzle{
+  position:relative;width:100vw;min-height:100vh;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.puzzle .grain{z-index:1}
+
+.puzzle__stage{
+  position:relative;
+  width:var(--stage-max);
+  aspect-ratio:var(--stage-aspect);
+  max-width:calc(100vw - var(--mx)*1.2);
+  overflow:hidden;            /* clip scatter that drifts past the frame */
+  z-index:2;
+  background:#000;            /* black gaps show through between unseated tiles */
+  box-shadow:0 40px 120px -40px rgba(0,0,0,.9);
+}
+
+.puzzle__grid{
+  position:absolute;inset:0;   /* exact final W×H of the stage */
+}
+
+/* each tile = one CSS sprite slice. left/top/width/height are STATIC. */
+.puzzle__tile{
+  position:absolute;
+  background-image:var(--img);
+  background-repeat:no-repeat;
+  /* sprite math — set per tile inline via custom props --c/--r/--cols/--rows */
+  background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);
+  background-position:
+    calc(var(--c) / max(var(--colsm1), 1) * 100%)
+    calc(var(--r) / max(var(--rowsm1), 1) * 100%);
+  transform:translateZ(0);     /* force GPU layer */
+  backface-visibility:hidden;
+  /* will-change is added by JS only while animating, removed onComplete */
+}
+
+/* persistent counter, top-right */
+.counter{
+  position:absolute;top:var(--mx);right:var(--mx);z-index:8;
+  font-family:var(--serif);font-weight:300;font-size:1rem;
+  letter-spacing:.04em;opacity:.7;text-align:right;line-height:1.2;
+}
+.counter b{font-weight:400;font-size:1.15rem;display:block}
+
+/* pinned headline + caption (siblings of the stage, fixed feel) */
+.puzzle__eyebrow{position:absolute;top:var(--mx);left:var(--mx);z-index:8}
+.puzzle__cap{
+  position:absolute;left:var(--mx);bottom:var(--mx);z-index:8;
+  max-width:34ch;
+}
+.puzzle__cap .t{
+  font-family:var(--serif);font-weight:400;letter-spacing:-.01em;line-height:1.1;
+  font-size:clamp(1.5rem,3.2vw,2.6rem);
+}
+.puzzle__cap .s{margin-top:.7rem;opacity:.7;font-size:.92rem;line-height:1.5}
+
+/* progress rail (right edge) — shows scrub position */
+.rail{position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  width:2px;height:30vh;background:rgba(244,240,234,.14);z-index:8;border-radius:2px}
+.rail__fill{position:absolute;left:0;top:0;width:100%;height:0%;
+  background:var(--bronze);border-radius:2px}
+
+/* outro */
+.outro{
+  min-height:90vh;display:flex;align-items:center;padding:0 var(--mx);
+  position:relative;z-index:2;
+}
+.outro .eyebrow{margin-bottom:1rem}
+.outro h2{font-family:var(--serif);font-weight:400;letter-spacing:-.02em;
+  font-size:clamp(2rem,6vw,4.5rem);line-height:.98}
+
+/* ===== mobile ===== */
+@media (max-width:760px){
+  :root{--mx:20px; --stage-max:92vw;}
+  .puzzle__cap{max-width:80vw}
+  .rail{display:none}
+}
+
+/* ===== reduced motion (also handled in JS) ===== */
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= LEAD-IN ================= -->
+<section class="lead">
+  <span class="eyebrow">LAB · puzzle-image</span>
+  <h1 class="serif">Зображення<br/>збирається<br/>зі скролу.</h1>
+  <p>Одне фото нарізане на сітку плиток (CSS-спрайт, нуль зайвих запитів). Кожна плитка прилітає зі свого розкиданого положення й сідає у свою клітинку. Прокрути далі.</p>
+  <div class="scrollhint">Scroll ↓</div>
+</section>
+
+<!-- ================= PUZZLE (pinned, scrub) ================= -->
+<section class="puzzle" id="puzzle">
+  <div class="grain"></div>
+
+  <span class="eyebrow puzzle__eyebrow">Зібрано зі скролу</span>
+  <div class="counter"><b>01</b>02</div>
+
+  <div class="puzzle__stage" id="stage">
+    <div class="puzzle__grid" id="grid" aria-label="Фото, що самозбирається"></div>
+  </div>
+
+  <div class="puzzle__cap">
+    <div class="t serif">Плитка за плиткою.</div>
+    <div class="s">Один декодований файл, N мальованих слайсів. transform · opacity · blur — нічого більше.</div>
+  </div>
+
+  <div class="rail"><div class="rail__fill" id="railFill"></div></div>
+</section>
+
+<!-- ================= OUTRO ================= -->
+<section class="outro">
+  <div>
+    <span class="eyebrow">Далі</span>
+    <h2 class="serif">Selected projects →</h2>
+  </div>
+</section>
+
+<script>
+/* ============================================================
+   CONFIG — reusableParams (clearly named, edit here)
+   ============================================================ */
+const CONFIG = {
+  /* SOURCE — swap for any image. Default is a self-contained SVG data-URI so the
+     lab runs standalone. To use a real nahirna render, set src to e.g.
+     "file:///Users/.../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/01-HERO/03-villa-34-day-v1FULL.png" */
+  src: buildPlaceholderSrc(),     // string url
+  alt: "Self-assembling cover image",
+
+  rows: 4,                         // grid density (desktop)
+  cols: 4,
+  rowsMobile: 3,                   // dropped density on small screens
+  colsMobile: 3,
+
+  trigger: 'scrub',                // 'scrub' (scroll-locked) | 'inview' (one-shot)
+
+  /* scatter: how far/where pieces start, in TILE-WIDTHS */
+  scatter: 1.8,                    // amount (≈1–2.5 = puzzle; >3 = explosion)
+  scatterPattern: 'random',        // 'random' | 'edges-in' | 'ring' | 'rows'
+
+  /* stagger: assembly ORDER + feel */
+  staggerFrom: 'center',           // 'center' | 'edges' | 'random' | 'rows'
+  staggerAmount: 0.45,             // spread of per-tile start across 0→1 progress
+  tileWindow: 0.55,                // per-tile sub-window width (fraction of progress)
+
+  /* rest (scattered) state of each tile */
+  scaleFrom: 0.65,                 // 0.5–0.8
+  opacityFrom: 0.0,                // 0.0–0.25
+  blurFrom: 18,                    // px (cap ≤20 for FPS)
+
+  ease: 'air',                     // 'air' (house) | 'expo' (expo.out)
+
+  /* scrub mode */
+  scrollDistance: '+=120%',        // pin length (≈1.0–1.3× viewport height)
+  pin: true,
+
+  /* inview mode */
+  duration: 1.0,                   // per-tile (s)
+  totalStagger: 0.5,               // from-center stagger total (s)
+
+  seed: 7,                         // deterministic random (reproducible scatter)
+  seamFix: 0.5,                    // px outset to guarantee seamless seated state
+  respectReducedMotion: true,
+};
+
+/* ============================================================
+   placeholder source — a recognizable "portrait" so you can SEE
+   the picture form before it's complete (the magic of the technique).
+   Replace CONFIG.src with a real photo url for production.
+   ============================================================ */
+function buildPlaceholderSrc(){
+  const svg = `
+  <svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'>
+    <defs>
+      <linearGradient id='sky' x1='0' y1='0' x2='0' y2='1'>
+        <stop offset='0' stop-color='%23223047'/>
+        <stop offset='0.55' stop-color='%23B8946A'/>
+        <stop offset='1' stop-color='%23E9D8BE'/>
+      </linearGradient>
+      <radialGradient id='sun' cx='0.72' cy='0.32' r='0.32'>
+        <stop offset='0' stop-color='%23FFF4DF'/>
+        <stop offset='1' stop-color='%23B8946A' stop-opacity='0'/>
+      </radialGradient>
+    </defs>
+    <rect width='1600' height='1000' fill='url(%23sky)'/>
+    <rect width='1600' height='1000' fill='url(%23sun)'/>
+    <!-- horizon land -->
+    <rect y='640' width='1600' height='360' fill='%230B0B0C'/>
+    <rect y='620' width='1600' height='40' fill='%23151515'/>
+    <!-- a simple villa silhouette so the assembly is legible -->
+    <g fill='%230B0B0C'>
+      <rect x='560' y='430' width='480' height='220'/>
+      <polygon points='540,430 800,330 1060,430'/>
+      <rect x='1040' y='480' width='150' height='170'/>
+      <polygon points='1020,480 1115,420 1210,480'/>
+    </g>
+    <!-- warm windows -->
+    <g fill='%23FFD27A'>
+      <rect x='600' y='480' width='70' height='90'/>
+      <rect x='720' y='480' width='70' height='90'/>
+      <rect x='840' y='480' width='70' height='90'/>
+      <rect x='1070' y='520' width='40' height='60'/>
+    </g>
+    <!-- ZERA-style wordmark to test legibility mid-assembly -->
+    <text x='800' y='900' font-family='Georgia, serif' font-size='120'
+      letter-spacing='28' text-anchor='middle' fill='%23F4F0EA' opacity='0.9'>NAHIRNA</text>
+    <!-- grid ticks so seams are easy to judge -->
+    <g stroke='%23ffffff' stroke-opacity='0.05'>
+      <line x1='400' y1='0' x2='400' y2='1000'/>
+      <line x1='800' y1='0' x2='800' y2='1000'/>
+      <line x1='1200' y1='0' x2='1200' y2='1000'/>
+      <line x1='0' y1='250' x2='1600' y2='250'/>
+      <line x1='0' y1='500' x2='1600' y2='500'/>
+      <line x1='0' y1='750' x2='1600' y2='750'/>
+    </g>
+  </svg>`;
+  return "data:image/svg+xml;utf8," + svg.replace(/\n\s*/g,'');
+}
+
+/* ============================================================
+   ENGINE
+   ============================================================ */
+gsap.registerPlugin(ScrollTrigger);
+const AIR = CustomEase.create("air","M0,0 C0.25,0.74 0.22,0.99 1,1");
+const EASE = CONFIG.ease === 'expo' ? 'expo.out' : AIR;
+const reduce = CONFIG.respectReducedMotion &&
+  window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+/* deterministic PRNG (mulberry32) seeded by CONFIG.seed → reproducible scatter */
+function makeRng(seed){
+  let a = seed >>> 0;
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const grid  = document.getElementById("grid");
+const stage = document.getElementById("stage");
+const railFill = document.getElementById("railFill");
+
+/* responsive grid density */
+const isMobile = window.matchMedia("(max-width:760px)").matches;
+const ROWS = isMobile ? CONFIG.rowsMobile : CONFIG.rows;
+const COLS = isMobile ? CONFIG.colsMobile : CONFIG.cols;
+
+let tiles = [];   // tile state records
+let builtTL = null;
+
+/* ---- preload + decode the source BEFORE building tiles (no empty flash) ---- */
+function preloadImage(url){
+  return new Promise((resolve)=>{
+    const img = new Image();
+    img.onload = ()=> (img.decode ? img.decode().then(resolve).catch(resolve) : resolve());
+    img.onerror = resolve;          // never block the lab on a bad url
+    img.src = url;
+  });
+}
+
+/* ---- build the R×C tiles (CSS sprite slicing) ---- */
+function buildTiles(){
+  grid.innerHTML = "";
+  tiles = [];
+  grid.style.setProperty("--img", `url("${CONFIG.src}")`);
+
+  const tileW = 100 / COLS;        // % of stage
+  const tileH = 100 / ROWS;
+  const centerC = (COLS - 1) / 2;
+  const centerR = (ROWS - 1) / 2;
+  const maxDist = Math.hypot(centerC, centerR) || 1;
+
+  for (let r = 0; r < ROWS; r++){
+    for (let c = 0; c < COLS; c++){
+      const el = document.createElement("div");
+      el.className = "puzzle__tile";
+      el.dataset.row = r; el.dataset.col = c;
+
+      /* STATIC home cell — never animated */
+      el.style.left   = (c * tileW) + "%";
+      el.style.top    = (r * tileH) + "%";
+      el.style.width  = tileW + "%";
+      el.style.height = tileH + "%";
+
+      /* sprite math vars (off-by-one handled: cols-1, guard via max(...,1)) */
+      el.style.setProperty("--c", c);
+      el.style.setProperty("--r", r);
+      el.style.setProperty("--cols", COLS);
+      el.style.setProperty("--rows", ROWS);
+      el.style.setProperty("--colsm1", COLS - 1);
+      el.style.setProperty("--rowsm1", ROWS - 1);
+
+      grid.appendChild(el);
+
+      const dist = Math.hypot(c - centerC, r - centerR) / maxDist; // 0(center)..1(edge)
+      tiles.push({ el, r, c, dist });
+    }
+  }
+  /* seamFix: outset each tile slightly so seated edges overdraw (no hairlines) */
+  applySeamFix();
+}
+
+/* convert seamFix px → a scale that the SEATED state holds (rest scale = that) */
+let SEATED_SCALE = 1;
+function applySeamFix(){
+  const rect = stage.getBoundingClientRect();
+  const tilePx = Math.min(rect.width / COLS, rect.height / ROWS) || 1;
+  SEATED_SCALE = 1 + (CONFIG.seamFix * 2) / tilePx;   // ~1.003 typical
+}
+
+/* ---- scatter offset for a tile, in px, by pattern ---- */
+function scatterOffset(t, rng, tileWpx, tileHpx){
+  const amt = CONFIG.scatter;        // in tile-widths
+  let dx, dy;
+  switch (CONFIG.scatterPattern){
+    case 'edges-in': {                // pieces start pushed OUT past their own edge
+      const cx = (CONFIG.cols - 1) / 2, cy = (CONFIG.rows - 1) / 2;
+      const vx = (t.c - cx), vy = (t.r - cy);
+      const m = Math.hypot(vx, vy) || 1;
+      dx = (vx / m) * amt * tileWpx * (0.6 + rng());
+      dy = (vy / m) * amt * tileHpx * (0.6 + rng());
+      break;
+    }
+    case 'ring': {                    // all pieces start on a ring around center
+      const ang = rng() * Math.PI * 2;
+      dx = Math.cos(ang) * amt * tileWpx * 1.4;
+      dy = Math.sin(ang) * amt * tileHpx * 1.4;
+      break;
+    }
+    case 'rows': {                    // pieces slide in horizontally per row
+      const dir = (t.r % 2 === 0) ? -1 : 1;
+      dx = dir * amt * tileWpx * (1 + rng());
+      dy = (rng() - 0.5) * tileHpx * 0.4;
+      break;
+    }
+    default: {                        // 'random' bounded scatter field
+      dx = (rng() * 2 - 1) * amt * tileWpx;
+      dy = (rng() * 2 - 1) * amt * tileHpx;
+    }
+  }
+  return { dx, dy };
+}
+
+/* ---- per-tile start progress (stagger ORDER) ---- */
+function staggerStart(t, rng){
+  let key;
+  switch (CONFIG.staggerFrom){
+    case 'edges':  key = 1 - t.dist; break;     // edges first, center last
+    case 'random': key = rng();      break;
+    case 'rows':   key = t.r / Math.max(ROWS - 1, 1); break;
+    default:       key = t.dist;                  // 'center' → center first
+  }
+  return key * CONFIG.staggerAmount;             // 0 .. staggerAmount
+}
+
+/* ============================================================
+   ASSEMBLE — build the timeline (scrub) or play it (inview)
+   ============================================================ */
+function assemble(){
+  const rng = makeRng(CONFIG.seed);
+  const rect = stage.getBoundingClientRect();
+  const tileWpx = rect.width / COLS;
+  const tileHpx = rect.height / ROWS;
+
+  /* reduced motion → seat everything instantly, no blur, done. */
+  if (reduce){
+    tiles.forEach(t=>{
+      gsap.set(t.el,{x:0,y:0,scale:SEATED_SCALE,autoAlpha:1,filter:"blur(0px)"});
+    });
+    railFill.style.height = "100%";
+    return;
+  }
+
+  /* set the scattered REST state for each tile */
+  tiles.forEach(t=>{
+    const {dx,dy} = scatterOffset(t, rng, tileWpx, tileHpx);
+    t.rx = dx; t.ry = dy;
+    t.startP = staggerStart(t, makeRng(CONFIG.seed + (t.r*COLS + t.c)));
+    gsap.set(t.el,{
+      x:t.rx, y:t.ry,
+      scale:CONFIG.scaleFrom,
+      autoAlpha:CONFIG.opacityFrom,
+      filter:`blur(${CONFIG.blurFrom}px)`,
+      willChange:"transform,opacity,filter",
+    });
+  });
+
+  if (CONFIG.trigger === 'inview'){ assembleInview(); }
+  else                            { assembleScrub();  }
+}
+
+/* ---- SCRUB: one timeline whose 0→1 IS scroll progress ----
+   Each tile tween is placed at position = startP with duration = tileWindow,
+   so the per-tile EASE lives in the mapped sub-window (not a wall-clock time). */
+function assembleScrub(){
+  const tl = gsap.timeline();
+  tiles.forEach(t=>{
+    tl.fromTo(t.el,
+      { x:t.rx, y:t.ry, scale:CONFIG.scaleFrom,
+        autoAlpha:CONFIG.opacityFrom, filter:`blur(${CONFIG.blurFrom}px)` },
+      { x:0, y:0, scale:SEATED_SCALE, autoAlpha:1, filter:"blur(0px)",
+        duration:CONFIG.tileWindow, ease:EASE,
+        onComplete(){ t.el.style.willChange = "auto"; t.el.style.filter = "none"; }
+      },
+      t.startP                         // <-- sub-window start (the stagger)
+    );
+  });
+
+  builtTL = tl;
+
+  ScrollTrigger.create({
+    trigger:"#puzzle", start:"top top", end:CONFIG.scrollDistance,
+    scrub:true, pin:CONFIG.pin, anticipatePin:1,
+    animation:tl,
+    onUpdate(self){ railFill.style.height = (self.progress*100).toFixed(1) + "%"; },
+  });
+}
+
+/* ---- INVIEW: one-shot autoplay on enter (hero use, no long pin) ---- */
+function assembleInview(){
+  const tl = gsap.timeline({ paused:true });
+  /* GSAP stagger from:center maps cleanly to the puzzle order */
+  tl.to(tiles.map(t=>t.el), {
+    x:0, y:0, scale:SEATED_SCALE, autoAlpha:1, filter:"blur(0px)",
+    duration:CONFIG.duration, ease:EASE,
+    stagger:{ each: CONFIG.totalStagger / Math.max(tiles.length-1,1),
+              from: (CONFIG.staggerFrom==='edges'?'edges':
+                     CONFIG.staggerFrom==='random'?'random':'center') },
+    onComplete(){ tiles.forEach(t=>{ t.el.style.willChange="auto"; t.el.style.filter="none"; }); }
+  });
+  builtTL = tl;
+  ScrollTrigger.create({
+    trigger:"#puzzle", start:"top 75%", once:true,
+    onEnter(){ tl.play(); }
+  });
+  /* rail mirrors timeline progress */
+  tl.eventCallback("onUpdate", ()=>{ railFill.style.height=(tl.progress()*100).toFixed(1)+"%"; });
+}
+
+/* ============================================================
+   BOOT — preload → build → assemble (decode before timeline)
+   ============================================================ */
+async function boot(){
+  await preloadImage(CONFIG.src);
+  buildTiles();
+  assemble();
+  ScrollTrigger.refresh();           // recompute pin after heights settle
+}
+
+window.addEventListener("load", boot);
+
+/* recompute on resize / orientation flip (re-measure seamFix + refresh) */
+let rT;
+window.addEventListener("resize", ()=>{
+  clearTimeout(rT);
+  rT = setTimeout(()=>{ applySeamFix(); ScrollTrigger.refresh(); }, 200);
+});
+</script>
+</body>
+</html>

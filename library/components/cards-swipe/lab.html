@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LAB · cards-swipe (Zera grammar)</title>
+
+<!-- ============================================================
+     LAB: cards-swipe
+     A pinned section whose inner row of full-bleed cards translates
+     horizontally on vertical scroll, snapping one card per viewport,
+     with a circular "stitch" handle riding the seam + pointer-drag.
+
+     Self-contained: open this file directly. No build step.
+     GSAP 3.12.5 + ScrollTrigger + CustomEase + ScrollToPlugin via cdnjs.
+     Motion is transform/opacity only. No WebGL. Respects reduced-motion.
+     ============================================================ -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+/* ---- bring in the component stylesheet inline so the lab is one file ---- */
+:root{
+  --cs-ink:#0B0B0C; --cs-paper:#F4F0EA; --cs-mid:#8A857C; --cs-bronze:#B8946A;
+  --cs-gap:24px; --cs-radius:22px; --cs-inset:18px; --cs-pad:clamp(28px,5vw,72px);
+  --cs-air:cubic-bezier(0.25,0.74,0.22,0.99);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{background:var(--cs-ink);color:var(--cs-paper);
+  font-family:"Helvetica Neue",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block}
+
+/* preloader ritual (matches house style: cream fill -> mark -> slice open) */
+#pre{position:fixed;inset:0;z-index:1000;background:var(--cs-paper);
+  display:flex;align-items:center;justify-content:center}
+#pre svg{width:min(30vw,150px);overflow:visible}
+#pre path,#pre line{stroke:var(--cs-ink);stroke-width:1.4;fill:none;vector-effect:non-scaling-stroke}
+.slice{position:fixed;top:0;bottom:0;z-index:999;background:var(--cs-ink);transform:scaleX(0);will-change:transform}
+.slice.l{left:0;width:50vw;transform-origin:right center}
+.slice.r{right:0;width:50vw;transform-origin:left center}
+
+/* a lead section before the track, so we see the pin engage */
+.intro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:0 clamp(24px,6vw,96px)}
+.intro .eyebrow{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;opacity:.55;margin-bottom:1.4rem}
+.intro h1{font:400 clamp(3rem,12vw,9rem)/.86 "Times New Roman",Georgia,serif;letter-spacing:-.02em}
+.intro p{margin-top:2rem;max-width:40ch;opacity:.7;line-height:1.7}
+.intro .hint{margin-top:3rem;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+/* ========== COMPONENT CSS (cards-swipe) ========== */
+.cs-root{position:relative;height:100vh;overflow:hidden;background:var(--cs-ink)}
+.cs-track{display:flex;gap:var(--cs-gap);height:100%;align-items:center;padding:0 var(--cs-gap);will-change:transform}
+.cs-card{position:relative;flex:0 0 calc(100vw - var(--cs-gap)*2);height:calc(100vh - var(--cs-inset)*2);
+  border-radius:var(--cs-radius);background:var(--cs-paper);color:var(--cs-ink);overflow:hidden;isolation:isolate;
+  box-shadow:0 30px 80px -30px rgba(0,0,0,.55);transition:box-shadow .5s var(--cs-air)}
+.cs-card.is-active{box-shadow:0 40px 100px -28px rgba(0,0,0,.65)}
+.cs-card .cs-media{position:absolute;inset:0;z-index:0;overflow:hidden}
+.cs-card .cs-media img{width:112%;height:100%;margin-left:-6%;object-fit:cover;will-change:transform}
+.cs-card .cs-body{position:relative;z-index:2;height:100%;padding:var(--cs-pad);display:flex;flex-direction:column;justify-content:space-between}
+.cs-eyebrow{font:500 .7rem/1 "Helvetica Neue",sans-serif;letter-spacing:.32em;text-transform:uppercase;opacity:.55}
+.cs-title{font:400 clamp(2.6rem,6vw,5.5rem)/.92 "Times New Roman",Georgia,serif;letter-spacing:-.02em;margin:.2em 0}
+.cs-text{max-width:42ch;font:400 .95rem/1.7 "Helvetica Neue",sans-serif;opacity:.8}
+.cs-list{list-style:none;font:400 .8rem/1 "Helvetica Neue",sans-serif;letter-spacing:.04em;opacity:.7;margin-top:1.4rem}
+.cs-list li{padding:.7rem 0;border-top:1px solid rgba(11,11,12,.14);display:flex;gap:.6rem;align-items:center}
+.cs-foot{display:flex;justify-content:space-between;align-items:end;font:500 .68rem/1 "Helvetica Neue",sans-serif;
+  letter-spacing:.24em;text-transform:uppercase;opacity:.5}
+/* media-only card variant: image fills, text overlaid bottom */
+.cs-card.is-media .cs-body{justify-content:flex-end;color:var(--cs-paper)}
+.cs-card.is-media::after{content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to top,rgba(11,11,12,.7),transparent 55%)}
+
+.cs-seam{position:absolute;top:50%;z-index:30;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
+  background:var(--cs-ink);border:1.5px solid var(--cs-bronze);display:flex;align-items:center;justify-content:center;
+  pointer-events:none;will-change:transform,opacity,left}
+.cs-seam svg{width:18px;height:18px;stroke:var(--cs-paper);stroke-width:1.6;fill:none}
+.cs-root{cursor:grab}.cs-root.cs-dragging{cursor:grabbing}
+
+/* progress dots (bonus chrome, not core) */
+.cs-dots{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:40;display:flex;gap:10px}
+.cs-dots button{width:7px;height:7px;border-radius:50%;border:none;background:rgba(244,240,234,.3);cursor:pointer;padding:0;transition:transform .3s var(--cs-air),background .3s}
+.cs-dots button.on{background:var(--cs-bronze);transform:scale(1.5)}
+
+@media (max-width:760px){
+  :root{--cs-gap:14px;--cs-radius:16px;--cs-inset:12px;--cs-pad:22px}
+  .cs-seam{width:38px;height:38px;margin:-19px 0 0 -19px}
+  .cs-title{font-size:clamp(2.1rem,9vw,3.4rem)}
+}
+
+/* reduced-motion stacked fallback */
+.cs-reduced.cs-root{height:auto;overflow:visible}
+.cs-reduced .cs-track{flex-direction:column;height:auto;padding:var(--cs-gap);gap:var(--cs-gap)}
+.cs-reduced .cs-card{flex:0 0 auto;width:100%;height:auto;min-height:70vh}
+.cs-reduced .cs-seam,.cs-reduced~.cs-dots{display:none}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .cs-card .cs-media img{width:100%;margin-left:0}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===================== PRELOADER ===================== -->
+<div id="pre" aria-hidden="true">
+  <svg viewBox="0 0 120 120">
+    <path id="mRoof" d="M22 56 L60 24 L98 56" />
+    <path id="mWall" d="M32 52 L32 96 L88 96 L88 52" />
+    <line id="mSpine" x1="60" y1="14" x2="60" y2="104" />
+  </svg>
+</div>
+<div class="slice l"></div>
+<div class="slice r"></div>
+
+<!-- lead-in so we can watch the pin engage -->
+<section class="intro">
+  <div class="eyebrow">Lab · technique</div>
+  <h1>Cards,<br>swiped.</h1>
+  <p>Scroll down: the section below pins and the row of cards slides sideways,
+     snapping one per screen. Grab and drag to fling. The bronze stitch rides the seam.</p>
+  <div class="hint">↓ scroll to enter the track</div>
+</section>
+
+<!-- ===================== THE CARD TRACK ===================== -->
+<section class="cs-root" id="cards">
+  <div class="cs-track">
+
+    <!-- CARD 01 — info-forward -->
+    <article class="cs-card">
+      <div class="cs-media"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80" alt=""></div>
+      <div class="cs-body">
+        <div class="cs-eyebrow">[01] — Foundation</div>
+        <div>
+          <h2 class="cs-title">Website &amp;<br>Design.</h2>
+          <p class="cs-text">A custom-crafted website designed to establish your brand, build credibility, and give your business a professional digital foundation.</p>
+          <ul class="cs-list">
+            <li>· UI / UX Design</li>
+            <li>· Custom Website Development</li>
+            <li>· Conversion-Focused Structure</li>
+          </ul>
+        </div>
+        <div class="cs-foot"><span>01 / 03 — Foundation</span><span>Where craft meets clarity →</span></div>
+      </div>
+    </article>
+
+    <!-- CARD 02 — info-forward -->
+    <article class="cs-card">
+      <div class="cs-media"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=80" alt=""></div>
+      <div class="cs-body">
+        <div class="cs-eyebrow">[02] — Growth</div>
+        <div>
+          <h2 class="cs-title">Growth<br>System.</h2>
+          <p class="cs-text">A complete digital growth engine that connects website, landing pages, paid advertising, SEO and ongoing optimization into one revenue machine.</p>
+          <ul class="cs-list">
+            <li>· Landing Pages</li>
+            <li>· Conversion Optimization</li>
+            <li>· Monthly Reporting &amp; Strategy</li>
+          </ul>
+        </div>
+        <div class="cs-foot"><span>02 / 03 — Growth</span><span>Everything in motion →</span></div>
+      </div>
+    </article>
+
+    <!-- CARD 03 — media-forward variant -->
+    <article class="cs-card is-media">
+      <div class="cs-media"><img src="https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=1600&q=80" alt=""></div>
+      <div class="cs-body">
+        <div class="cs-eyebrow" style="opacity:.7">[03] — Experience</div>
+        <div class="cs-foot" style="opacity:.85">
+          <h2 class="cs-title" style="margin:0">3D Experiences.</h2>
+          <span>End →</span>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- the stitch handle (single element; JS rides it across the seam) -->
+  <div class="cs-seam" id="seam">
+    <svg viewBox="0 0 24 24"><path d="M9 6 L4 12 L9 18 M15 6 L20 12 L15 18"/></svg>
+  </div>
+</section>
+
+<!-- progress dots -->
+<div class="cs-dots" id="dots"></div>
+
+<!-- a tail section so the page can scroll past the pin cleanly -->
+<section class="intro"><div class="eyebrow">End of lab</div><h1 style="font-size:clamp(2rem,8vw,5rem)">Reusable.</h1></section>
+
+<!-- ============================================================
+     COMPONENT JS (inlined for the single-file lab)
+     ============================================================ -->
+<script>
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+CustomEase.create("air","M0,0 C0.25,0.74 0.22,0.99 1,1");
+const REDUCE = matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+/* ---- preloader ritual, then build the track ---- */
+function lenOf(el){try{return el.getTotalLength()}catch(e){return 200}}
+function preload(done){
+  const roof=mRoof,wall=mWall,spine=mSpine,pre=document.getElementById("pre");
+  const sl=document.querySelector(".slice.l"),sr=document.querySelector(".slice.r");
+  if(REDUCE){pre.style.display="none";done();return;}
+  [roof,wall].forEach(p=>{const L=lenOf(p);gsap.set(p,{strokeDasharray:L,strokeDashoffset:L})});
+  const sL=lenOf(spine);gsap.set(spine,{strokeDasharray:sL,strokeDashoffset:sL});
+  gsap.timeline({onComplete:done})
+    .to(roof,{strokeDashoffset:0,duration:.7,ease:"air"},.15)
+    .to(wall,{strokeDashoffset:0,duration:.8,ease:"air"},"-=0.45")
+    .to(spine,{strokeDashoffset:0,duration:.6,ease:"air"},"-=0.25")
+    .set([sl,sr],{scaleX:1})
+    .to(pre,{opacity:0,duration:.35},"+=0.12").set(pre,{display:"none"})
+    .to(sl,{scaleX:0,duration:.95,ease:"air"},"<")
+    .to(sr,{scaleX:0,duration:.95,ease:"air"},"<");
+}
+
+/* ---- the cards-swipe controller (see component.js for the library form) ---- */
+function buildCards(){
+  const root=document.getElementById("cards");
+  const track=root.querySelector(".cs-track");
+  const cards=[...root.querySelectorAll(".cs-card")];
+  const seam=document.getElementById("seam");
+  const dotsWrap=document.getElementById("dots");
+  const n=cards.length, GAP=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--cs-gap"));
+  const SCRUB_PER_CARD=0.9, PARALLAX=0.12;
+
+  // dots
+  cards.forEach((_,i)=>{const b=document.createElement("button");if(i===0)b.className="on";
+    b.addEventListener("click",()=>goTo(i));dotsWrap.appendChild(b)});
+  const dots=[...dotsWrap.children];
+
+  let travel=0,cardStep=0;
+  function measure(){const w=cards[0].getBoundingClientRect().width;cardStep=w+GAP;travel=cardStep*(n-1)}
+  measure();
+
+  if(REDUCE){root.classList.add("cs-reduced");return;}
+
+  function setActive(i){cards.forEach((c,k)=>c.classList.toggle("is-active",k===i));
+    dots.forEach((d,k)=>d.classList.toggle("on",k===i))}
+  cards[0].classList.add("is-active");
+
+  // seam rides the gap; brightest mid-transition, fades at snap points
+  function seamAt(progress){
+    const pos=progress*(n-1),lead=Math.floor(pos),frac=pos-lead;
+    const vis=Math.sin(frac*Math.PI);
+    gsap.set(seam,{left:(1-frac)*100+"%",autoAlpha:.25+vis*.75,scale:.86+vis*.14});
+  }
+  seamAt(0);
+
+  // CORE: pin the section, translate the track on X, snap one card per screen
+  const tween=gsap.to(track,{
+    x:()=>-travel, ease:"none",
+    scrollTrigger:{
+      trigger:root,start:"top top",
+      end:()=>"+="+Math.round(innerHeight*SCRUB_PER_CARD*(n-1)),
+      scrub:0.6, pin:true, anticipatePin:1, invalidateOnRefresh:true,
+      snap:{snapTo:v=>Math.round(v*(n-1))/(n-1),duration:{min:.2,max:.5},delay:.04,ease:"air"},
+      onUpdate(self){setActive(Math.round(self.progress*(n-1)));seamAt(self.progress)}
+    }
+  });
+
+  // inner-image parallax via containerAnimation (drives off the same tween)
+  if(PARALLAX>0) cards.forEach(card=>{
+    const img=card.querySelector("img");if(!img)return;
+    gsap.fromTo(img,{xPercent:-PARALLAX*12},{xPercent:PARALLAX*12,ease:"none",
+      scrollTrigger:{trigger:card,containerAnimation:tween,start:"left right",end:"right left",scrub:true}});
+  });
+
+  // pointer fling -> translated into a scroll delta (ST stays source of truth)
+  let active=false,sx=0,ss=0;const pxPerCard=()=>innerHeight*SCRUB_PER_CARD;
+  const pt=e=>e.touches?e.touches[0].clientX:e.clientX;
+  root.addEventListener("mousedown",e=>{active=true;sx=pt(e);ss=scrollY;root.classList.add("cs-dragging")});
+  addEventListener("mousemove",e=>{if(!active)return;scrollTo(0,ss-(pt(e)-sx)*(pxPerCard()/cardStep))});
+  addEventListener("mouseup",()=>{active=false;root.classList.remove("cs-dragging")});
+  root.addEventListener("touchstart",e=>{active=true;sx=pt(e);ss=scrollY},{passive:true});
+  root.addEventListener("touchmove",e=>{if(!active)return;scrollTo(0,ss-(pt(e)-sx)*(pxPerCard()/cardStep))},{passive:true});
+  root.addEventListener("touchend",()=>active=false);
+
+  function goTo(i){const st=tween.scrollTrigger,p=n>1?i/(n-1):0;
+    gsap.to(window,{scrollTo:st.start+(st.end-st.start)*p,duration:.6,ease:"air"})}
+
+  let rT;addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>{measure();ScrollTrigger.refresh()},200)});
+}
+
+addEventListener("load",()=>preload(buildCards));
+</script>
+</body>
+</html>

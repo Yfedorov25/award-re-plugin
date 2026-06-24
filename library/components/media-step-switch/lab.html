@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LAB · media-step-switch (Naveera / Zera)</title>
+
+<!-- ============================================================
+     TECHNIQUE: media-step-switch
+     One pinned stage. A glass card holds stepped copy (BENEFIT 01,
+     02, 03…). As you scrub through the pin, the FULL-BLEED background
+     media swaps from step N to step N+1 via an ORGANIC WAVY clip-path
+     wipe (new media reveals top→down behind an undulating seam), the
+     card copy crossfades + the LEFT vertical step-rail advances its
+     filled marker. The card never moves; only media + copy + dot do.
+     Source recording: rec7-image-video-switch (Naveera/Zera portfolio).
+
+     STACK: vanilla HTML + GSAP 3.12.5 + ScrollTrigger + CustomEase.
+     NO WebGL. Motion on transform/opacity/clip-path only.
+     Background can be <img> OR muted autoplay <video> (never scrub
+     video.currentTime — the video just loops; only its VISIBILITY
+     is animated). Respects prefers-reduced-motion.
+     ============================================================ -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+:root{
+  --ink:#0B0B0C;
+  --paper:#F4F0EA;
+  --mid:#8A857C;
+  --accent:#1FA8C9;            /* the step-marker / eyebrow accent (Naveera teal) */
+  --card-glass:rgba(244,240,234,.10);
+  --card-border:rgba(244,240,234,.16);
+  --mx:64px;
+  --air:cubic-bezier(0.22,0.61,0.18,1); /* the only ease (also CustomEase 'air') */
+  --sans:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
+  --serif:"PP Editorial New","Times New Roman",Georgia,serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{background:var(--ink);color:var(--paper);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,video{display:block}
+
+/* spacer sections so there's something above/below the pinned stage */
+.spacer{height:100vh;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:clamp(2rem,7vw,5rem);opacity:.5;letter-spacing:-.02em}
+.spacer.top{background:#0e0e10}
+.spacer.bot{background:#0e0e10}
+
+/* ============================================================
+   PRELOADER (light Saisei ritual so the lab opens like the real thing)
+   ============================================================ */
+#preloader{position:fixed;inset:0;z-index:1000;background:var(--ink);
+  display:flex;align-items:center;justify-content:center}
+#preloader .mk{font-family:var(--serif);font-size:1.1rem;letter-spacing:.4em;
+  text-transform:uppercase;opacity:.7}
+.slice{position:fixed;top:0;bottom:0;z-index:999;background:var(--ink);
+  transform:scaleX(0);will-change:transform}
+.slice.left{left:0;width:50vw;transform-origin:right center}
+.slice.right{right:0;width:50vw;transform-origin:left center}
+
+/* ============================================================
+   THE STAGE
+   ============================================================ */
+.stage{position:relative;width:100vw;height:100vh;overflow:hidden;background:#000}
+
+/* --- media layers: one absolutely-stacked layer per step --- */
+.media-layer{position:absolute;inset:0;z-index:1;
+  /* every non-active layer is fully clipped away to nothing */
+  clip-path:inset(0 0 100% 0);
+  will-change:clip-path;
+}
+.media-layer.is-active{clip-path:inset(0 0 0% 0)} /* fully shown */
+.media-layer img,.media-layer video{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.06);                 /* slight overscan so parallax never reveals edges */
+  will-change:transform;
+}
+/* the wavy seam edge is baked into the layer via an SVG clip path (see <svg> defs)
+   — we morph between a flat inset and the wave shape during the wipe.
+   Fallback: a straight inset wipe if clip-path:path() is unsupported. */
+.media-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom, rgba(0,0,0,.18) 0%, rgba(0,0,0,.05) 38%, rgba(0,0,0,.45) 100%)}
+
+/* --- the glass card (fixed within the stage) --- */
+.card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:5;width:min(560px,86vw);
+  background:var(--card-glass);
+  border:1px solid var(--card-border);
+  border-radius:18px;
+  backdrop-filter:blur(14px) saturate(120%);
+  -webkit-backdrop-filter:blur(14px) saturate(120%);
+  padding:42px 54px 46px;
+  box-shadow:0 30px 80px -30px rgba(0,0,0,.6);
+  display:grid;grid-template-columns:auto 1fr;gap:26px;
+}
+/* left vertical step-rail */
+.rail{position:relative;width:3px;align-self:stretch;
+  background:rgba(244,240,234,.18);border-radius:2px}
+.rail .fill{position:absolute;left:0;top:0;width:100%;border-radius:2px;
+  background:var(--accent);transform-origin:top;will-change:height}
+.rail .dots{position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:space-between;align-items:center;transform:translateX(-3px)}
+.rail .dot{width:9px;height:9px;border-radius:50%;background:rgba(244,240,234,.3);
+  transition:none}
+.rail .dot.is-on{background:var(--accent);box-shadow:0 0 0 4px rgba(31,168,201,.18)}
+
+/* the copy column — only ONE step's copy is visible at a time, stacked */
+.copy{position:relative;min-height:230px}
+.step{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;text-align:center;gap:14px;opacity:0;will-change:opacity,transform}
+.step.is-active{opacity:1}
+.step .eyebrow{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--accent);font-weight:600}
+.step h3{font-family:var(--serif);font-weight:400;font-size:clamp(1.4rem,2.4vw,2rem);
+  line-height:1.05;letter-spacing:-.01em}
+.step p{font-size:.96rem;line-height:1.62;color:rgba(244,240,234,.78);max-width:40ch}
+
+/* progress hairline at the very bottom of the stage */
+.stage-progress{position:absolute;left:0;bottom:0;height:2px;width:100%;
+  background:var(--accent);transform:scaleX(0);transform-origin:left;z-index:6}
+
+@media (max-width:760px){
+  .card{grid-template-columns:auto 1fr;padding:30px 26px 34px;width:90vw}
+  .step p{font-size:.9rem}
+}
+</style>
+</head>
+<body>
+
+<!-- preloader -->
+<div id="preloader"><div class="mk">Naveera</div></div>
+<div class="slice left"></div><div class="slice right"></div>
+
+<div class="spacer top">scroll ↓</div>
+
+<!-- ============================================================
+     STAGE — pinned, scrubbed, N steps
+     ============================================================ -->
+<section class="stage" id="stage">
+
+  <!-- MEDIA LAYERS (one per step). Layer 0 starts active. -->
+  <!-- Using gradient placeholders so the lab runs with zero assets;
+       swap each .ph for <img src> or muted autoplay <video>. -->
+  <div class="media-layer is-active" data-layer="0">
+    <div style="width:100%;height:100%;background:
+      linear-gradient(160deg,#3a4a3f 0%,#5a6b54 45%,#8a9b6e 100%)"></div>
+  </div>
+  <div class="media-layer" data-layer="1">
+    <div style="width:100%;height:100%;background:
+      linear-gradient(160deg,#2e3b4a 0%,#46586b 45%,#6e859b 100%)"></div>
+  </div>
+  <div class="media-layer" data-layer="2">
+    <div style="width:100%;height:100%;background:
+      linear-gradient(160deg,#4a3a3a 0%,#6b5454 45%,#9b7e6e 100%)"></div>
+  </div>
+
+  <div class="media-scrim"></div>
+
+  <!-- GLASS CARD -->
+  <div class="card">
+    <div class="rail">
+      <div class="fill" style="height:0%"></div>
+      <div class="dots">
+        <span class="dot is-on"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+
+    <div class="copy">
+      <article class="step is-active" data-step="0">
+        <span class="eyebrow">Benefit 01</span>
+        <h3>A single platform for complete fleet visibility</h3>
+        <p>Naveera pulls routing, safety, and analytics into one unified
+           stack. Deep integrations with broker networks anticipate trip
+           volumes before your day begins — automatically generating
+           optimized manifests across your entire fleet.</p>
+      </article>
+      <article class="step" data-step="1">
+        <span class="eyebrow">Benefit 02</span>
+        <h3>Built to deploy fast, built to scale</h3>
+        <p>Designed for operators who can't afford downtime. No hardware
+           to install, no lengthy IT projects. Dispatchers are up and
+           running in hours — whether you run 10 vehicles or 10,000.</p>
+      </article>
+      <article class="step" data-step="2">
+        <span class="eyebrow">Benefit 03</span>
+        <h3>Every status, in real time</h3>
+        <p>Drivers see clear manifests in the app from day one. Surface
+           real-time vehicle and patient status across the whole network,
+           with health-system integrations that keep everyone in sync.</p>
+      </article>
+    </div>
+  </div>
+
+  <div class="stage-progress" id="stageProgress"></div>
+</section>
+
+<div class="spacer bot">end</div>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const AIR = CustomEase.create("air","M0,0 C0.22,0.61 0.18,1 1,1");
+const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+/* ---------- preloader ritual ---------- */
+function openLab(){
+  const pre=document.getElementById("preloader");
+  const sL=document.querySelector(".slice.left"), sR=document.querySelector(".slice.right");
+  if(reduce){ pre.style.display="none"; gsap.set([sL,sR],{scaleX:0}); return; }
+  const tl=gsap.timeline();
+  tl.to("#preloader .mk",{opacity:.25,duration:.5,ease:AIR},.3)
+    .set([sL,sR],{scaleX:1})
+    .set(pre,{display:"none"})
+    .to(sL,{scaleX:0,duration:.9,ease:AIR},"<")
+    .to(sR,{scaleX:0,duration:.9,ease:AIR},"<");
+}
+
+/* ============================================================
+   THE SWITCH ENGINE
+   N steps. Pin the stage for (N-1) screen-heights of scrub.
+   Each step boundary = one wavy clip-path wipe of the next media
+   layer over the current one, + copy crossfade + rail advance.
+   ============================================================ */
+(function mediaStepSwitch(){
+  const stage   = document.getElementById("stage");
+  const layers  = gsap.utils.toArray(".media-layer");
+  const steps   = gsap.utils.toArray(".step");
+  const dots    = gsap.utils.toArray(".rail .dot");
+  const fill    = document.querySelector(".rail .fill");
+  const progress= document.getElementById("stageProgress");
+  const N = steps.length;
+  if(N < 2) return;
+
+  /* --- the wavy seam: two clip-path strings per layer ---
+     CLOSED  = layer fully hidden below a wave near the TOP (nothing shown)
+     OPEN    = layer fully shown (flat full-bleed)
+     We animate clip-path between these. polygon() with many points
+     along the top edge makes the undulating seam; tweening point-by-point
+     gives the organic "fabric pulled down" wipe seen in the recording. */
+  function wavePoly(progress){
+    // progress 0 -> seam at very top (layer hidden), 1 -> seam off bottom (layer shown)
+    // build a top edge of 9 samples with a sine ripple riding the seam line
+    const pts=[];
+    const baseY = -8 + progress*116;          // seam sweeps from -8% to 108%
+    const amp   = 4.5 * Math.sin(progress*Math.PI); // ripple peaks mid-wipe, flat at ends
+    const cols  = 8;
+    for(let i=0;i<=cols;i++){
+      const x=(i/cols)*100;
+      const y=baseY + amp*Math.sin((i/cols)*Math.PI*2.2 + progress*4);
+      pts.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+    }
+    // close down the right, bottom, left
+    pts.push(`100% 100%`,`0% 100%`);
+    return `polygon(${pts.join(",")})`;
+  }
+  // init: layer 0 fully open, the rest closed (seam at top)
+  layers.forEach((l,i)=> gsap.set(l,{clipPath: i===0 ? wavePoly(1) : wavePoly(0)}));
+  gsap.set(steps,{opacity:0}); gsap.set(steps[0],{opacity:1});
+
+  /* master scrubbed timeline. Each transition occupies one equal slice. */
+  const tl=gsap.timeline({
+    scrollTrigger:{
+      trigger:stage, start:"top top", end:"+="+( (N-1)*100 )+"%",
+      scrub:true, pin:true, anticipatePin:1,
+      onUpdate:self=>{ gsap.set(progress,{scaleX:self.progress}); }
+    }
+  });
+
+  for(let i=1;i<N;i++){
+    const at=(i-1);                 // each slice is 1 unit long on the timeline
+    const incoming=layers[i], outgoing=layers[i-1];
+    const inStep=steps[i], outStep=steps[i-1];
+
+    // 1) incoming media wipes down over the current one (the wave)
+    tl.to(incoming,{ clipPath:wavePoly(1), duration:.7, ease:AIR }, at)
+      // gentle push on the incoming layer's image for life
+      .fromTo(incoming.querySelector("img,video,div"),
+              {yPercent:-3},{yPercent:0,duration:.7,ease:AIR}, at)
+      // 2) copy crossfade: old dims first, new clarifies after the seam passes
+      .to(outStep,{opacity:0,duration:.28,ease:"none"}, at+.02)
+      .fromTo(inStep,{opacity:0,y:10},{opacity:1,y:0,duration:.4,ease:AIR}, at+.34)
+      // 3) rail fill advances + dots toggle at the midpoint
+      .to(fill,{height:((i)/(N-1))*100+"%",duration:.7,ease:AIR}, at)
+      .set(dots[i-1],{className:"dot"}, at+.35)
+      .set(dots[i],{className:"dot is-on"}, at+.35)
+      // 4) once fully shown, re-close the OLD layer so a backward scrub re-wipes cleanly
+      .set(outgoing,{clipPath:wavePoly(0)}, at+.999);
+  }
+
+  if(reduce){
+    // no scrub motion: snap to a static state, kill the timeline
+    tl.scrollTrigger.kill();
+    layers.forEach((l,i)=>gsap.set(l,{clipPath:i===0?wavePoly(1):wavePoly(0)}));
+  }
+})();
+
+window.addEventListener("load",openLab);
+let rT;addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>ScrollTrigger.refresh(),200);});
+</script>
+</body>
+</html>

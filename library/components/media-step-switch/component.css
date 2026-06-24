@@ -1,0 +1,106 @@
+/* ============================================================
+   media-step-switch — component styles
+   Class prefix: .msw-*  (the lab.html uses semantic names; both
+   sets of selectors are honored by component.js).
+   Pair with component.js. See RECIPE.md for the markup contract.
+   ============================================================ */
+
+.msw-stage{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  background:#000;
+}
+
+/* one stacked, full-bleed media layer per step */
+.msw-layer{
+  position:absolute; inset:0; z-index:1;
+  clip-path:polygon(0 -8%,100% -8%,100% -8%,0 -8%); /* hidden until JS sets it */
+  will-change:clip-path;
+}
+.msw-layer > img,
+.msw-layer > video,
+.msw-layer > div{          /* div = gradient placeholder */
+  width:100%; height:100%;
+  object-fit:cover;
+  transform:scale(1.06);   /* JS overrides via opts.overscan */
+  will-change:transform;
+}
+
+/* legibility scrim over the media (keeps card readable on any frame) */
+.msw-scrim{
+  position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(0,0,0,.18) 0%, rgba(0,0,0,.05) 38%, rgba(0,0,0,.45) 100%);
+}
+
+/* ---- the glass card (fixed in the stage center; never animates position) ---- */
+.msw-card{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  z-index:5;
+  width:min(560px,86vw);
+  display:grid; grid-template-columns:auto 1fr; gap:26px;
+  padding:42px 54px 46px;
+  border-radius:18px;
+  background:rgba(244,240,234,.10);
+  border:1px solid rgba(244,240,234,.16);
+  backdrop-filter:blur(14px) saturate(120%);
+  -webkit-backdrop-filter:blur(14px) saturate(120%);
+  box-shadow:0 30px 80px -30px rgba(0,0,0,.6);
+}
+
+/* ---- left vertical step-rail ---- */
+.msw-rail{
+  position:relative; width:3px; align-self:stretch;
+  background:rgba(244,240,234,.18); border-radius:2px;
+}
+.msw-fill{
+  position:absolute; left:0; top:0; width:100%; border-radius:2px;
+  background:var(--msw-accent,#1FA8C9);
+  transform-origin:top; will-change:height;
+}
+.msw-dots{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; justify-content:space-between; align-items:center;
+  transform:translateX(-3px);
+}
+.msw-dot{
+  width:9px; height:9px; border-radius:50%;
+  background:rgba(244,240,234,.3);
+}
+.msw-dot.is-on{
+  background:var(--msw-accent,#1FA8C9);
+  box-shadow:0 0 0 4px rgba(31,168,201,.18);
+}
+
+/* ---- stepped copy (only one visible; all stacked) ---- */
+.msw-copy{ position:relative; min-height:230px; }
+.msw-step{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center; gap:14px;
+  opacity:0; will-change:opacity,transform;
+}
+.msw-step.is-active{ opacity:1; }
+.msw-step .msw-eyebrow{
+  font-size:.7rem; letter-spacing:.32em; text-transform:uppercase;
+  color:var(--msw-accent,#1FA8C9); font-weight:600;
+}
+
+/* ---- bottom progress hairline ---- */
+.msw-progress{
+  position:absolute; left:0; bottom:0; height:2px; width:100%;
+  background:var(--msw-accent,#1FA8C9);
+  transform:scaleX(0); transform-origin:left; z-index:6;
+}
+
+@media (max-width:760px){
+  .msw-card{ padding:30px 26px 34px; width:90vw; gap:18px; }
+  .msw-copy{ min-height:260px; }
+}
+
+/* reduced-motion: card + first media stay; no clip animation runs (JS guards) */
+@media (prefers-reduced-motion:reduce){
+  .msw-layer > img,.msw-layer > video,.msw-layer > div{ transform:none; }
+}

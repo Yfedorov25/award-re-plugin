@@ -1,0 +1,68 @@
+/* ============================================================
+   puzzle-image — component.css
+   One image, sliced into an R×C grid of CSS-sprite tiles that
+   scatter at rest and seat into a seamless full-bleed photo.
+   Pair with component.js. Motion = transform/opacity/filter ONLY.
+   ============================================================ */
+
+:root{
+  /* visual size + final-frame proportion of the stage */
+  --pz-stage-aspect: 16 / 10;   /* aspectRatio — lock the final frame */
+  --pz-stage-max: 78vmin;       /* on-screen size of the stage */
+  --pz-mx: 64px;
+}
+
+/* pinned scrub section (also fine for inview hero) */
+.puzzle{
+  position:relative;
+  width:100vw;
+  min-height:100vh;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* the final image frame — aspect-locked, clips scatter, black gaps show through */
+.puzzle__stage{
+  position:relative;
+  width:var(--pz-stage-max);
+  aspect-ratio:var(--pz-stage-aspect);
+  max-width:calc(100vw - var(--pz-mx) * 1.2);
+  overflow:hidden;
+  background:#000;              /* gaps between unseated tiles read as black */
+  box-shadow:0 40px 120px -40px rgba(0,0,0,.9);
+}
+
+/* exact final W×H of the stage */
+.puzzle__grid{ position:absolute; inset:0; }
+
+/* one CSS sprite slice per tile. left/top/width/height are STATIC (set by JS).
+   --c/--r = this tile's col/row; --cols/--rows = grid; --colsm1/--rowsm1 = minus 1.
+   THE OFF-BY-ONE: background-position uses c/(cols-1), guarded by max(...,1). */
+.puzzle__tile{
+  position:absolute;
+  background-image:var(--img);
+  background-repeat:no-repeat;
+  background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);
+  background-position:
+    calc(var(--c) / max(var(--colsm1), 1) * 100%)
+    calc(var(--r) / max(var(--rowsm1), 1) * 100%);
+  transform:translateZ(0);     /* force a GPU layer */
+  backface-visibility:hidden;
+  /* will-change is toggled by JS only while a tile animates, then removed */
+}
+
+/* optional chrome (siblings of the stage, never children of the grid) */
+.puzzle__eyebrow{ position:absolute; top:var(--pz-mx); left:var(--pz-mx); z-index:8; }
+.puzzle__cap{ position:absolute; left:var(--pz-mx); bottom:var(--pz-mx); z-index:8; max-width:34ch; }
+
+@media (max-width:760px){
+  :root{ --pz-mx:20px; --pz-stage-max:92vw; }
+  .puzzle__cap{ max-width:80vw; }
+}
+
+/* reduced motion: JS seats tiles instantly; this kills any incidental transitions */
+@media (prefers-reduced-motion:reduce){
+  .puzzle__tile{ transition:none !important; }
+}

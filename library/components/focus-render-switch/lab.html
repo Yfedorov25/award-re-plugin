@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LAB · focus-render-switch (FOCUS-ON-RENDER pinned stepper)</title>
+
+<!-- ============================================================
+     TECHNIQUE: focus-render-switch
+     One big media (LEFT) + a stack of headings (RIGHT). The section
+     PINS; as you scroll the section's length, it advances through N
+     "steps". Each step = (a) a new render crossfades+scales into the
+     left frame, (b) the right heading-stack ticks up one slot
+     (prev fades out top / current solid / next fades in as preview),
+     (c) the current heading's words sweep an accent colour, and
+     (d) a step counter increments (01 / 02 ...).
+     Reference site: Naveera / Zera ("Fleet Operating System" section).
+     Stack: vanilla + GSAP 3.12.5 + ScrollTrigger (+CustomEase). NO WebGL.
+     ============================================================ -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+/* ---------- grade / tokens (single source) ---------- */
+:root{
+  --ink:#10171d;          /* heading solid */
+  --paper:#f3f2ee;        /* right column paper */
+  --mid:#b9bdc0;          /* dim / preview heading */
+  --accent:#1aa6c7;       /* the sweep colour (teal, like ref) */
+  --media-bg:#0c1116;     /* behind the render frame */
+  --radius:22px;          /* media frame corner radius */
+  --mx:clamp(20px,4vw,64px);
+  --sans:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
+  /* the only ease, registered as CustomEase 'air' at runtime too */
+  --air:cubic-bezier(0.22,0.61,0.20,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* spacer sections so the pin sits in a real page */
+.pad{height:80vh;display:flex;align-items:center;justify-content:center;color:var(--mid);
+     font-size:.8rem;letter-spacing:.3em;text-transform:uppercase}
+.pad.dark{background:var(--ink);color:#5b6b76}
+
+/* ============================================================
+   THE PINNED STAGE
+   The whole .frs becomes position:fixed during the pin. Inside:
+   a 2-column grid. Left = media stack, right = heading stack.
+   ============================================================ */
+.frs{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--paper)}
+.frs__grid{
+  position:absolute;inset:0;
+  display:grid;
+  grid-template-columns:48% 52%;     /* media slightly under half, like ref */
+  align-items:center;
+}
+
+/* ---- LEFT: media frame ---- */
+.frs__media{
+  position:relative;
+  height:84vh;
+  margin-left:0;                     /* bleeds off the left edge in ref */
+  border-radius:0 var(--radius) var(--radius) 0;
+  overflow:hidden;
+  background:var(--media-bg);
+  /* SIGNATURE: a concave bite on the right edge where the paper column
+     pushes into the media. Done with a radial mask, not an image. */
+  -webkit-mask:
+     radial-gradient(120px 160px at 100% 50%, transparent 99%, #000 100%) ,
+     linear-gradient(#000,#000);
+  -webkit-mask-composite:source-out;
+          mask-composite:subtract;
+}
+.frs__slide{
+  position:absolute;inset:0;
+  opacity:0;
+  will-change:transform,opacity;
+}
+.frs__slide.is-active{opacity:1}
+.frs__slide img{transform:scale(1.08);will-change:transform} /* slow ken-burns target */
+
+/* tiny step counter that lives in the gutter near the seam */
+.frs__count{
+  position:absolute;left:calc(48% - 14px);top:50%;z-index:5;
+  transform:translateY(-50%);
+  font-size:.62rem;letter-spacing:.18em;color:var(--mid);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---- RIGHT: heading stack (the ticker) ---- */
+.frs__text{position:relative;padding:0 var(--mx) 0 clamp(28px,5vw,80px);height:84vh;display:flex;align-items:center}
+.frs__stack{position:relative;width:100%;max-width:18ch}
+.frs__head{
+  position:absolute;left:0;top:50%;width:100%;
+  font-size:clamp(1.6rem,2.6vw,2.3rem);
+  font-weight:600;line-height:1.12;letter-spacing:-.01em;
+  color:var(--mid);                  /* default = preview/dim */
+  will-change:transform,opacity;
+  opacity:0;
+}
+/* each word is its own span so the accent can sweep through them */
+.frs__head .w{color:inherit;transition:none}
+.frs__head .w.lit{color:var(--accent)}
+.frs__head .w.done{color:var(--ink)}  /* word fully passed = solid ink */
+
+/* reduced motion: everything visible, no pin, simple stacked list */
+@media (prefers-reduced-motion: reduce){
+  .frs{height:auto}
+  .frs__grid{position:relative;grid-template-columns:1fr}
+  .frs__media{height:50vh;border-radius:var(--radius);-webkit-mask:none;mask:none}
+  .frs__slide{position:relative;opacity:1}
+  .frs__slide+.frs__slide{display:none}
+  .frs__text{height:auto;padding:32px var(--mx)}
+  .frs__stack{max-width:none}
+  .frs__head{position:relative;opacity:1;top:auto;transform:none;color:var(--ink);margin:.4em 0}
+}
+</style>
+</head>
+<body>
+
+<section class="pad">scroll down ↓</section>
+
+<!-- ============================================================
+     MARKUP CONTRACT
+     - .frs                       the section that gets pinned
+     - .frs__media > .frs__slide  one slide per step (img inside)
+     - .frs__text  > .frs__stack > .frs__head   one heading per step
+     Slides and heads MUST be the same count and same order.
+     ============================================================ -->
+<section class="frs" id="frs">
+  <div class="frs__grid">
+    <!-- LEFT -->
+    <div class="frs__media" id="frsMedia">
+      <div class="frs__slide is-active"><img src="https://images.unsplash.com/photo-1553413077-190dd305871c?w=1100&q=70" alt=""></div>
+      <div class="frs__slide"><img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1100&q=70" alt=""></div>
+      <div class="frs__slide"><img src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=1100&q=70" alt=""></div>
+      <div class="frs__slide"><img src="https://images.unsplash.com/photo-1565043666747-69f6646db940?w=1100&q=70" alt=""></div>
+      <div class="frs__slide"><img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=1100&q=70" alt=""></div>
+    </div>
+
+    <span class="frs__count" id="frsCount">01</span>
+
+    <!-- RIGHT -->
+    <div class="frs__text">
+      <div class="frs__stack" id="frsStack">
+        <h2 class="frs__head">Fleet Operating System. Intelligent routing from dispatch to patient doorstep</h2>
+        <h2 class="frs__head">Real-time GPS tracking across your entire fleet</h2>
+        <h2 class="frs__head">AI-powered safety monitoring with cabin and road-facing cameras</h2>
+        <h2 class="frs__head">Driver scorecards, behaviour analytics, and in-app coaching</h2>
+        <h2 class="frs__head">Seamless integrations with broker networks, EHR, and billing systems</h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pad dark">section after the pin</section>
+
+<script src="./component.js"></script>
+<script>
+  // boot the lab with explicit params (the reusable API)
+  document.addEventListener("DOMContentLoaded", () => {
+    FocusRenderSwitch.init("#frs", {
+      stepHold: 0.78,      // fraction of each step spent "held" before the swap
+      scrollPerStep: 0.9,  // vh of scroll distance per step (pin length = steps*this)
+      kenBurns: true,      // slow scale on the active slide
+      accent: "#1aa6c7",
+    });
+  });
+</script>
+</body>
+</html>
