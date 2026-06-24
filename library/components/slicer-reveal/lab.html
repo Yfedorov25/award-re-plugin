@@ -8,14 +8,16 @@
 <!--
   LAB: slicer-reveal (Slicer reveal · SAISEI horizontal slice)
   ==================================================================
-  Recorded 1:1 from apps/quadro/public/slide-lab/slc-h2-split-reveal.html.
-  Three full-height acts on a dominant cream field. Each CONTAINED render
-  (~42-50vw) is REVEALED by a hard-edged clip that opens LEFT->RIGHT (clip-path
-  inset(0 100% 0 0) -> inset(0 0 0 0)) with a light-line edge, then STAYS OPEN /
-  STATIC (stacked scroll — NO re-close). Acts alternate render side. The climax
-  act pairs the big render held open with a SMALL inset detail that slices open
-  beside it. NO placeholder plate — the slice opens on clean cream. Renders
-  point at renders/.
+  Recorded 1:1 from the RESTORED, owner-approved
+  apps/quadro/public/slide-lab/slc-h2-split-reveal.html — the CONTAINED ~50vw
+  calm version. Three tall beat-sections on a dominant cream field; each beat's
+  STICKY stage pins the CONTAINED render (~50vw) centred in the viewport while
+  it is REVEALED by a hard-edged clip that opens LEFT->RIGHT (clip-path
+  inset(0 100% 0 0) -> inset(0 0 0 0)) on a calm expo.out scrub, with a
+  light-line edge, then STAYS OPEN / STATIC (stacked scroll — NO re-close).
+  Beats alternate render side. The climax beat pairs the big render held open
+  with a SMALL inset detail that slices open beside it. NO placeholder plate —
+  the slice opens on clean cream. Renders point at renders/.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,17 +53,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
 <script src="component.js"></script>
 <script>
-  // the real QUADRO arc (3 acts), 1:1 with the slc-h2 recording: each act =
-  // a contained render that slices open L->R + an opposite serif text-feature.
-  // Acts alternate render side (left / right / left). Act 3 is the climax with
-  // the SMALL inset detail pairing.
+  // the real QUADRO arc (3 beats), 1:1 with the restored slc-h2 recording: each
+  // beat = a sticky-staged CONTAINED render (~50vw) that slices open L->R + an
+  // opposite serif text-feature. Beats alternate render side (left / right /
+  // left). Beat 3 is the climax with the SMALL inset detail pairing.
   SlicerReveal.init({
     stackSel: "#stack",
-    start:    "top 82%",   // reveal window start (act top just below the fold)
-    end:      "top 24%",   // reveal window end   (act centred)
-    scrub:    0.8,         // smoothing only — NOT snap
-    sliceDur: 0.62,        // slice duration on the act timeline (0..1)
-    parScale: 1.06,        // micro-parallax start scale (-> 1.0)
+    start:    "top top",      // sticky stage locks at the top
+    end:      "bottom bottom",// through the full tall band
+    scrub:    0.8,            // smoothing only — NOT snap
+    sliceDur: 0.55,           // slice span on the beat timeline (0..1)
+    parScale: 1.06,           // micro-parallax start scale (-> 1.0)
     acts: [
       { // ACT 0 — facade · render LEFT  (1:1 with slc-h2)
         img:"renders/day-front.webp", alt:"QUADRO фасад · ранкове світло",
@@ -95,7 +97,7 @@
 </script>
 
 <!-- ── __LAB_OK__ acceptance probe (library convention) ──
-     asserts: gsap + ScrollTrigger + SlicerReveal present, >=3 slabs + >=3 acts
+     asserts: gsap + ScrollTrigger + SlicerReveal present, >=3 slabs + >=3 beats
      built, >=3 scrubbed slicer ScrollTriggers (or reduced/narrow static path),
      and zero real console.error. component.js already sets __LAB_OK__ inside
      init(); this re-confirms it after load and adds the console-error gate. -->
@@ -111,13 +113,13 @@
       var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
       var narrow = matchMedia && matchMedia('(max-width:820px)').matches;
       var slabs = document.querySelectorAll('.slab').length;
-      var acts  = document.querySelectorAll('.act').length;
+      var beats = document.querySelectorAll('.beat').length;
       var sliced = (window.ScrollTrigger && ScrollTrigger.getAll)
         ? ScrollTrigger.getAll().filter(function(s){ return s.vars && s.vars.scrub; }).length : 0;
       var engineOK = !!(window.gsap && window.ScrollTrigger && window.SlicerReveal);
       var motionOK = (reduce || narrow)
-        ? (slabs >= 3 && acts >= 3)
-        : (slabs >= 3 && acts >= 3 && sliced >= 3);
+        ? (slabs >= 3 && beats >= 3)
+        : (slabs >= 3 && beats >= 3 && sliced >= 3);
       var ok = errs===0 && engineOK && motionOK && window.__LAB_OK__ === true;
       window.__LAB_OK__ = !!ok;
       if(!ok && tries<40){ tries++; return setTimeout(ready,150); }

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>slicer-reveal / vertical-line-sweep — top-down line-sweep lab</title>
+
+<!--
+  LAB: slicer-reveal / vertical-line-sweep (variant)
+  ==================================================================
+  variant-as-delta of slicer-reveal. Recorded 1:1 from owner-chosen
+  apps/quadro/public/slide-lab/slc-v3-topdown-line-sweep.html.
+
+  A luminous warm scan-line descends top->bottom and the render is REVEALED IN
+  ITS WAKE on a clean cream field — the VERTICAL cousin of the base horizontal
+  slice. Contained render + Fraunces serif. The base ../../component.css carries
+  the family cream-paper restraint + house ease "air" via ../../component.js;
+  variant.css carries the line-sweep engine CSS; variant.js carries the engine.
+  Renders point at renders/ (symlink to the QUADRO slide-lab renders).
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- base family palette/restraint (component.css) THEN the line-sweep engine css -->
+<link rel="stylesheet" href="../../component.css">
+<link rel="stylesheet" href="variant.css">
+</head>
+<body>
+
+<div class="prog"><div class="prog__fill" id="progFill"></div></div>
+
+<!-- ════════════ SCROLLY (animated) ════════════ -->
+<main class="scrolly" id="scrolly">
+
+  <!-- 1 · HERO ─ full-bleed, line paints the facade downward -->
+  <section class="panel" id="hero">
+    <div class="pin">
+      <div class="frame">
+        <div class="frame__img"><img src="renders/day-front.webp" alt="Фасад QUADRO удень" loading="eager" decoding="async" fetchpriority="high"></div>
+        <div class="frame__develop"></div>
+        <div class="frame__line"></div>
+      </div>
+      <div class="hero__veil"></div>
+      <div class="hero__meta">
+        <div class="hero__top">
+          <span class="eyebrow">QUADRO</span>
+          <span class="eyebrow">EST · 2025</span>
+        </div>
+        <div class="hero__rule"></div>
+        <div class="hero__title">
+          <div class="hero__ja">Приватний дім</div>
+          <h1 class="display hero__h1">QUADRO<br>HOUSE</h1>
+        </div>
+        <div class="hero__bot">
+          <span class="eyebrow">Над озером</span>
+          <span class="eyebrow">Резиденція · 4 квартири</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · CONTAINED COLUMN ─ cream dominant, tall portrait left, feature list right + small inset -->
+  <section class="panel" id="col">
+    <div class="pin">
+      <div class="frame col__frame">
+        <div class="frame__img" style="transform-origin:50% 44%"><img src="renders/day-34-portrait.webp" alt="Дім три чверті" loading="eager" decoding="async"></div>
+        <div class="frame__develop"></div>
+        <div class="frame__line"></div>
+      </div>
+      <div class="col__text">
+        <div class="meta">
+          <span class="eyebrow">Про дім</span>
+          <p class="meta__lead">Чотири квартири над водою. Власна тераса в кожної, тиша замість сусідів за стіною.</p>
+        </div>
+        <ul class="feats">
+          <li class="feat">
+            <div class="feat__t">Власний берег</div>
+            <p class="feat__b">Лінія води перед домом лишається вашою. Не двір на всіх, а свій ранок із кавою над озером.</p>
+          </li>
+          <li class="feat">
+            <div class="feat__t">Тераса в кожній квартирі</div>
+            <p class="feat__b">Зовнішня кімната під відкритим небом. Місце, де день починається повільно.</p>
+          </li>
+          <li class="feat">
+            <div class="feat__t">Тепла геометрія</div>
+            <p class="feat__b">Дерево, камінь і скло у спокійній палітрі. Дім, що старіє гарно.</p>
+          </li>
+        </ul>
+      </div>
+      <!-- small detail render INSIDE the text column → big+small two-scale pairing -->
+      <div class="frame col__inset">
+        <div class="frame__img" style="transform-origin:50% 50%"><img src="renders/macro-table.webp" alt="Деталь тераси" loading="eager" decoding="async"></div>
+        <div class="frame__develop"></div>
+        <div class="frame__line"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · BREATHER ─ full-bleed night reset, line paints the dusk -->
+  <section class="panel" id="breather">
+    <div class="pin">
+      <div class="frame">
+        <div class="frame__img" style="transform-origin:50% 50%"><img src="renders/night-front.webp" alt="Фасад уночі" loading="eager" decoding="async"></div>
+        <div class="frame__develop"></div>
+        <div class="frame__line"></div>
+      </div>
+      <div class="br__veil"></div>
+      <div class="br__cap">
+        <div class="eyebrow eyebrow--light br__eb">Коли місто гасне</div>
+        <p class="serif">Вода тримає останнє світло.<br>Дім світиться зсередини.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · SHOWPIECE ─ climax, biggest cream air, line lingers, image breathes -->
+  <section class="panel" id="show">
+    <div class="pin">
+      <div class="frame show__frame">
+        <div class="frame__img" style="transform-origin:50% 40%"><img src="renders/terrace-04.webp" alt="Золота тераса на заході" loading="eager" decoding="async"></div>
+        <div class="frame__develop"></div>
+        <div class="frame__line"></div>
+      </div>
+      <div class="show__cap">
+        <span class="eyebrow">Тераса · захід</span>
+        <span class="serif">Власний вечір</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · DIM QUOTE ─ page closes on type over a dimmed render -->
+  <section class="panel" id="quote">
+    <div class="pin">
+      <div class="frame">
+        <div class="frame__img" style="transform-origin:50% 46%"><img src="renders/night-34.webp" alt="Дім у блакитну годину" loading="eager" decoding="async"></div>
+        <div class="frame__develop"></div>
+        <div class="frame__line"></div>
+      </div>
+      <div class="q__veil"></div>
+      <div class="q__wrap">
+        <div>
+          <div class="q__mark serif">“</div>
+          <p class="q__body">Ми не шукали більшу квартиру. Ми шукали ранок, який належить нам.</p>
+          <div class="q__attr">
+            <div class="q__hair"></div>
+            <span class="eyebrow eyebrow--light">Власники · QUADRO HOUSE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUTRO ─ pure cream, page ends on type + air -->
+  <footer class="outro">
+    <div class="eyebrow outro__eb">Деталі</div>
+    <div class="award"><span class="award__n">Розташування</span><span class="award__d">Над озером, приватна лінія берега</span><span class="award__y">·</span></div>
+    <div class="award"><span class="award__n">Формат</span><span class="award__d">Чотири квартири, тераса в кожній</span><span class="award__y">2025</span></div>
+    <div class="award"><span class="award__n">Палітра</span><span class="award__d">Дерево · камінь · скло</span><span class="award__y">·</span></div>
+    <p class="outro__note">Візуалізації. Деталі уточнюйте у відділі продажу.</p>
+  </footer>
+
+</main>
+
+<!-- ════════════ STATIC (reduced-motion / narrow) — slices fully open ════════════ -->
+<div class="static" id="static">
+  <div class="s-hero">
+    <div class="frame"><div class="frame__img"><img src="renders/day-front.webp" alt="Фасад QUADRO удень"></div></div>
+    <div class="s-hero__veil"></div>
+    <div class="s-hero__txt">
+      <div class="eyebrow eyebrow--light">Приватний дім · над озером</div>
+      <h1 class="display" style="margin-top:.4rem">QUADRO HOUSE</h1>
+    </div>
+  </div>
+
+  <section class="s-sec">
+    <div class="eyebrow" style="margin-bottom:1.2rem">Про дім</div>
+    <div class="frame s-shot s-shot--port"><div class="frame__img"><img src="renders/day-34-portrait.webp" alt="Дім три чверті"></div></div>
+    <h3>Чотири квартири над водою. Власна тераса в кожної, тиша замість сусідів за стіною.</h3>
+    <div class="s-feat"><strong>Власний берег</strong><span>Свій ранок із кавою над озером.</span></div>
+    <div class="s-feat"><strong>Тераса в кожній квартирі</strong><span>Зовнішня кімната під відкритим небом.</span></div>
+    <div class="s-feat"><strong>Тепла геометрія</strong><span>Дерево, камінь і скло у спокійній палітрі.</span></div>
+  </section>
+
+  <section class="s-sec">
+    <div class="eyebrow" style="margin-bottom:1.2rem">Тераса · захід</div>
+    <div class="frame s-shot s-shot--port"><div class="frame__img"><img src="renders/terrace-04.webp" alt="Золота тераса на заході"></div></div>
+    <div class="frame s-shot s-shot--land"><div class="frame__img"><img src="renders/night-front.webp" alt="Фасад уночі"></div></div>
+    <h3 class="serif">Ми не шукали більшу квартиру. Ми шукали ранок, який належить нам.</h3>
+    <p>Власники · QUADRO HOUSE</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<!-- base family engine (registers "air", exposes window.SlicerReveal) THEN the variant engine -->
+<script src="../../component.js"></script>
+<script src="variant.js"></script>
+<script>
+  // the slc-v3 DOM is markup-driven; init() reads it and wires the line-sweeps.
+  SlicerLineSweep.init();
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (library convention) ──
+     asserts: gsap + ScrollTrigger + CustomEase + the SlicerLineSweep engine and
+     its base family (SlicerReveal) present, >=5 .frame__img + >=5 .frame__line
+     built (or reduced/narrow static path), and zero real console.error.
+     variant.js already sets __LAB_OK__ inside init(); this re-confirms it after
+     load and adds the console-error gate. -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){
+    var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++;
+    return _e.apply(console,arguments);
+  };
+  var tries=0;
+  function ready(){
+    try{
+      var imgs  = document.querySelectorAll('.frame__img').length;
+      var lines = document.querySelectorAll('.frame__line').length;
+      var engineOK = !!(window.gsap && window.ScrollTrigger && window.CustomEase
+        && window.SlicerLineSweep && window.SlicerReveal);
+      var domOK = (imgs >= 5 && lines >= 5);
+      var ok = errs===0 && engineOK && domOK && window.__LAB_OK__ === true;
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+</body>
+</html>

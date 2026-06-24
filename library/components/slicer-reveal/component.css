@@ -1,22 +1,28 @@
 /* ============================================================================
    slicer-reveal/component.css — Slicer reveal (SAISEI horizontal slice)
    ----------------------------------------------------------------------------
-   Recorded 1:1 from apps/quadro/public/slide-lab/slc-h2-split-reveal.html.
+   Recorded 1:1 from the RESTORED, owner-approved
+   apps/quadro/public/slide-lab/slc-h2-split-reveal.html — the CONTAINED ~50vw
+   calm version (NOT the broken full-screen variant).
 
-   SAISEI's contained-column slot: a big contained render (~42-50vw) sits to one
+   SAISEI's contained-column slot: a big CONTAINED render (~50vw) sits to one
    side, hugging the page with a small cream gutter; a confident Fraunces serif
    headline + meta column sits opposite on cream paper. Cream is the dominant
-   surface (>=55% of the viewport on every beat).
+   surface (>=55% of the viewport on every beat). The render is CONTAINED —
+   never full-bleed, never full-screen.
 
    THE STAR — the horizontal slicer:
      The render APPEARS via a hard-edged clip that opens LEFT->RIGHT.
        closed:  clip-path inset(0 100% 0 0)  (only a 1px seam shows)
-       open:    clip-path inset(0 0 0 0)     (full contained render)
+       open:    clip-path inset(0 0 0 0)     (full contained ~50vw render)
      A thin LIGHT line rides the leading edge while it travels; the image
      behind is STATIC in world-space (scale 1.06 -> 1.0 micro-parallax only).
+     Eased expo.out, scroll-scrubbed — calm, slow, premium. NOT a snap.
 
-   STACKED-SCROLL REVEAL (BUG-A FIX): three full-height acts stacked; each
-   slices open ONCE then STAYS OPEN / STATIC (no re-close), alternating side.
+   STACKED-SCROLL REVEAL (BUG-A FIX): each beat lives in its OWN tall section
+   (height:200vh) whose inner STICKY stage (.beat-stage, 100vh) pins the
+   contained render centred in the viewport while the band scrolls the slice
+   ONCE; then it STAYS OPEN / STATIC (no re-close), alternating render side.
 
    NO-PLATE FIX (BUG-B FIX): the render slot's backing colour is the PAGE CREAM
    (--render-back = --cream), never a dark/beige plate. Closed slot reads clean
@@ -63,7 +69,7 @@ body{font-family:var(--sans);color:var(--ink);
 .lead span,.tail span{opacity:.62}
 
 /* ============================================================
-   STACK — full-height acts; the page scrolls past them.
+   STACK — tall beat-sections; the page scrolls past them.
    ============================================================ */
 .stack{
   position:relative;width:100vw;
@@ -71,7 +77,7 @@ body{font-family:var(--sans);color:var(--ink);
 }
 
 /* clean cream backdrop with a barely-there warm vignette (NO words),
-   fixed behind the stack so every act sits on the same calm paper. */
+   fixed behind the stack so every beat sits on the same calm paper. */
 .bg{
   position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
@@ -116,32 +122,47 @@ body{font-family:var(--sans);color:var(--ink);
 }
 
 /* ============================================================
-   ACT — a single full-height beat: render zone | gutter | text zone.
-   Render side alternates by .act--right (render on the right).
+   BEAT SECTION — tall scroll band. A STICKY inner stage holds the
+   contained render centred in the viewport while the slice plays.
+   The render owns its own band (section taller than the viewport)
+   so a stayed-open render scrolls away above before the next opens.
    ============================================================ */
-.act{
+.beat{
   position:relative;z-index:3;
-  width:100%;min-height:100vh;
+  /* tall band: gives the scrubbed slice a generous scroll distance and
+     keeps each render in its OWN window (zero overlap with the next). */
+  height:200vh;
+}
+/* the STICKY stage is exactly one viewport tall and pins the contained
+   render in view while its section's band scrolls. NOT full-bleed:
+   the render inside is min(86vh,720px) with cream air around it. */
+.beat-stage{
+  position:sticky;top:0;
+  width:100%;height:100vh;
   display:grid;
   grid-template-columns: var(--mx) minmax(0,50fr) clamp(40px,6vw,96px) minmax(0,42fr) var(--mx);
   /*                      [gutter] [   RENDER   ]  [center axis ]   [  TEXT  ]  [gutter] */
   align-items:center;
 }
 /* mirror: render on the right, text on the left (editorial alternation) */
-.act--right{
+.beat--right .beat-stage{
   grid-template-columns: var(--mx) minmax(0,42fr) clamp(40px,6vw,96px) minmax(0,50fr) var(--mx);
 }
-.act--right .slab{grid-column:4;}
-.act--right .text-col{grid-column:2;}
-.act--right .inset{grid-column:2;}
+.beat--right .render-col{grid-column:4;}
+.beat--right .text-col{grid-column:2;}
+.beat--right .inset{grid-column:2;}
 
-/* ---------- RENDER ZONE (contained ~42-50vw) ---------- */
+/* ---------- RENDER ZONE (contained ~50vw) ---------- */
+.render-col{
+  grid-column:2;grid-row:1;
+  position:relative;
+  height:min(86vh,720px);
+}
+
 /* the render = a hard-clipped slab; it travels closed->open L->R ONCE,
    then STAYS OPEN. BUG-B: backing = page cream, never a dark plate. */
 .slab{
-  grid-column:2;grid-row:1;
-  position:relative;
-  height:min(82vh,700px);
+  position:absolute;inset:0;z-index:1;
   overflow:hidden;
   background:var(--render-back);    /* BUG-B: clean cream, NO dark plate */
   /* CLOSED by default: clipped from the right to a 0-width sliver at left */
@@ -219,7 +240,9 @@ body{font-family:var(--sans);color:var(--ink);
   grid-column:4;grid-row:1;
   position:relative;
   align-self:center;
-  height:min(82vh,700px);
+  /* match the render zone height so the centred beat text aligns vertically
+     with the centre of the tall render (SAISEI frame_05). */
+  height:min(86vh,720px);
   display:flex;flex-direction:column;justify-content:center;
   max-width:36ch;
 }
@@ -255,15 +278,19 @@ h2.beat-head .ln > span{display:block;will-change:transform;}
 
 /* ============================================================
    STATIC / NARROW FALLBACK (reduced-motion OR <=820px):
-   no scrub, slices FULLY OPEN, legible stacked layout.
+   no sticky, slices FULLY OPEN, legible stacked layout.
    ============================================================ */
-.is-static .act{
-  display:block;min-height:auto;padding:12vh var(--mx) 10vh;
+.is-static .beat{height:auto;}
+.is-static .beat-stage{
+  position:relative;top:auto;height:auto;display:block;
+  padding:12vh var(--mx) 10vh;
 }
-.is-static .slab{
+.is-static .render-col{
   grid-column:auto;position:relative;height:auto;width:100%;
   aspect-ratio:4 / 3;margin:0 0 6vh;
-  clip-path:inset(0 0 0 0)!important; /* fully open */
+}
+.is-static .slab{
+  position:absolute;inset:0;clip-path:inset(0 0 0 0)!important; /* fully open */
   background:var(--render-back);
 }
 .is-static .slab img{transform:none!important;}

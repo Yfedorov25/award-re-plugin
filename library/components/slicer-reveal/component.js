@@ -1,29 +1,33 @@
 /* ============================================================================
    slicer-reveal/component.js — Slicer reveal (SAISEI horizontal slice)
    ----------------------------------------------------------------------------
-   Recorded 1:1 from apps/quadro/public/slide-lab/slc-h2-split-reveal.html
-   (the owner-approved, now-fixed "slc-h2 · split slicer reveal · horizontal ·
-   cream" prototype).
+   Recorded 1:1 from the RESTORED, owner-approved
+   apps/quadro/public/slide-lab/slc-h2-split-reveal.html — the CONTAINED ~50vw
+   calm version (NOT the broken full-screen variant).
 
    THE TECHNIQUE — a SAISEI-grade SLICER REVEAL (horizontal slice).
-   Each CONTAINED render (~42-50vw) sits on a dominant cream field and is
-   REVEALED by a hard-edged clip that opens LEFT->RIGHT:
+   Each CONTAINED render (~50vw) sits on a dominant cream field and is REVEALED
+   by a hard-edged clip that opens LEFT->RIGHT:
        closed:  clip-path inset(0 100% 0 0)   (a 1px seam on clean cream)
-       open:    clip-path inset(0 0 0 0)       (full contained render)
+       open:    clip-path inset(0 0 0 0)       (full contained ~50vw render)
    A thin LIGHT line rides the leading edge while it travels; the image behind
    is STATIC in world-space (scale 1.06 -> 1.0 micro-parallax only). Eased
-   expo.out, scroll-scrubbed. As the render opens, the opposite serif text-
-   column resolves (eyebrow up, masked lines rise, body + meta up).
+   expo.out, scroll-scrubbed (scrub:0.8) — calm, slow, premium, opening over a
+   generous scroll band. NOT a snap. As the render opens, the opposite serif
+   text-column resolves (eyebrow up, masked lines rise, body + meta up).
 
    ── STACKED NO-RECLOSE SCROLL (BUG-A FIX — preserved EXACTLY) ───────────────
-   The page is THREE full-height acts stacked vertically. Each act owns its OWN
-   scrubbed ScrollTrigger (start "top 82%", end "top 24%"). As an act enters,
-   its render slices open ONCE, then STAYS OPEN / STATIC. Scrolling DOWN brings
-   the next act up; the prior render NEVER re-closes. There is NO re-cover
-   tween. Reverse scroll re-runs the SAME eased tween backward (natural scrub
-   symmetry, not a forced re-close). DO NOT reintroduce a re-close.
-   ZERO image overlap: each act is its own full-height band, so only one render
-   is ever in its reveal window — no two render PHOTOS mid-slice at once.
+   The page is THREE tall beat-sections (height:200vh) stacked vertically. Each
+   section's inner STICKY stage (.beat-stage, 100vh) pins the contained render
+   centred in the viewport while its band scrolls. Each beat owns its OWN
+   scrubbed ScrollTrigger (start "top top", end "bottom bottom"); the slice
+   plays ONCE over normalized 0.0 -> 0.55 of the band (~0.55 viewport of real
+   scroll — calm, expo.out). Once open it STAYS OPEN / STATIC; the prior render
+   simply scrolls away above as the next sticky stage scrolls in. There is NO
+   re-cover tween. Reverse scroll re-runs the SAME eased tween backward (natural
+   scrub symmetry, not a forced re-close). DO NOT reintroduce a re-close.
+   ZERO image overlap: each beat is its own tall band + sticky stage, so only
+   one contained render is ever in its reveal window — no two PHOTOS mid-slice.
 
    ── NO-PLATE FIX (BUG-B FIX — preserved EXACTLY) ───────────────────────────
    The slab/inset backing IS the page cream (--render-back:--cream), never a
@@ -32,9 +36,9 @@
    opens on a PAINTED image — no grey/beige placeholder rectangle ever shows.
 
    ── CLIMAX big+small pairing ───────────────────────────────────────────────
-   The last act is the climax: its main render slices open and HOLDS, then a
-   SMALL inset detail render slices open L->R beside it (scheduled AFTER the
-   main is full — never two mid-slice at the same instant). SAISEI two-scale.
+   The last beat is the climax: its main render slices open and HOLDS, then a
+   SMALL inset detail render slices open L->R beside it (scheduled at 0.62 —
+   AFTER the main is full at sliceDur — never two mid-slice at the same instant).
 
    STACK: vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase. No build step.
    Motion is transform / opacity / clip-path ONLY on scrub. No mix-blend /
@@ -42,7 +46,7 @@
 
    USAGE — window-global IIFE, faithful entry:
      SlicerReveal.init({
-       stackSel: '#stack',          // the cream stack that holds the acts
+       stackSel: '#stack',          // the cream stack that holds the beats
        acts: [{                      // builds the slc-h2 DOM if the stack is empty
          img, alt, side:'left'|'right',   // contained render + which side it sits
          chip,                            // on-render eyebrow chip (e.g. "ФАСАД · РАНОК")
@@ -50,13 +54,13 @@
          inset:{ img, alt, cap },         // climax act only: the small detail render
          climax:false                     // true on the held final act
        }, ...],
-       start:    'top 82%',          // per-act reveal window start (top below fold)
-       end:      'top 24%',          // per-act reveal window end   (act centred)
+       start:    'top top',          // per-beat reveal window start (sticky locks)
+       end:      'bottom bottom',    // per-beat reveal window end   (full tall band)
        scrub:    0.8,                // ScrollTrigger smoothing (NOT snap)
-       sliceDur: 0.62,              // slice duration on the act timeline (0..1)
+       sliceDur: 0.55,              // slice span on the beat timeline (0..1)
        parScale: 1.06               // micro-parallax start scale (-> 1.0)
      });
-   If `acts` is omitted (or the stack already holds .act>.slab markup), the
+   If `acts` is omitted (or the stack already holds .beat>.slab markup), the
    engine drives whatever slc-h2-shaped DOM is present (the SMALLER faithful
    change). Either way the motion math below is byte-faithful to slc-h2.
    ========================================================================== */
@@ -70,21 +74,24 @@
   /* eyebrow/lines/chip/cap may carry the slc-h2 <br>/<em> markup — pass through. */
   function rich(s){ return (s == null) ? "" : String(s); }
 
-  /* Build one .act 1:1 with slc-h2 when the stack is empty. The caption text
-     lives in .text-col opposite the render; the render is a .slab clip box. */
-  function buildAct(d, i){
+  /* Build one .beat 1:1 with slc-h2 when the stack is empty. The contained
+     render lives in .render-col > .slab inside the sticky .beat-stage; the
+     caption text lives in .text-col opposite it. */
+  function buildBeat(d, i){
     var right  = (d.side === "right");
     var climax = !!d.climax;
     var lns = (d.lines || []).map(function(t){
       return '<span class="ln"><span>' + rich(t) + '</span></span>';
     }).join("");
-    var slab = ''
-      + '<figure class="slab" data-slab="' + i + '">'
-      +   '<img src="' + esc(d.img) + '" alt="' + esc(d.alt || "") + '" loading="eager" decoding="async">'
-      +   '<div class="grad"></div>'
-      +   '<div class="edge"></div>'
-      +   (d.chip ? '<div class="chip">' + rich(d.chip) + '</div>' : '')
-      + '</figure>';
+    var renderCol = ''
+      + '<div class="render-col">'
+      +   '<figure class="slab" data-slab="' + i + '">'
+      +     '<img src="' + esc(d.img) + '" alt="' + esc(d.alt || "") + '" loading="eager" decoding="async">'
+      +     '<div class="grad"></div>'
+      +     '<div class="edge"></div>'
+      +     (d.chip ? '<div class="chip">' + rich(d.chip) + '</div>' : '')
+      +   '</figure>'
+      + '</div>';
     var text = ''
       + '<div class="text-col">'
       +   (d.eyebrow ? '<span class="eyebrow">' + rich(d.eyebrow) + '</span>' : '')
@@ -99,8 +106,9 @@
         +   (d.inset.cap ? '<div class="cap">' + rich(d.inset.cap) + '</div>' : '')
         + '</figure>'
       : '';
-    return '<section class="act' + (right ? ' act--right' : '') + '" data-act="' + i + '">'
-      + slab + text + inset + '</section>';
+    return '<section class="beat' + (right ? ' beat--right' : '') + '" data-beat="' + i + '">'
+      + '<div class="beat-stage">' + renderCol + text + inset + '</div>'
+      + '</section>';
   }
 
   function init(opts){
@@ -108,10 +116,10 @@
     var cfg = {
       stackSel: opts.stackSel || "#stack",
       acts:     opts.acts     || null,
-      start:    opts.start    != null ? opts.start    : "top 82%",
-      end:      opts.end      != null ? opts.end      : "top 24%",
+      start:    opts.start    != null ? opts.start    : "top top",       // sticky stage locks at the top
+      end:      opts.end      != null ? opts.end      : "bottom bottom",  // through the full tall band
       scrub:    opts.scrub    != null ? opts.scrub    : 0.8,    // smoothing, NOT snap
-      sliceDur: opts.sliceDur != null ? opts.sliceDur : 0.62,   // slice duration (0..1)
+      sliceDur: opts.sliceDur != null ? opts.sliceDur : 0.55,   // slice span (0..1)
       parScale: opts.parScale != null ? opts.parScale : 1.06    // micro-parallax start scale
     };
 
@@ -127,15 +135,19 @@
       var E_AIR = global.CustomEase
         ? (gsap.parseEase("air") || CustomEase.create("air", "0.25,0.74,0.22,0.99"))
         : "power3.out";
-      var E_SLICE = "expo.out"; // the slice decelerates into its final edge
+      var E_SLICE = "expo.out"; // the slice decelerates into its final edge — calm, slow, premium
 
       var stackEl = typeof cfg.stackSel === "string" ? document.querySelector(cfg.stackSel) : cfg.stackSel;
       if (!stackEl) { global.__LAB_OK__ = false; return null; }
 
-      /* build the three acts from data ONLY if the stack is empty — otherwise
+      /* build the three beats from data ONLY if the stack is empty — otherwise
          drive the slc-h2-shaped DOM already present (the SMALLER faithful change). */
-      if (cfg.acts && cfg.acts.length && stackEl.querySelectorAll(".act").length === 0) {
-        stackEl.insertAdjacentHTML("beforeend", cfg.acts.map(buildAct).join(""));
+      if (cfg.acts && cfg.acts.length && stackEl.querySelectorAll(".beat").length === 0) {
+        /* inject before the .prog cue if present, else at the end */
+        var progWrap = stackEl.querySelector(".prog");
+        var html = cfg.acts.map(buildBeat).join("");
+        if (progWrap) progWrap.insertAdjacentHTML("beforebegin", html);
+        else stackEl.insertAdjacentHTML("beforeend", html);
         /* BUG-B: eager-preload + decode renders so the slice opens on a painted
            image — never a grey/beige placeholder rectangle. */
         cfg.acts.forEach(function(d){
@@ -146,7 +158,7 @@
         });
       }
 
-      var acts   = gsap.utils.toArray(stackEl.querySelectorAll(".act"));
+      var beats  = gsap.utils.toArray(stackEl.querySelectorAll(".beat"));
       var slabs  = gsap.utils.toArray(stackEl.querySelectorAll(".slab"));
       var imgs   = slabs.map(function(s){ return s.querySelector("img"); });
       var edges  = slabs.map(function(s){ return s.querySelector(".edge"); });
@@ -156,30 +168,30 @@
       var progEl = stackEl.querySelector("#prog") || stackEl.querySelector(".prog i");
 
       var slabsBuilt = slabs.length;
-      var actsBuilt  = acts.length;
-      var N = actsBuilt;
+      var beatsBuilt = beats.length;
+      var N = beatsBuilt;
 
       var reduce = global.matchMedia && matchMedia("(prefers-reduced-motion:reduce)").matches;
       var narrow = global.matchMedia && matchMedia("(max-width:820px)").matches;
 
-      /* per-act text element groups, for the rise-and-fade choreography */
-      function parts(actEl){
+      /* per-beat text element groups, for the rise-and-fade choreography */
+      function parts(beatEl){
         return {
-          eyebrow: actEl.querySelector(".eyebrow"),
-          lns: gsap.utils.toArray(actEl.querySelectorAll("h2.beat-head .ln > span")),
-          body: actEl.querySelector(".beat-body"),
-          meta: actEl.querySelector(".beat-meta")
+          eyebrow: beatEl.querySelector(".eyebrow"),
+          lns: gsap.utils.toArray(beatEl.querySelectorAll("h2.beat-head .ln > span")),
+          body: beatEl.querySelector(".beat-body"),
+          meta: beatEl.querySelector(".beat-meta")
         };
       }
-      var P = acts.map(parts);
+      var P = beats.map(parts);
 
       /* ============================================================
-         STATIC PATH — reduced-motion OR narrow: no scrub, slices OPEN.
+         STATIC PATH — reduced-motion OR narrow: no sticky, slices OPEN.
          ============================================================ */
       if (reduce || narrow) {
         stackEl.classList.add("is-static");
-        global.__LAB_OK__ = (slabsBuilt >= 3) && (actsBuilt >= 3);
-        if (global.console) console.log("[slicer-reveal] static path; slabs:", slabsBuilt, "acts:", actsBuilt, "__LAB_OK__:", global.__LAB_OK__);
+        global.__LAB_OK__ = (slabsBuilt >= 3) && (beatsBuilt >= 3);
+        if (global.console) console.log("[slicer-reveal] static path; slabs:", slabsBuilt, "beats:", beatsBuilt, "__LAB_OK__:", global.__LAB_OK__);
         return { reduced:true, n:N, refresh:function(){ ScrollTrigger.refresh(); }, kill:function(){} };
       }
 
@@ -205,66 +217,75 @@
       setStart();
 
       /* ============================================================
-         STACKED-SCROLL REVEAL (BUG-A FIX)
+         STACKED-SCROLL REVEAL — the ONE behaviour change (no re-close)
          ------------------------------------------------------------
-         Each act gets its OWN scrubbed ScrollTrigger. As the act scrolls
-         up into the viewport, a short timeline:
-           - slices the render OPEN L->R (clip 100% -> 0), snapping pixel-
-             exact full at the end (kills the expo asymptote),
-           - rides the light edge across,
-           - micro-parallaxes the image 1.06 -> 1.0,
-           - resolves the text (eyebrow / masked lines / body / meta).
-         Once open, the render STAYS OPEN / STATIC. There is NO re-cover
-         tween — scrolling DOWN simply brings the next act into view; the
-         prior act remains fully revealed above it. Reverse scroll re-runs
-         the same eased tween backward (symmetric, never "snaps shut").
-         ZERO OVERLAP: each act is its own full-height band, so only one
-         render is ever in the active reveal window of the viewport.
+         Each beat gets its OWN scrubbed ScrollTrigger over its tall
+         section. The sticky stage pins the contained render in the
+         viewport while the band scrolls; the slice plays ONLY across
+         normalized 0.0 -> sliceDur (~0.55) of the band — generously,
+         over ~0.55 viewport of REAL scroll — so it opens SLOWLY and
+         CALMLY with E_SLICE = expo.out (scrub:0.8). Once open, the
+         render STAYS OPEN / STATIC for the rest of the band; there is
+         NO re-cover tween. Scrolling DOWN carries the opened render
+         away above as the next sticky stage scrolls in.
+         ZERO OVERLAP: each beat owns its own tall band + sticky stage,
+         so only one contained render is ever in view at a time.
          ============================================================ */
       var timelines = [];
-      function buildActTl(i){
+      function buildBeatTl(i){
         var slab = slabs[i], img = imgs[i], edge = edges[i], p = P[i];
-        var isClimax = (i === acts.length - 1) && !!inset;
+        var isClimax = (i === beats.length - 1) && !!inset;
 
-        var at = gsap.timeline({
+        // trigger spans the section's scrollable band. The sticky stage pins
+        // the contained render in the viewport while the band scrolls, so
+        // normalized progress maps to ~one viewport of real scroll — the slice
+        // opens over a generous ~0.55vp. Calm, scrubbed, no snap.
+        var bt = gsap.timeline({
           defaults:{ ease:"none" },
           scrollTrigger:{
-            trigger: acts[i],
-            start: cfg.start,
-            end:   cfg.end,
+            trigger: beats[i],
+            start: cfg.start,      // begin when the sticky stage locks at the top
+            end:   cfg.end,        // through the full tall band
             scrub: cfg.scrub,
             invalidateOnRefresh:true
           }
         });
 
-        // light edge appears as travel begins, rides the edge, fades at full open
-        at.to(edge, { opacity:1, duration:0.02, ease:"none" }, 0.0);
-        at.to(slab, { clipPath:"inset(0 0% 0 0)", duration:cfg.sliceDur, ease:E_SLICE }, 0.0);
-        at.to(img,  { scale:1.0, duration:0.70, ease:E_AIR }, 0.0);
+        // light edge appears as travel begins, rides the leading edge, fades at full open.
+        bt.to(edge, { opacity:1, duration:0.02, ease:"none" }, 0.0);
+        // THE SLICE — generous expo.out over normalized 0.0 -> sliceDur of the
+        // band. The band's scrub-travel is ~one viewport (100vh), so the slice
+        // opens over ~0.55 viewport of real scroll => slow, calm, premium. NOT
+        // a snap, NOT hyper-fast. (Matches the restored unhurried expo.out open.)
+        bt.to(slab, { clipPath:"inset(0 0% 0 0)", duration:cfg.sliceDur, ease:E_SLICE }, 0.0);
+        bt.to(img,  { scale:1.0, duration:0.62, ease:E_AIR }, 0.0);
         // SNAP to exactly-full the instant the slice finishes — kills the expo
         // asymptotic tail so the render is pixel-exact open (no perpetual 99.5%).
-        at.set(slab, { clipPath:"inset(0 0 0 0)" }, cfg.sliceDur);
-        at.to(edge, { opacity:0, duration:0.06, ease:"none" }, 0.60);
+        bt.set(slab, { clipPath:"inset(0 0 0 0)" }, cfg.sliceDur);
+        bt.to(edge, { opacity:0, duration:0.05, ease:"none" }, cfg.sliceDur - 0.03);
 
-        // text resolves WITH the slice
-        at.to(p.eyebrow, { autoAlpha:1, y:0, duration:0.16, ease:E_AIR }, 0.10);
-        if (p.lns[0]) at.to(p.lns[0], { yPercent:0, duration:0.26, ease:E_AIR }, 0.16);
-        if (p.lns[1]) at.to(p.lns[1], { yPercent:0, duration:0.26, ease:E_AIR }, 0.24);
-        at.to(p.body,    { autoAlpha:1, y:0, duration:0.22, ease:E_AIR }, 0.34);
-        at.to(p.meta,    { autoAlpha:1, y:0, duration:0.18, ease:E_AIR }, 0.44);
+        // text resolves WITH the slice (rise from mask + fade up)
+        bt.to(p.eyebrow, { autoAlpha:1, y:0, duration:0.12, ease:E_AIR }, 0.10);
+        if (p.lns[0]) bt.to(p.lns[0], { yPercent:0, duration:0.20, ease:E_AIR }, 0.15);
+        if (p.lns[1]) bt.to(p.lns[1], { yPercent:0, duration:0.20, ease:E_AIR }, 0.22);
+        bt.to(p.body,    { autoAlpha:1, y:0, duration:0.18, ease:E_AIR }, 0.30);
+        bt.to(p.meta,    { autoAlpha:1, y:0, duration:0.14, ease:E_AIR }, 0.40);
 
-        // climax pairing: the small inset slices open AFTER the main is full,
-        // beside the settled main render (never mid-slice at the same instant).
+        // climax pairing: the small inset slices open AFTER the main is
+        // statically full, beside the settled main render (the two never slice
+        // at the same instant).
         if (isClimax){
-          at.to(insetEdge, { opacity:1, duration:0.02, ease:"none" }, 0.66);
-          at.to(inset,     { clipPath:"inset(0 0% 0 0)", duration:0.26, ease:E_SLICE }, 0.66);
-          at.to(insetImg,  { scale:1.0, duration:0.30, ease:E_AIR }, 0.66);
-          at.set(inset,    { clipPath:"inset(0 0 0 0)" }, 0.92);
-          at.to(insetEdge, { opacity:0, duration:0.06, ease:"none" }, 0.90);
+          bt.to(insetEdge, { opacity:1, duration:0.02, ease:"none" }, 0.62);
+          bt.to(inset,     { clipPath:"inset(0 0% 0 0)", duration:0.22, ease:E_SLICE }, 0.62);
+          bt.to(insetImg,  { scale:1.0, duration:0.26, ease:E_AIR }, 0.62);
+          bt.set(inset,    { clipPath:"inset(0 0 0 0)" }, 0.84);
+          bt.to(insetEdge, { opacity:0, duration:0.05, ease:"none" }, 0.82);
+          // final micro-settle: main render breathes a hair (deep-plane life)
+          bt.to(img, { scale:1.012, duration:0.12, ease:E_AIR }, 0.88);
         }
-        timelines.push(at);
+        timelines.push(bt);
       }
-      acts.forEach(function(_, i){ buildActTl(i); });
+      beats.forEach(function(_, i){ buildBeatTl(i); });
 
       /* ----- thin filmic progress line across the whole stack ----- */
       if (progEl) {
@@ -292,13 +313,13 @@
       ScrollTrigger.refresh();
 
       /* ============================================================
-         PROBE — engine wired + >=3 slabs + >=3 acts + scrubbed slicers built.
+         PROBE — engine wired + >=3 slabs + >=3 beats + scrubbed slicers built.
          ============================================================ */
       var sliced = ScrollTrigger.getAll().filter(function(s){
         return s.vars && s.vars.scrub;
       }).length;
-      global.__LAB_OK__ = (slabsBuilt >= 3) && (actsBuilt >= 3) && (sliced >= 3);
-      if (global.console) console.log("[slicer-reveal] scrubbed-slicers:", sliced, "slabs:", slabsBuilt, "acts:", actsBuilt, "__LAB_OK__:", global.__LAB_OK__);
+      global.__LAB_OK__ = (slabsBuilt >= 3) && (beatsBuilt >= 3) && (sliced >= 3);
+      if (global.console) console.log("[slicer-reveal] scrubbed-slicers:", sliced, "slabs:", slabsBuilt, "beats:", beatsBuilt, "__LAB_OK__:", global.__LAB_OK__);
 
       return {
         n: N,
@@ -313,8 +334,8 @@
       try {
         if (global.gsap && global.ScrollTrigger) {
           var okSlabs = document.querySelectorAll(".slab").length >= 3;
-          var okActs  = document.querySelectorAll(".act").length >= 3;
-          global.__LAB_OK__ = okSlabs && okActs;
+          var okBeats = document.querySelectorAll(".beat").length >= 3;
+          global.__LAB_OK__ = okSlabs && okBeats;
         } else {
           global.__LAB_OK__ = false;
         }
