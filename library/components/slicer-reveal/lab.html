@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>slicer-reveal — SAISEI horizontal slice lab</title>
+
+<!--
+  LAB: slicer-reveal (Slicer reveal · SAISEI horizontal slice)
+  ==================================================================
+  Recorded 1:1 from apps/quadro/public/slide-lab/slc-h2-split-reveal.html.
+  Three full-height acts on a dominant cream field. Each CONTAINED render
+  (~42-50vw) is REVEALED by a hard-edged clip that opens LEFT->RIGHT (clip-path
+  inset(0 100% 0 0) -> inset(0 0 0 0)) with a light-line edge, then STAYS OPEN /
+  STATIC (stacked scroll — NO re-close). Acts alternate render side. The climax
+  act pairs the big render held open with a SMALL inset detail that slices open
+  beside it. NO placeholder plate — the slice opens on clean cream. Renders
+  point at renders/.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="component.css">
+</head>
+<body>
+
+<div class="lead"><span>скрол ↓ · slicer-reveal · SAISEI спліт-слайсер</span></div>
+
+<!-- ===== STACK — SlicerReveal.init() builds the three acts from the data below.
+     Each render slices open L->R once and stays open. ===== -->
+<main class="stack" id="stack">
+  <div class="bg" aria-hidden="true"></div>
+
+  <div class="brand">QUADRO</div>
+  <div class="brand-rule" aria-hidden="true"></div>
+  <div class="est">EST · 2025</div>
+  <div class="foot-l">КОРЕЯ · ВІННИЦЯ</div>
+  <div class="index">02 / 09</div>
+
+  <!-- acts are injected here by SlicerReveal.init() -->
+
+  <div class="prog"><i id="prog"></i></div>
+</main>
+
+<div class="tail"><span>далі ↓</span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="component.js"></script>
+<script>
+  // the real QUADRO arc (3 acts), 1:1 with the slc-h2 recording: each act =
+  // a contained render that slices open L->R + an opposite serif text-feature.
+  // Acts alternate render side (left / right / left). Act 3 is the climax with
+  // the SMALL inset detail pairing.
+  SlicerReveal.init({
+    stackSel: "#stack",
+    start:    "top 82%",   // reveal window start (act top just below the fold)
+    end:      "top 24%",   // reveal window end   (act centred)
+    scrub:    0.8,         // smoothing only — NOT snap
+    sliceDur: 0.62,        // slice duration on the act timeline (0..1)
+    parScale: 1.06,        // micro-parallax start scale (-> 1.0)
+    acts: [
+      { // ACT 0 — facade · render LEFT  (1:1 with slc-h2)
+        img:"renders/day-front.webp", alt:"QUADRO фасад · ранкове світло",
+        side:"left", chip:"ФАСАД · РАНОК",
+        eyebrow:"Дім",
+        lines:["Не квартира.", "Цілий дім."],
+        body:"Власні стіни, власний вхід, власне небо над головою. Те, що неможливо купити поверхом вище.",
+        meta:"QUADRO · ВЛАСНИЙ ОБʼЄМ"
+      },
+      { // ACT 1 — terrace · render RIGHT (mirror)  (1:1 with slc-h2)
+        img:"renders/terrace-02.webp", alt:"Власна тераса QUADRO",
+        side:"right", chip:"ВЛАСНА ТЕРАСА · ДЕНЬ",
+        eyebrow:"Тераса",
+        lines:["Кава над водою.", "Тиша тільки твоя."],
+        body:"Власна тераса з краєвидом, де ранок починається без чужих голосів за стіною.",
+        meta:"ВЛАСНА ТЕРАСА · ВЛАСНИЙ БЕРЕГ"
+      },
+      { // ACT 2 — CLIMAX — blue hour + inset pairing · render LEFT  (1:1 with slc-h2)
+        img:"renders/night-front.webp", alt:"QUADRO у синю годину",
+        side:"left", chip:"ОБʼЄМ · СИНЯ ГОДИНА",
+        eyebrow:"Вечір",
+        lines:["Світло вмикається.", "Це вже твій дім."],
+        body:"Синя година, тепле вікно, і місце, куди хочеться повертатися. Деталі, які відчуваєш щодня.",
+        meta:"СИНЯ ГОДИНА · QUADRO",
+        climax:true,
+        inset:{ img:"renders/macro-table.webp", alt:"Деталь тераси QUADRO", cap:"ДЕТАЛЬ · ТЕРАСА" }
+      }
+    ]
+  });
+  window.addEventListener("resize", function(){ if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (library convention) ──
+     asserts: gsap + ScrollTrigger + SlicerReveal present, >=3 slabs + >=3 acts
+     built, >=3 scrubbed slicer ScrollTriggers (or reduced/narrow static path),
+     and zero real console.error. component.js already sets __LAB_OK__ inside
+     init(); this re-confirms it after load and adds the console-error gate. -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){
+    var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++;
+    return _e.apply(console,arguments);
+  };
+  var tries=0;
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var narrow = matchMedia && matchMedia('(max-width:820px)').matches;
+      var slabs = document.querySelectorAll('.slab').length;
+      var acts  = document.querySelectorAll('.act').length;
+      var sliced = (window.ScrollTrigger && ScrollTrigger.getAll)
+        ? ScrollTrigger.getAll().filter(function(s){ return s.vars && s.vars.scrub; }).length : 0;
+      var engineOK = !!(window.gsap && window.ScrollTrigger && window.SlicerReveal);
+      var motionOK = (reduce || narrow)
+        ? (slabs >= 3 && acts >= 3)
+        : (slabs >= 3 && acts >= 3 && sliced >= 3);
+      var ok = errs===0 && engineOK && motionOK && window.__LAB_OK__ === true;
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+</body>
+</html>

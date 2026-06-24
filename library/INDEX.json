@@ -487,6 +487,82 @@
     "_path": "library/components/puzzle-text/",
     "_variantsResolved": []
   },
+  "slicer-reveal": {
+    "id": "slicer-reveal",
+    "name": "Slicer reveal (SAISEI horizontal slice)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "SlicerReveal.init({ stackSel:'#stack', acts:[{ img, alt, side:'left'|'right', chip, eyebrow, lines:[a,b], body, meta, inset?:{ img, alt, cap }, climax?:bool }], start:'top 82%', end:'top 24%', scrub:0.8, sliceDur:0.62, parScale:1.06 })   # The REAL slc-h2 entry is an inline IIFE that reads three .act/.slab bands already in the DOM and builds one scrubbed slicer timeline each. Recorded faithfully as a window-global init(opts). If acts[] is omitted (or the stack already holds .act>.slab markup) the engine drives whatever slc-h2-shaped DOM is present (.stack > .act[.act--right] > .slab > img/.edge/.chip + .text-col, climax act carries #inset) — the SMALLER faithful change. The motion math (per-act clip-path inset(0 100% 0 0) -> inset(0 0 0 0) L->R slice on a scrubbed ScrollTrigger, the pixel-snap that kills the expo asymptote, the stacked NO-RECLOSE logic, the 1.06->1.0 micro-parallax, the light-edge ride, the masked-line text rise, the climax big+small inset pairing, reduced-motion / narrow static path) is byte-faithful to slc-h2 and is NOT rewritten to fit this signature.",
+      "module": "iife",
+      "returns": "{ n, timelines, refresh, kill } | { reduced:true, n, refresh, kill } | null"
+    },
+    "meaning": {
+      "what": "A SAISEI-grade editorial showcase where each CONTAINED render (~42-50vw) is REVEALED by a hard-edged horizontal clip that opens LEFT->RIGHT (clip-path inset(0 100% 0 0) -> inset(0 0 0 0)) on a generous cream field, a thin light-line riding the leading edge; the render stays OPEN/STATIC once sliced (stacked scroll — never re-closes) while the opposite serif text-column resolves (eyebrow + masked lines rise + meta), acts alternating render side; the climax pairs the big render held open with a SMALL inset detail that slices open beside it.",
+      "when": "A calm-luxury project/features showcase where each render should be REVEALED by an architectural slice on generous cream air — contained renders, alternating render/text rhythm, a thin divider, Fraunces serif. The 'open it like a drawing' editorial read, one render arriving per scroll band.",
+      "lands": "A genuine SAISEI award-page read: renders open like architectural drawings on cream restraint, the serif headline resolving alongside, the big+small pairing landing the climax — premium editorial, never a slideshow-cut, never clutter.",
+      "not_when": "Full-bleed cinematic takeover or a vertical film-advance of big heroes (use vertical-slide, or depth-stack for planes pushing through Z), or a horizontal card deck swiped sideways (use cards-swipe). Also not for flat index/conversion sections where motion must drop."
+    },
+    "source": {
+      "grammar": "QUADRO slide-lab — owner-approved, now-fixed slc-h2 horizontal split slicer reveal (SAISEI grade); the contained-render cream slot + L->R architectural slice + stacked no-reclose acts + climax big+small pairing",
+      "recording": "apps/quadro/public/slide-lab/slc-h2-split-reveal.html",
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "clip-path"
+    ],
+    "trigger": "scroll-scrub driving a clip-path L-to-R slice per render, renders stay open (stacked)",
+    "timing_layer": [
+      "B-entrance",
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "page_beat": [
+      "material",
+      "lifestyle-climax"
+    ],
+    "combines_with": [
+      "reveal",
+      "scroll-indicator",
+      "vertical-slide"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers",
+      "R_anti_combos"
+    ],
+    "variants": [
+      "horizontal-split"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "RECIPE.md",
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "render revealed by horizontal L-to-R clip slice, eased, no jerk: clip-path inset(0 100% 0 0) -> inset(0 0 0 0) on expo.out, scrub:0.8, pixel-snapped exactly-full at slice end (kills the expo asymptote so no perpetual 99.5%)",
+      "revealed render STAYS static (no re-close) — SAISEI stacked scroll: each act owns its OWN scrubbed ScrollTrigger over its band, once open the render simply scrolls with the page; there is NO re-cover tween (the bug fix is preserved — re-close is NOT reintroduced)",
+      "ZERO image overlap: each act is its own full-height band, so only one render is in its reveal window at a time; the climax inset slices open only AFTER the main render is settled (never two mid-slice at once)",
+      "no visible placeholder plate — photo opens on clean cream: the slot backing IS --render-back = --cream (NO dark/beige plate), renders eager-preloaded (new Image, loading=eager) so the slice opens on a painted image",
+      "SAISEI sizing: contained render + ~55% cream air + Fraunces serif + alternating text-features: render column ~42-50vw with cream gutter, headline in Fraunces, eyebrow/meta in sans, thin --hair divider over meta, acts alternate render side (left/right/left)",
+      "reduced-motion/narrow collapse to static legible layout: prefers-reduced-motion OR <=820px sets .is-static, slices FULLY OPEN (clip inset(0 0 0 0)), no scrub, no edge, block-stacked legible layout"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/slicer-reveal/",
+    "_variantsResolved": []
+  },
   "slide-out-img-text": {
     "id": "slide-out-img-text",
     "name": "Slide-out deck handoff",
