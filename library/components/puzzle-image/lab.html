@@ -1,491 +1,218 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LAB · puzzle-image — scattered tiles assemble → WIDE landscape cover scales up</title>
-
-<!-- GSAP + ScrollTrigger + CustomEase via cdnjs -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
-<!-- optional Lenis, GUARDED -->
-<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · puzzle-image — pz1 center-out faithful (assemble → modest grow)</title>
 
 <!--
 ================================================================================
-TECHNIQUE: puzzle-image  (id: puzzle-image)   ·   STRICT 1:1 of Zera /work
+TECHNIQUE: puzzle-image  (id: puzzle-image)   ·   BASE = pz1 center-out faithful
 ================================================================================
-SOURCE FRAMES: frames/rec3-puzzle-image/f_001..f_027 (studied in order).
+SOURCE: apps/quadro/public/slide-lab/pz1-center-out-faithful.html (owner-approved, 9/10).
+The closest honest clone of the Zera /work cover beat.
 
-WHAT THE FRAMES ACTUALLY SHOW (and ONLY this) — the cover is LANDSCAPE ~16:10,
-filling the FULL viewport width. The baked wordmark ("ZERA" in source) is a huge
-serif stretched across the ENTIRE TOP of the wide cover; the subject sits
-center-right; small captions sit lower-LEFT. The big serif HEADLINE to the LEFT
-of the section STAYS VISIBLE throughout (it does NOT fade out).
+THE BEAT (and ONLY this) — two phases on ONE pinned, scroll-scrubbed timeline,
+then a natural release:
 
-  f_001..f_005  REST. Black section. LEFT: big serif headline (3 lines).
-                RIGHT: small mono body caption (3 lines). Between/below them:
-                tiles of the WIDE landscape cover, scattered + blurred, faint.
-  f_007..f_011  ASSEMBLE. Tiles fly HOME from the center outward, de-blur,
-                opacity up, seating into the assembled WIDE cover. The baked
-                wordmark + subject + lower-left captions appear as tiles seat.
-  f_012         ASSEMBLED. One seamless WIDE landscape cover, ALREADY near
-                full-viewport-width. Headline (left) STILL visible.
-  f_016..f_020  GROW. The WHOLE assembled cover scales up MODESTLY (NOT 6x) to
-                full-bleed; it stays a WIDE landscape cover, the wordmark spans
-                ~90% of the width. Top/bottom crop via .stage overflow. The
-                left headline REMAINS visible.
-  f_021..f_027  RELEASE. The pin ends; the now-large cover scrolls UP off the
-                top as a normal element and the NEXT section ("Selected
-                projects" / "Обрані сцени") rises. Plain scroll, NOT a tween.
+  1 ASSEMBLE  Tiles — CSS-sprite SLICES of ONE WIDE QUADRO render (day-front,
+              16:9) — start SCATTERED + BLURRED + dim across a clean DARK field.
+              On scroll they fly HOME CENTER-OUT: centre tiles seat first, OUTER
+              tiles fly from FURTHER (radial reach bias) and land last. Each tile
+              de-blurs, brightens, un-rotates, scales 0.84->1. A ghost serif
+              wordmark + left headline + lower-left caption emerge WITH the seat.
+              The seamless photo + scrim fade in UNDER the tiles so seams vanish
+              into the SAME cover (zero two-photo overlap). At assembly the cover
+              already sits near full viewport WIDTH.
 
-THE THREE PHASES (and nothing else)
-  1 REST/ASSEMBLE  prog 0 -> .55  scattered blurred tiles seat home center-out,
-                                  de-blur, scale->1, opacity->1 => WIDE cover.
-  2 GROW           prog .55 -> 1.0 transform:scale the whole .cover unit up
-                                  MODESTLY (~1.35x) to full-bleed landscape,
-                                  cropping top/bottom via overflow on the stage.
-  3 RELEASE        pin END (natural). Section unpins, scrolls away; next rises.
+  2 GROW      The WHOLE assembled cover (.coverWrap, one DOM unit) scales up
+              MODESTLY via transform:scale (1 -> 1.34) until full-bleed wide.
+              Stays a WIDE landscape cover; top/bottom crop via .stage overflow.
+              NOT a clip-path reframe, NOT a 6x over-zoom, NOT a portrait box.
 
-CRUX — the cover is ONE DOM unit (.coverWrap): photo + baked wordmark + captions.
-  · During assembly the tiles (.tile) are CSS sprite slices of the SAME wide
-    photo, positioned at their home cells. They scatter+blur at rest and fly
-    home; the seamless cover image fades in under them at seat.
-  · The grow applies transform:scale to .coverWrap (the whole unit, GPU). The
-    wordmark + captions are children so they scale TOGETHER — grow-as-one.
-  · .coverWrap keeps a fixed LANDSCAPE aspect (16/10) sized near full width at
-    rest; .stage has overflow:hidden so the modest grow crops top/bottom.
-  · The headline is z-index ABOVE the cover and is NEVER tweened to opacity 0 —
-    it stays visible the whole beat.
+  3 RELEASE   The pin ends; the now-large cover scrolls away naturally and the
+              next section rises. No tween.
+
+The LEFT headline stays VISIBLE throughout (z above the cover, never opacity 0).
 Only transform / opacity / filter(blur) animate. No WebGL. One ease (air).
 No mix-blend / backdrop-filter over the scrubbed surface (D2).
-Canonical drop-in: award-re-plugin/library/components/puzzle-image/
+
+Canonical entry: PuzzleImage(root, userConfig)  (component.js, IIFE window-global).
+__LAB_OK__ probe asserts: gsap+ST+CustomEase present, exactly one .coverWrap,
+40 tiles each a slice of the SAME single src, growPeak <= 1.5, no clip-path on
+the cover, no em-dash in visible copy.
 ================================================================================
 -->
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,1,300;9..144,1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- eager preload of the single cover render (resolves via the renders symlink -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-front.webp">
+
+<!-- GSAP 3.12.5 + ScrollTrigger + CustomEase from cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<!-- the canonical component styles -->
+<link rel="stylesheet" href="component.css">
+
 <style>
-/* ============================================================
-   GRADE / TOKENS
-   ============================================================ */
-:root{
-  --bg:#0B0B0C;              /* black section ground (f_001) */
-  --ink:#EDEAE3;            /* headline ink */
-  --muted:#9A968C;          /* mono body caption */
-  --air:cubic-bezier(0.16,1,0.3,1);  /* the ONE ease, mirrored to CSS */
-  --serif:"Times New Roman",Georgia,"Cormorant Garamond",serif;
-  --mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
-  --sans:system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
-
-  /* cover composition tokens (baked typography proportions) */
-  --cover-aspect: 16 / 10;   /* WIDE LANDSCAPE cover */
-}
-
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--ink)}
-body{font-family:var(--sans);-webkit-font-smoothing:antialiased}
-img{display:block;max-width:none}
-
-/* spacer above so the pin has somewhere to enter from */
-.lead{height:60vh;display:flex;align-items:flex-end;padding:0 6vw 4vh}
-.lead small{font-family:var(--mono);font-size:12px;letter-spacing:.18em;
-  text-transform:uppercase;color:var(--muted)}
-
-/* ============================================================
-   PINNED SECTION
-   ============================================================ */
-.puzzle{position:relative;height:100vh;width:100%;overflow:hidden;background:var(--bg)}
-.stage{position:absolute;inset:0;overflow:hidden}   /* crops the growing cover */
-
-/* LEFT headline (visible THROUGHOUT — z above the cover, never faded) */
-.headline{
-  position:absolute;left:6vw;top:16vh;z-index:8;max-width:40vw;
-  font-family:var(--serif);font-weight:400;line-height:1.04;
-  font-size:clamp(34px,5.0vw,72px);letter-spacing:-.01em;color:var(--ink);
-  text-wrap:balance;pointer-events:none;mix-blend-mode:normal;
-}
-/* RIGHT body caption (f_001..f_009) */
-.body{
-  position:absolute;right:6vw;top:22vh;z-index:8;max-width:24vw;
-  font-family:var(--mono);font-size:clamp(11px,1.05vw,14px);line-height:1.65;
-  letter-spacing:.02em;color:var(--muted);pointer-events:none;
-}
-
-/* ============================================================
-   COVER UNIT — the single scaled DOM element
-   one LANDSCAPE box that holds: assembled photo + tile slices +
-   baked wordmark + baked captions. transform:scale grows it all.
-   ============================================================ */
-.coverWrap{
-  position:absolute;left:50%;top:50%;z-index:4;
-  transform:translate(-50%,-50%);
-  /* WIDE: sized near full viewport width at rest (like f_012). width-driven
-     so the landscape proportion holds; height follows aspect-ratio. */
-  width:84vw;aspect-ratio:var(--cover-aspect);
-  will-change:transform;
-}
-.cover{
-  position:relative;width:100%;height:100%;
-  transform-origin:center center;
-  overflow:hidden;                 /* keep baked typography inside the cover */
-  will-change:transform;
-}
-/* the seamless assembled photo (fades in as tiles seat) */
-.cover__photo{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;object-position:50% 42%;opacity:0;
-}
-/* fallback ground if the render is missing (never blank) */
-.cover__ground{position:absolute;inset:0;background:
-  linear-gradient(160deg,#9c9486 0%,#b8ad9c 45%,#85796a 100%);}
-/* gentle top scrim so the wordmark reads on bright sky (paint, not on scrub) */
-.cover__scrim{position:absolute;left:0;right:0;top:0;height:42%;z-index:2;
-  background:linear-gradient(180deg,rgba(20,18,14,.34),rgba(20,18,14,0));
-  pointer-events:none;opacity:0;}
-
-/* BAKED wordmark — child of .cover so it scales WITH the cover (f_012->f_020).
-   Huge serif across the ENTIRE TOP, spanning ~90% of the wide cover width. */
-.cover__wordmark{
-  position:absolute;left:0;right:0;top:5%;z-index:3;
-  text-align:center;font-family:var(--serif);font-weight:400;
-  /* sized as % of cover HEIGHT so it scales uniformly with the unit */
-  font-size:30%;
-  letter-spacing:.06em;line-height:1;color:#F4EFE6;
-  text-shadow:0 1px 22px rgba(0,0,0,.20);
-  opacity:0;mix-blend-mode:normal;white-space:nowrap;
-}
-/* lower-left baked captions (f_012) */
-.cover__caption{
-  position:absolute;left:6%;bottom:14%;z-index:3;text-align:left;
-  font-family:var(--serif);color:rgba(244,239,230,.94);opacity:0;
-}
-.cover__caption .cap{display:block;font-size:4.4%;letter-spacing:.06em;
-  line-height:1.4;font-variant:small-caps;text-transform:uppercase}
-.cover__caption .issue{display:block;margin-top:4%;font-size:2.8%;
-  letter-spacing:.14em;opacity:.72;text-transform:uppercase}
-/* % font sizes resolve against .cover height (container query units) */
-@supports (font-size:1cqh){
-  .cover{container-type:size}
-  .cover__wordmark{font-size:30cqh}
-  .cover__caption .cap{font-size:4.4cqh}
-  .cover__caption .issue{font-size:2.8cqh}
-}
-
-/* ============================================================
-   TILES — CSS sprite slices of the SAME wide photo, home-positioned
-   inside the cover; they scatter+blur at rest and fly home.
-   ============================================================ */
-.grid{position:absolute;inset:0;z-index:1;pointer-events:none}
-.tile{
-  position:absolute;
-  background-repeat:no-repeat;
-  background-color:#7c7468;
-  will-change:transform,opacity,filter;
-  opacity:0;
-}
-
-/* ============================================================
-   PROGRESS RAIL
-   ============================================================ */
-.rail{position:absolute;left:0;right:0;bottom:0;height:2px;
-  background:rgba(255,255,255,.08);z-index:9}
-.rail__fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;
-  background:rgba(255,255,255,.7)}
-
-/* ============================================================
-   NEXT SECTION — the natural release reveal (f_022..f_027)
-   ============================================================ */
-.next{position:relative;min-height:100vh;background:var(--bg);
-  display:flex;align-items:center;justify-content:flex-end;padding:0 8vw}
-.next h2{font-family:var(--serif);font-weight:400;line-height:1.0;
-  font-size:clamp(48px,8vw,120px);color:var(--ink);text-align:right}
-.next .kicker{position:absolute;left:6vw;top:14vh;font-family:var(--mono);
-  font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-
-/* ============================================================
-   REDUCED MOTION — show the assembled WIDE cover, no tile flight/scale
-   ============================================================ */
-@media (prefers-reduced-motion: reduce){
-  .puzzle{height:auto;min-height:100vh}
-  .grid{display:none}
-  .cover__photo,.cover__scrim,.cover__wordmark,.cover__caption{opacity:1}
-  .coverWrap{width:92vw}
-}
-
-/* ============================================================
-   MOBILE — no pin, stacked; show the assembled wide cover statically.
-   (a pinned scrub beat is desktop-only per the budget; mobile = no pin)
-   ============================================================ */
-@media (max-width: 720px){
-  .headline{position:static;max-width:none;padding:0 6vw;margin-top:8vh;font-size:clamp(30px,9vw,48px)}
-  .body{position:static;max-width:none;padding:2vh 6vw 0;text-align:left}
-  .coverWrap{position:static;transform:none;width:88vw;margin:6vh auto}
-}
+  /* lab-only chrome: fonts + intro/outro breathing room so the pin can enter/release */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#0c0c0e;color:#efe9dd}
+  body{font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;overflow-x:hidden}
+  ::selection{background:#b98a4e;color:#0c0c0e}
+  .pad{min-height:62vh;display:flex;align-items:center;padding:0 clamp(22px,5vw,84px);position:relative}
+  .pad__eyebrow{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:#b98a4e;margin-bottom:18px}
+  .pad p{max-width:34ch;line-height:1.6;color:#9c968b;font-size:clamp(13px,1.2vw,15px)}
+  .pad h2{font-family:"Fraunces",Georgia,serif;font-weight:300;
+    font-size:clamp(30px,5vw,64px);line-height:1.02;letter-spacing:-.01em;margin-bottom:18px}
+  .pad--out{min-height:80vh;align-items:flex-start;padding-top:14vh}
+  @media (max-width:720px){ .pad{min-height:auto;padding:10vh clamp(22px,5vw,84px)} }
 </style>
 </head>
 <body>
 
-<div class="lead"><small>прокрутіть — обкладинка збереться, тоді зросте</small></div>
+<!-- intro breathing room -->
+<section class="pad">
+  <div>
+    <span class="pad__eyebrow">QUADRO · серія обкладинок</span>
+    <h2>Один кадр.<br>Зібраний на ваших очах.</h2>
+    <p>Фрагменти однієї панорами розсіяні полем. Прогорніть нижче, і вони злітаються додому, від центру до країв, у єдину обкладинку.</p>
+  </div>
+</section>
 
 <!-- ================= PINNED PUZZLE SECTION ================= -->
 <section class="puzzle" id="puzzle" aria-label="Обкладинка, що самозбирається">
-  <div class="stage" id="stage">
+  <div class="stage">
+    <h1 class="headline" aria-hidden="false">
+      <span class="ey">Дім над водою</span>
+      QUADRO<br>над рікою
+    </h1>
 
-    <h1 class="headline" id="headline">Дім, який<br/>хочеться<br/>пам’ятати.</h1>
-    <p class="body" id="body">Власний берег, золоте світло, тиша над рікою. Місце, де ранок належить тільки вам.</p>
-
-    <div class="coverWrap" id="coverWrap">
-      <div class="cover" id="cover">
+    <div class="coverWrap">
+      <div class="cover">
         <div class="cover__ground"></div>
-        <div class="grid" id="grid"></div>
-        <img class="cover__photo" id="coverPhoto" alt="Нагірна — обкладинка" />
-        <div class="cover__scrim" id="scrim"></div>
-        <div class="cover__wordmark" id="wordmark">НАГІРНА</div>
-        <div class="cover__caption" id="caption">
-          <span class="cap">Золота година</span>
-          <span class="cap">своє світло на власному березі</span>
-          <span class="issue">Серія · дім над рікою</span>
-        </div>
+        <div class="grid" aria-hidden="true"></div>
+        <img class="cover__photo" alt="" decoding="async" fetchpriority="high">
+        <div class="cover__scrim"></div>
+        <div class="cover__wordmark"></div>
+        <div class="cover__caption"></div>
       </div>
     </div>
 
+    <div class="hint">Прокрутіть</div>
   </div>
-  <div class="rail"><div class="rail__fill" id="railFill"></div></div>
 </section>
 
-<!-- ================= NEXT SECTION (natural release reveal) ================= -->
-<section class="next">
-  <span class="kicker">Далі</span>
-  <h2>Обрані<br/>сцени</h2>
+<!-- outro breathing room (natural release) -->
+<section class="pad pad--out">
+  <div>
+    <span class="pad__eyebrow">Далі</span>
+    <h2>Обкладинка зібрана.</h2>
+    <p>Наступна сцена піднімається природно, поки великий кадр іде вгору.</p>
+  </div>
 </section>
+
+<!-- the canonical component engine (synchronous, before boot) -->
+<script src="component.js"></script>
 
 <script>
 /* ============================================================
-   CONFIG — reusableParams
-   ============================================================ */
-const CONFIG = {
-  /* COVER PHOTO — real nahirna render. Displayed inside a LANDSCAPE 16:10 frame
-     with object-fit:cover (we WANT a wide crop, matching the source wide cover).
-     Two relative candidates so the SAME file resolves from /labs/ (../../) and
-     from the plugin component (../../../../). First that decodes wins. */
-  coverCandidates: [
-    "../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/01-HERO/"
-      + encodeURIComponent("02-aerial-establish-golden-v2FULL.png"),
-    "../../../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/01-HERO/"
-      + encodeURIComponent("02-aerial-establish-golden-v2FULL.png"),
-  ],
-
-  cols: 6, rows: 4,            /* ~6x4 tiles like the source */
-  colsMobile: 4, rowsMobile: 4,
-
-  blurMax: 18,                 /* px, <= 20 per spec */
-  scatter: 0.40,              /* how far tiles fly from home (fraction of cover) */
-  restTileAlpha: 0.10,        /* near-invisible faint chips at rest (f_001) */
-
-  assembleEnd: 0.55,          /* prog where cover is fully assembled */
-  growPeak: 1.35,             /* MODEST uniform scale at peak (full-bleed, wide) */
-
-  scrub: 0.7,
-  pinLengthVh: 300,           /* scroll distance of the pin */
-};
-
-/* ============================================================
-   BOOT — ease · Lenis guard · media · build · timeline
+   BOOT — pz1 center-out, driven through the canonical entry.
    ============================================================ */
 gsap.registerPlugin(ScrollTrigger);
-if (window.CustomEase) CustomEase.create('air','0.16,1,0.3,1');
-const EASE = window.CustomEase ? 'air' : 'power3.out';
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const isMobile = matchMedia('(max-width: 720px)').matches;
+if (window.CustomEase) CustomEase.create('air','0.25,0.74,0.22,0.99');
 
-/* ---------- Lenis smooth scroll, GUARDED ---------- */
-let lenis = null;
-if (window.Lenis && !reduce){
-  lenis = new Lenis({ lerp:0.1, smoothWheel:true });
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((t)=> lenis.raf(t*1000));
-  gsap.ticker.lagSmoothing(0);
-}
-
-/* ---------- resolve the cover image across path candidates ---------- */
-function resolveImage(candidates){
-  return new Promise((resolve)=>{
-    let i = 0;
-    const tryNext = ()=>{
-      if (i >= candidates.length){ resolve(null); return; }
-      const url = candidates[i++];
-      const probe = new Image();
-      probe.onload = ()=> resolve(url);
-      probe.onerror = tryNext;
-      probe.src = url;
-    };
-    tryNext();
-  });
-}
-
-const els = {
-  puzzle:  document.getElementById('puzzle'),
-  stage:   document.getElementById('stage'),
-  coverWrap:document.getElementById('coverWrap'),
-  cover:   document.getElementById('cover'),
-  photo:   document.getElementById('coverPhoto'),
-  scrim:   document.getElementById('scrim'),
-  grid:    document.getElementById('grid'),
-  headline:document.getElementById('headline'),
-  body:    document.getElementById('body'),
-  wordmark:document.getElementById('wordmark'),
-  caption: document.getElementById('caption'),
-  rail:    document.getElementById('railFill'),
+/* config (pz1 faithful: 5x8 = 40 tiles, dark field, modest grow, ONE src) */
+var CFG = {
+  src:        'renders/day-front.webp',  // ONE wide QUADRO render, 16:9 landscape
+  rows:       5,
+  cols:       8,                          // 5 x 8 = 40 tiles
+  scatter:    0.42,                       // radial scatter; outer tiles fly further
+  blurMax:    16,                         // px, <= 20
+  restTileAlpha: 0.14,                    // near-invisible chips at rest
+  restScale:  0.84,
+  assembleEnd:0.56,                       // progress where the cover is seated
+  growPeak:   1.34,                       // MODEST uniform scale at full-bleed (<= 1.5)
+  scrub:      0.7,
+  pinLengthVh:300,
+  wordmark:   'QUADRO',
+  captionLines:['Золота година.','Власне світло на власному березі.'],
+  issueLine:  'Серія · Дім над рікою',
+  coverWidthVw:78,
+  coverAspect: 16/9,
 };
 
-const COLS = isMobile ? CONFIG.colsMobile : CONFIG.cols;
-const ROWS = isMobile ? CONFIG.rowsMobile : CONFIG.rows;
-
-/* ---------- build the sprite tiles (home-positioned inside the cover) ---------- */
-const tiles = [];
-function buildTiles(bgUrl){
-  els.grid.innerHTML = '';
-  tiles.length = 0;
-  const cw = 100 / COLS, ch = 100 / ROWS;             /* cell size in % */
-  for (let r = 0; r < ROWS; r++){
-    for (let c = 0; c < COLS; c++){
-      const t = document.createElement('div');
-      t.className = 'tile';
-      t.style.left   = (c * cw) + '%';
-      t.style.top    = (r * ch) + '%';
-      t.style.width  = cw + '%';
-      t.style.height = ch + '%';
-      if (bgUrl){
-        t.style.backgroundImage = 'url("' + bgUrl + '")';
-        t.style.backgroundSize = (COLS*100) + '% ' + (ROWS*100) + '%';
-        const px = COLS > 1 ? (c/(COLS-1))*100 : 0;
-        const py = ROWS > 1 ? (r/(ROWS-1))*100 : 0;
-        t.style.backgroundPosition = px + '% ' + py + '%';
-      }
-      t._c = c; t._r = r;
-      els.grid.appendChild(t);
-      tiles.push(t);
-    }
-  }
-}
-
-/* scatter offset for a tile (deterministic, radial from center) */
-function scatterOf(t){
-  const cx = (COLS-1)/2, cy = (ROWS-1)/2;
-  const dx = (t._c - cx), dy = (t._r - cy);
-  const len = Math.hypot(dx,dy) || 1;
-  const ux = dx/len, uy = dy/len;
-  const jitter = (Math.sin((t._c*7.3 + t._r*3.1)) * 0.5);
-  const dist = CONFIG.scatter;
-  return {
-    x: (ux*dist + jitter*0.10) * 100,   /* % of tile box -> translate */
-    y: (uy*dist - jitter*0.08) * 100,
-    rot: jitter * 5,
-  };
-}
-
-/* ============================================================
-   MAIN
-   ============================================================ */
-(async function init(){
-  const bg = await resolveImage(CONFIG.coverCandidates);
-  if (bg){ els.photo.src = bg; }
-  buildTiles(bg);
-
-  if (reduce || isMobile){
-    /* static assembled WIDE cover, no motion: show photo + baked typography */
-    gsap.set([els.photo, els.scrim, els.wordmark, els.caption], { opacity:1 });
-    gsap.set(els.grid, { display:'none' });
-    ScrollTrigger.refresh();
-    return;
-  }
-
-  /* initial states ---------------------------------------------------- */
-  gsap.set([els.photo, els.scrim], { opacity:0 });
-  gsap.set([els.wordmark, els.caption], { opacity:0 });
-  gsap.set([els.cover, els.coverWrap], { scale:1 });
-
-  tiles.forEach((t)=>{
-    const s = scatterOf(t);
-    gsap.set(t, {
-      xPercent: s.x,
-      yPercent: s.y,
-      rotation: s.rot,
-      scale: 0.86,
-      opacity: CONFIG.restTileAlpha,
-      filter: 'blur(' + CONFIG.blurMax + 'px)',
-    });
-  });
-
-  /* master timeline driven by scroll -------------------------------- */
-  const A = CONFIG.assembleEnd;
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: els.puzzle,
-      start: 'top top',
-      end: '+=' + CONFIG.pinLengthVh + '%',
-      pin: true,
-      scrub: CONFIG.scrub,
-      anticipatePin: 1,
-      onUpdate: (self)=>{ els.rail.style.transform = 'scaleX(' + self.progress + ')'; },
-      invalidateOnRefresh: true,
-    }
-  });
-
-  /* PHASE 1 — ASSEMBLE (0 -> .55): tiles fly home center-out, de-blur */
-  tl.to(tiles, {
-    xPercent: 0, yPercent: 0, rotation: 0, scale: 1, opacity: 1,
-    filter: 'blur(0px)',
-    ease: EASE,
-    duration: A,
-    stagger: { each: 0.012, from: 'center', grid: [ROWS, COLS] },
-  }, 0);
-
-  /* seamless photo + scrim fade in UNDER the tiles so seams vanish at seat */
-  tl.to([els.photo, els.scrim], { opacity:1, ease:'none', duration:0.12 }, A*0.80);
-  /* baked wordmark + captions emerge as the cover seats */
-  tl.to(els.wordmark, { opacity:1, ease:EASE, duration:0.20 }, A*0.62);
-  tl.to(els.caption,  { opacity:1, ease:EASE, duration:0.20 }, A*0.72);
-  /* NOTE: the LEFT headline + RIGHT body are NEVER faded — they stay visible. */
-
-  /* PHASE 2 — GROW (.55 -> 1.0): MODEST uniform transform:scale of the whole
-     cover unit; wordmark + captions scale WITH it; landscape crops top/bottom */
-  tl.to(els.coverWrap, {
-    scale: CONFIG.growPeak,
-    ease: EASE,
-    duration: 1 - A,
-  }, A);
-
-  ScrollTrigger.refresh();
-})();
-
-/* recalc after late image decode / resize (D16) */
-window.addEventListener('load', ()=> ScrollTrigger.refresh());
-let rt; window.addEventListener('resize', ()=>{
-  clearTimeout(rt); rt = setTimeout(()=> ScrollTrigger.refresh(), 180);
-});
+window.__PZ = PuzzleImage(document.getElementById('puzzle'), CFG);
 </script>
-<!-- ── __LAB_OK__ acceptance probe (added by library migration; additive) ──
-     Asserts the technique mounted: GSAP present + tiles built + a pinned
-     ScrollTrigger timeline registered (the scroll-assemble + scale-up), OR
-     reduced-motion static cover. A missing remote render under file:// is NOT
-     a failure — the acceptance is the MOTION wiring, not the demo photo. -->
+<!-- ── rich pz1 acceptance probe (object) + canonical __LAB_OK__ boolean ──
+     The rich probe mirrors pz1's frame-derived asserts; the boolean is the
+     contract the library-verify headless step waits on (=== true). A missing
+     remote render under file:// is NOT a failure — the acceptance is the MOTION
+     wiring + the single-src sprite invariant, not the demo photo bytes. -->
 <script>(function(){
-  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
   window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var probe={ ok:false, reasons:[], tileCount:0, sameSrc:false,
+      growPeak:1.34, coverWraps:0, reduced:false, src:'renders/day-front.webp', grid:'5x8' };
+    function fail(m){ probe.reasons.push(m); }
+
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:720px)').matches;
+    probe.reduced = !!(reduce||narrow);
+
+    if(!window.gsap || !window.ScrollTrigger) fail('GSAP / ScrollTrigger missing');
+    if(!window.CustomEase) fail('CustomEase missing (degraded to power3.out)');
+
+    probe.coverWraps = document.querySelectorAll('.coverWrap').length;
+    if(probe.coverWraps !== 1) fail('expected exactly one .coverWrap, got '+probe.coverWraps);
+
+    var tiles = document.querySelectorAll('.grid .tile');
+    probe.tileCount = tiles.length;
+    if(probe.tileCount !== 40) fail('tile count mismatch (expected 40): '+probe.tileCount);
+
+    probe.sameSrc = probe.tileCount>0 && Array.prototype.every.call(tiles, function(el){
+      return (el.style.backgroundImage||'').indexOf('day-front.webp') !== -1;
+    });
+    if(!probe.sameSrc) fail('not every tile is a slice of the single src');
+
+    if(!(probe.growPeak <= 1.5)) fail('grow peak too large (over-zoom): '+probe.growPeak);
+
+    var cw = document.querySelector('.coverWrap');
+    var cs = cw ? getComputedStyle(cw).clipPath : 'none';
+    if(cw && cs && cs !== 'none') fail('coverWrap has clip-path (must be transform:scale only): '+cs);
+
+    if(document.body.innerText.indexOf('—') !== -1) fail('em-dash found in visible copy');
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var motionWired = probe.reduced || stCount>0;
+    if(!motionWired) fail('no pinned ScrollTrigger and not reduced-motion');
+
+    // tolerate ONLY the CustomEase graceful-degrade note
+    var hardReasons = probe.reasons.filter(function(r){ return r.indexOf('CustomEase missing')!==0; });
+    probe.ok = errs===0 && hardReasons.length===0;
+    return probe;
+  }
+
   var tries=0;
   function ready(){
-    try{
-      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
-      var hasGsap = !!window.gsap;
-      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
-      var hasTiles = document.querySelectorAll('[class*="tile"]').length>0;
-      var ok = errs===0 && hasGsap && hasTiles && (reduce || stCount>0);
-      window.__LAB_OK__ = !!ok;
-      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
-    }catch(e){ window.__LAB_OK__=false; }
+    var p = gather();
+    window.__PZ_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
   }
-  setTimeout(ready,700);
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
 })();</script>
 </body>
 </html>

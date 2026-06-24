@@ -9,13 +9,13 @@ entry:
   module: iife
   returns: "controller | null"
 meaning:
-  what: "Slices ONE WIDE LANDSCAPE (~16:10) cover image into an R×C grid of CSS-sprite tiles that fly home from a blurred scatter on scroll (center-out), seating into the assembled cover (already near full viewport WIDTH at assembly); THEN the WHOLE cover (photo + baked top wordmark + lower-left captions, one DOM unit) is scaled up MODESTLY (~1.35x) via transform:scale to full-bleed, cropping top/bottom via overflow. The LEFT headline stays VISIBLE throughout."
+  what: "BASE = pz1 center-out. Slices ONE WIDE LANDSCAPE (16:9) render into a 5×8 grid of CSS-sprite tiles that fly home from a blurred dark-field scatter on scroll CENTER-OUT (outer tiles fly from further via a radial reach bias, centre seats first), de-blurring under a photo+scrim that fades in to erase seams (zero two-photo overlap); THEN the WHOLE cover (photo + baked top wordmark + lower-left captions, one DOM unit) is scaled up MODESTLY (~1.34x) via transform:scale to full-bleed, cropping top/bottom via overflow. The LEFT headline stays VISIBLE throughout."
   when: "An opening cover (hero) with one strong WIDE render that should RESOLVE INTO BEING on the first scroll, then take over the whole screen before releasing."
-  lands: "You recognize the place before it finishes assembling = ownership; then the whole wide cover grows modestly as one unit (wordmark grows wider WITH the subject) and the building takes over the screen."
+  lands: "You recognize the place before it finishes assembling = ownership; the centre forms first and the field fills in around it; then the whole wide cover grows modestly as one unit (wordmark grows wider WITH the subject) and the building takes over the screen."
   not_when: "Sections with no single hero render, conversion gates, or any beat that must read instantly without motion."
 source:
-  grammar: "Vide Infra / Saisei / Zera-class cover reveal (Zera /work, f_001 scatter -> f_012 assembled WIDE cover near full width -> f_016 modest scale-up full-bleed landscape)"
-  recording: "frames/rec3-puzzle-image/f_001..f_027"
+  grammar: "Vide Infra / Saisei / Zera-class cover reveal (Zera /work: scatter -> assembled WIDE cover near full width -> modest scale-up full-bleed landscape)"
+  recording: "apps/quadro/public/slide-lab/pz1-center-out-faithful.html"
   registry_ref: ["T-101", "T-201"]
 stack: "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase"
 webgl: false
@@ -27,33 +27,48 @@ page_beat: [hero]
 combines_with: [puzzle-text, parallax-depth, splitLines, scroll-indicator]
 anti_combos: [second-pin, cards-swipe]
 gated_by: [R_pin_budget, R_anti_combos, R_perf_limits, R_timing_layers]
-variants: [default]
+variants: [center-out, depth-fly-in]
 params_ref: tokens.json
 files: [component.js, component.css, lab.html, tokens.json]
 acceptance:
-  - "scattered blurred tiles fly home center-out, de-blur, opacity up, seating into one assembled WIDE LANDSCAPE cover already near full viewport WIDTH (f_001 -> f_012)"
-  - "the WHOLE cover unit (.coverWrap) scales up MODESTLY (~1.35x, NOT 6x) via transform:scale to full-bleed; wordmark + captions scale WITH it keeping relative composition (f_016 -> f_020)"
-  - "the cover is LANDSCAPE 16:10 (NOT a portrait box) and crops top/bottom via .stage overflow:hidden as it grows — NOT a clip-path reframe, NOT a narrow column"
+  - "scattered blurred tiles fly home CENTER-OUT (outer tiles from further), de-blur, opacity up, seating into one assembled WIDE LANDSCAPE cover already near full viewport WIDTH"
+  - "tiles are sprite slices of ONE wide render (zero two-photo overlap) — every tile a fragment of the SAME single src, and the photo layer underneath is that SAME image"
+  - "the WHOLE cover unit (.coverWrap) scales up MODESTLY (~1.34x, modest grow <=1.5x — NOT over-zoom, NOT 6x) via transform:scale to full-bleed; wordmark + captions scale WITH it keeping relative composition"
+  - "the cover is LANDSCAPE 16:9 (NOT a portrait box) and crops top/bottom via .stage overflow:hidden as it grows — NOT a clip-path reframe, NOT a narrow column"
   - "the LEFT serif headline stays VISIBLE throughout (z above the cover, NEVER faded to opacity 0)"
-  - "pin release is natural scroll-out; reduced-motion AND mobile give the assembled cover with no pin/flight/scale; transform/opacity/filter only; no WebGL; no mix-blend/backdrop over the scrubbed surface"
+  - "smooth eased assemble (ONE air ease, one tween) — no jerk, no pop; reverse scroll is the same tween run backward"
+  - "GPU transform/opacity/filter ONLY; no WebGL; no mix-blend/backdrop over the scrubbed surface"
+  - "pin release is natural scroll-out; reduced-motion AND narrow collapse to a static assembled cover with no pin/flight/scale"
 verify: "lab.html"
 ---
 
 # puzzle-image — scroll-assembled WIDE cover -> modest scale-up
 
-> STRICT 1:1 of the Zera `/work` cover beat (frames `f_001..f_027`). One **WIDE
-> LANDSCAPE (~16:10)** magazine cover that **fills the viewport width** is sliced
-> into an **R×C grid of CSS-sprite tiles**, scattered and blurred at rest with a
-> serif headline LEFT and small body text RIGHT. On scroll the tiles **fly home
-> from the center outward and de-blur**, seating into the assembled wide cover
-> (a huge serif wordmark across the entire TOP + lower-left captions emerge with
-> them). At assembly the cover is **already near full viewport width** (f_012).
-> THEN the **whole cover scales up MODESTLY** (`transform:scale` ~1.35x on the
-> single cover unit) to full-bleed — staying a **wide landscape cover**, cropping
-> top/bottom via overflow — then the pin releases and the cover scrolls away as
-> the next section rises. **The LEFT headline stays VISIBLE the whole time.**
+> **BASE = pz1 "center-out faithful"** (owner-approved, 9/10), re-extracted 1:1
+> from `apps/quadro/public/slide-lab/pz1-center-out-faithful.html` — the closest
+> honest clone of the Zera `/work` cover beat. One **WIDE LANDSCAPE (16:9)** cover
+> that **fills the viewport width** is sliced into a **5×8 grid (40) of CSS-sprite
+> tiles**, scattered + blurred + dim across a clean **DARK field** with a serif
+> headline LEFT. On scroll the tiles **fly home CENTER-OUT** — the centre seats
+> first, the **outer tiles fly from further** (a radial reach bias) and land last,
+> de-blurring as a photo + scrim fade in **UNDER** them to erase any seams (it is
+> literally **one image** — the tiles are slices of that SAME render). A ghost
+> serif wordmark across the top + lower-left captions emerge with the seat. At
+> assembly the cover is **already near full viewport width**. THEN the **whole
+> cover scales up MODESTLY** (`transform:scale` ~1.34x on the single cover unit)
+> to full-bleed — staying a **wide landscape cover**, cropping top/bottom via
+> overflow — then the pin releases and the cover scrolls away as the next section
+> rises. **The LEFT headline stays VISIBLE the whole time.**
 
 Sibling of `puzzle-text` (which assembles WORDS). This assembles a PHOTO.
+
+## Variants
+- **center-out** (base, this folder) — the flat CENTER-OUT assemble: tiles fly
+  home in-plane from a radial blurred scatter, centre-first, on a clean dark field.
+- **depth-fly-in** (`variants/depth-fly-in/`) — a depth/3D-feeling assemble: the
+  same single wide cover, but the tiles WAIT scattered in real **Z-depth** (near
+  tiles large + soft + dim, far tiles small) then **converge home from depth** into
+  the flat cover plane. Same modest grow (~1.35x). Source: `pz3-depth-fly-in.html`.
 
 ## What the frames ACTUALLY show (and ONLY this)
 The assembled cover is **LANDSCAPE ~16:10 WIDE**, filling the full viewport width.
@@ -161,28 +176,29 @@ headline but the headline keeps reading — exactly the source (f_016 still show
 ## Reusable params (CONFIG)
 | param | default | notes |
 |---|---|---|
-| `src` | — | image url OR array of path candidates (first that decodes wins); shown in a 16:10 frame, object-fit:cover |
-| `rows`, `cols` | 4×6 | density (desktop) |
+| `src` | — | image url OR array of path candidates (first that decodes wins); shown in a 16:9 frame, object-fit:cover |
+| `rows`, `cols` | 5×8 | density (desktop) = 40 tiles, the pz1 read |
 | `rowsMobile`, `colsMobile` | 4×4 | dropped density on small screens |
-| `wordmark` | `''` | huge baked top wordmark (spans ~90% of the WIDE cover width) |
+| `wordmark` | `''` | ghost baked top wordmark across the cover top |
 | `captionLines` | `[]` | lower-left caption lines |
 | `issueLine` | `''` | small issue line under the captions |
-| `coverWidthVw` | 84 | assembled (rest) cover WIDTH — wide, near full viewport |
-| `coverAspect` | 16/10 (1.6) | **LANDSCAPE** cover proportion (w/h) |
-| `scatter` | 0.40 | tile scatter as a fraction of the cover |
-| `blurMax` | 18 | px; **cap ≤20** (blur is the FPS killer) |
-| `restTileAlpha` | 0.10 | near-invisible rest chips (source f_001) |
-| `assembleEnd` | 0.55 | timeline progress where the cover is assembled |
-| `growPeak` | 1.35 | **MODEST** uniform scale at peak (full-bleed wide). **Do NOT over-scale (no 6x).** |
+| `coverWidthVw` | 78 | assembled (rest) cover WIDTH — wide, near full viewport |
+| `coverAspect` | 16/9 (1.778) | **LANDSCAPE** cover proportion (w/h); day-front is 16:9 |
+| `scatter` | 0.42 | tile scatter as a fraction of the cover (radial; **outer tiles fly from further**) |
+| `blurMax` | 16 | px; **cap ≤20** (blur is the FPS killer) |
+| `restTileAlpha` | 0.14 | near-invisible rest chips |
+| `restScale` | 0.84 | tile rest scale before seat |
+| `assembleEnd` | 0.56 | timeline progress where the cover is assembled |
+| `growPeak` | 1.34 | **MODEST** uniform scale at peak (full-bleed wide, capped ≤1.5). **Do NOT over-scale (no 6x).** |
 | `scrub` | 0.7 | ScrollTrigger scrub |
 | `pinLengthVh` | 300 | pin scroll distance |
-| `ease` | `'air'` | the ONE project ease (falls back to power3.out) |
+| `ease` | `'air'` | the ONE project ease cubic-bezier(0.25,0.74,0.22,0.99) (falls back to power3.out) |
 
 ## Gotchas (encoded in component.js)
 - **The cover is LANDSCAPE 16:10, width-driven near full viewport width.** NOT a
   portrait 3/4 box, NOT a narrow column. `object-fit:cover` gives the wanted wide crop.
-- **The grow is MODEST (~1.35x).** The cover is already near full width at assembly;
-  the grow is a small push to full-bleed. **No 6x over-scale.**
+- **The grow is MODEST (~1.34x, ≤1.5).** The cover is already near full width at
+  assembly; the grow is a small push to full-bleed. **No 6x over-scale.**
 - **The LEFT headline stays VISIBLE** — z-index ABOVE the cover, NEVER faded.
 - **The grow is UNIFORM transform:scale, NOT clip-path.** Scale the whole unit.
 - **The cover must be ONE unit.** Put wordmark + captions INSIDE `.cover` so they
@@ -191,29 +207,33 @@ headline but the headline keeps reading — exactly the source (f_016 still show
 - **No mix-blend / backdrop-filter over the scrubbed surface (D2).**
 - **BLUR is the expensive part.** Cap N (8–24), start blur ≤20px.
 - **Sprite off-by-one** — `c/(cols-1)`, guard `cols=1`.
-- **Stagger from center** sells the assembly; a plain fade reads cheap.
-- **Rest chips near-invisible** (`restTileAlpha` ~0.08–0.12, source f_001).
+- **Center-out via radial reach + stagger from center** sells the assembly; a plain
+  fade reads cheap. Outer tiles fly from further so the centre seats first.
+- **Rest chips near-invisible** (`restTileAlpha` ~0.10–0.16).
 - **transform/opacity/filter only** — never `left/top/width` (homes static). No WebGL.
 - `ScrollTrigger.refresh()` after image decode / resize.
 - **Mobile = NO pin** (C6/C7) and **reduced-motion** → assembled wide cover instantly.
 
 ## Source fidelity notes (STRICT 1:1 lab)
-The verified lab (`lab.html`) reproduces ONLY what the frames show:
-- **Assembly** (f_001 scatter -> f_007 fly-home -> f_012 assembled WIDE cover near
-  full viewport width).
-- **Modest scale-up** (f_016 -> f_020): the whole WIDE cover grows as one unit
-  ~1.35x to full-bleed, wordmark spans ~90% width, top/bottom cropped; the LEFT
-  headline stays visible.
-- **Natural release** (f_021 -> f_027): the pin ends and the cover scrolls away as
-  the next section rises — a plain scroll, NOT a tween.
-- **Real render** — production `01-HERO/02-aerial-establish-golden-v2FULL.png`,
-  cover-fit in a 16:10 frame. Ukrainian Fedoriv copy, no em-dash, no people.
+The verified lab (`lab.html`) reproduces ONLY what the owner-approved pz1
+prototype shows:
+- **Assembly** — scattered blurred 5×8 tiles fly home CENTER-OUT (outer from
+  further), de-blur, seating into the assembled WIDE cover near full viewport
+  width; the photo + scrim fade in UNDER the tiles so seams vanish (one image).
+- **Modest scale-up**: the whole WIDE cover grows as one unit ~1.34x to
+  full-bleed, top/bottom cropped; the LEFT headline stays visible.
+- **Natural release**: the pin ends and the cover scrolls away as the next
+  section rises — a plain scroll, NOT a tween.
+- **Real render** — production QUADRO `renders/day-front.webp` (16:9, via the
+  `renders -> apps/quadro/public/proto` symlink). Ukrainian Fedoriv copy, no
+  em-dash, no people.
 - **Nothing invented** — no card, no full-screen reveal, no portrait box, no 6x.
 
 ## Files
-- `lab.html` — runnable standalone demo, **byte-identical to the verified 1:1 lab**.
-- `component.css` — stage (overflow clip) + LANDSCAPE cover unit + sprite-slice skeleton.
-- `component.js` — `PuzzleImage(root, config)` factory (assemble + modest scale-up).
+- `lab.html` — runnable standalone demo, byte-faithful to `pz1-center-out-faithful.html`.
+- `component.css` — dark field + stage (overflow clip) + LANDSCAPE 16:9 cover unit + sprite grid.
+- `component.js` — `PuzzleImage(root, config)` factory (center-out assemble + modest scale-up).
+- `variants/depth-fly-in/` — the depth/3D-feeling assemble variant (from pz3).
 
 ## Drop-in
 ```html
@@ -224,12 +244,12 @@ The verified lab (`lab.html`) reproduces ONLY what the frames show:
 <script src="component.js"></script>
 <script>
   PuzzleImage(document.querySelector('.puzzle'), {
-    src: '/renders/cover-wide.webp',
-    rows:4, cols:6,
-    wordmark:'НАГІРНА',
-    captionLines:['ЗОЛОТА ГОДИНА','СВОЄ СВІТЛО НА ВЛАСНОМУ БЕРЕЗІ'],
-    issueLine:'СЕРІЯ · ДІМ НАД РІКОЮ',
-    growPeak:1.35, coverAspect:16/10
+    src: 'renders/day-front.webp',
+    rows:5, cols:8,
+    wordmark:'QUADRO',
+    captionLines:['Золота година.','Власне світло на власному березі.'],
+    issueLine:'Серія · Дім над рікою',
+    growPeak:1.34, coverAspect:16/9
   });
 </script>
 ```

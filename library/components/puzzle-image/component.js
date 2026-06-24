@@ -1,42 +1,60 @@
 /* ============================================================
    puzzle-image — component.js   (framework-free, GSAP + ScrollTrigger)
    ------------------------------------------------------------
-   STRICT 1:1 of the Zera /work cover beat (frames f_001..f_027).
+   BASE = pz1 "center-out faithful" (owner-approved, 9/10).
+   Re-extracted BYTE-FAITHFULLY from the prototype:
+     apps/quadro/public/slide-lab/pz1-center-out-faithful.html
+   The closest honest clone of the Zera /work cover beat.
 
-   THE TECHNIQUE (and ONLY this):
-     1 ASSEMBLE  scattered + blurred CSS-sprite tiles of ONE WIDE LANDSCAPE
-                 cover (~16:10) fly HOME from the center outward, de-blur,
-                 opacity up, seating into the assembled cover. A baked wordmark
-                 (huge serif across the TOP) + lower-left captions emerge. At
-                 assembly the cover is ALREADY near full viewport WIDTH.
-     2 GROW      the WHOLE assembled cover (photo + baked wordmark + captions,
-                 one DOM unit) scales up MODESTLY via transform:scale (~1.35x)
-                 until full-bleed. It STAYS a WIDE landscape cover; the wordmark
-                 spans ~90% of the width; top/bottom crop via .stage overflow.
-                 NOT a clip-path reframe, NOT a 6x over-scale, NOT a portrait box.
-     3 RELEASE   the pin ends; the now-large cover scrolls away naturally and
-                 the next section rises. No tween.
+   THE TECHNIQUE (and ONLY this) — two phases on ONE pinned,
+   scroll-scrubbed timeline, then a natural release:
 
-   THE LEFT HEADLINE STAYS VISIBLE THROUGHOUT (it is z-index ABOVE the cover and
-   is NEVER tweened to opacity 0).
+     1 ASSEMBLE  Tiles — CSS-sprite SLICES of ONE WIDE LANDSCAPE
+                 render (day-front, 16:9) — start SCATTERED + BLURRED
+                 + dim across a clean DARK field. As the timeline
+                 scrubs forward they FLY HOME CENTER-OUT: the centre
+                 tiles seat first, the OUTER tiles fly from FURTHER
+                 (a radial REACH bias) and land last. Each tile
+                 de-blurs, brightens, un-rotates, scales 0.84 -> 1 as
+                 it lands. A ghost serif wordmark (across the top) +
+                 a left serif headline + a lower-left caption emerge
+                 WITH the seat. The seamless photo + scrim fade in
+                 UNDER the tiles right at the seat so any sub-pixel
+                 seams vanish into the real cover (the tiles ARE
+                 slices of that SAME photo — ZERO two-photo overlap).
+                 At assembly the cover already sits near full
+                 viewport WIDTH.
 
-   WHY transform:scale (not clip-path inset): the source grows the cover AS ONE
-   UNIT keeping its relative composition (the wordmark grows wider WITH the
-   subject and captions). A uniform MODEST scale of the .coverWrap element does
-   exactly that.
+     2 GROW      The WHOLE assembled cover (photo + ghost wordmark +
+                 captions, ONE DOM unit = .coverWrap) scales up
+                 MODESTLY via transform:scale (1 -> ~1.34) until it
+                 is full-bleed wide. It STAYS a WIDE landscape cover:
+                 the wordmark grows wider WITH the subject; top/bottom
+                 crop via .stage overflow:hidden. NOT a clip-path
+                 reframe, NOT a 6x over-zoom, NOT a portrait box.
+
+     3 RELEASE   The pin ends; the now-large cover scrolls away
+                 naturally and the next section rises. No tween.
+
+   THE LEFT HEADLINE STAYS VISIBLE THROUGHOUT (it is z-index ABOVE the
+   cover and is NEVER tweened to opacity 0).
+
+   WHY transform:scale (not clip-path inset): the source grows the
+   cover AS ONE UNIT keeping its relative composition. A single MODEST
+   uniform scale of the .coverWrap element does exactly that.
 
    USAGE
      include after GSAP + ScrollTrigger (+ optional CustomEase), then:
 
        const pz = PuzzleImage(document.querySelector('.puzzle'), {
-         src: '/renders/cover-wide.webp',   // shown in a 16:10 frame, object-fit:cover
-         rows: 4, cols: 6,
-         wordmark: 'НАГІРНА',
-         captionLines: ['ЗОЛОТА ГОДИНА','СВОЄ СВІТЛО НА ВЛАСНОМУ БЕРЕЗІ'],
-         issueLine: 'СЕРІЯ · ДІМ НАД РІКОЮ',
-         growPeak: 1.35,          // MODEST uniform scale at peak (full-bleed wide)
-         scatter: 0.40,           // tile scatter (fraction of cover)
-         blurMax: 18,             // <= 20
+         src: 'renders/day-front.webp',  // ONE wide render, 16:9, object-fit:cover
+         rows: 5, cols: 8,               // 5 x 8 = 40 tiles
+         wordmark: 'QUADRO',
+         captionLines: ['Золота година.','Власне світло на власному березі.'],
+         issueLine: 'Серія · Дім над рікою',
+         growPeak: 1.34,         // MODEST uniform scale at peak (full-bleed wide)
+         scatter: 0.42,          // radial scatter (fraction of cover); outer fly further
+         blurMax: 16,            // <= 20
          pinLengthVh: 300,
        });
 
@@ -62,30 +80,34 @@
      • motion is transform / opacity / filter(blur) ONLY. No clip-path reframe.
      • the cover is ONE unit (.coverWrap); the grow is a single transform:scale
        tween on it, so wordmark + captions scale WITH it.
-     • cover frame is LANDSCAPE 16:10 sized near full width at rest; .stage has
+     • cover frame is LANDSCAPE (16:9) sized near full width at rest; .stage has
        overflow:hidden so the MODEST grow crops top/bottom.
+     • center-out: a radial REACH bias makes OUTER tiles fly from further so the
+       centre seats first, reinforced by a GSAP stagger from:'center'.
+     • the photo + scrim fade in UNDER the tiles at the seat — ONE image, no overlap.
      • the LEFT headline is NEVER faded — it stays visible the whole beat.
      • no mix-blend / backdrop-filter over the scrubbed surface (D2).
-     • Lenis is GUARDED; reduced-motion AND mobile show the assembled cover with
-       NO pin / NO scrub (pin is desktop-only per the budget, C6/C7).
+     • reduced-motion AND mobile show the assembled cover with NO pin / NO scrub
+       (pin is desktop-only per the budget, C6/C7).
    ============================================================ */
 (function (global) {
   'use strict';
 
   var DEFAULTS = {
     src: null,
-    rows: 4, cols: 6,
+    rows: 5, cols: 8,           // 5 x 8 = 40 tiles (pz1 faithful)
     rowsMobile: 4, colsMobile: 4,
     wordmark: '',
     captionLines: [],
     issueLine: '',
-    coverWidthVw: 84,           // assembled (rest) cover WIDTH — wide, near full
-    coverAspect: 16 / 10,       // LANDSCAPE cover proportion
-    blurMax: 18,                // px, <= 20
-    scatter: 0.40,              // fraction of cover the tiles fly from
-    restTileAlpha: 0.10,        // near-invisible chips at rest
-    assembleEnd: 0.55,          // timeline progress where cover is assembled
-    growPeak: 1.35,             // MODEST uniform scale at peak (full-bleed wide)
+    coverWidthVw: 78,           // assembled (rest) cover WIDTH — wide, near full
+    coverAspect: 16 / 9,        // LANDSCAPE cover proportion (day-front is 16:9)
+    blurMax: 16,                // px, <= 20
+    scatter: 0.42,              // fraction of cover the tiles fly from (radial)
+    restTileAlpha: 0.14,        // near-invisible chips at rest
+    restScale: 0.84,            // tile rest scale before seat
+    assembleEnd: 0.56,          // timeline progress where cover is assembled
+    growPeak: 1.34,             // MODEST uniform scale at peak (full-bleed wide)
     scrub: 0.7,
     pinLengthVh: 300,
     ease: 'air',                // CustomEase name; falls back to power3.out
@@ -98,7 +120,7 @@
 
     var cfg = Object.assign({}, DEFAULTS, userConfig || {});
     if (global.CustomEase && !gsap.parseEase(cfg.ease)) {
-      global.CustomEase.create('air', '0.16,1,0.3,1');
+      global.CustomEase.create('air', '0.25,0.74,0.22,0.99');
     }
     var EASE = (global.CustomEase && gsap.parseEase('air')) ? 'air' : 'power3.out';
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -170,16 +192,20 @@
       }
     }
 
+    /* radial scatter from centre with a REACH bias: outer tiles fly from FURTHER
+       (so the centre seats first naturally — the pz1 center-out signature),
+       plus a small deterministic jitter so the field is organic, not a clean grid. */
     function scatterOf(t) {
       var cx = (COLS - 1) / 2, cy = (ROWS - 1) / 2;
       var dx = t._c - cx, dy = t._r - cy;
       var len = Math.hypot(dx, dy) || 1;
       var jitter = Math.sin(t._c * 7.3 + t._r * 3.1) * 0.5;
-      var d = cfg.scatter;
+      var maxLen = Math.hypot(cx, cy) || 1;
+      var reach = cfg.scatter * (0.55 + 0.45 * (len / maxLen));   // outer -> longer reach
       return {
-        x: ((dx / len) * d + jitter * 0.10) * 100,
-        y: ((dy / len) * d - jitter * 0.08) * 100,
-        rot: jitter * 5,
+        x: ((dx / len) * reach + jitter * 0.10) * 100,
+        y: ((dy / len) * reach - jitter * 0.08) * 100,
+        rot: jitter * 6,
       };
     }
 
@@ -201,7 +227,7 @@
         var s = scatterOf(t);
         gsap.set(t, {
           xPercent: s.x, yPercent: s.y, rotation: s.rot,
-          scale: 0.86, opacity: cfg.restTileAlpha,
+          scale: cfg.restScale, opacity: cfg.restTileAlpha,
           filter: 'blur(' + cfg.blurMax + 'px)',
         });
       });
@@ -220,16 +246,16 @@
       });
       st = tl.scrollTrigger;
 
-      /* PHASE 1 — ASSEMBLE: tiles fly home center-out, de-blur */
+      /* PHASE 1 — ASSEMBLE: tiles fly home center-out, de-blur, brighten, un-rotate */
       tl.to(tiles, {
         xPercent: 0, yPercent: 0, rotation: 0, scale: 1, opacity: 1,
         filter: 'blur(0px)', ease: EASE, duration: A,
-        stagger: { each: 0.012, from: 'center', grid: [ROWS, COLS] },
+        stagger: { each: 0.014, from: 'center', grid: [ROWS, COLS] },
       }, 0);
       /* seamless photo + scrim fade in UNDER the tiles so seams vanish at seat */
-      tl.to([els.photo, els.scrim], { opacity: 1, ease: 'none', duration: 0.12 }, A * 0.80);
-      if (els.wordmark) tl.to(els.wordmark, { opacity: 1, ease: EASE, duration: 0.20 }, A * 0.62);
-      if (els.caption)  tl.to(els.caption,  { opacity: 1, ease: EASE, duration: 0.20 }, A * 0.72);
+      tl.to([els.photo, els.scrim], { opacity: 1, ease: 'none', duration: 0.12 }, A * 0.82);
+      if (els.wordmark) tl.to(els.wordmark, { opacity: 1, ease: EASE, duration: 0.20 }, A * 0.60);
+      if (els.caption)  tl.to(els.caption,  { opacity: 1, ease: EASE, duration: 0.20 }, A * 0.74);
       /* NOTE: the LEFT headline + RIGHT body are NEVER faded — they stay visible. */
 
       /* PHASE 2 — GROW: MODEST uniform transform:scale of the whole cover unit */

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · puzzle-image / depth-fly-in — pz3 (depth Z-converge assemble)</title>
+
+<!--
+================================================================================
+VARIANT: puzzle-image / depth-fly-in   ·   pz3 depth fly-in (owner-approved, 9/10)
+================================================================================
+SOURCE: apps/quadro/public/slide-lab/pz3-depth-fly-in.html
+
+The depth/3D-feeling reading of the SAME single-wide-cover beat. ONE wide QUADRO
+render (day-front, 16:9) is pre-sliced into CSS-sprite tiles that WAIT scattered
+in real CSS Z-DEPTH (near tiles large + soft + dim, far tiles small) then FLY HOME,
+converging onto the flat assembled cover plane (z=0, blur 0). A ghost serif
+wordmark + left headline + small captions emerge. Then the WHOLE assembled cover
+grows MODESTLY (~1.35x, transform:scale) to full-bleed — the SHARED grow phase.
+
+The LEFT headline stays visible throughout (z above cover, never opacity 0).
+Only transform(3d) / opacity / filter(blur) animate. No WebGL. One air ease.
+No mix-blend / backdrop over the scrubbed surface. reduced-motion / narrow →
+static assembled cover (the .fallback block), no scatter / pin / scrub.
+
+Entry: PuzzleImageDepthFlyIn.init(opts)  (variant.js — base-importing; loads
+../../component.js so the single-src sprite + modest grow contract is the SHARED
+base contract, not a fork).
+
+__LAB_OK__ probe asserts: base (PuzzleImage) + variant (PuzzleImageDepthFlyIn)
+present, 28 tiles each a slice of the SAME single src, a pinned ScrollTrigger
+live (or reduced-motion static), growPeak <= 1.5, no clip-path on the cover, no
+em-dash, zero real console.error.
+================================================================================
+-->
+
+<!-- Fonts: Fraunces (serif display) + Inter (sans meta) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- eager-preload the ONE cover render (resolves via the renders symlink -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-front.webp">
+
+<!-- the variant skin (cinematic depth field) -->
+<link rel="stylesheet" href="variant.css">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+</head>
+<body>
+
+<div class="lead"><span>scroll</span></div>
+
+<!-- =================== PINNED STAGE =================== -->
+<section class="stage" id="stage">
+
+  <!-- LEFT headline — always visible, above the cover -->
+  <div class="headline">
+    <h1>Дім, що <em>збирається</em><br>докупи.</h1>
+    <p class="sub">Один кадр, зібраний із фрагментів. Так само QUADRO збирається в дім над водою.</p>
+  </div>
+
+  <!-- RIGHT meta — always visible, above the cover -->
+  <div class="meta">
+    <div class="m-eye">QUADRO</div>
+    <div class="m-line">Чотири квартири<br>Власний берег<br>Тиха вода</div>
+  </div>
+
+  <!-- ONE cover — the unit that assembles from depth then grows -->
+  <div class="coverWrap" id="coverWrap">
+    <div class="cover" id="cover">
+      <img class="cover__photo" id="photo" alt="QUADRO, головний фасад удень" decoding="async">
+      <div class="cover__scrim" id="scrim"></div>
+      <div class="grid" id="grid"></div>
+      <div class="cover__wordmark" id="wordmark">QUADRO</div>
+      <div class="cover__caption" id="caption">
+        <span class="cap">Денне світло</span>
+        <span class="cap">Головний фасад</span>
+        <span class="issue">Серія · Дім над рікою</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- progress cue -->
+  <div class="cue"><i id="cueFill"></i></div>
+</section>
+
+<div class="tail"><span>далі</span></div>
+
+<!-- =================== STATIC FALLBACK =================== -->
+<div class="fallback">
+  <div class="feye">QUADRO · Денне світло</div>
+  <div class="fhead">Дім, що <em>збирається</em> докупи.</div>
+  <div class="fcover">
+    <img id="fbphoto" alt="QUADRO, головний фасад удень" decoding="async">
+    <div class="fmark">QUADRO</div>
+    <div class="fcap">Головний фасад</div>
+  </div>
+</div>
+
+<!-- the SHARED base engine + the depth-fly-in engine (base-importing, NOT a fork) -->
+<script src="../../component.js"></script>
+<script src="variant.js"></script>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+
+  /* real QUADRO render via the renders symlink -> apps/quadro/public/proto */
+  window.__PZ_DEPTH = window.PuzzleImageDepthFlyIn && PuzzleImageDepthFlyIn.init({
+    stage:'#stage', coverWrap:'#coverWrap', cover:'#cover',
+    photo:'#photo', scrim:'#scrim', grid:'#grid',
+    wordmark:'#wordmark', caption:'#caption', cueFill:'#cueFill', fbPhoto:'#fbphoto',
+    src:'renders/day-front.webp',
+    rows:4, cols:7,           // 28 tiles
+    assembleEnd:0.58, growPeak:1.35, blurMax:17,
+    zNear:260, zFar:-1180, pinVh:3.0, scrub:0.8
+  });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (variant) ── -->
+<script>(function(){
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:760px)').matches;
+    var hasBase = !!window.PuzzleImage;                       // ../../component.js
+    var hasVariant = !!window.PuzzleImageDepthFlyIn;          // variant.js
+    var tiles = document.querySelectorAll('#grid .tile');
+    var tileCount = tiles.length;
+    var sameSrc = tileCount>0 && Array.prototype.every.call(tiles, function(el){
+      return (el.style.backgroundImage||'').indexOf('day-front.webp') !== -1;
+    });
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var pinned = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().some(function(s){return s.pin;}):false;
+    var cw = document.querySelector('.coverWrap');
+    var clip = cw ? getComputedStyle(cw).clipPath : 'none';
+    var noClip = !(cw && clip && clip !== 'none');
+    var growOk = !window.__PZ_DEPTH || window.__PZ_DEPTH.growPeak <= 1.5;
+    var noEmDash = document.body.innerText.indexOf('—') === -1;
+    var motionWired = (reduce||narrow) || pinned || stCount>0;
+
+    return {
+      ok: errs===0 && hasBase && hasVariant && tileCount===28 && sameSrc &&
+          noClip && growOk && noEmDash && motionWired,
+      hasBase:hasBase, hasVariant:hasVariant, tiles:tileCount, sameSrc:sameSrc,
+      pinned:pinned, growOk:growOk, noClip:noClip, reduced:!!(reduce||narrow), errs:errs
+    };
+  }
+
+  var tries=0;
+  function ready(){
+    var p = gather();
+    window.__PZ_DEPTH_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
+})();</script>
+</body>
+</html>
