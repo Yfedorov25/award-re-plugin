@@ -3,305 +3,378 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LAB · media-step-switch (Naveera / Zera)</title>
+<title>LAB · media-step-switch (Naveera / Zera) · 1:1</title>
 
 <!-- ============================================================
      TECHNIQUE: media-step-switch
      One pinned stage. A glass card holds stepped copy (BENEFIT 01,
-     02, 03…). As you scrub through the pin, the FULL-BLEED background
-     media swaps from step N to step N+1 via an ORGANIC WAVY clip-path
-     wipe (new media reveals top→down behind an undulating seam), the
-     card copy crossfades + the LEFT vertical step-rail advances its
-     filled marker. The card never moves; only media + copy + dot do.
-     Source recording: rec7-image-video-switch (Naveera/Zera portfolio).
+     02, 03, 04). As you scrub through the pin, the FULL-BLEED
+     background media swaps from step N to step N+1 via an ORGANIC
+     WAVY clip-path wipe (new media reveals BOTTOM→UP behind an
+     undulating seam), the card copy crossfades with a deliberate
+     soft OVERLAP (a brief ghosted double-exposure of both headings),
+     and the LEFT vertical step-rail advances its filled marker. The
+     card never moves; only media + copy + dot do.
+     Source recording: rec "image-video-switch" (Naveera / Zera).
+
+     PASS: TRUE 1:1 (WAVE-2). Corrects the WAVE-1 draft (3 steps,
+     gradient placeholders, direction:'down', hard zero-overlap copy
+     dim) to: 4 steps, REAL portrait renders, direction:'up', and a
+     soft 'power1.out' copy-out overlapping the 'air' copy-in.
 
      STACK: vanilla HTML + GSAP 3.12.5 + ScrollTrigger + CustomEase.
      NO WebGL. Motion on transform/opacity/clip-path only.
      Background can be <img> OR muted autoplay <video> (never scrub
-     video.currentTime — the video just loops; only its VISIBILITY
-     is animated). Respects prefers-reduced-motion.
+     video.currentTime — only its clip visibility animates).
+
+     ASSETS: real 9:16 portrait renders from the sibling NAHIRNA
+     dataset, referenced relative to this file. If that project is
+     absent (the plugin checked out standalone), each <img> onerror
+     falls back to the grade-matched gradient so the technique still
+     demonstrates — the component itself ships with the consumer's
+     own media.
      ============================================================ -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
 <style>
 :root{
-  --ink:#0B0B0C;
-  --paper:#F4F0EA;
-  --mid:#8A857C;
-  --accent:#1FA8C9;            /* the step-marker / eyebrow accent (Naveera teal) */
-  --card-glass:rgba(244,240,234,.10);
-  --card-border:rgba(244,240,234,.16);
-  --mx:64px;
-  --air:cubic-bezier(0.22,0.61,0.18,1); /* the only ease (also CustomEase 'air') */
-  --sans:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
+  --ink:#0B0B0C; --paper:#F4F0EA; --mid:#8A857C; --bronze:#B8946A;
+  --mx:clamp(20px,4vw,64px);
   --serif:"PP Editorial New","Times New Roman",Georgia,serif;
+  --sans:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
+  --air:cubic-bezier(0.22,0.61,0.18,1);
+  --overscan:1.06;
+  --card-w:min(440px,82vw);
+  --card-minh:240px;
+  --card-blur:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:auto}
 body{background:var(--ink);color:var(--paper);font-family:var(--sans);
-  -webkit-font-smoothing:antialiased;overflow-x:hidden}
-img,video{display:block}
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+img{display:block}
 
-/* spacer sections so there's something above/below the pinned stage */
-.spacer{height:100vh;display:flex;align-items:center;justify-content:center;
-  font-family:var(--serif);font-size:clamp(2rem,7vw,5rem);opacity:.5;letter-spacing:-.02em}
-.spacer.top{background:#0e0e10}
-.spacer.bot{background:#0e0e10}
+.spacer{min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;color:var(--mid)}
+.spacer .eyebrow{font-size:.72rem;letter-spacing:.34em;text-transform:uppercase}
+.spacer .scroll-hint{margin-top:1rem;font-family:var(--serif);
+  font-size:clamp(2rem,6vw,4rem);color:var(--paper);line-height:1}
+.handoff{background:var(--ink)}
+.handoff h2{font-family:var(--serif);font-weight:400;
+  font-size:clamp(2.4rem,8vw,6rem);line-height:1;letter-spacing:-.02em;
+  color:var(--paper);max-width:18ch}
 
-/* ============================================================
-   PRELOADER (light Saisei ritual so the lab opens like the real thing)
-   ============================================================ */
-#preloader{position:fixed;inset:0;z-index:1000;background:var(--ink);
-  display:flex;align-items:center;justify-content:center}
-#preloader .mk{font-family:var(--serif);font-size:1.1rem;letter-spacing:.4em;
-  text-transform:uppercase;opacity:.7}
-.slice{position:fixed;top:0;bottom:0;z-index:999;background:var(--ink);
-  transform:scaleX(0);will-change:transform}
-.slice.left{left:0;width:50vw;transform-origin:right center}
-.slice.right{right:0;width:50vw;transform-origin:left center}
+.msw-stage{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--ink)}
+.msw-layer{position:absolute;inset:0;will-change:clip-path}
+.msw-layer .media{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;transform:scale(var(--overscan));
+  will-change:transform;background:#15140f}
+/* grade-matched gradient fallback when a real render is unavailable */
+.msw-layer.is-fallback .media{display:none}
+.msw-layer .fb{position:absolute;inset:0;display:none}
+.msw-layer.is-fallback .fb{display:block;transform:scale(var(--overscan))}
+.fb-0{background:radial-gradient(120% 90% at 40% 30%,#6a7257,transparent 60%),linear-gradient(160deg,#3b4a33,#1c241a)}
+.fb-1{background:radial-gradient(120% 90% at 60% 30%,#8a9a63,transparent 60%),linear-gradient(160deg,#4a5e30,#243314)}
+.fb-2{background:radial-gradient(120% 90% at 50% 35%,#b89366,transparent 60%),linear-gradient(160deg,#6e4f2d,#2a1d10)}
+.fb-3{background:radial-gradient(120% 80% at 50% 60%,#3a3550,transparent 60%),linear-gradient(160deg,#191726,#0a0a10)}
 
-/* ============================================================
-   THE STAGE
-   ============================================================ */
-.stage{position:relative;width:100vw;height:100vh;overflow:hidden;background:#000}
+.msw-scrim{position:absolute;inset:0;z-index:3;pointer-events:none;background:
+  radial-gradient(90% 70% at 22% 50%,rgba(11,11,12,.55),transparent 60%),
+  linear-gradient(to bottom,rgba(11,11,12,.25),transparent 30%,rgba(11,11,12,.45))}
 
-/* --- media layers: one absolutely-stacked layer per step --- */
-.media-layer{position:absolute;inset:0;z-index:1;
-  /* every non-active layer is fully clipped away to nothing */
-  clip-path:inset(0 0 100% 0);
-  will-change:clip-path;
-}
-.media-layer.is-active{clip-path:inset(0 0 0% 0)} /* fully shown */
-.media-layer img,.media-layer video{
-  width:100%;height:100%;object-fit:cover;
-  transform:scale(1.06);                 /* slight overscan so parallax never reveals edges */
-  will-change:transform;
-}
-/* the wavy seam edge is baked into the layer via an SVG clip path (see <svg> defs)
-   — we morph between a flat inset and the wave shape during the wipe.
-   Fallback: a straight inset wipe if clip-path:path() is unsupported. */
-.media-scrim{position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:linear-gradient(to bottom, rgba(0,0,0,.18) 0%, rgba(0,0,0,.05) 38%, rgba(0,0,0,.45) 100%)}
+.msw-card{position:absolute;z-index:5;left:var(--mx);top:50%;transform:translateY(-50%);
+  width:var(--card-w);min-height:var(--card-minh);display:flex;gap:1.4rem;
+  padding:1.8rem 1.8rem 1.9rem;background:rgba(18,18,20,.30);
+  border:1px solid rgba(244,240,234,.16);border-radius:4px;
+  backdrop-filter:blur(var(--card-blur)) saturate(120%);
+  -webkit-backdrop-filter:blur(var(--card-blur)) saturate(120%);
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.6)}
 
-/* --- the glass card (fixed within the stage) --- */
-.card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-  z-index:5;width:min(560px,86vw);
-  background:var(--card-glass);
-  border:1px solid var(--card-border);
-  border-radius:18px;
-  backdrop-filter:blur(14px) saturate(120%);
-  -webkit-backdrop-filter:blur(14px) saturate(120%);
-  padding:42px 54px 46px;
-  box-shadow:0 30px 80px -30px rgba(0,0,0,.6);
-  display:grid;grid-template-columns:auto 1fr;gap:26px;
-}
-/* left vertical step-rail */
-.rail{position:relative;width:3px;align-self:stretch;
-  background:rgba(244,240,234,.18);border-radius:2px}
-.rail .fill{position:absolute;left:0;top:0;width:100%;border-radius:2px;
-  background:var(--accent);transform-origin:top;will-change:height}
-.rail .dots{position:absolute;inset:0;display:flex;flex-direction:column;
-  justify-content:space-between;align-items:center;transform:translateX(-3px)}
-.rail .dot{width:9px;height:9px;border-radius:50%;background:rgba(244,240,234,.3);
-  transition:none}
-.rail .dot.is-on{background:var(--accent);box-shadow:0 0 0 4px rgba(31,168,201,.18)}
+.msw-rail{position:relative;width:2px;flex:0 0 2px;align-self:stretch;margin:.2rem 0}
+.msw-rail .track{position:absolute;inset:0;background:rgba(244,240,234,.16)}
+.msw-rail .msw-fill{position:absolute;left:0;top:0;width:100%;height:0%;
+  background:var(--bronze);transform-origin:top}
+.msw-rail .msw-dots{position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:space-between;align-items:center}
+.msw-rail .msw-dot{width:9px;height:9px;border-radius:50%;background:var(--ink);
+  border:1.5px solid rgba(244,240,234,.45);transform:translateX(-3.5px) scale(.86);
+  transition:border-color .3s var(--air),background .3s var(--air),
+             box-shadow .3s var(--air),transform .3s var(--air)}
+.msw-rail .msw-dot.is-on{background:var(--bronze);border-color:var(--bronze);
+  transform:translateX(-3.5px) scale(1);box-shadow:0 0 0 4px rgba(184,148,106,.18)}
 
-/* the copy column — only ONE step's copy is visible at a time, stacked */
-.copy{position:relative;min-height:230px}
-.step{position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;text-align:center;gap:14px;opacity:0;will-change:opacity,transform}
-.step.is-active{opacity:1}
-.step .eyebrow{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;
-  color:var(--accent);font-weight:600}
-.step h3{font-family:var(--serif);font-weight:400;font-size:clamp(1.4rem,2.4vw,2rem);
-  line-height:1.05;letter-spacing:-.01em}
-.step p{font-size:.96rem;line-height:1.62;color:rgba(244,240,234,.78);max-width:40ch}
+.msw-copy{position:relative;flex:1;min-height:inherit}
+.msw-step{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center}
+.msw-step .idx{font-family:var(--sans);font-size:.72rem;letter-spacing:.32em;
+  text-transform:uppercase;color:var(--bronze);margin-bottom:.9rem}
+.msw-step h3{font-family:var(--serif);font-weight:400;
+  font-size:clamp(1.5rem,3vw,2.3rem);line-height:1.06;letter-spacing:-.015em;margin-bottom:.9rem}
+.msw-step p{font-family:var(--sans);font-size:.98rem;line-height:1.6;
+  color:rgba(244,240,234,.78);max-width:30ch}
 
-/* progress hairline at the very bottom of the stage */
-.stage-progress{position:absolute;left:0;bottom:0;height:2px;width:100%;
-  background:var(--accent);transform:scaleX(0);transform-origin:left;z-index:6}
+.msw-progress{position:absolute;left:0;bottom:0;z-index:6;height:2px;width:100%;
+  background:var(--bronze);transform:scaleX(0);transform-origin:left center}
+.msw-eyebrow{position:absolute;top:var(--mx);left:var(--mx);z-index:6;
+  font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;opacity:.6}
+.msw-counter{position:absolute;top:var(--mx);right:var(--mx);z-index:6;text-align:right;
+  font-family:var(--serif);font-size:1rem;opacity:.7;line-height:1.2}
+.msw-counter b{display:block;font-size:1.15rem}
+.msw-disclaimer{position:absolute;right:var(--mx);bottom:calc(var(--mx) - 6px);z-index:6;
+  font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;opacity:.45}
 
 @media (max-width:760px){
-  .card{grid-template-columns:auto 1fr;padding:30px 26px 34px;width:90vw}
-  .step p{font-size:.9rem}
+  :root{--card-w:calc(100vw - var(--mx)*2);--card-minh:280px;--card-blur:10px}
+  .msw-card{left:var(--mx);right:var(--mx);top:auto;bottom:calc(var(--mx) + 24px);transform:none}
+  .msw-step p{max-width:none}
+  .msw-disclaimer{display:none}
 }
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
-<!-- preloader -->
-<div id="preloader"><div class="mk">Naveera</div></div>
-<div class="slice left"></div><div class="slice right"></div>
-
-<div class="spacer top">scroll ↓</div>
-
-<!-- ============================================================
-     STAGE — pinned, scrubbed, N steps
-     ============================================================ -->
-<section class="stage" id="stage">
-
-  <!-- MEDIA LAYERS (one per step). Layer 0 starts active. -->
-  <!-- Using gradient placeholders so the lab runs with zero assets;
-       swap each .ph for <img src> or muted autoplay <video>. -->
-  <div class="media-layer is-active" data-layer="0">
-    <div style="width:100%;height:100%;background:
-      linear-gradient(160deg,#3a4a3f 0%,#5a6b54 45%,#8a9b6e 100%)"></div>
+<section class="spacer">
+  <div>
+    <div class="eyebrow">media-step-switch · lab · 1:1</div>
+    <div class="scroll-hint">Гортайте ↓</div>
   </div>
-  <div class="media-layer" data-layer="1">
-    <div style="width:100%;height:100%;background:
-      linear-gradient(160deg,#2e3b4a 0%,#46586b 45%,#6e859b 100%)"></div>
+</section>
+
+<!-- LAYER ↔ STEP mapping (layer index = step index; reveals bottom→up):
+       layer0/step0 = 01-HERO/03-villa-34-day-v1FULL.png
+       layer1/step1 = 06-TERRACE/01-тераса-вид-на-ріку-день.png (Cyrillic → encodeURI)
+       layer2/step2 = 07-INTERIOR/02-kitchen-living-wide-day-v3.png
+       layer3/step3 = 08-CTA/01-night-facade-wide-v1FULL.png (night → dusk land)
+     SPARE/ALT swaps: 02-ARCH/01-clinker-macro-raking-v2FULL.png,
+                      03-RIVER/01-riverbank-reeds-golden-v2FULL.png
+     People-figure ELEMENT variants deliberately NOT used. -->
+<section class="msw-stage" id="stage" aria-label="stepped media benefits">
+
+  <div class="msw-layer" data-layer="0">
+    <img class="media" data-render="01-HERO/03-villa-34-day-v1FULL.png" alt="Вілла вдень" />
+    <div class="fb fb-0"></div>
   </div>
-  <div class="media-layer" data-layer="2">
-    <div style="width:100%;height:100%;background:
-      linear-gradient(160deg,#4a3a3a 0%,#6b5454 45%,#9b7e6e 100%)"></div>
+  <div class="msw-layer" data-layer="1">
+    <img class="media" data-render="06-TERRACE/01-тераса-вид-на-ріку-день.png" alt="Тераса з видом на ріку" />
+    <div class="fb fb-1"></div>
+  </div>
+  <div class="msw-layer" data-layer="2">
+    <img class="media" data-render="07-INTERIOR/02-kitchen-living-wide-day-v3.png" alt="Кухня-вітальня" />
+    <div class="fb fb-2"></div>
+  </div>
+  <div class="msw-layer" data-layer="3">
+    <img class="media" data-render="08-CTA/01-night-facade-wide-v1FULL.png" alt="Фасад вночі" />
+    <div class="fb fb-3"></div>
   </div>
 
-  <div class="media-scrim"></div>
+  <div class="msw-scrim"></div>
 
-  <!-- GLASS CARD -->
-  <div class="card">
-    <div class="rail">
-      <div class="fill" style="height:0%"></div>
-      <div class="dots">
-        <span class="dot is-on"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+  <div class="msw-card">
+    <div class="msw-rail">
+      <div class="track"></div>
+      <div class="msw-fill"></div>
+      <div class="msw-dots">
+        <span class="msw-dot is-on" data-dot="0"></span>
+        <span class="msw-dot" data-dot="1"></span>
+        <span class="msw-dot" data-dot="2"></span>
+        <span class="msw-dot" data-dot="3"></span>
       </div>
     </div>
 
-    <div class="copy">
-      <article class="step is-active" data-step="0">
-        <span class="eyebrow">Benefit 01</span>
-        <h3>A single platform for complete fleet visibility</h3>
-        <p>Naveera pulls routing, safety, and analytics into one unified
-           stack. Deep integrations with broker networks anticipate trip
-           volumes before your day begins — automatically generating
-           optimized manifests across your entire fleet.</p>
+    <div class="msw-copy">
+      <article class="msw-step" data-step="0">
+        <span class="idx">Перевага 01</span>
+        <h3>Власний берег від порога</h3>
+        <p>Земля що спускається до самої води. Між домом і річкою немає нікого.</p>
       </article>
-      <article class="step" data-step="1">
-        <span class="eyebrow">Benefit 02</span>
-        <h3>Built to deploy fast, built to scale</h3>
-        <p>Designed for operators who can't afford downtime. No hardware
-           to install, no lengthy IT projects. Dispatchers are up and
-           running in hours — whether you run 10 vehicles or 10,000.</p>
+      <article class="msw-step" data-step="1" style="opacity:0">
+        <span class="idx">Перевага 02</span>
+        <h3>Ранок на власній терасі</h3>
+        <p>Кава, тиша і відкритий вид на воду. Простір що належить тільки вам.</p>
       </article>
-      <article class="step" data-step="2">
-        <span class="eyebrow">Benefit 03</span>
-        <h3>Every status, in real time</h3>
-        <p>Drivers see clear manifests in the app from day one. Surface
-           real-time vehicle and patient status across the whole network,
-           with health-system integrations that keep everyone in sync.</p>
+      <article class="msw-step" data-step="2" style="opacity:0">
+        <span class="idx">Перевага 03</span>
+        <h3>Світло живе всередині</h3>
+        <p>Кухня-вітальня з видом на ріку. Натуральний дуб і камінь що старіють красиво.</p>
+      </article>
+      <article class="msw-step" data-step="3" style="opacity:0">
+        <span class="idx">Перевага 04</span>
+        <h3>Дім який світиться у темряві</h3>
+        <p>Увечері фасад стає теплим ліхтарем над берегом. Не коробка, а дім.</p>
       </article>
     </div>
   </div>
 
-  <div class="stage-progress" id="stageProgress"></div>
+  <div class="msw-eyebrow">Nahirna · техніка</div>
+  <div class="msw-counter"><b id="counterNum">01</b><span id="counterTot">04</span></div>
+  <div class="msw-disclaimer">візуалізація</div>
+  <div class="msw-progress" id="progress"></div>
 </section>
 
-<div class="spacer bot">end</div>
+<section class="spacer handoff">
+  <div>
+    <div class="eyebrow">наступна секція</div>
+    <h2>Дім на власному березі річки</h2>
+  </div>
+</section>
 
 <script>
+/* ASSETS — real renders from the sibling NAHIRNA dataset (4 levels up from this
+   plugin component dir). onerror → grade-matched gradient fallback so the lab
+   still runs when the plugin is checked out standalone. */
+const RENDER_BASE = "../../../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/";
+function renderURL(rel){
+  return RENDER_BASE + rel.split("/").map(encodeURIComponent).join("/");
+}
+document.querySelectorAll("[data-render]").forEach(img => {
+  img.addEventListener("error", () => img.closest(".msw-layer").classList.add("is-fallback"), {once:true});
+  img.src = renderURL(img.dataset.render);
+});
+
+const CONFIG = {
+  scrub:1, pin:true, stepVH:100,
+  wave:true, waveAmp:7, waveCols:14, waveFreq:1.5,
+  direction:'up', overscan:1.06, pushPercent:4, wipeEase:'air',
+  onStep:(i)=>{ document.getElementById('counterNum').textContent = String(i+1).padStart(2,'0'); }
+};
+/* RATIOS of one slice. copyIn STARTS at the same point copyOut starts → overlap/ghost. */
+const R = { wipe:1.0, copyOut:0.30, copyOutAt:0.40, copyIn:0.42, copyInAt:0.40, rail:0.85, dotAt:0.35 };
+
 gsap.registerPlugin(ScrollTrigger);
 const AIR = CustomEase.create("air","M0,0 C0.22,0.61 0.18,1 1,1");
 const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
 
-/* ---------- preloader ritual ---------- */
-function openLab(){
-  const pre=document.getElementById("preloader");
-  const sL=document.querySelector(".slice.left"), sR=document.querySelector(".slice.right");
-  if(reduce){ pre.style.display="none"; gsap.set([sL,sR],{scaleX:0}); return; }
-  const tl=gsap.timeline();
-  tl.to("#preloader .mk",{opacity:.25,duration:.5,ease:AIR},.3)
-    .set([sL,sR],{scaleX:1})
-    .set(pre,{display:"none"})
-    .to(sL,{scaleX:0,duration:.9,ease:AIR},"<")
-    .to(sR,{scaleX:0,duration:.9,ease:AIR},"<");
-}
+const stage  = document.getElementById("stage");
+const layers = gsap.utils.toArray("[data-layer]");
+const steps  = gsap.utils.toArray("[data-step]");
+const dots   = gsap.utils.toArray("[data-dot]");
+const fill   = stage.querySelector(".msw-fill");
+const progress = document.getElementById("progress");
+const N = steps.length;
+document.getElementById("counterTot").textContent = String(N).padStart(2,'0');
+console.assert(layers.length === steps.length, "[media-step-switch] layer/step counts must match");
 
-/* ============================================================
-   THE SWITCH ENGINE
-   N steps. Pin the stage for (N-1) screen-heights of scrub.
-   Each step boundary = one wavy clip-path wipe of the next media
-   layer over the current one, + copy crossfade + rail advance.
-   ============================================================ */
-(function mediaStepSwitch(){
-  const stage   = document.getElementById("stage");
-  const layers  = gsap.utils.toArray(".media-layer");
-  const steps   = gsap.utils.toArray(".step");
-  const dots    = gsap.utils.toArray(".rail .dot");
-  const fill    = document.querySelector(".rail .fill");
-  const progress= document.getElementById("stageProgress");
-  const N = steps.length;
-  if(N < 2) return;
-
-  /* --- the wavy seam: two clip-path strings per layer ---
-     CLOSED  = layer fully hidden below a wave near the TOP (nothing shown)
-     OPEN    = layer fully shown (flat full-bleed)
-     We animate clip-path between these. polygon() with many points
-     along the top edge makes the undulating seam; tweening point-by-point
-     gives the organic "fabric pulled down" wipe seen in the recording. */
-  function wavePoly(progress){
-    // progress 0 -> seam at very top (layer hidden), 1 -> seam off bottom (layer shown)
-    // build a top edge of 9 samples with a sine ripple riding the seam line
-    const pts=[];
-    const baseY = -8 + progress*116;          // seam sweeps from -8% to 108%
-    const amp   = 4.5 * Math.sin(progress*Math.PI); // ripple peaks mid-wipe, flat at ends
-    const cols  = 8;
-    for(let i=0;i<=cols;i++){
-      const x=(i/cols)*100;
-      const y=baseY + amp*Math.sin((i/cols)*Math.PI*2.2 + progress*4);
+const TAU = Math.PI * 2;
+function wavePolygon(p){
+  const amp   = CONFIG.wave ? CONFIG.waveAmp * Math.sin(p * Math.PI) : 0;
+  const cols  = CONFIG.wave ? CONFIG.waveCols : 1;
+  const phase = p * Math.PI;
+  if (CONFIG.direction === 'up'){
+    // bottom→up reveal: visible region is BELOW the seam; seam rises 108%→-8%.
+    const baseY = 108 - p * 116;
+    const pts = [];
+    for (let i = 0; i <= cols; i++){
+      const x = (i / cols) * 100;
+      const y = baseY + amp * Math.sin((i / cols) * TAU * CONFIG.waveFreq + phase);
       pts.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
     }
-    // close down the right, bottom, left
-    pts.push(`100% 100%`,`0% 100%`);
+    pts.push("100% 100%", "0% 100%");           // close over the two BOTTOM corners
     return `polygon(${pts.join(",")})`;
   }
-  // init: layer 0 fully open, the rest closed (seam at top)
-  layers.forEach((l,i)=> gsap.set(l,{clipPath: i===0 ? wavePoly(1) : wavePoly(0)}));
-  gsap.set(steps,{opacity:0}); gsap.set(steps[0],{opacity:1});
+  const baseY = -8 + p * 116;
+  const pts = [];
+  for (let i = 0; i <= cols; i++){
+    const x = (i / cols) * 100;
+    const y = baseY + amp * Math.sin((i / cols) * TAU * CONFIG.waveFreq + phase);
+    pts.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+  }
+  pts.push("100% 100%", "0% 100%");
+  return `polygon(${pts.join(",")})`;
+}
+function setLayerClip(layer, p){ layer.style.clipPath = wavePolygon(p); }
 
-  /* master scrubbed timeline. Each transition occupies one equal slice. */
-  const tl=gsap.timeline({
+function setActiveDot(i){ dots.forEach((d,idx)=>d.classList.toggle("is-on",idx===i)); CONFIG.onStep(i); }
+function snapToStep(i){
+  layers.forEach((l,idx)=> l.style.clipPath = idx <= i ? wavePolygon(1) : wavePolygon(0));
+  steps.forEach((s,idx)=> gsap.set(s,{autoAlpha: idx===i ? 1 : 0}));
+  dots.forEach((d,idx)=> d.classList.toggle("is-on", idx===i));
+  gsap.set(fill,{height:(N===1?0:(i/(N-1))*100)+"%"});
+  CONFIG.onStep(i);
+}
+snapToStep(0);
+
+if (reduce){
+  snapToStep(0);
+  gsap.set(progress,{scaleX:0});
+} else {
+  if (window.Lenis){
+    const lenis = new Lenis({ lerp:0.12 });
+    lenis.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add((t)=> lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  const tl = gsap.timeline({
     scrollTrigger:{
-      trigger:stage, start:"top top", end:"+="+( (N-1)*100 )+"%",
-      scrub:true, pin:true, anticipatePin:1,
-      onUpdate:self=>{ gsap.set(progress,{scaleX:self.progress}); }
+      trigger: stage, start:"top top",
+      end:"+=" + ((N-1)*CONFIG.stepVH) + "%",
+      scrub: CONFIG.scrub, pin: CONFIG.pin, anticipatePin:1,
+      onUpdate:(self)=> gsap.set(progress,{scaleX:self.progress})
     }
   });
 
-  for(let i=1;i<N;i++){
-    const at=(i-1);                 // each slice is 1 unit long on the timeline
-    const incoming=layers[i], outgoing=layers[i-1];
-    const inStep=steps[i], outStep=steps[i-1];
+  for (let i = 0; i < N - 1; i++){
+    const to = layers[i+1];
+    const oldCopy = steps[i];
+    const newCopy = steps[i+1];
+    const fillTo  = ((i+1)/(N-1))*100;
+    const slice   = i;
 
-    // 1) incoming media wipes down over the current one (the wave)
-    tl.to(incoming,{ clipPath:wavePoly(1), duration:.7, ease:AIR }, at)
-      // gentle push on the incoming layer's image for life
-      .fromTo(incoming.querySelector("img,video,div"),
-              {yPercent:-3},{yPercent:0,duration:.7,ease:AIR}, at)
-      // 2) copy crossfade: old dims first, new clarifies after the seam passes
-      .to(outStep,{opacity:0,duration:.28,ease:"none"}, at+.02)
-      .fromTo(inStep,{opacity:0,y:10},{opacity:1,y:0,duration:.4,ease:AIR}, at+.34)
-      // 3) rail fill advances + dots toggle at the midpoint
-      .to(fill,{height:((i)/(N-1))*100+"%",duration:.7,ease:AIR}, at)
-      .set(dots[i-1],{className:"dot"}, at+.35)
-      .set(dots[i],{className:"dot is-on"}, at+.35)
-      // 4) once fully shown, re-close the OLD layer so a backward scrub re-wipes cleanly
-      .set(outgoing,{clipPath:wavePoly(0)}, at+.999);
+    const proxy = { p:0 };
+    gsap.set(to, {clipPath: wavePolygon(0)});
+    tl.to(proxy, { p:1, duration:R.wipe, ease:CONFIG.wipeEase,
+      onUpdate(){ setLayerClip(to, proxy.p); } }, slice+0);
+
+    const dir = CONFIG.direction === 'up' ? 1 : -1;
+    tl.fromTo(to.querySelector(".media"),
+      { yPercent: dir*CONFIG.pushPercent },
+      { yPercent: 0, duration:R.wipe, ease:CONFIG.wipeEase }, slice+0);
+
+    /* soft copy-out overlapping copy-in → ghosted double-exposure */
+    tl.to(oldCopy, { autoAlpha:0, duration:R.copyOut, ease:"power1.out" }, slice+R.copyOutAt);
+
+    tl.to({}, { duration:0,
+      onStart(){ setActiveDot(i+1); },
+      onReverseComplete(){ setActiveDot(i); } }, slice+R.dotAt);
+
+    tl.to(fill, { height:fillTo+"%", duration:R.rail, ease:CONFIG.wipeEase }, slice+0);
+
+    tl.fromTo(newCopy, { autoAlpha:0, y:10 },
+      { autoAlpha:1, y:0, duration:R.copyIn, ease:CONFIG.wipeEase }, slice+R.copyInAt);
   }
 
-  if(reduce){
-    // no scrub motion: snap to a static state, kill the timeline
-    tl.scrollTrigger.kill();
-    layers.forEach((l,i)=>gsap.set(l,{clipPath:i===0?wavePoly(1):wavePoly(0)}));
-  }
-})();
+  /* P6 release = native pin un-pin (no tween). */
+  let rT; addEventListener("resize", ()=>{ clearTimeout(rT); rT=setTimeout(()=>ScrollTrigger.refresh(),200); });
+  window.addEventListener("load", ()=> ScrollTrigger.refresh());
+}
 
-window.addEventListener("load",openLab);
-let rT;addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>ScrollTrigger.refresh(),200);});
+window.__mswGoTo = function(stepIndex){ console.log("[media-step-switch] go to step", stepIndex); };
 </script>
+<!-- ── __LAB_OK__ acceptance probe (added by library migration; additive) ──
+     Sets window.__LAB_OK__ = true once the technique has booted and no error
+     fired: GSAP + ScrollTrigger present, ≥1 ScrollTrigger (or reduced-motion
+     fallback) live, and zero console.error. scripts/library-verify.mjs reads
+     this headless. Real per-phase assertions live in the RECIPE acceptance[]. -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var hasGsap = !!window.gsap;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll) ? ScrollTrigger.getAll().length : 0;
+      var ok = errs===0 && hasGsap && (reduce || stCount>0 || document.body.querySelector('[class*="static"],[class*="reduced"]'));
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  var tries=0;
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+
 </body>
 </html>

@@ -1,0 +1,1609 @@
+{
+  "cards-swipe": {
+    "id": "cards-swipe",
+    "name": "Pinned cinematic deck-swipe",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "CardsSwipe.init(opts)",
+      "module": "iife",
+      "returns": "{ goTo, refresh, kill, index }"
+    },
+    "meaning": {
+      "what": "Pinned scrub timeline: a render dissolves, a cream card slides up over the dark hero, then becomes a horizontal deck swiped sideways by scroll.",
+      "when": "A SHOW/services act with 3-6 equal beats that must read as ONE cinematic gesture, not a list.",
+      "lands": "The page 'becomes a film' for one section; chapters feel authored, premium, sequential.",
+      "not_when": "Short factual sections, conversion gates (motion must DROP there), more than half the page pinning."
+    },
+    "source": {
+      "grammar": "Zera Studio — zerasoftwarestudio.com / Our Services",
+      "recording": "rec1-cards-swipe.mov",
+      "registry_ref": [
+        "T-217",
+        "T-405"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "clip-path",
+      "left"
+    ],
+    "trigger": "one pinned scroll-scrub timeline (scrub:1), fully reversible",
+    "timing_layer": [
+      "B-entrance",
+      "A-ambient"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "show",
+      "material"
+    ],
+    "combines_with": [
+      "puzzle-text",
+      "focus-render-switch",
+      "parallax-depth",
+      "splitLines"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "before-after-drag"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "default",
+      "cinematic",
+      "editorial"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "render dissolves via 2-img crossfade, never video.currentTime",
+      "reverse-scroll replays all phases 1:1",
+      "at or below 760px (or reduce-motion) collapses to a static vertical stack, no pin"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/cards-swipe/",
+    "_variantsResolved": [
+      {
+        "id": "cinematic",
+        "status": "official",
+        "extends": "cards-swipe"
+      },
+      {
+        "id": "editorial",
+        "status": "official",
+        "extends": "cards-swipe"
+      }
+    ]
+  },
+  "depth-stack": {
+    "id": "depth-stack",
+    "name": "Depth stack (deal-fan / portal-through)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "DepthStack.mount(stage, { n, applyFrame, entryFrame?, updateChrome?, revealHeadline?, reducedFrame?, endMult, scrub })   # base owns ONLY the shared frame (pin+scrub+snap+signed-depth+reduced-motion). Each variant ships its OWN per-frame engine as variants/<name>/variant.js (it imports ../../component.js and supplies applyFrame). Call the variant entry — DepthDealFan.init / DepthPortalThrough.init — which internally mounts the base.",
+      "module": "iife",
+      "returns": "{ kill, refresh, airEase, n } | null"
+    },
+    "meaning": {
+      "what": "A pinned scroll-scrub deck of layered planes painted from one continuous signed depth (d = i - prog) that move through Z — dealt forward-and-down into a fanned hand (deal-fan), or flown THROUGH as a tunnel of portal-planes (portal-through).",
+      "when": "A depth-takeover section that should feel like moving THROUGH space, not across it — render planes that recede/advance toward the viewer on scroll, where the cards-swipe horizontal read is wrong.",
+      "lands": "The page gains real Z — you fall into the scene; planes pass YOU rather than slide by. The single felt motion is monotonic with the wheel: forward == down-the-page.",
+      "not_when": "Flat catalogue/index sections, conversion gates (motion must drop there), anywhere the cards-swipe horizontal deck already fits. depth-stack is its OWN technique, never a cards-swipe variant, and must not run as a second pin in a section that already pins."
+    },
+    "source": {
+      "grammar": "QUADRO cards-lab — owner-approved depth-d2 (deal/fan) + depth-d3 (portal/through); the V4 scroll-direction fix",
+      "recording": [
+        "apps/quadro/public/cards-lab/depth-d2-deal-fan.html",
+        "apps/quadro/public/cards-lab/depth-d3-portal-through.html"
+      ],
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase (no WebGL — CSS 3D transforms / perspective only)",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "filter"
+    ],
+    "trigger": "one pinned scroll-scrub timeline (scrub:0.7) per section, with honest snap to the n-1 frame slots; a second scrub:0.6 entry trigger hands frame 0 in over the hero",
+    "timing_layer": [
+      "B-entrance",
+      "A-ambient"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "material",
+      "lifestyle-climax"
+    ],
+    "combines_with": [
+      "parallax-depth",
+      "reveal",
+      "scroll-indicator"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "deal-fan",
+      "portal-through"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "RECIPE.md",
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "ONE pinned scroll-scrub ScrollTrigger drives the deck: prog = self.progress*(n-1), continuous; the base mounts it, no per-frame math in the base",
+      "signed depth d = i - prog drives every frame's transform — ahead (d>0) is deep/parked, d=0 is the active plane, behind (d<0) has been passed",
+      "SCROLL-DIRECTION LAW (the V4 fix): depth advances the SAME direction as scroll — incoming AND outgoing both travel down-the-page/forward; nothing rises against the wheel",
+      "honest snap to n-1 slots (step 1/(n-1), ease air, inertia:false) + a scrub:0.6 entry trigger handing frame 0 in over the hero",
+      "reduced-motion collapses to a flat jump between frames (scrub:false, snap 1/(n-1)) — no deal/fly-through drama",
+      "depth is CSS 3D transform/perspective only — zero WebGL; per-variant engine lives in variants/<name>/variant.js importing ../../component.js"
+    ],
+    "verify": "lab.html#__LAB_OK__   (variants: variants/deal-fan/variant.lab.html#__LAB_OK__, variants/portal-through/variant.lab.html#__LAB_OK__)",
+    "_path": "library/components/depth-stack/",
+    "_variantsResolved": [
+      {
+        "id": "deal-fan",
+        "status": "official",
+        "extends": "depth-stack"
+      },
+      {
+        "id": "portal-through",
+        "status": "official",
+        "extends": "depth-stack"
+      }
+    ]
+  },
+  "focus-render-switch": {
+    "id": "focus-render-switch",
+    "name": "Focus-on-render pinned stepper",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "FocusRenderSwitch.init(target, options)",
+      "module": "iife",
+      "returns": "controller"
+    },
+    "meaning": {
+      "what": "A pinned section steps through N renders; each step the heading ticks up through a slot while the active render crossfades into focus with a slow Ken-Burns hold.",
+      "when": "A MATERIAL/spec act where you want the viewer to LOOK AT the product N times, one labelled render per beat.",
+      "lands": "'I looked at the building N times' — each render gets a held, in-focus frame tied to a spec line.",
+      "not_when": "Hero covers, conversion gates, or any section that should NOT pin."
+    },
+    "source": {
+      "grammar": "Vide Infra / ERA frame-scrub — render-focus stepper",
+      "recording": null,
+      "registry_ref": [
+        "T-077"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "one pinned scroll-scrub stepper; pin length = steps * scrollPerStep * 100vh",
+    "timing_layer": [
+      "B-entrance",
+      "C-emphasis"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "material",
+      "proof"
+    ],
+    "combines_with": [
+      "parallax-depth",
+      "splitLines",
+      "reveal",
+      "custom-cursor"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "default"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "each step crossfades the active render in focus, never video.currentTime",
+      "heading rises through its slot per step (headRise), reversible on reverse-scroll",
+      "pinSpacing holds; following section does not jump on release"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/focus-render-switch/",
+    "_variantsResolved": []
+  },
+  "media-step-switch": {
+    "id": "media-step-switch",
+    "name": "Wavy-seam media stepper",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "mediaStepSwitch(stageSel, opts)",
+      "module": "esm",
+      "returns": "controller | null"
+    },
+    "meaning": {
+      "what": "A pinned stage steps through stacked media layers; each step a wavy (or straight) seam wipes the next image/video in from one edge with a small parallax push, synced to stepped text + dots.",
+      "when": "A PROOF/benefit act with 2-N stepped statements, each carrying its own full-bleed media that should swap with a crafted seam, not a hard cut.",
+      "lands": "Each claim arrives on its own held frame; the seam wipe makes the swap feel authored, like turning a page.",
+      "not_when": "Hero covers, conversion gates, sections with only one media."
+    },
+    "source": {
+      "grammar": "Vide Infra benefit-band — wavy-seam stepper",
+      "recording": null,
+      "registry_ref": [
+        "T-310"
+      ]
+    },
+    "stack": "vanilla ESM + GSAP 3.12.5 + ScrollTrigger + CustomEase",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "clip-path"
+    ],
+    "trigger": "one pinned scroll-scrub stepper; stepVH per transition",
+    "timing_layer": [
+      "B-entrance",
+      "A-ambient"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "proof",
+      "material"
+    ],
+    "combines_with": [
+      "splitLines",
+      "reveal",
+      "counter",
+      "scroll-indicator"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "default"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "seam wipe reveals each layer via clip-path polygon, never video.currentTime scrub",
+      "dots/fill track the active step; onStep fires per step",
+      "reverse-scroll replays seam wipes 1:1"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/media-step-switch/",
+    "_variantsResolved": []
+  },
+  "puzzle-image": {
+    "id": "puzzle-image",
+    "name": "Scroll-assembled WIDE cover -> modest scale-up",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "PuzzleImage(root, userConfig)",
+      "module": "iife",
+      "returns": "controller | null"
+    },
+    "meaning": {
+      "what": "Slices ONE WIDE LANDSCAPE (~16:10) cover image into an R×C grid of CSS-sprite tiles that fly home from a blurred scatter on scroll (center-out), seating into the assembled cover (already near full viewport WIDTH at assembly); THEN the WHOLE cover (photo + baked top wordmark + lower-left captions, one DOM unit) is scaled up MODESTLY (~1.35x) via transform:scale to full-bleed, cropping top/bottom via overflow. The LEFT headline stays VISIBLE throughout.",
+      "when": "An opening cover (hero) with one strong WIDE render that should RESOLVE INTO BEING on the first scroll, then take over the whole screen before releasing.",
+      "lands": "You recognize the place before it finishes assembling = ownership; then the whole wide cover grows modestly as one unit (wordmark grows wider WITH the subject) and the building takes over the screen.",
+      "not_when": "Sections with no single hero render, conversion gates, or any beat that must read instantly without motion."
+    },
+    "source": {
+      "grammar": "Vide Infra / Saisei / Zera-class cover reveal (Zera /work, f_001 scatter -> f_012 assembled WIDE cover near full width -> f_016 modest scale-up full-bleed landscape)",
+      "recording": "frames/rec3-puzzle-image/f_001..f_027",
+      "registry_ref": [
+        "T-101",
+        "T-201"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "filter"
+    ],
+    "trigger": "one pinned scroll-scrub timeline",
+    "timing_layer": [
+      "B-entrance",
+      "A-ambient"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "hero"
+    ],
+    "combines_with": [
+      "puzzle-text",
+      "parallax-depth",
+      "splitLines",
+      "scroll-indicator"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "default"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "scattered blurred tiles fly home center-out, de-blur, opacity up, seating into one assembled WIDE LANDSCAPE cover already near full viewport WIDTH (f_001 -> f_012)",
+      "the WHOLE cover unit (.coverWrap) scales up MODESTLY (~1.35x, NOT 6x) via transform:scale to full-bleed; wordmark + captions scale WITH it keeping relative composition (f_016 -> f_020)",
+      "the cover is LANDSCAPE 16:10 (NOT a portrait box) and crops top/bottom via .stage overflow:hidden as it grows — NOT a clip-path reframe, NOT a narrow column",
+      "the LEFT serif headline stays VISIBLE throughout (z above the cover, NEVER faded to opacity 0)",
+      "pin release is natural scroll-out; reduced-motion AND mobile give the assembled cover with no pin/flight/scale; transform/opacity/filter only; no WebGL; no mix-blend/backdrop over the scrubbed surface"
+    ],
+    "verify": "lab.html",
+    "_path": "library/components/puzzle-image/",
+    "_variantsResolved": []
+  },
+  "puzzle-text": {
+    "id": "puzzle-text",
+    "name": "Word scatter ↔ assemble",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "PuzzleText.mount({ stage, paragraph, assembleOpts?, pinVH? }) | PuzzleText.buildAssembly(el, tl, position, opts)",
+      "module": "iife",
+      "returns": "controller"
+    },
+    "meaning": {
+      "what": "Gray, displaced WORDS (always opaque) of one paragraph scattered across the viewport on BOTH axes (wide diagonal, some rotated/skewed, sized differently). On scroll they converge to the final readable paragraph on one expo-out ease, darkening gray→ink as each word seats (zero layout shift at rest). Scroll-scrubbed and reversible — scrolling back re-scatters.",
+      "when": "A single statement line that should read as composed in front of you, settling into place as you scroll.",
+      "lands": "Words drift home into a sentence = the thought assembling itself.",
+      "not_when": "Body copy, lists, conversion CTAs, or any text that must be instantly legible."
+    },
+    "source": {
+      "grammar": "Vide Infra / editorial cover titles — word-level scatter↔assemble",
+      "recording": "rec5-puzzle-text",
+      "registry_ref": [
+        "T-118"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "color"
+    ],
+    "trigger": "scroll-scrub (pinned, reversible)",
+    "timing_layer": [
+      "B-entrance",
+      "C-pinned"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "proof",
+      "statement"
+    ],
+    "combines_with": [
+      "parallax-depth",
+      "reveal"
+    ],
+    "anti_combos": [
+      "letter-level-split"
+    ],
+    "gated_by": [
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "default"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "split is WORD-level only (never letters — D12 letters-ban)",
+      "words NEVER go invisible — opacity stays 1; assembly is color-only gray→ink",
+      "farther-from-home word = lighter gray + larger",
+      "scatter is wide diagonal on BOTH axes + slight rotate/skew",
+      "font is SANS grotesque (NOT serif)",
+      "scatter ↔ assemble ONLY — no card, no image, no finale, no next section",
+      "scrub mode re-scatters the words on reverse-scroll",
+      "reduced-motion gives the settled paragraph, no scatter, no pin"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/puzzle-text/",
+    "_variantsResolved": []
+  },
+  "slide-out-img-text": {
+    "id": "slide-out-img-text",
+    "name": "Slide-out deck handoff",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "SlideOutImgText.init(root, opts)",
+      "module": "iife",
+      "returns": "void"
+    },
+    "meaning": {
+      "what": "A stacked hand of image cards fans out to four corners on a pinned scrub while paired captions cross-fade and a ghost letter/word bleeds behind — the lifestyle 'show life' climax.",
+      "when": "The lifestyle-climax beat: the emotional moment that sells the LIFE, where a deck of life-shots fans open as one authored gesture.",
+      "lands": "The moment that sells the life — the deck blooms and the caption lands the feeling, not a gallery grid.",
+      "not_when": "Spec/material sections, conversion gates, or anywhere two pin-owners would collide."
+    },
+    "source": {
+      "grammar": "Vide Infra Sofi — slide-out deck / lifestyle climax",
+      "recording": null,
+      "registry_ref": [
+        "T-220"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "one pinned scroll-scrub timeline; endVH carries the fan + caption handoff",
+    "timing_layer": [
+      "B-entrance",
+      "C-emphasis"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "lifestyle-climax"
+    ],
+    "combines_with": [
+      "counter",
+      "parallax-depth",
+      "reveal",
+      "scroll-indicator"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "default"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "cards fan from stacked deck to four-corner layout on scrub, transform-only",
+      "captions A/B cross-fade tied to the same pin progress (one clock)",
+      "reduced-motion / mobile collapses to a static legible layout, no pin"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/slide-out-img-text/",
+    "_variantsResolved": []
+  },
+  "benefit-wipe-band": {
+    "id": "benefit-wipe-band",
+    "name": "Wavy-seam benefit band",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "a stepped benefits/proof band where each claim swaps media with a crafted seam",
+    "page_beat": "proof",
+    "meaning": {
+      "what": "A pinned band steps through N benefit statements; each step a wavy seam wipes the next full-bleed media in, with reveal copy and depth riding the same progress.",
+      "when": "A PROOF/benefit act with 2-N stepped statements that each carry their own full-bleed media.",
+      "lands": "Each claim arrives on its own held frame; the page turns like authored chapters.",
+      "not_when": "Hero covers, conversion gates, single-media sections."
+    },
+    "source": {
+      "grammar": "Vide Infra benefit-band — wavy-seam stepper",
+      "recording": null,
+      "registry_ref": []
+    },
+    "theme": {
+      "skin": "neutral",
+      "book_end": false
+    },
+    "ease": "air",
+    "webgl": false,
+    "pin": {
+      "owner": "media-step-switch",
+      "count": 1,
+      "length": "steps * stepVH"
+    },
+    "owns_pin": true,
+    "uses": [
+      {
+        "atom": "media-step-switch",
+        "params": {
+          "wave": true,
+          "pin": true
+        }
+      },
+      {
+        "atom": "parallax-depth",
+        "params": {
+          "rides": "pin-progress"
+        }
+      },
+      {
+        "atom": "reveal",
+        "params": {
+          "trigger": "per-step"
+        }
+      }
+    ],
+    "combines_with": [
+      "story-stepper-render-focus",
+      "hero-puzzle-monument"
+    ],
+    "anti_combos": [
+      "interiors-cards-cursor"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html"
+    ],
+    "acceptance": [
+      "exactly ONE pin (media-step-switch owns it)",
+      "seam wipe per step via clip-path, never video.currentTime",
+      "reveal copy fires per step, reversible; fps holds"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "_path": "library/combos/benefit-wipe-band/",
+    "_variantsResolved": []
+  },
+  "conversion-quiet-gate": {
+    "id": "conversion-quiet-gate",
+    "name": "Quiet conversion gate",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "the conversion gate where the decision must read cleanly",
+    "page_beat": "conversion",
+    "meaning": {
+      "what": "Motion budget drops to near-zero: one entrance fade then dead-still; hover-only micro-interactions (swap + hairline draw + cursor), no pin, no scrub, no climax.",
+      "when": "The form / callback / apartments-handoff beat, where the page must STOP and the decision read without competing motion.",
+      "lands": "A full stop — the offer reads cleanly; the eye is not pulled by another moving act.",
+      "not_when": "Any act meant to be cinematic; never pin or scrub this section."
+    },
+    "source": {
+      "grammar": "ERA §08 / Springs §09 — conversion gate",
+      "recording": null,
+      "registry_ref": []
+    },
+    "theme": {
+      "skin": "neutral",
+      "book_end": true
+    },
+    "ease": "easeOutQuad",
+    "webgl": false,
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "owns_pin": false,
+    "uses": [
+      {
+        "atom": "reveal",
+        "params": {
+          "trigger": "onEnter",
+          "once": true
+        }
+      },
+      {
+        "atom": "parallax-depth",
+        "params": {
+          "amount": "faint-side-drift"
+        }
+      },
+      {
+        "atom": "custom-cursor",
+        "params": {
+          "hover-only": true
+        }
+      }
+    ],
+    "combines_with": [],
+    "anti_combos": [
+      "hero-puzzle-monument",
+      "lifestyle-deck-fan",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html"
+    ],
+    "acceptance": [
+      "ZERO pins, ZERO scrub by design (R_pin_budget conversion exception)",
+      "one entrance fade then dead-still; only hover micro-interactions",
+      "no theme drama; the gate reads as a full stop"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "_path": "library/combos/conversion-quiet-gate/",
+    "_variantsResolved": []
+  },
+  "hero-puzzle-monument": {
+    "id": "hero-puzzle-monument",
+    "name": "Self-assembling cover hero",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "the opening cover that earns the render",
+    "page_beat": "hero",
+    "meaning": {
+      "what": "Scattered blurred fragments fly home into one full-bleed monument while the serif title reveals word-by-word and the indicator hands you down.",
+      "when": "The first section, when one strong full-bleed render is available and the cover must read as ONE scroll gesture.",
+      "lands": "You recognize the house before it finishes = ownership; the building resolves into being.",
+      "not_when": "Sections without a single hero render; conversion gates; anywhere a second pin would collide."
+    },
+    "source": {
+      "grammar": "Vide Infra / Saisei / Zera-class cover reveal",
+      "recording": null,
+      "registry_ref": []
+    },
+    "theme": {
+      "skin": "dark",
+      "book_end": true
+    },
+    "ease": "air",
+    "webgl": false,
+    "pin": {
+      "owner": "puzzle-image",
+      "count": 1,
+      "length": "+=120%"
+    },
+    "owns_pin": true,
+    "uses": [
+      {
+        "atom": "puzzle-image",
+        "params": {
+          "rows": 6,
+          "cols": 4,
+          "scatter": 1.8,
+          "blurFrom": 18,
+          "staggerFrom": "center",
+          "pin": true
+        }
+      },
+      {
+        "atom": "parallax-depth",
+        "params": {
+          "rides": "pin-progress"
+        }
+      },
+      {
+        "atom": "splitLines",
+        "params": {
+          "trigger": "onEnter-gated"
+        }
+      },
+      {
+        "atom": "appear",
+        "params": {
+          "order": "before-all"
+        }
+      },
+      {
+        "atom": "scroll-indicator",
+        "params": {
+          "is-finished": true
+        }
+      }
+    ],
+    "combines_with": [
+      "story-stepper-render-focus"
+    ],
+    "anti_combos": [
+      "lifestyle-deck-fan"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html"
+    ],
+    "acceptance": [
+      "exactly ONE pin (puzzle-image owns it); no second ScrollTrigger pin",
+      "render recognizable before assembly completes (~p0.6)",
+      "no layout animation; transform/opacity/filter only; fps holds"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "_path": "library/combos/hero-puzzle-monument/",
+    "_variantsResolved": []
+  },
+  "interiors-cards-cursor": {
+    "id": "interiors-cards-cursor",
+    "name": "Interiors deck with custom cursor",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "the interiors walk-through as a cinematic horizontal deck",
+    "page_beat": "material",
+    "meaning": {
+      "what": "A pinned horizontal card deck swipes through interior renders; a custom cursor + decode-gate intros + reveal + a ticking counter ride the spine's single progress.",
+      "when": "An interiors/material act that should read as a curated reel of rooms, one held frame at a time, with a tactile cursor.",
+      "lands": "You walk the interior like a film reel; each room gets its own held, labelled frame.",
+      "not_when": "Hero covers, conversion gates, anywhere a second pin would collide."
+    },
+    "source": {
+      "grammar": "Zera / Vide Infra interiors deck + custom cursor",
+      "recording": null,
+      "registry_ref": []
+    },
+    "theme": {
+      "skin": "dark",
+      "book_end": false
+    },
+    "ease": "air",
+    "webgl": false,
+    "pin": {
+      "owner": "cards-swipe",
+      "count": 1,
+      "length": "scrubPerCard * (n-1)"
+    },
+    "owns_pin": true,
+    "uses": [
+      {
+        "atom": "cards-swipe",
+        "params": {
+          "pin": true,
+          "snap": true,
+          "drag": true
+        }
+      },
+      {
+        "atom": "parallax-depth",
+        "params": {
+          "rides": "pin-progress"
+        }
+      },
+      {
+        "atom": "custom-cursor",
+        "params": {
+          "hover": true
+        }
+      },
+      {
+        "atom": "reveal",
+        "params": {
+          "trigger": "per-card"
+        }
+      },
+      {
+        "atom": "appear",
+        "params": {
+          "order": "decode-gate"
+        }
+      },
+      {
+        "atom": "counter",
+        "params": {
+          "rides": "pin-progress"
+        }
+      }
+    ],
+    "combines_with": [
+      "story-stepper-render-focus"
+    ],
+    "anti_combos": [
+      "hero-puzzle-monument",
+      "benefit-wipe-band"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html"
+    ],
+    "acceptance": [
+      "exactly ONE pin (cards-swipe owns it); cursor/drag never create a second pin",
+      "deck swipes transform-only; counter + reveal ride one clock",
+      "reduced-motion / mobile collapses to a static vertical stack"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "_path": "library/combos/interiors-cards-cursor/",
+    "_variantsResolved": []
+  },
+  "lifestyle-deck-fan": {
+    "id": "lifestyle-deck-fan",
+    "name": "Lifestyle deck-fan climax",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "the 'show life' climax that sells the lifestyle",
+    "page_beat": "lifestyle-climax",
+    "meaning": {
+      "what": "Four stacked life-shot cards fan out to the corners on one pinned scrub while paired captions cross-fade, a counter ticks, and depth rides the same progress.",
+      "when": "The emotional lifestyle-climax beat, where a deck of life-shots should bloom open as one authored gesture.",
+      "lands": "The moment that sells the life — the deck blooms, the caption lands the feeling.",
+      "not_when": "Spec/material sections, conversion gates, anywhere a second pin would collide."
+    },
+    "source": {
+      "grammar": "Vide Infra Sofi — slide-out deck / lifestyle climax",
+      "recording": null,
+      "registry_ref": []
+    },
+    "theme": {
+      "skin": "warm",
+      "book_end": false
+    },
+    "ease": "air",
+    "webgl": false,
+    "pin": {
+      "owner": "slide-out-img-text",
+      "count": 1,
+      "length": "+=130%"
+    },
+    "owns_pin": true,
+    "uses": [
+      {
+        "atom": "slide-out-img-text",
+        "params": {
+          "scrub": 1,
+          "endVH": 130,
+          "pin": true
+        }
+      },
+      {
+        "atom": "counter",
+        "params": {
+          "rides": "pin-progress"
+        }
+      },
+      {
+        "atom": "parallax-depth",
+        "params": {
+          "rides": "pin-progress"
+        }
+      },
+      {
+        "atom": "reveal",
+        "params": {
+          "trigger": "onEnter"
+        }
+      }
+    ],
+    "combines_with": [
+      "story-stepper-render-focus"
+    ],
+    "anti_combos": [
+      "hero-puzzle-monument",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html"
+    ],
+    "acceptance": [
+      "exactly ONE pin (slide-out-img-text owns it)",
+      "cards fan stacked->corners transform-only; captions cross-fade on one clock",
+      "reduced-motion / mobile collapses to a legible static layout, no pin"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "_path": "library/combos/lifestyle-deck-fan/",
+    "_variantsResolved": []
+  },
+  "manifesto-flip-draw": {
+    "id": "manifesto-flip-draw",
+    "name": "Theme-flip manifesto with self-drawing hairlines",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "the manifesto/statement beat where the page changes temperature",
+    "page_beat": "bridge",
+    "meaning": {
+      "what": "A statement assembles word-by-word as the section flips theme (dark<->light); self-drawing hairlines stroke in and reveal copy + depth ride the same scroll.",
+      "when": "A manifesto/bridge beat that should change the page's temperature and deliver one composed statement.",
+      "lands": "The page turns a page — a tonal shift plus a sentence that reads as authored intent.",
+      "not_when": "Conversion gates, dense spec sections, anywhere two pin-owners collide."
+    },
+    "source": {
+      "grammar": "Vide Infra / AIR manifesto — theme-flip + line-draw",
+      "recording": null,
+      "registry_ref": []
+    },
+    "theme": {
+      "skin": "flip",
+      "book_end": false
+    },
+    "ease": "air",
+    "webgl": false,
+    "pin": {
+      "owner": "puzzle-text",
+      "count": 1,
+      "length": "+=110%"
+    },
+    "owns_pin": true,
+    "uses": [
+      {
+        "atom": "puzzle-text",
+        "params": {
+          "trigger": "scrub",
+          "pin": true
+        }
+      },
+      {
+        "atom": "theme-flip",
+        "params": {
+          "rides": "pin-progress"
+        }
+      },
+      {
+        "atom": "reveal",
+        "params": {
+          "trigger": "per-line"
+        }
+      },
+      {
+        "atom": "parallax-depth",
+        "params": {
+          "rides": "pin-progress"
+        }
+      }
+    ],
+    "combines_with": [
+      "hero-puzzle-monument",
+      "story-stepper-render-focus"
+    ],
+    "anti_combos": [
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html"
+    ],
+    "acceptance": [
+      "exactly ONE pin (puzzle-text owns it)",
+      "theme flip is a single temperature change tied to one progress",
+      "hairlines self-draw via stroke-dashoffset; no layout animation"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "_path": "library/combos/manifesto-flip-draw/",
+    "_variantsResolved": []
+  },
+  "story-stepper-render-focus": {
+    "id": "story-stepper-render-focus",
+    "name": "Pinned render-focus scrollytelling",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "the 'show the material' beat — look at the building N times",
+    "page_beat": "material",
+    "meaning": {
+      "what": "A pinned stepper walks through N labelled renders; each step the heading ticks, the render crossfades into focus, split-line copy + reveal + cursor + depth ride the spine's single progress.",
+      "when": "A MATERIAL/proof act where the viewer should LOOK AT the product N times, one labelled render per step.",
+      "lands": "'I looked at the building N times' — each render gets a held, in-focus, captioned frame.",
+      "not_when": "Hero covers, conversion gates, anywhere a second pin would collide."
+    },
+    "source": {
+      "grammar": "Vide Infra / ERA frame-scrub — render-focus stepper",
+      "recording": null,
+      "registry_ref": []
+    },
+    "theme": {
+      "skin": "neutral",
+      "book_end": false
+    },
+    "ease": "air",
+    "webgl": false,
+    "pin": {
+      "owner": "focus-render-switch",
+      "count": 1,
+      "length": "steps * scrollPerStep"
+    },
+    "owns_pin": true,
+    "uses": [
+      {
+        "atom": "focus-render-switch",
+        "params": {
+          "pin": true
+        }
+      },
+      {
+        "atom": "parallax-depth",
+        "params": {
+          "rides": "pin-progress"
+        }
+      },
+      {
+        "atom": "reveal",
+        "params": {
+          "trigger": "per-step"
+        }
+      },
+      {
+        "atom": "splitLines",
+        "params": {
+          "trigger": "per-step"
+        }
+      },
+      {
+        "atom": "custom-cursor",
+        "params": {
+          "hover": true
+        }
+      },
+      {
+        "atom": "counter",
+        "params": {
+          "rides": "pin-progress"
+        }
+      }
+    ],
+    "combines_with": [
+      "hero-puzzle-monument",
+      "lifestyle-deck-fan",
+      "interiors-cards-cursor"
+    ],
+    "anti_combos": [
+      "benefit-wipe-band"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html"
+    ],
+    "acceptance": [
+      "exactly ONE pin (focus-render-switch owns it); others read the spine's progress",
+      "each render crossfades in focus, never video.currentTime",
+      "split-line copy + counter + reveal ride one clock; pinSpacing holds on release"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "_path": "library/combos/story-stepper-render-focus/",
+    "_variantsResolved": []
+  },
+  "appear": {
+    "id": "appear",
+    "name": "Reveal-on-enter gate",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "Appear.mount(el, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "Fades/translates an element in once when it enters the viewport (IntersectionObserver); the decode-gate intro variant adds a brief blur/clip settle.",
+      "when": "Any element that should arrive on enter rather than on load (avoids the load-jump).",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "filter"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "reveal",
+      "splitLines"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "transform, opacity, filter only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/appear/",
+    "_variantsResolved": []
+  },
+  "counter": {
+    "id": "counter",
+    "name": "Count-up number ticker",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "Counter.mount(el, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "Animates a number from a start to a target as the section scrolls or enters; used for stats and step indices.",
+      "when": "A stat/metric or step index that should tick up rather than appear static.",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "opacity"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "C-emphasis"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "reveal",
+      "parallax-depth"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "opacity only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/counter/",
+    "_variantsResolved": []
+  },
+  "custom-cursor": {
+    "id": "custom-cursor",
+    "name": "Custom hover cursor",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "CustomCursor.mount(root, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "Replaces the native cursor with a lerped follower that grows/labels on interactive targets; pointer-spring clock, never a pin.",
+      "when": "Sections that want a tactile, branded pointer on hover (galleries, decks, gates).",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "cards-swipe",
+      "reveal"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "transform, opacity only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/custom-cursor/",
+    "_variantsResolved": []
+  },
+  "parallax-depth": {
+    "id": "parallax-depth",
+    "name": "Inline scroll-keyframe depth",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "ParallaxDepth.mount(el, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "Drives translateY/translateX of layers from scroll progress (inline scroll-keyframe, no pin) to give a flat section depth.",
+      "when": "Any non-pinned section that should carry length with DEPTH instead of a pin.",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "transform"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "any spine"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "transform only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/parallax-depth/",
+    "_variantsResolved": []
+  },
+  "reveal": {
+    "id": "reveal",
+    "name": "Staggered content reveal",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "Reveal.mount(scope, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "Staggers a set of elements into place (y+opacity) on enter or per-step, reading-order stagger as one wave.",
+      "when": "Lists, copy blocks, per-step content that should arrive as one staggered gesture.",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "appear",
+      "splitLines"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "transform, opacity only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/reveal/",
+    "_variantsResolved": []
+  },
+  "scroll-indicator": {
+    "id": "scroll-indicator",
+    "name": "Scroll hint + progress",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "ScrollIndicator.mount(el, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "A scroll-cue line/dot that hints downward motion and flips to is-finished when its section is consumed.",
+      "when": "Hero/section ends that should bait the next scroll and report completion.",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "puzzle-image",
+      "slide-out-img-text"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "transform, opacity only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/scroll-indicator/",
+    "_variantsResolved": []
+  },
+  "splitLines": {
+    "id": "splitLines",
+    "name": "Line-level text reveal",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "SplitLines.mount(el, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "Splits a heading into LINES (never letters) and masks them up from below per line on enter or scrub.",
+      "when": "A headline/paragraph that should reveal line-by-line under a mask.",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "puzzle-text",
+      "reveal"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "transform, opacity only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/splitLines/",
+    "_variantsResolved": []
+  },
+  "theme-flip": {
+    "id": "theme-flip",
+    "name": "Section theme temperature flip",
+    "level": "u",
+    "kind": "shared-util",
+    "status": "wip",
+    "entry": {
+      "call": "ThemeFlip.mount(root, opts)",
+      "module": "iife",
+      "returns": "controller | void"
+    },
+    "meaning": {
+      "what": "Cross-fades a section's skin (dark<->light, warm<->cool) tied to scroll progress; one temperature change, no pin of its own.",
+      "when": "A bridge/manifesto beat that should change the page's temperature on scroll.",
+      "lands": "supports the section's spine; never the headline move on its own.",
+      "not_when": "as a section's primary pinned mechanic — promote to components/ first."
+    },
+    "source": {
+      "grammar": "cited by library/combos/* — extracted from Vide Infra-class builds",
+      "recording": null,
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger",
+    "webgl": false,
+    "motion_props": [
+      "opacity"
+    ],
+    "trigger": "rides a spine's scroll progress OR onEnter; never owns a pin",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "combines_with": [
+      "reveal",
+      "parallax-depth"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "util.js",
+      "util.css"
+    ],
+    "acceptance": [
+      "rides an existing progress / onEnter; never creates a second pin",
+      "opacity only; reduced-motion gives a static fallback"
+    ],
+    "verify": "n/a (shared-util stub — promote via /award-re:learn for a runnable lab)",
+    "_path": "library/shared/theme-flip/",
+    "_variantsResolved": []
+  }
+}

@@ -1,63 +1,55 @@
 /* ============================================================
-   PUZZLE-TEXT  ·  component.css
+   PUZZLE-TEXT · component.css
    ------------------------------------------------------------
-   Word-level "assembly" reveal: a paragraph whose words start
-   scattered/displaced (x, y, scale, color) and converge into
-   their natural flow positions as the section is scrolled.
+   The load-bearing rules. Words are inline-block in NORMAL FLOW;
+   we animate ONLY transform + color. opacity STAYS 1 (the words
+   are always opaque — never opacity:0). Font is SANS grotesque,
+   NOT serif.
 
-   Observed in: Zera (portfolio6.zerasoftwarestudio.com) statement
-   section. Scroll-SCRUBBED and reversible (words re-scatter on
-   scroll-up), word granularity (NOT per-character).
-
-   Motion is on transform / opacity / color only. No layout
-   thrash: the words live in normal inline flow; we only ever
-   translate/scale them relative to their resting position, so
-   the final layout (line breaks, wrapping) is authored by the
-   browser, not by us. That is the whole trick — the "puzzle"
-   pieces snap to slots the browser already computed.
+   This component is ONLY the scatter <-> assemble move of one
+   paragraph. There is NO card, NO image, NO finale panel — those
+   are not part of the technique.
    ============================================================ */
 
-/* ---- the paragraph that gets assembled --------------------- */
-.puzzle-text{
-  /* author your real type here; the effect is layout-agnostic */
-  font-family: var(--pt-font, "Helvetica Neue", Inter, system-ui, sans-serif);
-  font-size:   var(--pt-size, clamp(1.6rem, 4.6vw, 3.1rem));
-  line-height: var(--pt-leading, 1.18);
-  font-weight: var(--pt-weight, 400);
-  letter-spacing: var(--pt-tracking, -0.01em);
-  text-align:  var(--pt-align, center);
-  max-width:   var(--pt-measure, 18ch);
-  margin-inline: auto;
-  color:       var(--pt-ink, #14130F);
-
-  /* perf: hint the compositor, but only while animating (JS toggles) */
-  text-wrap: balance;        /* nicer final line breaks; harmless if unsupported */
+:root{
+  --pt-ink:#161614;            /* settled word color */
+  --pt-ghost-near:#B9B7AF;     /* nearest scattered tint (darker gray) */
+  --pt-ghost-far:#D4D2CA;      /* farthest scattered tint (lighter gray) */
+  /* the ONE ease, hard expo-out */
+  --pt-ease:cubic-bezier(0.16,1,0.3,1);
+  --pt-sans:"Helvetica Neue","Helvetica","Arial",system-ui,-apple-system,sans-serif;
 }
 
-/* ---- each word is an independently-transformable box -------- */
-/* inline-block so transforms apply yet it still wraps in flow.  */
+/* ---- the paragraph ---- */
+.puzzle-text{
+  position:relative;z-index:2;
+  font-family:var(--pt-sans);   /* SANS grotesque (NOT serif) */
+  font-weight:500;
+  font-size:clamp(1.7rem,4.4vw,3.0rem);
+  line-height:1.22;
+  letter-spacing:-.018em;
+  text-align:center;
+  max-width:22ch;
+  margin-inline:auto;
+  color:var(--pt-ink);
+  text-wrap:balance;            /* nice breaks WITHOUT justify space-stretch */
+  will-change:transform;
+}
 .puzzle-text .pt-word{
-  display:inline-block;
-  white-space:pre;            /* preserve the trailing space we inject */
-  will-change:transform, opacity;
-  /* start state is written by JS as inline style so SSR/no-JS
-     shows the finished, readable paragraph (progressive enhancement). */
+  display:inline-block;          /* the slot lives in normal flow */
+  white-space:pre;
   backface-visibility:hidden;
   transform-origin:50% 60%;
+  /* opacity intentionally NEVER touched: words are always opaque */
+}
+.puzzle-text .pt-space{display:inline-block;white-space:pre}
+
+/* ---- reduced motion: settled paragraph, no scatter ---- */
+@media (prefers-reduced-motion:reduce){
+  .puzzle-text .pt-word{transform:none!important;color:var(--pt-ink)!important}
 }
 
-/* the injected inter-word space rides along with the word so the
-   gap never collapses mid-animation */
-.puzzle-text .pt-space{ display:inline-block; white-space:pre; }
-
-/* ---- reduced motion: no scatter, just a calm fade ---------- */
-@media (prefers-reduced-motion: reduce){
-  .puzzle-text .pt-word{
-    transform:none !important;
-    will-change:auto;
-  }
+/* ---- mobile ---- */
+@media (max-width:760px){
+  .puzzle-text{font-size:clamp(1.5rem,7vw,2.2rem);max-width:18ch}
 }
-
-/* ---- optional: a faint pre-assembly tint for the scattered
-   pieces, applied via JS-set CSS var so you can theme it. ----- */
-.puzzle-text{ --pt-ghost: #B9B6AE; }

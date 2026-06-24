@@ -1,3 +1,10 @@
+---
+id: R_anti_combos
+kind: rule
+gates: [anti_combos, owns_pin, trigger, combines_with]
+severity: hard
+---
+
 # Anti-combos — що НЕ стакати
 
 Combining techniques is where award sites quietly turn cheap. Each rule below is a pairing that fights itself when layered in one section. Check every section against this list before building.

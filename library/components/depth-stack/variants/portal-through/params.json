@@ -1,0 +1,42 @@
+{
+  "$extends": "depth-stack",
+  "$variant": "portal-through",
+  "note": "Knob DIFF over the base depth-stack frame. The base owns pin/scrub/snap/signed-depth/reduced-motion; these are the translateZ tunnel constants this variant's engine (variant.js) paints with, plus the frame knobs it passes to DepthStack.mount. Byte-faithful to depth-d3-portal-through.html.",
+  "params": {
+    "endMult": 1.0,
+    "scrub": 0.7,
+    "entryScrub": 0.6,
+    "snap": "1/(n-1)"
+  },
+  "engine": {
+    "ahead": {
+      "z": "-min(d,3) * 540",
+      "scale": "0.62 .. 1 on approach  (if d>1: 0.62 .. 0.7 held back)",
+      "blur": "7 .. 0 px",
+      "haze": "0.82 .. 0",
+      "brightness": "0.5 .. 1",
+      "opacity": "1 (0 when d>2.4)",
+      "zIndex": "100 - i"
+    },
+    "behind": {
+      "z": "e * 360 (toward/past camera)",
+      "scale": "1 .. 1.9",
+      "opacity": "1 .. 0 (dissolve)",
+      "blur": "0 .. 6 px",
+      "brightness": "1 .. 1.18 (bloom)",
+      "zIndex": 200
+    },
+    "parallaxText": "d>0: yPercent 46→0 ; d<0: 0→-34 ; opacity near*1.4 / 1-min(-d,1) ; z:60",
+    "kenburns": { "scale": [1.0, 1.06], "x": "±1.8", "y": -1.3 },
+    "depthCounter": "fly=sin(frac·π); scale=max(0.2, 1+fly·0.5); opacity 0.06→0.015",
+    "micro_mechanics": ["scale-through", "cross-dissolve", "depth-haze", "parallax-text-lag", "ken-burns", "headline-split-reveal", "forward-flying-depth-counter"]
+  },
+  "skin": {
+    "serif": "Fraunces, Georgia, serif",
+    "tunnelPerspective": "1200px @ 50% 47%",
+    "frame": "full-bleed render plane, inset var(--pad)",
+    "accent": "#b07b3e",
+    "text": "lower-left column over the render",
+    "railHandle": "round bead"
+  }
+}

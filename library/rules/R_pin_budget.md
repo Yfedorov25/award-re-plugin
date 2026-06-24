@@ -1,3 +1,10 @@
+---
+id: R_pin_budget
+kind: rule
+gates: [owns_pin, pin, trigger]
+severity: hard
+---
+
 # Pin budget — скільки пінів, вкладеність, ланцюги
 
 Pins are the site's scarcest resource. Spend them on the anchor moment(s) only — everything else carries length with depth, not pin. Use this rule when combining the six section primitives so ScrollTriggers never fight each other.

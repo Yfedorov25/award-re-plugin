@@ -1,68 +1,108 @@
 /* ============================================================
    puzzle-image — component.css
-   One image, sliced into an R×C grid of CSS-sprite tiles that
-   scatter at rest and seat into a seamless full-bleed photo.
-   Pair with component.js. Motion = transform/opacity/filter ONLY.
+   STRICT 1:1 of Zera /work: scattered blurred tiles assemble into a
+   WIDE LANDSCAPE (~16:10) cover that fills the viewport width, then the
+   WHOLE cover unit scales up MODESTLY to full-bleed (cropping top/bottom
+   via .stage overflow). The baked wordmark spans the entire top; captions
+   sit lower-left; the LEFT headline stays VISIBLE throughout.
+   transform / opacity / filter ONLY. No clip-path reframe. No WebGL.
+   No mix-blend / backdrop-filter over the scrubbed surface (D2).
    ============================================================ */
-
 :root{
-  /* visual size + final-frame proportion of the stage */
-  --pz-stage-aspect: 16 / 10;   /* aspectRatio — lock the final frame */
-  --pz-stage-max: 78vmin;       /* on-screen size of the stage */
-  --pz-mx: 64px;
+  --pz-bg:#0B0B0C;
+  --pz-ink:#EDEAE3;
+  --pz-muted:#9A968C;
+  --pz-air:cubic-bezier(0.16,1,0.3,1);
+  --pz-serif:"Times New Roman",Georgia,"Cormorant Garamond",serif;
+  --pz-mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace;
+  --pz-cover-aspect:16 / 10;   /* WIDE LANDSCAPE cover */
 }
 
-/* pinned scrub section (also fine for inview hero) */
-.puzzle{
-  position:relative;
-  width:100vw;
-  min-height:100vh;
-  overflow:hidden;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.puzzle{position:relative;height:100vh;width:100%;overflow:hidden;background:var(--pz-bg)}
+.puzzle .stage{position:absolute;inset:0;overflow:hidden}   /* crops growing cover */
+
+/* LEFT headline (visible THROUGHOUT — z ABOVE the cover, never faded) + RIGHT body */
+.puzzle .headline{
+  position:absolute;left:6vw;top:16vh;z-index:8;max-width:40vw;
+  font-family:var(--pz-serif);font-weight:400;line-height:1.04;
+  font-size:clamp(34px,5.0vw,72px);letter-spacing:-.01em;color:var(--pz-ink);
+  text-wrap:balance;pointer-events:none;mix-blend-mode:normal;
+}
+.puzzle .body{
+  position:absolute;right:6vw;top:22vh;z-index:8;max-width:24vw;
+  font-family:var(--pz-mono);font-size:clamp(11px,1.05vw,14px);line-height:1.65;
+  letter-spacing:.02em;color:var(--pz-muted);pointer-events:none;
 }
 
-/* the final image frame — aspect-locked, clips scatter, black gaps show through */
-.puzzle__stage{
-  position:relative;
-  width:var(--pz-stage-max);
-  aspect-ratio:var(--pz-stage-aspect);
-  max-width:calc(100vw - var(--pz-mx) * 1.2);
-  overflow:hidden;
-  background:#000;              /* gaps between unseated tiles read as black */
-  box-shadow:0 40px 120px -40px rgba(0,0,0,.9);
+/* COVER UNIT — the single element transform:scale grows.
+   WIDE: width-driven near full viewport width; height follows aspect-ratio. */
+.puzzle .coverWrap{
+  position:absolute;left:50%;top:50%;z-index:4;
+  transform:translate(-50%,-50%);
+  width:84vw;aspect-ratio:var(--pz-cover-aspect);
+  will-change:transform;
+}
+.puzzle .cover{
+  position:relative;width:100%;height:100%;
+  transform-origin:center center;overflow:hidden;will-change:transform;
+}
+.puzzle .cover__photo{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:50% 42%;opacity:0}
+.puzzle .cover__ground{position:absolute;inset:0;
+  background:linear-gradient(160deg,#9c9486 0%,#b8ad9c 45%,#85796a 100%)}
+.puzzle .cover__scrim{position:absolute;left:0;right:0;top:0;height:42%;z-index:2;
+  background:linear-gradient(180deg,rgba(20,18,14,.34),rgba(20,18,14,0));
+  pointer-events:none;opacity:0}
+
+/* BAKED wordmark — child of .cover so it scales WITH it. Huge serif across the
+   ENTIRE TOP, spanning ~90% of the wide cover width. */
+.puzzle .cover__wordmark{
+  position:absolute;left:0;right:0;top:5%;z-index:3;text-align:center;
+  font-family:var(--pz-serif);font-weight:400;font-size:30%;
+  letter-spacing:.06em;line-height:1;color:#F4EFE6;white-space:nowrap;
+  text-shadow:0 1px 22px rgba(0,0,0,.20);opacity:0;mix-blend-mode:normal;
+}
+.puzzle .cover__caption{
+  position:absolute;left:6%;bottom:14%;z-index:3;text-align:left;
+  font-family:var(--pz-serif);color:rgba(244,239,230,.94);opacity:0;
+}
+.puzzle .cover__caption .cap{display:block;font-size:4.4%;letter-spacing:.06em;
+  line-height:1.4;font-variant:small-caps;text-transform:uppercase}
+.puzzle .cover__caption .issue{display:block;margin-top:4%;font-size:2.8%;
+  letter-spacing:.14em;opacity:.72;text-transform:uppercase}
+@supports (font-size:1cqh){
+  .puzzle .cover{container-type:size}
+  .puzzle .cover__wordmark{font-size:30cqh}
+  .puzzle .cover__caption .cap{font-size:4.4cqh}
+  .puzzle .cover__caption .issue{font-size:2.8cqh}
 }
 
-/* exact final W×H of the stage */
-.puzzle__grid{ position:absolute; inset:0; }
+/* TILES — sprite slices that scatter+blur then fly home */
+.puzzle .grid{position:absolute;inset:0;z-index:1;pointer-events:none}
+.puzzle .tile{position:absolute;background-repeat:no-repeat;background-color:#7c7468;
+  will-change:transform,opacity,filter;opacity:0}
 
-/* one CSS sprite slice per tile. left/top/width/height are STATIC (set by JS).
-   --c/--r = this tile's col/row; --cols/--rows = grid; --colsm1/--rowsm1 = minus 1.
-   THE OFF-BY-ONE: background-position uses c/(cols-1), guarded by max(...,1). */
-.puzzle__tile{
-  position:absolute;
-  background-image:var(--img);
-  background-repeat:no-repeat;
-  background-size:calc(var(--cols) * 100%) calc(var(--rows) * 100%);
-  background-position:
-    calc(var(--c) / max(var(--colsm1), 1) * 100%)
-    calc(var(--r) / max(var(--rowsm1), 1) * 100%);
-  transform:translateZ(0);     /* force a GPU layer */
-  backface-visibility:hidden;
-  /* will-change is toggled by JS only while a tile animates, then removed */
+/* PROGRESS RAIL (optional) */
+.puzzle .rail{position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:rgba(255,255,255,.08);z-index:9}
+.puzzle .rail__fill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;
+  background:rgba(255,255,255,.7)}
+
+/* REDUCED MOTION — show assembled WIDE cover, no flight/scale */
+@media (prefers-reduced-motion: reduce){
+  .puzzle{height:auto;min-height:100vh}
+  .puzzle .grid{display:none}
+  .puzzle .cover__photo,
+  .puzzle .cover__scrim,
+  .puzzle .cover__wordmark,
+  .puzzle .cover__caption{opacity:1}
+  .puzzle .coverWrap{width:92vw}
 }
 
-/* optional chrome (siblings of the stage, never children of the grid) */
-.puzzle__eyebrow{ position:absolute; top:var(--pz-mx); left:var(--pz-mx); z-index:8; }
-.puzzle__cap{ position:absolute; left:var(--pz-mx); bottom:var(--pz-mx); z-index:8; max-width:34ch; }
-
-@media (max-width:760px){
-  :root{ --pz-mx:20px; --pz-stage-max:92vw; }
-  .puzzle__cap{ max-width:80vw; }
-}
-
-/* reduced motion: JS seats tiles instantly; this kills any incidental transitions */
-@media (prefers-reduced-motion:reduce){
-  .puzzle__tile{ transition:none !important; }
+/* MOBILE — no pin, stacked; show the assembled wide cover statically (C6/C7) */
+@media (max-width: 720px){
+  .puzzle .headline{position:static;max-width:none;padding:0 6vw;margin-top:8vh;
+    font-size:clamp(30px,9vw,48px)}
+  .puzzle .body{position:static;max-width:none;padding:2vh 6vw 0;text-align:left}
+  .puzzle .coverWrap{position:static;transform:none;width:88vw;margin:6vh auto}
 }

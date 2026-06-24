@@ -3,179 +3,691 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LAB · slide-out-img-text (deck-fan reveal)</title>
+<title>LAB · slide-out-img-text · 1:1 Zera</title>
 
-<!-- GSAP + ScrollTrigger + CustomEase via cdnjs -->
+<!-- GSAP 3.12.5 + ScrollTrigger + CustomEase via cdnjs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<!-- Lenis (guarded — lab runs fine without it if CDN blocked) -->
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<!--
+================================================================================
+ TECHNIQUE · slide-out-img-text   ·  TRUE 1:1 reproduction of ZERA STUDIO
+================================================================================
+ SOURCE FRAMES studied: rec2-slide-out-img-text f_001..f_016 + _keyframes 001/017/035.
+
+ This is the full 7-PHASE choreography, not just the middle beat. Every phase
+ from the source is implemented and scroll-scrubbed on ONE pinned timeline:
+
+   P1 0.00-0.12  HERO HANDOFF. Prior "ПОСЛУГИ / OUR SERVICES" drawer plate is
+                 still parked over the TOP and slides UP+out (translateY 0→-100%).
+                 Stage crossfades light→black. Deck pre-staged COLLAPSED dead-
+                 centre. Rim ghost words (ВЛАСНИЙ/БЕРЕГ/РІЧКА/ДІМ) fade to .14.
+                 Giant ghost "E" behind. Ghost wordmark "НАГІРНА" up to .22.
+   P2 0.12-0.26  HERO CARD beat. Centre portrait card (НАГІРНА, tall 9:16) rises
+                 fully forward: scale .92→1.0, opacity .85→1.0. 3 siblings stay
+                 tucked behind (edges peek). Ghost "НАГІРНА" recedes .22→.12.
+   P3 0.26-0.52  SLIDE-OUT. 3 siblings deal OUT from behind the hero like drawers
+                 along straight diagonals toward corners (staggered .06 progress:
+                 TR first, then BL, then BR). The hero card begins drifting from
+                 dead-centre toward its FINAL top-left anchor. Ghost fades .12→.04.
+   P4 0.52-0.66  LOCK. All 4 cards snap-settle to corner anchors with a tiny
+                 back.out scale overshoot. Ghost "НАГІРНА" out, ghost "ЖИТТЯ НА
+                 БЕРЕЗІ" (two stacked lines) crossfades in behind centre to .10.
+   P5 0.66-0.82  CENTRE CONTENT. Headline "Доказ у самому домі." reveals (y+24→0,
+                 fade), long centred horizontal rule draws scaleX 0→1, "ДИВИТИСЯ"
+                 label + scroll-dot fade in (staggered lag).
+   P6 0.82-0.90  HOLD / READ. Climax dwell. No scroll-major motion; only optional
+                 micro-parallax (corner cards ±6px, ghost ±10px). Hover live.
+   P7 0.90-1.00  EXIT. Whole pinned wrap translates UP and out (pin releases →
+                 native scroll), revealing the NEXT section below (marble-bust-
+                 equivalent + rising ghost wordmark "СТУДІЯ НАГІРНА").
+
+ EASING (per-site CustomEase, NO 'air' here — the drawer mechanic wants snap):
+   slideOut  = 0.22,1,0.36,1   (fast-out, long-settle; primary slide/settle)
+   reveal    = 0.25,1,0.3,1    (headline + rule reveal)
+   overshoot = back.out(1.4)   (scale only, P4 lock)
+   ghost crossfades = linear (tied to scrub)
+   hover (non-scroll) = power2.out 0.4s
+
+ ENGINE
+   - Cards centred ONCE (top/left 50% + translate -50%,-50%) then offset by
+     per-card props --tx/--ty/--scl that JS tweens → transform-only, 60fps.
+   - Corner targets are FRACTIONS of the stage half-box fed as FUNCTION-BASED
+     GSAP values, so invalidateOnRefresh recomputes them on resize.
+   - Headline/ghost crossfade IN PLACE (autoAlpha + tiny y), never sideways.
+   - Inner <img> counter-parallax 1.12→1.0 so photos aren't flat stickers.
+
+ NON-NEGOTIABLES
+   - transform/opacity/clip-path ONLY. Never animate left/top/width.
+   - Never scrub video.currentTime (no video here anyway). max 2 decoders.
+   - prefers-reduced-motion → jump to settled end-state, no scrub/pin.
+   - will-change:transform on cards + inner imgs ONLY.
+   - ScrollTrigger.refresh() after height-affecting changes (resize handler).
+================================================================================
+-->
 
 <style>
-/* ============================================================
-   LAB SHELL — minimal page that hosts the component twice:
-   1) a tall intro so you scroll INTO the pinned section
-   2) the technique itself
-   3) a tail so you scroll OUT
-   The component's own styles live in component.css; this <style>
-   only sets the shell + display font so the lab runs standalone.
-   ============================================================ */
-@font-face{
-  font-family:"Display Serif";
-  src:local("Nyght Serif"), local("PP Editorial New"), local("Times New Roman");
-  font-weight:300 500; font-display:swap;
+:root{
+  --ink:#0B0A09;
+  --paper:#F2EDE4;
+  --mid:#8C857A;
+  --bronze:#B5895A;
+
+  --serif:"PP Editorial New","Times New Roman",Georgia,serif;
+  --sans:"Helvetica Neue","Inter",system-ui,-apple-system,sans-serif;
+
+  --mx:56px;
+
+  --card-radius:4px;
+  --rim-ghost:0.12;     /* rim ghost words */
+  --ghost-wm:0.18;      /* centre ghost wordmark base (JS drives) */
 }
-:root{ --ink:#0B0B0C; --paper:#EDE7DD; --bronze:#B8946A; }
+
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:auto}
-body{ background:var(--ink); color:var(--paper);
-  font-family:"Helvetica Neue","Inter Tight",system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
 img{display:block}
+a{color:inherit;text-decoration:none}
 
-/* intro / outro spacers so the pin has somewhere to grab */
-.shell-band{ min-height:100vh; display:grid; place-items:center; text-align:center; }
-.shell-band h2{ font-family:"Display Serif",serif; font-weight:400;
-  font-size:clamp(2rem,6vw,5rem); letter-spacing:-.01em; opacity:.9 }
-.shell-band p{ margin-top:1rem; opacity:.5; letter-spacing:.06em; font-size:.85rem }
+/* intro spacer + the prior "OUR SERVICES" world that hands off */
+.spacer{
+  height:100vh;display:flex;align-items:center;justify-content:center;
+  font-family:var(--sans);letter-spacing:.28em;text-transform:uppercase;
+  font-size:.7rem;opacity:.4;
+}
 
-/* ---- preloader (Saisei-style ritual, no-WebGL) ---- */
-#pre{ position:fixed; inset:0; z-index:1000; background:var(--ink);
-  display:flex; align-items:center; justify-content:center; }
-#pre svg{ width:min(28vw,150px); overflow:visible }
-#pre path{ stroke:var(--paper); stroke-width:1.3; fill:none; vector-effect:non-scaling-stroke }
-.curt{ position:fixed; top:0; bottom:0; width:50vw; background:var(--ink); z-index:999; transform:scaleX(0) }
-.curt.l{ left:0; transform-origin:right center }
-.curt.r{ right:0; transform-origin:left center }
+/* ============================================================
+   SECTION SKELETON  (.sofi)  — the pinned wrap (children leave together in P7)
+   ============================================================ */
+.sofi{
+  position:relative;
+  width:100vw;
+  min-height:100vh;
+  overflow:hidden;
+  background:var(--ink);
+}
 
-@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+/* P1: the stage colour crossfades light->black. We do it with a backdrop layer. */
+.sofi__bg{
+  position:absolute;inset:0;z-index:0;
+  background:radial-gradient(120% 90% at 50% 40%, #16140f 0%, var(--ink) 64%);
+}
+.sofi__bg-light{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(180deg,#EFE9DE 0%, #E6DECF 100%);
+  /* JS fades this OUT 1->0 over P1 */
+}
+
+.sofi__rail-l,.sofi__rail-r{
+  position:absolute;top:0;bottom:0;width:var(--mx);z-index:9;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;
+  font-family:var(--sans);font-size:.6rem;letter-spacing:.34em;
+  text-transform:uppercase;opacity:.42;pointer-events:none;
+}
+.sofi__rail-l{left:0;transform:rotate(180deg)}
+.sofi__rail-r{right:0}
+
+.sofi__index{
+  position:absolute;top:var(--mx);right:calc(var(--mx) + 28px);z-index:9;
+  font-family:var(--serif);font-size:1rem;letter-spacing:.04em;opacity:.5;
+}
+
+/* the stage = pinned 100vh box; place-items:center is the card ORIGIN */
+.sofi__stage{
+  position:relative;
+  width:100%;
+  height:100vh;
+  display:grid;
+  place-items:center;
+  z-index:2;
+}
+
+/* ---------- P1 DRAWER HANDOFF plate (prior "OUR SERVICES") ---------- */
+.sofi__drawer{
+  position:absolute;left:50%;top:0;z-index:8;
+  width:min(82vw,1040px);height:140px;
+  transform:translateX(-50%);
+  /* JS drives translateY 0 -> -100% of own height + opacity */
+  background:linear-gradient(180deg,#F6F1E8 0%,#ECE4D6 100%);
+  border-radius:0 0 14px 14px;
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.55);
+}
+.sofi__drawer-label{
+  position:absolute;top:34px;left:46px;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.34em;
+  text-transform:uppercase;color:#6b6256;
+}
+.sofi__drawer-dot{
+  position:absolute;top:30px;right:46px;
+  width:7px;height:7px;border-radius:50%;background:#6b6256;opacity:.55;
+}
+.sofi__drawer-line{
+  position:absolute;left:46px;right:46px;top:62px;height:1px;
+  background:rgba(60,52,40,.28);
+}
+
+/* ---------- GHOST layer (texture behind everything) ---------- */
+.sofi__ghost{
+  position:absolute;inset:0;z-index:1;
+  display:grid;place-items:center;pointer-events:none;
+}
+.sofi__ghost-letter{
+  grid-area:1 / 1;
+  font-family:var(--serif);font-weight:300;color:var(--bronze);
+  font-size:clamp(22rem,48vw,54rem);line-height:.8;
+  opacity:0;                       /* JS: 0 -> .10 in P1 */
+}
+.sofi__ghost-wm{
+  grid-area:1 / 1;
+  font-family:var(--serif);font-weight:300;color:var(--paper);
+  font-size:clamp(4rem,11vw,9rem);line-height:.84;letter-spacing:-.02em;
+  text-align:center;opacity:0;     /* "НАГІРНА" — JS drives 0->.22->0 */
+}
+.sofi__ghost-wm2{
+  grid-area:1 / 1;
+  font-family:var(--serif);font-weight:300;color:var(--paper);
+  font-size:clamp(3rem,8.5vw,7rem);line-height:.92;letter-spacing:-.01em;
+  text-align:center;opacity:0;     /* "ЖИТТЯ НА БЕРЕЗІ" — JS drives 0->.10 */
+}
+
+/* rim ghost words, the BRAND/LED/EXPER/IENCE equivalent */
+.sofi__rim{
+  position:absolute;z-index:1;pointer-events:none;
+  font-family:var(--serif);font-weight:300;color:var(--paper);
+  font-size:clamp(3rem,7vw,6rem);letter-spacing:.06em;line-height:.9;
+  opacity:0;                       /* JS: 0 -> .12/.14 in P1 */
+}
+.sofi__rim.tl{top:18%;left:var(--mx)}
+.sofi__rim.tr{top:18%;right:var(--mx);text-align:right}
+.sofi__rim.bl{bottom:18%;left:var(--mx)}
+.sofi__rim.br{bottom:18%;right:var(--mx);text-align:right}
+
+/* ---------- DECK (cards) ---------- */
+.sofi__deck{
+  position:absolute;inset:0;z-index:3;
+}
+.sofi__card{
+  position:absolute;top:50%;left:50%;
+  /* per-card props the JS tweens */
+  --tx:0px; --ty:0px; --scl:1; --hv:1;
+  transform:
+    translate(-50%,-50%)
+    translate(var(--tx),var(--ty))
+    scale(calc(var(--scl) * var(--hv)));
+  transform-origin:center center;
+  will-change:transform;
+  border-radius:var(--card-radius);
+  overflow:hidden;
+  background:#15120e;
+  box-shadow:0 34px 80px -34px rgba(0,0,0,.85), 0 2px 0 rgba(255,255,255,.04) inset;
+  cursor:pointer;
+}
+/* ALL renders in the Nahirna dataset are TRUE portrait 9:16 (3072x5504).
+   Every card is 9:16 so object-fit:cover never crops a portrait into landscape.
+   The hero reads slightly larger than the 3 siblings (hierarchy, not ratio). */
+.sofi__card.is-tall{ width:clamp(190px,21vw,310px); aspect-ratio:9 / 16; }
+.sofi__card.is-sib { width:clamp(150px,16vw,232px); aspect-ratio:9 / 16; }
+
+.sofi__card-inner{
+  position:absolute;inset:0;overflow:hidden;
+}
+.sofi__card-inner img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.12);          /* JS counter-parallax relaxes to 1.0 */
+  will-change:transform;
+}
+.sofi__card-label{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:.9rem 1rem .8rem;
+  font-family:var(--serif);font-size:.92rem;letter-spacing:.22em;
+  text-transform:uppercase;
+  background:linear-gradient(to top, rgba(8,7,6,.82), transparent);
+}
+.sofi__card-cap{
+  display:block;margin-top:.25rem;
+  font-family:var(--sans);font-size:.52rem;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.66;font-weight:400;
+}
+
+/* ---------- CENTRE CONTENT (P5) ---------- */
+.sofi__copy{
+  position:absolute;inset:0;z-index:5;
+  display:grid;place-items:center;pointer-events:none;
+}
+.sofi__center{
+  grid-area:1 / 1;text-align:center;pointer-events:auto;
+}
+.sofi__center h2{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(2.6rem,6.4vw,5.4rem);line-height:1.0;letter-spacing:-.02em;
+  opacity:0;                      /* JS reveal */
+}
+.sofi__cta-wrap{ margin-top:1.4rem; opacity:0; } /* JS reveal */
+.sofi__rule{
+  width:min(34vw,460px);height:1px;margin:0 auto;
+  background:rgba(242,237,228,.55);
+  transform:scaleX(0);transform-origin:center;  /* JS draws scaleX 0->1 */
+}
+.sofi__cta{
+  display:inline-block;margin-top:1rem;
+  font-family:var(--sans);font-size:.66rem;letter-spacing:.4em;
+  text-transform:uppercase;color:var(--paper);opacity:.82;
+}
+.sofi__dot{
+  position:absolute;left:50%;bottom:calc(var(--mx) - 4px);z-index:6;
+  transform:translateX(-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:var(--bronze);opacity:0;
+}
+
+/* ---------- P7 NEXT SECTION (revealed on exit) ---------- */
+.next{
+  position:relative;
+  width:100vw;min-height:100vh;
+  background:#0a0908;
+  overflow:hidden;
+  display:flex;align-items:center;
+}
+.next__bust{
+  position:absolute;left:7vw;bottom:0;z-index:2;
+  width:min(28vw,360px);
+  filter:grayscale(.2) brightness(1.02);
+  transform:translateY(40px);opacity:0;  /* JS: rises in from below */
+}
+.next__bust .ph{
+  width:100%;aspect-ratio:3 / 4;border-radius:6px;
+  background:
+    radial-gradient(60% 50% at 50% 30%, #cfc7b8 0%, #6f685c 70%, #2a2620 100%);
+  box-shadow:0 30px 70px -30px rgba(0,0,0,.8);
+}
+.next__wm{
+  position:absolute;left:0;right:0;bottom:8%;z-index:1;text-align:center;
+  font-family:var(--serif);font-weight:300;color:var(--paper);
+  font-size:clamp(4rem,13vw,12rem);line-height:.85;letter-spacing:-.02em;
+  opacity:0;transform:translateY(60px);  /* JS rises in from bottom */
+}
+
+/* ============================================================
+   MOBILE  (<=760px): NO pin, clean stacked reveal (C6/C7 mobile law)
+   ============================================================ */
+@media (max-width:760px){
+  :root{--mx:18px;}
+  .sofi__index{right:var(--mx)}
+  .sofi__center h2{font-size:clamp(2rem,9vw,3rem)}
+  .sofi__ghost-letter{font-size:clamp(16rem,72vw,26rem)}
+  .sofi__rim{font-size:clamp(2rem,9vw,3rem)}
+  .sofi__card.is-tall{width:46vw}
+  .sofi__card.is-sib {width:40vw}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
 </style>
-
-<!-- the component's own stylesheet -->
-<link rel="stylesheet" href="component.css" />
 </head>
 
 <body>
 
-<!-- ===================== PRELOADER ===================== -->
-<div id="pre" aria-hidden="true">
-  <svg viewBox="0 0 120 120">
-    <path id="pMark" d="M30 90 L30 40 L60 22 L90 40 L90 90" />
-    <path id="pBar"  d="M30 64 L90 64" />
-  </svg>
-</div>
-<div class="curt l"></div>
-<div class="curt r"></div>
+<div class="spacer">scroll ↓</div>
 
-<!-- intro spacer -->
-<section class="shell-band">
-  <div>
-    <h2>scroll ↓</h2>
-    <p>DECK-FAN REVEAL — slide-out-img-text</p>
+<!-- ============================================================
+     §  THE SLIDE-OUT DECK SECTION  (pinned wrap)
+     ============================================================ -->
+<section class="sofi" id="sofi">
+  <div class="sofi__bg"></div>
+  <div class="sofi__bg-light" id="bgLight"></div>
+
+  <div class="sofi__rail-l">Нагірна · власний берег</div>
+  <div class="sofi__rail-r">Портфоліо · студія · контакт</div>
+  <div class="sofi__index">03 / 07</div>
+
+  <!-- P1: prior drawer plate handing off (slides up + out) -->
+  <div class="sofi__drawer" id="drawer">
+    <div class="sofi__drawer-label">Що ми робимо</div>
+    <div class="sofi__drawer-dot"></div>
+    <div class="sofi__drawer-line"></div>
   </div>
-</section>
 
-<!-- ===================== THE TECHNIQUE ===================== -->
-<!-- NOTE: placeholder imagery uses picsum so the lab runs offline-ish.
-     Swap the src for real renders; ratios match the card box. -->
-<section class="sofi" id="deckFan" aria-label="Портфоліо">
-  <div class="sofi__eyebrow">Zera Studio · Portfolio</div>
+  <div class="sofi__stage" id="stage">
 
-  <div class="sofi__stage">
-
-    <!-- ghost depth layer -->
-    <div class="sofi__ghost">
-      <span class="sofi__ghost-letter">E</span>
-      <span class="sofi__ghost-word">Craft
-Systems</span>
+    <!-- GHOST texture -->
+    <div class="sofi__ghost" aria-hidden="true">
+      <div class="sofi__ghost-letter" id="ghostLetter">Н</div>
+      <div class="sofi__ghost-wm"  id="ghostWm">НАГІРНА</div>
+      <div class="sofi__ghost-wm2" id="ghostWm2">ЖИТТЯ<br>НА БЕРЕЗІ</div>
     </div>
 
-    <!-- the deck: 4 cards, dealt to 4 corners -->
-    <div class="sofi__deck">
-      <figure class="sofi__card">
-        <img src="https://picsum.photos/id/1027/600/860" alt="Eterna" />
-        <figcaption class="sofi__card-label">Eterna</figcaption>
-      </figure>
-      <figure class="sofi__card">
-        <img src="https://picsum.photos/id/1062/600/860" alt="Orva" />
-        <figcaption class="sofi__card-label">Orva</figcaption>
-      </figure>
-      <figure class="sofi__card">
-        <img src="https://picsum.photos/id/1080/600/860" alt="Interior" />
-        <figcaption class="sofi__card-label">Lumen</figcaption>
-      </figure>
-      <figure class="sofi__card">
-        <img src="https://picsum.photos/id/180/600/860" alt="Portal" />
-        <figcaption class="sofi__card-label">Portal</figcaption>
-      </figure>
+    <!-- rim ghost words (BRAND/LED/EXPER/IENCE equivalent) -->
+    <div class="sofi__rim tl" id="rimTL" aria-hidden="true">ВЛАСНИЙ</div>
+    <div class="sofi__rim tr" id="rimTR" aria-hidden="true">БЕРЕГ</div>
+    <div class="sofi__rim bl" id="rimBL" aria-hidden="true">РІЧКА</div>
+    <div class="sofi__rim br" id="rimBR" aria-hidden="true">ДІМ</div>
+
+    <!-- DECK: hero card (centre) + 3 siblings, all parked dead-centre -->
+    <div class="sofi__deck" id="deck">
+      <!-- SLOT A — hero, TALL portrait, top-left final (НАГІРНА villa) -->
+      <article class="sofi__card is-tall" data-card data-role="hero" style="z-index:4">
+        <div class="sofi__card-inner"><img id="imgA" alt="" /></div>
+        <div class="sofi__card-label">Нагірна<span class="sofi__card-cap">Дім на березі</span></div>
+      </article>
+      <!-- SLOT B — TR, portrait 9:16 (clinker / craft proof) -->
+      <article class="sofi__card is-sib" data-card data-role="tr" style="z-index:3">
+        <div class="sofi__card-inner"><img id="imgB" alt="" /></div>
+        <div class="sofi__card-label">Клінкер<span class="sofi__card-cap">Фасад, що старіє гідно</span></div>
+      </article>
+      <!-- SLOT C — BL, portrait 9:16 (interior proof) -->
+      <article class="sofi__card is-sib" data-card data-role="bl" style="z-index:3">
+        <div class="sofi__card-inner"><img id="imgC" alt="" /></div>
+        <div class="sofi__card-label">Інтер'єр<span class="sofi__card-cap">Світло крізь тюль</span></div>
+      </article>
+      <!-- SLOT D — BR, portrait 9:16 (terrace river-view) -->
+      <article class="sofi__card is-sib" data-card data-role="br" style="z-index:3">
+        <div class="sofi__card-inner"><img id="imgD" alt="" /></div>
+        <div class="sofi__card-label">Тераса<span class="sofi__card-cap">Кава з видом на ріку</span></div>
+      </article>
     </div>
 
-    <!-- centre copy: two captions crossfade in place -->
+    <!-- CENTRE CONTENT (P5) -->
     <div class="sofi__copy">
-      <div class="sofi__cap sofi__cap-a">
-        <div class="sofi__h">PORTFOLIO</div>
-        <div class="sofi__sub">ETERNA</div>
-      </div>
-      <div class="sofi__cap sofi__cap-b">
-        <div class="sofi__h">The proof is in the work.</div>
-        <a class="sofi__cta" href="#">View work</a>
+      <div class="sofi__center" id="center">
+        <h2 id="headline">Доказ у самому домі.</h2>
+        <div class="sofi__cta-wrap" id="ctaWrap">
+          <div class="sofi__rule" id="rule"></div>
+          <a class="sofi__cta" href="#" id="cta">Дивитися</a>
+        </div>
       </div>
     </div>
 
-    <span class="sofi__dot" aria-hidden="true"></span>
+    <div class="sofi__dot" id="dot"></div>
   </div>
 </section>
 
-<!-- outro spacer -->
-<section class="shell-band">
-  <div>
-    <h2>end of demo</h2>
-    <p>scroll back up to replay the deal-out</p>
-  </div>
+<!-- ============================================================
+     §  NEXT SECTION (revealed on P7 exit)
+     ============================================================ -->
+<section class="next" id="next">
+  <div class="next__bust"><div class="ph"></div></div>
+  <div class="next__wm" id="nextWm">СТУДІЯ НАГІРНА</div>
 </section>
 
-<!-- component logic -->
-<script src="component.js"></script>
 <script>
 /* ============================================================
-   LAB BOOT — preloader ritual, then init the component.
+   CONFIG — reusableParams in one place
+   ============================================================ */
+const CONFIG = {
+  /* FINAL corner anchors as FRACTIONS of the stage half-box.
+     fx/fy: -1 = full left/top edge, +1 = full right/bottom edge. */
+  anchors: {
+    hero: { fx:-0.66, fy:-0.50, scl:1.00 },  // TL, largest (tall)
+    tr:   { fx: 0.62, fy:-0.58, scl:0.92 },  // TR (wide)
+    bl:   { fx:-0.58, fy: 0.60, scl:0.90 },  // BL (port)
+    br:   { fx: 0.60, fy: 0.58, scl:0.92 },  // BR (wide)
+  },
+  /* per-card progress offset for the deal-out stagger (TR, then BL, then BR) */
+  stagger: { tr:0.00, bl:0.06, br:0.12 },
+
+  scrub:   1,
+  endVH:   220,    // pin length % of viewport (7 phases need room)
+  innerZoom:1.12,
+  ghostWmPeak:0.22,
+  ghostWm2Peak:0.10,
+  rimPeak:0.13,
+};
+
+/* image sources — relative from /labs/, Cyrillic wrapped in encodeURI */
+const BASE = "../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/";
+const SRC = {
+  A: BASE + "01-HERO/03-villa-34-day-v1FULL.png",
+  B: BASE + "02-ARCH/01-clinker-macro-raking-v2FULL.png",
+  C: BASE + "07-INTERIOR/02-kitchen-living-wide-day-v3.png",
+  D: BASE + encodeURI("06-TERRACE/01-тераса-вид-на-ріку-день.png"),
+};
+document.getElementById("imgA").src = SRC.A;
+document.getElementById("imgB").src = SRC.B;
+document.getElementById("imgC").src = SRC.C;
+document.getElementById("imgD").src = SRC.D;
+
+/* ============================================================
+   MOTION
    ============================================================ */
 gsap.registerPlugin(ScrollTrigger);
-const AIR = CustomEase.create("air","M0,0 C0.22,0.68 0.16,0.99 1,1");
-const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+const E_SLIDE  = CustomEase.create("slideOut","0.22,1,0.36,1");
+const E_REVEAL = CustomEase.create("reveal","0.25,1,0.3,1");
+const reduce   = window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+const isMobile = () => window.matchMedia("(max-width:760px)").matches;
 
-function lenOf(el){ try{return el.getTotalLength();}catch(e){return 200;} }
+const cardEls = {
+  hero: document.querySelector('[data-role="hero"]'),
+  tr:   document.querySelector('[data-role="tr"]'),
+  bl:   document.querySelector('[data-role="bl"]'),
+  br:   document.querySelector('[data-role="br"]'),
+};
+const innerImgs = Object.values(cardEls).map(c=>c.querySelector("img"));
 
-function boot(){
-  // init component first so its ScrollTrigger exists before refresh
-  SlideOutImgText.init("#deckFan");
-
-  const mark=document.getElementById("pMark");
-  const bar=document.getElementById("pBar");
-  const cl=document.querySelector(".curt.l");
-  const cr=document.querySelector(".curt.r");
-  const pre=document.getElementById("pre");
-
-  if(reduce){
-    pre.style.display="none";
-    gsap.set([cl,cr],{scaleX:0});
-    ScrollTrigger.refresh();
-    return;
-  }
-
-  [mark,bar].forEach(p=>{ const L=lenOf(p);
-    gsap.set(p,{strokeDasharray:L,strokeDashoffset:L}); });
-
-  const tl=gsap.timeline({ onComplete(){ ScrollTrigger.refresh(); } });
-  tl.to(mark,{strokeDashoffset:0,duration:.7,ease:AIR},.15)
-    .to(bar ,{strokeDashoffset:0,duration:.5,ease:AIR},"-=0.3")
-    .set([cl,cr],{scaleX:1})
-    .to(pre,{opacity:0,duration:.3,ease:"none"},"+=0.1")
-    .set(pre,{display:"none"})
-    .to(cl,{scaleX:0,duration:.9,ease:AIR},"<")
-    .to(cr,{scaleX:0,duration:.9,ease:AIR},"<");
+/* Half-box of the stage → turns fractions into px target offsets. */
+function halfBox(){
+  const r = document.getElementById("stage").getBoundingClientRect();
+  const pad = Math.min(r.width,r.height) * 0.18;
+  return { hx: r.width/2 - pad, hy: r.height/2 - pad };
+}
+function anchorPx(role){
+  const a = CONFIG.anchors[role];
+  const { hx, hy } = halfBox();
+  /* mobile: clean 2x2, tighter spread */
+  const mob = isMobile();
+  const fx = mob ? Math.sign(a.fx) * 0.5 : a.fx;
+  const fy = mob ? Math.sign(a.fy) * 0.62 : a.fy;
+  return { tx: fx*hx, ty: fy*hy, scl: a.scl };
 }
 
-window.addEventListener("load",boot);
+/* ---- START pose: all cards collapsed dead-centre ---- */
+function setStart(){
+  // hero forward, siblings behind small + dim
+  gsap.set(cardEls.hero, { "--tx":"0px","--ty":"0px","--scl":0.92, autoAlpha:0.85 });
+  gsap.set([cardEls.tr,cardEls.bl,cardEls.br], { "--tx":"0px","--ty":"0px","--scl":0.85, autoAlpha:0.30 });
+  gsap.set(innerImgs, { scale: CONFIG.innerZoom });
+}
+setStart();
+
+/* ============================================================
+   REDUCED MOTION: jump straight to the settled climax (P5/P6)
+   ============================================================ */
+if (reduce){
+  ["hero","tr","bl","br"].forEach(role=>{
+    const t = anchorPx(role);
+    gsap.set(cardEls[role], { "--tx":t.tx+"px","--ty":t.ty+"px","--scl":t.scl, autoAlpha:1 });
+  });
+  gsap.set(innerImgs,{ scale:1 });
+  gsap.set("#drawer",{ y:"-110%", autoAlpha:0 });
+  gsap.set("#bgLight",{ autoAlpha:0 });
+  gsap.set(["#rimTL","#rimTR","#rimBL","#rimBR"],{ opacity:CONFIG.rimPeak*0.7 });
+  gsap.set("#ghostLetter",{ autoAlpha:0 });
+  gsap.set("#ghostWm",{ opacity:0 });
+  gsap.set("#ghostWm2",{ opacity:CONFIG.ghostWm2Peak });
+  gsap.set(["#headline","#ctaWrap"],{ autoAlpha:1, y:0 });
+  gsap.set("#rule",{ scaleX:1 });
+  gsap.set("#dot",{ autoAlpha:1 });
+} else {
+
+  /* ----------------------------------------------------------
+     ONE pinned, scrubbed timeline. progress 0..1 == scroll.
+     ---------------------------------------------------------- */
+  const tl = gsap.timeline({
+    defaults:{ ease:"none" },
+    scrollTrigger:{
+      trigger:"#sofi",
+      start:"top top",
+      end:"+="+CONFIG.endVH+"%",
+      pin:true,
+      scrub:CONFIG.scrub,
+      anticipatePin:1,
+      invalidateOnRefresh:true,
+    }
+  });
+
+  /* ===== P1 0.00->0.12 — HERO HANDOFF ===== */
+  // prior drawer leaves first (up + out)
+  tl.to("#drawer", { y:"-110%", autoAlpha:0, duration:0.12, ease:E_SLIDE }, 0.00);
+  // stage light->black crossfade
+  tl.to("#bgLight", { autoAlpha:0, duration:0.12, ease:"none" }, 0.00);
+  // rim ghosts fade in
+  tl.to(["#rimTL","#rimTR","#rimBL","#rimBR"], { opacity:CONFIG.rimPeak, duration:0.12, ease:"none" }, 0.00);
+  // ghost letter + wordmark fade up
+  tl.to("#ghostLetter", { autoAlpha:0.10, duration:0.12, ease:"none" }, 0.00);
+  tl.fromTo("#ghostWm", { opacity:0, scale:1.0 }, { opacity:CONFIG.ghostWmPeak, duration:0.12, ease:"none" }, 0.00);
+  // hero card lifts toward full
+  tl.to(cardEls.hero, { autoAlpha:0.92, duration:0.12, ease:E_SLIDE }, 0.00);
+
+  /* ===== P2 0.12->0.26 — HERO CARD beat ===== */
+  tl.to(cardEls.hero, { "--scl":1.0, autoAlpha:1.0, duration:0.14, ease:E_SLIDE }, 0.12);
+  tl.fromTo(innerImgs[0], { scale:CONFIG.innerZoom }, { scale:1.0, duration:0.14, ease:E_SLIDE }, 0.12);
+  // ghost wordmark recedes + slow drift
+  tl.to("#ghostWm", { opacity:0.12, scale:1.04, duration:0.14, ease:"none" }, 0.12);
+
+  /* ===== P3 0.26->0.52 — SLIDE-OUT (siblings deal toward corners) ===== */
+  const siblings = ["tr","bl","br"];
+  siblings.forEach(role=>{
+    const at = 0.26 + CONFIG.stagger[role];
+    const card = cardEls[role];
+    const idx = ["hero","tr","bl","br"].indexOf(role);
+    tl.to(card, {
+      "--tx": () => anchorPx(role).tx+"px",
+      "--ty": () => anchorPx(role).ty+"px",
+      "--scl": 0.95,
+      autoAlpha:0.85,
+      duration:0.22, ease:E_SLIDE,
+    }, at);
+    tl.fromTo(innerImgs[idx], { scale:CONFIG.innerZoom }, { scale:1.0, duration:0.22, ease:E_SLIDE }, at);
+  });
+  // hero starts drifting from centre toward its top-left anchor (partial in P3)
+  tl.to(cardEls.hero, {
+    "--tx": () => anchorPx("hero").tx*0.6+"px",
+    "--ty": () => anchorPx("hero").ty*0.6+"px",
+    duration:0.26, ease:E_SLIDE,
+  }, 0.26);
+  // ghost wordmark fades
+  tl.to("#ghostWm", { opacity:0.04, duration:0.26, ease:"none" }, 0.26);
+
+  /* ===== P4 0.52->0.66 — LOCK to corners (overshoot scale settle) ===== */
+  ["tr","bl","br"].forEach(role=>{
+    const card = cardEls[role];
+    tl.to(card, {
+      "--tx": () => anchorPx(role).tx+"px",
+      "--ty": () => anchorPx(role).ty+"px",
+      autoAlpha:1.0,
+      duration:0.14, ease:E_SLIDE,
+    }, 0.52);
+    tl.to(card, { "--scl": () => anchorPx(role).scl, duration:0.14, ease:"back.out(1.4)" }, 0.52);
+  });
+  // hero finishes its slide to top-left anchor, scale overshoot
+  tl.to(cardEls.hero, {
+    "--tx": () => anchorPx("hero").tx+"px",
+    "--ty": () => anchorPx("hero").ty+"px",
+    duration:0.14, ease:E_SLIDE,
+  }, 0.52);
+  tl.to(cardEls.hero, { "--scl": () => anchorPx("hero").scl, duration:0.14, ease:"back.out(1.4)" }, 0.52);
+  // ghost crossfade: НАГІРНА out, ЖИТТЯ НА БЕРЕЗІ in
+  tl.to("#ghostWm",  { opacity:0, duration:0.14, ease:"none" }, 0.52);
+  tl.to("#ghostLetter", { autoAlpha:0, duration:0.14, ease:"none" }, 0.52);
+  tl.fromTo("#ghostWm2", { opacity:0 }, { opacity:CONFIG.ghostWm2Peak, duration:0.14, ease:"none" }, 0.52);
+
+  /* ===== P5 0.66->0.82 — CENTRE CONTENT reveal ===== */
+  tl.fromTo("#headline", { autoAlpha:0, y:24 }, { autoAlpha:1, y:0, duration:0.12, ease:E_REVEAL }, 0.66);
+  tl.to("#ctaWrap", { autoAlpha:1, duration:0.10, ease:"none" }, 0.70);
+  tl.fromTo("#rule", { scaleX:0 }, { scaleX:1, duration:0.12, ease:E_REVEAL }, 0.70);
+  tl.fromTo("#cta", { autoAlpha:0, y:8 }, { autoAlpha:0.82, y:0, duration:0.10, ease:E_REVEAL }, 0.74);
+  tl.fromTo("#dot", { autoAlpha:0, scale:0.4 }, { autoAlpha:1, scale:1, duration:0.10, ease:E_REVEAL }, 0.76);
+
+  /* ===== P6 0.82->0.90 — HOLD / READ (micro-parallax only) ===== */
+  // corner cards tiny independent y-drift for depth (additive via a 2nd prop)
+  tl.to(cardEls.hero, { yPercent:-1.4, duration:0.08, ease:"none" }, 0.82);
+  tl.to(cardEls.tr,   { yPercent:1.0,  duration:0.08, ease:"none" }, 0.82);
+  tl.to(cardEls.bl,   { yPercent:-1.0, duration:0.08, ease:"none" }, 0.82);
+  tl.to(cardEls.br,   { yPercent:1.4,  duration:0.08, ease:"none" }, 0.82);
+  tl.to("#ghostWm2",  { yPercent:-2.0, duration:0.08, ease:"none" }, 0.82);
+
+  /* ===== P7 0.90->1.00 — EXIT (whole wrap leaves, next enters) ===== */
+  // top cards lead a hair faster than bottom for a peel feel
+  tl.to([cardEls.hero,cardEls.tr], { yPercent:"-=120", duration:0.10, ease:E_SLIDE }, 0.90);
+  tl.to([cardEls.bl,cardEls.br],   { yPercent:"-=110", duration:0.10, ease:E_SLIDE }, 0.905);
+  tl.to(["#center","#dot"],        { autoAlpha:0, y:-60, duration:0.10, ease:E_SLIDE }, 0.90);
+  tl.to(["#ghostWm2","#rimTL","#rimTR","#rimBL","#rimBR"], { autoAlpha:0, duration:0.08, ease:"none" }, 0.90);
+
+  /* next section bust + ghost wordmark rise in from below */
+  gsap.fromTo(".next__bust",
+    { y:60, autoAlpha:0 },
+    { y:0, autoAlpha:1, ease:E_SLIDE,
+      scrollTrigger:{ trigger:"#next", start:"top 85%", end:"top 30%", scrub:1 } }
+  );
+  gsap.fromTo("#nextWm",
+    { y:80, autoAlpha:0 },
+    { y:0, autoAlpha:0.16, ease:E_SLIDE,
+      scrollTrigger:{ trigger:"#next", start:"top 90%", end:"top 35%", scrub:1 } }
+  );
+}
+
+/* ============================================================
+   HOVER (non-scroll): cards lift scale 1.0 -> 1.03, power2.out 0.4s
+   ============================================================ */
+if (!reduce && !isMobile()){
+  Object.values(cardEls).forEach(card=>{
+    card.addEventListener("mouseenter", ()=> gsap.to(card,{ "--hv":1.03, duration:0.4, ease:"power2.out" }));
+    card.addEventListener("mouseleave", ()=> gsap.to(card,{ "--hv":1.0,  duration:0.4, ease:"power2.out" }));
+  });
+}
+
+/* ============================================================
+   OPTIONAL Lenis (guarded). max 0 video decoders here.
+   ============================================================ */
+(function initLenis(){
+  if (reduce) return;
+  if (typeof Lenis === "undefined") return;
+  const lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add((t)=> lenis.raf(t*1000));
+  gsap.ticker.lagSmoothing(0);
+})();
+
+/* ============================================================
+   RESIZE: re-pose start, refresh ScrollTrigger (D16)
+   ============================================================ */
+let rT;
+window.addEventListener("resize",()=>{
+  clearTimeout(rT);
+  rT=setTimeout(()=>{
+    if(!reduce) setStart();
+    ScrollTrigger.refresh();
+  },180);
+});
 </script>
+<!-- ── __LAB_OK__ acceptance probe (re-added by library migration; additive) ── -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+  var tries=0;
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var hasGsap = !!window.gsap;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+      var ok = errs===0 && hasGsap && (reduce || stCount>0 || document.body.querySelector('[class*="static"],[class*="reduced"]'));
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  setTimeout(ready,700);
+})();</script>
+
 </body>
 </html>

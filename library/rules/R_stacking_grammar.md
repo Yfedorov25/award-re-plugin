@@ -1,3 +1,10 @@
+---
+id: R_stacking_grammar
+kind: rule
+gates: [uses, owns_pin, timing_layer]
+severity: hard
+---
+
 # R_stacking_grammar — how Vide Infra layers 4-5 moves into ONE section
 
 > Source: anatomy of aircenter.space (AIR, Vide Infra · Tekta) 11 home sections,

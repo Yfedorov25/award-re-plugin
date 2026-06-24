@@ -1,3 +1,10 @@
+---
+id: R_theme_flow
+kind: rule
+gates: [theme, page_beat]
+severity: soft
+---
+
 # Theme flow — прогрес теми по секціях
 
 Theme (light/dark/warm tonal register) is not per-section decoration — it is a single arc across the whole page. Pick ONE of the two macro-shapes below, then apply the seam/conversion/render rules. Source models cited from live Vide Infra sites.

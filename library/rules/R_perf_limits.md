@@ -1,3 +1,10 @@
+---
+id: R_perf_limits
+kind: rule
+gates: [motion_props, webgl, stack]
+severity: hard
+---
+
 # Perf limits — декодери, blend, GPU при стакінгу
 
 Hard limits for combining techniques without dropping below 60fps. Every rule is a budget you cannot exceed when stacking effects in one section or across the site. Violating any one of these is the documented root cause of scroll-jank in our builds.

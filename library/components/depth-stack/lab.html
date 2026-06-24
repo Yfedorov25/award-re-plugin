@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>depth-stack — base SHARED-FRAME lab</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="component.css" />
+<style>
+  /* a MINIMAL neutral depth context so the base frame has something to pin +
+     paint. The real per-variant geometry (felt+fan / tunnel) lives in the
+     variant labs. */
+  .deck{ position:absolute; inset:0; perspective:1400px; perspective-origin:50% 45%; overflow:hidden; background:var(--dark-3); }
+  .deck__pad{ position:absolute; inset:0; transform-style:preserve-3d; }
+  .plane{
+    position:absolute; inset:var(--pad); border-radius:var(--radius);
+    background:#0a0908; overflow:hidden; will-change:transform,opacity;
+    backface-visibility:hidden; box-shadow:0 50px 120px -50px rgba(0,0,0,.78);
+    display:grid; place-items:center;
+  }
+  .plane h2{ font-size:clamp(28px,5vw,64px); font-weight:300; color:var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="grade" aria-hidden="true"><div class="grain"></div><div class="vignette"></div></div>
+
+<section class="hero">
+  <div class="hero__top"><span>QUADRO</span><span>Корея · Вінниця</span></div>
+  <div class="hero__center">
+    <div class="hero__kicker">Базовий каркас</div>
+    <h1 class="hero__title serif">Спільний каркас <em>глибини</em></h1>
+    <p class="hero__sub">Цей лаб доводить лише спільний каркас depth-stack: пін, scrub, snap, знакова глибина, reduced-motion. Реальні рушії — у лабах варіантів.</p>
+  </div>
+  <div class="hero__bottom"><span class="dot"></span><span>Гортайте вниз</span></div>
+</section>
+
+<section class="stage" id="stage">
+  <div class="deck"><div class="deck__pad" id="pad"></div></div>
+</section>
+
+<section class="outro">
+  <span class="outro__k">Чотири квартири</span>
+  <h2 class="outro__t serif">Каркас працює. Рушій додає варіант.</h2>
+  <p class="outro__b">deal-fan роздає колоду, portal-through летить крізь тунель.</p>
+</section>
+
+<div class="rail" aria-hidden="true">
+  <span class="rail__num" id="railNum">01</span>
+  <div class="rail__track"><div class="rail__fill" id="railFill"></div></div>
+  <span class="rail__num" style="opacity:.5">04</span>
+</div>
+<div class="scrollhint" id="hint">Кадр 01 / 04</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="component.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+
+  /* build N neutral planes */
+  var N = 4, pad = document.getElementById("pad"), els = [];
+  for (var i = 0; i < N; i++){
+    var el = document.createElement("article");
+    el.className = "plane";
+    el.innerHTML = '<h2 class="serif">' + String(i+1).padStart(2,"0") + '</h2>';
+    pad.appendChild(el); els.push(el);
+  }
+  var railFill = document.getElementById("railFill"),
+      railNum  = document.getElementById("railNum"),
+      hint     = document.getElementById("hint");
+
+  /* a MINIMAL generic depth painter (the variant supplies the real one). The
+     base only cares that applyFrame is called for continuous prog. */
+  function applyFrame(prog){
+    for (var i = 0; i < N; i++){
+      var d = i - prog;
+      gsap.set(els[i], {
+        z: -Math.min(Math.max(d,0),3) * 480 + (d < 0 ? -d * 320 : 0),
+        scale: d >= 0 ? gsap.utils.interpolate(0.7, 1, gsap.utils.clamp(0,1,1-Math.min(d,1))) : gsap.utils.interpolate(1,1.6,Math.min(-d,1)),
+        opacity: d > 2.4 ? 0 : (d < 0 ? 1 - Math.min(-d,1) : 1),
+        zIndex: d < 0 ? 200 : Math.round(100 - i)
+      });
+    }
+  }
+  function updateChrome(prog){
+    var t = prog / (N - 1), a = Math.round(prog);
+    railFill.style.height = (t*100) + "%";
+    railNum.textContent = String(a+1).padStart(2,"0");
+    hint.textContent = "Кадр " + String(a+1).padStart(2,"0") + " / " + String(N).padStart(2,"0");
+  }
+
+  var ctrl = window.DepthStack && DepthStack.mount("#stage", {
+    n: N,
+    applyFrame: applyFrame,
+    updateChrome: updateChrome,
+    endMult: 1.0,
+    scrub: 0.7
+  });
+  window.addEventListener("resize", function(){ ScrollTrigger.refresh(); });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe ── -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  var tries=0;
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+      // base frame booted: DepthStack present + a pinned ScrollTrigger exists (or reduce) + zero real console.error
+      var ok = errs===0 && !!window.DepthStack && (reduce || stCount>0);
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+</body>
+</html>

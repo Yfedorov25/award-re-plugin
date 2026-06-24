@@ -1,3 +1,10 @@
+---
+id: R_stackability
+kind: rule
+gates: [combines_with, anti_combos, timing_layer]
+severity: soft
+---
+
 # Stackability — які примітиви комбінуються
 
 How to layer techniques in ONE section without them fighting. The core question: do two moves share a clock, a pin, or a trigger? If they do, they stack for free. Pick ONE pin-owning primitive per section, then layer the rest on top.

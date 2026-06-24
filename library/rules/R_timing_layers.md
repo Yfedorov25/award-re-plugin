@@ -1,3 +1,10 @@
+---
+id: R_timing_layers
+kind: rule
+gates: [timing_layer, motion_props, trigger]
+severity: hard
+---
+
 # Timing layers — як стак читається як один рух
 
 When you stack techniques in one section, every move runs on a *clock*. The art is making 3-5 simultaneous tweens read as ONE assembling gesture, not a pile-up. These rules govern how the clocks combine.

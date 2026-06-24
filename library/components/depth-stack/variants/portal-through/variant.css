@@ -1,0 +1,132 @@
+/* ============================================================================
+   depth-stack / portal-through — variant.css  (the TUNNEL skin, byte-faithful d3)
+   ----------------------------------------------------------------------------
+   The per-variant 3D geometry + frame chrome for the portal-through engine: the
+   tunnel stage with a deep perspective throat, the full-bleed render plane, the
+   depth-haze scrim, the lower-left text column, the forward-flying depth counter,
+   and the rail bead. The shared dark grade, hero, outro, progress-rail track and
+   .serif=Fraunces come from the base component.css (loaded first in the lab).
+   ========================================================================== */
+
+/* ============ PINNED TUNNEL STAGE ============ */
+.tunnel{
+  position:absolute; inset:0;
+  /* deep perspective = the throat of the portal */
+  perspective: 1200px;
+  perspective-origin:50% 47%;
+  overflow:hidden;
+  background:var(--dark-3);
+}
+.tunnel__pad{
+  position:absolute; inset:0;
+  transform-style:preserve-3d;
+}
+
+/* each render is a full-bleed plane in the tunnel */
+.frame{
+  position:absolute; inset:var(--pad);
+  border-radius:var(--radius);
+  overflow:hidden;
+  transform-origin:50% 50%;
+  will-change:transform, opacity, filter;
+  backface-visibility:hidden;
+  background:#0a0908;
+  box-shadow:0 50px 120px -50px rgba(0,0,0,.78);
+}
+.frame__img{
+  position:absolute; inset:-7%;          /* bleed for ken-burns */
+  width:114%; height:114%;
+  object-fit:cover;
+  will-change:transform;
+}
+/* inner depth edge + cinematic floor-shade so the render reads expensive */
+.frame::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; z-index:2;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07), inset 0 -140px 170px -80px rgba(0,0,0,.62);
+  pointer-events:none;
+}
+/* a tunnel-darkening scrim that strengthens as a frame recedes (depth haze) */
+.frame__haze{
+  position:absolute; inset:0; z-index:3; border-radius:inherit;
+  background:var(--dark-3); opacity:0; pointer-events:none;
+}
+
+/* ---- TEXT: deliberate column, asymmetric margin, holds over the lower-left ---- */
+.frame__text{
+  position:absolute; left:0; bottom:0; z-index:4;
+  width:min(560px, 78%);
+  padding:clamp(26px,3.4vw,58px);
+  will-change:transform, opacity;
+}
+.frame__eyebrow{
+  display:flex; align-items:center; gap:14px;
+  font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:var(--sub);
+  margin-bottom:clamp(14px,1.8vw,22px);
+}
+.frame__count{ font-variant-numeric:tabular-nums; }
+.frame__count b{ font-weight:500; color:var(--accent); }
+.frame__rule{ width:46px; height:1px; background:var(--line); }
+.frame__title{
+  font-size:clamp(30px, 4.4vw, 70px); line-height:.99; font-weight:300;
+  max-width:13ch; color:var(--ink);
+  text-shadow:0 2px 40px rgba(0,0,0,.55);
+}
+.frame__title em{ color:var(--accent-soft); }
+
+.frame__desc{
+  margin-top:clamp(16px,1.7vw,24px);
+  font-size:clamp(14px,1.05vw,16px); line-height:1.55; max-width:38ch; color:var(--sub);
+  text-shadow:0 1px 24px rgba(0,0,0,.6);
+}
+.frame__feats{
+  margin-top:clamp(20px,2.3vw,32px);
+  display:flex; gap:clamp(20px,3vw,42px);
+}
+.feat{ display:flex; flex-direction:column; gap:5px; }
+.feat .k{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--sub-deep); }
+.feat .v{ font-family:"Fraunces", serif; font-size:clamp(16px,1.5vw,21px); color:var(--ink); }
+
+/* tag pinned bottom-right of the render */
+.frame__tag{
+  position:absolute; right:clamp(20px,2.4vw,40px); bottom:clamp(20px,2.4vw,40px); z-index:4;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(255,255,255,.82);
+  padding:7px 13px; border-radius:999px;
+  background:rgba(0,0,0,.3); backdrop-filter:blur(7px);
+}
+
+/* ============ DEPTH CUE: a forward-traveling counter that flies toward you ============ */
+.depthnum{
+  position:fixed; top:clamp(20px,4vh,46px); left:50%; transform:translateX(-50%);
+  z-index:90; font-family:"Fraunces", serif; font-weight:300;
+  font-size:clamp(64px,12vw,150px); line-height:1; color:rgba(241,236,226,.06);
+  letter-spacing:-0.02em; font-variant-numeric:tabular-nums; pointer-events:none;
+  will-change:transform, opacity;
+}
+
+/* ============ the rail bead (portal-through handle) ============ */
+.rail__bead{
+  position:absolute; left:50%; top:0; transform:translate(-50%,-50%);
+  width:12px; height:12px; border-radius:50%;
+  background:var(--dark-3); border:1.5px solid var(--accent);
+  box-shadow:0 0 0 4px rgba(176,123,62,.14);
+}
+
+/* ============ RESPONSIVE — 390px ============ */
+@media (max-width: 820px){
+  .tunnel{ perspective:880px; }
+  .frame{ inset:clamp(12px,3.5vw,18px); }
+  .frame__text{ width:100%; padding:clamp(18px,5vw,26px); }
+  .frame__title{ font-size:clamp(28px,8.4vw,44px); max-width:15ch; }
+  .frame__desc{ max-width:30ch; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .frame__feats{ gap:22px; }
+  .depthnum{ font-size:clamp(56px,22vw,96px); }
+}
+@media (max-width: 480px){
+  .frame__tag{ display:none; }
+  /* darken the lower third so text always reads over the render */
+  .frame__text::before{
+    content:""; position:absolute; inset:-40% -20% -20% -20%; z-index:-1;
+    background:linear-gradient(to top, rgba(8,7,6,.86) 18%, transparent 88%);
+  }
+}

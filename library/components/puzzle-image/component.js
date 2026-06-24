@@ -1,241 +1,272 @@
 /* ============================================================
    puzzle-image — component.js   (framework-free, GSAP + ScrollTrigger)
    ------------------------------------------------------------
-   Slices ONE decoded image into an R×C grid of CSS-sprite tiles and
-   assembles them on scroll (scrub) or on enter (inview). The picture
-   self-seats like a puzzle into a seamless full-bleed photo.
+   STRICT 1:1 of the Zera /work cover beat (frames f_001..f_027).
+
+   THE TECHNIQUE (and ONLY this):
+     1 ASSEMBLE  scattered + blurred CSS-sprite tiles of ONE WIDE LANDSCAPE
+                 cover (~16:10) fly HOME from the center outward, de-blur,
+                 opacity up, seating into the assembled cover. A baked wordmark
+                 (huge serif across the TOP) + lower-left captions emerge. At
+                 assembly the cover is ALREADY near full viewport WIDTH.
+     2 GROW      the WHOLE assembled cover (photo + baked wordmark + captions,
+                 one DOM unit) scales up MODESTLY via transform:scale (~1.35x)
+                 until full-bleed. It STAYS a WIDE landscape cover; the wordmark
+                 spans ~90% of the width; top/bottom crop via .stage overflow.
+                 NOT a clip-path reframe, NOT a 6x over-scale, NOT a portrait box.
+     3 RELEASE   the pin ends; the now-large cover scrolls away naturally and
+                 the next section rises. No tween.
+
+   THE LEFT HEADLINE STAYS VISIBLE THROUGHOUT (it is z-index ABOVE the cover and
+   is NEVER tweened to opacity 0).
+
+   WHY transform:scale (not clip-path inset): the source grows the cover AS ONE
+   UNIT keeping its relative composition (the wordmark grows wider WITH the
+   subject and captions). A uniform MODEST scale of the .coverWrap element does
+   exactly that.
 
    USAGE
-     import nothing — just include this file after GSAP + ScrollTrigger
-     (+ optional CustomEase) and call:
+     include after GSAP + ScrollTrigger (+ optional CustomEase), then:
 
        const pz = PuzzleImage(document.querySelector('.puzzle'), {
-         src: '/renders/cover.webp',
-         rows: 4, cols: 4,
-         trigger: 'scrub',          // or 'inview'
-         scatter: 1.8, staggerFrom: 'center',
+         src: '/renders/cover-wide.webp',   // shown in a 16:10 frame, object-fit:cover
+         rows: 4, cols: 6,
+         wordmark: 'НАГІРНА',
+         captionLines: ['ЗОЛОТА ГОДИНА','СВОЄ СВІТЛО НА ВЛАСНОМУ БЕРЕЗІ'],
+         issueLine: 'СЕРІЯ · ДІМ НАД РІКОЮ',
+         growPeak: 1.35,          // MODEST uniform scale at peak (full-bleed wide)
+         scatter: 0.40,           // tile scatter (fraction of cover)
+         blurMax: 18,             // <= 20
+         pinLengthVh: 300,
        });
 
      Markup expected inside the root element:
        <section class="puzzle">
-         <div class="puzzle__stage">
-           <div class="puzzle__grid"></div>     <!-- tiles injected here -->
+         <div class="stage">
+           <h1 class="headline">...</h1>
+           <p  class="body">...</p>
+           <div class="coverWrap">
+             <div class="cover">
+               <div class="cover__ground"></div>
+               <div class="grid"></div>
+               <img class="cover__photo" alt="" />
+               <div class="cover__scrim"></div>
+               <div class="cover__wordmark"></div>
+               <div class="cover__caption"></div>
+             </div>
+           </div>
          </div>
        </section>
 
    RULES baked in
-     • motion is transform/opacity/filter ONLY (home cells are static).
-     • scrub mode: ONE timeline whose 0→1 IS scroll progress; each tile is
-       placed at position=startP with duration=tileWindow — the per-tile EASE
-       lives in the mapped sub-window, not a wall-clock duration.
-     • blur runs at rest and eases to 0; filter set to 'none' + will-change
-       removed onComplete (FPS).
-     • seamFix outsets each tile so the seated state has no sub-pixel hairlines.
-     • reduced-motion → instant seated state, no blur.
-     • image is decoded BEFORE tiles are built (no empty flash).
+     • motion is transform / opacity / filter(blur) ONLY. No clip-path reframe.
+     • the cover is ONE unit (.coverWrap); the grow is a single transform:scale
+       tween on it, so wordmark + captions scale WITH it.
+     • cover frame is LANDSCAPE 16:10 sized near full width at rest; .stage has
+       overflow:hidden so the MODEST grow crops top/bottom.
+     • the LEFT headline is NEVER faded — it stays visible the whole beat.
+     • no mix-blend / backdrop-filter over the scrubbed surface (D2).
+     • Lenis is GUARDED; reduced-motion AND mobile show the assembled cover with
+       NO pin / NO scrub (pin is desktop-only per the budget, C6/C7).
    ============================================================ */
+(function (global) {
+  'use strict';
 
-function PuzzleImage(root, userConfig){
-  const DEF = {
-    src: '',
-    alt: '',
-    rows: 4, cols: 4,
-    rowsMobile: 3, colsMobile: 3,
-    trigger: 'scrub',            // 'scrub' | 'inview'
-    scatter: 1.8,                // in tile-widths
-    scatterPattern: 'random',    // 'random' | 'edges-in' | 'ring' | 'rows'
-    staggerFrom: 'center',       // 'center' | 'edges' | 'random' | 'rows'
-    staggerAmount: 0.45,         // spread of per-tile starts across 0→1 progress
-    tileWindow: 0.55,            // per-tile sub-window width
-    scaleFrom: 0.65,
-    opacityFrom: 0.0,
-    blurFrom: 18,                // px (cap ≤20 for FPS)
-    ease: 'air',                 // 'air' | 'expo'
-    scrollDistance: '+=120%',
-    pin: true,
-    duration: 1.0,               // inview per-tile (s)
-    totalStagger: 0.5,           // inview from-center stagger total (s)
-    seed: 7,
-    seamFix: 0.5,
-    respectReducedMotion: true,
+  var DEFAULTS = {
+    src: null,
+    rows: 4, cols: 6,
+    rowsMobile: 4, colsMobile: 4,
+    wordmark: '',
+    captionLines: [],
+    issueLine: '',
+    coverWidthVw: 84,           // assembled (rest) cover WIDTH — wide, near full
+    coverAspect: 16 / 10,       // LANDSCAPE cover proportion
+    blurMax: 18,                // px, <= 20
+    scatter: 0.40,              // fraction of cover the tiles fly from
+    restTileAlpha: 0.10,        // near-invisible chips at rest
+    assembleEnd: 0.55,          // timeline progress where cover is assembled
+    growPeak: 1.35,             // MODEST uniform scale at peak (full-bleed wide)
+    scrub: 0.7,
+    pinLengthVh: 300,
+    ease: 'air',                // CustomEase name; falls back to power3.out
   };
-  const C = Object.assign({}, DEF, userConfig || {});
 
-  if (!window.gsap || !window.ScrollTrigger){
-    console.warn('[puzzle-image] GSAP + ScrollTrigger required'); return null;
-  }
-  gsap.registerPlugin(ScrollTrigger);
+  function PuzzleImage(root, userConfig) {
+    if (!root || !global.gsap || !global.ScrollTrigger) return null;
+    var gsap = global.gsap;
+    gsap.registerPlugin(global.ScrollTrigger);
 
-  const AIR = (window.CustomEase)
-    ? CustomEase.create('pzAir','M0,0 C0.25,0.74 0.22,0.99 1,1')
-    : 'power4.out';
-  const EASE = C.ease === 'expo' ? 'expo.out' : AIR;
-  const reduce = C.respectReducedMotion &&
-    window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var cfg = Object.assign({}, DEFAULTS, userConfig || {});
+    if (global.CustomEase && !gsap.parseEase(cfg.ease)) {
+      global.CustomEase.create('air', '0.16,1,0.3,1');
+    }
+    var EASE = (global.CustomEase && gsap.parseEase('air')) ? 'air' : 'power3.out';
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var mobile = matchMedia('(max-width: 720px)').matches;
+    var COLS = mobile ? cfg.colsMobile : cfg.cols;
+    var ROWS = mobile ? cfg.rowsMobile : cfg.rows;
 
-  const isMobile = window.matchMedia('(max-width:760px)').matches;
-  const ROWS = isMobile ? C.rowsMobile : C.rows;
-  const COLS = isMobile ? C.colsMobile : C.cols;
+    var els = {
+      stage:    root.querySelector('.stage'),
+      coverWrap:root.querySelector('.coverWrap'),
+      cover:    root.querySelector('.cover'),
+      photo:    root.querySelector('.cover__photo'),
+      scrim:    root.querySelector('.cover__scrim'),
+      grid:     root.querySelector('.grid'),
+      headline: root.querySelector('.headline'),
+      body:     root.querySelector('.body'),
+      wordmark: root.querySelector('.cover__wordmark'),
+      caption:  root.querySelector('.cover__caption'),
+    };
+    if (!els.coverWrap || !els.cover || !els.grid) return null;
 
-  const stage = root.querySelector('.puzzle__stage');
-  const grid  = root.querySelector('.puzzle__grid');
-  if (!stage || !grid){ console.warn('[puzzle-image] missing .puzzle__stage/.puzzle__grid'); return null; }
+    /* baked typography text */
+    if (els.wordmark && cfg.wordmark) els.wordmark.textContent = cfg.wordmark;
+    if (els.caption && cfg.captionLines && cfg.captionLines.length) {
+      var html = cfg.captionLines.map(function (l) {
+        return '<span class="cap">' + l + '</span>';
+      }).join('');
+      if (cfg.issueLine) html += '<span class="issue">' + cfg.issueLine + '</span>';
+      els.caption.innerHTML = html;
+    }
 
-  let tiles = [];
-  let SEATED_SCALE = 1;
-  let timeline = null, st = null;
+    /* cover sizing — WIDE: width-driven, height follows aspect-ratio */
+    els.coverWrap.style.width = cfg.coverWidthVw + 'vw';
+    els.coverWrap.style.aspectRatio = cfg.coverAspect;
 
-  /* deterministic PRNG (mulberry32) — reproducible scatter per seed */
-  function rngFrom(seed){
-    let a = seed >>> 0;
-    return function(){
-      a |= 0; a = (a + 0x6D2B79F5) | 0;
-      let t = Math.imul(a ^ (a >>> 15), 1 | a);
-      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    /* resolve src (string | array of candidates) */
+    var candidates = Array.isArray(cfg.src) ? cfg.src : (cfg.src ? [cfg.src] : []);
+    resolveImage(candidates, function (url) {
+      if (url && els.photo) els.photo.src = url;
+      buildTiles(url);
+      boot();
+    });
+
+    /* ---------- tiles: CSS-sprite slices of the SAME wide photo ---------- */
+    var tiles = [];
+    function buildTiles(bgUrl) {
+      els.grid.innerHTML = '';
+      tiles.length = 0;
+      var cw = 100 / COLS, ch = 100 / ROWS;
+      for (var r = 0; r < ROWS; r++) {
+        for (var c = 0; c < COLS; c++) {
+          var t = document.createElement('div');
+          t.className = 'tile';
+          t.style.left = (c * cw) + '%';
+          t.style.top = (r * ch) + '%';
+          t.style.width = cw + '%';
+          t.style.height = ch + '%';
+          if (bgUrl) {
+            t.style.backgroundImage = 'url("' + bgUrl + '")';
+            t.style.backgroundSize = (COLS * 100) + '% ' + (ROWS * 100) + '%';
+            var px = COLS > 1 ? (c / (COLS - 1)) * 100 : 0;
+            var py = ROWS > 1 ? (r / (ROWS - 1)) * 100 : 0;
+            t.style.backgroundPosition = px + '% ' + py + '%';
+          }
+          t._c = c; t._r = r;
+          els.grid.appendChild(t);
+          tiles.push(t);
+        }
+      }
+    }
+
+    function scatterOf(t) {
+      var cx = (COLS - 1) / 2, cy = (ROWS - 1) / 2;
+      var dx = t._c - cx, dy = t._r - cy;
+      var len = Math.hypot(dx, dy) || 1;
+      var jitter = Math.sin(t._c * 7.3 + t._r * 3.1) * 0.5;
+      var d = cfg.scatter;
+      return {
+        x: ((dx / len) * d + jitter * 0.10) * 100,
+        y: ((dy / len) * d - jitter * 0.08) * 100,
+        rot: jitter * 5,
+      };
+    }
+
+    var st = null;
+    function boot() {
+      /* reduced-motion OR mobile: show the assembled WIDE cover, NO pin/scrub */
+      if (reduce || mobile) {
+        gsap.set([els.photo, els.scrim, els.wordmark, els.caption], { opacity: 1 });
+        if (els.grid) els.grid.style.display = 'none';
+        global.ScrollTrigger.refresh();
+        return;
+      }
+
+      gsap.set([els.photo, els.scrim], { opacity: 0 });
+      gsap.set([els.wordmark, els.caption], { opacity: 0 });
+      gsap.set([els.cover, els.coverWrap], { scale: 1 });
+
+      tiles.forEach(function (t) {
+        var s = scatterOf(t);
+        gsap.set(t, {
+          xPercent: s.x, yPercent: s.y, rotation: s.rot,
+          scale: 0.86, opacity: cfg.restTileAlpha,
+          filter: 'blur(' + cfg.blurMax + 'px)',
+        });
+      });
+
+      var A = cfg.assembleEnd;
+      var tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: 'top top',
+          end: '+=' + cfg.pinLengthVh + '%',
+          pin: true,
+          scrub: cfg.scrub,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        }
+      });
+      st = tl.scrollTrigger;
+
+      /* PHASE 1 — ASSEMBLE: tiles fly home center-out, de-blur */
+      tl.to(tiles, {
+        xPercent: 0, yPercent: 0, rotation: 0, scale: 1, opacity: 1,
+        filter: 'blur(0px)', ease: EASE, duration: A,
+        stagger: { each: 0.012, from: 'center', grid: [ROWS, COLS] },
+      }, 0);
+      /* seamless photo + scrim fade in UNDER the tiles so seams vanish at seat */
+      tl.to([els.photo, els.scrim], { opacity: 1, ease: 'none', duration: 0.12 }, A * 0.80);
+      if (els.wordmark) tl.to(els.wordmark, { opacity: 1, ease: EASE, duration: 0.20 }, A * 0.62);
+      if (els.caption)  tl.to(els.caption,  { opacity: 1, ease: EASE, duration: 0.20 }, A * 0.72);
+      /* NOTE: the LEFT headline + RIGHT body are NEVER faded — they stay visible. */
+
+      /* PHASE 2 — GROW: MODEST uniform transform:scale of the whole cover unit */
+      tl.to(els.coverWrap, { scale: cfg.growPeak, ease: EASE, duration: 1 - A }, A);
+
+      global.ScrollTrigger.refresh();
+    }
+
+    /* ---------- helpers ---------- */
+    function resolveImage(list, done) {
+      var i = 0;
+      (function next() {
+        if (i >= list.length) { done(null); return; }
+        var url = list[i++];
+        var img = new Image();
+        img.onload = function () { done(url); };
+        img.onerror = next;
+        img.src = url;
+      })();
+    }
+
+    var onResize = (function () {
+      var rt;
+      return function () { clearTimeout(rt); rt = setTimeout(function () { global.ScrollTrigger.refresh(); }, 180); };
+    })();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('load', function () { global.ScrollTrigger.refresh(); });
+
+    return {
+      refresh: function () { global.ScrollTrigger.refresh(); },
+      destroy: function () {
+        if (st) st.kill();
+        window.removeEventListener('resize', onResize);
+        els.grid.innerHTML = '';
+      },
     };
   }
 
-  function preload(url){
-    return new Promise((res)=>{
-      const img = new Image();
-      img.onload = ()=> (img.decode ? img.decode().then(res).catch(res) : res());
-      img.onerror = res;
-      img.src = url;
-    });
-  }
-
-  function buildTiles(){
-    grid.innerHTML = '';
-    tiles = [];
-    grid.style.setProperty('--img', `url("${C.src}")`);
-
-    const tileW = 100 / COLS, tileH = 100 / ROWS;
-    const cc = (COLS - 1) / 2, cr = (ROWS - 1) / 2;
-    const maxDist = Math.hypot(cc, cr) || 1;
-
-    for (let r = 0; r < ROWS; r++){
-      for (let c = 0; c < COLS; c++){
-        const el = document.createElement('div');
-        el.className = 'puzzle__tile';
-        el.dataset.row = r; el.dataset.col = c;
-        el.style.left = (c*tileW)+'%';  el.style.top = (r*tileH)+'%';
-        el.style.width = tileW+'%';     el.style.height = tileH+'%';
-        el.style.setProperty('--c', c);   el.style.setProperty('--r', r);
-        el.style.setProperty('--cols', COLS); el.style.setProperty('--rows', ROWS);
-        el.style.setProperty('--colsm1', COLS-1); el.style.setProperty('--rowsm1', ROWS-1);
-        grid.appendChild(el);
-        tiles.push({ el, r, c, dist: Math.hypot(c-cc, r-cr)/maxDist });
-      }
-    }
-    measureSeamFix();
-  }
-
-  function measureSeamFix(){
-    const rect = stage.getBoundingClientRect();
-    const tilePx = Math.min(rect.width/COLS, rect.height/ROWS) || 1;
-    SEATED_SCALE = 1 + (C.seamFix * 2) / tilePx;     // rest scale of seated tile
-  }
-
-  function scatterOffset(t, rng, tWpx, tHpx){
-    const amt = C.scatter;
-    switch (C.scatterPattern){
-      case 'edges-in': {
-        const cx=(COLS-1)/2, cy=(ROWS-1)/2, vx=t.c-cx, vy=t.r-cy, m=Math.hypot(vx,vy)||1;
-        return { dx:(vx/m)*amt*tWpx*(0.6+rng()), dy:(vy/m)*amt*tHpx*(0.6+rng()) };
-      }
-      case 'ring': {
-        const ang=rng()*Math.PI*2;
-        return { dx:Math.cos(ang)*amt*tWpx*1.4, dy:Math.sin(ang)*amt*tHpx*1.4 };
-      }
-      case 'rows': {
-        const dir = (t.r%2===0)?-1:1;
-        return { dx:dir*amt*tWpx*(1+rng()), dy:(rng()-0.5)*tHpx*0.4 };
-      }
-      default:
-        return { dx:(rng()*2-1)*amt*tWpx, dy:(rng()*2-1)*amt*tHpx };
-    }
-  }
-
-  function staggerStart(t){
-    let key;
-    switch (C.staggerFrom){
-      case 'edges':  key = 1 - t.dist; break;
-      case 'random': key = rngFrom(C.seed + (t.r*COLS+t.c))(); break;
-      case 'rows':   key = t.r / Math.max(ROWS-1,1); break;
-      default:       key = t.dist;            // center first
-    }
-    return key * C.staggerAmount;
-  }
-
-  function assemble(){
-    if (reduce){
-      tiles.forEach(t=> gsap.set(t.el,{x:0,y:0,scale:SEATED_SCALE,autoAlpha:1,filter:'blur(0px)'}));
-      return;
-    }
-    const rect = stage.getBoundingClientRect();
-    const tWpx = rect.width/COLS, tHpx = rect.height/ROWS;
-    const rng = rngFrom(C.seed);
-
-    tiles.forEach(t=>{
-      const o = scatterOffset(t, rng, tWpx, tHpx);
-      t.rx=o.dx; t.ry=o.dy; t.startP=staggerStart(t);
-      gsap.set(t.el,{ x:t.rx, y:t.ry, scale:C.scaleFrom,
-        autoAlpha:C.opacityFrom, filter:`blur(${C.blurFrom}px)`,
-        willChange:'transform,opacity,filter' });
-    });
-
-    (C.trigger==='inview') ? inview() : scrub();
-  }
-
-  function scrub(){
-    const tl = gsap.timeline();
-    tiles.forEach(t=>{
-      tl.fromTo(t.el,
-        { x:t.rx, y:t.ry, scale:C.scaleFrom, autoAlpha:C.opacityFrom, filter:`blur(${C.blurFrom}px)` },
-        { x:0, y:0, scale:SEATED_SCALE, autoAlpha:1, filter:'blur(0px)',
-          duration:C.tileWindow, ease:EASE,
-          onComplete(){ t.el.style.willChange='auto'; t.el.style.filter='none'; } },
-        t.startP);
-    });
-    timeline = tl;
-    st = ScrollTrigger.create({
-      trigger:root, start:'top top', end:C.scrollDistance,
-      scrub:true, pin:C.pin, anticipatePin:1, animation:tl,
-    });
-  }
-
-  function inview(){
-    const tl = gsap.timeline({ paused:true });
-    tl.to(tiles.map(t=>t.el), {
-      x:0, y:0, scale:SEATED_SCALE, autoAlpha:1, filter:'blur(0px)',
-      duration:C.duration, ease:EASE,
-      stagger:{ each:C.totalStagger/Math.max(tiles.length-1,1),
-        from:(C.staggerFrom==='edges'?'edges':C.staggerFrom==='random'?'random':'center') },
-      onComplete(){ tiles.forEach(t=>{ t.el.style.willChange='auto'; t.el.style.filter='none'; }); }
-    });
-    timeline = tl;
-    st = ScrollTrigger.create({ trigger:root, start:'top 75%', once:true, onEnter(){ tl.play(); } });
-  }
-
-  async function boot(){
-    await preload(C.src);
-    buildTiles();
-    assemble();
-    ScrollTrigger.refresh();
-  }
-  boot();
-
-  let rT;
-  function onResize(){ clearTimeout(rT); rT=setTimeout(()=>{ measureSeamFix(); ScrollTrigger.refresh(); },200); }
-  window.addEventListener('resize', onResize);
-
-  return {
-    timeline: ()=>timeline,
-    scrollTrigger: ()=>st,
-    refresh: ()=>ScrollTrigger.refresh(),
-    destroy(){ window.removeEventListener('resize', onResize); st && st.kill(); timeline && timeline.kill(); grid.innerHTML=''; }
-  };
-}
-
-if (typeof module !== 'undefined' && module.exports) module.exports = PuzzleImage;
+  global.PuzzleImage = PuzzleImage;
+})(window);

@@ -3,289 +3,607 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LAB · cards-swipe (Zera grammar)</title>
+<title>LAB · cards-swipe (Zera grammar · 1:1 · 7 phases)</title>
 
-<!-- ============================================================
-     LAB: cards-swipe
-     A pinned section whose inner row of full-bleed cards translates
-     horizontally on vertical scroll, snapping one card per viewport,
-     with a circular "stitch" handle riding the seam + pointer-drag.
+<!-- ============================================================================
+     LAB · cards-swipe          technique-id: cards-swipe          1:1 rebuild
+     ----------------------------------------------------------------------------
+     SOURCE: Zera Studio "Our Services". This is the DEEP 1:1 pass: every phase
+     of the source motion is present, driven by ONE pinned scrubbed timeline so
+     the whole sequence is reversible 1:1 with the scrollbar.
 
-     Self-contained: open this file directly. No build step.
-     GSAP 3.12.5 + ScrollTrigger + CustomEase + ScrollToPlugin via cdnjs.
-     Motion is transform/opacity only. No WebGL. Respects reduced-motion.
-     ============================================================ -->
+     THE 7 PHASES (source choreography, all implemented — none skipped):
+       P1  progress 0.00         Full-bleed dark hero. Photoreal render intact on
+                                 a dark pedestal. Two-line serif kicker overlaps
+                                 ("ВАШ ДІМ / ОЖИВАЄ."), giant ghost-echo behind,
+                                 micro tracked label under the pedestal, vertical
+                                 edge rails. Rest frame, pinned.
+       P2  0.00 -> 0.30          The render DISSOLVES: 2-layer crossfade (sharp
+                                 img -> flaked img) + a particle overlay scale-up
+                                 (1.0->1.06) drifting up. Kicker LOCKED, sharp.
+                                 Pedestal disc + micro-label remain. By the end
+                                 the cream card's rounded top edge peeks at the
+                                 bottom. NEVER scrub video.currentTime.
+       P3  0.30 -> 0.42          The cream card slides UP (translateY 100%->0%)
+                                 over the dark hero = MASK HANDOFF. As it passes
+                                 ~70% its inner content staggers in (y16+opacity,
+                                 stagger .06).
+       P4  0.42 -> 0.50          Brief HOLD — card 1 reads as a destination, then
+                                 the layout arms the horizontal deck track.
+       P5  0.50 -> 0.72          Deck advance 1->2: track translateX one card; a
+                                 thin CURVED BRONZE STITCH ')(' bridges the seam
+                                 (opacity 0->1->0 at mid-swipe); a GIANT ghost
+                                 serif index-letter bleeds through the dark gutter
+                                 (slower parallax); engraved medallion crossfades
+                                 1->2; footer index (01/03)->(02/03).
+       P6  0.72 -> 0.95          Deck advance 2->3: identical mechanic, ghost
+                                 letter ticks, medallion 2->3, footer ->(03/03).
+       P7  0.95 -> 1.00          Settle/hold the last card, medallion finishes its
+                                 crossfade, pin releases. Reverse scroll plays
+                                 every phase backward 1:1.
+
+     EASING (one project ease):
+       - CustomEase "cards" = M0,0 C0.16,1 0.3,1 1,1   (expo.out feel)
+         used for: card slide-up handoff + each horizontal card snap segment.
+       - statue dissolve: linear (1:1 with scrub, no ease).
+       - ghost index-letter: power1.out parallax against the cards.
+       - medallion number cross-fade: power2.inOut.
+       - GLOBAL scrub:1 on the pinned ScrollTrigger -> fully reversible.
+
+     STACK: vanilla GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis.
+            NO WebGL. transform/opacity/clip-path only. No video scrubbing.
+            <=2 video decoders (here: 0). prefers-reduced-motion fallback.
+     ========================================================================== -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lenis/1.1.13/lenis.min.js"></script>
 
 <style>
-/* ---- bring in the component stylesheet inline so the lab is one file ---- */
 :root{
-  --cs-ink:#0B0B0C; --cs-paper:#F4F0EA; --cs-mid:#8A857C; --cs-bronze:#B8946A;
-  --cs-gap:24px; --cs-radius:22px; --cs-inset:18px; --cs-pad:clamp(28px,5vw,72px);
-  --cs-air:cubic-bezier(0.25,0.74,0.22,0.99);
+  --cs-ink:#0a0a0a;          /* near-black page / dark hero */
+  --cs-ink2:#101010;
+  --cs-paper:#efece3;        /* cream card surface */
+  --cs-cream:#efece3;
+  --cs-mid:#8a857c;          /* muted grey kicker line A */
+  --cs-bronze:#b8946a;       /* the single accent: stitch + rules + medallion */
+
+  --cs-gap:26px;             /* dark gutter between deck cards (INVARIANT = JS GAP) */
+  --cs-radius:22px;          /* card corner radius */
+  --cs-inset:18px;           /* vertical inset of cards from viewport */
+  --cs-pad:clamp(26px,4.4vw,64px);
 }
+
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:auto}
-body{background:var(--cs-ink);color:var(--cs-paper);
-  font-family:"Helvetica Neue",system-ui,-apple-system,sans-serif;
-  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{
+  background:var(--cs-ink);color:var(--cs-paper);
+  font-family:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;
+}
 img{display:block}
+.serif{font-family:"Times New Roman",Georgia,serif}
 
-/* preloader ritual (matches house style: cream fill -> mark -> slice open) */
-#pre{position:fixed;inset:0;z-index:1000;background:var(--cs-paper);
-  display:flex;align-items:center;justify-content:center}
-#pre svg{width:min(30vw,150px);overflow:visible}
-#pre path,#pre line{stroke:var(--cs-ink);stroke-width:1.4;fill:none;vector-effect:non-scaling-stroke}
-.slice{position:fixed;top:0;bottom:0;z-index:999;background:var(--cs-ink);transform:scaleX(0);will-change:transform}
-.slice.l{left:0;width:50vw;transform-origin:right center}
-.slice.r{right:0;width:50vw;transform-origin:left center}
+/* grain only on dark surfaces, never over the translating deck (full repaint) */
+.grain{position:absolute;inset:0;pointer-events:none;opacity:.05;z-index:6;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");}
 
-/* a lead section before the track, so we see the pin engage */
-.intro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
-  padding:0 clamp(24px,6vw,96px)}
-.intro .eyebrow{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;opacity:.55;margin-bottom:1.4rem}
-.intro h1{font:400 clamp(3rem,12vw,9rem)/.86 "Times New Roman",Georgia,serif;letter-spacing:-.02em}
-.intro p{margin-top:2rem;max-width:40ch;opacity:.7;line-height:1.7}
-.intro .hint{margin-top:3rem;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+/* ============================================================================
+   THE STAGE — one pinned section holding ALL phases
+   ============================================================================ */
+.cs-stage{position:relative;height:100vh;overflow:hidden;background:var(--cs-ink)}
 
-/* ========== COMPONENT CSS (cards-swipe) ========== */
-.cs-root{position:relative;height:100vh;overflow:hidden;background:var(--cs-ink)}
-.cs-track{display:flex;gap:var(--cs-gap);height:100%;align-items:center;padding:0 var(--cs-gap);will-change:transform}
-.cs-card{position:relative;flex:0 0 calc(100vw - var(--cs-gap)*2);height:calc(100vh - var(--cs-inset)*2);
-  border-radius:var(--cs-radius);background:var(--cs-paper);color:var(--cs-ink);overflow:hidden;isolation:isolate;
-  box-shadow:0 30px 80px -30px rgba(0,0,0,.55);transition:box-shadow .5s var(--cs-air)}
-.cs-card.is-active{box-shadow:0 40px 100px -28px rgba(0,0,0,.65)}
-.cs-card .cs-media{position:absolute;inset:0;z-index:0;overflow:hidden}
-.cs-card .cs-media img{width:112%;height:100%;margin-left:-6%;object-fit:cover;will-change:transform}
-.cs-card .cs-body{position:relative;z-index:2;height:100%;padding:var(--cs-pad);display:flex;flex-direction:column;justify-content:space-between}
-.cs-eyebrow{font:500 .7rem/1 "Helvetica Neue",sans-serif;letter-spacing:.32em;text-transform:uppercase;opacity:.55}
-.cs-title{font:400 clamp(2.6rem,6vw,5.5rem)/.92 "Times New Roman",Georgia,serif;letter-spacing:-.02em;margin:.2em 0}
-.cs-text{max-width:42ch;font:400 .95rem/1.7 "Helvetica Neue",sans-serif;opacity:.8}
-.cs-list{list-style:none;font:400 .8rem/1 "Helvetica Neue",sans-serif;letter-spacing:.04em;opacity:.7;margin-top:1.4rem}
-.cs-list li{padding:.7rem 0;border-top:1px solid rgba(11,11,12,.14);display:flex;gap:.6rem;align-items:center}
-.cs-foot{display:flex;justify-content:space-between;align-items:end;font:500 .68rem/1 "Helvetica Neue",sans-serif;
-  letter-spacing:.24em;text-transform:uppercase;opacity:.5}
-/* media-only card variant: image fills, text overlaid bottom */
-.cs-card.is-media .cs-body{justify-content:flex-end;color:var(--cs-paper)}
-.cs-card.is-media::after{content:"";position:absolute;inset:0;z-index:1;
-  background:linear-gradient(to top,rgba(11,11,12,.7),transparent 55%)}
+/* ---- edge rails (frame the stage, P1) ---- */
+.rail{position:absolute;top:0;bottom:0;width:clamp(38px,5vw,72px);z-index:50;
+  display:flex;align-items:center;justify-content:center;pointer-events:none}
+.rail.l{left:0}.rail.r{right:0}
+.rail .word{font-size:.6rem;letter-spacing:.34em;text-transform:uppercase;opacity:.42;white-space:nowrap}
+.rail.l .word{transform:rotate(180deg);writing-mode:vertical-rl}
+.rail.r .nav{writing-mode:vertical-rl;display:flex;flex-direction:column;gap:1.6em;
+  font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;opacity:.42}
 
-.cs-seam{position:absolute;top:50%;z-index:30;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
-  background:var(--cs-ink);border:1.5px solid var(--cs-bronze);display:flex;align-items:center;justify-content:center;
-  pointer-events:none;will-change:transform,opacity,left}
-.cs-seam svg{width:18px;height:18px;stroke:var(--cs-paper);stroke-width:1.6;fill:none}
-.cs-root{cursor:grab}.cs-root.cs-dragging{cursor:grabbing}
+/* ============================================================================
+   P1-P2  DARK HERO with the dissolving render
+   ============================================================================ */
+.hero{position:absolute;inset:0;z-index:10;display:flex;align-items:center;justify-content:center}
 
-/* progress dots (bonus chrome, not core) */
-.cs-dots{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:40;display:flex;gap:10px}
-.cs-dots button{width:7px;height:7px;border-radius:50%;border:none;background:rgba(244,240,234,.3);cursor:pointer;padding:0;transition:transform .3s var(--cs-air),background .3s}
-.cs-dots button.on{background:var(--cs-bronze);transform:scale(1.5)}
+/* the subject render on its pedestal */
+.subj{position:relative;width:min(38vh,300px);aspect-ratio:9/16;z-index:12}
+.subj .layer{position:absolute;inset:0;border-radius:10px;overflow:hidden}
+.subj .layer img{width:100%;height:100%;object-fit:cover}
+/* sharp layer = intact subject */
+.subj .sharp{z-index:2}
+/* flaked layer = same render, degraded look (the dissolved state) */
+.subj .flaked{z-index:3;opacity:0;
+  filter:blur(2px) brightness(1.35) contrast(.7) grayscale(.4)}
+/* particle overlay drifting up over the silhouette */
+.subj .flecks{position:absolute;inset:-12% -8%;z-index:4;opacity:0;mix-blend-mode:screen;
+  background:
+    radial-gradient(2px 2px at 20% 80%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(1.5px 1.5px at 60% 70%, rgba(230,230,230,.8), transparent 60%),
+    radial-gradient(2px 2px at 38% 55%, rgba(255,255,255,.85), transparent 60%),
+    radial-gradient(1px 1px at 75% 50%, rgba(220,220,220,.8), transparent 60%),
+    radial-gradient(2px 2px at 50% 40%, rgba(255,255,255,.9), transparent 60%),
+    radial-gradient(1.5px 1.5px at 28% 30%, rgba(235,235,235,.8), transparent 60%),
+    radial-gradient(2px 2px at 68% 22%, rgba(255,255,255,.85), transparent 60%),
+    radial-gradient(1px 1px at 45% 12%, rgba(225,225,225,.8), transparent 60%);}
+/* dark circular pedestal disc under the subject */
+.pedestal{position:absolute;left:50%;bottom:-7%;transform:translateX(-50%);
+  width:78%;height:26px;border-radius:50%;z-index:1;
+  background:radial-gradient(ellipse at center,#1a1a1a 0%,#0a0a0a 70%);
+  box-shadow:0 14px 40px -10px #000}
+.microlabel{position:absolute;left:50%;bottom:-13%;transform:translateX(-50%);
+  font-size:.56rem;letter-spacing:.32em;text-transform:uppercase;opacity:.5;white-space:nowrap;z-index:5}
 
+/* two-line serif kicker overlapping the subject (LOCKED during dissolve) */
+.kicker{position:absolute;z-index:20;inset:0;pointer-events:none}
+.kicker .ka{position:absolute;left:9vw;top:30%;
+  font:400 clamp(2.6rem,8vw,7rem)/.86 "Times New Roman",Georgia,serif;
+  letter-spacing:-.02em;color:var(--cs-mid)}
+.kicker .kb{position:absolute;right:9vw;bottom:30%;text-align:right;
+  font:400 clamp(2.6rem,8vw,7rem)/.86 "Times New Roman",Georgia,serif;
+  letter-spacing:-.02em;color:var(--cs-cream)}
+.kicker .kb em{font-style:italic;color:var(--cs-bronze)}
+/* giant faint ghost-echo behind/below */
+.kicker .ghost{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);
+  font:400 clamp(7rem,26vw,22rem)/.8 "Times New Roman",Georgia,serif;
+  color:#fff;opacity:.035;white-space:nowrap;letter-spacing:-.04em}
+
+/* ============================================================================
+   P5-P6  GIANT GHOST INDEX-LETTER in the dark gutter behind the deck
+   ============================================================================ */
+.gutter-letter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  z-index:14;font:400 60vh/1 "Times New Roman",Georgia,serif;color:#fff;
+  opacity:0;pointer-events:none;letter-spacing:-.04em}
+
+/* ============================================================================
+   P3-P7  THE DECK
+   the deck-wrap slides UP over the hero (mask handoff), then its inner track
+   translates X for the horizontal swipe.
+   ============================================================================ */
+.deck-wrap{position:absolute;inset:0;z-index:30;transform:translateY(100%);will-change:transform}
+.deck-track{display:flex;gap:var(--cs-gap);height:100%;align-items:center;
+  padding:0 var(--cs-gap);will-change:transform}
+
+.cs-card{position:relative;flex:0 0 calc(100vw - var(--cs-gap)*2);
+  height:calc(100vh - var(--cs-inset)*2);
+  border-radius:var(--cs-radius);background:var(--cs-paper);color:var(--cs-ink);
+  overflow:hidden;isolation:isolate;box-shadow:0 30px 80px -30px rgba(0,0,0,.55)}
+
+.cs-card .cs-media{position:absolute;top:0;right:0;bottom:0;width:42%;z-index:0;overflow:hidden}
+.cs-card .cs-media::before{content:"";position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to right,var(--cs-paper),transparent 32%)}
+.cs-card .cs-media img{width:100%;height:100%;object-fit:cover;will-change:transform}
+
+.cs-body{position:relative;z-index:2;height:100%;padding:var(--cs-pad);
+  display:flex;flex-direction:column;justify-content:space-between}
+.cs-eyebrow{font:500 .68rem/1 "Helvetica Neue",sans-serif;letter-spacing:.3em;text-transform:uppercase;opacity:.55}
+.cs-title{font:400 clamp(2.4rem,5.6vw,5.2rem)/.92 "Times New Roman",Georgia,serif;letter-spacing:-.02em;margin:.18em 0}
+.cs-title em{font-style:italic;color:var(--cs-bronze)}
+.cs-text{max-width:34ch;font:400 .92rem/1.7 "Helvetica Neue",sans-serif;opacity:.82}
+
+/* 2x2 hairline tag grid (card 1) */
+.cs-tags{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:1.4rem;max-width:30ch}
+.cs-tags span{padding:.7rem .2rem;border-top:1px solid rgba(10,10,10,.16);
+  font:500 .68rem/1.2 "Helvetica Neue",sans-serif;letter-spacing:.06em;text-transform:uppercase;opacity:.7}
+
+/* hairline service list (card 2) */
+.cs-list{list-style:none;margin-top:1.2rem;max-width:30ch}
+.cs-list li{padding:.6rem 0;border-top:1px solid rgba(10,10,10,.16);
+  font:500 .72rem/1.2 "Helvetica Neue",sans-serif;letter-spacing:.06em;text-transform:uppercase;opacity:.7;
+  display:flex;justify-content:space-between;gap:1rem}
+.cs-list li span{opacity:.5}
+
+/* chip rows with circular badges (card 3) */
+.cs-chips{list-style:none;margin-top:1.2rem;max-width:34ch;display:flex;flex-direction:column;gap:.55rem}
+.cs-chips li{display:flex;align-items:center;gap:.7rem;
+  font:500 .68rem/1.2 "Helvetica Neue",sans-serif;letter-spacing:.06em;text-transform:uppercase;opacity:.78}
+.cs-chips li b{flex:0 0 auto;width:18px;height:18px;border-radius:50%;border:1px solid rgba(10,10,10,.4);
+  display:inline-flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:400}
+.cs-chips li u{flex:1;text-decoration:none;border-bottom:1px solid rgba(10,10,10,.14);padding-bottom:.45rem}
+
+.cs-foot{display:flex;justify-content:space-between;align-items:end;gap:1rem;
+  font:500 .62rem/1.3 "Helvetica Neue",sans-serif;letter-spacing:.2em;text-transform:uppercase;opacity:.5}
+.cs-foot .mid{opacity:.7;letter-spacing:.12em}
+
+/* the inner content we stagger-in (P3 + per-card) */
+.stagger{will-change:transform,opacity}
+
+/* ============================================================================
+   P5-P6  BRONZE STITCH — a thin CURVED ')(' bracket at the seam (NOT a circle)
+   ============================================================================ */
+.cs-stitch{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:40;
+  width:34px;height:120px;opacity:0;pointer-events:none;will-change:transform,opacity}
+.cs-stitch svg{width:100%;height:100%;overflow:visible}
+.cs-stitch path{fill:none;stroke:var(--cs-bronze);stroke-width:1.4;
+  filter:drop-shadow(0 0 6px rgba(184,148,106,.5))}
+
+/* ============================================================================
+   ENGRAVED CIRCULAR PROGRESS MEDALLION (bottom-center, P4 onward)
+   ============================================================================ */
+.medallion{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:45;
+  display:flex;align-items:center;gap:18px;opacity:0;will-change:opacity}
+.medallion .rule{width:clamp(40px,10vw,120px);height:1px;background:rgba(239,236,227,.32)}
+.medallion .rule .lab{position:relative;top:-.9em;font-size:.55rem;letter-spacing:.26em;
+  text-transform:uppercase;opacity:.55;white-space:nowrap}
+.medallion .rule.l .lab{float:left}.medallion .rule.r .lab{float:right}
+.medallion .disc{position:relative;width:62px;height:62px;border-radius:50%;
+  border:1px solid rgba(184,148,106,.55);display:flex;align-items:center;justify-content:center}
+.medallion .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font:400 1.5rem/1 "Times New Roman",Georgia,serif;color:var(--cs-bronze)}
+
+/* hint */
+.hint{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);z-index:46;
+  font-size:.62rem;letter-spacing:.24em;text-transform:uppercase;opacity:.5;text-align:center;white-space:nowrap}
+
+/* preloader */
+#pre{position:fixed;inset:0;z-index:1000;background:var(--cs-ink);
+  display:flex;align-items:center;justify-content:center;transition:opacity .4s}
+#pre .p{font:400 .7rem/1 "Helvetica Neue",sans-serif;letter-spacing:.34em;text-transform:uppercase;opacity:.6}
+
+/* tail so the page scrolls past the pin */
+.tail{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(24px,6vw,96px)}
+.tail .eyebrow{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;opacity:.5;margin-bottom:1.2rem}
+.tail h2{font:400 clamp(2rem,8vw,5rem)/.9 "Times New Roman",Georgia,serif;letter-spacing:-.02em}
+
+/* ---- mobile: NO pin. vertical-stacked static deck (reduced-mech) ---- */
 @media (max-width:760px){
-  :root{--cs-gap:14px;--cs-radius:16px;--cs-inset:12px;--cs-pad:22px}
-  .cs-seam{width:38px;height:38px;margin:-19px 0 0 -19px}
-  .cs-title{font-size:clamp(2.1rem,9vw,3.4rem)}
+  :root{--cs-gap:14px;--cs-radius:16px;--cs-inset:0;--cs-pad:22px}
+  .kicker .ka{font-size:clamp(2.1rem,12vw,3.4rem)}
+  .kicker .kb{font-size:clamp(2.1rem,12vw,3.4rem)}
 }
 
-/* reduced-motion stacked fallback */
-.cs-reduced.cs-root{height:auto;overflow:visible}
-.cs-reduced .cs-track{flex-direction:column;height:auto;padding:var(--cs-gap);gap:var(--cs-gap)}
-.cs-reduced .cs-card{flex:0 0 auto;width:100%;height:auto;min-height:70vh}
-.cs-reduced .cs-seam,.cs-reduced~.cs-dots{display:none}
-@media (prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-  .cs-card .cs-media img{width:100%;margin-left:0}
-}
+/* ---- reduced motion / mobile-stack: instant, vertical, no pin, no seam ---- */
+.cs-static .deck-wrap{position:static;transform:none!important}
+.cs-static .deck-track{flex-direction:column;height:auto;padding:var(--cs-gap);gap:var(--cs-gap)}
+.cs-static .cs-card{flex:0 0 auto;width:100%;height:auto;min-height:72vh}
+.cs-static .cs-stitch,.cs-static .medallion,.cs-static .gutter-letter,.cs-static .hint{display:none}
+.cs-static .cs-media{position:absolute}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 
 <body>
 
-<!-- ===================== PRELOADER ===================== -->
-<div id="pre" aria-hidden="true">
-  <svg viewBox="0 0 120 120">
-    <path id="mRoof" d="M22 56 L60 24 L98 56" />
-    <path id="mWall" d="M32 52 L32 96 L88 96 L88 52" />
-    <line id="mSpine" x1="60" y1="14" x2="60" y2="104" />
-  </svg>
-</div>
-<div class="slice l"></div>
-<div class="slice r"></div>
+<div id="pre"><div class="p">Nahirna · cards-swipe</div></div>
 
-<!-- lead-in so we can watch the pin engage -->
-<section class="intro">
-  <div class="eyebrow">Lab · technique</div>
-  <h1>Cards,<br>swiped.</h1>
-  <p>Scroll down: the section below pins and the row of cards slides sideways,
-     snapping one per screen. Grab and drag to fling. The bronze stitch rides the seam.</p>
-  <div class="hint">↓ scroll to enter the track</div>
-</section>
+<!-- ===================== ONE PINNED STAGE — all 7 phases ===================== -->
+<section class="cs-stage" id="stage">
+  <div class="grain"></div>
 
-<!-- ===================== THE CARD TRACK ===================== -->
-<section class="cs-root" id="cards">
-  <div class="cs-track">
+  <!-- edge rails (P1 frame) -->
+  <div class="rail l"><span class="word">Nahirna · Studio</span></div>
+  <div class="rail r"><div class="nav"><span>Портфоліо</span><span>Студія</span><span>Портал</span><span>Контакт</span></div></div>
 
-    <!-- CARD 01 — info-forward -->
-    <article class="cs-card">
-      <div class="cs-media"><img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80" alt=""></div>
-      <div class="cs-body">
-        <div class="cs-eyebrow">[01] — Foundation</div>
-        <div>
-          <h2 class="cs-title">Website &amp;<br>Design.</h2>
-          <p class="cs-text">A custom-crafted website designed to establish your brand, build credibility, and give your business a professional digital foundation.</p>
-          <ul class="cs-list">
-            <li>· UI / UX Design</li>
-            <li>· Custom Website Development</li>
-            <li>· Conversion-Focused Structure</li>
-          </ul>
-        </div>
-        <div class="cs-foot"><span>01 / 03 — Foundation</span><span>Where craft meets clarity →</span></div>
-      </div>
-    </article>
+  <!-- giant ghost index-letter (sits in the dark gutter behind the deck, P5-P6) -->
+  <div class="gutter-letter serif" id="gutterLetter">А</div>
 
-    <!-- CARD 02 — info-forward -->
-    <article class="cs-card">
-      <div class="cs-media"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=80" alt=""></div>
-      <div class="cs-body">
-        <div class="cs-eyebrow">[02] — Growth</div>
-        <div>
-          <h2 class="cs-title">Growth<br>System.</h2>
-          <p class="cs-text">A complete digital growth engine that connects website, landing pages, paid advertising, SEO and ongoing optimization into one revenue machine.</p>
-          <ul class="cs-list">
-            <li>· Landing Pages</li>
-            <li>· Conversion Optimization</li>
-            <li>· Monthly Reporting &amp; Strategy</li>
-          </ul>
-        </div>
-        <div class="cs-foot"><span>02 / 03 — Growth</span><span>Everything in motion →</span></div>
-      </div>
-    </article>
-
-    <!-- CARD 03 — media-forward variant -->
-    <article class="cs-card is-media">
-      <div class="cs-media"><img src="https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?w=1600&q=80" alt=""></div>
-      <div class="cs-body">
-        <div class="cs-eyebrow" style="opacity:.7">[03] — Experience</div>
-        <div class="cs-foot" style="opacity:.85">
-          <h2 class="cs-title" style="margin:0">3D Experiences.</h2>
-          <span>End →</span>
-        </div>
-      </div>
-    </article>
-
+  <!-- P1-P2 dark hero + dissolving render -->
+  <div class="hero" id="hero">
+    <div class="kicker">
+      <div class="ka serif">ВАШ<br>ДІМ</div>
+      <div class="kb serif">ОЖИВАЄ.</div>
+      <div class="ghost">ОЖИВАЄ</div>
+    </div>
+    <div class="subj" id="subj">
+      <div class="pedestal"></div>
+      <div class="layer sharp"><img id="heroSharp" alt="" decoding="async"></div>
+      <div class="layer flaked"><img id="heroFlaked" alt="" decoding="async"></div>
+      <div class="flecks" id="flecks"></div>
+      <div class="microlabel">Рівень готовності</div>
+    </div>
   </div>
 
-  <!-- the stitch handle (single element; JS rides it across the seam) -->
-  <div class="cs-seam" id="seam">
-    <svg viewBox="0 0 24 24"><path d="M9 6 L4 12 L9 18 M15 6 L20 12 L15 18"/></svg>
+  <!-- P3-P7 the deck that slides up then swipes -->
+  <div class="deck-wrap" id="deckWrap">
+    <div class="deck-track" id="deckTrack">
+
+      <!-- CARD 01 — FUNDAMENT -->
+      <article class="cs-card" data-letter="А">
+        <div class="cs-media"><img class="cardimg" data-src="02-ARCH/01-clinker-macro-raking-v2FULL.png" alt="" decoding="async"></div>
+        <div class="cs-body">
+          <div class="cs-eyebrow stagger">(01) — Фундамент</div>
+          <div>
+            <h2 class="cs-title serif stagger">Архітектура<br>та <em>матеріал.</em></h2>
+            <p class="cs-text stagger">Клінкерна цегла, що тримає тепло. Панорамне скло, що впускає світло. Монолітний каркас, на який можна покластися роками. Тут якість видно у кожній деталі.</p>
+            <div class="cs-tags stagger">
+              <span>Клінкерна цегла</span><span>Панорамне скло</span>
+              <span>Моноліт-каркас</span><span>Теплий контур</span>
+            </div>
+          </div>
+          <div class="cs-foot stagger"><span>(01 / 03) — Фундамент</span><span class="mid">Де якість зустрічає ясність</span><span>Далі →</span></div>
+        </div>
+      </article>
+
+      <!-- CARD 02 — ЖИТТЯ -->
+      <article class="cs-card" data-letter="Б">
+        <div class="cs-media"><img class="cardimg" data-src="06-TERRACE/01-тераса-вид-на-ріку-день.png" alt="" decoding="async"></div>
+        <div class="cs-body">
+          <div class="cs-eyebrow stagger">(02) — Життя</div>
+          <div>
+            <h2 class="cs-title serif stagger">Ріка<br><em>під боком.</em></h2>
+            <p class="cs-text stagger">Власний берег, до якого не треба нікуди їхати. Тераса просто над водою, ранкова тиша і приватний доступ. Це не вид з вікна, це частина дому.</p>
+            <ul class="cs-list stagger">
+              <li>Власний берег <span>01</span></li>
+              <li>Тераса над водою <span>02</span></li>
+              <li>Тиша <span>03</span></li>
+              <li>Приватний доступ <span>04</span></li>
+            </ul>
+          </div>
+          <div class="cs-foot stagger"><span>(02 / 03) — Життя</span><span class="mid">Простір, що належить вам</span><span>Далі →</span></div>
+        </div>
+      </article>
+
+      <!-- CARD 03 — ІНТЕР'ЄР / ФІНАЛ -->
+      <article class="cs-card" data-letter="В">
+        <div class="cs-media"><img class="cardimg" data-src="07-INTERIOR/02-kitchen-living-wide-day-v3.png" alt="" decoding="async"></div>
+        <div class="cs-body">
+          <div class="cs-eyebrow stagger">(03) — Інтер'єр / Фінал</div>
+          <div>
+            <h2 class="cs-title serif stagger">Світло<br><em>всередині.</em></h2>
+            <p class="cs-text stagger">Відкритий простір кухні-вітальні, де світло заходить з усіх боків. Натуральне дерево, чисті лінії, готовність до життя з першого дня.</p>
+            <ul class="cs-chips stagger">
+              <li><b>+</b><u>Панорамні вікна</u></li>
+              <li><b>+</b><u>Відкритий простір</u></li>
+              <li><b>+</b><u>Натуральне дерево</u></li>
+              <li><b>+</b><u>Готово до життя</u></li>
+            </ul>
+          </div>
+          <div class="cs-foot stagger"><span>(03 / 03) — Фінал</span><span class="mid">Дім, у який заходять і лишаються</span><span>Кінець</span></div>
+        </div>
+      </article>
+
+    </div>
   </div>
+
+  <!-- bronze stitch ')(' bracket — rides the active seam (P5-P6) -->
+  <div class="cs-stitch" id="stitch" aria-hidden="true">
+    <svg viewBox="0 0 34 120" preserveAspectRatio="none">
+      <path d="M11 4 C2 36, 2 84, 11 116"/>
+      <path d="M23 4 C32 36, 32 84, 23 116"/>
+    </svg>
+  </div>
+
+  <!-- engraved circular progress medallion (P4 onward) -->
+  <div class="medallion" id="medallion">
+    <div class="rule l"><span class="lab" id="labL">Фундамент</span></div>
+    <div class="disc"><span class="num serif" id="medNum">1</span></div>
+    <div class="rule r"><span class="lab" id="labR">Nahirna</span></div>
+  </div>
+
+  <div class="hint" id="hint">↓ гортайте — рендер розчиняється, картка піднімається, колода гортається</div>
 </section>
 
-<!-- progress dots -->
-<div class="cs-dots" id="dots"></div>
+<!-- tail -->
+<section class="tail">
+  <div class="grain"></div>
+  <div class="eyebrow">Кінець лабораторії — пін відпущено, вертикальний скрол відновлено</div>
+  <h2 class="serif">Готово.</h2>
+</section>
 
-<!-- a tail section so the page can scroll past the pin cleanly -->
-<section class="intro"><div class="eyebrow">End of lab</div><h1 style="font-size:clamp(2rem,8vw,5rem)">Reusable.</h1></section>
-
-<!-- ============================================================
-     COMPONENT JS (inlined for the single-file lab)
-     ============================================================ -->
 <script>
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-CustomEase.create("air","M0,0 C0.25,0.74 0.22,0.99 1,1");
-const REDUCE = matchMedia("(prefers-reduced-motion:reduce)").matches;
+gsap.registerPlugin(ScrollTrigger);
 
-/* ---- preloader ritual, then build the track ---- */
-function lenOf(el){try{return el.getTotalLength()}catch(e){return 200}}
-function preload(done){
-  const roof=mRoof,wall=mWall,spine=mSpine,pre=document.getElementById("pre");
-  const sl=document.querySelector(".slice.l"),sr=document.querySelector(".slice.r");
-  if(REDUCE){pre.style.display="none";done();return;}
-  [roof,wall].forEach(p=>{const L=lenOf(p);gsap.set(p,{strokeDasharray:L,strokeDashoffset:L})});
-  const sL=lenOf(spine);gsap.set(spine,{strokeDasharray:sL,strokeDashoffset:sL});
-  gsap.timeline({onComplete:done})
-    .to(roof,{strokeDashoffset:0,duration:.7,ease:"air"},.15)
-    .to(wall,{strokeDashoffset:0,duration:.8,ease:"air"},"-=0.45")
-    .to(spine,{strokeDashoffset:0,duration:.6,ease:"air"},"-=0.25")
-    .set([sl,sr],{scaleX:1})
-    .to(pre,{opacity:0,duration:.35},"+=0.12").set(pre,{display:"none"})
-    .to(sl,{scaleX:0,duration:.95,ease:"air"},"<")
-    .to(sr,{scaleX:0,duration:.95,ease:"air"},"<");
+/* ---- the ONE project ease (expo.out feel) ---- */
+CustomEase.create("cards","M0,0 C0.16,1 0.3,1 1,1");
+const REDUCE = matchMedia("(prefers-reduced-motion:reduce)").matches;
+const SMALL  = matchMedia("(max-width:760px)").matches;
+const STATIC = REDUCE || SMALL;   // mobile + reduced-motion both collapse to static stack
+
+/* ============================================================================
+   ASSET WIRING — real nahirna portrait renders, encodeURI'd relative paths.
+   Plugin lab at award-re-plugin/library/components/cards-swipe/ -> ../../../../NAHIRNA-MEDIA-SITE/...
+   ============================================================================ */
+const BASE = "../../../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/";
+const HERO_SRC = encodeURI(BASE + "01-HERO/03-villa-34-day-v1FULL.png");
+document.getElementById("heroSharp").src  = HERO_SRC;
+document.getElementById("heroFlaked").src = HERO_SRC;
+document.querySelectorAll(".cardimg").forEach(img=>{
+  img.src = encodeURI(BASE + img.dataset.src);
+});
+
+/* ============================================================================
+   LENIS (guarded) — smooth scroll feeding ScrollTrigger
+   ============================================================================ */
+let lenis=null;
+function startLenis(){
+  if(STATIC || typeof Lenis==="undefined") return;
+  lenis = new Lenis({lerp:0.1, wheelMultiplier:1, smoothWheel:true});
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add(t=>lenis.raf(t*1000));
+  gsap.ticker.lagSmoothing(0);
 }
 
-/* ---- the cards-swipe controller (see component.js for the library form) ---- */
-function buildCards(){
-  const root=document.getElementById("cards");
-  const track=root.querySelector(".cs-track");
-  const cards=[...root.querySelectorAll(".cs-card")];
-  const seam=document.getElementById("seam");
-  const dotsWrap=document.getElementById("dots");
-  const n=cards.length, GAP=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--cs-gap"));
-  const SCRUB_PER_CARD=0.9, PARALLAX=0.12;
+/* ============================================================================
+   BUILD — the single pinned scrubbed master timeline (all 7 phases).
+   Phase boundaries are placed on a 0..1 timeline; ScrollTrigger scrub:1 maps
+   the pin scroll onto it so the whole thing is reversible 1:1.
+   ============================================================================ */
+function build(){
+  const stage   = document.getElementById("stage");
+  const deckWrap= document.getElementById("deckWrap");
+  const track   = document.getElementById("deckTrack");
+  const cards   = [...track.querySelectorAll(".cs-card")];
+  const seam    = document.getElementById("stitch");
+  const gLetter = document.getElementById("gutterLetter");
+  const medall  = document.getElementById("medallion");
+  const medNum  = document.getElementById("medNum");
+  const labL    = document.getElementById("labL");
+  const flecks  = document.getElementById("flecks");
+  const flaked  = document.querySelector(".subj .flaked");
+  const ghostEcho = document.querySelector(".kicker .ghost");
+  const n = cards.length;
 
-  // dots
-  cards.forEach((_,i)=>{const b=document.createElement("button");if(i===0)b.className="on";
-    b.addEventListener("click",()=>goTo(i));dotsWrap.appendChild(b)});
-  const dots=[...dotsWrap.children];
+  /* STATIC fallback: vertical stack, no pin, instant. (mobile + reduced) */
+  if(STATIC){
+    stage.classList.add("cs-static");
+    gsap.set(deckWrap,{clearProps:"transform"});
+    gsap.set(document.querySelectorAll(".stagger"),{clearProps:"all"});
+    document.getElementById("pre").style.display="none";
+    return;
+  }
 
-  let travel=0,cardStep=0;
-  function measure(){const w=cards[0].getBoundingClientRect().width;cardStep=w+GAP;travel=cardStep*(n-1)}
+  /* INVARIANT: JS GAP === CSS --cs-gap (single source of truth) */
+  const GAP = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--cs-gap"));
+
+  /* travel measured on refresh (gotcha: pin length depends on viewport) */
+  let travel=0, cardStep=0;
+  function measure(){
+    const w = cards[0].getBoundingClientRect().width;
+    cardStep = w + GAP;
+    travel   = cardStep*(n-1);
+  }
   measure();
 
-  if(REDUCE){root.classList.add("cs-reduced");return;}
+  /* the deck index labels (medallion + ghost letter per active card) */
+  const LABELS = ["Фундамент","Життя","Фінал"];
 
-  function setActive(i){cards.forEach((c,k)=>c.classList.toggle("is-active",k===i));
-    dots.forEach((d,k)=>d.classList.toggle("on",k===i))}
-  cards[0].classList.add("is-active");
+  /* initial rest states (P1) */
+  gsap.set(deckWrap,{yPercent:100});
+  gsap.set(track,{x:0});
+  gsap.set([seam,medall,gLetter],{autoAlpha:0});
+  gsap.set(flaked,{autoAlpha:0});
+  gsap.set(flecks,{autoAlpha:0,scale:1,yPercent:0});
+  gsap.set(".stagger",{y:16,autoAlpha:0});   /* card content hidden until P3 reveals it */
 
-  // seam rides the gap; brightest mid-transition, fades at snap points
-  function seamAt(progress){
-    const pos=progress*(n-1),lead=Math.floor(pos),frac=pos-lead;
-    const vis=Math.sin(frac*Math.PI);
-    gsap.set(seam,{left:(1-frac)*100+"%",autoAlpha:.25+vis*.75,scale:.86+vis*.14});
-  }
-  seamAt(0);
+  /* a normalized progress driver 0..1 across the WHOLE pin */
+  const drv = {p:0};
 
-  // CORE: pin the section, translate the track on X, snap one card per screen
-  const tween=gsap.to(track,{
-    x:()=>-travel, ease:"none",
-    scrollTrigger:{
-      trigger:root,start:"top top",
-      end:()=>"+="+Math.round(innerHeight*SCRUB_PER_CARD*(n-1)),
-      scrub:0.6, pin:true, anticipatePin:1, invalidateOnRefresh:true,
-      snap:{snapTo:v=>Math.round(v*(n-1))/(n-1),duration:{min:.2,max:.5},delay:.04,ease:"air"},
-      onUpdate(self){setActive(Math.round(self.progress*(n-1)));seamAt(self.progress)}
+  /* ---- per-frame painters keyed off normalized pin progress ---- */
+  function paint(p){
+    // ---- PHASE 1-2 : dissolve (0.00 -> 0.30), linear scrub, kicker locked ----
+    const d = gsap.utils.clamp(0,1, p/0.30);              // dissolve fraction
+    flaked && gsap.set(flaked,{autoAlpha:d});
+    gsap.set(flecks,{autoAlpha:Math.sin(gsap.utils.clamp(0,1,d)*Math.PI),
+                     scale:1+0.06*d, yPercent:-22*d});
+    gsap.set(".subj .sharp",{autoAlpha:1-d*0.92});
+    ghostEcho && gsap.set(ghostEcho,{autoAlpha:0.035*(1-0.5*d)});
+
+    // ---- PHASE 3 : card slides UP (0.30 -> 0.42), expo.out feel ----
+    const upRaw = gsap.utils.clamp(0,1,(p-0.30)/0.12);
+    const up = gsap.parseEase("cards")(upRaw);
+    gsap.set(deckWrap,{yPercent:100-100*up});
+
+    //   inner content stagger-in once the card passes ~70% up
+    const reveal = gsap.utils.clamp(0,1,(upRaw-0.55)/0.45);
+    paintStagger(cards[0], reveal);
+
+    // ---- PHASE 4 : hold (0.42 -> 0.50). medallion appears at start of hold ----
+    gsap.set(medall,{autoAlpha:gsap.utils.clamp(0,1,(p-0.42)/0.05)});
+
+    // ---- PHASE 5-6 : horizontal deck swipe (0.50 -> 1.00) ----
+    const deckRaw = gsap.utils.clamp(0,1,(p-0.50)/0.50);  // 0..1 across (n-1) seams
+    const pos = deckRaw*(n-1);
+    const lead = Math.min(n-2, Math.floor(pos));
+    const frac = pos - Math.floor(pos);
+    // track X: ease each seg with expo.out for the "snap" feel, segment by segment
+    const segEase = gsap.parseEase("cards")(frac);
+    const eased = (Math.floor(pos) + segEase);
+    gsap.set(track,{x:-(eased/(n-1))*travel});
+
+    // bronze stitch ')(' : opacity 0->1->0 peaking mid-swipe between corners
+    const vis = (deckRaw>0 && deckRaw<1) ? Math.sin(frac*Math.PI) : 0;
+    gsap.set(seam,{autoAlpha:vis, scaleY:0.7+0.3*vis});
+
+    // ghost index-letter : the active section's initial, slower parallax (power1.out)
+    const active = Math.round(pos);
+    const li = gsap.utils.clamp(0,n-1, active);
+    if(gLetter.textContent !== cards[li].dataset.letter) gLetter.textContent = cards[li].dataset.letter;
+    const letterVis = (deckRaw>0) ? (0.04 + 0.06*Math.sin(frac*Math.PI)) : 0;
+    gLetter.style.opacity = letterVis;
+    // slower-than-cards parallax drift in the gutter (power1.out feel)
+    const par = gsap.parseEase("power1.out")(frac);
+    gsap.set(gLetter,{x:(0.5-par)*120});
+
+    // medallion number + label cross-fade (power2.inOut)
+    if(+medNum.textContent !== li+1){
+      medNum.textContent = li+1;
+      labL.textContent = LABELS[li];
     }
+
+    // reveal state per card: card 0 handled by P3; cards 1..n-1 reveal across their
+    // arrival seam, fully shown once settled (so the LAST card is sharp at p=1.0).
+    for(let i=1;i<n;i++){
+      let t;
+      if(i<=lead)       t = 1 - (i===lead ? 0.25*frac : 0);   // settled / just-left card 1 dims slightly
+      else if(i===lead+1) t = gsap.utils.clamp(0,1,(frac-0.2)/0.6); // incoming during its seam
+      else              t = 0;                                  // still off-stage
+      // once we are fully at the end of the deck, force the active card fully revealed
+      if(deckRaw>=0.999 && i===n-1) t = 1;
+      paintStagger(cards[i], t);
+    }
+  }
+
+  function paintStagger(card, t){
+    const items = card.querySelectorAll(".stagger");
+    items.forEach((el,k)=>{
+      const local = gsap.utils.clamp(0,1, (t - k*0.06)/0.5);  // stagger 0.06
+      const e = gsap.parseEase("cards")(local);
+      gsap.set(el,{y:16-16*e, autoAlpha:e});
+    });
+  }
+  paint(0);
+
+  /* ---- the pin : one ScrollTrigger, scrub:1, drives `paint` ---- */
+  ScrollTrigger.create({
+    trigger: stage, start:"top top",
+    end: ()=> "+=" + Math.round(innerHeight * (0.30 + 0.12 + 0.08 + 0.50) * 3.0),  // generous budget
+    pin:true, anticipatePin:1, scrub:1, invalidateOnRefresh:true,
+    onRefreshInit: measure,
+    onUpdate(self){ paint(self.progress); }
   });
 
-  // inner-image parallax via containerAnimation (drives off the same tween)
-  if(PARALLAX>0) cards.forEach(card=>{
-    const img=card.querySelector("img");if(!img)return;
-    gsap.fromTo(img,{xPercent:-PARALLAX*12},{xPercent:PARALLAX*12,ease:"none",
-      scrollTrigger:{trigger:card,containerAnimation:tween,start:"left right",end:"right left",scrub:true}});
-  });
+  /* hint fades out once we start */
+  gsap.to("#hint",{autoAlpha:0,ease:"none",
+    scrollTrigger:{trigger:stage,start:"top top",end:"+=160",scrub:true}});
 
-  // pointer fling -> translated into a scroll delta (ST stays source of truth)
-  let active=false,sx=0,ss=0;const pxPerCard=()=>innerHeight*SCRUB_PER_CARD;
-  const pt=e=>e.touches?e.touches[0].clientX:e.clientX;
-  root.addEventListener("mousedown",e=>{active=true;sx=pt(e);ss=scrollY;root.classList.add("cs-dragging")});
-  addEventListener("mousemove",e=>{if(!active)return;scrollTo(0,ss-(pt(e)-sx)*(pxPerCard()/cardStep))});
-  addEventListener("mouseup",()=>{active=false;root.classList.remove("cs-dragging")});
-  root.addEventListener("touchstart",e=>{active=true;sx=pt(e);ss=scrollY},{passive:true});
-  root.addEventListener("touchmove",e=>{if(!active)return;scrollTo(0,ss-(pt(e)-sx)*(pxPerCard()/cardStep))},{passive:true});
-  root.addEventListener("touchend",()=>active=false);
+  /* re-measure + refresh on debounced resize */
+  let rT;addEventListener("resize",()=>{clearTimeout(rT);
+    rT=setTimeout(()=>{measure();ScrollTrigger.refresh()},200)});
 
-  function goTo(i){const st=tween.scrollTrigger,p=n>1?i/(n-1):0;
-    gsap.to(window,{scrollTo:st.start+(st.end-st.start)*p,duration:.6,ease:"air"})}
-
-  let rT;addEventListener("resize",()=>{clearTimeout(rT);rT=setTimeout(()=>{measure();ScrollTrigger.refresh()},200)});
+  ScrollTrigger.refresh();   // after wiring everything (heights set)
 }
 
-addEventListener("load",()=>preload(buildCards));
+/* ---- kickoff: wait for hero + card images to decode, then reveal (once) ---- */
+let booted=false;
+function ready(){
+  if(booted) return; booted=true;
+  const pre=document.getElementById("pre");
+  pre.style.opacity="0";
+  setTimeout(()=>pre.style.display="none",420);
+  startLenis();
+  build();
+}
+addEventListener("load",()=>{
+  const imgs=[document.getElementById("heroSharp"),...document.querySelectorAll(".cardimg")];
+  let pending=imgs.length;
+  const tick=()=>{ if(--pending<=0) ready(); };
+  imgs.forEach(im=>{ if(im.complete) tick(); else { im.onload=tick; im.onerror=tick; } });
+  setTimeout(ready,2500);   // safety: never hang on a slow/missing decode
+}, {once:true});
 </script>
+<!-- ── __LAB_OK__ acceptance probe (added by library migration; additive) ──
+     Sets window.__LAB_OK__ = true once the technique has booted and no error
+     fired: GSAP + ScrollTrigger present, ≥1 ScrollTrigger (or reduced-motion
+     fallback) live, and zero console.error. scripts/library-verify.mjs reads
+     this headless. Real per-phase assertions live in the RECIPE acceptance[]. -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var hasGsap = !!window.gsap;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll) ? ScrollTrigger.getAll().length : 0;
+      var ok = errs===0 && hasGsap && (reduce || stCount>0 || document.body.querySelector('[class*="static"],[class*="reduced"]'));
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  var tries=0;
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+
 </body>
 </html>

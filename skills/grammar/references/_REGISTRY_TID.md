@@ -253,3 +253,29 @@
 7. **Page-transition ERA/SP** — Barba-переходи флагмана ERA і SP наживо не описані (лише прелоадери).
 
 > Правило підтримки: новий відео-тірдаун додає РЯДКИ у відповідні шари (наступний вільний номер у T-1xx…T-5xx), не міняючи модель. Якщо прийом не лягає в шар — лагодимо _GRAMMAR і пишемо чому.
+
+---
+
+## IMPLEMENTED-BY — brain→body coverage map (append-only; generated-adjacent)
+
+> Added by the library migration (2026-06-24). The 6 reproducible primitives in
+> `library/` realize these registry techniques. This is the DOWN link from the
+> 163-`.md` brain to the executable body — append-only, no existing row changed.
+> Authoritative coverage lives in `library/COVERAGE.md` (generated). Walk back the
+> other way via each RECIPE's `source.registry_ref`.
+
+| T-ID(s) | IMPLEMENTED-BY (library id) | path | status |
+|---------|-----------------------------|------|--------|
+| T-217, T-405 | `cards-swipe` (+ variants: editorial, cinematic) | `library/components/cards-swipe/` | official |
+| T-101, T-201 | `puzzle-image` | `library/components/puzzle-image/` | official |
+| T-118 | `puzzle-text` | `library/components/puzzle-text/` | official |
+| T-077 | `focus-render-switch` | `library/components/focus-render-switch/` | official |
+| T-310 | `media-step-switch` | `library/components/media-step-switch/` | official |
+| T-220 | `slide-out-img-text` | `library/components/slide-out-img-text/` | official |
+| (pending) | `depth-stack` (forward-stack / deal-fan / portal-through) | `library/components/depth-stack/` | seed |
+
+Combos (Level-2 section recipes) that compose the above:
+`hero-puzzle-monument`, `benefit-wipe-band`, `lifestyle-deck-fan`,
+`manifesto-flip-draw`, `interiors-cards-cursor`, `story-stepper-render-focus`,
+`conversion-quiet-gate` — see `library/combos/<id>/RECIPE.md` (`uses:` cites the
+component ids). Shared utils cited by combos live in `library/shared/`.

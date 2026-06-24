@@ -1,21 +1,39 @@
 /* ============================================================
    PUZZLE-TEXT  ·  component.js   (vanilla + GSAP 3.12.5)
    ------------------------------------------------------------
-   Turns a block of copy into words that ASSEMBLE from a
-   scattered state into their natural flow positions, driven by
-   scroll (scrub) — reversible — or by in-view (one-shot).
+   ONE paragraph whose WORDS start scattered — GRAY and displaced
+   across the viewport on BOTH axes (wide diagonal spread, some
+   rotated, some skewed/italic-drifted, sized differently) — and
+   converge into their natural flow positions on ONE shared
+   expo-out ease, color darkening gray -> ink as each word seats.
+   Scroll-scrubbed and fully reversible: scrolling back up
+   re-scatters the words. That is the WHOLE technique.
 
-   WHY IT LOOKS EXPENSIVE
-   ----------------------
-   1. We never move the LAYOUT. The browser lays the paragraph out
-      normally; we read each word's resting box and animate FROM a
-      random offset back to transform:none. Final line breaks are
-      perfect because the browser authored them.
-   2. Per-word offset is seeded but *coherent*: scale, x, y and a
-      gray->ink color shift all ease on ONE curve, so 30 words read
-      as one gesture, not 30 confetti pieces.
-   3. Stagger flows in reading order (top-left -> bottom-right) but
-      gently, so the eye is led, not strobed.
+   There is NO card, NO portrait, NO image finale, NO "next
+   section" reveal. Those are not part of this move.
+
+   HARD RULES (do not break — these are the technique)
+   ---------------------------------------------------
+   • Font is SANS grotesque (Helvetica Neue / system-ui), NOT serif.
+   • Words NEVER go invisible. opacity STAYS 1; assembly is COLOR-only
+     (gray -> ink) plus transform. There is NO opacityFrom.
+   • Farther-from-home  =  LIGHTER gray  +  LARGER.
+   • Scatter is WIDE DIAGONAL on BOTH axes + slight rotate/skew.
+   • Ease = hard expo-out '0.16,1,0.3,1'. ONE ease everywhere.
+   • We never animate LAYOUT. The browser lays the paragraph out; we
+     animate each word FROM an offset back to transform:none, so the
+     final line-breaks are pixel-perfect (zero reflow at rest).
+   • No WebGL. transform/color only. prefers-reduced-motion = settled.
+
+   TWO ENTRY POINTS
+   ----------------
+   1) PuzzleText.buildAssembly(el, timeline, position, opts)
+        Splits `el` into words and appends the gray->ink assembly
+        tweens onto YOUR timeline at `position`. Compose it with a
+        pinned, scrubbed ScrollTrigger for the reversible scatter.
+   2) PuzzleText.mount({ stage, paragraph, assembleOpts?, pinVH? })
+        Self-contained: pins the stage and scrubs the scatter<->assemble
+        move. Returns { timeline, destroy }.
 
    DEPENDENCIES (load before this file):
      gsap 3.12.5, ScrollTrigger, (optional) CustomEase
@@ -24,46 +42,24 @@
 (function (global) {
   'use strict';
 
-  /* ---- the one ease. registered if CustomEase is present ----- */
-  var EASE = 'power3.out';
+  /* ---- the ONE ease: hard expo-out. registered if CustomEase present ---- */
+  var EASE = 'power4.out';
   if (global.CustomEase) {
-    global.CustomEase.create('puzzleAir', '0.22,1,0.36,1'); // expo-ish settle
+    global.CustomEase.create('puzzleAir', '0.16,1,0.3,1'); // hard expo-out
     EASE = 'puzzleAir';
   }
 
   var DEFAULTS = {
-    /* --- granularity --- */
-    split:        'word',     // 'word' only (this technique is word-level)
-
-    /* --- scatter geometry (relative to each word's resting box) --- */
-    maxX:         140,        // px, max horizontal scatter (+/-)
-    maxY:         90,         // px, max vertical scatter (+/-)
-    scaleFrom:    1.55,       // some words start larger (the "loose pieces")
-    scaleJitter:  0.45,       // +/- random around scaleFrom toward 1
-    rotate:       0,          // deg; keep 0 for editorial, try 4 for playful
-    opacityFrom:  0.0,        // start opacity of scattered words
-
-    /* --- color assembly (optional gray->ink) --- */
-    ghostColor:   null,       // e.g. '#B9B6AE'. null = no color tween
-    inkColor:     null,       // resting color; null = inherit from CSS
-
-    /* --- choreography --- */
-    duration:     0.9,        // per-word tween (in-view mode)
-    stagger:      0.045,      // seconds between words, reading order
-    ease:         EASE,
-    seed:         1,          // change to reshuffle the scatter pattern
-
-    /* --- trigger --- */
-    trigger:      'scrub',    // 'scrub' (scroll-scrubbed, reversible)
-                              // | 'inview' (one-shot when entered)
-    start:        'top 80%',  // ScrollTrigger start
-    end:          'top 30%',  // scrub end (ignored for inview)
-    scrub:        0.6,        // scrub smoothing (sec) or true
-    once:         false       // inview: animate only first time
+    /* scatter geometry — WIDE DIAGONAL on BOTH axes (source f_001) */
+    maxX: 300, maxY: 170, rotate: 9, skew: 7,
+    /* farther-from-home = LIGHTER + LARGER */
+    scaleNear: 1.0, scaleFar: 1.42,
+    ghostNear: '#B9B7AF', ghostFar: '#D4D2CA', inkColor: '#161614',
+    /* choreography (positions on the timeline you pass in) */
+    duration: 0.9, stagger: 0.045, ease: EASE, seed: 7
   };
 
-  /* deterministic PRNG so the scatter is stable across reloads
-     (mulberry32) — seeded per word index. */
+  /* deterministic PRNG (mulberry32) — stable + reshuffleable scatter */
   function rng(seed) {
     return function () {
       seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
@@ -73,9 +69,8 @@
     };
   }
 
-  /* split an element's text into word spans + space spans, in place.
-     Preserves spaces as their own inline-blocks so gaps never
-     collapse while words are translated. Returns the word nodes. */
+  /* split an element's text into word spans + space spans (gaps never
+     collapse while words translate). Returns the word nodes. */
   function splitWords(el) {
     var text = el.textContent.replace(/\s+/g, ' ').trim();
     var parts = text.split(' ');
@@ -97,120 +92,115 @@
     return words;
   }
 
-  /* build the per-word "from" vars (the scattered piece). */
+  function hex(c) {
+    c = c.replace('#', '');
+    return [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)];
+  }
+  function lerpHex(a, b, t) {
+    var A = hex(a), B = hex(b), r = function (i) { return Math.round(A[i] + (B[i] - A[i]) * t); };
+    return 'rgb(' + r(0) + ',' + r(1) + ',' + r(2) + ')';
+  }
+
+  /* per-word scattered "from" state — coherent, seeded.
+     KEY: opacity is NEVER set (words always opaque).
+     KEY: euclidean distance from home -> lighter color + larger scale.
+     WIDE diagonal displacement on both axes + slight rotate/skew. */
   function scatterVars(opt, rand) {
-    var s = opt.scaleFrom + (rand() * 2 - 1) * opt.scaleJitter;
-    var v = {
-      x: (rand() * 2 - 1) * opt.maxX,
-      y: (rand() * 2 - 1) * opt.maxY,
-      scale: Math.max(0.6, s),
-      opacity: opt.opacityFrom
-    };
+    var dx = (rand() * 2 - 1);
+    var dy = (rand() * 2 - 1);
+    var x = dx * opt.maxX;
+    var y = dy * opt.maxY;
+    var dist = Math.min(1, Math.sqrt(dx * dx + dy * dy) / Math.SQRT2);
+    var scale = opt.scaleNear + (opt.scaleFar - opt.scaleNear) * dist;
+    var color = lerpHex(opt.ghostNear, opt.ghostFar, dist);
+    var v = { x: x, y: y, scale: scale, color: color };
     if (opt.rotate) v.rotation = (rand() * 2 - 1) * opt.rotate;
-    if (opt.ghostColor) v.color = opt.ghostColor;
+    if (opt.skew) v.skewX = (rand() * 2 - 1) * opt.skew;   // italic-drift feel
     return v;
   }
 
-  function init(el, userOpt) {
-    if (!global.gsap) { console.warn('[puzzle-text] GSAP missing'); return; }
+  /* Append the ASSEMBLY (scatter -> home) onto a timeline you control.
+     Returns { words }. opacity is intentionally never touched. */
+  function buildAssembly(el, tl, position, userOpt) {
+    if (!global.gsap) { console.warn('[puzzle-text] GSAP missing'); return { words: [] }; }
     var opt = Object.assign({}, DEFAULTS, userOpt || {});
     var gsap = global.gsap;
-
     var reduce = global.matchMedia &&
       global.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var words = splitWords(el);
-    if (opt.inkColor) el.style.setProperty('--pt-ink', opt.inkColor);
+    el.style.color = opt.inkColor;
 
-    /* reduced motion: simple, no scatter — just settle in place. */
     if (reduce) {
-      gsap.set(words, { opacity: 1 });
-      return { destroy: function () {} };
+      gsap.set(words, { x: 0, y: 0, scale: 1, skewX: 0, rotation: 0, color: opt.inkColor });
+      return { words: words };
     }
 
     var rand = rng(opt.seed * 9301 + 49297);
-
-    /* precompute a from-state per word (stable via seed). */
     var froms = words.map(function () { return scatterVars(opt, rand); });
 
-    var to = { x: 0, y: 0, scale: 1, opacity: 1, rotation: 0, ease: opt.ease };
-    if (opt.inkColor || opt.ghostColor) to.color = opt.inkColor || 'inherit';
+    /* scattered start state (opacity untouched = stays 1) */
+    words.forEach(function (w, i) { gsap.set(w, froms[i]); });
 
-    var st;
+    /* each word tweens home; reading-order stagger so the paragraph reads
+       as ONE gesture. position maps the assembly onto SCROLL distance, so
+       scrubbing back re-scatters the words. */
+    var to = { x: 0, y: 0, scale: 1, rotation: 0, skewX: 0, color: opt.inkColor, ease: opt.ease, duration: opt.duration };
+    words.forEach(function (w, i) {
+      tl.to(w, to, (position || 0) + i * opt.stagger);
+    });
 
-    if (opt.trigger === 'inview') {
-      /* ONE-SHOT: tween each word from scattered -> rest, staggered
-         in reading order. ScrollTrigger only fires the timeline. */
-      gsap.set(words, { /* prime */ });
-      words.forEach(function (w, i) { gsap.set(w, froms[i]); });
+    return { words: words };
+  }
 
-      var tl = gsap.timeline({ paused: true });
-      tl.to(words, Object.assign({}, to, {
-        duration: opt.duration,
-        stagger: { each: opt.stagger, from: 0 } // 0 = DOM/reading order
-      }));
+  /* Self-contained scene: the scatter <-> assemble move on one pinned,
+     scrubbed (reversible) timeline. NOTHING follows the assemble.
+     args: { stage, paragraph, assembleOpts?, pinVH? } */
+  function mount(args) {
+    if (!global.gsap || !global.ScrollTrigger) {
+      console.warn('[puzzle-text] GSAP/ScrollTrigger missing'); return null;
+    }
+    var gsap = global.gsap;
+    var stage = args.stage, p = args.paragraph;
+    var reduce = global.matchMedia &&
+      global.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      st = global.ScrollTrigger.create({
-        trigger: el,
-        start: opt.start,
-        once: opt.once,
-        onEnter: function () { tl.play(); },
-        onLeaveBack: opt.once ? null : function () { tl.reverse(); }
-      });
-
-    } else {
-      /* SCRUB (the Zera behavior): bind assembly progress to scroll.
-         Each word gets the SAME tween but offset along the timeline
-         so the stagger maps onto scroll distance -> reversible. */
-      var tl2 = gsap.timeline({
-        scrollTrigger: {
-          trigger: el,
-          start: opt.start,
-          end: opt.end,
-          scrub: opt.scrub
-        }
-      });
-      words.forEach(function (w, i) {
-        gsap.set(w, froms[i]);
-        tl2.to(w, Object.assign({}, to, { duration: opt.duration }),
-               i * opt.stagger);  // position param = the scrub stagger
-      });
-      st = tl2.scrollTrigger;
+    if (reduce) {
+      var trivial = gsap.timeline();
+      buildAssembly(p, trivial, 0, args.assembleOpts);
+      return { timeline: trivial, destroy: function () { trivial.kill(); } };
     }
 
+    var PIN = (args.pinVH || 1.8);
+
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: stage, start: 'top top',
+        end: '+=' + (PIN * 100) + '%',
+        scrub: 0.6, pin: true, pinSpacing: true,
+        invalidateOnRefresh: true
+      }
+    });
+
+    /* the entire move: scatter (set at 0) -> assemble home, gray -> ink,
+       opacity always 1. Scrub reverses it (re-scatter). Nothing else. */
+    buildAssembly(p, tl, 0, args.assembleOpts);
+
     return {
-      timeline: st,
-      words: words,
+      timeline: tl,
       destroy: function () {
-        if (st && st.kill) st.kill();
-        gsap.set(words, { clearProps: 'all' });
+        if (tl.scrollTrigger) tl.scrollTrigger.kill();
+        tl.kill();
       }
     };
   }
 
-  /* auto-init any [data-puzzle-text] on DOM ready, reading options
-     from data-* attributes (numbers parsed, strings passed through). */
-  function auto() {
-    var nodes = document.querySelectorAll('[data-puzzle-text]');
-    nodes.forEach(function (el) {
-      var o = {};
-      ['maxX','maxY','scaleFrom','scaleJitter','rotate','opacityFrom',
-       'duration','stagger','seed','scrub'].forEach(function (k){
-        var dv = el.dataset[k];
-        if (dv != null) o[k] = parseFloat(dv);
-      });
-      ['trigger','start','end','ghostColor','inkColor'].forEach(function (k){
-        var dv = el.dataset[k];
-        if (dv != null) o[k] = dv;
-      });
-      if (el.dataset.once != null) o.once = el.dataset.once === 'true';
-      init(el, o);
-    });
-  }
-
-  global.PuzzleText = { init: init, auto: auto, DEFAULTS: DEFAULTS };
-
-  if (document.readyState !== 'loading') auto();
-  else document.addEventListener('DOMContentLoaded', auto);
+  global.PuzzleText = {
+    buildAssembly: buildAssembly,
+    mount: mount,
+    splitWords: splitWords,
+    DEFAULTS: DEFAULTS,
+    EASE: EASE
+  };
 
 })(window);

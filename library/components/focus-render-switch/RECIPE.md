@@ -1,4 +1,91 @@
+---
+id: focus-render-switch
+name: "Focus-on-render pinned stepper"
+level: 1
+kind: component
+status: official
+entry:
+  call: "FocusRenderSwitch.init(target, options)"
+  module: iife
+  returns: "controller"
+meaning:
+  what: "A pinned section steps through N renders; each step the heading ticks up through a slot while the active render crossfades into focus with a slow Ken-Burns hold."
+  when: "A MATERIAL/spec act where you want the viewer to LOOK AT the product N times, one labelled render per beat."
+  lands: "'I looked at the building N times' — each render gets a held, in-focus frame tied to a spec line."
+  not_when: "Hero covers, conversion gates, or any section that should NOT pin."
+source:
+  grammar: "Vide Infra / ERA frame-scrub — render-focus stepper"
+  recording: null
+  registry_ref: ["T-077"]
+stack: "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis"
+webgl: false
+motion_props: [transform, opacity]
+trigger: "one pinned scroll-scrub stepper; pin length = steps * scrollPerStep * 100vh"
+timing_layer: [B-entrance, C-emphasis]
+owns_pin: true
+page_beat: [material, proof]
+combines_with: [parallax-depth, splitLines, reveal, custom-cursor]
+anti_combos: [second-pin, cards-swipe]
+gated_by: [R_pin_budget, R_anti_combos, R_perf_limits, R_timing_layers]
+variants: [default]
+params_ref: tokens.json
+files: [component.js, component.css, lab.html, tokens.json]
+acceptance:
+  - "each step crossfades the active render in focus, never video.currentTime"
+  - "heading rises through its slot per step (headRise), reversible on reverse-scroll"
+  - "pinSpacing holds; following section does not jump on release"
+verify: "lab.html#__LAB_OK__"
+---
+
 # focus-render-switch — FOCUS-ON-RENDER pinned stepper
+
+> **lab.html is now the TRUE 1:1 reproduction of the Naveera source (8 motion
+> beats / 2 macro-phases), not just the middle stepper.** The reusable
+> `component.js` API below still covers MACRO B (the stepper) for drop-in use;
+> the lab additionally hand-builds the hero + handoff + reveal + finale beats
+> inline so the full original motion can be studied end to end.
+
+## The full 8-beat choreography in lab.html (1:1)
+1. **Hero, beat 1** — full-bleed dark real render (`01-HERO/01-hero-day-to-night-v1.png`)
+   under a fixed dark-glass header; white serif headlines lower-center; a teal
+   accent sweeps the keyword(s) **word-by-word** as scroll progresses. Pinned + scrubbed.
+   The media uses a slow Ken-Burns still (no `<video>` clip exists in our set, 0 decoders);
+   if a clip is added it must autoplay-loop, **never** scrub `currentTime`.
+2. **Hero, beat 2** — translucent HUD/data cards crossfade in then out over the
+   media; a black scrim ramps `0→1` across the back half so the media "goes to
+   black"; the final headline lands fully composed on solid black.
+3. **Handoff, beat 3** — pin releases; the black hero scrolls up off the top edge
+   and the near-white reveal section is uncovered (vertical reveal, not a colour tween).
+4. **Reveal, beat 4** — a dark-on-light statement resolves left-to-right
+   grey → brief teal → ink (keywords settle teal), scroll-scrubbed per word.
+5–7. **Stepper, beats 5-7** — the pinned two-column concave-seam stepper (MACRO B,
+   documented in full below): six steps, left render swaps behind a FIXED inward
+   double-notch seam, right heading+body ticker advances. Step 6 intentionally
+   swaps a NIGHT render to echo the source progression + our day→night signature.
+8. **Finale, beat 8** — stepper unpins, block scrolls out the top, a deep-navy
+   section rises beneath with an ambient looping teal light-streak.
+
+## Easings used in the lab (1:1)
+- **`air` = CustomEase `M0,0 C0.22,1 0.36,1 1,1`** (≈expo.out) — keyword sweeps /
+  per-word reveals (snap in, settle).
+- **`calm` = CustomEase `M0,0 C0.25,0.1 0.25,1 1,1`** (≈power2.out) — line swaps /
+  photo-panel rise.
+- Photo crossfade between steps: **0.5s opacity power1.inOut**. Pin scrubs: **scrub:1**.
+- prefers-reduced-motion / ≤820px: all pins+scrubs+sweeps dropped, every statement
+  fully composed (ink+teal), photos a static stacked list, no autoplay.
+
+## Real assets (figure-free nahirna renders, 9:16)
+Referenced from the lab via a runtime-resolved `ASSET_BASE` (probes both candidate
+relative depths so the file is byte-identical in `NAHIRNA-METHOD/labs/` and in this
+plugin dir). The TERRACE filename is Cyrillic and is `encodeURIComponent`-d.
+Hero `01-HERO/01-hero-day-to-night-v1.png`; steps: `01-HERO/03-villa-34-day-v1FULL.png`,
+`06-TERRACE/01-тераса-вид-на-ріку-день.png`, `07-INTERIOR/02-kitchen-living-wide-day-v3.png`,
+`02-ARCH/01-clinker-macro-raking-v2FULL.png`, `03-RIVER/01-riverbank-reeds-golden-v2FULL.png`,
+`08-CTA/01-night-facade-wide-v1FULL.png`.
+
+---
+
+## MACRO B reusable API (the stepper component)
 
 > Big media on the LEFT, a stack of headings on the RIGHT. The section
 > **pins**; scroll advances through N steps. Each step swaps the render

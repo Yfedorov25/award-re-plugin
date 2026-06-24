@@ -1,3 +1,10 @@
+---
+id: STACKING-GRAMMAR
+kind: rule
+gates: [uses, owns_pin, timing_layer, theme]
+severity: hard
+---
+
 # STACKING-GRAMMAR — how Vide Infra layers 4-5 moves into ONE section
 
 > Derived from the Ever (ever-live-here.com) section anatomy, cross-referenced

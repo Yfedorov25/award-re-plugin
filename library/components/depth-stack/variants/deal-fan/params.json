@@ -1,0 +1,33 @@
+{
+  "$extends": "depth-stack",
+  "$variant": "deal-fan",
+  "note": "Knob DIFF over the base depth-stack frame. The base owns pin/scrub/snap/signed-depth/reduced-motion; these are the deal-conveyor + fan geometry constants this variant's engine (variant.js) paints with, plus the frame knobs it passes to DepthStack.mount. Byte-faithful to depth-d2-deal-fan.html.",
+  "params": {
+    "endMult": 0.95,
+    "scrub": 0.7,
+    "entryScrub": 0.6,
+    "snap": "1/(n-1)"
+  },
+  "engine": {
+    "FAN_ROT": 6.5,
+    "FAN_X": 12,
+    "FAN_Y": -34,
+    "FAN_Z": -150,
+    "FAN_SCALE": 0.055,
+    "MAXD": 3.2,
+    "DEAL_OUT": 104,
+    "DEAL_IN0": -34,
+    "roleA_p": ">= 1   (parked deck / hand, fanned up-right with 3D depth)",
+    "roleB_in_p": "0 < p < 1   (incoming: descends deck-slot → centre, pure DOWN)",
+    "roleB_spent_p": "p < 0   (spent: continues DOWN past bottom, z+ toward viewer)",
+    "kenburns": { "scale": [1.0, 1.07], "x": "±2.2", "y": -1.6 }
+  },
+  "skin": {
+    "serif": "Fraunces, Georgia, serif",
+    "stagePerspective": "1850px @ 50% 40%",
+    "themePerCard": ["cream", "dark"],
+    "accent": "#b07b3e",
+    "split": "asymmetric 0.9fr / 1.3fr, .card--flip swaps sides",
+    "railHandle": "tilted dealt-card chip (rotate -8deg, dips mid-deal)"
+  }
+}

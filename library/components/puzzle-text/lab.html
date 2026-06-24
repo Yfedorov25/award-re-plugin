@@ -3,200 +3,268 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LAB · puzzle-text · word-assembly reveal</title>
+<title>LAB · puzzle-text · scatter ↔ assemble (1:1)</title>
 
-<!-- GSAP + ScrollTrigger + CustomEase via cdnjs -->
+<!--
+=================================================================================
+  TECHNIQUE LAB · puzzle-text   (STRICT 1:1 of rec5-puzzle-text, f_001..f_027)
+=================================================================================
+
+  WHAT THE SOURCE ACTUALLY SHOWS  — and NOTHING else
+  --------------------------------------------------
+  ONE paragraph of words. Nothing more. No card, no portrait, no image
+  finale, no "next section", no full-screen reveal. Those were INVENTED by
+  the previous build and broke verification. They are GONE.
+
+  • SCATTERED state (f_001): every word DISPLACED from its resting flow box
+    on BOTH axes (wide diagonal spread). Some words are skewed / italic-drift,
+    some rotated a little, sized differently. ALL words are GRAY but ALWAYS
+    OPAQUE (opacity stays 1 — never 0).
+  • FARTHER-FROM-HOME  =  LIGHTER gray  +  LARGER.
+  • CONVERGE (f_005→f_013→f_021): on scroll each word slides home on ONE
+    shared CustomEase, color darkening gray → ink as it seats. ZERO layout
+    shift at rest (the final line breaks were the browser's all along).
+  • SETTLED (f_027): clean ink paragraph, perfectly wrapped.
+  • REVERSE: scrubbing back up re-scatters the words (it is a scrub, not a
+    one-shot). The pin holds the section for the assemble duration.
+
+  HARD RULES (from the frames)
+  ----------------------------
+  • Font is SANS grotesque (Helvetica Neue / system-ui), NOT serif.
+  • Words NEVER go invisible. opacity stays 1; assembly is COLOR-only gray→ink
+    plus transform (x/y/scale/rotate/skew). No opacityFrom:0.
+  • ONE CustomEase everywhere ('0.16,1,0.3,1', hard expo-out).
+  • Copy is Ukrainian, Fedoriv voice (no em-dash, no people figures).
+  • No WebGL. transform / opacity / color only. prefers-reduced-motion branch.
+
+  STACK: vanilla HTML + GSAP 3.12.5 + ScrollTrigger + CustomEase (cdnjs),
+         optional Lenis (unpkg, guarded). No build step.
+  Canonical drop-in: award-re-plugin/library/components/puzzle-text/
+=================================================================================
+-->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
-<!-- optional Lenis, guarded -->
 <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
 <style>
 /* ============================================================
-   LAB: puzzle-text
-   Reproduces the Zera statement-section "word assembly":
-   words start scattered (x/y/scale, gray) and snap into the
-   natural paragraph as you scroll. Scroll-scrubbed, reversible.
-
-   This file is self-contained: open it, scroll, watch it build.
-   Component code is INLINED below the lab styles so the file
-   runs with no imports; the canonical copy lives in
-   component.js / component.css next to this file.
+   GRADE / TOKENS  — sage paper + ink (matches the recording)
    ============================================================ */
-
 :root{
-  --paper:#E7EAE2;          /* the Zera sage paper */
-  --ink:#14130F;
-  --ghost:#B9B6AE;          /* scattered-piece tint */
+  --paper:#E3EAE0;            /* sage paper ground (from frames) */
+  --ink:#161614;             /* settled word color  [inkColor] */
+  --ghost:#B9B7AF;           /* nearest scattered tint */
+  --ghost-far:#D4D2CA;       /* farthest scattered tint (lighter) */
   --mx:64px;
-  /* the one ease, mirrored as CSS var for any CSS-side motion */
-  --air:cubic-bezier(0.22,1,0.36,1);
+
+  /* the ONE ease, hard expo-out, mirrored for any CSS motion */
+  --air:cubic-bezier(0.16,1,0.3,1);
+
+  /* SANS grotesque — the source font (NOT serif) */
+  --sans:"Helvetica Neue","Helvetica","Arial",system-ui,-apple-system,sans-serif;
 }
+
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:auto}
 body{
   background:var(--paper);
   color:var(--ink);
-  font-family:"Helvetica Neue",Inter,system-ui,-apple-system,sans-serif;
+  font-family:var(--sans);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
   overflow-x:hidden;
 }
 
-/* faint paper weave like the reference site */
+/* faint paper weave (NORMAL blend, light surface — never over a scrub) */
 body::before{
   content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><path d='M0 40L40 0' stroke='%23000' stroke-width='0.5' opacity='0.06'/></svg>");
 }
 
-/* ---- header (mirrors reference chrome) --------------------- */
+/* ============================================================
+   CHROME — fixed header (NOT over a scrubbed surface)
+   ============================================================ */
 header{
   position:fixed;top:0;left:0;right:0;z-index:50;
   display:flex;align-items:center;justify-content:space-between;
   padding:22px var(--mx);
-  mix-blend-mode:multiply;
 }
-.brand{font-weight:700;letter-spacing:.18em;font-size:1.05rem}
-.nav{display:flex;gap:14px;align-items:center;font-size:.7rem;letter-spacing:.08em}
+.brand{font-weight:800;letter-spacing:.16em;font-size:1.05rem}
+.nav{display:flex;gap:12px;align-items:center;font-size:.66rem;letter-spacing:.1em}
 .pill{padding:8px 14px;border-radius:20px;background:#0000;border:1px solid #0002}
 .pill.dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 
-/* ---- section markers (dev aid, like reference) ------------- */
 .marker{
-  position:absolute;left:12px;top:12px;z-index:40;
-  font-size:10px;letter-spacing:.14em;opacity:.4;
+  position:fixed;left:var(--mx);top:86px;z-index:40;
+  font-size:10px;letter-spacing:.16em;opacity:.45;
   font-variant-numeric:tabular-nums;text-transform:uppercase;
 }
 
-/* ---- stage / sections ------------------------------------- */
+/* ============================================================
+   STAGE / SECTIONS
+   ============================================================ */
 main{position:relative;z-index:1}
-.spacer{height:80vh;display:grid;place-items:center;opacity:.35;
-  font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
 .frame{
   position:relative;width:100vw;min-height:100vh;
-  display:grid;place-items:center;
-  padding:0 var(--mx);
+  display:grid;place-items:center;padding:0 var(--mx);
+}
+.intro{text-align:center;max-width:42ch}
+.intro .eyebrow{
+  font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;
+  opacity:.55;margin-bottom:1.4rem;
+}
+.intro h1{
+  font-family:var(--sans);font-weight:700;
+  font-size:clamp(2.4rem,6.4vw,4.6rem);line-height:1.0;letter-spacing:-.02em;
+  margin-bottom:1.6rem;
+}
+.intro p{font-size:.96rem;line-height:1.7;opacity:.7;max-width:46ch;margin-inline:auto}
+.scrollcue{
+  position:absolute;bottom:42px;left:50%;transform:translateX(-50%);
+  font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;opacity:.5;
 }
 
-/* ====== COMPONENT CSS (inlined copy of component.css) ====== */
+/* --- THE PINNED STAGE: only the paragraph lives here --- */
+#stage{
+  position:relative;width:100vw;height:100vh;overflow:hidden;
+  display:grid;place-items:center;
+}
+#stageInner{
+  position:relative;width:100%;height:100%;
+  display:grid;place-items:center;
+}
+
+/* ============================================================
+   COMPONENT CSS  (canonical, inlined copy of component.css)
+   Words are inline-block in NORMAL FLOW. We animate ONLY
+   transform + color. opacity STAYS 1 (source rule).
+   ============================================================ */
 .puzzle-text{
-  font-size: clamp(1.7rem, 4.8vw, 3.2rem);
-  line-height:1.18;
-  font-weight:400;
-  letter-spacing:-0.015em;
+  position:relative;z-index:2;
+  font-family:var(--sans);
+  font-weight:500;
+  font-size:clamp(1.7rem,4.4vw,3.0rem);
+  line-height:1.22;
+  letter-spacing:-.018em;
   text-align:center;
-  max-width:18ch;
+  max-width:22ch;
   margin-inline:auto;
   color:var(--ink);
-  text-wrap:balance;
+  text-wrap:balance;            /* nice breaks WITHOUT justify space-stretch */
+  will-change:transform;
 }
 .puzzle-text .pt-word{
-  display:inline-block;white-space:pre;
-  will-change:transform,opacity;
-  backface-visibility:hidden;transform-origin:50% 60%;
+  display:inline-block;          /* the slot lives in normal flow */
+  white-space:pre;
+  backface-visibility:hidden;
+  transform-origin:50% 60%;
+  /* opacity intentionally NEVER touched: words are always opaque */
 }
 .puzzle-text .pt-space{display:inline-block;white-space:pre}
-@media (prefers-reduced-motion: reduce){
-  .puzzle-text .pt-word{transform:none !important;will-change:auto}
+@media (prefers-reduced-motion:reduce){
+  .puzzle-text .pt-word{transform:none!important;color:var(--ink)!important}
 }
 
-/* ---- a second instance to show param variants ------------- */
-.variant-label{
-  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
-  font-size:.66rem;letter-spacing:.18em;opacity:.45;text-transform:uppercase;
+/* ============================================================
+   MOBILE — margins shrink
+   ============================================================ */
+@media (max-width:760px){
+  :root{--mx:20px}
+  .marker{top:74px}
+  .puzzle-text{font-size:clamp(1.5rem,7vw,2.2rem);max-width:18ch}
 }
-
-/* ---- preloader ritual (Saisei-class, no WebGL) ------------ */
-#preloader{
-  position:fixed;inset:0;z-index:1000;background:var(--paper);
-  display:flex;align-items:center;justify-content:center;
-}
-#preloader .count{
-  font-size:.8rem;letter-spacing:.3em;font-variant-numeric:tabular-nums;
-  opacity:.6;
-}
-.slice{position:fixed;top:0;bottom:0;z-index:999;background:var(--ink);
-  transform:scaleX(0);will-change:transform}
-.slice.left{left:0;width:50vw;transform-origin:right center}
-.slice.right{right:0;width:50vw;transform-origin:left center}
 </style>
 </head>
 <body>
 
-<!-- preloader: counter 0->100, then twin slices wipe the page open -->
-<div id="preloader"><div class="count">000</div></div>
-<div class="slice left"></div>
-<div class="slice right"></div>
-
+<!-- ===================== CHROME ===================== -->
 <header>
-  <div class="brand">LAB</div>
+  <div class="brand">NAHIRNA</div>
   <div class="nav">
     <span class="pill">PUZZLE-TEXT</span>
-    <span class="pill dark">MENU</span>
+    <span class="pill dark">МЕНЮ</span>
   </div>
 </header>
+<span class="marker" id="marker">§ scatter ↔ assemble</span>
 
 <main>
-  <section class="frame"><div class="spacer">scroll ↓</div></section>
 
-  <!-- INSTANCE 1 — the canonical Zera behavior: scrub, gray->ink -->
-  <section class="frame" id="s1">
-    <span class="marker">§ 01 · scrub · gray→ink · seed 7</span>
-    <p class="puzzle-text"
-       data-puzzle-text
-       data-trigger="scrub"
-       data-start="top 78%" data-end="top 28%"
-       data-max-x="150" data-max-y="92"
-       data-scale-from="1.55" data-scale-jitter="0.45"
-       data-stagger="0.05" data-duration="0.9"
-       data-seed="7"
-       data-ghost-color="#B9B6AE" data-ink-color="#14130F">
-       Pick the toolchain after the behavior is defined — runtime first, DX second. The stack should disappear once the interaction feels inevitable.
-    </p>
-    <div class="variant-label">SCROLL UP TO RE-SCATTER ↑↓</div>
+  <!-- ===================== §00 INTRO ===================== -->
+  <section class="frame" id="intro">
+    <div class="intro">
+      <div class="eyebrow">Прийом · слова сходяться в думку</div>
+      <h1>Слова стають<br>на свої місця.</h1>
+      <p>Кожне слово починає розсіяним і сірим, а на скролі сходиться туди, де
+         браузер уже все порахував. Жодного зсуву верстки. Колір темнішає від
+         сірого до чорнила, поки текст не стане одним абзацом. Скрольте назад,
+         і слова знову розлітаються.</p>
+    </div>
+    <div class="scrollcue">скрольте ↓</div>
   </section>
 
-  <section class="frame"><div class="spacer">·</div></section>
+  <!-- ===================== §01 THE PINNED STAGE ===================== -->
+  <section class="frame" id="stageWrap">
+    <div id="stage">
+      <div id="stageInner">
 
-  <!-- INSTANCE 2 — in-view one-shot, tighter scatter, playful rotate -->
-  <section class="frame" id="s2">
-    <span class="marker">§ 02 · inview · rotate · seed 3</span>
-    <p class="puzzle-text"
-       data-puzzle-text
-       data-trigger="inview"
-       data-start="top 72%"
-       data-max-x="90" data-max-y="60" data-rotate="5"
-       data-scale-from="1.3" data-scale-jitter="0.3"
-       data-stagger="0.04" data-duration="0.8"
-       data-seed="3">
-       Every detail is a decision someone made. Make fewer, make them count.
-    </p>
-    <div class="variant-label">IN-VIEW · ONE-SHOT (reverses on scroll back)</div>
+        <!-- the paragraph — words split by JS, NORMAL FLOW, opacity always 1 -->
+        <p class="puzzle-text"
+           id="liveTarget"
+           data-puzzle-text="manual">
+           Ми будуємо не стіни. Ми будуємо ранок, у якому хочеться прокинутись на власному березі річки.
+        </p>
+
+      </div>
+    </div>
   </section>
 
-  <section class="frame"><div class="spacer">end</div></section>
+  <!-- runway so the pin has scroll distance after it releases -->
+  <section class="frame" id="after">
+    <div class="intro">
+      <div class="eyebrow">Далі</div>
+      <h1>Тут починається<br>ваша історія.</h1>
+      <p>Скрольте вгору, щоб побачити, як абзац знову розсипається на слова.</p>
+    </div>
+  </section>
 </main>
 
-<!-- ====== COMPONENT JS (inlined copy of component.js) ====== -->
+<!-- ============================================================
+     COMPONENT JS  (canonical, inlined copy of component.js)
+     ============================================================ -->
 <script>
 (function (global) {
   'use strict';
-  var EASE = 'power3.out';
-  if (global.CustomEase) { global.CustomEase.create('puzzleAir','0.22,1,0.36,1'); EASE='puzzleAir'; }
+
+  /* ---- the ONE ease: hard expo-out. registered as CustomEase if available ---- */
+  var EASE = 'power4.out';
+  if (global.CustomEase) {
+    global.CustomEase.create('puzzleAir', '0.16,1,0.3,1'); // hard expo-out settle
+    EASE = 'puzzleAir';
+  }
 
   var DEFAULTS = {
-    maxX:140, maxY:90, scaleFrom:1.55, scaleJitter:0.45, rotate:0, opacityFrom:0,
-    ghostColor:null, inkColor:null,
-    duration:0.9, stagger:0.045, ease:EASE, seed:1,
-    trigger:'scrub', start:'top 80%', end:'top 30%', scrub:0.6, once:false
+    /* scatter geometry — WIDE DIAGONAL on BOTH axes (source f_001) */
+    maxX:300, maxY:170, rotate:9, skew:7,
+    /* farther-from-home = LIGHTER + LARGER */
+    scaleNear:1.0, scaleFar:1.42,
+    ghostNear:'#B9B7AF', ghostFar:'#D4D2CA', inkColor:'#161614',
+    /* choreography (positions on the assembly timeline) */
+    duration:0.9, stagger:0.045, ease:EASE, seed:7
   };
 
-  function rng(seed){return function(){seed|=0;seed=(seed+0x6D2B79F5)|0;
-    var t=Math.imul(seed^(seed>>>15),1|seed);
-    t=(t+Math.imul(t^(t>>>7),61|t))^t;
-    return ((t^(t>>>14))>>>0)/4294967296;};}
+  /* deterministic PRNG (mulberry32) — stable + reshuffleable scatter */
+  function rng(seed){
+    return function(){
+      seed|=0; seed=(seed+0x6D2B79F5)|0;
+      var t=Math.imul(seed^(seed>>>15),1|seed);
+      t=(t+Math.imul(t^(t>>>7),61|t))^t;
+      return ((t^(t>>>14))>>>0)/4294967296;
+    };
+  }
 
+  /* split text -> word spans + space spans (gaps never collapse). */
   function splitWords(el){
     var text=el.textContent.replace(/\s+/g,' ').trim();
     var parts=text.split(' '); el.textContent=''; var words=[];
@@ -204,110 +272,164 @@ main{position:relative;z-index:1}
       var span=document.createElement('span');
       span.className='pt-word'; span.textContent=w;
       el.appendChild(span); words.push(span);
-      if(i<parts.length-1){var sp=document.createElement('span');
-        sp.className='pt-space';sp.textContent=' ';el.appendChild(sp);}
+      if(i<parts.length-1){
+        var sp=document.createElement('span');
+        sp.className='pt-space'; sp.textContent=' '; el.appendChild(sp);
+      }
     });
     return words;
   }
 
+  /* per-word scattered "from" state — coherent, seeded.
+     KEY: opacity is NEVER set (words always opaque).
+     WIDE DIAGONAL spread on both axes + slight rotate/skew.
+     farther from home (by euclidean distance) = lighter + larger. */
   function scatterVars(opt,rand){
-    var s=opt.scaleFrom+(rand()*2-1)*opt.scaleJitter;
-    var v={x:(rand()*2-1)*opt.maxX, y:(rand()*2-1)*opt.maxY,
-           scale:Math.max(0.6,s), opacity:opt.opacityFrom};
+    var dx=(rand()*2-1);
+    var dy=(rand()*2-1);
+    var x=dx*opt.maxX;
+    var y=dy*opt.maxY;
+    /* normalized euclidean distance from home (0..1) */
+    var dist=Math.min(1, Math.sqrt(dx*dx+dy*dy)/Math.SQRT2);
+    var scale=opt.scaleNear+(opt.scaleFar-opt.scaleNear)*dist;
+    var color=lerpHex(opt.ghostNear,opt.ghostFar,dist);
+    var v={ x:x, y:y, scale:scale, color:color };
     if(opt.rotate) v.rotation=(rand()*2-1)*opt.rotate;
-    if(opt.ghostColor) v.color=opt.ghostColor;
+    if(opt.skew)   v.skewX=(rand()*2-1)*opt.skew;   /* italic-drift feel */
     return v;
   }
 
-  function init(el,userOpt){
-    if(!global.gsap){console.warn('[puzzle-text] GSAP missing');return;}
+  function hex(c){c=c.replace('#','');return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];}
+  function lerpHex(a,b,t){
+    var A=hex(a),B=hex(b),r=function(i){return Math.round(A[i]+(B[i]-A[i])*t);};
+    return 'rgb('+r(0)+','+r(1)+','+r(2)+')';
+  }
+
+  /* Build the ASSEMBLY onto a provided timeline (so a pinned, scrubbed
+     ScrollTrigger can drive scatter<->assemble reversibly). Returns {words}. */
+  function buildAssembly(el, tl, position, userOpt){
     var opt=Object.assign({},DEFAULTS,userOpt||{}); var gsap=global.gsap;
-    var reduce=global.matchMedia&&global.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var reduce=global.matchMedia&&
+      global.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     var words=splitWords(el);
-    if(opt.inkColor) el.style.setProperty('--pt-ink',opt.inkColor);
-    if(reduce){gsap.set(words,{opacity:1});return {destroy:function(){}};}
+    el.style.color=opt.inkColor;
+
+    if(reduce){
+      gsap.set(words,{x:0,y:0,scale:1,skewX:0,rotation:0,color:opt.inkColor});
+      return {words:words};
+    }
 
     var rand=rng(opt.seed*9301+49297);
     var froms=words.map(function(){return scatterVars(opt,rand);});
-    var to={x:0,y:0,scale:1,opacity:1,rotation:0,ease:opt.ease};
-    if(opt.inkColor||opt.ghostColor) to.color=opt.inkColor||'inherit';
-    var st;
 
-    if(opt.trigger==='inview'){
-      words.forEach(function(w,i){gsap.set(w,froms[i]);});
-      var tl=gsap.timeline({paused:true});
-      tl.to(words,Object.assign({},to,{duration:opt.duration,
-        stagger:{each:opt.stagger,from:0}}));
-      st=global.ScrollTrigger.create({trigger:el,start:opt.start,once:opt.once,
-        onEnter:function(){tl.play();},
-        onLeaveBack:opt.once?null:function(){tl.reverse();}});
-    }else{
-      var tl2=gsap.timeline({scrollTrigger:{trigger:el,start:opt.start,
-        end:opt.end,scrub:opt.scrub}});
-      words.forEach(function(w,i){gsap.set(w,froms[i]);
-        tl2.to(w,Object.assign({},to,{duration:opt.duration}),i*opt.stagger);});
-      st=tl2.scrollTrigger;
-    }
-    return {timeline:st,words:words,destroy:function(){
-      if(st&&st.kill)st.kill(); gsap.set(words,{clearProps:'all'});}};
-  }
+    /* set the scattered start state (opacity untouched = stays 1) */
+    words.forEach(function(w,i){ gsap.set(w,froms[i]); });
 
-  function auto(){
-    document.querySelectorAll('[data-puzzle-text]').forEach(function(el){
-      var o={};
-      ['maxX','maxY','scaleFrom','scaleJitter','rotate','opacityFrom',
-       'duration','stagger','seed','scrub'].forEach(function(k){
-        var camel=k; var dv=el.dataset[camel]; if(dv!=null)o[k]=parseFloat(dv);});
-      ['trigger','start','end','ghostColor','inkColor'].forEach(function(k){
-        var dv=el.dataset[k]; if(dv!=null)o[k]=dv;});
-      if(el.dataset.once!=null)o.once=el.dataset.once==='true';
-      init(el,o);
+    /* each word tweens home; staggered in reading order so the paragraph reads
+       as ONE gesture. position maps the assembly onto SCROLL distance, so
+       scrubbing back re-scatters every word (reverse). */
+    var to={x:0,y:0,scale:1,rotation:0,skewX:0,color:opt.inkColor,
+            ease:opt.ease,duration:opt.duration};
+    words.forEach(function(w,i){
+      tl.to(w, to, (position||0) + i*opt.stagger);
     });
+
+    return {words:words};
   }
-  global.PuzzleText={init:init,auto:auto,DEFAULTS:DEFAULTS};
+
+  global.PuzzleText={
+    buildAssembly:buildAssembly, splitWords:splitWords,
+    DEFAULTS:DEFAULTS, EASE:EASE
+  };
 })(window);
 </script>
 
-<!-- ====== LAB BOOT: ease reg, Lenis guard, preloader, init ====== -->
+<!-- ============================================================
+     LAB BOOT — ease · Lenis guard · the one pinned scrub · refresh
+     ============================================================ -->
 <script>
 gsap.registerPlugin(ScrollTrigger);
+if (window.CustomEase) CustomEase.create('air','0.16,1,0.3,1');
+var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* one ease for the whole lab (mirrors --air) */
-if (window.CustomEase) CustomEase.create('air','0.22,1,0.36,1');
-
-/* Lenis smooth scroll, guarded — drives ScrollTrigger if present */
+/* ---------- Lenis smooth scroll, GUARDED ---------- */
 var lenis=null;
-if (window.Lenis){
+if (window.Lenis && !reduce){
   lenis=new Lenis({lerp:0.1,smoothWheel:true});
   lenis.on('scroll',ScrollTrigger.update);
   gsap.ticker.add(function(t){lenis.raf(t*1000);});
   gsap.ticker.lagSmoothing(0);
 }
 
-/* preloader ritual: count 0->100, then twin slices open the page */
-(function preloader(){
-  var pre=document.getElementById('preloader');
-  var count=pre.querySelector('.count');
-  var L=document.querySelector('.slice.left');
-  var R=document.querySelector('.slice.right');
-  var obj={n:0};
-  var tl=gsap.timeline({defaults:{ease:'air'}});
-  tl.to(obj,{n:100,duration:1.1,ease:'power2.inOut',
-      onUpdate:function(){count.textContent=String(Math.round(obj.n)).padStart(3,'0');}})
-    .to(pre,{autoAlpha:0,duration:0.3},'+=0.1')
-    .set([L,R],{scaleX:1},'<')        /* slices cover, then split open */
-    .to(L,{scaleX:0,duration:0.8,transformOrigin:'left center'},'>-0.05')
-    .to(R,{scaleX:0,duration:0.8,transformOrigin:'right center'},'<')
-    .add(function(){ScrollTrigger.refresh();},'>-0.4');
-})();
+/* ---------- the ONE move: scatter <-> assemble, pinned + scrubbed ---------- */
+function buildScene(){
+  var stageWrap=document.getElementById('stageWrap');
+  var liveTarget=document.getElementById('liveTarget');
 
-/* init the component (auto() also runs via the IIFE pattern; call
-   explicitly here AFTER preloader so resting boxes are measured
-   with final fonts/layout). */
+  if(reduce){
+    /* reduced motion: just show the settled paragraph, no pin, no motion. */
+    var trivial=gsap.timeline();
+    PuzzleText.buildAssembly(liveTarget, trivial, 0, {seed:7});
+    return;
+  }
+
+  /* pin distance for the assemble (in viewport-heights). The whole timeline
+     IS the assemble; scrub keeps it reversible (scroll back = re-scatter). */
+  var PIN = 1.8;
+
+  var tl=gsap.timeline({
+    scrollTrigger:{
+      trigger:stageWrap,
+      start:'top top',
+      end:'+='+(PIN*100)+'%',
+      scrub:0.6,
+      pin:true,
+      pinSpacing:true,
+      invalidateOnRefresh:true
+    }
+  });
+
+  /* PHASE: scatter (set at t=0) -> assemble (tweens home), color gray->ink,
+     opacity always 1. This is the entire technique. Nothing follows. */
+  PuzzleText.buildAssembly(liveTarget, tl, 0, {
+    seed:7, maxX:300, maxY:170, rotate:9, skew:7,
+    scaleNear:1.0, scaleFar:1.42,
+    ghostNear:'#B9B7AF', ghostFar:'#D4D2CA', inkColor:'#161614',
+    duration:0.9, stagger:0.045
+  });
+}
+
+/* ---------- kickoff AFTER load so fonts/layout are final ----------
+   (measure resting boxes after web fonts load, else words snap to wrong
+   slots; then ScrollTrigger.refresh()) */
 window.addEventListener('load',function(){
-  PuzzleText.auto();
-  ScrollTrigger.refresh();
+  buildScene();
+  ScrollTrigger.refresh();   // D16: refresh after pin heights settle
+});
+
+/* recompute on resize / orientation flip */
+var rT;window.addEventListener('resize',function(){
+  clearTimeout(rT);rT=setTimeout(function(){ScrollTrigger.refresh();},200);
 });
 </script>
+<!-- ── __LAB_OK__ acceptance probe (re-added by library migration; additive) ── -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+  var tries=0;
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var hasGsap = !!window.gsap;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+      var ok = errs===0 && hasGsap && (reduce || stCount>0 || document.body.querySelector('[class*="static"],[class*="reduced"]'));
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  setTimeout(ready,700);
+})();</script>
+
 </body>
 </html>

@@ -68,9 +68,15 @@
 .msw-dot{
   width:9px; height:9px; border-radius:50%;
   background:rgba(244,240,234,.3);
+  transform:scale(.86);
+  /* --msw-air mirrors the registered CustomEase 'air' for the dot micro-transition */
+  transition:background .3s var(--msw-air,cubic-bezier(0.22,0.61,0.18,1)),
+             box-shadow .3s var(--msw-air,cubic-bezier(0.22,0.61,0.18,1)),
+             transform .3s var(--msw-air,cubic-bezier(0.22,0.61,0.18,1));
 }
 .msw-dot.is-on{
   background:var(--msw-accent,#1FA8C9);
+  transform:scale(1);
   box-shadow:0 0 0 4px rgba(31,168,201,.18);
 }
 
