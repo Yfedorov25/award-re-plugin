@@ -561,6 +561,82 @@
     "_path": "library/components/slide-out-img-text/",
     "_variantsResolved": []
   },
+  "vertical-slide": {
+    "id": "vertical-slide",
+    "name": "Vertical clean-slide (film advance)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "VerticalSlide.init({ stageSel:'#stage', trackSel:'#track', fillSel:'#progFill', slides:[{ img, alt, eye, title, sub, capSide:'left'|'right', brkNum, brkWord, climax?, origin, kb0, kb1, par, cap, brk }], move:0.80, scrub:0.8, pitchVh:2.00, endMult:1.55 })   # The REAL vs3 entry is an inline IIFE build(); recorded faithfully as a window-global init(opts). If slides[] is omitted it drives whatever vs3-shaped DOM (.track > .slide > .frame > .frame__img + .cap + .brk) already exists inside the stage — the SMALLER faithful change. The motion math (pitchPx / centerOffset / travelEndY, the single track.y timeline, ken-burns, climax HOLD, reduced-motion path) is byte-faithful to vs3 and is NOT rewritten to fit this signature.",
+      "module": "iife",
+      "returns": "{ n, timeline, refresh, kill } | { reduced:true, n, refresh, kill } | null"
+    },
+    "meaning": {
+      "what": "A pinned vertical film-advance where big render+caption cels rise one per scroll-step on a single rigid track (one track.y translateY) through a void LARGER than the viewport, so the outgoing cel fully exits before the incoming reaches centre; per-slide three-plane parallax (frame/image/caption) gives depth and the final terrace cel is HELD as the climax.",
+      "when": "A sequence of big hero images that should advance like vertical film cels with ZERO overlap and a held climax — the moody twilight 'arrival from above → down to the terrace' arc, one photo on stage at a time.",
+      "lands": "Clean cinematic vertical advance — one photo on stage at a time, the void between cels reading as depth between film planes, the terrace climax opening biggest as chrome dissolves. Premium, never a slideshow-cut: every transition is a single reversible glide.",
+      "not_when": "Horizontal catalogue reads (use cards-swipe), depth-takeover where planes push toward/through the viewer (use depth-stack), or anywhere a deck-fan fits. Also not for flat index/conversion sections where motion must drop."
+    },
+    "source": {
+      "grammar": "QUADRO slide-lab — owner-approved vs3 parallax-depth vertical-slide (rated 9/10, OVERLAP:NONE); the cln5 clean-advance track + the multi-plane depth layer",
+      "recording": "apps/quadro/public/slide-lab/vs3-parallax-depth-layers.html",
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "one pinned scroll-scrub translating a single rigid track on Y",
+    "timing_layer": [
+      "B-entrance",
+      "A-ambient"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "material",
+      "lifestyle-climax"
+    ],
+    "combines_with": [
+      "reveal",
+      "scroll-indicator"
+    ],
+    "anti_combos": [
+      "second-pin",
+      "cards-swipe"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "parallax-depth"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "RECIPE.md",
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "ZERO image overlap: PITCH > frameH so the void gap exceeds one viewport; outgoing cel fully exits before incoming reaches centre (PITCH 200vh - frameH 76vh = 124vh > 100vh; JS pitchPx() = innerHeight*2.00 equals CSS --pitch)",
+      "ONE rigid track, ONE moving surface: the whole advance is a single linear tween on track.y (translateY) at constant velocity, smoothing scrub only, NO snap — reverse is the exact inverse",
+      "caption atomic inside its slide: .cap lives inside .frame so render + caption are one rigid block that rises together",
+      "per-slide three-plane parallax-depth: frame (master, rides track exactly) / image (deep, --par lag ≤2.4vh) / caption (near, --capPar lead ≤1.6vh) ride slightly different vertical rates; all bounded inner transforms that never move WHICH frame is centred",
+      "climax HOLD: the timeline holds the column on the terrace cel while --peak ramps 0→1, growing the frame to ≤94vh — gated to the stationary HOLD so it never grows while the previous cel is still leaving (worst case 96.4vh < 124vh void budget)",
+      "transform/opacity only on scrub, no clip-reveal-over-stack: no clip-path / mix-blend / backdrop-filter as the swap, no video.currentTime; .stage overflow:hidden clips the spent cel away",
+      "reduced-motion / narrow collapse to a static big-image legible stack (no pin, no motion)"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/vertical-slide/",
+    "_variantsResolved": []
+  },
   "benefit-wipe-band": {
     "id": "benefit-wipe-band",
     "name": "Wavy-seam benefit band",

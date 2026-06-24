@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>vertical-slide — clean-slide film-advance lab</title>
+
+<!--
+  LAB: vertical-slide (Vertical clean-slide / film advance)
+  ==================================================================
+  Recorded 1:1 from apps/quadro/public/slide-lab/vs3-parallax-depth-layers.html.
+  ONE rigid .track translates UP by exactly one PITCH per step (track.y, a single
+  translateY) on a pinned scrub. PITCH (200vh) - frameH (76vh) = 124vh void > one
+  viewport => ZERO image overlap BY CONSTRUCTION. Per-slide three-plane parallax
+  (frame / image / caption) + a held terrace climax. Renders point at renders/.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="component.css">
+</head>
+<body>
+
+  <!-- ===== intro mood ===== -->
+  <header class="intro">
+    <span class="intro__kicker">QUADRO · приватний квартал</span>
+    <h1 class="intro__title">Глибина, що<br><em>проявляється</em> з висоти</h1>
+    <p class="intro__lede">Кадр за кадром, план за планом. Згори донизу до тераси, де світло сідає на воду. Один образ за раз.</p>
+  </header>
+
+  <!-- ===== pinned stage — one rigid column climbs inside a clean clip box.
+       VerticalSlide.init() builds the .track slides from the data below. ===== -->
+  <section class="stage" id="stage" aria-label="vertical clean-slide film advance">
+    <div class="track" id="track"></div>
+    <div class="prog"><div class="prog__fill" id="progFill"></div></div>
+    <div class="hint">скрол</div>
+  </section>
+
+  <!-- ===== static fallback (narrow / reduced-motion) — BIG legible stack ===== -->
+  <div class="static" aria-hidden="false">
+    <div class="static__shot">
+      <img src="renders/aerial.webp" alt="Квартал згори">
+      <div class="static__cap"><span class="e">Квартал · згори</span><span class="t">Тиша, <em>яку видно</em></span></div>
+    </div>
+    <div class="static__shot">
+      <img src="renders/day-front.webp" alt="Фасад удень">
+      <div class="static__cap"><span class="e">Фасад · день</span><span class="t">Лінії, <em>що тримають</em></span></div>
+    </div>
+    <div class="static__shot">
+      <img src="renders/night-pergola.webp" alt="Пергола в сутінках">
+      <div class="static__cap"><span class="e">Сутінки · пергола</span><span class="t">Світло, <em>що сідає</em></span></div>
+    </div>
+    <div class="static__shot">
+      <img src="renders/macro-roof.webp" alt="Деталь покрівлі">
+      <div class="static__cap"><span class="e">Деталь · матеріал</span><span class="t">Близько, <em>як удома</em></span></div>
+    </div>
+    <div class="static__shot">
+      <img src="renders/terrace-05.webp" alt="Тераса в золотому світлі">
+      <div class="static__cap"><span class="e">Тераса · золото</span><span class="t">Година, <em>коли тихо</em></span></div>
+    </div>
+    <div class="static__shot">
+      <img src="renders/terrace-04.webp" alt="Тераса на заході">
+      <div class="static__cap"><span class="e">Тераса · захід</span><span class="t">Власне небо <em>над водою</em></span></div>
+    </div>
+  </div>
+
+  <!-- ===== outro ===== -->
+  <footer class="outro">
+    <h2 class="outro__title">QUADRO. Глибина, що завершується<br><em>на твоїй терасі.</em></h2>
+    <p class="outro__note">Візуалізації. Деталі уточнюйте у відділі продажу.</p>
+  </footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="component.js"></script>
+<script>
+  // the real QUADRO twilight arc (6 frames), 1:1 with the vs3 recording.
+  // each slide = a big render + an ATOMIC caption + its per-slide depth row.
+  VerticalSlide.init({
+    stageSel: "#stage",
+    trackSel: "#track",
+    fillSel:  "#progFill",
+    move:    0.80,   // 80% translate, 20% climax HOLD
+    scrub:   0.8,    // smoothing only — NOT snap
+    pitchVh: 2.00,   // == CSS --pitch:200vh  (the zero-overlap geometry)
+    endMult: 1.55,   // pin length = (N-1) * innerHeight * 1.55
+    slides: [
+      { // S1 · aerial — arrival from above (portrait, deep vertical drift)
+        img:"renders/aerial.webp", alt:"Квартал з висоти",
+        eye:"Квартал · згори", title:"Тиша,<br><em>яку видно</em>",
+        sub:"Кілька будинків серед зелені. Простір, що дихає.",
+        capSide:"left",
+        origin:"50% 42%", kb0:1.10, kb1:1.03, par:2.2, cap:-1.4, brk:2.4
+      },
+      { // S2 · day-front — the architecture by day (landscape)
+        img:"renders/day-front.webp", alt:"Фасад удень",
+        eye:"Фасад · день", title:"Лінії,<br><em>що тримають</em>",
+        sub:"Спокійна архітектура без зайвих слів.",
+        capSide:"right", brkNum:"ii.", brkWord:"фасад · день",
+        origin:"44% 50%", kb0:1.08, kb1:1.02, par:1.8, cap:-1.2, brk:-2.4
+      },
+      { // S3 · night-pergola — the dusk turn, deepest mid lag (portrait)
+        img:"renders/night-pergola.webp", alt:"Пергола в сутінках",
+        eye:"Сутінки · пергола", title:"Світло,<br><em>що сідає</em>",
+        sub:"Коли день переходить у вечір, простір стає твоїм.",
+        capSide:"left", brkNum:"iii.", brkWord:"сутінки · пергола",
+        origin:"52% 44%", kb0:1.09, kb1:1.03, par:2.4, cap:-1.6, brk:2.4
+      },
+      { // S4 · macro-roof — intimate detail, slows the eye (square)
+        img:"renders/macro-roof.webp", alt:"Деталь покрівлі",
+        eye:"Деталь · матеріал", title:"Близько,<br><em>як удома</em>",
+        sub:"Текстура, до якої хочеться доторкнутись.",
+        capSide:"right", brkNum:"iv.", brkWord:"деталь · матеріал",
+        origin:"50% 50%", kb0:1.07, kb1:1.02, par:1.4, cap:-1.0, brk:-2.4
+      },
+      { // S5 · terrace-05 — the golden setup, light arrives (portrait)
+        img:"renders/terrace-05.webp", alt:"Тераса в золотому світлі",
+        eye:"Тераса · золото", title:"Година,<br><em>коли тихо</em>",
+        sub:"Тепле світло лягає на дерево. День майже завершено.",
+        capSide:"left", brkNum:"v.", brkWord:"тераса · золото",
+        origin:"50% 40%", kb0:1.08, kb1:1.03, par:2.0, cap:-1.3, brk:2.4
+      },
+      { // S6 · terrace-04 — THE CLIMAX: opens biggest, deepest push (portrait)
+        img:"renders/terrace-04.webp", alt:"Золота тераса на заході",
+        eye:"Тераса · захід", title:"Власне небо<br><em>над водою</em>",
+        sub:"Кава, тиша і лінія горизонту, що належить тільки тобі.",
+        capSide:"left", brkNum:"vi.", brkWord:"тераса · захід", climax:true,
+        origin:"50% 36%", kb0:1.05, kb1:1.10, par:2.4, cap:-1.6, brk:-2.4
+      }
+    ]
+  });
+  window.addEventListener("resize", function(){ if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (library convention) ──
+     asserts: gsap + ScrollTrigger present, exactly ONE .track, a PINNED
+     ScrollTrigger exists (or reduced/narrow static path), >=3 slides built,
+     and zero real console.error. component.js already sets __LAB_OK__ inside
+     init(); this re-confirms it after load and adds the console-error gate. -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){
+    var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++;
+    return _e.apply(console,arguments);
+  };
+  var tries=0;
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var narrow = matchMedia && matchMedia('(max-width:760px)').matches;
+      var oneTrack = document.querySelectorAll('.track').length === 1;
+      var stPinned = (window.ScrollTrigger && ScrollTrigger.getAll)
+        ? ScrollTrigger.getAll().some(function(st){ return st.pin; }) : false;
+      var slides = document.querySelectorAll('.slide').length;
+      var staticShots = document.querySelectorAll('.static__shot').length;
+      var engineOK = !!(window.gsap && window.ScrollTrigger && window.VerticalSlide);
+      var motionOK = (reduce || narrow)
+        ? staticShots >= 3
+        : (oneTrack && stPinned && slides >= 3);
+      var ok = errs===0 && engineOK && motionOK && window.__LAB_OK__ === true;
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+</body>
+</html>
