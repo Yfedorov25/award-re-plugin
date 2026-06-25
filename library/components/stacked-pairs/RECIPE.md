@@ -27,7 +27,7 @@ page_beat: [show, material]
 combines_with: [reveal, splitLines, scroll-indicator, parallax-depth]
 anti_combos: [second-pin]
 gated_by: [R_anti_combos, R_perf_limits, R_timing_layers]
-variants: []
+variants: [slice-lr, slice-td]
 params_ref: tokens.json
 files: [component.js, component.css, lab.html, tokens.json]
 acceptance:
