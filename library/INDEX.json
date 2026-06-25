@@ -761,6 +761,80 @@
     "_path": "library/components/slide-out-img-text/",
     "_variantsResolved": []
   },
+  "stacked-pairs": {
+    "id": "stacked-pairs",
+    "name": "Stacked pairs (text-left / render-right per section)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "StackedPairs.init(target, options)  // target = a container el or selector (default '#pairs'); if it already holds .pair sections they are used verbatim, else the pairs are BUILT into it from options.slides. options all optional: { slides, lerp, revealStart, revealEnd, kenStart, kenEnd, kenFrom, kenTo, revealSpan, textSpan, manageLenis }",
+      "module": "iife",
+      "returns": "{ triggers, sections, lenis, refresh, destroy }  (or { static:true, sections, destroy } in the reduced-motion / narrow branch)"
+    },
+    "meaning": {
+      "what": "A VERTICAL RHYTHM of distinct full-screen sections (NOT a pinned stepper). Each section = TEXT on the LEFT (~38%) + a BIG contained fixed-size RENDER on the RIGHT (~62%, 84vh, clean rounded-left frame, ~2cm gap, a thin bronze rule on the far-left text edge, an index eyebrow + Fraunces serif heading with an italic-bronze keyword + sub, a small tag bottom-right of the render). The render is ALWAYS on the right. You scroll from one PAIR to the NEXT. Each section's render + text REVEAL smoothly as the section enters the viewport (scrub-driven, reverse-safe) — the render rises + fades, the bronze rule fades + grows, the text bits rise in a gentle air-eased stagger — and a SLOW continuous monotonic ken-burns runs on the render while it is on screen. A Lenis-smoothed scroll drives a PURE render(progress) per section. NO pin, NO swap, NO clip.",
+      "when": "An editorial route of paired beats — a quiet day/night/terrace/material/aerial/interior sequence, a numbered set of one-render-one-thought sections — where you want each pair to read as its own calm full-screen statement and the eye to walk DOWN the page from one to the next, rather than being pinned and stepped through swaps in place. The restful alternative to a pinned slicer/stepper.",
+      "lands": "Each pair arrives as its own composed editorial frame as you scroll into it — render settling on the right, words rising on the left, the photo breathing on a slow ken-burns — and then you move on to the next. It reads as an unhurried, expensive vertical magazine spread, never a busy in-place carousel.",
+      "not_when": "An indexed render-deck that must SWAP one big render in place beat-by-beat (use slice-clip's pinned clip-wipe or focus-render-switch's pinned crossfade stepper). A single hero. A section that must be pinned. Never reach for video.currentTime scrubbing."
+    },
+    "source": {
+      "grammar": "QUADRO slide-lab — frs11 stacked pairs: the frs7 text-left / render-right composition turned into a pin-LESS vertical rhythm (the calm alternative to the pinned slicer/stepper)",
+      "recording": "apps/quadro/public/slide-lab/frs11-stacked-pairs.html",
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis 1.1.13",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "per-section scrubbed ScrollTriggers (scrub:true), Lenis-smoothed, reversible — NOT pinned",
+    "timing_layer": [
+      "B-entrance",
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "page_beat": [
+      "show",
+      "material"
+    ],
+    "combines_with": [
+      "reveal",
+      "splitLines",
+      "scroll-indicator",
+      "parallax-depth"
+    ],
+    "anti_combos": [
+      "second-pin"
+    ],
+    "gated_by": [
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "a VERTICAL RHYTHM of distinct full-screen .pair sections, scrolled one to the NEXT — NOT a pinned stepper (owns_pin false; no ScrollTrigger pins)",
+      "frs7 composition per pair: text LEFT ~38%, BIG contained fixed-size render RIGHT ~62% (84vh, rounded-left frame), ~2cm gap, far-left bronze rule, index eyebrow + Fraunces serif heading (italic-bronze keyword) + sub, tag bottom-right; render ALWAYS on the right",
+      "each section reveals on a PURE render(self.progress) from a scrubbed ScrollTrigger (start 'top 85%' end 'top 35%') + an init paint at load — render rises + fades (opacity only; IMG opaque), bronze rule fades + grows, text bits stagger; reverse-safe",
+      "a SEPARATE monotonic ken-burns ScrollTrigger (start 'top bottom' end 'bottom top' scrub) scales the img 1.06 -> 1.12 ease none; image-only, never resets, never blanks",
+      "NO toggleActions — the first frs11 used a toggleActions tween and it failed to fire on load; the fix is the pure scrubbed render(progress) + init paint. Reintroducing toggleActions is the bug.",
+      "ONE smoother: Lenis 1.1.13 lerp 0.1 smoothWheel -> gsap.ticker -> ScrollTrigger.update, lagSmoothing(0)",
+      "transform / opacity ONLY — no WebGL, no mask-composite, no mix-blend / backdrop over the scrubbed surface, no video.currentTime",
+      "reduced-motion / <=820px collapse to a static legible stack (no Lenis, no triggers); on narrow the render stacks above the text"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/stacked-pairs/",
+    "_variantsResolved": []
+  },
   "vertical-slide": {
     "id": "vertical-slide",
     "name": "Vertical clean-slide (film advance)",
