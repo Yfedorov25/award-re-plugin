@@ -259,36 +259,35 @@
   },
   "media-step-switch": {
     "id": "media-step-switch",
-    "name": "Wavy-seam media stepper",
+    "name": "Full-bleed media+text stepper (film/quote)",
     "level": 1,
     "kind": "component",
     "status": "official",
     "entry": {
-      "call": "mediaStepSwitch(stageSel, opts)",
-      "module": "esm",
-      "returns": "controller | null"
+      "call": "MediaStepSwitch.init(target, options)  // target = the pinned stage el or selector (default '#pin'); the engine BUILDS the two full-bleed GPU media layers + the four different-format text moments + chrome INTO it. options all optional: { steps, lerp, pinFactor, dwell, wipeStart, wipeEnd, kenFrom, kenStep, manageLenis }. (alias: mediaStepSwitch(target, options))",
+      "module": "iife",
+      "returns": "{ trigger, moments, layers, lenis, refresh, destroy }  (or { static:true, moments, destroy } in the reduced-motion / narrow branch)"
     },
     "meaning": {
-      "what": "A pinned stage steps through stacked media layers; each step a wavy (or straight) seam wipes the next image/video in from one edge with a small parallax push, synced to stepped text + dots.",
-      "when": "A PROOF/benefit act with 2-N stepped statements, each carrying its own full-bleed media that should swap with a crafted seam, not a hard cut.",
-      "lands": "Each claim arrives on its own held frame; the seam wipe makes the swap feel authored, like turning a page.",
-      "not_when": "Hero covers, conversion gates, sections with only one media."
+      "what": "A PINNED full-bleed MEDIA STEPPER. The full-bleed render/video is the WHOLE background; typographic text steps float OVER it. Each step is a DIFFERENT text TYPE — (1) BIG STATEMENT, (2) VIDEO BEAT, (3) QUOTE, (4) NUMBER/FACT — each with its own font/scale/position, woven with a looping VIDEO beat (the river clip, the emotional centre). Clean sequence per beat: the TEXT settles FIRST, a clear PAUSE, THEN the media crossfades. The swap is an OPACITY crossfade of TWO stacked full-bleed GPU layers (outgoing underneath fully opaque, incoming on top fading 0->1) so media is never see-through (no blank) and never a diptych (no seam). The lite video lives in layer B (poster <img> + <video> toggled; NEVER currentTime-scrubbed, paused off-stage). A Lenis-smoothed scroll drives a PURE render(progress) over a generously-long pin; quantized GPU-only writes (opacity + a tiny monotonic ken-burns) keep it buttery.",
+      "when": "A PROOF / SHOW act where one full-bleed render is the WHOLE frame and the message is carried by a few DIFFERENT typographic moments over it — a big statement, then a quiet film beat, then a felt quote, then one hard number — and you want the media itself to swap in place beat-by-beat as a held film, not a card grid. The cinematic in-place stepper, the counterpart to the pin-LESS vertical stacked-pairs rhythm.",
+      "lands": "Each claim arrives on its own held cinematic frame: the words settle over the full render, a beat passes, then the whole image crossfades to the next while the next text type rises in. The looping river beat reads as the emotional centre. It feels like a short film you scrub through, expensive and authored, never a busy carousel and never a moment where the screen blanks or shows two images at once.",
+      "not_when": "A quiet editorial route where each beat should be its OWN full-screen section the eye walks DOWN the page (use stacked-pairs, pin-LESS). A hero cover. A conversion gate. A section that must NOT be pinned, or a section that already sits under another pin in the same beat (one pin owner per section). Never reach for video.currentTime scrubbing."
     },
     "source": {
-      "grammar": "Vide Infra benefit-band — wavy-seam stepper",
-      "recording": null,
+      "grammar": "QUADRO slide-lab — msw4a film/quote: a pinned full-bleed media stepper whose text steps are four DIFFERENT typographic types woven with a looping lite-video beat (the cinematic in-place counterpart to the pin-less stacked-pairs rhythm)",
+      "recording": "apps/quadro/public/slide-lab/msw4a-film-quote.html",
       "registry_ref": [
         "T-310"
       ]
     },
-    "stack": "vanilla ESM + GSAP 3.12.5 + ScrollTrigger + CustomEase",
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis 1.1.13",
     "webgl": false,
     "motion_props": [
       "transform",
-      "opacity",
-      "clip-path"
+      "opacity"
     ],
-    "trigger": "one pinned scroll-scrub stepper; stepVH per transition",
+    "trigger": "ONE pinned scroll-scrub ScrollTrigger (scrub:1, pin:true), Lenis-smoothed, reversible; pin length = innerHeight*(N-1)*pinFactor",
     "timing_layer": [
       "B-entrance",
       "A-ambient"
@@ -299,8 +298,8 @@
       "material"
     ],
     "combines_with": [
-      "splitLines",
       "reveal",
+      "splitLines",
       "counter",
       "scroll-indicator"
     ],
@@ -314,9 +313,7 @@
       "R_perf_limits",
       "R_timing_layers"
     ],
-    "variants": [
-      "default"
-    ],
+    "variants": [],
     "params_ref": "tokens.json",
     "files": [
       "component.js",
@@ -325,9 +322,16 @@
       "tokens.json"
     ],
     "acceptance": [
-      "seam wipe reveals each layer via clip-path polygon, never video.currentTime scrub",
-      "dots/fill track the active step; onStep fires per step",
-      "reverse-scroll replays seam wipes 1:1"
+      "a PINNED full-bleed media stepper (owns_pin TRUE; exactly one ScrollTrigger pins) — the render/video is the WHOLE background, text floats over it",
+      "each step is a DIFFERENT text TYPE (BIG STATEMENT / VIDEO BEAT / QUOTE / NUMBER-FACT), each entering from its own direction (transform-only); NOT a uniform benefit 1-2-3 card",
+      "the sequence WEAVES photos with a looping VIDEO beat (the lite river clip), present and muted-autoplay-loop, paused off-stage, NEVER currentTime-scrubbed",
+      "clean sequence per beat: text settles FIRST -> PAUSE -> media crossfades; outgoing text fades FULLY out before the incoming reads (one text moment at a time, no ghost)",
+      "SWAP = an OPACITY crossfade of TWO stacked full-bleed GPU layers (outgoing underneath always opaque, incoming on top fades 0->1); never see-through (no blank), never a diptych (no seam); NOT a per-frame clip-path on a decoding video",
+      "GPU smoothness intact: each .layer is its own compositor layer (will-change:transform,opacity; translateZ(0); backface-visibility:hidden); only opacity (swap) + transform (a tiny monotonic ken-burns) animate; quantized skip-unchanged DOM writes; eager img.decode()",
+      "render(prog) is a PURE fn of progress (scrubbed onUpdate + render(0) at init); reverse-safe, correct on load/jump",
+      "ONE smoother: Lenis 1.1.13 lerp 0.09 smoothWheel -> gsap.ticker -> ScrollTrigger.update, lagSmoothing(0)",
+      "transform / opacity ONLY — no WebGL, no mask-composite, NO backdrop-filter over the moving media, no mix-blend over the scrubbed surface, no video.currentTime",
+      "reduced-motion / <=820px collapse to a static legible vertical deck of the four shots (no Lenis, no pin, no triggers); the video autoplays inline"
     ],
     "verify": "lab.html#__LAB_OK__",
     "_path": "library/components/media-step-switch/",

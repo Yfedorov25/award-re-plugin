@@ -1,379 +1,150 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LAB · media-step-switch (Naveera / Zera) · 1:1</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · media-step-switch · msw4a · full-bleed media+text stepper (film/quote) (BASE, 1:1)</title>
 
-<!-- ============================================================
-     TECHNIQUE: media-step-switch
-     One pinned stage. A glass card holds stepped copy (BENEFIT 01,
-     02, 03, 04). As you scrub through the pin, the FULL-BLEED
-     background media swaps from step N to step N+1 via an ORGANIC
-     WAVY clip-path wipe (new media reveals BOTTOM→UP behind an
-     undulating seam), the card copy crossfades with a deliberate
-     soft OVERLAP (a brief ghosted double-exposure of both headings),
-     and the LEFT vertical step-rail advances its filled marker. The
-     card never moves; only media + copy + dot do.
-     Source recording: rec "image-video-switch" (Naveera / Zera).
+<!--
+================================================================================
+  TECHNIQUE LAB · media-step-switch   ·   BASE = msw4a-film-quote (owner-approved)
+================================================================================
+  SOURCE: apps/quadro/public/slide-lab/msw4a-film-quote.html  (gate-passing)
 
-     PASS: TRUE 1:1 (WAVE-2). Corrects the WAVE-1 draft (3 steps,
-     gradient placeholders, direction:'down', hard zero-overlap copy
-     dim) to: 4 steps, REAL portrait renders, direction:'up', and a
-     soft 'power1.out' copy-out overlapping the 'air' copy-in.
+  A PINNED full-bleed MEDIA STEPPER. The full-bleed render/video is the WHOLE
+  background; typographic text steps float OVER it. Each step is a DIFFERENT text
+  TYPE — (1) BIG STATEMENT (photo day-front), (2) VIDEO BEAT (the lite river clip,
+  the emotional centre), (3) QUOTE (photo terrace), (4) NUMBER/FACT (photo aerial)
+  — woven with a looping VIDEO beat. Clean sequence per beat: the TEXT settles
+  FIRST -> a clear PAUSE -> THEN the media crossfades.
 
-     STACK: vanilla HTML + GSAP 3.12.5 + ScrollTrigger + CustomEase.
-     NO WebGL. Motion on transform/opacity/clip-path only.
-     Background can be <img> OR muted autoplay <video> (never scrub
-     video.currentTime — only its clip visibility animates).
+  SWAP: an OPACITY crossfade of TWO stacked full-bleed GPU layers (A=even, B=odd).
+  Outgoing sits underneath, FULLY OPAQUE the whole beat; incoming sits on top and
+  fades 0 -> 1. Same rect => a crossfade, never a seam/diptych, never a blank. The
+  lite video lives in layer B; we toggle the poster <img> vs the <video> and NEVER
+  scrub video.currentTime (muted-autoplay-loop while on stage, PAUSE off-stage).
 
-     ASSETS: real 9:16 portrait renders from the sibling NAHIRNA
-     dataset, referenced relative to this file. If that project is
-     absent (the plugin checked out standalone), each <img> onerror
-     falls back to the grade-matched gradient so the technique still
-     demonstrates — the component itself ships with the consumer's
-     own media.
-     ============================================================ -->
+  SMOOTHNESS (verbatim from msw4a): every .layer is its OWN GPU compositor layer
+  (will-change:transform; transform:translateZ(0); backface-visibility:hidden); we
+  animate ONLY opacity (swap) + transform (a tiny monotonic ken-burns); NO
+  backdrop-filter over the moving media; NO clip-path on the full-screen surface.
+  ONE smoother: Lenis 1.1.13 lerp 0.09 -> gsap.ticker -> ScrollTrigger.update;
+  lagSmoothing(0). PINNED stage, scrub:1, GENEROUS pin length. render(prog) is a
+  PURE fn of progress (onUpdate + render(0) at init; reverse-safe). QUANTIZED DOM
+  writes with skip-unchanged caches. GSAP 3.12.5 + CustomEase ("air"/"glide").
 
+  Fraunces + Inter; bronze #c08a4e; cream; Ukrainian copy; ZERO em-dashes. NO
+  WebGL. reduced-motion / <=820px -> static legible stack.
+
+  RENDERS: renders/*.webp + renders/clip-river-lite.mp4 + renders/clip-river-poster.webp
+  resolve via the renders symlink -> apps/quadro/public/proto.
+
+  STACK: vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + Lenis 1.1.13
+  (cdnjs / jsdelivr). No build. Canonical drop-in:
+  award-re-plugin/library/components/media-step-switch/
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- eager-preload the first full-bleed render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-front.webp">
+
+<!-- the canonical component skin -->
+<link rel="stylesheet" href="component.css">
+
+<!-- GSAP + Lenis -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
-<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-
-<style>
-:root{
-  --ink:#0B0B0C; --paper:#F4F0EA; --mid:#8A857C; --bronze:#B8946A;
-  --mx:clamp(20px,4vw,64px);
-  --serif:"PP Editorial New","Times New Roman",Georgia,serif;
-  --sans:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
-  --air:cubic-bezier(0.22,0.61,0.18,1);
-  --overscan:1.06;
-  --card-w:min(440px,82vw);
-  --card-minh:240px;
-  --card-blur:14px;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:auto}
-body{background:var(--ink);color:var(--paper);font-family:var(--sans);
-  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
-img{display:block}
-
-.spacer{min-height:100vh;display:flex;align-items:center;justify-content:center;
-  text-align:center;color:var(--mid)}
-.spacer .eyebrow{font-size:.72rem;letter-spacing:.34em;text-transform:uppercase}
-.spacer .scroll-hint{margin-top:1rem;font-family:var(--serif);
-  font-size:clamp(2rem,6vw,4rem);color:var(--paper);line-height:1}
-.handoff{background:var(--ink)}
-.handoff h2{font-family:var(--serif);font-weight:400;
-  font-size:clamp(2.4rem,8vw,6rem);line-height:1;letter-spacing:-.02em;
-  color:var(--paper);max-width:18ch}
-
-.msw-stage{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--ink)}
-.msw-layer{position:absolute;inset:0;will-change:clip-path}
-.msw-layer .media{position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;object-position:center;transform:scale(var(--overscan));
-  will-change:transform;background:#15140f}
-/* grade-matched gradient fallback when a real render is unavailable */
-.msw-layer.is-fallback .media{display:none}
-.msw-layer .fb{position:absolute;inset:0;display:none}
-.msw-layer.is-fallback .fb{display:block;transform:scale(var(--overscan))}
-.fb-0{background:radial-gradient(120% 90% at 40% 30%,#6a7257,transparent 60%),linear-gradient(160deg,#3b4a33,#1c241a)}
-.fb-1{background:radial-gradient(120% 90% at 60% 30%,#8a9a63,transparent 60%),linear-gradient(160deg,#4a5e30,#243314)}
-.fb-2{background:radial-gradient(120% 90% at 50% 35%,#b89366,transparent 60%),linear-gradient(160deg,#6e4f2d,#2a1d10)}
-.fb-3{background:radial-gradient(120% 80% at 50% 60%,#3a3550,transparent 60%),linear-gradient(160deg,#191726,#0a0a10)}
-
-.msw-scrim{position:absolute;inset:0;z-index:3;pointer-events:none;background:
-  radial-gradient(90% 70% at 22% 50%,rgba(11,11,12,.55),transparent 60%),
-  linear-gradient(to bottom,rgba(11,11,12,.25),transparent 30%,rgba(11,11,12,.45))}
-
-.msw-card{position:absolute;z-index:5;left:var(--mx);top:50%;transform:translateY(-50%);
-  width:var(--card-w);min-height:var(--card-minh);display:flex;gap:1.4rem;
-  padding:1.8rem 1.8rem 1.9rem;background:rgba(18,18,20,.30);
-  border:1px solid rgba(244,240,234,.16);border-radius:4px;
-  backdrop-filter:blur(var(--card-blur)) saturate(120%);
-  -webkit-backdrop-filter:blur(var(--card-blur)) saturate(120%);
-  box-shadow:0 24px 60px -20px rgba(0,0,0,.6)}
-
-.msw-rail{position:relative;width:2px;flex:0 0 2px;align-self:stretch;margin:.2rem 0}
-.msw-rail .track{position:absolute;inset:0;background:rgba(244,240,234,.16)}
-.msw-rail .msw-fill{position:absolute;left:0;top:0;width:100%;height:0%;
-  background:var(--bronze);transform-origin:top}
-.msw-rail .msw-dots{position:absolute;inset:0;display:flex;flex-direction:column;
-  justify-content:space-between;align-items:center}
-.msw-rail .msw-dot{width:9px;height:9px;border-radius:50%;background:var(--ink);
-  border:1.5px solid rgba(244,240,234,.45);transform:translateX(-3.5px) scale(.86);
-  transition:border-color .3s var(--air),background .3s var(--air),
-             box-shadow .3s var(--air),transform .3s var(--air)}
-.msw-rail .msw-dot.is-on{background:var(--bronze);border-color:var(--bronze);
-  transform:translateX(-3.5px) scale(1);box-shadow:0 0 0 4px rgba(184,148,106,.18)}
-
-.msw-copy{position:relative;flex:1;min-height:inherit}
-.msw-step{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center}
-.msw-step .idx{font-family:var(--sans);font-size:.72rem;letter-spacing:.32em;
-  text-transform:uppercase;color:var(--bronze);margin-bottom:.9rem}
-.msw-step h3{font-family:var(--serif);font-weight:400;
-  font-size:clamp(1.5rem,3vw,2.3rem);line-height:1.06;letter-spacing:-.015em;margin-bottom:.9rem}
-.msw-step p{font-family:var(--sans);font-size:.98rem;line-height:1.6;
-  color:rgba(244,240,234,.78);max-width:30ch}
-
-.msw-progress{position:absolute;left:0;bottom:0;z-index:6;height:2px;width:100%;
-  background:var(--bronze);transform:scaleX(0);transform-origin:left center}
-.msw-eyebrow{position:absolute;top:var(--mx);left:var(--mx);z-index:6;
-  font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;opacity:.6}
-.msw-counter{position:absolute;top:var(--mx);right:var(--mx);z-index:6;text-align:right;
-  font-family:var(--serif);font-size:1rem;opacity:.7;line-height:1.2}
-.msw-counter b{display:block;font-size:1.15rem}
-.msw-disclaimer{position:absolute;right:var(--mx);bottom:calc(var(--mx) - 6px);z-index:6;
-  font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;opacity:.45}
-
-@media (max-width:760px){
-  :root{--card-w:calc(100vw - var(--mx)*2);--card-minh:280px;--card-blur:10px}
-  .msw-card{left:var(--mx);right:var(--mx);top:auto;bottom:calc(var(--mx) + 24px);transform:none}
-  .msw-step p{max-width:none}
-  .msw-disclaimer{display:none}
-}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 </head>
 <body>
 
-<section class="spacer">
-  <div>
-    <div class="eyebrow">media-step-switch · lab · 1:1</div>
-    <div class="scroll-hint">Гортайте ↓</div>
-  </div>
-</section>
+  <section class="intro gate">
+    <span class="intro__kicker">QUADRO HOUSE</span>
+    <h1 class="intro__title">Кіно про <em>один берег</em>.</h1>
+    <span class="scrollcue">Гортайте</span>
+  </section>
 
-<!-- LAYER ↔ STEP mapping (layer index = step index; reveals bottom→up):
-       layer0/step0 = 01-HERO/03-villa-34-day-v1FULL.png
-       layer1/step1 = 06-TERRACE/01-тераса-вид-на-ріку-день.png (Cyrillic → encodeURI)
-       layer2/step2 = 07-INTERIOR/02-kitchen-living-wide-day-v3.png
-       layer3/step3 = 08-CTA/01-night-facade-wide-v1FULL.png (night → dusk land)
-     SPARE/ALT swaps: 02-ARCH/01-clinker-macro-raking-v2FULL.png,
-                      03-RIVER/01-riverbank-reeds-golden-v2FULL.png
-     People-figure ELEMENT variants deliberately NOT used. -->
-<section class="msw-stage" id="stage" aria-label="stepped media benefits">
+  <!-- empty pin host: the component builds the full-bleed layers + the four text
+       moments (photo / VIDEO / quote / number) + chrome into it -->
+  <div class="pin gate" id="pin"></div>
 
-  <div class="msw-layer" data-layer="0">
-    <img class="media" data-render="01-HERO/03-villa-34-day-v1FULL.png" alt="Вілла вдень" />
-    <div class="fb fb-0"></div>
-  </div>
-  <div class="msw-layer" data-layer="1">
-    <img class="media" data-render="06-TERRACE/01-тераса-вид-на-ріку-день.png" alt="Тераса з видом на ріку" />
-    <div class="fb fb-1"></div>
-  </div>
-  <div class="msw-layer" data-layer="2">
-    <img class="media" data-render="07-INTERIOR/02-kitchen-living-wide-day-v3.png" alt="Кухня-вітальня" />
-    <div class="fb fb-2"></div>
-  </div>
-  <div class="msw-layer" data-layer="3">
-    <img class="media" data-render="08-CTA/01-night-facade-wide-v1FULL.png" alt="Фасад вночі" />
-    <div class="fb fb-3"></div>
-  </div>
+  <section class="outro gate">
+    <h2 class="outro__title">Один дім, у якому <em>хочеться лишитися</em>.</h2>
+  </section>
 
-  <div class="msw-scrim"></div>
+  <!-- the static fallback host (reduced-motion / <=820px). Filled by the engine. -->
+  <div class="static" id="static"></div>
 
-  <div class="msw-card">
-    <div class="msw-rail">
-      <div class="track"></div>
-      <div class="msw-fill"></div>
-      <div class="msw-dots">
-        <span class="msw-dot is-on" data-dot="0"></span>
-        <span class="msw-dot" data-dot="1"></span>
-        <span class="msw-dot" data-dot="2"></span>
-        <span class="msw-dot" data-dot="3"></span>
-      </div>
-    </div>
-
-    <div class="msw-copy">
-      <article class="msw-step" data-step="0">
-        <span class="idx">Перевага 01</span>
-        <h3>Власний берег від порога</h3>
-        <p>Земля що спускається до самої води. Між домом і річкою немає нікого.</p>
-      </article>
-      <article class="msw-step" data-step="1" style="opacity:0">
-        <span class="idx">Перевага 02</span>
-        <h3>Ранок на власній терасі</h3>
-        <p>Кава, тиша і відкритий вид на воду. Простір що належить тільки вам.</p>
-      </article>
-      <article class="msw-step" data-step="2" style="opacity:0">
-        <span class="idx">Перевага 03</span>
-        <h3>Світло живе всередині</h3>
-        <p>Кухня-вітальня з видом на ріку. Натуральний дуб і камінь що старіють красиво.</p>
-      </article>
-      <article class="msw-step" data-step="3" style="opacity:0">
-        <span class="idx">Перевага 04</span>
-        <h3>Дім який світиться у темряві</h3>
-        <p>Увечері фасад стає теплим ліхтарем над берегом. Не коробка, а дім.</p>
-      </article>
-    </div>
-  </div>
-
-  <div class="msw-eyebrow">Nahirna · техніка</div>
-  <div class="msw-counter"><b id="counterNum">01</b><span id="counterTot">04</span></div>
-  <div class="msw-disclaimer">візуалізація</div>
-  <div class="msw-progress" id="progress"></div>
-</section>
-
-<section class="spacer handoff">
-  <div>
-    <div class="eyebrow">наступна секція</div>
-    <h2>Дім на власному березі річки</h2>
-  </div>
-</section>
+<!-- the canonical component engine -->
+<script src="component.js"></script>
 
 <script>
-/* ASSETS — real renders from the sibling NAHIRNA dataset (4 levels up from this
-   plugin component dir). onerror → grade-matched gradient fallback so the lab
-   still runs when the plugin is checked out standalone. */
-const RENDER_BASE = "../../../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/";
-function renderURL(rel){
-  return RENDER_BASE + rel.split("/").map(encodeURIComponent).join("/");
-}
-document.querySelectorAll("[data-render]").forEach(img => {
-  img.addEventListener("error", () => img.closest(".msw-layer").classList.add("is-fallback"), {once:true});
-  img.src = renderURL(img.dataset.render);
-});
-
-const CONFIG = {
-  scrub:1, pin:true, stepVH:100,
-  wave:true, waveAmp:7, waveCols:14, waveFreq:1.5,
-  direction:'up', overscan:1.06, pushPercent:4, wipeEase:'air',
-  onStep:(i)=>{ document.getElementById('counterNum').textContent = String(i+1).padStart(2,'0'); }
-};
-/* RATIOS of one slice. copyIn STARTS at the same point copyOut starts → overlap/ghost. */
-const R = { wipe:1.0, copyOut:0.30, copyOutAt:0.40, copyIn:0.42, copyInAt:0.40, rail:0.85, dotAt:0.35 };
-
-gsap.registerPlugin(ScrollTrigger);
-const AIR = CustomEase.create("air","M0,0 C0.22,0.61 0.18,1 1,1");
-const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
-
-const stage  = document.getElementById("stage");
-const layers = gsap.utils.toArray("[data-layer]");
-const steps  = gsap.utils.toArray("[data-step]");
-const dots   = gsap.utils.toArray("[data-dot]");
-const fill   = stage.querySelector(".msw-fill");
-const progress = document.getElementById("progress");
-const N = steps.length;
-document.getElementById("counterTot").textContent = String(N).padStart(2,'0');
-console.assert(layers.length === steps.length, "[media-step-switch] layer/step counts must match");
-
-const TAU = Math.PI * 2;
-function wavePolygon(p){
-  const amp   = CONFIG.wave ? CONFIG.waveAmp * Math.sin(p * Math.PI) : 0;
-  const cols  = CONFIG.wave ? CONFIG.waveCols : 1;
-  const phase = p * Math.PI;
-  if (CONFIG.direction === 'up'){
-    // bottom→up reveal: visible region is BELOW the seam; seam rises 108%→-8%.
-    const baseY = 108 - p * 116;
-    const pts = [];
-    for (let i = 0; i <= cols; i++){
-      const x = (i / cols) * 100;
-      const y = baseY + amp * Math.sin((i / cols) * TAU * CONFIG.waveFreq + phase);
-      pts.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
-    }
-    pts.push("100% 100%", "0% 100%");           // close over the two BOTTOM corners
-    return `polygon(${pts.join(",")})`;
-  }
-  const baseY = -8 + p * 116;
-  const pts = [];
-  for (let i = 0; i <= cols; i++){
-    const x = (i / cols) * 100;
-    const y = baseY + amp * Math.sin((i / cols) * TAU * CONFIG.waveFreq + phase);
-    pts.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
-  }
-  pts.push("100% 100%", "0% 100%");
-  return `polygon(${pts.join(",")})`;
-}
-function setLayerClip(layer, p){ layer.style.clipPath = wavePolygon(p); }
-
-function setActiveDot(i){ dots.forEach((d,idx)=>d.classList.toggle("is-on",idx===i)); CONFIG.onStep(i); }
-function snapToStep(i){
-  layers.forEach((l,idx)=> l.style.clipPath = idx <= i ? wavePolygon(1) : wavePolygon(0));
-  steps.forEach((s,idx)=> gsap.set(s,{autoAlpha: idx===i ? 1 : 0}));
-  dots.forEach((d,idx)=> d.classList.toggle("is-on", idx===i));
-  gsap.set(fill,{height:(N===1?0:(i/(N-1))*100)+"%"});
-  CONFIG.onStep(i);
-}
-snapToStep(0);
-
-if (reduce){
-  snapToStep(0);
-  gsap.set(progress,{scaleX:0});
-} else {
-  if (window.Lenis){
-    const lenis = new Lenis({ lerp:0.12 });
-    lenis.on("scroll", ScrollTrigger.update);
-    gsap.ticker.add((t)=> lenis.raf(t*1000));
-    gsap.ticker.lagSmoothing(0);
-  }
-
-  const tl = gsap.timeline({
-    scrollTrigger:{
-      trigger: stage, start:"top top",
-      end:"+=" + ((N-1)*CONFIG.stepVH) + "%",
-      scrub: CONFIG.scrub, pin: CONFIG.pin, anticipatePin:1,
-      onUpdate:(self)=> gsap.set(progress,{scaleX:self.progress})
-    }
-  });
-
-  for (let i = 0; i < N - 1; i++){
-    const to = layers[i+1];
-    const oldCopy = steps[i];
-    const newCopy = steps[i+1];
-    const fillTo  = ((i+1)/(N-1))*100;
-    const slice   = i;
-
-    const proxy = { p:0 };
-    gsap.set(to, {clipPath: wavePolygon(0)});
-    tl.to(proxy, { p:1, duration:R.wipe, ease:CONFIG.wipeEase,
-      onUpdate(){ setLayerClip(to, proxy.p); } }, slice+0);
-
-    const dir = CONFIG.direction === 'up' ? 1 : -1;
-    tl.fromTo(to.querySelector(".media"),
-      { yPercent: dir*CONFIG.pushPercent },
-      { yPercent: 0, duration:R.wipe, ease:CONFIG.wipeEase }, slice+0);
-
-    /* soft copy-out overlapping copy-in → ghosted double-exposure */
-    tl.to(oldCopy, { autoAlpha:0, duration:R.copyOut, ease:"power1.out" }, slice+R.copyOutAt);
-
-    tl.to({}, { duration:0,
-      onStart(){ setActiveDot(i+1); },
-      onReverseComplete(){ setActiveDot(i); } }, slice+R.dotAt);
-
-    tl.to(fill, { height:fillTo+"%", duration:R.rail, ease:CONFIG.wipeEase }, slice+0);
-
-    tl.fromTo(newCopy, { autoAlpha:0, y:10 },
-      { autoAlpha:1, y:0, duration:R.copyIn, ease:CONFIG.wipeEase }, slice+R.copyInAt);
-  }
-
-  /* P6 release = native pin un-pin (no tween). */
-  let rT; addEventListener("resize", ()=>{ clearTimeout(rT); rT=setTimeout(()=>ScrollTrigger.refresh(),200); });
-  window.addEventListener("load", ()=> ScrollTrigger.refresh());
-}
-
-window.__mswGoTo = function(stepIndex){ console.log("[media-step-switch] go to step", stepIndex); };
+  /* the msw4a film/quote scene — a pinned full-bleed media stepper whose text
+     steps are four DIFFERENT types woven with a looping video beat. Builds into
+     the #pin host from the faithful msw4a steps; renders resolve via the renders
+     symlink. */
+  window.__MSW = MediaStepSwitch.init('#pin');
 </script>
-<!-- ── __LAB_OK__ acceptance probe (added by library migration; additive) ──
-     Sets window.__LAB_OK__ = true once the technique has booted and no error
-     fired: GSAP + ScrollTrigger present, ≥1 ScrollTrigger (or reduced-motion
-     fallback) live, and zero console.error. scripts/library-verify.mjs reads
-     this headless. Real per-phase assertions live in the RECIPE acceptance[]. -->
+
+<!-- ── __LAB_OK__ acceptance probe ──
+     asserts: gsap + ScrollTrigger + CustomEase + Lenis present; the stage built
+     (the 4 .moment text blocks + 2 full-bleed .layer media surfaces, OR the
+     reduced-motion / narrow static branch with >=4 .static__shot); this technique
+     OWNS A PIN (exactly one pinned ScrollTrigger); the lite video is present and
+     never currentTime-scrubbed; no em-dash in visible copy; zero real
+     console.error. -->
 <script>(function(){
-  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode|play\(\) request/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
   window.__LAB_ERRORS=function(){return errs;};
-  function ready(){
-    try{
-      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
-      var hasGsap = !!window.gsap;
-      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll) ? ScrollTrigger.getAll().length : 0;
-      var ok = errs===0 && hasGsap && (reduce || stCount>0 || document.body.querySelector('[class*="static"],[class*="reduced"]'));
-      window.__LAB_OK__ = !!ok;
-      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
-    }catch(e){ window.__LAB_OK__=false; }
+
+  function gather(){
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:820px)').matches;
+    var hasGsap = !!window.gsap;
+    var hasST   = !!window.ScrollTrigger;
+    var hasCE   = !!window.CustomEase;
+    var hasLenis= !!window.Lenis;
+
+    var isStatic = !!(window.__MSW && window.__MSW.static);
+    var moments = document.querySelectorAll('#pin .moment').length;
+    var layers  = document.querySelectorAll('#pin .layer').length;
+    var shots   = document.querySelectorAll('#static .static__shot').length;
+    var video   = document.querySelector('#pin video') || document.querySelector('#static video');
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var pinned  = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().some(function(s){return s.pin;}):false;
+
+    // this technique OWNS its pin: in the live branch exactly one trigger pins +
+    // 4 moments + 2 layers are built; in the static branch the deck is the shots.
+    var stageBuilt = isStatic ? (shots>=4) : (moments>=4 && layers>=2);
+    var pinWired   = isStatic ? true : (stCount>0 && pinned);
+    var hasVideo   = !!video;
+    var noEmDash   = document.body.innerText.indexOf('—') === -1;
+
+    return {
+      ok: errs===0 && hasGsap && hasST && hasCE && hasLenis && stageBuilt && pinWired && hasVideo && noEmDash,
+      moments:moments, layers:layers, shots:shots, hasVideo:hasVideo,
+      stCount:stCount, pinned:pinned, isStatic:isStatic, reduced:!!(reduce||narrow), errs:errs
+    };
   }
+
   var tries=0;
-  window.addEventListener('load',function(){ setTimeout(ready,400); });
+  function ready(){
+    var p = gather();
+    window.__MSW_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
 })();</script>
 
 </body>
