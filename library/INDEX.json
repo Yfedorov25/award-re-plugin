@@ -511,6 +511,98 @@
       }
     ]
   },
+  "slice-clip": {
+    "id": "slice-clip",
+    "name": "Slice-clip render reveal (spec-index)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "SliceClip.init(opts)  // opts all optional — defaults drive the frs7 DOM ids; the one knob that makes the 3 prototypes is dir: 'lr'|'td'|'bu'. Pass { dir, edge, slides, dwell, hold, pinFactor, lerp, ...sels } to override / author the frs7 DOM and call SliceClip.init({dir})",
+      "module": "iife",
+      "returns": "{ st, render, slides, destroy }  (or { static:true, slides, destroy } in the reduced-motion / narrow branch)"
+    },
+    "meaning": {
+      "what": "A pinned frs3 COMPOSITION — a numbered spec-RAIL on one side (38%), a BIG contained fixed-size RENDER on the other (62%), ~2cm gap, bronze accent — where each beat the render SWAPS via a CLEAN CLIP-PATH WIPE. TWO stacked <img> layers, BOTH opacity:1 (outgoing zIndex 1 underneath, incoming zIndex 2 revealed by animating its clip-path inset along ONE axis), so there is a single clean travelling edge: NO opacity ghosting, NO blank, NO cover-plate. Held current photo ~78% of each beat, then a gentle glide-eased wipe over the last ~22%; a Lenis-smoothed, pinned, scrubbed scroll drives a pure render(prog) and a continuously gliding rail marker.",
+      "when": "An indexed gallery / route of renders (a numbered spec-list paired with one big quiet render that changes per beat) where each photo should give way to the next as a deliberate, expensive SLICE rather than a soft dissolve — material proof, day/night/terrace/aerial route, a guided tour of one house.",
+      "lands": "Each render gives way to the next on one crisp travelling edge while the numbered rail tracks the beat — the swap reads as a deliberate cut, never a muddy crossfade; the photo is always whole, the index always honest.",
+      "not_when": "A soft mood crossfade (use a 2-img opacity dissolve), a single hero, body copy, or content that must not be pinned. Not when there is no indexed render-deck to walk through. Never reach for video.currentTime scrubbing — that is the anti-pattern this replaces."
+    },
+    "source": {
+      "grammar": "QUADRO slide-lab — frs7 slice L→R clip-reveal on the frs3 spec-rail + contained-render composition (the clean-cut answer to the muddy crossfade)",
+      "recording": "apps/quadro/public/slide-lab/frs7-slice-lr-clip.html",
+      "registry_ref": []
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis 1.1.13",
+    "webgl": false,
+    "motion_props": [
+      "clip-path",
+      "opacity",
+      "transform",
+      "color",
+      "left",
+      "top"
+    ],
+    "trigger": "one pinned scroll-scrub timeline (scrub:true), Lenis-smoothed, reversible",
+    "timing_layer": [
+      "B-entrance",
+      "C-pinned"
+    ],
+    "owns_pin": true,
+    "page_beat": [
+      "proof",
+      "material"
+    ],
+    "combines_with": [
+      "puzzle-text",
+      "focus-render-switch"
+    ],
+    "anti_combos": [
+      "second-pin"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [
+      "slice-top-down",
+      "slice-bottom-up"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "render swaps via a clip-path inset wipe, NEVER an opacity crossfade or video.currentTime",
+      "both <img> layers stay opacity:1 the whole time (outgoing underneath zIndex 1, incoming revealed by the clip) — zero ghosting, zero double-exposure",
+      "outside the wipe window exactly one photo fills the frame (no blank, no cover-plate)",
+      "frs3 composition: numbered spec-rail LEFT 38%, big contained fixed-size render RIGHT 62%, ~2cm gap, bronze accent",
+      "ONE smoother: Lenis 1.1.13 lerp 0.1 -> gsap.ticker -> ScrollTrigger.update, lagSmoothing(0); render(prog) pure fn; pin/pinSpacing/scrub:true",
+      "wipe holds ~hold of the beat then travels on the gentle glide ease (0.45,0.05,0.2,1), not the snappy air",
+      "transform / opacity / clip-path only — no WebGL, no mask-composite, no mix-blend / backdrop over the scrub, no video.currentTime",
+      "the bronze edge-line is kept ONLY for dir=lr; the td/bu variants ship edge:false (the edge travelled opposite the wipe = a bug)",
+      "reduced-motion / <=820px collapse to a static readable stack (no Lenis, no pin, no scrub)"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "_path": "library/components/slice-clip/",
+    "_variantsResolved": [
+      {
+        "id": "slice-bottom-up",
+        "status": "official",
+        "extends": "slice-clip"
+      },
+      {
+        "id": "slice-top-down",
+        "status": "official",
+        "extends": "slice-clip"
+      }
+    ]
+  },
   "slicer-reveal": {
     "id": "slicer-reveal",
     "name": "Slicer reveal (SAISEI horizontal slice)",

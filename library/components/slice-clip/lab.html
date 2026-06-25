@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · slice-clip · frs7 slice L→R · clip-reveal (BASE, 1:1)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · slice-clip   ·   BASE = frs7-slice-lr-clip (owner-approved)
+================================================================================
+  SOURCE: apps/quadro/public/slide-lab/frs7-slice-lr-clip.html
+
+  frs3 COMPOSITION: a numbered spec-RAIL on the LEFT (38%), a BIG contained
+  fixed-size RENDER on the RIGHT (62%), ~2cm gap (small rail right-pad), bronze
+  accent. Each beat the render SWAPS via a CLEAN CLIP-PATH WIPE.
+
+  THE SLICE MECHANISM (zero ghosting, zero blank, one crisp edge):
+  • TWO stacked <img> layers, BOTH always opacity:1 (never semi-transparent ->
+    no double-exposure). The swap is a CLIP, not an opacity fade.
+  • The OUTGOING photo sits underneath (zIndex 1), fully visible.
+  • The INCOMING photo sits on top (zIndex 2) and is revealed by a clip-path
+    inset that opens LEFT->RIGHT: inset(0 100% 0 0) (hidden) -> inset(0 0 0 0)
+    (full). During the wipe: LEFT of the edge = new photo, RIGHT = old photo,
+    meeting at ONE hard vertical edge. No transparency, no tear.
+  • Outside the short wipe window exactly one photo fills the frame.
+  • The edge carries a thin bronze light-line (the base KEEPS its edge).
+
+  ENGINE LAWS (verbatim from frs3 v2): Lenis 1.1.13 lerp 0.1 smoothWheel ->
+  gsap.ticker -> ScrollTrigger.update; lagSmoothing(0); render(prog) pure fn from
+  onUpdate + once at init; pin/pinSpacing/scrub:true. GSAP 3.12.5. Fraunces +
+  Inter; bronze #c08a4e; transform / opacity / clip-path ONLY; NO WebGL; NO
+  mask-composite; NO mix-blend / backdrop over the scrubbed surface; NO
+  video.currentTime; reduced-motion / <=820px -> static stack; zero em-dashes.
+
+  RENDERS: renders/*.webp resolve via the renders symlink -> apps/quadro/public/proto.
+
+  STACK: vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + Lenis 1.1.13
+  (cdnjs / jsdelivr). No build. Canonical drop-in:
+  award-re-plugin/library/components/slice-clip/
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- eager-preload the first paired render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-34-portrait.webp">
+
+<!-- the canonical component skin -->
+<link rel="stylesheet" href="component.css">
+
+<!-- GSAP + Lenis -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+</head>
+<body>
+
+  <section class="intro gate">
+    <span class="intro__kicker">QUADRO HOUSE</span>
+    <h1 class="intro__title">Шість поглядів на <em>один дім</em>.</h1>
+    <span class="scrollcue">Гортайте</span>
+  </section>
+
+  <div class="pin gate" id="pin">
+    <div class="stage" id="stage">
+      <div class="rail">
+        <div class="railInner">
+          <span class="rail__eyebrow">Маршрут</span>
+          <div class="list" id="list"><div class="marker" id="marker"></div></div>
+        </div>
+      </div>
+      <div class="text">
+        <div class="media" id="media">
+          <div class="layer" id="layerA"><img id="imgA" src="renders/day-34-portrait.webp" alt="QUADRO" fetchpriority="high" decoding="async"><div class="grade"></div></div>
+          <div class="layer" id="layerB"><img id="imgB" src="renders/night-front.webp" alt="QUADRO" decoding="async"><div class="grade"></div></div>
+          <div class="edge" id="edge"></div>
+          <span class="tag" id="tag">Ранок</span>
+        </div>
+      </div>
+      <div class="count" id="count">01 / 06</div>
+      <div class="progress"><div class="progress__fill" id="progFill"></div></div>
+      <div class="hint" id="hint">01 / 06</div>
+    </div>
+  </div>
+
+  <section class="outro gate">
+    <h2 class="outro__title">Один дім, у якому <em>хочеться лишитися</em>.</h2>
+  </section>
+
+  <div class="static" id="static"></div>
+
+<!-- the canonical component engine -->
+<script src="component.js"></script>
+
+<script>
+  /* the frs7 slice scene — LEFT->RIGHT clip wipe, the base KEEPS its bronze edge.
+     Drives the existing frs7 DOM ids; renders resolve via the renders symlink. */
+  window.__SC = SliceClip.init({ dir:'lr' });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe ──
+     asserts: gsap + ScrollTrigger + Lenis present; the spec-rail deck built
+     (>=2 rows); the slice is wired (a pinned ScrollTrigger live, OR the
+     reduced-motion / narrow static branch); both media layers stay opaque
+     (clip-only swap, never an opacity fade); no em-dash in visible copy; zero
+     real console.error. -->
+<script>(function(){
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:820px)').matches;
+    var hasGsap = !!window.gsap;
+    var hasST   = !!window.ScrollTrigger;
+    var hasLenis= !!window.Lenis;
+
+    var isStatic = !!(window.__SC && window.__SC.static);
+    var rows = document.querySelectorAll('#list .row').length;
+    var staticShots = document.querySelectorAll('.static__shot').length;
+
+    // both media layers OPAQUE (the swap is a CLIP, never an opacity fade)
+    var layers = document.querySelectorAll('#media .layer');
+    var layersOpaque = layers.length===2 && Array.prototype.every.call(layers, function(l){
+      return parseFloat(getComputedStyle(l).opacity) === 1;
+    });
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var pinned  = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().some(function(s){return s.pin;}):false;
+    var sliceWired = isStatic ? (staticShots>=2) : (pinned || stCount>0);
+    var deckBuilt = isStatic ? (staticShots>=2) : (rows>=2 && layersOpaque);
+    var noEmDash = document.body.innerText.indexOf('—') === -1;
+
+    return {
+      ok: errs===0 && hasGsap && hasST && hasLenis && deckBuilt && sliceWired && noEmDash,
+      rows:rows, staticShots:staticShots, layersOpaque:layersOpaque,
+      pinned:pinned, isStatic:isStatic, reduced:!!(reduce||narrow), errs:errs
+    };
+  }
+
+  var tries=0;
+  function ready(){
+    var p = gather();
+    window.__SC_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
+})();</script>
+
+</body>
+</html>
