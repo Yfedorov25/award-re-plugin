@@ -1,0 +1,159 @@
+/* ============================================================
+   puzzle-text / converge-faithful — variant.css   (variant skin delta)
+   Re-extracted BYTE-FAITHFULLY from
+     apps/quadro/public/slide-lab/tx1-converge-faithful.html
+
+   The DELTA over the tx5 paired base skin:
+     • a LIGHT field (pale calm paper) instead of the cream paired column,
+     • a faint quiet structure grid on the field (the ref's paper grid),
+     • NO paired render slab — instead a small, OPTIONAL, quiet companion
+       render in the lower-right that resolves only AFTER the statement seats,
+     • a tiny scroll hint.
+
+   SHARED with the base (intentionally identical contract): words ALWAYS OPAQUE
+   (opacity NEVER touched) => zero layout shift; assembly is transform + COLOR
+   (gray -> ink) only; the browser lays the paragraph out and we animate each
+   word FROM an offset back to transform:none; farther-from-home = lighter +
+   larger; ONE air ease; transform / color ONLY; no mix-blend / backdrop over
+   the scrub. Fraunces (serif, the star) + Inter (sans meta).
+   ============================================================ */
+:root{
+  /* -- LIGHT field palette (faithful Zera light read: pale, calm) -- */
+  --field:#eceae3;            /* the pale calm field the words scatter across */
+  --field-hi:#f3f1ea;         /* faint lift at centre, where the statement seats */
+  --ink:#161614;             /* seated ink */
+  --ghost-near:#b7b4ab;      /* near-home gray */
+  --ghost-far:#d6d4cc;       /* far-from-home gray (lighter) */
+  --hair:rgba(22,22,20,.07);  /* faint structure lines on the field */
+  --eyebrow:#9a7b46;          /* restrained warm bronze, eyebrows only */
+  --soft:#6f6c64;            /* secondary text */
+
+  --serif:"Fraunces",Georgia,serif;
+  --sans:"Inter",system-ui,sans-serif;
+
+  /* air ease, also registered as a CustomEase in JS */
+  --air:cubic-bezier(0.25,0.74,0.22,0.99);
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ background:var(--field); color:var(--ink); }
+body{
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+::selection{ background:var(--eyebrow); color:#fff; }
+
+/* intro + outro breathing room so the pin has somewhere to start / release */
+.pad{
+  min-height:62vh;
+  display:flex; align-items:center;
+  padding:0 clamp(22px,5vw,84px);
+  position:relative;
+}
+.pad__eyebrow{
+  font-size:11px; letter-spacing:.34em; text-transform:uppercase;
+  color:var(--eyebrow); margin-bottom:18px;
+}
+.pad p{
+  max-width:36ch; line-height:1.6; color:var(--soft);
+  font-size:clamp(13px,1.2vw,15px);
+}
+.pad h2{
+  font-family:var(--serif); font-weight:300;
+  font-size:clamp(30px,5vw,64px); line-height:1.04; letter-spacing:-.012em;
+  margin-bottom:18px; color:var(--ink);
+}
+.pad--out{ min-height:80vh; align-items:flex-start; padding-top:14vh; }
+
+/* ----------------------- the puzzle-text section ----------------------- */
+.puzzle{ position:relative; }
+.stage{
+  position:relative;
+  height:100vh; width:100%;
+  overflow:hidden;                /* scattered words may reach near the field edges */
+  display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(120% 90% at 50% 48%, var(--field-hi) 0%, var(--field) 64%);
+}
+/* faint structure lines on the field, like the ref's quiet paper grid */
+.stage::before{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.6;
+  background-image:
+    linear-gradient(var(--hair) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hair) 1px, transparent 1px);
+  background-size: 14.2857% 25%, 14.2857% 25%;
+  -webkit-mask-image:radial-gradient(120% 90% at 50% 48%, #000 0%, transparent 72%);
+          mask-image:radial-gradient(120% 90% at 50% 48%, #000 0%, transparent 72%);
+}
+
+.eyebrow{
+  position:absolute; top:clamp(28px,6vh,64px); left:50%; transform:translateX(-50%);
+  z-index:6; font-size:11px; letter-spacing:.36em; text-transform:uppercase;
+  color:var(--eyebrow); pointer-events:none;
+}
+
+/* the statement -- the STAR. Browser lays it out; words tween FROM an offset to none.
+   stagewidth caps the measure so the line-breaks are stable and read as a paragraph. */
+.statement{
+  position:relative; z-index:4;
+  width:min(86vw, 17.5em);          /* em-based measure -> stable line-breaks at rest */
+  margin:0 auto; text-align:center;
+  font-family:var(--serif); font-weight:300;
+  font-size:clamp(30px,5.4vw,72px); line-height:1.12; letter-spacing:-.012em;
+  color:var(--ink);
+}
+/* word + space spans (gaps never collapse while words translate) */
+.pt-word{
+  display:inline-block;
+  will-change:transform,color;
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+.pt-space{ display:inline-block; white-space:pre; }
+
+/* the QUIET paired render -- a whisper in the lower-right, never behind the text */
+.companion{
+  position:absolute; right:clamp(20px,4vw,70px); bottom:clamp(20px,5vh,64px);
+  z-index:3; width:clamp(150px, 19vw, 282px); aspect-ratio:16 / 10;
+  border-radius:3px; overflow:hidden;
+  box-shadow:0 24px 60px -34px rgba(22,22,20,.42);
+  opacity:0;                         /* fades in only after the statement seats */
+  will-change:opacity;
+  pointer-events:none;
+}
+.companion img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  filter:saturate(.72) brightness(1.02) contrast(.96);   /* quiet, desaturated */
+}
+.companion figcaption{
+  position:absolute; left:10px; bottom:8px; z-index:2;
+  font-family:var(--sans); font-weight:500;
+  font-size:9.5px; letter-spacing:.26em; text-transform:uppercase;
+  color:#f3f1ea; text-shadow:0 1px 8px rgba(0,0,0,.45);
+}
+.companion::after{   /* tiny legibility scrim for the caption only */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(0deg, rgba(20,16,12,.34) 0%, transparent 38%);
+}
+
+/* tiny scroll hint */
+.hint{
+  position:absolute; left:50%; bottom:24px; transform:translateX(-50%);
+  z-index:7; font-size:10px; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--soft); opacity:.7; pointer-events:none;
+  animation:hintBob 2.4s var(--air) infinite;
+}
+@keyframes hintBob{ 0%,100%{ transform:translate(-50%,0);} 50%{ transform:translate(-50%,5px);} }
+
+/* -- reduced-motion / narrow: static readable paragraph, no scatter, no pin -- */
+@media (max-width:720px){
+  .stage{ height:auto; padding:20vh 0 16vh; }
+  .statement{ width:min(90vw, 16em); }
+  .companion{ position:static; margin:34px auto 0; width:min(70vw, 240px); opacity:1; }
+  .hint{ display:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  .hint{ animation:none; display:none; }
+}

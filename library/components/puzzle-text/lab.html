@@ -1,434 +1,169 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LAB · puzzle-text · scatter ↔ assemble (1:1)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · puzzle-text · tx5 paired-with-render (1:1)</title>
 
 <!--
-=================================================================================
-  TECHNIQUE LAB · puzzle-text   (STRICT 1:1 of rec5-puzzle-text, f_001..f_027)
-=================================================================================
+================================================================================
+  TECHNIQUE LAB · puzzle-text   ·   BASE = tx5-paired-with-render (9/10)
+================================================================================
+  SOURCE: apps/quadro/public/slide-lab/tx5-paired-with-render.html
 
-  WHAT THE SOURCE ACTUALLY SHOWS  — and NOTHING else
-  --------------------------------------------------
-  ONE paragraph of words. Nothing more. No card, no portrait, no image
-  finale, no "next section", no full-screen reveal. Those were INVENTED by
-  the previous build and broke verification. They are GONE.
+  SAISEI-style PAIRED composition. A big contained QUADRO render slab on the
+  LEFT (~45vw, portrait-cropped, fully painted, quietly present). The confident
+  STATEMENT in the facing CREAM AIR COLUMN on the RIGHT.
 
-  • SCATTERED state (f_001): every word DISPLACED from its resting flow box
-    on BOTH axes (wide diagonal spread). Some words are skewed / italic-drift,
-    some rotated a little, sized differently. ALL words are GRAY but ALWAYS
-    OPAQUE (opacity stays 1 — never 0).
-  • FARTHER-FROM-HOME  =  LIGHTER gray  +  LARGER.
-  • CONVERGE (f_005→f_013→f_021): on scroll each word slides home on ONE
-    shared CustomEase, color darkening gray → ink as it seats. ZERO layout
-    shift at rest (the final line breaks were the browser's all along).
-  • SETTLED (f_027): clean ink paragraph, perfectly wrapped.
-  • REVERSE: scrubbing back up re-scatters the words (it is a scrub, not a
-    one-shot). The pin holds the section for the assemble duration.
+  THE MOVE (Zera portfolio6, technique #4, faithful):
+  the statement's WORDS start GRAY and displaced across BOTH axes — a wide
+  diagonal scatter, some rotated / skewed / sized larger, CONTAINED to the text
+  side so the debris never crosses onto the render slab — and on a pinned,
+  scrubbed (reversible) ScrollTrigger they CONVERGE to their natural flow
+  positions on ONE air ease, color darkening gray -> ink as each word seats.
+  The render slab counter-drifts to rest as the last word seats; a hairline rule
+  + ordinal draw on.
 
-  HARD RULES (from the frames)
-  ----------------------------
-  • Font is SANS grotesque (Helvetica Neue / system-ui), NOT serif.
-  • Words NEVER go invisible. opacity stays 1; assembly is COLOR-only gray→ink
-    plus transform (x/y/scale/rotate/skew). No opacityFrom:0.
-  • ONE CustomEase everywhere ('0.16,1,0.3,1', hard expo-out).
-  • Copy is Ukrainian, Fedoriv voice (no em-dash, no people figures).
-  • No WebGL. transform / opacity / color only. prefers-reduced-motion branch.
+  HARD LAWS
+  ---------
+  • Words are ALWAYS OPAQUE. opacity stays 1; assembly is transform + COLOR only
+    (gray -> ink). Zero fade => ZERO layout shift (browser lays it out once; we
+    animate each word FROM an offset back to transform:none).
+  • Display = Fraunces serif. Body/eyebrow = Inter.
+  • ONE air ease everywhere: cubic-bezier(0.25,0.74,0.22,0.99).
+  • GPU transform / opacity / color only. No WebGL, no video.currentTime, no
+    mix-blend / backdrop-filter over the scrubbed surface.
+  • Pinned scroll-scrub, fully reversible (scroll back re-scatters).
+  • prefers-reduced-motion OR narrow => static readable paragraph (render stacks
+    above), no scatter, no pin.
 
-  STACK: vanilla HTML + GSAP 3.12.5 + ScrollTrigger + CustomEase (cdnjs),
-         optional Lenis (unpkg, guarded). No build step.
+  RENDER: renders/terrace-04.webp (a sunset terrace over the water) — resolves
+  via the renders symlink -> apps/quadro/public/proto. Paired companion; the
+  TEXT is the star.
+
+  STACK: vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase (cdnjs). No build.
   Canonical drop-in: award-re-plugin/library/components/puzzle-text/
-=================================================================================
+================================================================================
 -->
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,340;9..144,0,420;9..144,1,360&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- eager-preload the ONE paired render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/terrace-04.webp">
+
+<!-- the canonical component skin -->
+<link rel="stylesheet" href="component.css">
+
+<!-- GSAP -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
-<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 
 <style>
-/* ============================================================
-   GRADE / TOKENS  — sage paper + ink (matches the recording)
-   ============================================================ */
-:root{
-  --paper:#E3EAE0;            /* sage paper ground (from frames) */
-  --ink:#161614;             /* settled word color  [inkColor] */
-  --ghost:#B9B7AF;           /* nearest scattered tint */
-  --ghost-far:#D4D2CA;       /* farthest scattered tint (lighter) */
-  --mx:64px;
-
-  /* the ONE ease, hard expo-out, mirrored for any CSS motion */
-  --air:cubic-bezier(0.16,1,0.3,1);
-
-  /* SANS grotesque — the source font (NOT serif) */
-  --sans:"Helvetica Neue","Helvetica","Arial",system-ui,-apple-system,sans-serif;
-}
-
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:auto}
-body{
-  background:var(--paper);
-  color:var(--ink);
-  font-family:var(--sans);
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
-  overflow-x:hidden;
-}
-
-/* faint paper weave (NORMAL blend, light surface — never over a scrub) */
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><path d='M0 40L40 0' stroke='%23000' stroke-width='0.5' opacity='0.06'/></svg>");
-}
-
-/* ============================================================
-   CHROME — fixed header (NOT over a scrubbed surface)
-   ============================================================ */
-header{
-  position:fixed;top:0;left:0;right:0;z-index:50;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:22px var(--mx);
-}
-.brand{font-weight:800;letter-spacing:.16em;font-size:1.05rem}
-.nav{display:flex;gap:12px;align-items:center;font-size:.66rem;letter-spacing:.1em}
-.pill{padding:8px 14px;border-radius:20px;background:#0000;border:1px solid #0002}
-.pill.dark{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-
-.marker{
-  position:fixed;left:var(--mx);top:86px;z-index:40;
-  font-size:10px;letter-spacing:.16em;opacity:.45;
-  font-variant-numeric:tabular-nums;text-transform:uppercase;
-}
-
-/* ============================================================
-   STAGE / SECTIONS
-   ============================================================ */
-main{position:relative;z-index:1}
-.frame{
-  position:relative;width:100vw;min-height:100vh;
-  display:grid;place-items:center;padding:0 var(--mx);
-}
-.intro{text-align:center;max-width:42ch}
-.intro .eyebrow{
-  font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;
-  opacity:.55;margin-bottom:1.4rem;
-}
-.intro h1{
-  font-family:var(--sans);font-weight:700;
-  font-size:clamp(2.4rem,6.4vw,4.6rem);line-height:1.0;letter-spacing:-.02em;
-  margin-bottom:1.6rem;
-}
-.intro p{font-size:.96rem;line-height:1.7;opacity:.7;max-width:46ch;margin-inline:auto}
-.scrollcue{
-  position:absolute;bottom:42px;left:50%;transform:translateX(-50%);
-  font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;opacity:.5;
-}
-
-/* --- THE PINNED STAGE: only the paragraph lives here --- */
-#stage{
-  position:relative;width:100vw;height:100vh;overflow:hidden;
-  display:grid;place-items:center;
-}
-#stageInner{
-  position:relative;width:100%;height:100%;
-  display:grid;place-items:center;
-}
-
-/* ============================================================
-   COMPONENT CSS  (canonical, inlined copy of component.css)
-   Words are inline-block in NORMAL FLOW. We animate ONLY
-   transform + color. opacity STAYS 1 (source rule).
-   ============================================================ */
-.puzzle-text{
-  position:relative;z-index:2;
-  font-family:var(--sans);
-  font-weight:500;
-  font-size:clamp(1.7rem,4.4vw,3.0rem);
-  line-height:1.22;
-  letter-spacing:-.018em;
-  text-align:center;
-  max-width:22ch;
-  margin-inline:auto;
-  color:var(--ink);
-  text-wrap:balance;            /* nice breaks WITHOUT justify space-stretch */
-  will-change:transform;
-}
-.puzzle-text .pt-word{
-  display:inline-block;          /* the slot lives in normal flow */
-  white-space:pre;
-  backface-visibility:hidden;
-  transform-origin:50% 60%;
-  /* opacity intentionally NEVER touched: words are always opaque */
-}
-.puzzle-text .pt-space{display:inline-block;white-space:pre}
-@media (prefers-reduced-motion:reduce){
-  .puzzle-text .pt-word{transform:none!important;color:var(--ink)!important}
-}
-
-/* ============================================================
-   MOBILE — margins shrink
-   ============================================================ */
-@media (max-width:760px){
-  :root{--mx:20px}
-  .marker{top:74px}
-  .puzzle-text{font-size:clamp(1.5rem,7vw,2.2rem);max-width:18ch}
-}
+  /* set the real paired render onto the slab image (component.css leaves the url
+     to the author so the technique is render-agnostic) */
+  #slabImg{ background-image:url("renders/terrace-04.webp"); }
 </style>
 </head>
 <body>
 
-<!-- ===================== CHROME ===================== -->
-<header>
-  <div class="brand">NAHIRNA</div>
-  <div class="nav">
-    <span class="pill">PUZZLE-TEXT</span>
-    <span class="pill dark">МЕНЮ</span>
-  </div>
-</header>
-<span class="marker" id="marker">§ scatter ↔ assemble</span>
+  <header class="rail">
+    <span class="eyebrow">QUADRO · technique #4 · puzzle-text · paired with render</span>
+  </header>
 
-<main>
-
-  <!-- ===================== §00 INTRO ===================== -->
-  <section class="frame" id="intro">
-    <div class="intro">
-      <div class="eyebrow">Прийом · слова сходяться в думку</div>
-      <h1>Слова стають<br>на свої місця.</h1>
-      <p>Кожне слово починає розсіяним і сірим, а на скролі сходиться туди, де
-         браузер уже все порахував. Жодного зсуву верстки. Колір темнішає від
-         сірого до чорнила, поки текст не стане одним абзацом. Скрольте назад,
-         і слова знову розлітаються.</p>
+  <section class="stage" id="stage">
+    <div class="slab" id="slab">
+      <div class="slab__img" id="slabImg"></div>
+      <span class="slab__cap">візуалізація</span>
     </div>
-    <div class="scrollcue">скрольте ↓</div>
-  </section>
 
-  <!-- ===================== §01 THE PINNED STAGE ===================== -->
-  <section class="frame" id="stageWrap">
-    <div id="stage">
-      <div id="stageInner">
-
-        <!-- the paragraph — words split by JS, NORMAL FLOW, opacity always 1 -->
-        <p class="puzzle-text"
-           id="liveTarget"
-           data-puzzle-text="manual">
-           Ми будуємо не стіни. Ми будуємо ранок, у якому хочеться прокинутись на власному березі річки.
-        </p>
-
-      </div>
+    <div class="col">
+      <p class="col__eyebrow" id="eyebrow">Власний берег</p>
+      <h2 class="statement" id="statement">Деякі ранки ти зустрічаєш над водою, а не серед стін. Тераса твоя ще до того, як прокинеться місто, і тиша лишається стільки, скільки ти захочеш.</h2>
+      <div class="col__rule" id="rule"></div>
+      <div class="col__ord" id="ord">QUADRO · 01</div>
     </div>
   </section>
 
-  <!-- runway so the pin has scroll distance after it releases -->
-  <section class="frame" id="after">
-    <div class="intro">
-      <div class="eyebrow">Далі</div>
-      <h1>Тут починається<br>ваша історія.</h1>
-      <p>Скрольте вгору, щоб побачити, як абзац знову розсипається на слова.</p>
-    </div>
-  </section>
-</main>
+  <footer class="rail bottom">
+    <span class="eyebrow">прокрутіть назад · слова знову розлітаються</span>
+  </footer>
 
-<!-- ============================================================
-     COMPONENT JS  (canonical, inlined copy of component.js)
-     ============================================================ -->
+<!-- the canonical component engine -->
+<script src="component.js"></script>
+
 <script>
-(function (global) {
-  'use strict';
+  gsap.registerPlugin(ScrollTrigger);
+  if (window.CustomEase) gsap.registerPlugin(CustomEase);
 
-  /* ---- the ONE ease: hard expo-out. registered as CustomEase if available ---- */
-  var EASE = 'power4.out';
-  if (global.CustomEase) {
-    global.CustomEase.create('puzzleAir', '0.16,1,0.3,1'); // hard expo-out settle
-    EASE = 'puzzleAir';
-  }
+  /* the WHOLE tx5 paired scene — drives the existing DOM (tx5 ids). */
+  window.__PT = PuzzleText.mount({
+    renderSrc: 'renders/terrace-04.webp',
+    renderSide: 'left'
+  });
 
-  var DEFAULTS = {
-    /* scatter geometry — WIDE DIAGONAL on BOTH axes (source f_001) */
-    maxX:300, maxY:170, rotate:9, skew:7,
-    /* farther-from-home = LIGHTER + LARGER */
-    scaleNear:1.0, scaleFar:1.42,
-    ghostNear:'#B9B7AF', ghostFar:'#D4D2CA', inkColor:'#161614',
-    /* choreography (positions on the assembly timeline) */
-    duration:0.9, stagger:0.045, ease:EASE, seed:7
-  };
+  /* refresh after fonts/layout settle so word boxes measure at final metrics */
+  window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
+  var rT; window.addEventListener('resize', function(){
+    clearTimeout(rT); rT = setTimeout(function(){ ScrollTrigger.refresh(); }, 200);
+  });
+</script>
 
-  /* deterministic PRNG (mulberry32) — stable + reshuffleable scatter */
-  function rng(seed){
-    return function(){
-      seed|=0; seed=(seed+0x6D2B79F5)|0;
-      var t=Math.imul(seed^(seed>>>15),1|seed);
-      t=(t+Math.imul(t^(t>>>7),61|t))^t;
-      return ((t^(t>>>14))>>>0)/4294967296;
+<!-- ── __LAB_OK__ acceptance probe ──
+     asserts: gsap + ScrollTrigger present; words split + ALL opaque (opacity
+     untouched, color-only assembly = zero layout shift); the converge is wired
+     (a pinned ScrollTrigger live, OR the reduced-motion / narrow static branch);
+     no opacity tween on any word; no em-dash in visible copy; zero real
+     console.error. -->
+<script>(function(){
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:880px)').matches;
+    var hasGsap = !!window.gsap;
+    var hasST   = !!window.ScrollTrigger;
+    var words   = document.querySelectorAll('#statement .w');
+    var wordCount = words.length;
+
+    // every word span OPAQUE at rest (color-only assembly, zero layout shift)
+    var allOpaque = wordCount>0 && Array.prototype.every.call(words, function(w){
+      return parseFloat(getComputedStyle(w).opacity) === 1;
+    });
+    // never an opacity tween on a word (would be a fade / pop smell)
+    var opacityTweened = window.gsap && Array.prototype.some.call(words, function(w){
+      return gsap.getTweensOf(w).some(function(tw){ return 'opacity' in (tw.vars||{}); });
+    });
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var pinned  = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().some(function(s){return s.pin;}):false;
+    var isStatic = !!(window.__PT && window.__PT.static);
+    var convergeWired = isStatic || pinned || stCount>0;   // pinned scrub OR static branch
+    var noEmDash = document.body.innerText.indexOf('—') === -1;
+
+    return {
+      ok: errs===0 && hasGsap && hasST && wordCount>=6 && allOpaque &&
+          !opacityTweened && convergeWired && noEmDash,
+      words:wordCount, allOpaque:allOpaque, opacityTweened:opacityTweened,
+      pinned:pinned, isStatic:isStatic, reduced:!!(reduce||narrow), errs:errs
     };
   }
 
-  /* split text -> word spans + space spans (gaps never collapse). */
-  function splitWords(el){
-    var text=el.textContent.replace(/\s+/g,' ').trim();
-    var parts=text.split(' '); el.textContent=''; var words=[];
-    parts.forEach(function(w,i){
-      var span=document.createElement('span');
-      span.className='pt-word'; span.textContent=w;
-      el.appendChild(span); words.push(span);
-      if(i<parts.length-1){
-        var sp=document.createElement('span');
-        sp.className='pt-space'; sp.textContent=' '; el.appendChild(sp);
-      }
-    });
-    return words;
-  }
-
-  /* per-word scattered "from" state — coherent, seeded.
-     KEY: opacity is NEVER set (words always opaque).
-     WIDE DIAGONAL spread on both axes + slight rotate/skew.
-     farther from home (by euclidean distance) = lighter + larger. */
-  function scatterVars(opt,rand){
-    var dx=(rand()*2-1);
-    var dy=(rand()*2-1);
-    var x=dx*opt.maxX;
-    var y=dy*opt.maxY;
-    /* normalized euclidean distance from home (0..1) */
-    var dist=Math.min(1, Math.sqrt(dx*dx+dy*dy)/Math.SQRT2);
-    var scale=opt.scaleNear+(opt.scaleFar-opt.scaleNear)*dist;
-    var color=lerpHex(opt.ghostNear,opt.ghostFar,dist);
-    var v={ x:x, y:y, scale:scale, color:color };
-    if(opt.rotate) v.rotation=(rand()*2-1)*opt.rotate;
-    if(opt.skew)   v.skewX=(rand()*2-1)*opt.skew;   /* italic-drift feel */
-    return v;
-  }
-
-  function hex(c){c=c.replace('#','');return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];}
-  function lerpHex(a,b,t){
-    var A=hex(a),B=hex(b),r=function(i){return Math.round(A[i]+(B[i]-A[i])*t);};
-    return 'rgb('+r(0)+','+r(1)+','+r(2)+')';
-  }
-
-  /* Build the ASSEMBLY onto a provided timeline (so a pinned, scrubbed
-     ScrollTrigger can drive scatter<->assemble reversibly). Returns {words}. */
-  function buildAssembly(el, tl, position, userOpt){
-    var opt=Object.assign({},DEFAULTS,userOpt||{}); var gsap=global.gsap;
-    var reduce=global.matchMedia&&
-      global.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    var words=splitWords(el);
-    el.style.color=opt.inkColor;
-
-    if(reduce){
-      gsap.set(words,{x:0,y:0,scale:1,skewX:0,rotation:0,color:opt.inkColor});
-      return {words:words};
-    }
-
-    var rand=rng(opt.seed*9301+49297);
-    var froms=words.map(function(){return scatterVars(opt,rand);});
-
-    /* set the scattered start state (opacity untouched = stays 1) */
-    words.forEach(function(w,i){ gsap.set(w,froms[i]); });
-
-    /* each word tweens home; staggered in reading order so the paragraph reads
-       as ONE gesture. position maps the assembly onto SCROLL distance, so
-       scrubbing back re-scatters every word (reverse). */
-    var to={x:0,y:0,scale:1,rotation:0,skewX:0,color:opt.inkColor,
-            ease:opt.ease,duration:opt.duration};
-    words.forEach(function(w,i){
-      tl.to(w, to, (position||0) + i*opt.stagger);
-    });
-
-    return {words:words};
-  }
-
-  global.PuzzleText={
-    buildAssembly:buildAssembly, splitWords:splitWords,
-    DEFAULTS:DEFAULTS, EASE:EASE
-  };
-})(window);
-</script>
-
-<!-- ============================================================
-     LAB BOOT — ease · Lenis guard · the one pinned scrub · refresh
-     ============================================================ -->
-<script>
-gsap.registerPlugin(ScrollTrigger);
-if (window.CustomEase) CustomEase.create('air','0.16,1,0.3,1');
-var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ---------- Lenis smooth scroll, GUARDED ---------- */
-var lenis=null;
-if (window.Lenis && !reduce){
-  lenis=new Lenis({lerp:0.1,smoothWheel:true});
-  lenis.on('scroll',ScrollTrigger.update);
-  gsap.ticker.add(function(t){lenis.raf(t*1000);});
-  gsap.ticker.lagSmoothing(0);
-}
-
-/* ---------- the ONE move: scatter <-> assemble, pinned + scrubbed ---------- */
-function buildScene(){
-  var stageWrap=document.getElementById('stageWrap');
-  var liveTarget=document.getElementById('liveTarget');
-
-  if(reduce){
-    /* reduced motion: just show the settled paragraph, no pin, no motion. */
-    var trivial=gsap.timeline();
-    PuzzleText.buildAssembly(liveTarget, trivial, 0, {seed:7});
-    return;
-  }
-
-  /* pin distance for the assemble (in viewport-heights). The whole timeline
-     IS the assemble; scrub keeps it reversible (scroll back = re-scatter). */
-  var PIN = 1.8;
-
-  var tl=gsap.timeline({
-    scrollTrigger:{
-      trigger:stageWrap,
-      start:'top top',
-      end:'+='+(PIN*100)+'%',
-      scrub:0.6,
-      pin:true,
-      pinSpacing:true,
-      invalidateOnRefresh:true
-    }
-  });
-
-  /* PHASE: scatter (set at t=0) -> assemble (tweens home), color gray->ink,
-     opacity always 1. This is the entire technique. Nothing follows. */
-  PuzzleText.buildAssembly(liveTarget, tl, 0, {
-    seed:7, maxX:300, maxY:170, rotate:9, skew:7,
-    scaleNear:1.0, scaleFar:1.42,
-    ghostNear:'#B9B7AF', ghostFar:'#D4D2CA', inkColor:'#161614',
-    duration:0.9, stagger:0.045
-  });
-}
-
-/* ---------- kickoff AFTER load so fonts/layout are final ----------
-   (measure resting boxes after web fonts load, else words snap to wrong
-   slots; then ScrollTrigger.refresh()) */
-window.addEventListener('load',function(){
-  buildScene();
-  ScrollTrigger.refresh();   // D16: refresh after pin heights settle
-});
-
-/* recompute on resize / orientation flip */
-var rT;window.addEventListener('resize',function(){
-  clearTimeout(rT);rT=setTimeout(function(){ScrollTrigger.refresh();},200);
-});
-</script>
-<!-- ── __LAB_OK__ acceptance probe (re-added by library migration; additive) ── -->
-<script>(function(){
-  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
-  window.__LAB_ERRORS=function(){return errs;};
   var tries=0;
   function ready(){
-    try{
-      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
-      var hasGsap = !!window.gsap;
-      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
-      var ok = errs===0 && hasGsap && (reduce || stCount>0 || document.body.querySelector('[class*="static"],[class*="reduced"]'));
-      window.__LAB_OK__ = !!ok;
-      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
-    }catch(e){ window.__LAB_OK__=false; }
+    var p = gather();
+    window.__PT_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
   }
-  setTimeout(ready,700);
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
 })();</script>
 
 </body>

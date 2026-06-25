@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · puzzle-text / word-blocks-depth — tx3 (depth Z-converge text assemble)</title>
+
+<!--
+================================================================================
+VARIANT: puzzle-text / word-blocks-depth   ·   tx3 word-blocks-depth (9/10)
+================================================================================
+SOURCE: apps/quadro/public/slide-lab/tx3-word-blocks-depth.html
+
+The DEPTH / 3D-feeling reading of the SAME scatter↔assemble beat. Whole
+WORD-BLOCKS of ONE statement WAIT scattered in real CSS Z-DEPTH (near words
+LARGE + heavily blurred + dim, far words small + distant + lighter gray) then
+FLY HOME, converging onto the flat readable Fraunces plane (z=0, blur 0),
+de-blurring and darkening gray -> ink as each seats. A 3D-feeling cinematic
+text assemble. Dark cinematic field, a quiet QUADRO aerial render behind.
+
+Words are ALWAYS OPAQUE (opacity NEVER touched) => zero layout shift; assembly
+is transform + filter(blur) + COLOR only. ONE air ease. Pinned + scrubbed =>
+reversible. Only transform(3d) / opacity-untouched / filter / color animate. No
+WebGL, no mix-blend / backdrop over the scrub, no video.currentTime.
+reduced-motion / narrow => static readable statement (the .fallback block), no
+scatter / pin / scrub.
+
+Entry: PuzzleTextWordBlocksDepth.init(opts)  (variant.js — base-importing; loads
+../../component.js so the word-split + always-opaque + air-ease + reduced-motion
+contract is the SHARED base contract, not a fork).
+
+__LAB_OK__ probe asserts: base (PuzzleText) + variant (PuzzleTextWordBlocksDepth)
+present, the statement split into >=6 opaque word spans, a pinned ScrollTrigger
+live (or reduced-motion / narrow static), no opacity tween on a word, no em-dash,
+zero real console.error.
+================================================================================
+-->
+
+<!-- Fonts: Fraunces (serif display, the star) + Inter (sans meta) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- eager-preload the ONE quiet background render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/aerial.webp">
+
+<!-- the variant skin (cinematic depth field) -->
+<link rel="stylesheet" href="variant.css">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+</head>
+<body>
+
+<div class="lead"><span>scroll</span></div>
+
+<!-- =================== PINNED STAGE =================== -->
+<section class="stage" id="stage">
+
+  <!-- quiet QUADRO render behind -->
+  <div class="bg"><img id="bg" alt="" decoding="async" aria-hidden="true"></div>
+
+  <!-- eyebrow (emerges at seat) -->
+  <div class="eyebrow" id="eyebrow">QUADRO · Дім над водою</div>
+
+  <!-- THE STATEMENT — split + animated from depth by JS. Zero em-dashes. -->
+  <h1 class="statement" id="statement">Спочатку це чотири стіни. Потім тиша, <em>власний берег</em> і ранкова кава над водою.</h1>
+
+  <!-- signature (emerges at seat) -->
+  <p class="sig" id="sig"><b>QUADRO.</b> Чотири квартири на власному березі.</p>
+
+  <!-- progress cue -->
+  <div class="cue"><i id="cueFill"></i></div>
+</section>
+
+<div class="tail"><span>далі</span></div>
+
+<!-- =================== STATIC FALLBACK =================== -->
+<div class="fallback">
+  <div class="fbg"><img id="fbbg" alt="" decoding="async" aria-hidden="true"></div>
+  <div class="feye">QUADRO · Дім над водою</div>
+  <h1 class="fhead">Спочатку це чотири стіни. Потім тиша, <em>власний берег</em> і ранкова кава над водою.</h1>
+  <p class="fsig"><b>QUADRO.</b> Чотири квартири на власному березі.</p>
+</div>
+
+<!-- the SHARED base engine + the word-blocks-depth engine (base-importing, NOT a fork) -->
+<script src="../../component.js"></script>
+<script src="variant.js"></script>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+
+  /* real QUADRO render via the renders symlink -> apps/quadro/public/proto */
+  window.__PT_DEPTH = window.PuzzleTextWordBlocksDepth && PuzzleTextWordBlocksDepth.init({
+    statement:'#statement', bg:'#bg', eyebrow:'#eyebrow', sig:'#sig',
+    cueFill:'#cueFill', fbBg:'#fbbg',
+    src:'renders/aerial.webp',
+    assembleEnd:0.86, zNear:520, zFar:-1080, blurMax:18,
+    spreadX:0.42, spreadY:0.40, pinVh:3.0, scrub:0.8
+  });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (variant) ── -->
+<script>(function(){
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:760px)').matches;
+    var hasBase = !!window.PuzzleText;                  // ../../component.js
+    var hasVariant = !!window.PuzzleTextWordBlocksDepth; // variant.js
+    var words = document.querySelectorAll('#statement .pt-word');
+    var wordCount = words.length;
+
+    // every word span OPAQUE at rest (color-only assembly, zero layout shift)
+    var allOpaque = wordCount>0 && Array.prototype.every.call(words, function(w){
+      return parseFloat(getComputedStyle(w).opacity) === 1;
+    });
+    var opacityTweened = window.gsap && Array.prototype.some.call(words, function(w){
+      return gsap.getTweensOf(w).some(function(tw){ return 'opacity' in (tw.vars||{}); });
+    });
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var pinned  = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().some(function(s){return s.pin;}):false;
+    var motionWired = (reduce||narrow) || pinned || stCount>0;
+    var noEmDash = document.body.innerText.indexOf('—') === -1;
+
+    return {
+      ok: errs===0 && hasBase && hasVariant && wordCount>=6 && allOpaque &&
+          !opacityTweened && motionWired && noEmDash,
+      hasBase:hasBase, hasVariant:hasVariant, words:wordCount, allOpaque:allOpaque,
+      opacityTweened:opacityTweened, pinned:pinned, reduced:!!(reduce||narrow), errs:errs
+    };
+  }
+
+  var tries=0;
+  function ready(){
+    var p = gather();
+    window.__PT_DEPTH_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
+})();</script>
+</body>
+</html>

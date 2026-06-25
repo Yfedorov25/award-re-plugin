@@ -1,21 +1,21 @@
 ---
 id: puzzle-text
-name: "Word scatter ↔ assemble"
+name: "Word scatter ↔ assemble, paired with render"
 level: 1
 kind: component
 status: official
 entry:
-  call: "PuzzleText.mount({ stage, paragraph, assembleOpts?, pinVH? }) | PuzzleText.buildAssembly(el, tl, position, opts)"
+  call: "PuzzleText.mount(opts)  // opts all optional — defaults drive the tx5 DOM ids; or pass { paragraph, renderSrc, renderSide, ... } / author the tx5 DOM and call with no args"
   module: iife
-  returns: "controller"
+  returns: "{ timeline, words, destroy }  (or { static:true, words, destroy } in the reduced-motion / narrow branch)"
 meaning:
-  what: "Gray, displaced WORDS (always opaque) of one paragraph scattered across the viewport on BOTH axes (wide diagonal, some rotated/skewed, sized differently). On scroll they converge to the final readable paragraph on one expo-out ease, darkening gray→ink as each word seats (zero layout shift at rest). Scroll-scrubbed and reversible — scrolling back re-scatters."
-  when: "A single statement line that should read as composed in front of you, settling into place as you scroll."
-  lands: "Words drift home into a sentence = the thought assembling itself."
-  not_when: "Body copy, lists, conversion CTAs, or any text that must be instantly legible."
+  what: "A SAISEI-style paired beat. A big contained QUADRO render slab (~45vw) sits on one side; the confident statement lives in the facing CREAM AIR COLUMN. The statement's WORDS (always opaque) start GRAY and displaced on BOTH axes (wide diagonal, some rotated/skewed/larger), CONTAINED to the column so the gray debris never crosses onto the render slab. On a pinned, scrubbed (reversible) ScrollTrigger they CONVERGE to their natural flow positions on ONE air ease, darkening gray->ink as each word seats (zero layout shift). The render slab counter-drifts to rest exactly as the last word seats; a hairline rule + ordinal draw on."
+  when: "A single statement that should read as composed in front of you, paired with one big quiet render — the photo breathes while the thought assembles itself beside it."
+  lands: "The render is the steady companion; the words drift home into a sentence = the thought assembling itself, the pair choreographed together."
+  not_when: "Body copy, lists, conversion CTAs, or any text that must be instantly legible. Also not when there is no paired render to compose against — use the converge-faithful variant for pure text."
 source:
-  grammar: "Vide Infra / editorial cover titles — word-level scatter↔assemble"
-  recording: "rec5-puzzle-text"
+  grammar: "Vide Infra / Zera portfolio6 — word-level scatter↔assemble, paired Saisei composition"
+  recording: "apps/quadro/public/slide-lab/tx5-paired-with-render.html"
   registry_ref: ["T-118"]
 stack: "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase"
 webgl: false
@@ -27,132 +27,139 @@ page_beat: [proof, statement]
 combines_with: [parallax-depth, reveal]
 anti_combos: [letter-level-split]
 gated_by: [R_anti_combos, R_perf_limits, R_timing_layers]
-variants: [default]
+variants: [paired-with-render, word-blocks-depth, converge-faithful]
 params_ref: tokens.json
 files: [component.js, component.css, lab.html, tokens.json]
 acceptance:
   - "split is WORD-level only (never letters — D12 letters-ban)"
-  - "words NEVER go invisible — opacity stays 1; assembly is color-only gray→ink"
-  - "farther-from-home word = lighter gray + larger"
-  - "scatter is wide diagonal on BOTH axes + slight rotate/skew"
-  - "font is SANS grotesque (NOT serif)"
-  - "scatter ↔ assemble ONLY — no card, no image, no finale, no next section"
-  - "scrub mode re-scatters the words on reverse-scroll"
-  - "reduced-motion gives the settled paragraph, no scatter, no pin"
+  - "words always opaque (zero layout shift) — opacity untouched; assembly is transform + color only"
+  - "gray->ink as each word seats; farther-from-home = lighter gray + larger"
+  - "smooth eased converge no jerk/pop — one air ease 0.25,0.74,0.22,0.99 everywhere"
+  - "scrub-reversible (re-scatters on scroll back)"
+  - "GPU transform/opacity/color only (no WebGL, no video.currentTime, no mix-blend/backdrop over the scrub)"
+  - "paired with a big contained render (~45vw) on one side; scatter CONTAINED to the column (debris never crosses onto the slab)"
+  - "display is Fraunces serif (statement); body/eyebrow is Inter"
+  - "reduced-motion/narrow collapse to a static readable paragraph (render stacks above), no scatter, no pin"
 verify: "lab.html#__LAB_OK__"
 ---
 
-# puzzle-text — word scatter ↔ assemble
+# puzzle-text — word scatter ↔ assemble, paired with render
 
-> Gray, **displaced words that are always opaque** sit scattered across the
-> viewport (wide diagonal, both axes, some rotated/skewed, sized differently),
-> then converge into the paragraph the browser already laid out (zero reflow),
-> darkening **gray → ink** as each word seats. Word-level (never per-character).
-> Scroll-scrubbed and reversible: scroll back and the words re-scatter.
-> Source recording: `rec5-puzzle-text` (frames f_001..f_027).
+> **BASE = tx5-paired-with-render** (owner-approved, 9/10). A SAISEI-style
+> **paired** beat: a big contained QUADRO render slab (~45vw) on one side, the
+> confident **statement** in the facing **cream air column**. The statement's
+> **words are always opaque** and start scattered **gray** on **both axes** (wide
+> diagonal, some rotated/skewed/larger), **contained to the column** so the gray
+> debris never crosses onto the render slab. On a pinned, scrubbed (reversible)
+> ScrollTrigger they **converge** to the paragraph the browser already laid out
+> (zero reflow), darkening **gray → ink** as each word seats. The render slab
+> **counter-drifts** to rest exactly as the last word seats; a hairline rule +
+> ordinal draw on. Word-level (never per-character). Scroll back and the words
+> re-scatter.
+> Source recording: `apps/quadro/public/slide-lab/tx5-paired-with-render.html`.
 
-## STRICT 1:1 — what the recording shows, and nothing else
-The recording is **one paragraph of words doing scatter ↔ assemble**. There is
-**no portrait card, no bottom-up card, no full-screen image finale, no "next
-section" reveal.** A previous build invented those phases and failed
-verification. They are **not part of this technique** and must not be added.
+## STRICT 1:1 — what tx5 shows, and nothing else
+The base is **one statement converging from a contained gray scatter into ink,
+paired with one big quiet render.** There is **no card stack, no portrait
+take-over, no full-screen finale, no "next section" reveal.** Those are not part
+of this technique and must not be added.
 
 ## The move (what the eye sees)
-1. **Scattered** (f_001) — words sit displaced from their flow boxes on **both
-   axes** (wide diagonal spread), some **rotated**, some **skewed/italic-drifted**,
-   sized differently. They are **always opaque** (`opacity:1`, never 0) — only
-   **gray** and offset. **Farther-from-home = lighter gray + larger.**
-2. **Converge** (f_005 → f_013 → f_021) — every word slides home on **one** hard
-   expo-out ease; color darkens **gray → ink** as it seats. **Zero layout shift.**
-3. **Settled** (f_027) — clean ink paragraph, perfectly wrapped.
+1. **Paired & scattered** — the render slab is fully painted on one side; the
+   statement's words sit displaced from their flow boxes on **both axes** (wide
+   diagonal), some **rotated**, some **skewed/italic-drifted**, sized larger. They
+   are **always opaque** (`opacity:1`) — only **gray** and offset. **Farther-from-home
+   = lighter gray + larger + more rotate/skew.** The horizontal spread is **biased
+   inward** (toward the column interior) so debris never crosses onto the slab.
+2. **Converge** — every word slides home on **one** air ease in reading order; color
+   darkens **gray → ink** as it seats. **Zero layout shift.** The render slab
+   **counter-drifts** (a tiny GPU translate+scale, ~14px) to rest as the last word
+   seats — the photo "breathes" while the statement assembles.
+3. **Settled** — clean ink paragraph beside the steady render; the hairline rule +
+   ordinal draw on.
 4. **Reverse** — scrubbing back up re-scatters the words. The section is **pinned**
    for the assemble duration; that is the whole timeline.
 
 ## Hard rules
-- **Font is SANS grotesque** (Helvetica Neue / system-ui), **NOT serif.**
-- **Words never go invisible.** `opacity` stays `1`; assembly is **color-only**
-  (gray → ink) plus transform (x/y/scale/rotate/skew). There is **no `opacityFrom`.**
-- **Farther-from-home = lighter + larger.** Tint and scale are a function of the
-  word's normalized euclidean distance from home.
-- **Scatter is wide diagonal on BOTH axes** + slight `rotate`/`skewX`.
-- **Ease = hard expo-out `0.16,1,0.3,1`.** One ease everywhere (falls back to
-  `power4.out`).
+- **Display = Fraunces serif**, big; **body/eyebrow = Inter.**
+- **Words never go invisible.** `opacity` stays `1`; assembly is **transform + color
+  only** (gray → ink). There is **no `opacityFrom`** → **zero layout shift.**
+- **Farther-from-home = lighter + larger + more rotate/skew** (a function of each
+  word's normalized euclidean distance from home).
+- **Scatter is wide diagonal on BOTH axes, CONTAINED to the column** (the `xBias`
+  push keeps the gray debris off the render slab; mirror it for `renderSide:'right'`).
+- **ONE air ease everywhere:** `cubic-bezier(0.25,0.74,0.22,0.99)` (registered as a
+  CustomEase `air`; falls back to `power4.out`).
 - Ukrainian Fedoriv copy (no em-dash, no people figures).
-- **No WebGL.** transform / color only. `prefers-reduced-motion` = settled
-  paragraph, no scatter, no pin.
+- **No WebGL.** transform / color only. No `video.currentTime`, no mix-blend /
+  backdrop-filter over the scrubbed surface. `prefers-reduced-motion` OR narrow =
+  static readable paragraph (render stacks above), no scatter, no pin.
 
 ## The key idea that makes it look expensive
 **Never animate layout.** The paragraph is laid out normally; we only ever apply
 `transform`/`color` relative to each word's resting box, so wrapping/kerning/line
-breaks are pixel-perfect at the end → zero reflow. The scatter is a **seeded
-PRNG** (mulberry32), stable across reloads and tweakable via `seed`. One ease +
-reading-order stagger = the words read as **one gesture**, not confetti.
+breaks are pixel-perfect at the end → zero reflow. The scatter is a **seeded PRNG**
+(mulberry32), stable across reloads and tweakable via `seed`. One air ease +
+reading-order stagger = the words read as **one gesture**, not confetti. Pairing
+the render as a **steady companion that counter-drifts to rest as the words seat**
+makes the two halves feel **choreographed together** — the text is the star, the
+render the quiet anchor.
 
 ## Easing & timing
-- Ease `CustomEase 'puzzleAir' = 0.16,1,0.3,1`; fallback `power4.out`.
-- Per-word duration ~0.9s; stagger ~0.045s in DOM/reading order.
-- **One pinned, scrubbed timeline** holds the whole move; the stagger is a
-  **position param**, so the assemble maps onto scroll distance and reverses 1:1.
-  `scrub:0.6`, pin length ~1.8vh.
+- Ease `CustomEase 'air' = 0.25,0.74,0.22,0.99`; fallback `power4.out`.
+- Per-word duration ~0.85s; stagger ~0.04s in reading order.
+- **One pinned, scrubbed timeline** (`end:'+=190%'`, `scrub:0.6`, `pin:true`) holds
+  the whole move; the stagger is a **position param**, so the assemble maps onto
+  scroll distance and reverses 1:1.
 
-## DOM structure
+## DOM structure (tx5)
 ```
-#stage (pinned)
-  └ #stageInner
-     └ <p class="puzzle-text" data-puzzle-text> …copy… </p>   → JS word-splits
+.stage (pinned)            grid-template-columns: 45vw 1fr
+  ├ .slab #slab            the contained render slab (~45vw), counter-drifts
+  │  ├ .slab__img #slabImg the painted render (JS sets the url)
+  │  └ .slab__cap          "візуалізація"
+  └ .col                   the cream air column
+     ├ .col__eyebrow #eyebrow   draws in as the words finish
+     ├ .statement #statement    → JS word-splits into <span class="w"> + <span class="sp">
+     ├ .col__rule #rule         hairline rule, draws on
+     └ .col__ord  #ord          ordinal, fades in
 ```
-Words become `<span class="pt-word">` + `<span class="pt-space">` so gaps never
-collapse mid-translate. No-JS / SSR shows the finished readable paragraph.
+Words become `<span class="w">` + `<span class="sp">` so gaps never collapse
+mid-translate. No-JS / SSR shows the finished readable paragraph beside the render.
 
-## Core CSS / GSAP
-```css
-.pt-word{ display:inline-block; white-space:pre; }   /* opacity NEVER touched */
-```
-```js
-// scatter (set) -> assemble: color-only gray→ink, opacity stays 1
-// farther = lighter + larger; both axes + slight rotate/skew
-words.forEach((w,i)=>{ gsap.set(w, fromVars[i]);     // {x,y,scale,rotation,skewX,color}
-  tl.to(w,{x:0,y:0,scale:1,rotation:0,skewX:0,color:ink,ease}, i*stagger); });
-```
-
-## Entry points
-- `PuzzleText.mount({ stage, paragraph, assembleOpts?, pinVH? })` — pins the stage
-  and scrubs the reversible scatter↔assemble move; returns `{ timeline, destroy }`.
-- `PuzzleText.buildAssembly(el, tl, position, opts)` — append just the gray→ink
-  assembly onto your own pinned/scrubbed timeline.
+## Entry point (the truth on disk)
+- `PuzzleText.mount(opts)` — pins the stage and scrubs the reversible
+  scatter↔assemble move of the whole paired scene; returns `{ timeline, words,
+  destroy }` (or `{ static:true, words, destroy }` in the reduced-motion / narrow
+  branch). `opts` are **all optional**: with no args it drives the existing tx5 DOM
+  ids (`#stage #statement #slab #slabImg #eyebrow #rule #ord`); pass
+  `{ paragraph, renderSrc, renderSide, ghostNear, ghostFar, inkColor, maxX, maxY,
+  rotate, skew, scaleFar, xBias, xSpread, duration, stagger, seed, scrub, pinPct,
+  ease }` to override.
 
 ## Gotchas
 - **Measure resting boxes AFTER fonts load.** Init in `load` / after preloader and
   call `ScrollTrigger.refresh()`, or words snap to wrong slots on font swap.
 - **Word-level only.** Per-character reads as a scramble and kills legibility (D12).
 - **Never set opacity on words.** Gray displacement IS the scattered state.
-- **Do not add a card / image / full-screen finale.** Not in the recording.
-- Use `text-wrap:balance` (not `text-align:justify`) for nice breaks.
+- **Keep the scatter contained** (the `xBias`) so the gray debris stays off the
+  render slab — the two halves must read as a legible pair.
+- **Do not add a card / portrait / full-screen finale.** Not in the recording.
 
-## Reusable params (init opts)
-`maxX`, `maxY`, `rotate`, `skew`, `scaleNear`, `scaleFar`, `ghostNear`,
-`ghostFar`, `inkColor`, `duration`, `stagger`, `ease`, `seed` (assembly) ·
-`pinVH`, `assembleOpts` (mount).
-
-## Usage
-```html
-<link rel="stylesheet" href="component.css">
-<script src="gsap.min.js"></script><script src="ScrollTrigger.min.js"></script>
-<script src="CustomEase.min.js"></script>
-<script src="component.js"></script>
-
-<section id="stage">
-  <p class="puzzle-text">Ми будуємо не стіни. Ми будуємо ранок…</p>
-</section>
-<script>
-  PuzzleText.mount({
-    stage: document.querySelector('#stage'),
-    paragraph: document.querySelector('.puzzle-text')
-  });
-</script>
-```
+## Variants
+- **paired-with-render (base)** — this file. The tx5 Saisei paired beat: contained
+  render slab + cream column, contained gray scatter, render counter-drift.
+- **word-blocks-depth** (`variants/word-blocks-depth/`) — from tx3. Whole word-blocks
+  fly home from **real Z-depth** (near large + blurred, far small) converging into the
+  flat readable paragraph — a 3D-feeling cinematic text assemble on a dark cinematic
+  field, a quiet render behind. Ships as a base-importing `variant.js`.
+- **converge-faithful** (`variants/converge-faithful/`) — from tx1. The faithful Zera
+  read: gray words scattered wide on **both axes** converge to the readable paragraph
+  on one air ease, gray→ink, on a **light** field, **no paired render** — pure text.
+  Ships as a base-importing `variant.js`.
 
 ## Files
-- `lab.html` — self-contained 1:1 demo (scatter↔assemble only, reduced-motion
-  fallback). Mirror of `NAHIRNA-METHOD/labs/puzzle-text.html`.
+- `lab.html` — self-contained tx5 demo (paired render + contained scatter↔assemble,
+  reduced-motion / narrow fallback, `__LAB_OK__` probe).
 - `component.css` / `component.js` — drop-in canonical copies.
+- `tokens.json` — the knob contract.

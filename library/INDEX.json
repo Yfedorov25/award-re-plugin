@@ -423,24 +423,24 @@
   },
   "puzzle-text": {
     "id": "puzzle-text",
-    "name": "Word scatter ↔ assemble",
+    "name": "Word scatter ↔ assemble, paired with render",
     "level": 1,
     "kind": "component",
     "status": "official",
     "entry": {
-      "call": "PuzzleText.mount({ stage, paragraph, assembleOpts?, pinVH? }) | PuzzleText.buildAssembly(el, tl, position, opts)",
+      "call": "PuzzleText.mount(opts)  // opts all optional — defaults drive the tx5 DOM ids; or pass { paragraph, renderSrc, renderSide, ... } / author the tx5 DOM and call with no args",
       "module": "iife",
-      "returns": "controller"
+      "returns": "{ timeline, words, destroy }  (or { static:true, words, destroy } in the reduced-motion / narrow branch)"
     },
     "meaning": {
-      "what": "Gray, displaced WORDS (always opaque) of one paragraph scattered across the viewport on BOTH axes (wide diagonal, some rotated/skewed, sized differently). On scroll they converge to the final readable paragraph on one expo-out ease, darkening gray→ink as each word seats (zero layout shift at rest). Scroll-scrubbed and reversible — scrolling back re-scatters.",
-      "when": "A single statement line that should read as composed in front of you, settling into place as you scroll.",
-      "lands": "Words drift home into a sentence = the thought assembling itself.",
-      "not_when": "Body copy, lists, conversion CTAs, or any text that must be instantly legible."
+      "what": "A SAISEI-style paired beat. A big contained QUADRO render slab (~45vw) sits on one side; the confident statement lives in the facing CREAM AIR COLUMN. The statement's WORDS (always opaque) start GRAY and displaced on BOTH axes (wide diagonal, some rotated/skewed/larger), CONTAINED to the column so the gray debris never crosses onto the render slab. On a pinned, scrubbed (reversible) ScrollTrigger they CONVERGE to their natural flow positions on ONE air ease, darkening gray->ink as each word seats (zero layout shift). The render slab counter-drifts to rest exactly as the last word seats; a hairline rule + ordinal draw on.",
+      "when": "A single statement that should read as composed in front of you, paired with one big quiet render — the photo breathes while the thought assembles itself beside it.",
+      "lands": "The render is the steady companion; the words drift home into a sentence = the thought assembling itself, the pair choreographed together.",
+      "not_when": "Body copy, lists, conversion CTAs, or any text that must be instantly legible. Also not when there is no paired render to compose against — use the converge-faithful variant for pure text."
     },
     "source": {
-      "grammar": "Vide Infra / editorial cover titles — word-level scatter↔assemble",
-      "recording": "rec5-puzzle-text",
+      "grammar": "Vide Infra / Zera portfolio6 — word-level scatter↔assemble, paired Saisei composition",
+      "recording": "apps/quadro/public/slide-lab/tx5-paired-with-render.html",
       "registry_ref": [
         "T-118"
       ]
@@ -474,7 +474,9 @@
       "R_timing_layers"
     ],
     "variants": [
-      "default"
+      "paired-with-render",
+      "word-blocks-depth",
+      "converge-faithful"
     ],
     "params_ref": "tokens.json",
     "files": [
@@ -485,17 +487,29 @@
     ],
     "acceptance": [
       "split is WORD-level only (never letters — D12 letters-ban)",
-      "words NEVER go invisible — opacity stays 1; assembly is color-only gray→ink",
-      "farther-from-home word = lighter gray + larger",
-      "scatter is wide diagonal on BOTH axes + slight rotate/skew",
-      "font is SANS grotesque (NOT serif)",
-      "scatter ↔ assemble ONLY — no card, no image, no finale, no next section",
-      "scrub mode re-scatters the words on reverse-scroll",
-      "reduced-motion gives the settled paragraph, no scatter, no pin"
+      "words always opaque (zero layout shift) — opacity untouched; assembly is transform + color only",
+      "gray->ink as each word seats; farther-from-home = lighter gray + larger",
+      "smooth eased converge no jerk/pop — one air ease 0.25,0.74,0.22,0.99 everywhere",
+      "scrub-reversible (re-scatters on scroll back)",
+      "GPU transform/opacity/color only (no WebGL, no video.currentTime, no mix-blend/backdrop over the scrub)",
+      "paired with a big contained render (~45vw) on one side; scatter CONTAINED to the column (debris never crosses onto the slab)",
+      "display is Fraunces serif (statement); body/eyebrow is Inter",
+      "reduced-motion/narrow collapse to a static readable paragraph (render stacks above), no scatter, no pin"
     ],
     "verify": "lab.html#__LAB_OK__",
     "_path": "library/components/puzzle-text/",
-    "_variantsResolved": []
+    "_variantsResolved": [
+      {
+        "id": "converge-faithful",
+        "status": "official",
+        "extends": "puzzle-text"
+      },
+      {
+        "id": "word-blocks-depth",
+        "status": "official",
+        "extends": "puzzle-text"
+      }
+    ]
   },
   "slicer-reveal": {
     "id": "slicer-reveal",

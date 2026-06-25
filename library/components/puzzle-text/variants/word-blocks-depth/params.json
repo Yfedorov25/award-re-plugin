@@ -1,0 +1,36 @@
+{
+  "$extends": "puzzle-text",
+  "$variant": "word-blocks-depth",
+  "note": "Knob DIFF over the base puzzle-text (tx5 paired contained-scatter converge). The base owns the word-level split, the always-opaque words (zero layout shift), the transform+color assembly, the ONE air ease and the reduced-motion/narrow static fallback. This variant's engine (variant.js) ADDS a real Z-depth assemble: whole word-blocks WAIT scattered in CSS perspective Z-depth (near large+blurred+dim, far small) and CONVERGE home from depth, de-blurring gray->ink. Byte-faithful to tx3-word-blocks-depth.html.",
+  "params": {
+    "assembleEnd": 0.86,
+    "pinVh": 3.0,
+    "scrub": 0.8,
+    "seed": 73
+  },
+  "engine": {
+    "model": "depth-converge (Z-fly-in for text) — whole word-blocks wait in real CSS perspective Z-depth then converge to z=0, blur=0, gray->ink",
+    "zNear": 520,
+    "zFar": -1080,
+    "blurMax": 18,
+    "translateZ_range": "[zFar -1080 .. zNear 520]   (per-word zNorm 0..1, deterministic mulberry32 seed)",
+    "depthSplit": "zNorm>0.5 => near half (toward viewer, +z, big+blurred+dim); zNorm<=0.5 => far half (away, -z, small+distant+lighter)",
+    "blur": "BLUR_MAX * (0.30 + 0.70 * (near? zNorm : nearness*0.7))   near words = blurrier DOF, capped <=20px",
+    "scatterOffset": "both-axis radial: x = cos(ang)*rad*innerWidth*spreadX, y = sin(ang)*rad*innerHeight*spreadY  (rad 0.35..1.0)",
+    "spreadX": 0.42,
+    "spreadY": 0.40,
+    "tilt": { "rotation": "(rnd*2-1)*6  in-plane", "rotationX": "(rnd*2-1)*9  3D card tilt", "rotationY": "(rnd*2-1)*9" },
+    "cascade": "reading-order startAt = (i/words.length) * (assembleEnd*0.34)  (gentle top->bottom cascade)",
+    "colorRamp": "lerp #2A2622 -> (near #615B52 / far #7E776B) on the way in; seats to --type-ink (or --bronze for .pt-em accent words)",
+    "stagePerspective": "1250px @ 50% 48%, transformPerspective 1250 per word",
+    "cue": "thin filling progress line (scaleX 0->1), NOT a count-up"
+  },
+  "skin": {
+    "field": "dark cinematic near-black (radial 1A1612 -> 0E0C0B -> 080706)",
+    "serif": "Fraunces, Times New Roman, Georgia, serif",
+    "bronze": "#B5895A (the <em> accent ink)",
+    "typeInk": "#F3ECE0 (seated warm ink on the dark field)",
+    "render": "quiet QUADRO aerial behind, opacity 0.16, desaturated — never the star",
+    "fallback": "static .fallback statement block for reduced-motion / narrow"
+  }
+}
