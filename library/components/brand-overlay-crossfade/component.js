@@ -13,8 +13,8 @@
 
    CONFIG-DRIVEN:
      BrandOverlayCrossfade.init(target, {
-       wash: 0.7,           // starting wash opacity (the brand-tint strength)
-       fadeImage: true,     // also autoAlpha the image 0->1 (else just clear the wash)
+       wash: 1.0,           // starting wash opacity (1 = full brand cover -> tints to 0)
+       fadeImage: false,    // default: photo is solid under the wash; the wash tints to 0 ON it (zero see-through, any background). true = also crossfade the image 0->1 (only on a brand-coloured backdrop)
        lerp: 0.1, pinFactor: 0.6, manageLenis: true
      })
    Markup: .boc-stage > .boc-img(img) + .boc-wash(brand-colour layer). The wash
@@ -31,8 +31,8 @@
   function init(target, options) {
     options = options || {};
     var opt = {
-      wash: options.wash != null ? options.wash : 0.7,
-      fadeImage: options.fadeImage !== false,
+      wash: options.wash != null ? options.wash : 1.0,
+      fadeImage: options.fadeImage === true,
       lerp: options.lerp != null ? options.lerp : 0.1,
       pinFactor: options.pinFactor != null ? options.pinFactor : 0.6,
       manageLenis: options.manageLenis !== false
@@ -73,7 +73,7 @@
 
     // PURE render(prog): 0 = washed-in (image 0/wash full); 1 = resolved (image 1/wash 0)
     function render(prog) {
-      if (img && opt.fadeImage) img.style.opacity = Math.min(1, prog * 1.4).toFixed(3); // image arrives a touch faster
+      if (img && opt.fadeImage) img.style.opacity = Math.min(1, prog * 2).toFixed(3); // image fully in by mid-scroll (wash still ~0.5) so the composite never thins below opaque
       if (wash) wash.style.opacity = (opt.wash * (1 - prog)).toFixed(3);
     }
 
