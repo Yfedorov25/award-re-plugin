@@ -115,17 +115,29 @@
         // top inset 100% -> 0% as p 0 -> 1  (seam travels UP)
         renders[i].style.clipPath = 'inset(' + ((1 - p) * 100).toFixed(2) + '% 0 0 0)';
       }
-      // LEFT column, COUPLED to the SAME scroll: heading lines reveal early, inset rises
+      // LEFT column, COUPLED to the SAME scroll. RULE (user): the left text must be
+      // FULLY revealed by the time the FIRST render finishes opening. The first
+      // render handoff completes at prog = stripEnd/handoffs (its segEnd). So the
+      // whole left reveal (all heading lines + the inset) lands a hair BEFORE that.
+      var firstHandoffEnd = stripEnd / handoffs;     // when render 1 is fully open
+      var leftDone = firstHandoffEnd * 0.92;         // finish the text just before it
+      var nLines = lines.length || 1;
       lines.forEach(function (l, k) {
         var i = l.querySelector('.ds-line__i'); if (!i) return;
-        var ls = 0.04 + k * 0.10, le = ls + 0.26;          // staggered per line
+        // stagger the lines across [0 .. leftDone], each line ~60% of the slice so
+        // they overlap a touch; the LAST line still finishes by leftDone.
+        var slice = leftDone / nLines;
+        var ls = k * slice, le = ls + slice * 1.5;
+        if (le > leftDone) le = leftDone;
         var p = (prog - ls) / (le - ls); p = p < 0 ? 0 : p > 1 ? 1 : p;
         i.style.transform = 'translateY(' + ((1 - p) * 112).toFixed(2) + '%)';
       });
       if (inset) {
-        var p = (prog - 0.12) / 0.30; p = p < 0 ? 0 : p > 1 ? 1 : p;
+        // inset also lands by leftDone (starts after the first line is moving)
+        var p = (prog - sliceStart()) / (leftDone - sliceStart()); p = p < 0 ? 0 : p > 1 ? 1 : p;
         inset.style.transform = 'translateY(' + ((1 - p) * 118).toFixed(2) + '%)';
       }
+      function sliceStart() { return (leftDone / nLines) * 0.5; }
     }
 
     var trigger = ScrollTrigger.create({
