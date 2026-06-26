@@ -61,13 +61,22 @@
         word.style.webkitTextStroke = (options.strokePx != null ? options.strokePx : 1.6) + 'px currentColor';
         word.style.setProperty('-webkit-text-stroke-color', getComputedStyle(wrap).color || '#DCC5B7');
       }
-      // 2) fill the line (compose with fluid-type-sizing if present)
+      // 2) fill the line (compose with fluid-type-sizing if present).
+      // container = the WRAP itself (the clip box the word must fit INSIDE), NOT the
+      // parent section. fill slightly < 1 leaves room for the last glyph's right
+      // side-bearing + the em letter-spacing tail so the final letter is never
+      // clipped off the right edge (the clipped-off-last-letter bug). Re-fit on font
+      // load (the web font is wider than the fallback -> would overflow after swap).
+      var fitOpts = {
+        container: options.container || wrap,
+        gutter: options.gutter != null ? options.gutter : 0,
+        fill: options.fillRatio != null ? options.fillRatio : 0.97
+      };
       if (FluidType && FluidType.fit) {
-        FluidType.fit(word, {
-          container: options.container || wrap.parentElement || wrap,
-          gutter: options.gutter != null ? options.gutter : 0,
-          fill: options.fillRatio != null ? options.fillRatio : 1
-        });
+        FluidType.fit(word, fitOpts);
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () { FluidType.fit(word, fitOpts); });
+        }
       }
       // 3) clipped-reveal init state
       if (doReveal && !reduced) { word.style.willChange = 'transform'; word.style.transform = 'translateY(110%)'; }
