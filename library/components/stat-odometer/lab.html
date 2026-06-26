@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · stat-odometer · Springs pinned stat-slider (4 mechanics/step) on OUR data</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · stat-odometer
+================================================================================
+  Springs' "3/9/10/16" pinned STAT-CARD slider — the most engineered module,
+  harvested from D_springs_walkthrough_video (S11). ONE pinned scroll steps through
+  N data points; on EACH step FOUR mechanics fire AT ONCE:
+    1. BG full-bleed photo swaps by VERTICAL SLIDE-UP.
+    2. CARD PHOTO (square tile) CROSSFADES.
+    3. NUMERAL changes via ODOMETER ROLL (column translates so the active number
+       sits in the window).
+    4. LABEL text SWAPS (crossfade, dips at mid).
+  Plus a progress bar + snap to each step. Each mechanic DIFFERENT = cinematic.
+
+  ASSET-SUBSTITUTION GATE (council): rebuilt on OUR data — QUADRO distances/POI
+  (Ukrainian labels), our renders in the bg + card tiles, our numbers. Proving the
+  engine re-fires on our content, not a trace of Springs'. Scroll to step through.
+
+  ENGINE LAWS (verbatim from slice-clip/dual-slicer): Lenis 1.1.13 -> gsap.ticker ->
+  ScrollTrigger.update; lagSmoothing(0); render(prog) pure; pin/scrub/snap; transform
+  + opacity only; NO mix-blend/backdrop over the scrubbed surface; NO WebGL;
+  reduced-motion / <=820px static. window.__LAB_OK__ set on init. renders -> proto.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --green:#16302a; --cream:#e9e2d2; --slate:#9fb0a6; --accent:#c9b79a;
+    --serif:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green);color:var(--cream);font-family:var(--body)}
+  .spacer{height:60vh;display:grid;place-items:center;color:var(--slate);font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+
+  .so-card{background:rgba(14,28,23,.55);padding:clamp(14px,1.2vw,20px);border:1px solid rgba(233,226,210,.14);
+    backdrop-filter:none}  /* note: card is NOT over the scrubbed surface region that moves; static panel */
+  /* the window height MUST equal the numeral height (one number tall) so the roll
+     shows exactly one number; using the same clamp as .so-num, not a body-em. */
+  .so-num-window{height:clamp(90px,11vw,150px);line-height:clamp(90px,11vw,150px)}
+  .so-num{font-family:var(--serif);font-weight:300;font-size:clamp(90px,11vw,150px);
+    line-height:clamp(90px,11vw,150px);height:clamp(90px,11vw,150px);color:var(--cream)}
+  .so-label{font-family:var(--body);font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--slate);margin-top:.4em;min-height:2.4em}
+  .so-progress{background:rgba(233,226,210,.16)}
+  .so-progress__fill{background:linear-gradient(90deg,var(--accent),#e9e2d2)}
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол вниз ↓</div>
+
+  <!-- pinned stat-slider. 4 steps = OUR QUADRO distances. Engine builds the layers. -->
+  <section class="so-stage" id="stat">
+    <div class="so-bg"></div>
+
+    <div class="so-card">
+      <div class="so-card__photo"></div>
+      <div class="so-num-window"><div class="so-num-col"></div></div>
+      <div class="so-label"></div>
+      <div class="so-progress"><div class="so-progress__fill"></div></div>
+    </div>
+
+    <!-- step data (markup-first): num / label / bg / card photo -->
+    <div class="so-step" data-num="3"  data-label="хвилини пішки до парку"        data-bg="renders/macro-roof.webp"   data-photo="renders/day-08.webp"     hidden></div>
+    <div class="so-step" data-num="7"  data-label="хвилини пішки до набережної"   data-bg="renders/aerial.webp"       data-photo="renders/terrace-03.webp" hidden></div>
+    <div class="so-step" data-num="12" data-label="хвилини авто до центру"        data-bg="renders/night-front.webp"  data-photo="renders/night.webp"      hidden></div>
+    <div class="so-step" data-num="20" data-label="хвилини авто до аеропорту"     data-bg="renders/day.webp"          data-photo="renders/scene18.webp"    hidden></div>
+  </section>
+
+  <div class="spacer">кінець секції</div>
+
+<script src="component.js"></script>
+<script>
+  StatOdometer.init('#stat', { lerp: 0.1, pinFactor: 1.2, snap: true });
+</script>
+</body>
+</html>
