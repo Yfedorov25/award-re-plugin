@@ -1612,6 +1612,7 @@
       "component.js",
       "component.css",
       "lab.html",
+      "lab-full.html",
       "tokens.json"
     ],
     "acceptance": [
@@ -1628,6 +1629,81 @@
     },
     "note": "|",
     "_path": "library/components/center-seam-split/",
+    "_variantsResolved": []
+  },
+  "content-stage-cascade": {
+    "id": "content-stage-cascade",
+    "name": "Content stage cascade (reveal a page's elements in a fixed depth order — header LAST)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "ContentStageCascade.create({ stages, gap })  // stages = ordered [{ el, kind:'fade'|'slide-x'|'draw-line'|'fn', dur, ease, from, stagger, fn }].",
+      "module": "iife",
+      "returns": "{ play(onDone), reset(), destroy }"
+    },
+    "meaning": {
+      "what": "Saisei's content-reveal choreographer — after a page opens, its elements appear in a FIXED depth order: background -> accent (awards) -> title -> meta -> header LAST, with a small stagger between groups. It does not invent the per-element animation; it ORCHESTRATES them (fade / slide-x / draw-line / a custom fn that delegates to another brick). The header arriving last and quietest is the rule: first the work, then the interface.",
+      "when": "Staging a hero or page after it opens (after a center-seam-split open, or on first load). Any time content should assemble in a deliberate order rather than all at once — the cascade that makes an arrival feel authored. The conductor that ties center-seam-split (open) + mask-up-title (title stage) + the meta + the chrome together.",
+      "lands": "The page doesn't pop in — it assembles: the photo settles, the award tabs slide in from the edge, the big title rises, the small labels fade into the corners, and only then, last and quietly, the header and its hairline draw across the top. It reads as choreography, and the late, soft header says 'the work first, the interface second'.",
+      "not_when": "A single element reveal (just animate it). A page that should appear instantly. When there is no depth order to honour (one thing on screen). It is an orchestrator — don't use it to animate one node."
+    },
+    "source": {
+      "grammar": "Saisei project open: bg(center-split) -> awards(slide-from-right) -> title(mask-up) -> eyebrow + corner meta(fade) -> header + toprule(draw) LAST, ~110ms between groups.",
+      "recording": "apps/quadro/.award-re/teardowns/D_saisei_video.md (S4; v3 f053-084, v2 f106-125)",
+      "registry_ref": [
+        "S4-content-cascade-saisei"
+      ]
+    },
+    "stack": "vanilla (GSAP optional — built-in rAF power3 fallback)",
+    "webgl": false,
+    "motion_props": [
+      "opacity",
+      "transform"
+    ],
+    "trigger": "triggered (play after a page open / on load)",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "hero",
+      "chapter",
+      "proof"
+    ],
+    "combines_with": [
+      "center-seam-split",
+      "mask-up-title",
+      "monogram-ring-loader",
+      "corner-frame-meta",
+      "vertical-awards-rail"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "stages run in order with a group gap; each stage names el + kind (fade / slide-x / draw-line / fn)",
+      "the LAST stage is the header/chrome and it is the quietest (object-before-interface rule)",
+      "a 'fn' stage delegates to another brick (e.g. mask-up-title.play()) for the title; a NodeList stage reveals per-item with its own stagger",
+      "opacity + transform(translateX) + scaleX(line) only; GPU; NO mix-blend / NO backdrop / NO WebGL",
+      "GSAP used if present, else built-in rAF; reduced-motion -> all shown; reset() re-hides; window.__LAB_OK__ on init",
+      "asset-substitution gate: OUR QUADRO hero staged bg->awards->title->meta->header, proven in the combo"
+    ],
+    "gate": {
+      "probe": "In lab-full (combo): after the dark open, the cascade reveals bg -> awards -> title(rises) -> meta -> header LAST. Triggered DOM reveal (no <img>, not scroll) — the wheel-scroll gate does not apply; verify the ORDER (header arrives last) and that the full transition stays smooth (fps>=50, jank<8%)."
+    },
+    "note": "|",
+    "_path": "library/components/content-stage-cascade/",
     "_variantsResolved": []
   },
   "conversion-quiet-gate": {
@@ -2240,6 +2316,156 @@
     ],
     "verify": "combo-lab.html#__LAB_OK__",
     "_path": "library/combos/manifesto-flip-draw/",
+    "_variantsResolved": []
+  },
+  "mask-up-title": {
+    "id": "mask-up-title",
+    "name": "Mask-up title (a large serif title rises from under a baseline mask, line by line)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "MaskUpTitle.create(target, opts)  // target = container with .mut-line wrappers (overflow:hidden), each holding the moving text as its first child. opts: { lineSelector, stagger, duration, ease, from }.",
+      "module": "iife",
+      "returns": "{ lines, play(o), set(p), reset(), destroy }"
+    },
+    "meaning": {
+      "what": "Saisei's big-title reveal — a large serif title RISES from under a baseline mask, line by line (overflow:hidden wrapper + the inner line translateY(110% -> 0)), staggered, expo.out. Not a fade — the words slide up from behind the line, as if printed onto a rising sheet. set(p) is a PURE scrub so it can also be scroll-driven.",
+      "when": "The big serif title of a hero or a project header — the reveal beat after the page opens. The display moment in a Saisei-grade content cascade (it is the 'title' stage). Anywhere a large headline should arrive with intent rather than a plain fade.",
+      "lands": "The headline doesn't fade in — it rises into place, each line climbing up from behind an invisible baseline, one after the other, settling with a soft expo tail. It reads as typeset, deliberate, expensive; the words feel printed onto a sheet sliding up into view.",
+      "not_when": "Small body text (the mask-rise is for display sizes). A title that should read instantly (the rise delays it). When there's no clean baseline to mask against (needs an overflow:hidden line box). Long multi-line paragraphs (use a per-line body reveal / scroll-clip-rise instead)."
+    },
+    "source": {
+      "grammar": "Saisei project hero: SHIZUKA then GARDENS rise from under the baseline, per line, line-height ~0.9, expo.out, ~100ms stagger.",
+      "recording": "apps/quadro/.award-re/teardowns/D_saisei_video.md (S5; v3 f066-073)",
+      "registry_ref": [
+        "S5-mask-up-title-saisei"
+      ]
+    },
+    "stack": "vanilla (GSAP optional — built-in rAF expo tween fallback)",
+    "webgl": false,
+    "motion_props": [
+      "transform"
+    ],
+    "trigger": "triggered (play) or scrubbed (set(p)) — not inherently scroll-bound",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "hero",
+      "chapter",
+      "proof"
+    ],
+    "combines_with": [
+      "content-stage-cascade",
+      "center-seam-split",
+      "fluid-type-sizing",
+      "bleeding-wordmark"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "each .mut-line is an overflow:hidden wrapper; its inner line starts translateY(from%) (below the mask) and rises to 0, staggered per line",
+      "play() runs the staggered rise (expo.out); set(p 0..1) is a PURE scrub of all lines; reset() returns to hidden",
+      "transform(translateY) + wrapper overflow:hidden only; GPU; NO mix-blend / NO backdrop / NO WebGL",
+      "GSAP drives a proxy writing the SAME style.transform channel as set() (play and set never conflict); built-in rAF fallback",
+      "reduced-motion -> instant shown; window.__LAB_OK__ on init",
+      "asset-substitution gate: OUR title (QUADRO / HOUSE) in the Saisei serif, proven in the combo"
+    ],
+    "gate": {
+      "probe": "In lab-full (combo): the QUADRO / HOUSE serif title rises from under the baseline mask, per line, after the page opens. DOM text transform (no <img>, triggered) — the wheel-scroll gate does not apply; verify the lines rise + settle smoothly (translateY(0) at rest) and the full transition stays smooth."
+    },
+    "note": "|",
+    "_path": "library/components/mask-up-title/",
+    "_variantsResolved": []
+  },
+  "monogram-ring-loader": {
+    "id": "monogram-ring-loader",
+    "name": "Monogram + ring loader (a brand glyph with a stroking ring + grid skeleton, held as a real network-wait gate)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "MonogramRingLoader.create(target, opts)  // target = element/selector or null (=body). opts: { glyph, html, bg, ink, ringR, grid, minHold, z }.",
+      "module": "iife",
+      "returns": "{ el, show(), ready(), hide(), whenDone(cb), destroy }"
+    },
+    "meaning": {
+      "what": "Saisei's interstitial loader — a centred brand monogram (木 / a logo glyph) fades in, a thin SVG ring strokes ON around it (stroke-dashoffset full->0), and the next page's grid skeleton (vertical column rules) strokes in top->down. The crux: it is NOT a timed flourish but a real NETWORK-WAIT GATE — it holds for a minimum time AND until the page signals ready(), then retracts. The interstitial that sits in the gap of a page transition.",
+      "when": "Between a page CLOSE and a page OPEN — the held moment of a transition where the next page is loading. Especially for real-estate sites with heavy renders: the monogram + grid-skeleton mask the load instead of a blank flash, and it resolves exactly when the content is ready, not on a guessed timer. Pair: center-seam-split close -> this loader -> center-seam-split open.",
+      "lands": "After the page seals shut in cream, a small brand mark settles in the centre and a thin ring quietly draws itself around it, while faint vertical rules sketch in the next page's columns — it reads as the site composing the next page, holding just long enough, then clearing the moment it is ready. Not a spinner, not a fixed pause — a branded, intentional wait.",
+      "not_when": "An instant transition with no load to mask (the hold buys nothing). A fade/dissolve transition (the loader wants a solid field to sit on). When you cannot signal ready() (then it is just a timer — acceptable but loses the point). Stacking it with another full-screen overlay."
+    },
+    "source": {
+      "grammar": "Saisei page transition: on the cream interstitial, 木 + a stroking ring + vertical grid rules of the next page draw in and hold across the real load (URL changes mid-hold, tab spinner active), then retract as the new page opens.",
+      "recording": "apps/quadro/.award-re/teardowns/D_saisei_video.md (S2 + S3; v2 f071-099, v3 f011-036)",
+      "registry_ref": [
+        "S2-monogram-loader-saisei"
+      ]
+    },
+    "stack": "vanilla (GSAP optional — built-in rAF tween fallback) + inline SVG",
+    "webgl": false,
+    "motion_props": [
+      "opacity",
+      "stroke-dashoffset",
+      "transform"
+    ],
+    "trigger": "triggered overlay (sits in a transition gap), held by a min-hold + resolve-when-ready contract",
+    "timing_layer": [
+      "T-transition"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "preloader",
+      "transition"
+    ],
+    "combines_with": [
+      "center-seam-split",
+      "content-stage-cascade",
+      "grid-skeleton-draw",
+      "mask-up-title"
+    ],
+    "anti_combos": [
+      "second-overlay"
+    ],
+    "gated_by": [
+      "R_anti_combos",
+      "R_perf_limits"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "show() fades the monogram in, strokes the SVG ring ON (stroke-dashoffset full->0), and draws the grid rules (scaleY 0->1, staggered top-down)",
+      "it HOLDS until BOTH minHold elapsed AND ready() called — never a hardcoded ms (resolve-when-ready)",
+      "hide() / auto-hide retracts: ring un-draws, rules recede, monogram + root fade; whenDone(cb) fires after",
+      "opacity + SVG stroke-dashoffset + transform(scaleY) only; NO mix-blend / NO backdrop; NO WebGL",
+      "GSAP used if present, else a built-in rAF tween; reduced-motion -> instant; window.__LAB_OK__ on init",
+      "asset-substitution gate: OUR monogram (木 / QUADRO mark) + cream/ink brand palette, proven in the combo"
+    ],
+    "gate": {
+      "probe": "In lab-full (combo): after the cream close, the 木 + stroking ring + grid rules hold on the cream gap, then retract and chain the dark open. Triggered SVG/DOM overlay (no <img>, not scroll) — the wheel-scroll gate does not apply; verify the hold respects minHold + ready() and the full transition stays smooth (fps>=50, jank<8%)."
+    },
+    "note": "|",
+    "_path": "library/components/monogram-ring-loader/",
     "_variantsResolved": []
   },
   "parallax-collage": {

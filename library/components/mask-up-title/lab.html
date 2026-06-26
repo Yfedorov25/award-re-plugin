@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · mask-up-title · serif title rises from under a baseline mask (per line)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#0e0e0c;color:#f0e9d2;font-family:system-ui;display:grid;place-items:center}
+  .title{padding-left:6vw}
+  .title .mut-line{overflow:hidden;display:block}
+  .title .mut-line>span{display:block;font-family:'Fraunces',Georgia,serif;font-weight:300;
+    font-size:clamp(3rem,12vw,9rem);line-height:.86;letter-spacing:-.012em}
+  .replay{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);color:#13130e;
+    background:#f0e9d2;border:0;padding:.5rem 1rem;font:600 .7rem/1 system-ui;letter-spacing:.16em;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="title" id="title">
+    <span class="mut-line"><span>QUADRO</span></span>
+    <span class="mut-line"><span>HOUSE</span></span>
+  </div>
+  <button class="replay" id="replay">▶ програти reveal</button>
+<script src="component.js"></script>
+<script>
+  (function(){
+    var t = MaskUpTitle.create('#title', { stagger:0.13, duration:1.0, ease:'expo.out', from:115 });
+    function play(){ t.reset(); requestAnimationFrame(function(){ t.play(); }); }
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 400);
+    try{ window.__LAB_OK__ = true; }catch(e){}
+  })();
+</script>
+</body>
+</html>

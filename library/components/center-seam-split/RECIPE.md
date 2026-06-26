@@ -30,7 +30,7 @@ anti_combos: [vertical-curtain-wipe, second-cover]
 gated_by: [R_anti_combos, R_perf_limits]
 variants: []
 params_ref: tokens.json
-files: [component.js, component.css, lab.html, tokens.json]
+files: [component.js, component.css, lab.html, lab-full.html, tokens.json]
 acceptance:
   - "create(target) injects a .css-cover over the target (or body, fixed full-viewport) and drives its clip-path; destroy() removes it"
   - "open() peels the seam centre->edges (inset 0 -> inset(0 50% 0 50%) on axis x) revealing the layer behind; close() grows edges->centre covering it; set(p) is a PURE fn of progress (0 covering, 1 open)"

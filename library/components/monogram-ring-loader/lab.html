@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · monogram-ring-loader · 木 + stroking ring + grid skeleton (network-wait gate)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root{ --mrl-serif:'Fraunces',Georgia,serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#0e0e0c;font-family:system-ui}
+  .hint{position:fixed;z-index:2;left:50%;bottom:18px;transform:translateX(-50%);color:#f0e9d2;
+    font:500 .7rem/1 system-ui;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .replay{position:fixed;z-index:3;left:50%;bottom:46px;transform:translateX(-50%);color:#13130e;
+    background:#f0e9d2;border:0;padding:.5rem 1rem;font:600 .7rem/1 system-ui;letter-spacing:.16em;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="hint">木 + кільце що обводиться + рулі сітки · тримається до ready()</div>
+  <button class="replay" id="replay">▶ показати loader</button>
+<script src="component.js"></script>
+<script>
+  (function(){
+    var current=null;
+    function play(){
+      if(current) current.destroy();
+      current = MonogramRingLoader.create(document.body, { glyph:'木', bg:'#f0e9d2', ink:'#13130e', ringR:34, grid:[8,50,92], minHold:1200, z:50 });
+      current.show();
+      setTimeout(function(){ current.ready(); }, 1500);  // simulate a load finishing
+    }
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 400);
+    try{ window.__LAB_OK__ = true; }catch(e){}
+  })();
+</script>
+</body>
+</html>

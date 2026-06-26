@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · content-stage-cascade · reveal order bg → awards → title → meta → header LAST</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{ --cream:#f0e9d2; --ink:#13130e; --serif:'Fraunces',Georgia,serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#0c0c0a;color:var(--cream);font-family:system-ui;overflow:hidden}
+  .stage{position:fixed;inset:0}
+  .hero-bg{position:absolute;inset:0;background:#1b1a14}
+  .hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.6}
+  header{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:20px 5vw 14px;z-index:4}
+  header .brand{font-family:var(--serif);letter-spacing:.18em;font-size:14px}
+  .toprule{position:absolute;top:50px;left:5vw;right:5vw;height:1px;background:rgba(240,233,210,.45);transform:scaleX(0);transform-origin:left}
+  .title{position:absolute;left:5vw;bottom:9vh;font-family:var(--serif);font-weight:300;font-size:clamp(3rem,11vw,8rem);line-height:.9}
+  .meta-br{position:absolute;right:5vw;bottom:9vh;text-align:right;max-width:24ch;font-size:.9rem;line-height:1.5;opacity:.8}
+  .awards{position:absolute;right:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px}
+  .awards .a{writing-mode:vertical-rl;background:#fff;color:#13130e;padding:12px 6px;font-size:11px;letter-spacing:.12em}
+  .replay{position:fixed;z-index:9;left:50%;bottom:18px;transform:translateX(-50%);color:#13130e;background:#f0e9d2;border:0;padding:.5rem 1rem;font:600 .7rem/1 system-ui;letter-spacing:.16em;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="hero-bg"><img src="renders/terrace.webp" alt=""></div>
+    <div class="toprule"></div>
+    <header><div class="brand">QUADRO</div><div class="est">EST — 2025</div></header>
+    <div class="title">QUADRO</div>
+    <div class="meta-br">Простір, що відкривається одним рухом.</div>
+    <div class="awards"><div class="a">W. Winner</div><div class="a">W. Site of the Day</div></div>
+  </div>
+  <button class="replay" id="replay">▶ програти каскад</button>
+<script src="component.js"></script>
+<script>
+  (function(){
+    var cascade = ContentStageCascade.create({ gap:0.13, stages:[
+      { el:'.hero-bg', kind:'fade', dur:0.7 },
+      { el:'.awards .a', kind:'slide-x', from:36, dur:0.5, stagger:0.08 },
+      { el:'.title', kind:'fade', dur:0.7 },
+      { el:'.meta-br', kind:'fade', dur:0.6 },
+      { el:'.toprule', kind:'draw-line', dur:0.7 },
+      { el:'header', kind:'fade', dur:0.5 }     // chrome LAST
+    ]});
+    function play(){ cascade.reset(); requestAnimationFrame(function(){ cascade.play(); }); }
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 400);
+    try{ window.__LAB_OK__ = true; }catch(e){}
+  })();
+</script>
+</body>
+</html>
