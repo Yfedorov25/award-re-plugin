@@ -25,7 +25,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 <style>
-  :root{ --cream:#f0e9d2; --ink:#13130e; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mrl-serif:'Fraunces',Georgia,serif; }
+  :root{ --cream:#f1ebd6; --ink:#2a2418; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mrl-serif:'Fraunces',Georgia,serif; }
   *{margin:0;box-sizing:border-box}
   html,body{height:100%}
   body{background:var(--ink);color:var(--cream);font-family:var(--sans);overflow:hidden}
@@ -113,7 +113,7 @@
     var hero = document.getElementById('hero');
 
     // pre-build the title + cascade (controls hero chrome state)
-    var titleApi = MaskUpTitle.create('#title', { stagger: 0.12, duration: 1.0, ease: 'expo.out', from: 115 });
+    var titleApi = MaskUpTitle.create('#title', { stagger: 0.2, duration: 0.34, ease: 'power3.out', from: 115 });
     var cascade = ContentStageCascade.create({
       gap: 0.12,
       stages: [
@@ -130,29 +130,39 @@
     cascade.reset();          // hero chrome hidden
     titleApi.reset();
 
+    // Saisei 1:1 transition = THREE separate layers, not a morph:
+    //   1) CLOSE cream  (soft, ease-in-out ~0.73s)         — entry is the softer move
+    //   2) LOADER on cream, builds + FULLY clears in cream  — network-wait gate
+    //   3) ~270ms EMPTY-CREAM pause  (the purgatory beat)
+    //   4) OPEN dark    (power2.in ~0.93s — hairline dwells, then rips)  — exit is sharper
+    //   5) CASCADE  (awards first under the seam -> title rises -> ... -> header LAST)
+    var cream = '#f1ebd6', dark = '#0e0e0c', ink = '#2a2418';
     function play() {
       pageA.style.display = '';
       cascade.reset(); titleApi.reset();
-      // 1) CLOSE the cream page in cream (seam converges edges->centre)
-      var cream = CenterSeamSplit.create(document.body, { fill: '#f0e9d2', z: 9998 });
-      cream.set(1);
-      cream.close({ duration: 0.6, ease: 'power3.inOut', onComplete: function () {
+      // 1) CLOSE — soft cream curtain converges edges->centre
+      var creamSeam = CenterSeamSplit.create(document.body, { fill: cream, z: 9998 });
+      creamSeam.set(1);
+      creamSeam.close({ duration: 0.73, ease: 'power3.inOut', onComplete: function () {
         pageA.style.display = 'none';
-        // 2) HOLD on cream: the 木 monogram-ring loader (network-wait gate)
-        var loader = MonogramRingLoader.create(document.body, { glyph: '木', bg: '#f0e9d2', ink: '#13130e', ringR: 30, grid: [7, 50, 93], minHold: 900, z: 9998 });
+        // 2) LOADER builds on the cream, then fully clears (still cream underneath)
+        var loader = MonogramRingLoader.create(document.body, { glyph: '木', bg: cream, ink: ink, ringR: 30, grid: [7, 50, 93], minHold: 900, z: 9998 });
         loader.show();
-        // (simulate a load finishing) — in production call loader.ready() when the page is ready
-        setTimeout(function () { loader.ready(); }, 1100);
+        setTimeout(function () { loader.ready(); }, 1100);   // prod: call ready() when the page is loaded
         loader.whenDone(function () {
-          loader.destroy(); cream.destroy();
-          // 3) OPEN in dark (seam splits centre->edges), revealing the hero
-          var dark = CenterSeamSplit.create(document.body, { fill: '#0e0e0c', z: 9998 });
-          dark.set(0);
-          dark.open({ duration: 0.9, ease: 'expo.out', onComplete: function () {
-            dark.destroy();
-            // 4) CASCADE the hero content in (bg -> awards -> title rises -> meta -> header LAST)
-            cascade.play();
-          }});
+          loader.destroy();
+          // 3) EMPTY-CREAM PAUSE (~270ms) — the cream cover is still up, nothing on it
+          setTimeout(function () {
+            creamSeam.destroy();
+            // 4) OPEN — dark panel rips open centre->edges, power2.in (hairline dwell + accelerate)
+            var darkSeam = CenterSeamSplit.create(document.body, { fill: dark, z: 9998 });
+            darkSeam.set(0);
+            darkSeam.open({ duration: 0.93, ease: 'power2.in', onComplete: function () {
+              darkSeam.destroy();
+              // 5) CASCADE the hero content (awards already first in the stage list)
+              cascade.play();
+            }});
+          }, 270);
         });
       }});
     }

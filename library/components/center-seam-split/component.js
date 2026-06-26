@@ -57,7 +57,10 @@
       'expo.in': function (t) { return t === 0 ? 0 : Math.pow(2, 10 * t - 10); },
       'power3.out': function (t) { return 1 - Math.pow(1 - t, 3); },
       'power3.inOut': function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; },
-      'power2.out': function (t) { return 1 - Math.pow(1 - t, 2); }
+      'power2.out': function (t) { return 1 - Math.pow(1 - t, 2); },
+      // Saisei OPEN curve: front-slow then accelerate (hairline dwells, then rips open)
+      'power2.in': function (t) { return t * t; },
+      'power4.out': function (t) { return 1 - Math.pow(1 - t, 4); }
     };
     return map[name] || map['expo.out'];
   }
@@ -67,8 +70,12 @@
     var opt = {
       axis: options.axis === 'y' ? 'y' : 'x',
       fill: options.fill || '#0e0e0c',
-      duration: options.duration != null ? options.duration : 0.75,
-      ease: options.ease || 'expo.out',
+      // Saisei 1:1: OPEN = power2.in over ~0.93s (hairline dwells ~270ms, then rips
+      // open accelerating) — NOT expo.out. CLOSE is the softer, faster move (~0.73s,
+      // ease-in-out): the rule is "the entry is softer than the exit".
+      duration: options.duration != null ? options.duration : 0.93,
+      ease: options.ease || 'power2.in',
+      durationClose: options.durationClose != null ? options.durationClose : 0.73,
       easeClose: options.easeClose || 'power3.inOut',
       z: options.z != null ? options.z : 9999,
       onComplete: options.onComplete
@@ -129,7 +136,7 @@
     function close(o) {
       o = o || {};
       if (o.fill) { cover.style.background = o.fill; } // re-tint for the close phase (e.g. cream)
-      animateTo(0, o.duration != null ? o.duration : opt.duration, o.ease || opt.easeClose,
+      animateTo(0, o.duration != null ? o.duration : opt.durationClose, o.ease || opt.easeClose,
         function () { if (o.onComplete) o.onComplete(); });
     }
 

@@ -112,17 +112,22 @@
     function show() {
       shownAt = (global.performance && performance.now) ? performance.now() : Date.now();
       root.style.opacity = '1';
-      // rules draw top->down (staggered)
-      rules.forEach(function (r, i) {
-        var s = { v: 0 };
-        setTimeout(function () { tween(s, { v: 1 }, 0.5, 'power3.out', function () { r.style.transform = 'scaleY(' + s.v + ')'; }); }, i * 90);
-      });
-      // monogram fade-in
+      // Saisei 1:1 build ORDER: 木 fade (~130ms) -> ring strokes on (start ~130ms,
+      // ~270ms) -> grid rules grow from both ends toward centre (start ~270ms, ~730ms).
+      // 1) monogram fade-in
       var m = { o: 0 };
-      tween(m, { o: 1 }, 0.25, 'power2.out', function () { mono.style.opacity = m.o; });
-      // ring strokes ON
+      tween(m, { o: 1 }, 0.13, 'power2.out', function () { mono.style.opacity = m.o; });
+      // 2) ring strokes ON (after the glyph)
       var rg = { off: circ };
-      setTimeout(function () { tween(rg, { off: 0 }, 0.5, 'power2.out', function () { ring.style.strokeDashoffset = rg.off; }); }, 120);
+      setTimeout(function () { tween(rg, { off: 0 }, 0.27, 'power2.out', function () { ring.style.strokeDashoffset = rg.off; }); }, 130);
+      // 3) grid rules draw from both ends toward the horizontal middle (centre-origin scaleY)
+      rules.forEach(function (r) { r.style.transformOrigin = 'center'; });
+      setTimeout(function () {
+        rules.forEach(function (r, i) {
+          var s = { v: 0 };
+          setTimeout(function () { tween(s, { v: 1 }, 0.7, 'power3.out', function () { r.style.transform = 'scaleY(' + s.v + ')'; }); }, i * 60);
+        });
+      }, 270);
     }
 
     function doHide() {

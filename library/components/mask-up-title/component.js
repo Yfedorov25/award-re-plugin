@@ -43,9 +43,11 @@
     options = options || {};
     var opt = {
       lineSelector: options.lineSelector || '.mut-line',
-      stagger: options.stagger != null ? options.stagger : 0.1,
-      duration: options.duration != null ? options.duration : 0.9,
-      ease: options.ease || 'expo.out',
+      // Saisei 1:1 (project title SHIZUKA/GARDENS): each line ~340ms, stagger ~200ms
+      // between lines, power3.out, rising from under the baseline (no fade).
+      stagger: options.stagger != null ? options.stagger : 0.2,
+      duration: options.duration != null ? options.duration : 0.34,
+      ease: options.ease || 'power3.out',
       from: options.from != null ? options.from : 110
     };
     var host = typeof target === 'string' ? doc.querySelector(target) : target;

@@ -1,0 +1,9 @@
+/* ============================================================
+   SCROLL-CLIP-RISE · component.css
+   Section elements rise from under a bottom mask on scroll-into-view. The engine drives
+   clip-path(bottom) + transform + opacity; this file documents the masked-line hook.
+   ============================================================ */
+[data-rise] { will-change: clip-path, transform, opacity; }
+/* masked line wrappers are built by the engine (overflow:hidden + inner translateY). */
+[data-rise-lines] span { will-change: transform; }
+/* NO mix-blend / NO backdrop over the scrubbed surface. clip-path + transform + opacity only. */
