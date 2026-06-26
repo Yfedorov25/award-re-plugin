@@ -1,0 +1,26 @@
+/* ============================================================
+   ROTATED-MOSAIC-HERO · component.css
+   A grid of photo tiles rotated as one rigid plane, a unifying colour wash over it,
+   a giant title above. Plane scale must over-cover the viewport after rotation.
+   ============================================================ */
+
+.rmh-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+
+/* solid bg behind the mosaic (the green field) */
+.rmh-bg { position: absolute; inset: 0; z-index: 0; }
+
+/* THE PLANE — rotated + scaled as one rigid body; the parallax drifts THIS */
+.rmh-plane { position: absolute; inset: -20%; z-index: 1; transform-origin: 50% 50%;
+  will-change: transform; backface-visibility: hidden; }
+.rmh-grid { position: absolute; inset: 0; }
+.rmh-tile { position: relative; overflow: hidden; }
+.rmh-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* the unifying colour WASH over the mosaic — INSIDE the plane (transforms with it),
+   so the mix-blend is baked into one static plane (the allowed mix-blend spot). */
+.rmh-wash { position: absolute; inset: 0; z-index: 2; mix-blend-mode: multiply; pointer-events: none; }
+
+/* content (title + eyebrow) above the plane */
+.rmh-content { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; }
+
+/* reduced-motion: no parallax; the rotated mosaic just rests */
