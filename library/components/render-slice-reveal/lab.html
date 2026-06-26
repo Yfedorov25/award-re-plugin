@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · render-slice-reveal · Saisei render appears through a slice + brightens in sync</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · render-slice-reveal
+================================================================================
+  Saisei's render reveal — a fixed full-bleed render appears through a black centre SLICE
+  that opens (power2.in: hairline dwells, then rips), and a dark VEIL over the render
+  clears IN SYNC with the slice, so the render brightens dark->full colour exactly as the
+  slice grows (matches Saisei page-open t073-t080). Composes center-seam-split.
+  OUR QUADRO render. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<!-- composes center-seam-split -->
+<script src="../center-seam-split/component.js"></script>
+
+<style>
+  :root{ --cream:#f1ebd6; --ink:#2a2418; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#0e0e0c;color:var(--cream);font-family:var(--sans);overflow:hidden}
+  .rsr-stage{position:fixed;inset:0}
+  .rsr-content{display:flex;align-items:flex-end;padding:0 clamp(28px,5vw,80px) clamp(36px,7vh,72px)}
+  .rsr-content .title{font-family:var(--serif);font-weight:300;color:var(--cream);font-size:clamp(3rem,13vw,11rem);line-height:.9;letter-spacing:-.01em}
+  .rsr-meta{position:absolute;right:clamp(28px,5vw,80px);bottom:clamp(40px,8vh,80px);max-width:26ch;text-align:right;z-index:2}
+  .rsr-meta .jp{font-family:var(--serif);font-size:clamp(1.1rem,2vw,1.6rem);margin-bottom:.5rem}
+  .rsr-meta p{font-size:clamp(.85rem,1.1vw,1rem);line-height:1.55;opacity:.82}
+  .replay{position:fixed;z-index:100;left:50%;bottom:16px;transform:translateX(-50%);color:var(--ink);
+    background:var(--cream);border:0;padding:.55rem 1rem;font:600 .68rem/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+</style>
+</head>
+<body>
+
+  <section class="rsr-stage" id="stage">
+    <div class="rsr-render"><img src="renders/terrace.webp" alt="QUADRO"></div>
+    <div class="rsr-veil" id="veil"></div>
+    <div class="rsr-content"><div class="title">QUADRO</div></div>
+    <div class="rsr-meta"><div class="jp">再生</div><p>Рендер проявляється крізь слайс і прояснюється з темного до повного кольору.</p></div>
+  </section>
+
+  <button class="replay" id="replay">▶ програти слайсер</button>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    var rsr = RenderSliceReveal.create('#stage', { veil: 0.8, fill: '#0e0e0c', duration: 0.93, ease: 'power2.in', z: 60 });
+    function play() { rsr.reset(); requestAnimationFrame(function () { rsr.open(); }); }
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 500);
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

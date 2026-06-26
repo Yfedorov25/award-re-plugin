@@ -116,14 +116,16 @@
     var titleApi = MaskUpTitle.create('#title', { stagger: 0.2, duration: 0.34, ease: 'power3.out', from: 115 });
     var cascade = ContentStageCascade.create({
       gap: 0.12,
+      // UNEVEN staggers (Saisei 1:1): awards first, then the title block, then BIGGER
+      // pauses (~0.4s) before the corner meta and the chrome — header/rule LAST + slowest.
       stages: [
-        { el: '.hero-bg', kind: 'fade', dur: 0.7 },
-        { el: '.awards .a', kind: 'slide-x', from: 36, dur: 0.5, stagger: 0.08 },
-        { el: '#title', kind: 'fn', fn: function () { titleApi.play(); } },
-        { el: '.eyebrow', kind: 'fade', dur: 0.5 },
-        { el: '.meta-tl', kind: 'fade', dur: 0.5 },
-        { el: '.meta-br', kind: 'fade', dur: 0.6 },
-        { el: '.toprule', kind: 'draw-line', dur: 0.7 },   // header chrome LAST
+        { el: '.hero-bg', kind: 'fade', dur: 0.7, gapAfter: 0.1 },
+        { el: '.awards .a', kind: 'slide-x', from: 36, dur: 0.5, stagger: 0.08, gapAfter: 0.2 },
+        { el: '#title', kind: 'fn', fn: function () { titleApi.play(); }, gapAfter: 0.46 },  // title holds, then a real pause
+        { el: '.eyebrow', kind: 'fade', dur: 0.5, gapAfter: 0.06 },
+        { el: '.meta-tl', kind: 'fade', dur: 0.5, gapAfter: 0.06 },
+        { el: '.meta-br', kind: 'fade', dur: 0.6, gapAfter: 0.4 },                            // pause before the chrome
+        { el: '.toprule', kind: 'draw-line', dur: 0.7, gapAfter: 0.04 },                      // header chrome LAST
         { el: 'header', kind: 'fade', dur: 0.5 }
       ]
     });

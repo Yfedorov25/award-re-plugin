@@ -91,7 +91,10 @@
         if (i >= stages.length) { onDone && onDone(); return; }
         var s = stages[i++];
         runStage(s, null);                 // don't await within-stage; cascade is time-based
-        if (i < stages.length) setTimeout(next, gap * 1000);
+        // per-stage gapAfter overrides the default gap -> UNEVEN staggers (Saisei: the
+        // title block is tight, then bigger pauses before the chrome). s.gapAfter in s.
+        var thisGap = (s.gapAfter != null ? s.gapAfter : gap) * 1000;
+        if (i < stages.length) setTimeout(next, thisGap);
         else setTimeout(function () { onDone && onDone(); }, (s.dur || 0.5) * 1000);
       })();
     }

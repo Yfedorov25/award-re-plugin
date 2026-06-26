@@ -1,0 +1,6 @@
+/* STROKE-DRAW-TITLE · component.css
+   The engine injects an <svg> with an outline <text> (strokes on) + a fill <text>
+   (fades in). Author the size/tracking via opts (fontSize/tracking) or CSS on the svg
+   text. SVG stroke-dashoffset + opacity only. NO mix-blend / NO backdrop / NO WebGL. */
+.sdt-stage svg { display: block; overflow: visible; }
+.sdt-stage svg text { will-change: stroke-dashoffset, opacity; }
