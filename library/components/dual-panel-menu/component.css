@@ -1,0 +1,9 @@
+/* DUAL-PANEL-MENU · component.css
+   Two full-height panels: cream nav (left) + dark identity (right) slide to a centre
+   seam. The engine drives translateX + opacity; author the panel content yourself.
+   transform + opacity only. NO mix-blend / NO backdrop / NO WebGL. */
+.dpm-root { position: fixed; inset: 0; z-index: 9990; }
+.dpm-scrim { position: fixed; inset: 0; z-index: 9989; background: #000; opacity: 0; pointer-events: none; }
+.dpm-left, .dpm-right { position: absolute; top: 0; bottom: 0; overflow: hidden; will-change: transform; }
+.dpm-left { left: 0; }   /* width/left set by the engine from `split` */
+.dpm-item { will-change: transform, opacity; }

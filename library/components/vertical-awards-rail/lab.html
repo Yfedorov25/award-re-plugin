@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · vertical-awards-rail · Saisei awards rail (slide in from right)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{--cream:#f1ebd6;--var-serif:'Fraunces',serif}*{margin:0;box-sizing:border-box}html,body{height:100%}
+  body{background:#0c0c0a;color:var(--cream);font-family:'Inter',system-ui;overflow:hidden}
+  .frame{position:fixed;inset:0}.frame img{width:100%;height:100%;object-fit:cover;opacity:.5}
+  .var-badge--w{background:#dfeaee;color:#13130e}.var-badge--s{background:#fff;color:#13130e}
+  .replay{position:fixed;z-index:9;left:50%;bottom:16px;transform:translateX(-50%);color:#2a2418;background:var(--cream);border:0;padding:.55rem 1rem;font:600 .68rem/1 'Inter';letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+</style></head><body>
+  <div class="frame"><img src="renders/terrace.webp" alt=""></div>
+  <div class="var-rail" id="rail">
+    <div class="var-badge var-badge--w"><b>W.</b><span>Winner</span></div>
+    <div class="var-badge var-badge--s"><b>W.</b><span>Site of the Day</span></div>
+  </div>
+  <button class="replay" id="replay">▶ показати rail</button>
+<script src="component.js"></script>
+<script>(function(){
+  var r=VerticalAwardsRail.create('#rail',{stagger:0.1});
+  function play(){ r.hide(); requestAnimationFrame(function(){ r.reveal(); }); }
+  document.getElementById('replay').addEventListener('click',play); setTimeout(play,500);
+  try{window.__LAB_OK__=true}catch(e){}
+})();</script>
+</body></html>

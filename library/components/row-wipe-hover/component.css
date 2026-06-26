@@ -1,0 +1,14 @@
+/* ROW-WIPE-HOVER · component.css
+   The hover shapes live here: a tan band wipes L->R (scaleX from left), a baseline
+   underline grows from the left, the ordinal flips (JS swaps text). transform+opacity. */
+.rwh-row{position:relative;display:flex;align-items:baseline;cursor:pointer;
+  padding:.4em .2em;overflow:hidden}
+.rwh-row::before{content:"";position:absolute;inset:0;z-index:0;background:var(--rwh-band,#d8cdb0);
+  transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.65,0,.35,1)}
+.rwh-row.is-hover::before{transform:scaleX(1)}
+.rwh-row > *{position:relative;z-index:1}
+.rwh-row::after{content:"";position:absolute;left:0;bottom:0;height:1px;width:100%;background:currentColor;
+  transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.65,0,.35,1) .04s}
+.rwh-row.is-hover::after{transform:scaleX(1)}
+.rwh-ordinal{display:inline-block;min-width:2.2em;font-family:var(--rwh-serif,'Fraunces',Georgia,serif);opacity:.5;transition:opacity .3s}
+.rwh-row.is-hover .rwh-ordinal{opacity:.9}
