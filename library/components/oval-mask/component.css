@@ -1,0 +1,19 @@
+/* ============================================================
+   OVAL-MASK · component.css
+   A fixed portrait oval with media inside that parallaxes within the static mask.
+   The wrap's ASPECT (the oval ratio) + position are composition; the engine sets
+   the ellipse clip + drives the inner media.
+   ============================================================ */
+
+[data-oval-mask] { position: relative; overflow: hidden; display: block;
+  /* clip-path ellipse is set by the engine; aspect-ratio gives the portrait shape */
+}
+[data-oval-mask] .ovm__media,
+[data-oval-mask] > video,
+[data-oval-mask] > img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+  will-change: transform; backface-visibility: hidden;
+}
+
+/* the MASK SHAPE never animates (no morph). Only the inner media drifts/scales.
+   NO mix-blend / NO backdrop. transform + the static clip-path only. */
