@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · portrait-carousel · Springs terrace carousel (vertical push + arrows + copy-lag)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · portrait-carousel
+================================================================================
+  Springs' terrace CAROUSEL — arrow-driven portrait carousel; slides change by a
+  VERTICAL SLICE/PUSH inside a fixed frame (NEXT = new from below, PREV = new from
+  top), copy crossfading a beat behind, each slide Ken-Burns drifting. Harvested
+  from D_springs_nature_and_carousel.
+
+  ASSET-SUBSTITUTION GATE: OUR terrace renders in a portrait frame + Ukrainian
+  captions + circular ← → controls, deep-green plate (like Springs). Click arrows.
+  NO WebGL. window.__LAB_OK__ on init.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --green:#13251a; --cream:#e9e2d2; --slate:#9fb0a6; --serif:'Fraunces',Georgia,serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--green);color:var(--cream);font-family:'Inter',system-ui,sans-serif}
+  .pc-stage{ background: radial-gradient(80% 60% at 30% 20%, #1a3225 0%, var(--green) 100%); }
+  .pc-eyebrow{font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--slate);margin-bottom:1em}
+  .pc-copy{font-size:clamp(.95rem,1.2vw,1.15rem);line-height:1.6;color:var(--cream);min-height:5em}
+  .pc-btn{color:var(--cream)}
+</style>
+</head>
+<body>
+
+  <section class="pc-stage" id="carousel" tabindex="0">
+    <!-- LEFT: the portrait push frame (engine builds 2 layers) -->
+    <div class="pc-frame"></div>
+
+    <!-- RIGHT: copy + circular controls -->
+    <div class="pc-right">
+      <div class="pc-eyebrow">QUADRO · простір довкола</div>
+      <p class="pc-copy"></p>
+      <div class="pc-controls">
+        <button class="pc-btn pc-prev" aria-label="назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 19l-7-7 7-7"/></svg></button>
+        <button class="pc-btn pc-next" aria-label="далі"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <!-- slide data (markup-first) -->
+    <div class="pc-slide" data-image="renders/terrace-03.webp" data-copy="Тераса над дахами в обрамленні зелені створює відчуття власного парку, що ширяє над кварталом." hidden></div>
+    <div class="pc-slide" data-image="renders/macro-pergola.webp" data-copy="Затишна перлога з деревом і м’яким світлом. Місце для вечері просто неба, коли місто вже стихло." hidden></div>
+    <div class="pc-slide" data-image="renders/day-08.webp" data-copy="Зелений двір з мощенням і деревами. Спокій за крок від дому, без чужих вікон за парканом." hidden></div>
+    <div class="pc-slide" data-image="renders/scene18.webp" data-copy="Продумані зони відпочинку з різноманітним озелененням, що тішать око у будь-яку пору року." hidden></div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  PortraitCarousel.init('#carousel', { pushMs: 780, loop: true, kenBurns: true });
+  document.getElementById('carousel').focus();
+</script>
+</body>
+</html>
