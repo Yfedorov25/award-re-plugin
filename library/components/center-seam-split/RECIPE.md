@@ -50,6 +50,15 @@ note: |
   open -> [content-stage-cascade]. Triggered cover, owns_pin false. clip-path inset only,
   GPU, no WebGL; the smoothness-gate (wheel + <img>) doesn't apply — verified with a
   direct rAF probe (0% jank, 59.9fps, built-in tween under 4x throttle).
+  1:1 CURVES (measured 15fps): OPEN = power2.in ~0.93s (hairline DWELLS ~270ms then RIPS
+  open accelerating — NOT expo.out); CLOSE = power3.inOut ~0.73s (softer/faster). Rule:
+  "the entry is softer than the exit." Live-verified: t100=0.04%, t300=1.5%, t500=7%,
+  t800=30%, t1000=50% — matches Saisei.
+  RENDER-SLICER (lab.html): the incoming render is FIXED full-bleed behind a dark veil;
+  open() exposes it as a growing centre slice, and the veil opacity is driven down via
+  open()'s onUpdate(progress) so the render BRIGHTENS exactly as the slice grows (Saisei:
+  the render appears through the slice, then clears from dark to full colour). Verified
+  in sync: slice 7%/veil .67 -> slice 30%/veil .31 -> slice 50%/veil 0.
 ---
 
 # center-seam-split — a vertical seam opens to reveal, or closes to cover (two-phase colour)

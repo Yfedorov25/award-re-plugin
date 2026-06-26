@@ -106,14 +106,14 @@
     apply(0);                 // start covering
 
     var rafId = null;
-    function animateTo(toP, dur, easeName, done) {
+    function animateTo(toP, dur, easeName, done, onUpd) {
       if (rafId) { global.cancelAnimationFrame(rafId); rafId = null; }
-      if (reduced || dur <= 0) { apply(toP); if (done) done(); return; }
+      if (reduced || dur <= 0) { apply(toP); if (onUpd) onUpd(toP); if (done) done(); return; }
       if (gsap) {
         var o = { p: prog };
         gsap.to(o, { p: toP, duration: dur, ease: easeName,
-          onUpdate: function () { apply(o.p); },
-          onComplete: function () { apply(toP); if (done) done(); } });
+          onUpdate: function () { apply(o.p); if (onUpd) onUpd(o.p); },
+          onComplete: function () { apply(toP); if (onUpd) onUpd(toP); if (done) done(); } });
         return;
       }
       // built-in rAF tween
@@ -121,9 +121,9 @@
       function step(ts) {
         if (t0 == null) t0 = ts;
         var t = Math.min(1, (ts - t0) / ms);
-        apply(fromP + (toP - fromP) * ef(t));
+        var pp = fromP + (toP - fromP) * ef(t); apply(pp); if (onUpd) onUpd(pp);
         if (t < 1) rafId = global.requestAnimationFrame(step);
-        else { rafId = null; apply(toP); if (done) done(); }
+        else { rafId = null; apply(toP); if (onUpd) onUpd(toP); if (done) done(); }
       }
       rafId = global.requestAnimationFrame(step);
     }
@@ -131,7 +131,7 @@
     function open(o) {
       o = o || {};
       animateTo(1, o.duration != null ? o.duration : opt.duration, o.ease || opt.ease,
-        function () { if (o.onComplete) o.onComplete(); else if (opt.onComplete) opt.onComplete(); });
+        function () { if (o.onComplete) o.onComplete(); else if (opt.onComplete) opt.onComplete(); }, o.onUpdate);
     }
     function close(o) {
       o = o || {};

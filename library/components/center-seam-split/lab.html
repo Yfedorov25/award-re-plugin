@@ -30,10 +30,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 <style>
-  :root{ --cream:#f0e9d2; --ink:#13130e; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  :root{ --cream:#f1ebd6; --ink:#2a2418; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
   *{margin:0;box-sizing:border-box}
   html,body{height:100%}
-  body{background:var(--ink);color:var(--cream);font-family:var(--sans);overflow:hidden}
+  body{background:#0e0e0c;color:var(--cream);font-family:var(--sans);overflow:hidden}
 
   /* the "outgoing" cream page (state A) */
   .page-a{position:fixed;inset:0;z-index:1;background:var(--cream);color:var(--ink);
@@ -41,9 +41,12 @@
   .page-a .mono{font-family:var(--serif);font-size:clamp(2rem,6vw,4rem)}
   .page-a .lbl{margin-top:1rem;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;opacity:.6}
 
-  /* the "incoming" dark hero (state B), behind the cover, revealed by the open seam */
-  .page-b{position:fixed;inset:0;z-index:0;overflow:hidden}
-  .page-b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.62}
+  /* the "incoming" dark hero (state B), behind the cover, revealed by the open seam.
+     The render is FIXED full-bleed; a dark veil sits over it and clears as the slice
+     opens (Saisei: the render appears through the growing slice, then brightens). */
+  .page-b{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0c0c0a}
+  .page-b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:1}
+  .page-b .veil{position:absolute;inset:0;z-index:1;background:#0a0a08;opacity:.78;pointer-events:none}
   .page-b .wrap{position:absolute;inset:0;display:flex;align-items:flex-end;
     padding:0 clamp(28px,5vw,80px) clamp(36px,7vh,72px)}
   .page-b .title{font-family:var(--serif);font-weight:300;color:var(--cream);
@@ -61,11 +64,12 @@
 </head>
 <body>
 
-  <!-- incoming dark hero (behind) -->
+  <!-- incoming dark hero (behind): render fixed, dark veil over it, title above the veil -->
   <section class="page-b">
     <img src="renders/terrace.webp" alt="QUADRO">
-    <div class="wrap"><div class="title">QUADRO</div></div>
-    <div class="meta"><div class="jp">再生</div><p>Простір, що відкривається одним рухом. Дім, який дихає тишею.</p></div>
+    <div class="veil" id="veil"></div>
+    <div class="wrap" style="z-index:2"><div class="title">QUADRO</div></div>
+    <div class="meta" style="z-index:2"><div class="jp">再生</div><p>Простір, що відкривається одним рухом. Дім, який дихає тишею.</p></div>
   </section>
 
   <!-- outgoing cream page (front) -->
@@ -83,23 +87,32 @@
   (function () {
     var pageA = document.getElementById('pageA');
 
-    // play the full transition: CLOSE in cream over the cream page (the seam converges,
-    // briefly hiding everything), hold (loader spot), then hide page-A and OPEN in dark
-    // (the black seam splits from centre revealing the QUADRO hero behind).
+    // Saisei 1:1 transition. CLOSE is the SOFTER move (power3.inOut ~0.73s); OPEN is the
+    // SHARPER one (power2.in ~0.93s — the seam hairline DWELLS then RIPS). Between them a
+    // ~270ms empty-cream pause. The render is FIXED behind a dark veil; as the black
+    // SLICE opens from centre it reveals the render as a growing slice, and the veil
+    // CLEARS in sync so the render BRIGHTENS as the slice grows (the Saisei render-slicer).
+    var veil = document.getElementById('veil');
     function play() {
       pageA.style.display = '';
-      // a cover that CLOSES in cream (edges -> centre), covering page-A
-      var creamSeam = CenterSeamSplit.create(document.body, { fill: '#f0e9d2', axis: 'x', z: 9998 });
-      creamSeam.set(1);                       // start fully open (cream page visible underneath)
-      creamSeam.close({ duration: 0.55, ease: 'power3.inOut', onComplete: function () {
-        // fully cream now; drop page-A, switch the cover to dark, hold, then open to reveal hero
+      veil.style.opacity = '.78';             // render starts dark
+      // 1) CLOSE — soft cream curtain converges edges -> centre
+      var creamSeam = CenterSeamSplit.create(document.body, { fill: '#f1ebd6', axis: 'x', z: 9998 });
+      creamSeam.set(1);
+      creamSeam.close({ duration: 0.73, ease: 'power3.inOut', onComplete: function () {
         pageA.style.display = 'none';
-        creamSeam.destroy();
-        var darkSeam = CenterSeamSplit.create(document.body, { fill: '#0e0e0c', axis: 'x', z: 9998 });
-        darkSeam.set(0);                      // fully dark (covering the hero)
+        // 2) ~270ms empty-cream pause (where the 木 loader would sit in the full flow)
         setTimeout(function () {
-          darkSeam.open({ duration: 0.85, ease: 'expo.out', onComplete: function () { darkSeam.destroy(); } });
-        }, 520);                              // the loader hold
+          creamSeam.destroy();
+          // 3) OPEN — black slice rips open centre -> edges (power2.in), revealing the render
+          var darkSeam = CenterSeamSplit.create(document.body, { fill: '#0e0e0c', axis: 'x', z: 9998 });
+          darkSeam.set(0);
+          // veil clears IN SYNC with the slice: the render brightens exactly as the
+          // slice grows (onUpdate gives the seam's live progress 0->1).
+          darkSeam.open({ duration: 0.93, ease: 'power2.in',
+            onUpdate: function (p) { veil.style.opacity = (0.78 * (1 - p)).toFixed(3); },
+            onComplete: function () { veil.style.opacity = '0'; darkSeam.destroy(); } });
+        }, 270);
       }});
     }
 
