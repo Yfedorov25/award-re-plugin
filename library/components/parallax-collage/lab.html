@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · parallax-collage · EVER Architecture editorial collage, on OUR renders</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · parallax-collage
+================================================================================
+  The EVER "Architecture" editorial-collage ENGINE, harvested from the live site.
+  MEASURED LIVE @1440x900:
+    - static tile grid, MIXED masks: left ROUND 420x345 + center RECT 420x730,
+      gap 40, left edge x=50.
+    - a giant wordmark BEHIND the tiles (108px), showing through the gutters.
+    - meta: small uppercase title group top-right (~40px @67%), a "+" button, counter.
+    - 2 floating DECOR objects that MOUSE-PARALLAX, each its own amplitude (depth):
+      sphere1 ~±4px, sphere2 ~±2px (pointer-parallax, not scroll).
+
+  ASSET-SUBSTITUTION GATE (council): EVER's exact photos + textured spheres are art
+  direction. This lab rebuilds the ENGINE on OUR content — QUADRO renders in the
+  tiles, the word "архітектура" behind (sized by the fluid-type-sizing engine), and
+  simple geometric decor as the floating mouse-parallax layers at different depths.
+  Move the mouse: the decor (and the wordmark a touch) drift at their own depths.
+  NO WebGL.
+
+  window.__LAB_OK__ is set by the engine once mounted. Renders via renders -> proto.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="renders/day.webp">
+<link rel="stylesheet" href="component.css">
+<!-- compose with the fluid-type-sizing engine (sibling component) for the behind-word -->
+<script src="../fluid-type-sizing/component.js"></script>
+
+<style>
+  :root{ --cream:#DCC5B7; --accent:#AC7E65; --slate:#95A3AE; --bg:#2b333a;
+    --wm:'Jost','Century Gothic',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif;
+    --gutter:clamp(20px,3.47vw,50px); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);color:var(--cream);font-family:var(--body);overflow:hidden}
+  body{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+
+  /* the stage = a 1340-wide editorial field centred, like EVER (x=50 gutters @1440) */
+  .pc-stage{position:relative;width:min(1340px,calc(100vw - 2*var(--gutter)));height:min(730px,76vh)}
+
+  /* wordmark BEHIND (z1), sized to fill the field by fluid-type-sizing */
+  .pc-word{left:0;right:0;bottom:6%;font-family:var(--wm);font-weight:400;text-transform:uppercase;
+    color:var(--cream);opacity:.92;letter-spacing:-.02em;line-height:.9;white-space:nowrap}
+
+  /* tiles: a ROUND tile (left) + a tall RECT tile (centre) — EVER's mix */
+  .pc-tile--round{left:0;top:0;width:31.3%;height:47%}      /* 420/1340, 345/730 */
+  .pc-tile--rect{left:34.3%;top:0;width:31.3%;height:100%}  /* gap 40 -> 3% ; 420 wide, full height */
+
+  /* meta: title group top-right + counter bottom-left + a "+" button */
+  .pc-meta--title{right:0;top:2%;max-width:30%;font-family:var(--wm);font-weight:400;
+    font-size:clamp(20px,2.8vw,40px);line-height:1.16;text-transform:uppercase;color:var(--cream)}
+  .pc-meta--sub{right:0;top:34%;max-width:26%;font-size:clamp(.8rem,1vw,14px);line-height:1.5;color:var(--slate)}
+  .pc-meta--counter{left:0;bottom:0;font-family:var(--wm);font-size:clamp(70px,9vw,150px);
+    color:var(--accent);line-height:.8;letter-spacing:-.04em}
+  .pc-meta--plus{right:0;bottom:8%;width:64px;height:64px;border:1px solid rgba(220,197,183,.45);
+    border-radius:50%;display:grid;place-items:center;color:var(--cream);font-size:28px;font-weight:300}
+
+  /* simple geometric decor stand-ins (EVER uses textured render spheres) */
+  .deco{border-radius:50%}
+  .deco--1{left:18%;top:54%;width:130px;height:130px;
+    background:radial-gradient(circle at 34% 30%, #c9a48c, #6f5341 70%, #3a2c22);box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+  .deco--2{left:66%;top:30%;width:170px;height:170px;
+    background:radial-gradient(circle at 38% 32%, #aeb6bd, #6c757d 70%, #3c4248);box-shadow:0 36px 70px -22px rgba(0,0,0,.5)}
+</style>
+</head>
+<body>
+
+  <div class="pc-stage" id="collage">
+    <!-- z1: wordmark behind, sized to fill the field -->
+    <div class="pc-word" data-fluid-fit>архітектура</div>
+
+    <!-- z2: tiles (mixed masks) on OUR renders -->
+    <div class="pc-tile pc-tile--round"><img src="renders/day-08.webp" alt="QUADRO деталь фасаду"></div>
+    <div class="pc-tile pc-tile--rect"><img src="renders/day.webp" alt="QUADRO фасад"></div>
+
+    <!-- z3: floating decor, mouse-parallax at different depths -->
+    <div class="deco deco--1" data-deco data-depth="1.0" data-axis="0.9"></div>
+    <div class="deco deco--2" data-deco data-depth="0.55" data-axis="0.8"></div>
+
+    <!-- z4: meta -->
+    <div class="pc-meta pc-meta--title">Прості<br>обриси,<br>виразні<br>матеріали</div>
+    <div class="pc-meta pc-meta--sub">Камінь, скло і світло замість зайвого декору.</div>
+    <div class="pc-meta pc-meta--counter">1</div>
+    <div class="pc-meta pc-meta--plus">+</div>
+  </div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    // size the behind-word to fill the collage field (compose with fluid-type-sizing)
+    if (window.FluidType) {
+      FluidType.fit(document.querySelector('.pc-word'), {
+        container: document.getElementById('collage'),
+        gutter: 0, fill: 1
+      });
+    }
+    // the collage engine: mouse-parallax the decor (+ wordmark a touch) at per-element depths
+    ParallaxCollage.init('#collage', {
+      decoSelector: '[data-deco]',
+      wordmark: '.pc-word',
+      maxShiftPx: 26,
+      ease: 0.09,
+      wordmarkDepth: 0.10
+    });
+  })();
+</script>
+</body>
+</html>
