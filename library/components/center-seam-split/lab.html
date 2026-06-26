@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · center-seam-split · Saisei centre-seam page transition (close cream → open dark)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · center-seam-split
+================================================================================
+  Saisei's signature primitive — a vertical centre seam that OPENS (a fill splits from
+  the centre outward to reveal what's behind) or CLOSES (two halves slide from the edges
+  to a centre seam to cover). ONE engine, four uses (preloader, page-enter, menu-close,
+  image-reveal). Harvested from D_saisei (S1).
+
+  This lab plays the full Saisei PAGE TRANSITION on OUR content: a cream page CLOSES
+  in cream (curtain converges to centre) -> a brief hold (where the monogram loader
+  would sit) -> OPENS in dark (black seam splits from centre) revealing the QUADRO hero.
+  The "expensive" tell is the two-phase colour: close=cream, open=dark.
+
+  NO WebGL (clip-path + opacity only). window.__LAB_OK__ on init.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --cream:#f0e9d2; --ink:#13130e; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--ink);color:var(--cream);font-family:var(--sans);overflow:hidden}
+
+  /* the "outgoing" cream page (state A) */
+  .page-a{position:fixed;inset:0;z-index:1;background:var(--cream);color:var(--ink);
+    display:grid;place-items:center;text-align:center}
+  .page-a .mono{font-family:var(--serif);font-size:clamp(2rem,6vw,4rem)}
+  .page-a .lbl{margin-top:1rem;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;opacity:.6}
+
+  /* the "incoming" dark hero (state B), behind the cover, revealed by the open seam */
+  .page-b{position:fixed;inset:0;z-index:0;overflow:hidden}
+  .page-b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.62}
+  .page-b .wrap{position:absolute;inset:0;display:flex;align-items:flex-end;
+    padding:0 clamp(28px,5vw,80px) clamp(36px,7vh,72px)}
+  .page-b .title{font-family:var(--serif);font-weight:300;color:var(--cream);
+    font-size:clamp(3rem,13vw,11rem);line-height:.9;letter-spacing:-.01em}
+  .page-b .meta{position:absolute;right:clamp(28px,5vw,80px);bottom:clamp(40px,8vh,80px);
+    max-width:26ch;text-align:right;color:var(--cream)}
+  .page-b .meta .jp{font-family:var(--serif);font-size:clamp(1.1rem,2vw,1.6rem);margin-bottom:.5rem}
+  .page-b .meta p{font-size:clamp(.85rem,1.1vw,1rem);line-height:1.55;opacity:.82}
+
+  .replay{position:fixed;z-index:10000;left:50%;bottom:18px;transform:translateX(-50%);
+    font:500 .7rem/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;
+    color:var(--cream);background:rgba(0,0,0,.45);border:1px solid rgba(240,233,210,.4);
+    padding:.6rem 1rem;border-radius:2px;cursor:pointer}
+</style>
+</head>
+<body>
+
+  <!-- incoming dark hero (behind) -->
+  <section class="page-b">
+    <img src="renders/terrace.webp" alt="QUADRO">
+    <div class="wrap"><div class="title">QUADRO</div></div>
+    <div class="meta"><div class="jp">再生</div><p>Простір, що відкривається одним рухом. Дім, який дихає тишею.</p></div>
+  </section>
+
+  <!-- outgoing cream page (front) -->
+  <section class="page-a" id="pageA">
+    <div>
+      <div class="mono">木</div>
+      <div class="lbl">SAISEI-style seam · клік знизу повторить</div>
+    </div>
+  </section>
+
+  <button class="replay" id="replay">▶ програти перехід</button>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    var pageA = document.getElementById('pageA');
+
+    // play the full transition: CLOSE in cream over the cream page (the seam converges,
+    // briefly hiding everything), hold (loader spot), then hide page-A and OPEN in dark
+    // (the black seam splits from centre revealing the QUADRO hero behind).
+    function play() {
+      pageA.style.display = '';
+      // a cover that CLOSES in cream (edges -> centre), covering page-A
+      var creamSeam = CenterSeamSplit.create(document.body, { fill: '#f0e9d2', axis: 'x', z: 9998 });
+      creamSeam.set(1);                       // start fully open (cream page visible underneath)
+      creamSeam.close({ duration: 0.55, ease: 'power3.inOut', onComplete: function () {
+        // fully cream now; drop page-A, switch the cover to dark, hold, then open to reveal hero
+        pageA.style.display = 'none';
+        creamSeam.destroy();
+        var darkSeam = CenterSeamSplit.create(document.body, { fill: '#0e0e0c', axis: 'x', z: 9998 });
+        darkSeam.set(0);                      // fully dark (covering the hero)
+        setTimeout(function () {
+          darkSeam.open({ duration: 0.85, ease: 'expo.out', onComplete: function () { darkSeam.destroy(); } });
+        }, 520);                              // the loader hold
+      }});
+    }
+
+    document.getElementById('replay').addEventListener('click', play);
+    // autoplay once on load
+    setTimeout(play, 500);
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

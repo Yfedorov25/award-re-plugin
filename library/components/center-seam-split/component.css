@@ -1,0 +1,18 @@
+/* ============================================================
+   CENTER-SEAM-SPLIT · component.css
+   The cover element is injected by JS over the target; the engine drives its
+   clip-path. This file only documents the cover + a thin centre seam-line option.
+   ============================================================ */
+
+.css-cover { /* injected: position/inset/z/background set inline by the engine */
+  will-change: clip-path;
+}
+
+/* optional hairline seam drawn down the centre while covering (Saisei's guide line).
+   Add .css-cover--seam and set --seam-colour to show a 1px centre rule. */
+.css-cover--seam::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+  background: var(--seam-colour, rgba(14,14,12,.5)); transform: translateX(-.5px);
+}
+
+/* NO mix-blend / NO backdrop. clip-path + opacity only. */
