@@ -1477,9 +1477,9 @@
       "returns": "{ trigger, lenis, render, refresh, destroy }  (or { static:true, destroy } under reduced-motion / <=820px / no-libs)"
     },
     "meaning": {
-      "what": "Springs' brand-tinted reveal — a full-bleed photo arrives under a brand-colour WASH whose opacity then animates to 0 ON the photo as the section scrolls in, so every photo gets a brief 'brand-tint' beat before it resolves to full colour. A single opacity scrub (wash -> 0) over a solid photo does the reveal; scroll-scrubbed and reversible. The 'every image enters wearing the brand colour, then clears' move.",
+      "what": "Springs' brand-tinted reveal — the section PINS full-screen on a full-bleed photo dipped in the brand colour, and while pinned a brand-colour WASH tints from full to 0 ON THE WHOLE FRAME, so the photo is seen surfacing from under the house colour across the entire screen (not while it slides in). A single opacity scrub (wash -> 0) over a solid, full-bleed, pinned photo does the reveal; scroll-scrubbed along the pin and reversible. The 'every image enters wearing the brand colour, then clears' move.",
       "when": "A section whose lead photo should enter wearing the house/section colour and then clear to full colour — the brand-tint signature that ties a gallery or a sequence of full-bleed photos together (every shot dipped in the brand, then resolved). Springs' Place/Jogging beats; the cheap, repeatable way to brand a run of photos without a per-photo treatment.",
-      "lands": "A full-bleed render that comes in dipped in the brand green (a heavy tint), and as you scroll the tint drains off it to reveal the true photo — the image 'surfacing' from under the brand colour. It reads as a deliberate house wash on every photo, not a fade-from-black; reverse re-tints it. The photo is solid the whole time, so it never shows a hole.",
+      "lands": "You scroll onto a full-bleed render that fills the screen dipped in the brand green (a heavy tint); it holds there (pinned) and the tint drains off the WHOLE frame to reveal the true photo — the image 'surfacing' from under the brand colour across the entire screen. It reads as a deliberate house wash on every photo, not a fade-from-black; reverse re-tints it. The photo is solid the whole time, so it never shows a hole.",
       "not_when": "A photo that should read in true colour immediately (no brand beat). A section already owning a heavier transition (section-pager pane, curtain). A hero that must read instantly (a tint delays the read). When the section colour is muddy on the photo (test the multiply-free wash first). On a light backdrop with fadeImage:true (the image would see-through the wash at entry — keep fadeImage:false)."
     },
     "source": {
@@ -1494,12 +1494,12 @@
     "motion_props": [
       "opacity"
     ],
-    "trigger": "ONE entry scroll-scrub ScrollTrigger (scrub:true, start 'top bottom', end 'top 30%'), Lenis-smoothed, reversible; no hard pin (resolves as the section enters)",
+    "trigger": "ONE pinned scroll-scrub ScrollTrigger (pin:true, pinSpacing:true, scrub:true, start 'top top', end '+=innerHeight*pinFactor'), Lenis-smoothed, reversible; pins the section full-screen and tints the wash off the full frame",
     "timing_layer": [
       "B-entrance",
       "A-ambient"
     ],
-    "owns_pin": false,
+    "owns_pin": true,
     "owns_scroll": false,
     "page_beat": [
       "chapter",
@@ -1515,9 +1515,11 @@
     ],
     "anti_combos": [
       "section-pager",
-      "vertical-curtain-wipe"
+      "vertical-curtain-wipe",
+      "second-pin"
     ],
     "gated_by": [
+      "R_pin_budget",
       "R_anti_combos",
       "R_perf_limits",
       "R_one_scroll_owner"
@@ -1531,8 +1533,8 @@
       "tokens.json"
     ],
     "acceptance": [
-      "ONE entry scroll-scrub clears the wash (owns_pin FALSE, no hard pin); render(prog) is a PURE fn of progress (wash opacity = wash*(1-prog)); reversible (scroll back re-tints)",
-      "the photo is solid under the wash; the brand-colour wash tints from wash (default 1.0) -> 0 ON the photo as the section enters the viewport",
+      "ONE pinned scroll-scrub clears the wash (owns_pin TRUE; pin full-screen, start 'top top', end '+=innerHeight*pinFactor'); render(prog) is a PURE fn of progress (wash opacity = wash*(1-prog)); reversible (scroll back re-tints)",
+      "the section pins full-screen on a full-bleed solid photo; the brand-colour wash tints from wash (default 1.0) -> 0 ON THE WHOLE FRAME while pinned (the tint is seen across the entire photo, not a strip as it slides in)",
       "the wash colour is the brand/section colour (CSS var --boc-wash / background) so the photo enters wearing the house colour, then clears",
       "opacity ONLY (on the wash, and optionally the image); NO mix-blend / NO backdrop over the scrubbed surface; NO WebGL",
       "composite coverage (image + wash) stays opaque through the whole transition = zero see-through on any background (fadeImage:false default)",
@@ -1540,7 +1542,7 @@
       "asset-substitution gate: OUR render + Ukrainian copy"
     ],
     "gate": {
-      "probe": "Open lab.html (Lenis from jsdelivr). __LAB_OK__ true (boc-ready, NOT boc-static). Scroll the section up into the viewport and confirm: the render arrives dipped in the brand green, the tint drains off it to reveal the true photo, scroll back re-tints. Normal smoothness gate (single solid media under a tinting wash, no two-render overlap): PASS = 0 blank, fps>=50, jank<8%. Also probe composite (img+wash) coverage never thins below opaque."
+      "probe": "Open lab.html (Lenis from jsdelivr). __LAB_OK__ true (boc-ready, NOT boc-static). Scroll into the section and confirm it PINS full-screen, then while pinned (stageTop 0) the tint drains off the WHOLE frame: wash ~0.8 heavily dipped -> 0.5 half-clear -> 0 full colour, all at full-bleed; scroll back re-tints. Normal smoothness gate (single solid media under a tinting wash, no two-render overlap): PASS = 0 blank, fps>=50, jank<8%. Also probe composite (img+wash) coverage never thins below opaque."
     },
     "note": "|",
     "_path": "library/components/brand-overlay-crossfade/",

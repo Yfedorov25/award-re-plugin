@@ -7,15 +7,16 @@
    "brand tint" beat before it resolves to full colour. Harvested from D_springs
    (Place->Jogging SEAM-07, f099->f106: heavy green tint -> lighter -> full colour).
 
-   THE MOVE: as the section enters, the image autoAlpha 0->1 AND a brand-colour
-   overlay opacity wash% -> 0, on the SAME scrub. The image arrives already washed in
-   the brand colour, then the wash clears to reveal the true photo. Reversible.
+   THE MOVE: the section PINS full-screen on a full-bleed photo dipped in the brand
+   colour; while pinned, the wash opacity scrubs wash% -> 0 ON THE WHOLE FRAME, so the
+   tint drains off the full photo in place (not while it slides in). The photo is solid
+   the whole time. Reversible. (Optional fadeImage also autoAlphas the image 0->1.)
 
    CONFIG-DRIVEN:
      BrandOverlayCrossfade.init(target, {
        wash: 1.0,           // starting wash opacity (1 = full brand cover -> tints to 0)
        fadeImage: false,    // default: photo is solid under the wash; the wash tints to 0 ON it (zero see-through, any background). true = also crossfade the image 0->1 (only on a brand-coloured backdrop)
-       lerp: 0.1, pinFactor: 0.6, manageLenis: true
+       lerp: 0.1, pinFactor: 1.0, manageLenis: true
      })
    Markup: .boc-stage > .boc-img(img) + .boc-wash(brand-colour layer). The wash
    colour is set in CSS (var/background) = the brand/section colour.
@@ -34,7 +35,7 @@
       wash: options.wash != null ? options.wash : 1.0,
       fadeImage: options.fadeImage === true,
       lerp: options.lerp != null ? options.lerp : 0.1,
-      pinFactor: options.pinFactor != null ? options.pinFactor : 0.6,
+      pinFactor: options.pinFactor != null ? options.pinFactor : 1.0,
       manageLenis: options.manageLenis !== false
     };
 
@@ -77,9 +78,13 @@
       if (wash) wash.style.opacity = (opt.wash * (1 - prog)).toFixed(3);
     }
 
+    // PIN the section full-screen, then scrub the wash 1->0 ON the full photo (Springs
+    // SEAM-07): you arrive on a full-bleed shot dipped in the brand colour and, while
+    // pinned, the tint drains off the WHOLE frame. pin length = innerHeight*pinFactor.
     var trigger = ScrollTrigger.create({
-      trigger: stage, start: 'top bottom', end: 'top 30%',  // resolves as it enters the viewport
-      scrub: true,
+      trigger: stage, start: 'top top',
+      end: function () { return '+=' + Math.round(global.innerHeight * opt.pinFactor); },
+      pin: true, pinSpacing: true, scrub: true,
       onUpdate: function (self) { render(self.progress); }
     });
     render(0);
