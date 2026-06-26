@@ -1,0 +1,15 @@
+/* ============================================================
+   FLUID-TYPE-SIZING · component.css
+   Sizing engine — owns almost no visual style. It only needs the sized line to be
+   a block that can take a JS-computed font-size on one line. Everything else
+   (color, weight, position, the bleed/clip) is the composition layer, per site.
+   ============================================================ */
+
+/* a line being fit must be nowrap so the measured width is the single-line width */
+[data-fluid-fit] { white-space: nowrap; display: block; line-height: 1; }
+
+/* a vector word mark fills (100% - gutters); height follows the intrinsic ratio */
+[data-fluid-vector] { display: block; width: 100%; height: auto; }
+
+/* convenience: a giant bleeding wordmark host (pairs with bleeding-wordmark) */
+.fluid-wm { display: block; white-space: nowrap; line-height: .9; letter-spacing: -.02em; }

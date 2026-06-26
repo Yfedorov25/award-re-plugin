@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · fluid-type-sizing · giant word fills width, on OUR varying words</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · fluid-type-sizing
+================================================================================
+  The giant-word SIZING ENGINE harvested from live EVER (ever-live-here.com).
+  MEASURED LIVE @ 3 viewports: the hero word = (viewport - 2*gutter) wide, ALWAYS
+  (gutter ramps 20px@768 -> 50px@1440 -> 70px@1920 ≈ clamp(20px,3.6vw,70px)).
+  EVER's hero word is an SVG logo (one fixed word) stretched to that width.
+
+  THE REUSABLE MECHANISM (not EVER's letter): size a single line so it FILLS the
+  container width minus gutters, at any viewport, for ANY word length.
+
+  ASSET-SUBSTITUTION GATE (per the council): EVER had ONE word; WE have THREE
+  DIFFERENT words of different lengths — "quadro", "архітектура", "тераса". This
+  lab fits all three to the SAME target width (each its own font-size), proving
+  the engine is config-driven and re-fires on OUR content, not a trace of EVER's
+  single logo. Resize the window: all three re-fit live, flush to the gutters.
+  NO WebGL.
+
+  window.__LAB_OK__ is set once a fit completes. Renders via renders -> proto.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --cream:#DCC5B7; --slate:#95A3AE; --bg:#1b2126;
+    --wm:'Jost','Century Gothic',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);color:var(--cream);font-family:var(--body)}
+  body{min-height:100%;padding:0;display:flex;flex-direction:column;justify-content:center;gap:clamp(18px,4vh,46px)}
+
+  .row{position:relative}
+  /* each giant word fills (100% - gutters); different words, same target width */
+  .word{font-family:var(--wm);font-weight:400;text-transform:uppercase;color:var(--cream);
+    letter-spacing:-.02em;line-height:.92}
+  .word--out{color:transparent;-webkit-text-stroke:1.6px var(--cream)}  /* mirror-law variant */
+  .tag{position:absolute;right:clamp(20px,3.6vw,70px);top:-1.2em;font-family:var(--body);
+    font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--slate)}
+
+  .note{position:fixed;left:clamp(20px,3.6vw,70px);bottom:14px;font-size:.72rem;color:var(--slate);font-family:var(--body)}
+</style>
+</head>
+<body>
+
+  <div class="row">
+    <span class="tag">quadro · 6 літер</span>
+    <div class="word" data-fluid-fit>quadro</div>
+  </div>
+
+  <div class="row">
+    <span class="tag">архітектура · 11 літер</span>
+    <div class="word word--out" data-fluid-fit>архітектура</div>
+  </div>
+
+  <div class="row">
+    <span class="tag">тераса · 6 літер</span>
+    <div class="word" data-fluid-fit>тераса</div>
+  </div>
+
+  <div class="note">Той самий двигун: різні слова різної довжини, кожне заповнює ширину мінус поля. Зміни розмір вікна — всі три перерахуються.</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    // CONFIG-DRIVEN: fill the line to (container width - gutters), EVER's gutter ramp.
+    // gutter as a fn of viewport width = EVER's measured clamp(20,3.6vw,70).
+    var opts = {
+      container: document.body,
+      gutter: function (vw) { return Math.max(20, Math.min(70, vw * 0.036)); },
+      fill: 1
+    };
+    FluidType.fitAll('[data-fluid-fit]', opts);
+  })();
+</script>
+</body>
+</html>
