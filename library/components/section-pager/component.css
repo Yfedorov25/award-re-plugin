@@ -1,0 +1,45 @@
+/* ============================================================
+   SECTION-PAGER · component.css
+   The wheel-hijack fullpage pager skin. Pure structure + GPU isolation.
+   Content typography (wordmarks, copy) is the COMPOSITION layer — set per site,
+   NOT owned here. This file owns only: the stage, the stacked panes, the GPU
+   promotion, the bg-zoom layer, and the reduced-motion static fallback.
+   ============================================================ */
+
+.sp-stage { position: fixed; inset: 0; overflow: hidden; opacity: 0; }
+.sp-stage.sp-ready { opacity: 1; transition: opacity .5s ease; }
+
+.sp-stage .pane {
+  position: fixed; inset: 0; overflow: hidden;
+  will-change: transform; transform: translate3d(0, 0, 0);
+  backface-visibility: hidden; contain: layout paint;
+}
+
+/* the media/background layer — its own GPU layer, takes the slow bg zoom */
+.sp-stage .bg { position: absolute; inset: 0; overflow: hidden; }
+.sp-stage .bg img,
+.sp-stage [data-bg] {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  will-change: transform; transform: translateZ(0) scale(1); backface-visibility: hidden;
+}
+
+/* reveal wrappers — TRANSLATE-only clipped rise (EVER barely fades) */
+.sp-stage [data-rise],
+.sp-stage .rise { will-change: transform; backface-visibility: hidden; }
+.sp-stage .sp-ln { display: block; overflow: hidden; }
+.sp-stage .sp-ln__i { display: inline-block; will-change: transform; transform: translateY(112%); backface-visibility: hidden; }
+.sp-stage [data-fade] { will-change: transform, opacity; opacity: 0; backface-visibility: hidden; }
+
+/* a host that wraps a giant bleeding wordmark for the clipped rise */
+.sp-stage [data-rise-wrap] { overflow: hidden; }
+
+/* NO mix-blend-mode and NO backdrop-filter anywhere over a moving pane.
+   NO clip-path on the pane itself (the curtain is pure translateY). */
+
+/* ---- reduced-motion / no-hijack static fallback ---- */
+.sp-stage.sp-static { position: static; overflow: visible; opacity: 1; }
+.sp-stage.sp-static .pane { position: relative; transform: none !important; height: 100vh; }
+.sp-stage.sp-static .sp-ln__i,
+.sp-stage.sp-static [data-rise],
+.sp-stage.sp-static .rise { transform: none !important; }
+.sp-stage.sp-static [data-fade] { opacity: 1 !important; transform: none !important; }
