@@ -337,6 +337,77 @@
     "_path": "library/components/media-step-switch/",
     "_variantsResolved": []
   },
+  "orbit-stage-3d": {
+    "id": "orbit-stage-3d",
+    "name": "Interactive 3D orbit stage (model + tuning panel)",
+    "level": 1,
+    "kind": "component",
+    "status": "candidate",
+    "entry": {
+      "call": "OrbitStage3D.init(target, options)  // target = the stage container el or selector (default '#orbit-stage'); the engine builds the WebGL renderer canvas into .orbit__stage and wires every [data-state] / [data-knob] / [data-bg] in the panel. options all optional: { models:{stateA,stateB}, initialState, toggleLabels, dracoPath, sunPos, sunColor, sunIntensity, hemiIntensity, exposure, envIntensity, fogColor, fogDensity, skyTop, skyBot, fov, far, damping, minDistance, maxDistance, maxPolarAngle, framePullback, autoRotate, autoRotateSpeed, ground }",
+      "module": "esm",
+      "returns": "{ THREE, renderer, scene, camera, controls, show, setExposure, setSun, setShadows, setAutoRotate, setSpin, setFov, setBg, setGround, invalidate, resize, destroy }  (or { error } if WebGL is unavailable; then __LAB_OK__ = false)"
+    },
+    "meaning": {
+      "what": "AN INTERACTIVE 3D ORBIT STAGE. LEFT ~70% is a LIVE 3D scene you ORBIT with the mouse (a Draco-glb house model on its full yard); RIGHT ~30% is a TUNING panel of controls that change the scene in REAL TIME (Світло: exposure + sun + shadows; Камера: autorotate + speed + fov; Сцена: background dark-gradient/cream/grid + ground plane); plus a signature floating STATE TOGGLE that swaps between two model states (here: roof-terrace ON vs OFF) with ZERO house-jump (the two glb are identically aligned, same X/Y, same Z-min; only the toggled feature differs; the second state lazy-loads on the first toggle). three 0.169 + GLTFLoader + DRACOLoader + OrbitControls + procedural Sky (IBL only). ACESFilmic, SRGB, soft PCF shadows. RENDER-ON-DEMAND (only draws on change/orbit/autorotate -> idle = 0 GPU = smooth). FIXED natural daylight (day/night was tried and removed as unrealistic). A lazy placeholder box stands in if a glb is missing. WebGL is ALLOWED for this isolated 3D section — it OVERRIDES the plugin's usual no-WebGL rule BECAUSE it is a self-contained 3D stage, not page chrome.",
+      "when": "A RE site has a real 3D model of the building AND a real configurable option the buyer wants to explore from every side — a roof terrace on/off, a facade material/colour variant, a layout state — that renders alone cannot let them spin and flip live. The one place WebGL is worth its weight: when the value IS the interactivity (orbit + a true toggle), not a still frame.",
+      "lands": "I can see the house from every side and flip the option live. The buyer drags to walk around their future home, watches the light/shadows, then flips the roof terrace on and off in place with no jump — it reads as a confident, configurator-grade moment, the proof that the option is real, not a promise.",
+      "not_when": "No 3D model available, or no real toggle-able option to explore (per the council, then use renders — stacked-pairs / focus-render-switch / media-step-switch — never a 3D stage for its own sake). Page chrome / hero / a scroll-driven beat (the no-WebGL rule still holds everywhere else). A section that must be pinned to the scroll. Never reach for video.currentTime scrubbing."
+    },
+    "source": {
+      "grammar": "QUADRO slide-lab — orbit3d-quadro: a Vector-Bloom interactive 3D block (live orbit stage + real-time tuning panel + a two-state glb toggle), the owner-approved working viewer; frozen engine contract in apps/quadro/public/3d/README-3D-STATE.md",
+      "recording": "apps/quadro/public/slide-lab/orbit3d-quadro.html",
+      "registry_ref": []
+    },
+    "stack": "three 0.169 (importmap/unpkg) + GLTFLoader + DRACOLoader + OrbitControls + procedural Sky (IBL only)",
+    "webgl": true,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "clip"
+    ],
+    "trigger": "mouse-driven OrbitControls (damped) + optional auto-rotate; a render-on-demand rAF loop draws only on change/orbit/autorotate (NOT scroll-driven, NOT pinned)",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "page_beat": [
+      "proof",
+      "material"
+    ],
+    "combines_with": [
+      "reveal",
+      "scroll-indicator"
+    ],
+    "anti_combos": [
+      "second-pin"
+    ],
+    "gated_by": [
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "GL-READINESS PROBE (NOT the DOM pixel-audit gate): window.__LAB_OK__ becomes TRUE once the WebGLRenderer is up AND at least one model (or the lazy placeholder box) is in the scene; it is set FALSE if WebGL init throws — the lab never fake-passes when GL is down",
+      "MUST be eye-checked in a REAL browser — headless WebGL (swiftshader) is slow + unreliable with this model, so library-verify SKIPS this lab (webgl:true -> status:candidate); the headless gate is intentionally not the proof here",
+      "LEFT ~70% live orbit stage (mouse-drag orbit, wheel zoom, damped) + RIGHT ~30% tuning panel whose [data-knob]/[data-bg] controls change the scene in real time; a floating [data-state] STATE TOGGLE swaps two identically-aligned glb with ZERO house-jump (second state lazy-loads on first toggle)",
+      "engine contract held 1:1: three 0.169 + GLTFLoader + DRACOLoader + OrbitControls + procedural Sky IBL; ACESFilmic + SRGB + soft PCF shadows; pixelRatio min(dpr,2); RENDER-ON-DEMAND (idle = 0 GPU); FIXED daylight (sun (70,120,50) #fff4e6 i2.4, hemi 0.45, env 1.0, exposure 1.0, FogExp2 #cfdae8 0.00055, blue gradient bg)",
+      "camera fov 42 far 20000; orbit damping 0.08, minDist 14 maxDist 320, maxPolarAngle ~0.49 pi; frameModel centers X/Z, base y=0, pulls back ~0.9*max(size.x,size.z)",
+      "WebGL allowed ONLY for this isolated 3D stage (overrides the no-WebGL rule); NO backdrop-filter / mask-composite / mix-blend over the moving 3D canvas; transform/opacity/clip only on chrome; reduced-motion -> autorotate off; no video.currentTime",
+      "lazy placeholder: a stand-in box renders if a glb is missing so the viewer still proves out and __LAB_OK__ still flips true"
+    ],
+    "verify": "lab.html#__LAB_OK__  (GL-readiness probe + a real-browser eye check; headless GL step SKIPPED by library-verify for webgl:true candidates)",
+    "_path": "library/components/orbit-stage-3d/",
+    "_variantsResolved": []
+  },
   "puzzle-image": {
     "id": "puzzle-image",
     "name": "Scroll-assembled WIDE cover -> modest scale-up",
