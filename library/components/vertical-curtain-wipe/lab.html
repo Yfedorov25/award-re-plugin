@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · vertical-curtain-wipe · Springs section-entry wipe (seam L→R to 50% + crop-zoom)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · vertical-curtain-wipe
+================================================================================
+  Springs' section ENTRY: a panel enters as a hard VERTICAL seam wiping L->R and
+  PARKING at the 50% column split, while the outgoing full-bleed image CROP-ZOOMS
+  to recompose into the shrinking right column. Harvested from D_springs SEAM-02
+  (f014->f017). It is the entry that hands off into the coupled-split.
+
+  ASSET-SUBSTITUTION GATE: OUR render full-bleed, a green panel wiping in to the
+  50% split (a heading rising in it), the render crop-zooming in the right half.
+  Scroll into the pinned section. NO WebGL. window.__LAB_OK__ on init.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --green:#1f3a32; --green-2:#16302a; --cream:#e9e2d2; --slate:#9fb0a6; --serif:'Fraunces',Georgia,serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{background:var(--green-2);color:var(--cream);font-family:'Inter',system-ui,sans-serif}
+  .spacer{height:80vh;display:grid;place-items:center;color:var(--cream);opacity:.5;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+
+  /* the entering panel = a green text column */
+  .vcw-panel{ background:linear-gradient(100deg,var(--green) 0%,var(--green-2) 70%);
+    display:flex;flex-direction:column;justify-content:center;padding:0 clamp(28px,5vw,90px); }
+  .vcw-panel__eye{font-family:var(--serif);font-style:italic;font-size:1.05rem;color:var(--slate);margin-bottom:.8em}
+  .vcw-panel__h{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,4vw,3.4rem);line-height:1.08;letter-spacing:-.01em;max-width:14ch}
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол — зелена панель в'їжджає швом до 50% ↓</div>
+
+  <section class="vcw-stage" id="wipe">
+    <!-- z1: the outgoing full-bleed render (crop-zooms in the shrinking right half) -->
+    <div class="vcw-out"><img src="renders/day.webp" alt="QUADRO фасад"></div>
+    <!-- z2: the entering green panel (wipes L->R to the 50% split) -->
+    <div class="vcw-panel">
+      <div class="vcw-panel__eye">QUADRO · відчинити двері</div>
+      <div class="vcw-panel__h">Простір, що належить тільки твоїй родині</div>
+    </div>
+  </section>
+
+  <div class="spacer">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  VerticalCurtainWipe.init('#wipe', { park: 50, zoom: 0.12, lerp: 0.1, pinFactor: 0.9 });
+</script>
+</body>
+</html>
