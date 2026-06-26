@@ -30,7 +30,7 @@ anti_combos: [section-pager, vertical-curtain-wipe, second-pin]
 gated_by: [R_pin_budget, R_anti_combos, R_perf_limits, R_one_scroll_owner]
 variants: []
 params_ref: tokens.json
-files: [component.js, component.css, lab.html, tokens.json]
+files: [component.js, component.css, lab.html, lab-video.html, tokens.json]
 acceptance:
   - "ONE pinned scroll-scrub clears the wash (owns_pin TRUE; pin full-screen, start 'top top', end '+=innerHeight*pinFactor'); render(prog) is a PURE fn of progress (wash opacity = wash*(1-prog)); reversible (scroll back re-tints)"
   - "the section pins full-screen on a full-bleed solid photo; the brand-colour wash tints from wash (default 1.0) -> 0 ON THE WHOLE FRAME while pinned (the tint is seen across the entire photo, not a strip as it slides in)"
@@ -51,6 +51,18 @@ note: |
   see-through on any background); fadeImage:true (crossfade the image too) is only
   safe on a brand-coloured backdrop. owns_pin TRUE -> it is the section's one scroll
   owner (anti_combos: section-pager, vertical-curtain-wipe, second-pin).
+
+  MEDIA-AGNOSTIC: the .boc-img layer takes an <img> OR a <video autoplay muted loop
+  playsinline>. With fadeImage:false the engine never touches the media (only the
+  wash), so a live video plays the whole time while the tint drains off the pinned
+  frame (lab-video.html, proven on OUR nahirna water render: video advanced
+  0.47->5.50, zero paused frames, composite 1.000 throughout). NOTE: this is a video
+  PLAYING under the tint (scenario A), NOT scroll-scrubbed currentTime — scrubbing a
+  video's currentTime by scroll is a separate brick (decoder jank, see
+  scroll-driven-hero law). The smoothness-gate's blank/pixel checks target <img> and
+  .media selectors, so a <video> media reads as 'blank 100%' in the gate — that is a
+  gate blindspot, not a real blank (verify a video variant with a composite probe
+  instead: media-eff-opacity + wash-eff-opacity stays opaque every frame).
 ---
 
 # brand-overlay-crossfade — a photo surfaces from under a brand-colour wash
