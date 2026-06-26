@@ -13,7 +13,7 @@ meaning:
   when: "Any multi-section page that should carry a per-section palette / mood (day->night, warm->cool, one chapter color per section) where the whole chrome shifts as you move — the thing that makes EVER feel like distinct rooms rather than one flat theme. Whenever the header / accents / a persistent modal must always match the section currently on screen."
   lands: "As you scroll, the entire page mood drifts from one section's palette to the next — background, text ink, accent, the header, even an open modal — smoothly across the boundary, never a jarring flip. Each section reads as its own room; the chrome always belongs to where you are."
   not_when: "A single-palette site (one theme throughout — just set the vars once). A site whose colors must be authored exactly per element rather than tweened. When nothing in the chrome should react to the section (then plain per-section CSS is simpler). Heavy use with dozens of vars on a weak device (keep the var list small)."
-  source:
+source:
   grammar: "EVER per-section palette (slate/brown/green) with the header tinting to the incoming theme across each seam and modals inheriting the active theme; live-read."
   recording: "ever-live-here.com (live) + apps/quadro/.award-re/teardowns/EVER-MOTION-SPEC-live.md"
   registry_ref: ["T-themetween-ever"]
