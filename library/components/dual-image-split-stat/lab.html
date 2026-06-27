@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · dual-image-split-stat · r1864 (each slide = interior + city-view split with a stat-row overlay; ‹ › swaps the whole pair)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · dual-image-split-stat
+================================================================================
+  r1864's apartment-type gallery — a CAROUSEL where each slide is a DUAL-IMAGE SPLIT (left
+  interior + right city-view) with a STAT-ROW OVERLAID across the bottom (площадь / спальни /
+  высота) + a type TITLE; round ‹ › arrows (+ NN/N counter) swap the WHOLE pair. On enter the
+  active split clip-reveals from the centre seam outward + the stat-row rises. Distinct from
+  fullscreen-media-carousel (one full-bleed slide). Harvested from D_r1864 (r18641 /comfort +
+  apartment types). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#211c1b; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:#efe9df;font-family:'Inter',system-ui,sans-serif}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--paper);opacity:.5;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .dss-stage{ --dss-ground:#211c1b; --dss-cream:#efe9df; --dss-dim:#c4bcae; --dss-line:#8d8a82;
+    --dss-serif:'Playfair Display',Georgia,serif; --dss-sans:'Inter',sans-serif;
+    --dss-title:2.6vw; --dss-num:2.1vw; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — спліт інтер'єр + вид розкривається від центрального шва, статистика підіймається; ‹ › гортає типи</div>
+
+  <section class="dss-stage" id="apt-types">
+    <div class="dss-viewport">
+      <div class="dss-slide"
+           data-title="Историческая коллекция"
+           data-stats="105–165|Площадь, м² ; 1–2|Спальни ; 3,4–4|Высота сводов, м">
+        <div class="dss-split"><div class="dss-img dss-img--l"><img src="renders/terrace-02.webp" alt=""></div><div class="dss-img dss-img--r"><img src="renders/aerial.webp" alt=""></div></div>
+      </div>
+      <div class="dss-slide"
+           data-title="Частная коллекция"
+           data-stats="125–370|Площадь, м² ; 1–4|Спальни ; 3,4|Высота, м">
+        <div class="dss-split"><div class="dss-img dss-img--l"><img src="renders/day-front.webp" alt=""></div><div class="dss-img dss-img--r"><img src="renders/day-34.webp" alt=""></div></div>
+      </div>
+      <div class="dss-slide"
+           data-title="С террасами"
+           data-stats="145–365|Площадь, м² ; 1–4|Спальни ; 170|Терраса, м²">
+        <div class="dss-split"><div class="dss-img dss-img--l"><img src="renders/terrace-04.webp" alt=""></div><div class="dss-img dss-img--r"><img src="renders/scene18.webp" alt=""></div></div>
+      </div>
+      <div class="dss-slide"
+           data-title="Пентхаусы"
+           data-stats="623–987|Площадь, м² ; 5–7|Спальни ; 558–664|Терраса, м²">
+        <div class="dss-split"><div class="dss-img dss-img--l"><img src="renders/night-front.webp" alt=""></div><div class="dss-img dss-img--r"><img src="renders/night-34.webp" alt=""></div></div>
+      </div>
+    </div>
+
+    <div class="dss-meta">
+      <h2 class="dss-title">—</h2>
+      <div class="dss-stats"></div>
+    </div>
+
+    <div class="dss-nav">
+      <button class="dss-prev" aria-label="попередній тип">‹</button>
+      <span class="dss-counter">01 / 04</span>
+      <button class="dss-next" aria-label="наступний тип">›</button>
+    </div>
+  </section>
+
+  <div class="spacer">типи показано</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__dss = DualImageSplitStat.create('#apt-types', { start:'top 72%', revealDur:1.0, swapDur:0.6, ease:'power3.out', loop:true, once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

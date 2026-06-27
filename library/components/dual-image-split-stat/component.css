@@ -1,0 +1,71 @@
+/* DUAL-IMAGE-SPLIT-STAT · component.css
+   r1864 apartment-type gallery: a carousel where each slide is a dual-image split (interior +
+   city-view) with a stat-row overlaid + a type title; ‹ › swaps the whole pair.
+   clip-path(inset) + transform + opacity only. NO mix-blend. NO WebGL. */
+
+.dss-stage { position: relative; min-height: 100vh; overflow: hidden;
+  background: var(--dss-ground, #211c1b); color: var(--dss-cream, #efe9df); }
+
+/* stacked slides; each fills the viewport */
+.dss-viewport { position: absolute; inset: 0; z-index: 0; }
+.dss-slide { position: absolute; inset: 0; opacity: 0; will-change: opacity, transform; }
+.dss-split { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
+.dss-img { position: relative; overflow: hidden; will-change: clip-path; }
+.dss-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* a bottom scrim so the overlaid stat-row + title always read */
+.dss-stage::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(20,18,16,.40) 0%, rgba(20,18,16,0) 32%, rgba(20,18,16,.78) 100%);
+}
+
+/* overlaid meta: title (upper) + stat-row (bottom) */
+.dss-meta { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.dss-title {
+  position: absolute; left: 5vw; right: 5vw; top: 14vh; text-align: center;
+  font-family: var(--dss-serif, 'Playfair Display', Georgia, serif); font-weight: 400;
+  text-transform: uppercase; font-size: var(--dss-title, 2.6vw); line-height: 1.14;
+  letter-spacing: .03em; margin: 0; opacity: 0; will-change: transform, opacity;
+}
+.dss-stats {
+  position: absolute; left: 0; right: 0; bottom: 9vh; display: flex; justify-content: center;
+  gap: 5vw; padding: 0 5vw;
+}
+.dss-stat { text-align: center; opacity: 0; will-change: transform, opacity; }
+.dss-num {
+  font-family: var(--dss-serif, 'Playfair Display', Georgia, serif); font-weight: 400;
+  font-size: var(--dss-num, 2.1vw); line-height: 1; color: var(--dss-cream, #efe9df);
+  font-variant-numeric: tabular-nums;
+}
+.dss-lab {
+  font-family: var(--dss-sans, 'Inter', system-ui, sans-serif); font-size: .62rem;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--dss-dim, #c4bcae); margin-top: .7rem;
+}
+
+/* nav: ‹ counter › */
+.dss-nav {
+  position: absolute; z-index: 3; left: 50%; transform: translateX(-50%); bottom: 3.4vh;
+  display: inline-flex; align-items: center; gap: 1.4rem; pointer-events: auto;
+}
+.dss-counter {
+  font-family: var(--dss-sans, 'Inter', system-ui, sans-serif); font-size: .76rem;
+  letter-spacing: .22em; color: var(--dss-cream, #efe9df); font-variant-numeric: tabular-nums; min-width: 5ch; text-align: center;
+}
+.dss-prev, .dss-next {
+  width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--dss-line, #8d8a82);
+  background: rgba(20,18,16,.30); color: var(--dss-cream, #efe9df); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.05rem; line-height: 1; padding: 0;
+  transition: background .24s, color .24s, border-color .24s;
+}
+.dss-prev:hover, .dss-next:hover { background: var(--dss-cream, #efe9df); color: var(--dss-ground, #211c1b); border-color: var(--dss-cream, #efe9df); }
+
+/* static fallback */
+.dss-static .dss-slide:first-child { opacity: 1; }
+.dss-static .dss-img { clip-path: none !important; -webkit-clip-path: none !important; }
+.dss-static .dss-title, .dss-static .dss-stat { opacity: 1; transform: none; }
+
+@media (max-width: 820px) {
+  .dss-split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .dss-title { font-size: 6.5vw; }
+  .dss-num { font-size: 6vw; }
+  .dss-stats { flex-wrap: wrap; gap: 4vw 7vw; bottom: 12vh; }
+}
