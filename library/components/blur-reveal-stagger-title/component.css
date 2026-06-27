@@ -1,0 +1,6 @@
+/* BLUR-REVEAL-STAGGER-TITLE · component.css
+   Each word of the heading is wrapped in an inline-block span and revealed via
+   filter:blur(20->0) + opacity, staggered. filter + opacity only (per-word GPU layer).
+   NO mix-blend / NO backdrop / NO WebGL. The blur animates only on reveal (not on a
+   continuous scroll surface) so it's perf-safe. */
+.brst-word { display: inline-block; will-change: filter, opacity; }
