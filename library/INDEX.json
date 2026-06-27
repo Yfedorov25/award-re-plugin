@@ -4189,6 +4189,88 @@
     "_path": "library/components/preloader-band-collapse/",
     "_variantsResolved": []
   },
+  "river-tinted-poi-map": {
+    "id": "river-tinted-poi-map",
+    "name": "River-tinted POI map (a hand-styled vector district map — warm-taupe field, a slate-blue river band, green park blobs, white landmark glyphs, terracotta POI pins, a copper project disc; reveals on scroll, NOT Mapbox)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "RiverTintedPoiMap.create(target, opts)  // target = .rtm-stage > svg.rtm-map([data-river] + .rtm-park/.rtm-road + [data-glyph]) + .rtm-pin[data-poi](.dot + .lbl) + .rtm-disc[data-disc]. opts: { draw, stagger, duration, ease, start, once, manageLenis }.",
+      "module": "iife",
+      "returns": "{ trigger, set(p), play(), destroy }"
+    },
+    "meaning": {
+      "what": "r1864's drawn location map — the third map dialect. A hand-styled vector district map on a warm-taupe / near-black field: a winding slate-blue river band, filled green park blobs, a thin road network, white landmark glyphs with labels, terracotta circular POI pins with icons, and a big copper project disc at the centre. On scroll-into-view the river draws, glyphs rise, pins ladder bottom-to-top, the disc scales in. NOT live Mapbox — inline SVG + DOM.",
+      "when": "The location / neighbourhood beat for a premium, dark-themed site where the map should feel illustrated and branded — a warm tinted district with the river drawn in, a copper marker on the project, and a constellation of terracotta POI pins. Use it when a Google embed would break the mood and a flat line-art map (line-art-location-map) is too austere or a painterly one (watercolor-svg-map) too soft: this one is rich + dark + cartographic. The contacts page reuses it with one ОФИС ПРОДАЖ pill.",
+      "lands": "You scroll to the location and a dark, warm map composes itself: the river snakes in as a slate-blue ribbon, parks settle as soft green shapes, little landmark icons name the Kremlin and the gallery, and a ring of copper pins marks the lifestyle around you — a restaurant, a concert hall, a park — with a glowing copper disc on the building itself. It reads as a drawn, branded map, not a widget.",
+      "not_when": "When users need a real, pannable, accurate map (use Google/Mapbox). A light/airy palette (use watercolor-svg-map) or an austere line-only look (line-art-location-map). Too many POIs to place cleanly (~6-12). When there's no brand reason to hand-draw it."
+    },
+    "source": {
+      "grammar": "r18645 /location: warm-black/taupe field, a slate-blue Moskva river band, green park blobs, thin roads, white landmark line-glyphs (Кремль / Храм Христа Спасителя / Третьяковская галерея), terracotta circular pins with icons (Парк Зарядье / Филармония / Музеон / Дом музыки), a copper '1864 / СОФИЙСКАЯ НАБЕРЕЖНАЯ 36' disc.",
+      "recording": "apps/quadro/.award-re/teardowns/D_r1864_video.md (Brick 3 of the r1864 harvest; the drawn map)",
+      "registry_ref": [
+        "r1864-river-tinted-poi-map"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger (+ guarded Lenis 1.1.13)",
+    "webgl": false,
+    "motion_props": [
+      "stroke-dashoffset",
+      "transform",
+      "opacity"
+    ],
+    "trigger": "scroll-into-view reveal (once; not pinned)",
+    "timing_layer": [
+      "B-reveal",
+      "D-content"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "location",
+      "where",
+      "contacts"
+    ],
+    "combines_with": [
+      "numeral-frame-expand-hero",
+      "isometric-building-unit-selector",
+      "map-dim-carousel-announce",
+      "collection-tier-announce"
+    ],
+    "anti_combos": [
+      "embedded-map-widget",
+      "emoji-pin-icons"
+    ],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [
+      "themed-contact-map (this engine + a single ОФИС ПРОДАЖ pill)"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "a hand-styled inline SVG map: a slate-blue river band [data-river], filled green park blobs (.rtm-park), thin roads (.rtm-road), white landmark glyph groups [data-glyph] with labels — NOT Mapbox/Leaflet",
+      "the SVG is preserveAspectRatio='none' so the art fills the stage and the %-positioned DOM pins/disc align with it",
+      "on scroll-into-view: the river draws (stroke-dashoffset -> 0, 0..0.5); parks/roads fade (0..0.45); glyphs fade + rise (0.30..0.70, stagger); POI pins pop scale 0.5->1 bottom-to-top (0.45..1); the copper disc scales 0.7->1 + fades (0.55..0.85)",
+      "terracotta POI pins (.rtm-pin) use FONT-INDEPENDENT glyph icons (SVG/unicode marks, NOT emoji); hover -> .is-hot (dot scale + brighter + label opacity 1)",
+      "a copper project disc (.rtm-disc) with a number + a caption below it; set(p 0..1) is a PURE scrub",
+      "stroke-dashoffset + transform + opacity only; NO mix-blend; NO WebGL; owns_pin false; reduced-motion or <=820px -> shown",
+      "asset-substitution gate: a warm-dark field + a drawn river + terracotta pins + a copper project disc; window.__LAB_OK__ on init"
+    ],
+    "gate": {
+      "probe": "Open lab.html. __LAB_OK__ true. Scroll the section in: the river draws across the warm-dark field, park blobs + roads settle, landmark glyphs rise, terracotta POI pins ladder up, and the copper project disc scales in at the centre with its address caption; hover a pin lights it + its label. Verify preserveAspectRatio='none' (art fills + pins align), the river-draw + pin-ladder + disc-scale curve, font-independent pin glyphs (no emoji), + fps. Scroll-into-view reveal."
+    },
+    "note": "|",
+    "_path": "library/components/river-tinted-poi-map/",
+    "_variantsResolved": []
+  },
   "room-dolly-scroll": {
     "id": "room-dolly-scroll",
     "name": "Room dolly-scroll (a pinned multi-layer parallax that fakes a forward camera dolly into a scene; near layers grow + rush past, far barely move; a focal headline arrives — a NO-WebGL approximation of a 3D room walk)",
