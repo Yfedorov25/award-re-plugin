@@ -3628,6 +3628,89 @@
     "_path": "library/components/mask-up-title/",
     "_variantsResolved": []
   },
+  "masked-heritage-split": {
+    "id": "masked-heritage-split",
+    "name": "Masked heritage split (a left dark-green serif narrative panel + a right full-bleed heritage-artwork panel that reveals by a vertical clip-path top->bottom on enter; a circular arrow swaps the captioned artwork)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "MaskedHeritageSplit.create(target, opts)  // target = .mhs-stage > .mhs-left ( .mhs-title + .mhs-body + .mhs-credit + .mhs-credit-by + .mhs-nav( .mhs-counter + .mhs-arrow ) ) + .mhs-right ( .mhs-slide[data-credit][data-credit-by] x N ). opts: { start, revealDur, swapDur, ease, clipFrom, scaleFrom, once, autoAdvance, manageLenis }.",
+      "module": "iife",
+      "returns": "{ trigger, set(p), play(), go(i), next(), prev(), destroy }"
+    },
+    "meaning": {
+      "what": "r1864's /history split — a LEFT dark-green serif NARRATIVE panel (giant ALL-CAPS title + small sans body + an artwork CREDIT caption + a 'NN / N' counter + a circular arrow) beside a RIGHT full-bleed HERITAGE-ARTWORK panel that REVEALS by a vertical clip-path (top->bottom) on enter; advancing the arrow swaps the artwork + its credit. The museum-grade 'the place has a past' chapter.",
+      "when": "The 'history of the place' / heritage chapter of a premium project — where you tell the lineage of the site beside a series of archival paintings, engravings or old photographs. Use it when the location's PAST is part of the sell (a historic embankment, an old estate, a named architect). One side carries the narrative + the artwork credit; the other reveals the plate like a curtain dropping in a museum. Pairs naturally after a compass-rose-section-divider that announces the chapter.",
+      "lands": "The chapter opens onto a calm forest-green page; on the right a heritage painting is unveiled top-to-bottom as if a curtain drops, while on the left a serif statement and a quiet paragraph settle in, with the artwork's credit ('Кремль при Иване III — А. Васнецов') and a small counter beneath. A circular arrow turns the page to the next plate, the credit changing with it. It reads as a museum wall text beside the work — the place has provenance.",
+      "not_when": "There is no real history to tell (it wants genuine archival imagery + credits). A fast, modern, present-tense brand (the green + serif + engravings read heritage/classical). A single image with no narrative (use a plain split or oval-mask-reveal). When you can't supply proper artwork credits (the credit line is half the point)."
+    },
+    "source": {
+      "grammar": "r18644 /history: left forest-green panel — 'ИСТОРИЯ \\\"РЕЗИДЕНЦИИ 1864\\\" С XV ВЕКА' + a small body + the credit 'Кремль при Иване III / А. Васнецов' + a '1 / 4' counter + a circular -> arrow; the right side a full-bleed Vasnetsov painting revealed top->bottom. /location 'ОКРУЖЕНИЕ' reuses the same split.",
+      "recording": "apps/quadro/.award-re/teardowns/D_r1864_video.md (Brick 5 of the r1864 harvest; the /history heritage split)",
+      "registry_ref": [
+        "r1864-masked-heritage-split"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger (+ guarded Lenis 1.1.13)",
+    "webgl": false,
+    "motion_props": [
+      "clip-path",
+      "transform",
+      "opacity"
+    ],
+    "trigger": "scroll-into-view reveal (once) + a manual captioned carousel (arrow / dots)",
+    "timing_layer": [
+      "B-reveal",
+      "T-section-announce",
+      "C-carousel"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "heritage",
+      "history",
+      "provenance",
+      "section-announce",
+      "captioned-carousel"
+    ],
+    "combines_with": [
+      "compass-rose-section-divider",
+      "numeral-frame-expand-hero",
+      "collection-tier-announce",
+      "river-tinted-poi-map"
+    ],
+    "anti_combos": [
+      "pin",
+      "mix-blend-over-scroll"
+    ],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "a two-column split: a dark-green left narrative panel + a right full-bleed heritage-artwork panel (N stacked .mhs-slide plates)",
+      "on scroll-into-view the right plate un-curtains via clip-path inset (top->bottom, hidden 100%->0%) over 0..0.62 + a scale 1.06->1 settle",
+      "the left title fades + translateY 28->0 (0.20..0.55); body (0.40..0.70); credit + counter + circular arrow (0.60..1.0) staggered",
+      "the circular arrow (and dots) advance the captioned heritage carousel: the next plate drops from the top via clip-path, the credit cross-fades, the 'NN / N' counter updates, wraps",
+      "set(p 0..1) is a PURE scrub of the ENTER reveal; clip-path + transform + opacity only; NO mix-blend / NO WebGL; owns_pin false",
+      "reduced-motion or <=820px -> shown (split stacks to 1 column, first plate shown, no play); window.__LAB_OK__ on init",
+      "asset-substitution gate: heritage artwork (paintings/engravings/old photos) + proper credits + a forest-green serif narrative panel; the lab uses dense engraving-style inline SVG so it is asset-independent"
+    ],
+    "gate": {
+      "probe": "Open lab.html. __LAB_OK__ true. Scroll the split in: the right heritage plate un-curtains top->bottom while the left title/body/credit/counter stagger in. Click the circular arrow: the next plate drops from the top, the credit cross-fades, the counter NN/N updates, and it wraps. Verify the curtain direction, the left stagger order, the swap + credit/counter sync, + fps. It is a full-height split — scroll so the stage fills the frame to screenshot it."
+    },
+    "note": "|",
+    "_path": "library/components/masked-heritage-split/",
+    "_variantsResolved": []
+  },
   "menu-tracked-stagger": {
     "id": "menu-tracked-stagger",
     "name": "Menu tracked-stagger (a full-screen overlay nav: big condensed items ghost by default, solid on hover, current page red, staggered in; a contact column on the right; Close pill + Escape)",
