@@ -1,0 +1,8 @@
+/* SECTION-RISE-INTO-VIEW · component.css
+   A whole full-bleed media block rises up from below (translateY + fade) as it scrolls into
+   view, once. transform(translateY, scale) + opacity only. NO clip-mask, NO mix-blend. NO WebGL. */
+.sriv-stage { background: var(--sriv-bg, #f1efe9); }
+[data-rise-block] { will-change: transform, opacity; }
+[data-rise-block] img, [data-rise-block] video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* a typical full-bleed media block; consumers size it as they like */
+.sriv-media { width: 100%; height: var(--sriv-h, 70vh); overflow: hidden; border-radius: var(--sriv-radius, 0); }
