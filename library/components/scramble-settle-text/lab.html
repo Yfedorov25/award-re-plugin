@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · scramble-settle-text · bydorr (scroll-scrubbed per-character scramble-settle reveal)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · scramble-settle-text
+================================================================================
+  bydorr's text reveal — a multi-line passage that reveals CHARACTER BY CHARACTER on scroll:
+  the settled head is solid, the chars at the reveal edge are SCRAMBLED (rotated + offset +
+  faded) and tumble into place as you scroll. Scroll-scrubbed per-glyph scramble-settle.
+  Harvested from D_bydorr. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#ffffff; --ink:#1c1c1a; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif}
+  .spacer{height:110vh;display:grid;place-items:center;background:var(--paper);color:var(--ink);opacity:.4;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .sst-stage{ --sst-bg:#ffffff; --sst-ink:#2a2a28; --sst-font:'Inter',sans-serif; --sst-size:2.4vw; font-weight:300; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — текст збирається по літерах (scramble → settle)</div>
+
+  <section class="sst-stage" id="poem">
+    <div class="sst-text">
+      <span data-line>Живи, бо маєш дім,</span>
+      <span data-line>де тиша має сенс.</span>
+      <span data-line>Де ранок — це вікно,</span>
+      <span data-line>а вечір — це твій час.</span>
+    </div>
+  </section>
+
+  <div class="spacer">текст зібрано</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__sst = ScrambleSettleText.create('#poem', { chaos:38, charWin:0.10, pinFactor:1.2, ease:'power3.out', seed:7, manageLenis:false });
+  })();
+</script>
+</body>
+</html>
