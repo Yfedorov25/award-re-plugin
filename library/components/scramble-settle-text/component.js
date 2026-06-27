@@ -37,7 +37,7 @@
     options = options || {};
     var opt = {
       chaos: options.chaos != null ? options.chaos : 38,
-      charWin: options.charWin != null ? options.charWin : 0.10,
+      charWin: options.charWin != null ? options.charWin : 0.16,
       pinFactor: options.pinFactor != null ? options.pinFactor : 1.2,
       ease: options.ease || 'power3.out',
       seed: options.seed != null ? options.seed : 7,
@@ -72,10 +72,8 @@
         sp.textContent = ch;
         sp.style.display = 'inline-block';
         sp.style.willChange = 'transform, opacity';
-        // seed the scramble vector for this char
-        sp.__dx = (rnd() * 2 - 1) * opt.chaos;
-        sp.__dy = (rnd() * 2 - 1) * opt.chaos;
-        sp.__r = (rnd() * 2 - 1) * opt.chaos * 0.7;
+        // seed a deterministic per-char jitter scalar [0,1] (used for organic, sub-px variety)
+        sp.__k = rnd();
         ln.appendChild(sp);
         chars.push(sp);
       }
@@ -90,8 +88,17 @@
         var start = (i / N) * spread;
         var lp = efOut(clamp01((p - start) / opt.charWin));
         var inv = 1 - lp;
-        c.style.opacity = lp.toFixed(3);
-        c.style.transform = 'translate(' + (c.__dx * inv).toFixed(1) + 'px,' + (c.__dy * inv).toFixed(1) + 'px) rotate(' + (c.__r * inv).toFixed(1) + 'deg)';
+        // BASELINE-LOCKED HORIZONTAL COLLAPSE (the bydorr smear): the edge of the wave is a
+        // translucent, slightly-shrunk, extra-tracked, rightward-drifted ghost that COLLAPSES
+        // to settled as the wave reaches it. NO vertical move, NO rotation -> stable + liquid.
+        var k = c.__k || 0;
+        var smear = inv * inv;                       // tracking + x collapse faster than the fade
+        var tx = inv * (opt.chaos * 0.13 + opt.chaos * 0.32 * k); // rightward only (x of translate3d)
+        var ls = smear * (0.08 + 0.20 * k);          // extra letter-spacing on the unsettled tail (em)
+        var sc = 1 - inv * (0.06 + 0.05 * k);        // slight shrink while unsettled, never > 1
+        c.style.opacity = (0.10 + 0.90 * lp).toFixed(3);
+        c.style.letterSpacing = ls.toFixed(4) + 'em';
+        c.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,0,0) scale(' + sc.toFixed(4) + ')';
       }
     }
     apply(0);
