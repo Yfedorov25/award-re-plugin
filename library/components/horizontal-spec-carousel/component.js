@@ -67,22 +67,29 @@
       return cw + gap;
     }
 
+    var lastSpec = -1;
     function paintSpec() {
       var c = cards[idx];
-      if (spec) { spec.style.opacity = '0'; }
-      // crossfade: blank -> set -> show (on the next frame)
-      global.requestAnimationFrame(function () {
-        if (specTitle) specTitle.textContent = c.getAttribute('data-title') || '';
-        if (specSqft) specSqft.textContent = c.getAttribute('data-sqft') || '';
-        if (specRooms) specRooms.textContent = c.getAttribute('data-rooms') || '';
-        if (spec) spec.style.opacity = '1';
-      });
       cards.forEach(function (cc, i) { cc.classList.toggle('is-active', i === idx); });
       dots.forEach(function (d, i) { d.classList.toggle('is-on', i === idx); });
       if (!opt.loop) {
         if (prevBtn) prevBtn.disabled = idx === 0;
         if (nextBtn) nextBtn.disabled = idx === n - 1;
       }
+      if (!spec) return;
+      function setText() {
+        if (specTitle) specTitle.textContent = c.getAttribute('data-title') || '';
+        if (specSqft) specSqft.textContent = c.getAttribute('data-sqft') || '';
+        if (specRooms) specRooms.textContent = c.getAttribute('data-rooms') || '';
+      }
+      // only crossfade when the card actually changed; a snap-back never blanks the row.
+      if (idx === lastSpec) { spec.style.opacity = '1'; return; }
+      lastSpec = idx;
+      spec.style.opacity = '0';
+      // set text + restore opacity on the next frame; a safety timeout guarantees the row
+      // never gets stuck at 0 if the rAF is throttled (e.g. a backgrounded tab).
+      global.requestAnimationFrame(function () { setText(); spec.style.opacity = '1'; });
+      global.setTimeout(function () { setText(); spec.style.opacity = '1'; }, 80);
     }
 
     function layout(animate) {
@@ -121,26 +128,40 @@
       }, { passive: false });
     }
 
-    // drag / swipe
+    // drag / swipe — robust: move/up are tracked on the WINDOW so a drag that leaves
+    // the viewport (pointer moved away without releasing inside) still ends cleanly and
+    // always snaps to a card + repaints the spec-row. Threshold scales with card width.
     var drag = null;
+    function dragMove(e) {
+      if (!drag) return;
+      drag.dx = e.clientX - drag.x;
+      if (Math.abs(drag.dx) > 4) drag.moved = true;
+      track.style.transform = 'translateX(' + (drag.base + drag.dx) + 'px)';
+    }
+    function dragEnd() {
+      if (!drag) return;
+      var dx = drag.dx, moved = drag.moved;
+      drag = null;
+      global.removeEventListener('pointermove', dragMove);
+      global.removeEventListener('pointerup', dragEnd);
+      global.removeEventListener('pointercancel', dragEnd);
+      var thresh = Math.max(40, step() * 0.18);   // ~18% of a card = a real swipe
+      if (!moved) { layout(true); return; }       // a click, not a drag -> settle, no step
+      if (dx <= -thresh) next();
+      else if (dx >= thresh) prev();
+      else go(idx);                               // small throw -> snap back to current
+    }
     if (opt.drag && viewport) {
       viewport.addEventListener('pointerdown', function (e) {
-        drag = { x: e.clientX, base: -idx * step() };
+        if (e.button != null && e.button !== 0) return; // primary button only
+        drag = { x: e.clientX, base: -idx * step(), dx: 0, moved: false };
         track.style.transition = 'none';
-        viewport.setPointerCapture && viewport.setPointerCapture(e.pointerId);
+        global.addEventListener('pointermove', dragMove);
+        global.addEventListener('pointerup', dragEnd);
+        global.addEventListener('pointercancel', dragEnd);
       });
-      viewport.addEventListener('pointermove', function (e) {
-        if (!drag) return;
-        track.style.transform = 'translateX(' + (drag.base + (e.clientX - drag.x)) + 'px)';
-      });
-      var end = function (e) {
-        if (!drag) return;
-        var dx = e.clientX - drag.x;
-        drag = null;
-        if (dx < -40) next(); else if (dx > 40) prev(); else go(idx);
-      };
-      viewport.addEventListener('pointerup', end);
-      viewport.addEventListener('pointercancel', end);
+      // a drag never selects text / drags the image ghost
+      viewport.addEventListener('dragstart', function (e) { e.preventDefault(); });
     }
 
     go(idx, false);

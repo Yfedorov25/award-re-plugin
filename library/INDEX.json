@@ -2653,7 +2653,7 @@
       "a vertical-pill arrow sits in each gap (next / prev); arrows disable at the first/last card when loop is false",
       "each card has a CTA-pill that fades + lifts in on the active card only; the active card is opacity 1, neighbours dimmed",
       "a spec-row (title / sqft / rooms) crossfades to the active card's data-title/data-sqft/data-rooms SYNCHRONOUSLY with the slide",
-      "driven by arrows, drag/swipe (>40px = step), horizontal wheel intent, and Left/Right keys; the stage is focusable",
+      "driven by arrows, drag/swipe (threshold max(40px, 18% of a card); pure click never steps; drag move/up tracked on window so a drag leaving the viewport still ends cleanly + the spec-row never blanks on a non-step), horizontal wheel intent, and Left/Right keys; the stage is focusable",
       "transform: translateX + opacity only; NO mix-blend / NO backdrop over the cards; NO WebGL; reduced-motion -> instant index",
       "asset-substitution gate: OUR QUADRO plan/unit renders + a serif italic spec title + warm palette; window.__LAB_OK__ on init"
     ],
