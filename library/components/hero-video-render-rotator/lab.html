@@ -29,6 +29,10 @@
   .bar{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:3vh 4vw;color:#fff;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase}
   .bar .logo{font-family:var(--serif);font-style:italic;font-size:1.3rem;letter-spacing:0;text-transform:none}
   .hvr-title .mark{font-style:italic}
+  .searchpill{position:absolute;left:50%;bottom:4vh;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:1rem;
+    background:#fff;border-radius:999px;padding:.7rem 1.4rem;box-shadow:0 8px 30px rgba(0,0,0,.18);font-size:.95rem;color:#16150f}
+  .searchpill .chip{background:#efece6;border-radius:999px;padding:.3rem .8rem;font-size:.85rem}
+  .searchpill a{color:#16150f;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -45,14 +49,9 @@
     </div>
 
     <div class="hvr-title"><div class="mark">finest</div></div>
-
-    <div class="hvr-dots">
-      <button class="hvr-dot" aria-label="1"></button>
-      <button class="hvr-dot" aria-label="2"></button>
-      <button class="hvr-dot" aria-label="3"></button>
-      <button class="hvr-dot" aria-label="4"></button>
-      <button class="hvr-dot" aria-label="5"></button>
-    </div>
+    <!-- finest hero has NO dots/controls — it just auto-rotates the background under the
+         fixed wordmark until you scroll on. Dots are an OPTIONAL extra (omit for the finest look). -->
+    <div class="searchpill"><span class="chip">Finest</span><a href="#">Wohnung finden</a></div>
   </section>
 
 <script src="component.js"></script>

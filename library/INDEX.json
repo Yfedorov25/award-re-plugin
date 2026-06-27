@@ -2882,12 +2882,12 @@
       "auto-advances every `interval` ms; pauses on hover (hoverPause) and when the hero is off-screen (IntersectionObserver)",
       "a video slide play()s on activate and pause()s on deactivate (no currentTime scrub); videos are muted+loop+playsinline; play only while active AND on-screen",
       "the active media's .hvr-frame does a slow ken-burns scale 1.02 -> 1.12 (~6s); off when kenburns false / reduced-motion",
-      "the .hvr-title layer is ABOVE all media and FIXED — it never animates with the rotation; dots (if present) track the index",
+      "the .hvr-title layer is ABOVE all media and FIXED — it never animates with the rotation; finest has NO dots/controls (pure auto-rotate); dots are an OPTIONAL extra, omitted for the finest look",
       "opacity + transform scale only; NO mix-blend over the media; NO WebGL; reduced-motion -> no auto-advance, no ken-burns, first slide, video paused",
       "asset-substitution gate: OUR QUADRO video clip + renders rotating under a serif wordmark; window.__LAB_OK__ on init"
     ],
     "gate": {
-      "probe": "Open lab.html. __LAB_OK__ true. The hero background crossfades through a video clip + several renders while the serif wordmark stays put; dots track it. Triggered/auto (NOT scroll) -> verify exactly one active slide, the video PLAYS when active / PAUSES when off, the title is fixed, and probe JANK DURING CROSSFADES (force slide changes) — steady video playback is not jank. A static screenshot shows one slide only."
+      "probe": "Open lab.html. __LAB_OK__ true. The hero background crossfades through a video clip + several renders while the serif wordmark stays put; there are NO dots on finest (it just auto-rotates under the fixed title until you scroll). Triggered/auto (NOT scroll) -> verify exactly one active slide, the video PLAYS when active / PAUSES when off, the title is fixed, and probe JANK DURING CROSSFADES (force slide changes) — steady video playback is not jank. A static screenshot shows one slide only."
     },
     "note": "|",
     "_path": "library/components/hero-video-render-rotator/",

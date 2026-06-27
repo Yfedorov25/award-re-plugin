@@ -36,11 +36,11 @@ acceptance:
   - "auto-advances every `interval` ms; pauses on hover (hoverPause) and when the hero is off-screen (IntersectionObserver)"
   - "a video slide play()s on activate and pause()s on deactivate (no currentTime scrub); videos are muted+loop+playsinline; play only while active AND on-screen"
   - "the active media's .hvr-frame does a slow ken-burns scale 1.02 -> 1.12 (~6s); off when kenburns false / reduced-motion"
-  - "the .hvr-title layer is ABOVE all media and FIXED — it never animates with the rotation; dots (if present) track the index"
+  - "the .hvr-title layer is ABOVE all media and FIXED — it never animates with the rotation; finest has NO dots/controls (pure auto-rotate); dots are an OPTIONAL extra, omitted for the finest look"
   - "opacity + transform scale only; NO mix-blend over the media; NO WebGL; reduced-motion -> no auto-advance, no ken-burns, first slide, video paused"
   - "asset-substitution gate: OUR QUADRO video clip + renders rotating under a serif wordmark; window.__LAB_OK__ on init"
 gate:
-  probe: "Open lab.html. __LAB_OK__ true. The hero background crossfades through a video clip + several renders while the serif wordmark stays put; dots track it. Triggered/auto (NOT scroll) -> verify exactly one active slide, the video PLAYS when active / PAUSES when off, the title is fixed, and probe JANK DURING CROSSFADES (force slide changes) — steady video playback is not jank. A static screenshot shows one slide only."
+  probe: "Open lab.html. __LAB_OK__ true. The hero background crossfades through a video clip + several renders while the serif wordmark stays put; there are NO dots on finest (it just auto-rotates under the fixed title until you scroll). Triggered/auto (NOT scroll) -> verify exactly one active slide, the video PLAYS when active / PAUSES when off, the title is fixed, and probe JANK DURING CROSSFADES (force slide changes) — steady video playback is not jank. A static screenshot shows one slide only."
 note: |
   First crownd/finest harvest (F1). A hero whose background is a crossfading video+render
   slideshow under a fixed serif wordmark. Distinct from editorial-act-crossfade (there the
@@ -80,7 +80,7 @@ HeroVideoRenderRotator.create('#hero', { interval:4200, fade:1100, kenburns:true
 5 slides on OUR QUADRO media (clip-river-lite.webm video + aerial / day-front / terrace / night
 renders) under a fixed "finest" serif wordmark. Measured live: exactly 1 slide active (opacity 1,
 rest 0); the video slide (idx 0) playing=true when active, paused on a render slide, resumes on
-return; title fixed across all; dots track index; clip loads (200, 10.9MB). Screenshot (aerial
+return; title fixed across all; NO dots (finest has none); clip loads (200, 10.9MB). Screenshot (aerial
 render active): the "finest" italic serif centred + persistent over the QUADRO render, nav + dots
 (matches finest hero). Probe (4× CPU throttle, 6 forced crossfades): 6/333 long frames (1.8%),
 59.9fps → PASS. Zero console errors.
