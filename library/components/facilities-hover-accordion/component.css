@@ -1,0 +1,38 @@
+/* FACILITIES-HOVER-ACCORDION · component.css
+   N image cards in a flex row. The .is-active card grows (flex-grow: var(--fha-grow)),
+   neighbours shrink (flex-grow: 1); the active label fades in and the active media eases
+   to a wider, centred crop. flex-grow + opacity + object-position transition only.
+   NO mix-blend / NO backdrop. NO WebGL. The default-active card is set by JS. */
+.fha-row { display: flex; gap: var(--fha-gap, 10px); width: 100%; height: var(--fha-h, 70vh);
+  --fha-grow: 3.5; }
+
+.fha-card { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden;
+  border-radius: var(--fha-radius, 8px); cursor: pointer;
+  transition: flex-grow 350ms cubic-bezier(.4,0,.2,1); will-change: flex-grow; }
+.fha-card.is-active { flex-grow: var(--fha-grow); }
+
+.fha-media { position: absolute; inset: 0; }
+.fha-media img { width: 100%; height: 100%; object-fit: cover; display: block;
+  /* idle cards show an off-centre slice; the active card eases to the centre (wider crop) */
+  object-position: 50% 50%;
+  transition: object-position 350ms cubic-bezier(.4,0,.2,1), transform 350ms cubic-bezier(.4,0,.2,1);
+  will-change: object-position; }
+.fha-card:not(.is-active) .fha-media img { object-position: 62% 50%; transform: scale(1.04); }
+
+/* a bottom scrim so the label always reads */
+.fha-card::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(30,26,23,0) 45%, rgba(30,26,23,.6) 100%);
+  opacity: .85; transition: opacity 350ms cubic-bezier(.4,0,.2,1); }
+
+.fha-label { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  padding: 1.4rem 1.6rem; color: var(--fha-ink, #f4f1ea); pointer-events: none;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 350ms cubic-bezier(.4,0,.2,1), transform 350ms cubic-bezier(.4,0,.2,1); }
+.fha-card.is-active .fha-label { opacity: 1; transform: translateY(0); }
+
+/* a vertical mini-label for the collapsed cards (so they're not blank) */
+.fha-tab { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+  padding: 1rem; text-align: center; color: var(--fha-ink, #f4f1ea); pointer-events: none;
+  font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+  opacity: .9; transition: opacity 350ms cubic-bezier(.4,0,.2,1); }
+.fha-card.is-active .fha-tab { opacity: 0; }
