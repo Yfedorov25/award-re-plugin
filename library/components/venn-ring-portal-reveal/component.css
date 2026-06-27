@@ -1,0 +1,18 @@
+/* VENN-RING-PORTAL-REVEAL · component.css
+   3 outline circles in a row (overlapping = venn). On scroll the side circles fill ->
+   hollow -> shrink to dots; the centre circle is a clip-path:circle portal that opens
+   onto a full-bleed render. clip-path + border-width + transform + opacity only.
+   NO mix-blend / NO backdrop over the render. NO WebGL. */
+.vrp-stage { position: relative; height: 100vh; overflow: hidden; background: var(--vrp-bg, #6b5e4f); }
+/* the render the centre portal reveals — fills the stage, clipped by the portal ring */
+.vrp-render { position: absolute; inset: 0; z-index: 2; will-change: clip-path, transform; }
+.vrp-render img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* the rings row (above the render so the side rings read; centre IS the portal mask on the render) */
+.vrp-rings { position: absolute; inset: 0; z-index: 3; display: flex; align-items: center; justify-content: center;
+  gap: var(--vrp-gap, -4%); pointer-events: none; }
+.vrp-ring { width: var(--vrp-d, 26vw); height: var(--vrp-d, 26vw); border-radius: 50%;
+  border: 1px solid var(--vrp-stroke, #e6e0d4); display: grid; place-items: center;
+  will-change: border-width, transform, opacity; box-sizing: border-box; }
+/* the centre portal ring carries the clip-path on the RENDER, so itself stays a thin guide ring */
+.vrp-ring--portal { border-color: transparent; }
+.vrp-labels { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
