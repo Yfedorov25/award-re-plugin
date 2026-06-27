@@ -4275,6 +4275,89 @@
     "_path": "library/components/persistent-index-menu/",
     "_variantsResolved": []
   },
+  "poi-caption-carousel": {
+    "id": "poi-caption-carousel",
+    "name": "POI caption-carousel (a standalone rail of place cards, each with its caption directly under, paging in a big step via round ‹ › arrows with edge-peek + active-page emphasis)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "PoiCaptionCarousel.create(target, opts)  // target = .pcc-stage > .pcc-rail-wrap( .pcc-rail > .pcc-card( .pcc-card-img + .pcc-card-cap ) x N ) + .pcc-nav( .pcc-prev + .pcc-counter + .pcc-next ). opts: { start, pageStep, ease, slideDur, loop, activeDim, cardStagger, once, manageLenis }.",
+      "module": "iife",
+      "returns": "{ trigger, set(p), play(), next(), prev(), go(i), destroy }"
+    },
+    "meaning": {
+      "what": "r1864's standalone POI card-rail — a horizontal row of place cards, EACH with its CAPTION directly UNDER the card (the caption travels WITH the card), advancing in a BIG STEP via round ‹ › arrows (page-by-page, not one card) with EDGE-PEEK of the next card and ACTIVE-PAGE emphasis (off-page cards dim). On enter the cards stagger up from below. Drag supported.",
+      "when": "A 'what's nearby' / points-of-interest rail — landmarks, parks, amenities, neighbours — where each item is a photo with a short name under it and you want a clean, browsable rail that pages a whole screen-width at a time (not one nudged card). Use it as a standalone section (its own heading) when the map isn't the backdrop; if you want it OVER a dimmed map use map-dim-carousel-announce instead. Good for 6–12 places.",
+      "lands": "A heading like 'what's nearby', then a row of photographs each labelled underneath — the embankment, the park, the gallery — with the next one peeking in at the edge. A single round arrow turns the whole page of cards at once; the off-screen cards sit dimmed until they're the active page. It reads as a tidy index of the surroundings, not a fussy one-at-a-time slider.",
+      "not_when": "A swapping spec-row (title/sqft/rooms that changes per active card) — use horizontal-spec-carousel. The rail should sit over a dimmed map with an announce — use map-dim-carousel-announce. A single image or a full-bleed gallery (use fullscreen-media-carousel). When captions belong beside, not under, the image."
+    },
+    "source": {
+      "grammar": "r18641 /location POI rail: 5 place cards (НАБЕРЕЖНАЯ МОСКВЫ-РЕКИ / ПАРК «ЗАРЯДЬЕ» / ГУМ / РЕПИНСКИЙ СКВЕР / ТРЕТЬЯКОВСКАЯ ГАЛЕРЕЯ) each with a 2-line caption directly UNDER the photo, a round → arrow, edge-peek of the next card.",
+      "recording": "apps/quadro/.award-re/teardowns/D_r1864_video.md (Brick 9 of the r1864 harvest; the standalone POI rail)",
+      "registry_ref": [
+        "r1864-poi-caption-carousel"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger (+ guarded Lenis 1.1.13)",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "scroll-into-view stagger (once) + a manual big-step pager (arrows / drag / dots)",
+    "timing_layer": [
+      "B-reveal",
+      "C-carousel"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "nearby",
+      "points-of-interest",
+      "card-rail",
+      "location"
+    ],
+    "combines_with": [
+      "river-tinted-poi-map",
+      "map-dim-carousel-announce",
+      "compass-rose-section-divider",
+      "masked-heritage-split"
+    ],
+    "anti_combos": [
+      "pin",
+      "mix-blend-over-scroll"
+    ],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [
+      "horizontal-spec-carousel",
+      "map-dim-carousel-announce"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "a horizontal rail of N place cards, each = .pcc-card-img + a .pcc-card-cap caption directly UNDER it",
+      "on scroll-into-view the cards stagger fade + translateY 44->0 (active-page cards to opacity 1, off-page to activeDim)",
+      "round ‹ › arrows (and dots / drag) PAGE the rail by a big step (pageStep cards; 0 = the visible-card count), eased; counter shows NN / N(pages); clamps unless loop",
+      "off-page (peeked / out-of-page) cards dim to activeDim; edge-peek shows the next page's first card past the active page",
+      "set(p 0..1) is a PURE scrub of the ENTER stagger; transform + opacity only; NO mix-blend / NO WebGL; owns_pin false",
+      "drag follows F-08 law (window listeners, settle always, step only past threshold); reduced-motion or <=820px -> shown (native overflow-x); window.__LAB_OK__ on init",
+      "asset-substitution gate: place photos + a short caption under each + a section heading (e.g. 'what's nearby')"
+    ],
+    "gate": {
+      "probe": "Open lab.html. __LAB_OK__ true. Scroll the rail in: the cards stagger up. Click ‹ ›: the rail pages by the visible-card count (a big step, not one card), with edge-peek + off-page cards dimmed, counter NN / N(pages), clamping at the ends; drag pages too. Verify the caption-under, the big-step paging, the active-emphasis dim, + fps. The rail is one band — scroll so it's centred to screenshot the cards + peek."
+    },
+    "note": "|",
+    "_path": "library/components/poi-caption-carousel/",
+    "_variantsResolved": []
+  },
   "portrait-carousel": {
     "id": "portrait-carousel",
     "name": "Arrow portrait carousel (vertical push-slice + copy-lag + ken-burns)",
