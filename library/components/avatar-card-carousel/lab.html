@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · avatar-card-carousel · gapsy (portrait team cards + name/role + progress-line)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · avatar-card-carousel
+================================================================================
+  gapsystudio's team carousel — a row of PORTRAIT cards (several visible) that translateX
+  one at a time; name + role caption UNDER each; a horizontal PROGRESS-LINE (scaleX fill)
+  with end arrows below. Driven by arrows / drag / wheel / keyboard. Harvested from D_gapsy
+  (C /about: Albina/Katya/Olena "UI/UX Designer" + a progress line). OUR QUADRO renders as
+  the card images. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --studio:#f2f2f0; --ink:#16150f; --red:#f0473e; --display:'Anton',sans-serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--studio);color:var(--ink);font-family:var(--sans);
+    display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:6vh 6vw}
+  .head h2{font-family:var(--display);font-size:3.4vw;line-height:1;margin-bottom:.4rem}
+  .head .kicker{font-family:var(--sans);font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;opacity:.6;margin-bottom:3vh}
+
+  .acc-stage{ --acc-ink:#16150f; --acc-bg:#f2f2f0; --acc-display:'Anton',sans-serif;
+    --acc-per:3; --acc-gap:24px; --acc-radius:12px; --acc-name-size:1.7rem; }
+</style>
+</head>
+<body>
+
+  <div class="head">
+    <div class="kicker">/ Команда — 05</div>
+    <h2>Хто будує ваш простір</h2>
+  </div>
+
+  <section class="acc-stage" id="team">
+    <div class="acc-viewport">
+      <div class="acc-track">
+        <article class="acc-card"><div class="acc-media"><img src="renders/day-34-portrait.webp" alt=""></div><div class="acc-name">Андрій</div><div class="acc-role">Архітектор</div></article>
+        <article class="acc-card"><div class="acc-media"><img src="renders/terrace.webp" alt=""></div><div class="acc-name">Марта</div><div class="acc-role">Дизайнерка інтер'єру</div></article>
+        <article class="acc-card"><div class="acc-media"><img src="renders/day-front.webp" alt=""></div><div class="acc-name">Олег</div><div class="acc-role">Девелопер</div></article>
+        <article class="acc-card"><div class="acc-media"><img src="renders/night.webp" alt=""></div><div class="acc-name">Ірина</div><div class="acc-role">Ландшафт</div></article>
+        <article class="acc-card"><div class="acc-media"><img src="renders/aerial.webp" alt=""></div><div class="acc-name">Назар</div><div class="acc-role">Менеджер проєкту</div></article>
+      </div>
+    </div>
+
+    <div class="acc-nav">
+      <button class="acc-prev" aria-label="попередній">‹</button>
+      <div class="acc-progress"><span class="acc-progress-fill"></span></div>
+      <button class="acc-next" aria-label="наступний">›</button>
+    </div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  window.__acc = AvatarCardCarousel.create('#team', { perView:3, duration:520, ease:'cubic-bezier(.22,1,.36,1)', wheel:true, drag:true, index:0 });
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+/* AVATAR-CARD-CAROUSEL · component.css
+   A row of portrait cards (several visible), translateX one at a time; name + role caption
+   under each; a horizontal progress-line (scaleX fill) with end arrows below. transform:
+   translateX (track) + scaleX (fill) + scale (active) + opacity only. NO mix-blend /
+   NO backdrop over the cards. NO WebGL. */
+.acc-stage { position: relative; --acc-per: 3; --acc-gap: 24px; outline: none; }
+
+.acc-viewport { overflow: hidden; cursor: grab; touch-action: pan-y; }
+.acc-viewport:active { cursor: grabbing; }
+
+.acc-track { display: flex; gap: var(--acc-gap); will-change: transform; }
+/* each card fills 1/perView of the viewport (minus the gaps) */
+.acc-card { flex: 0 0 calc((100% - (var(--acc-per) - 1) * var(--acc-gap)) / var(--acc-per));
+  min-width: 0; will-change: transform, opacity; }
+.acc-media { position: relative; aspect-ratio: 3 / 4; overflow: hidden;
+  border-radius: var(--acc-radius, 10px); background: #e9e9e6;
+  transition: transform 520ms cubic-bezier(.22,1,.36,1); }
+.acc-card:not(.is-active) .acc-media { transform: scale(.97); opacity: .82; }
+.acc-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* name + role caption UNDER the card */
+.acc-name { margin-top: 1rem; font-family: var(--acc-display, system-ui, sans-serif);
+  font-size: var(--acc-name-size, 1.6rem); line-height: 1; }
+.acc-role { margin-top: .3rem; font-size: .82rem; letter-spacing: .08em; opacity: .6; }
+
+/* nav row: <- progress-line -> */
+.acc-nav { display: flex; align-items: center; gap: 1.6rem; margin-top: 2.4rem; }
+.acc-prev, .acc-next { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--acc-ink, #16150f); background: transparent; color: var(--acc-ink, #16150f);
+  cursor: pointer; display: grid; place-items: center; font-size: 1rem;
+  transition: background 220ms ease, color 220ms ease, opacity 220ms ease; }
+.acc-prev:hover, .acc-next:hover { background: var(--acc-ink, #16150f); color: var(--acc-bg, #f2f2f0); }
+.acc-prev:disabled, .acc-next:disabled { opacity: .25; cursor: default; }
+
+.acc-progress { flex: 1 1 auto; height: 1px; background: rgba(22,21,15,.18); position: relative; overflow: hidden; }
+.acc-progress-fill { position: absolute; inset: 0; transform-origin: left center; transform: scaleX(0);
+  background: var(--acc-ink, #16150f); transition: transform 520ms cubic-bezier(.22,1,.36,1); will-change: transform; }

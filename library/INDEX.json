@@ -1309,6 +1309,84 @@
     "_path": "library/components/vertical-slide/",
     "_variantsResolved": []
   },
+  "avatar-card-carousel": {
+    "id": "avatar-card-carousel",
+    "name": "Avatar card-carousel (a row of portrait cards, several visible, that translateX one at a time; name + role caption under each; a horizontal progress-line with end arrows tracks position)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "AvatarCardCarousel.create(target, opts)  // target = .acc-stage > .acc-viewport > .acc-track > .acc-card(.acc-media img + .acc-name + .acc-role) + .acc-prev/.acc-next + .acc-progress(.acc-progress-fill). opts: { perView, duration, ease, wheel, drag, index }.",
+      "module": "iife",
+      "returns": "{ go(i), next(), prev(), index(), count, destroy }"
+    },
+    "meaning": {
+      "what": "gapsystudio's team carousel — a row of PORTRAIT cards (people / avatars), SEVERAL visible at once (perView), that translateX one card at a time. Under each card a NAME + ROLE caption. Below the row a horizontal PROGRESS-LINE whose filled segment tracks position, flanked by round prev/next arrows. Driven by arrows, drag, wheel, keyboard.",
+      "when": "A TEAM / people / testimonials / logos strip where you want SEVERAL items in view and a calm sense of how far through the set you are. The portrait card + name/role caption is the canonical 'meet the team' unit; the progress-line (not dots) reads as understated and premium, good for a set of 5-12. Use it on an /about or /people page, or for any peer set where the caption matters as much as the image.",
+      "lands": "You see three tall cards side by side, each a person with their name and role written underneath. A thin line beneath the row shows how far along you are, with a small round arrow at each end. Press it (or drag, or flick the wheel) and the row slides one card over, the line filling a little more, the next face sliding into view. It feels like leafing through a team, never losing your place.",
+      "not_when": "A single hero item (no carousel). One landscape card in focus with specs (use horizontal-spec-carousel). A huge set that needs search/filter (use a grid). Auto-rotating banners (this is user-driven). When each card needs its own CTA / spec-row (that's horizontal-spec-carousel's job)."
+    },
+    "source": {
+      "grammar": "gapsy /about: portrait cards (avatar images), several visible, name + role ('UI/UX Designer') under each; a horizontal progress line with left/right arrows below.",
+      "recording": "apps/quadro/.award-re/teardowns/D_gapsy_video.md (C /about; gapsystudio.com, NO-WebGL basket A)",
+      "registry_ref": [
+        "C-avatar-card-carousel-gapsy"
+      ]
+    },
+    "stack": "vanilla (transform-driven; arrows / drag / wheel / keyboard)",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "triggered (arrows / drag / wheel / keyboard), not scroll",
+    "timing_layer": [
+      "D-interaction"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "team",
+      "people",
+      "testimonials"
+    ],
+    "combines_with": [
+      "script-overline-display-pair",
+      "drag-tab-reveal",
+      "menu-tracked-stagger",
+      "coords-corner-frame"
+    ],
+    "anti_combos": [
+      "auto-rotate",
+      "carousel-over-scrubbed-surface"
+    ],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "a row of portrait cards, perView visible at once (card width = 1/perView of the viewport minus gaps); the track translateX(-index * step), step = cardW + gap",
+      "each card has a name (.acc-name) + role (.acc-role) caption UNDER it; off-window cards scale .97 + dim, the visible window is full",
+      "a horizontal progress-line (.acc-progress-fill scaleX = index/maxIdx, transform-origin left) below, flanked by round prev/next arrows",
+      "maxIdx = count - perView; arrows disable at idx 0 and maxIdx (cannot scroll past the last full view)",
+      "driven by arrows, drag/swipe (threshold max(40px, 18% of a card), move/up on WINDOW per F-08), horizontal wheel, Left/Right keys; stage focusable",
+      "transform: translateX + scaleX + scale + opacity only; NO mix-blend / NO backdrop; NO WebGL; reduced-motion -> instant index",
+      "asset-substitution gate: OUR QUADRO portrait renders as the card images + name/role captions + warm palette; window.__LAB_OK__ on init"
+    ],
+    "gate": {
+      "probe": "Open lab.html. __LAB_OK__ true. Several portrait cards show with name+role under each; a progress-line + round arrows below. Press next/prev (or drag / wheel / arrow keys) -> the row slides one card, the progress-fill grows (idx/maxIdx), arrows disable at the ends. Distinct from horizontal-spec-carousel (one landscape card + edge-peek + spec-row). Triggered (NOT scroll) -> verify perView + step + progress-fill + end-disable, and run the TRIGGERED smoothness probe."
+    },
+    "note": "|",
+    "_path": "library/components/avatar-card-carousel/",
+    "_variantsResolved": []
+  },
   "benefit-wipe-band": {
     "id": "benefit-wipe-band",
     "name": "Wavy-seam benefit band",
