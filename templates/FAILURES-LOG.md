@@ -12,3 +12,8 @@
 **Що сталось** — line-art-location-map (Brick 9): target-marker ⊙ мав стояти в центрі мапи (`<g transform="translate(760 470)">`), але опинявся у верхньому-лівому куті (0,0).
 **Чому** (корінь) — JS анімував scale через `element.style.transform = 'scale(...)'` на ТОМУ Ж `<g>`, що ніс позиційний SVG-атрибут `transform="translate(...)"`. CSS-inline transform ПОВНІСТЮ перекриває presentation-атрибут `transform` → translate зник, група впала в 0,0.
 **Правило** — НІКОЛИ не анімувати CSS-transform на SVG-елементі, що позиціонується SVG-атрибутом `transform`. Розділяти: ЗОВНІШНІЙ `<g transform="translate">` = позиція (не чіпати), ВНУТРІШНІЙ `<g data-*>` = лише анімований scale/opacity. (Для HTML — те саме: не змішувати позиційний і анімаційний transform на одному вузлі.)
+
+## F-10 · клік по Close не спрацьовував (header перекривав по z-index)
+**Що сталось** — menu-tracked-stagger (gapsy Brick 4): overlay відкривається, але клік по «Close»-pill не закривав — playwright показав «header Menu button intercepts pointer events».
+**Чому** (корінь) — Close-pill мав z-index calc(overlay+1)≈81, а хедер сторінки з тригером «Menu» = z 90. Вони обидва у правому-верхньому куті → хедер (вищий z) з'їдав кліки по Close, хоч візуально Close зверху.
+**Правило** — будь-який overlay-control (Close/тригер) мусить ЯВНО переважати z-index хедера/персистентного UI, що ділить ту саму зону. Не покладатися на «calc(base+1)» — задавати свідомо великий (напр. 200) і перевіряти РЕАЛЬНИМ кліком (не лише isOpen()-станом), бо overlap-перехоплення не видно у програмному set-state.

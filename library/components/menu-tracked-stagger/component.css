@@ -1,0 +1,41 @@
+/* MENU-TRACKED-STAGGER · component.css
+   A full-screen overlay menu on the studio field. LEFT: a big condensed nav, items ghost
+   by default, solid on hover, current page red. RIGHT: a contact column. On open the items
+   stagger in (fade + rise). transform(translateY) + opacity only. NO mix-blend / NO
+   backdrop. NO WebGL. The .is-open class drives the CSS reveal; per-item --mts-delay staggers. */
+.mts-overlay { position: fixed; inset: 0; z-index: var(--mts-z, 80);
+  background: var(--mts-bg, #f2f2f0); color: var(--mts-ink, #16150f);
+  display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 4vw;
+  padding: 12vh 7vw; opacity: 0; pointer-events: none;
+  transition: opacity var(--mts-dur, 520ms) var(--mts-ease, ease); }
+.mts-overlay.is-open { opacity: 1; pointer-events: auto; }
+
+/* LEFT — the big condensed nav */
+.mts-nav { display: flex; flex-direction: column; gap: .2em; }
+.mts-item { font-family: var(--mts-display, 'Anton', system-ui, sans-serif);
+  font-size: var(--mts-size, 4vw); line-height: 1.05; letter-spacing: .01em; text-transform: uppercase;
+  color: var(--mts-ghost, rgba(22,21,15,.28)); text-decoration: none; width: max-content;
+  opacity: 0; transform: translateY(24px);
+  transition: opacity var(--mts-dur,520ms) var(--mts-ease,ease) var(--mts-delay,0ms),
+              transform var(--mts-dur,520ms) var(--mts-ease,ease) var(--mts-delay,0ms),
+              color 200ms ease; }
+.mts-overlay.is-open .mts-item { opacity: 1; transform: translateY(0); }
+.mts-item:hover, .mts-item:focus-visible { color: var(--mts-ink, #16150f); }
+.mts-item.is-current { color: var(--mts-accent, #f0473e); }
+
+/* RIGHT — the contact aside */
+.mts-aside { font-family: var(--mts-sans, system-ui, sans-serif); align-self: center;
+  opacity: 0; transform: translateY(16px);
+  transition: opacity var(--mts-dur,520ms) var(--mts-ease,ease) 120ms, transform var(--mts-dur,520ms) var(--mts-ease,ease) 120ms; }
+.mts-overlay.is-open .mts-aside { opacity: 1; transform: translateY(0); }
+.mts-aside .mts-lbl { font-size: .66rem; letter-spacing: .26em; text-transform: uppercase; opacity: .45; margin: 2rem 0 .6rem; }
+.mts-aside .mts-lbl:first-child { margin-top: 0; }
+.mts-aside a { display: block; font-size: 1.2rem; color: var(--mts-ink, #16150f); text-decoration: none; margin: .25rem 0; }
+.mts-aside a:hover { color: var(--mts-accent, #f0473e); }
+
+/* the Close pill (place it in your header; styled here for the lab) */
+.mts-close { position: fixed; top: 4vh; right: 7vw; z-index: var(--mts-close-z, 200);
+  padding: .6rem 1.4rem; border-radius: 999px; border: 0; cursor: pointer;
+  background: var(--mts-ink, #16150f); color: var(--mts-bg, #f2f2f0); font-size: .9rem;
+  opacity: 0; pointer-events: none; transition: opacity 240ms ease; }
+.mts-overlay.is-open ~ .mts-close, .mts-close.is-shown { opacity: 1; pointer-events: auto; }
