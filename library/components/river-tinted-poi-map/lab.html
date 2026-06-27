@@ -29,7 +29,7 @@
   body{background:#2b2622;color:#e9e3db;font-family:var(--sans)}
   .spacer{height:90vh;display:grid;place-items:center;background:#2b2622;opacity:.4;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
   .rtm-stage{ --rtm-bg:#2b2622; --rtm-ink:#e9e3db; --rtm-river:#48535f; --rtm-river-w:26;
-    --rtm-park:rgba(96,112,82,.5); --rtm-road:rgba(233,227,219,.14); --rtm-pin:#b07a52; --rtm-pin-hot:#c98a5e;
+    --rtm-park:rgba(88,104,76,.34); --rtm-road:rgba(233,227,219,.13); --rtm-pin:#b07a52; --rtm-pin-hot:#c98a5e;
     --rtm-disc:#b06a3e; --rtm-serif:'Playfair Display',serif; --rtm-sans:'Inter',sans-serif; }
 </style>
 </head>
@@ -39,34 +39,253 @@
 
   <section class="rtm-stage" id="map">
     <svg class="rtm-map" viewBox="0 0 1440 900" preserveAspectRatio="none">
-      <!-- park blobs -->
-      <path class="rtm-park" d="M 470 180 C 560 150 660 200 640 290 C 520 320 430 270 470 180 Z"/>
-      <path class="rtm-park" d="M 1080 240 C 1160 220 1230 270 1200 340 C 1110 360 1040 310 1080 240 Z"/>
-      <path class="rtm-park" d="M 360 640 C 440 620 500 670 470 740 C 390 760 320 710 360 640 Z"/>
-      <path class="rtm-park" d="M 980 700 C 1060 680 1120 730 1090 800 C 1010 820 940 770 980 700 Z"/>
-      <!-- roads -->
-      <path class="rtm-road" d="M -20 220 C 300 240 600 180 900 240 C 1140 288 1300 240 1480 270"/>
-      <path class="rtm-road" d="M 200 -20 C 260 240 360 460 320 760 C 300 880 360 960 340 1000"/>
-      <path class="rtm-road" d="M 1100 -20 C 1080 240 1160 460 1100 720 C 1060 860 1120 960 1100 1000"/>
-      <!-- the river band (draws in) -->
-      <path data-river d="M -40 470 C 260 430 440 520 620 470 C 760 432 760 320 900 330 C 1080 342 1180 470 1140 600 C 1100 740 940 720 820 700 C 660 676 540 760 360 800 C 180 836 40 800 -40 820"/>
+      <!-- LAYER: parks (organic blobs) -->
+<g class="rtm-parks">
+  <!-- Alexander Garden: long slim strip NW of Kremlin, hugging the wall -->
+  <path class="rtm-park" d="M362 250 C 400 232, 452 230, 498 246 C 540 260, 556 296, 540 332 C 520 372, 470 388, 426 372 C 388 358, 360 330, 354 296 C 350 274, 348 258, 362 250 Z"/>
 
-      <!-- landmark glyphs -->
-      <g data-glyph transform="translate(560 240)">
-        <polygon points="0,-26 8,-12 5,-12 5,14 -5,14 -5,-12 -8,-12"/>
-        <rect x="-14" y="14" width="28" height="20"/>
-        <text x="0" y="50" text-anchor="middle">Кремль</text>
-      </g>
-      <g data-glyph transform="translate(330 360)">
-        <rect x="-22" y="-8" width="44" height="34" rx="2"/>
-        <polygon points="0,-26 14,-8 -14,-8"/>
-        <text x="0" y="46" text-anchor="middle">Храм Христа Спасителя</text>
-      </g>
-      <g data-glyph transform="translate(660 540)">
-        <rect x="-30" y="-6" width="60" height="32" rx="2"/>
-        <polygon points="-30,-6 0,-26 30,-6"/>
-        <text x="0" y="46" text-anchor="middle">Третьяковская галерея</text>
-      </g>
+  <!-- Tainitsky / Kremlin inner green, irregular north of river -->
+  <path class="rtm-park" d="M598 286 C 642 272, 700 276, 736 302 C 766 324, 770 366, 744 396 C 712 432, 650 440, 606 420 C 572 404, 556 364, 566 326 C 574 302, 580 292, 598 286 Z"/>
+
+  <!-- Bolotny Island park: large blob INSIDE the river peninsula bend -->
+  <path class="rtm-park" d="M812 470 C 880 444, 968 446, 1024 480 C 1070 508, 1082 562, 1052 606 C 1016 658, 932 678, 858 658 C 800 642, 760 596, 768 540 C 774 500, 784 480, 812 470 Z"/>
+
+  <!-- small riverside green on south bank, left -->
+  <path class="rtm-park" d="M474 552 C 512 540, 556 546, 580 572 C 598 592, 594 624, 566 642 C 532 664, 484 660, 458 634 C 440 616, 442 584, 458 566 C 464 558, 466 554, 474 552 Z"/>
+
+  <!-- compact square-park, upper right of grid -->
+  <path class="rtm-park" d="M1126 230 C 1162 218, 1206 224, 1228 250 C 1246 272, 1240 304, 1212 320 C 1180 338, 1136 332, 1114 306 C 1098 286, 1100 254, 1116 238 C 1120 234, 1122 232, 1126 230 Z"/>
+
+  <!-- ribbon park lower-left, off the main river -->
+  <path class="rtm-park" d="M196 666 C 244 650, 308 654, 348 682 C 380 704, 380 744, 346 766 C 304 792, 236 790, 196 762 C 168 742, 164 700, 184 680 C 188 674, 190 670, 196 666 Z"/>
+
+  <!-- teardrop green by the lower-right river exit -->
+  <path class="rtm-park" d="M1098 636 C 1144 622, 1196 632, 1222 664 C 1242 690, 1234 728, 1198 746 C 1156 766, 1100 758, 1076 726 C 1058 702, 1064 666, 1086 648 C 1090 644, 1092 640, 1098 636 Z"/>
+
+  <!-- small pocket park top-centre, north of Kremlin green -->
+  <path class="rtm-park" d="M822 184 C 856 174, 896 180, 916 204 C 932 224, 926 252, 900 266 C 870 282, 830 276, 810 252 C 796 234, 800 206, 814 192 C 817 188, 819 186, 822 184 Z"/>
+
+  <!-- elongated organic green far-left edge -->
+  <path class="rtm-park" d="M84 396 C 116 380, 158 380, 184 402 C 206 420, 208 456, 184 478 C 156 504, 110 504, 84 480 C 64 462, 62 422, 78 404 C 80 400, 81 398, 84 396 Z"/>
+</g>
+      <!-- LAYER: streets (dense network) -->
+<g class="rtm-roads" fill="none" stroke="rgba(233,227,219,.14)" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linecap="round">
+  <!-- ===== KREMLIN / NORTH-BANK GRID (above the river) ===== -->
+  <!-- main north-bank embankment-parallel arterial -->
+  <path class="rtm-road" d="M-10,300 C160,272 360,250 560,256 C760,262 950,288 1120,322"/>
+  <!-- second north arterial, gentler -->
+  <path class="rtm-road" d="M40,210 C260,188 500,176 760,190 C1000,203 1230,232 1450,270"/>
+  <!-- top ring road -->
+  <path class="rtm-road" d="M-10,120 C300,96 700,84 1050,104 C1240,115 1380,132 1450,148"/>
+  <!-- radial spokes fanning down toward the river from the north -->
+  <path class="rtm-road" d="M250,60 C268,180 300,300 372,408"/>
+  <path class="rtm-road" d="M470,52 C476,190 470,320 452,452"/>
+  <path class="rtm-road" d="M690,48 C700,200 712,330 706,470"/>
+  <path class="rtm-road" d="M905,56 C898,200 880,320 836,448"/>
+  <path class="rtm-road" d="M1120,72 C1100,210 1056,330 980,430"/>
+  <!-- short cross-connectors in the kremlin block -->
+  <path class="rtm-road" d="M360,150 C480,168 620,172 760,160"/>
+  <path class="rtm-road" d="M540,232 C660,250 800,254 940,238"/>
+  <path class="rtm-road" d="M120,176 C200,210 250,256 268,308"/>
+
+  <!-- ===== RIVER-HUGGING / EMBANKMENT STREETS ===== -->
+  <!-- north embankment road tracing the river -->
+  <path class="rtm-road" d="M-10,372 C200,344 420,332 560,360 C700,388 800,470 904,506 C1010,542 1180,520 1450,470"/>
+  <!-- south embankment road (Sofiyskaya side, hugging the peninsula) -->
+  <path class="rtm-road" d="M-10,470 C180,452 360,452 520,492 C640,522 700,600 800,628 C920,662 1120,628 1450,576"/>
+
+  <!-- ===== SOUTH-BANK GRID (Bolotny / Zamoskvorechye) ===== -->
+  <!-- southern arterials -->
+  <path class="rtm-road" d="M-10,612 C220,588 480,580 760,600 C1010,618 1240,652 1450,690"/>
+  <path class="rtm-road" d="M-10,724 C260,700 560,690 880,706 C1130,718 1330,742 1450,758"/>
+  <path class="rtm-road" d="M60,832 C340,810 680,800 1020,812 C1230,819 1380,832 1450,842"/>
+  <!-- south radial spokes rising toward the river -->
+  <path class="rtm-road" d="M210,880 C232,760 270,650 348,548"/>
+  <path class="rtm-road" d="M430,884 C440,760 446,648 488,556"/>
+  <path class="rtm-road" d="M640,888 C648,770 660,668 712,588"/>
+  <path class="rtm-road" d="M860,884 C852,772 838,672 870,592"/>
+  <path class="rtm-road" d="M1080,880 C1064,766 1030,668 988,584"/>
+  <!-- south cross-connectors / diagonals -->
+  <path class="rtm-road" d="M300,672 C460,700 640,706 820,684"/>
+  <path class="rtm-road" d="M520,760 C700,784 900,786 1080,762"/>
+  <path class="rtm-road" d="M1180,612 C1240,680 1300,748 1340,820"/>
+  <path class="rtm-road" d="M120,560 C160,640 196,720 212,808"/>
+
+  <!-- ===== LONG DIAGONALS CROSSING THE WHOLE FIELD ===== -->
+  <path class="rtm-road" d="M-10,560 C300,500 620,420 920,348 C1130,298 1320,266 1450,250"/>
+  <path class="rtm-road" d="M120,884 C400,720 700,560 1010,420 C1220,326 1380,272 1450,250"/>
+  <path class="rtm-road" d="M1450,360 C1240,420 1020,500 800,592 C560,692 320,776 80,860"/>
+</g>
+      <!-- LAYER: river (multi-curve band + bank labels) -->
+<path data-river fill="none" d="M -40,400 C 240,372 470,398 650,486 C 800,560 880,690 1040,700 C 1180,708 1280,628 1300,500 C 1316,400 1390,440 1500,520"/>
+<text x="150" y="430" fill="rgba(233,227,219,.5)" font-size="12" font-style="italic" font-family="Georgia, 'Times New Roman', serif" letter-spacing="0.4" transform="rotate(-9 150 430)">Кремлёвская набережная</text>
+<text x="430" y="612" fill="rgba(233,227,219,.5)" font-size="12" font-style="italic" font-family="Georgia, 'Times New Roman', serif" letter-spacing="0.4" transform="rotate(13 430 612)">Софийская набережная</text>
+<text x="612" y="412" fill="rgba(233,227,219,.5)" font-size="11.5" font-style="italic" font-family="Georgia, 'Times New Roman', serif" letter-spacing="0.4" transform="rotate(86 612 412)">Болотная наб.</text>
+<text x="932" y="600" fill="rgba(233,227,219,.5)" font-size="12" font-style="italic" font-family="Georgia, 'Times New Roman', serif" letter-spacing="0.4" transform="rotate(34 932 600)">Овчинниковская наб.</text>
+      <!-- LAYER: landmark glyphs -->
+<!-- ============ LANDMARK GLYPHS (white silhouettes, fill=currentColor) ============ -->
+<g class="map-glyphs" fill="none" stroke="none">
+
+  <!-- (1) КРЕМЛЬ — Spasskaya tower: tent roof + star + clock + wall -->
+  <g data-glyph data-name="kremlin" transform="translate(560 250)" fill="currentColor" color="#f2ede6">
+    <!-- star finial -->
+    <path d="M0 -58 L2.4 -50.6 L10 -50.6 L3.8 -46 L6.2 -38.6 L0 -43.2 L-6.2 -38.6 L-3.8 -46 L-10 -50.6 L-2.4 -50.6 Z"/>
+    <!-- spire pole -->
+    <rect x="-1" y="-50" width="2" height="7"/>
+    <!-- tent roof (tapered) -->
+    <path d="M0 -43 L11 -16 L-11 -16 Z"/>
+    <!-- tier / cornice under tent -->
+    <path d="M-13 -16 L13 -16 L13 -12 L-13 -12 Z"/>
+    <!-- decorative pinnacles row -->
+    <path d="M-13 -12 L-13 -18 L-10 -18 L-10 -12 Z M10 -12 L10 -18 L13 -18 L13 -12 Z"/>
+    <!-- arched belfry stage with clock -->
+    <path d="M-11 -12 L11 -12 L11 14 L-11 14 Z"/>
+    <!-- clock face cut -->
+    <circle cx="0" cy="-1" r="5.4" fill="#2b2622"/>
+    <circle cx="0" cy="-1" r="5.4" fill="none" stroke="#2b2622" stroke-width="0"/>
+    <path d="M0 -5.4 a5.4 5.4 0 1 0 0.01 0" fill="#2b2622"/>
+    <circle cx="0" cy="-1" r="1.2" fill="#f2ede6"/>
+    <rect x="-0.6" y="-5" width="1.2" height="4" fill="#f2ede6"/>
+    <rect x="-0.6" y="-1.6" width="4" height="1.1" fill="#f2ede6"/>
+    <!-- main tower body / archway -->
+    <path d="M-14 14 L14 14 L14 50 L-14 50 Z"/>
+    <!-- crenellations at body top -->
+    <path d="M-14 14 L-14 9 L-10 9 L-10 14 Z M-3 14 L-3 9 L3 9 L3 14 Z M10 14 L10 9 L14 9 L14 14 Z"/>
+    <!-- gate arch (cut-out) -->
+    <path d="M-7 50 L-7 32 a7 7 0 0 1 14 0 L7 50 Z" fill="#2b2622"/>
+    <!-- KREMLIN WALL extending both sides with merlons -->
+    <path d="M-46 44 L-14 44 L-14 50 L-46 50 Z"/>
+    <path d="M14 44 L46 44 L46 50 L14 50 Z"/>
+    <!-- swallowtail merlons (left wall) -->
+    <path d="M-46 44 L-46 39 L-42 39 L-44 41.5 L-42 44 Z M-39 44 L-39 39 L-35 39 L-37 41.5 L-35 44 Z M-32 44 L-32 39 L-28 39 L-30 41.5 L-28 44 Z M-25 44 L-25 39 L-21 39 L-23 41.5 L-21 44 Z M-18 44 L-18 39 L-14 39 L-16 41.5 L-14 44 Z"/>
+    <!-- swallowtail merlons (right wall) -->
+    <path d="M14 44 L14 39 L18 39 L16 41.5 L18 44 Z M21 44 L21 39 L25 39 L23 41.5 L25 44 Z M28 44 L28 39 L32 39 L30 41.5 L32 44 Z M35 44 L35 39 L39 39 L37 41.5 L39 44 Z M42 44 L42 39 L46 39 L44 41.5 L46 44 Z"/>
+    <!-- small wall corner tower (left) -->
+    <path d="M-52 36 L-44 36 L-44 50 L-52 50 Z"/>
+    <path d="M-52 36 L-48 28 L-44 36 Z"/>
+    <!-- small wall corner tower (right) -->
+    <path d="M44 36 L52 36 L52 50 L44 50 Z"/>
+    <path d="M44 36 L48 28 L52 36 Z"/>
+    <text x="0" y="68" text-anchor="middle" font-family="'Georgia',serif" font-style="italic" font-size="13" fill="#e9e3db" letter-spacing="0.3">Кремль</text>
+  </g>
+
+  <!-- (2) ХРАМ ХРИСТА СПАСИТЕЛЯ — central dome + 4 corner domes on a block -->
+  <g data-glyph data-name="hhs" transform="translate(330 360)" fill="currentColor" color="#f2ede6">
+    <!-- central drum + great dome -->
+    <!-- main block -->
+    <path d="M-34 26 L34 26 L34 54 L-34 54 Z"/>
+    <!-- block tier line -->
+    <path d="M-34 26 L34 26 L34 22 L-34 22 Z"/>
+    <!-- central drum -->
+    <path d="M-13 22 L13 22 L13 4 L-13 4 Z"/>
+    <!-- great golden dome (onion) -->
+    <path d="M-15 4 C-15 -14 15 -14 15 4 C15 9 -15 9 -15 4 Z"/>
+    <path d="M0 4 C-9 0 -9 -10 0 -16 C9 -10 9 0 0 4 Z"/>
+    <!-- cross + cupola neck -->
+    <rect x="-1" y="-26" width="2" height="11"/>
+    <rect x="-4" y="-22" width="8" height="2"/>
+    <!-- 4 corner onion domes -->
+    <!-- left-front -->
+    <g transform="translate(-25 22)">
+      <rect x="-5" y="-12" width="10" height="12"/>
+      <path d="M-6 -12 C-6 -24 6 -24 6 -12 C6 -9 -6 -9 -6 -12 Z"/>
+      <path d="M0 -12 C-4 -15 -4 -22 0 -25 C4 -22 4 -15 0 -12 Z"/>
+      <rect x="-0.8" y="-31" width="1.6" height="6"/>
+      <rect x="-3" y="-29" width="6" height="1.4"/>
+    </g>
+    <!-- right-front -->
+    <g transform="translate(25 22)">
+      <rect x="-5" y="-12" width="10" height="12"/>
+      <path d="M-6 -12 C-6 -24 6 -24 6 -12 C6 -9 -6 -9 -6 -12 Z"/>
+      <path d="M0 -12 C-4 -15 -4 -22 0 -25 C4 -22 4 -15 0 -12 Z"/>
+      <rect x="-0.8" y="-31" width="1.6" height="6"/>
+      <rect x="-3" y="-29" width="6" height="1.4"/>
+    </g>
+    <!-- left-back (smaller, peeking) -->
+    <g transform="translate(-32 18) scale(0.78)">
+      <rect x="-5" y="-12" width="10" height="12"/>
+      <path d="M-6 -12 C-6 -24 6 -24 6 -12 C6 -9 -6 -9 -6 -12 Z"/>
+      <rect x="-0.8" y="-31" width="1.6" height="6"/>
+      <rect x="-3" y="-29" width="6" height="1.4"/>
+    </g>
+    <!-- right-back (smaller, peeking) -->
+    <g transform="translate(32 18) scale(0.78)">
+      <rect x="-5" y="-12" width="10" height="12"/>
+      <path d="M-6 -12 C-6 -24 6 -24 6 -12 C6 -9 -6 -9 -6 -12 Z"/>
+      <rect x="-0.8" y="-31" width="1.6" height="6"/>
+      <rect x="-3" y="-29" width="6" height="1.4"/>
+    </g>
+    <!-- arched portals along base (cut-outs) -->
+    <path d="M-26 54 L-26 40 a4 4 0 0 1 8 0 L-18 54 Z" fill="#2b2622"/>
+    <path d="M-4 54 L-4 38 a4 4 0 0 1 8 0 L4 54 Z" fill="#2b2622"/>
+    <path d="M18 54 L18 40 a4 4 0 0 1 8 0 L26 54 Z" fill="#2b2622"/>
+    <text x="0" y="70" text-anchor="middle" font-family="'Georgia',serif" font-style="italic" font-size="13" fill="#e9e3db" letter-spacing="0.3">Храм Христа Спасителя</text>
+  </g>
+
+  <!-- (3) ГЭС-2 — columned hall with a tall chimney -->
+  <g data-glyph data-name="ges2" transform="translate(540 470)" fill="currentColor" color="#f2ede6">
+    <!-- tall slender chimney with blue cap -->
+    <rect x="22" y="-46" width="7" height="62"/>
+    <rect x="20.5" y="-50" width="10" height="5"/>
+    <rect x="23" y="-58" width="5" height="9" fill="#6f8fb0"/>
+    <!-- main hall body -->
+    <path d="M-32 16 L18 16 L18 52 L-32 52 Z"/>
+    <!-- gabled roof of hall -->
+    <path d="M-36 16 L-7 -4 L22 16 Z"/>
+    <!-- roof ridge skylight -->
+    <rect x="-12" y="2" width="10" height="6"/>
+    <!-- colonnade (5 columns with capitals/bases) -->
+    <g>
+      <rect x="-29" y="22" width="4" height="30"/>
+      <rect x="-19" y="22" width="4" height="30"/>
+      <rect x="-9" y="22" width="4" height="30"/>
+      <rect x="1" y="22" width="4" height="30"/>
+      <rect x="11" y="22" width="4" height="30"/>
+    </g>
+    <!-- architrave over columns -->
+    <rect x="-32" y="16" width="50" height="6"/>
+    <!-- stylobate / base platform -->
+    <rect x="-34" y="52" width="54" height="4"/>
+    <!-- pediment line accent -->
+    <path d="M-36 16 L-7 -4 L22 16 L18 16 L-7 0 L-32 16 Z" fill="#2b2622" opacity="0.18"/>
+    <text x="-7" y="72" text-anchor="middle" font-family="'Georgia',serif" font-style="italic" font-size="13" fill="#e9e3db" letter-spacing="0.3">ГЭС-2</text>
+  </g>
+
+  <!-- (4) ТРЕТЬЯКОВСКАЯ ГАЛЕРЕЯ — Russian-revival facade with stepped gable -->
+  <g data-glyph data-name="tretyakovka" transform="translate(660 540)" fill="currentColor" color="#f2ede6">
+    <!-- main facade block -->
+    <path d="M-36 10 L36 10 L36 50 L-36 50 Z"/>
+    <!-- ornate stepped kokoshnik gable (central) -->
+    <path d="M-22 10 L-22 2 L-16 2 L-16 -4 L-10 -4 L-10 -10 L-4 -16 a6 6 0 0 1 8 0 L4 -10 L10 -10 L10 -4 L16 -4 L16 2 L22 2 L22 10 Z"/>
+    <!-- finial pinnacles on gable shoulders -->
+    <path d="M-19 2 L-17 -3 L-15 2 Z"/>
+    <path d="M19 2 L17 -3 L15 2 Z"/>
+    <!-- central kokoshnik arch detail (cut) -->
+    <path d="M-5 6 L-5 -3 a5 5 0 0 1 10 0 L5 6 Z" fill="#2b2622"/>
+    <!-- decorative frieze band -->
+    <rect x="-36" y="10" width="72" height="4"/>
+    <!-- side corner turrets with tent caps -->
+    <g transform="translate(-30 0)">
+      <rect x="-4" y="-2" width="8" height="12"/>
+      <path d="M-5 -2 L0 -12 L5 -2 Z"/>
+      <rect x="-0.7" y="-17" width="1.4" height="5"/>
+    </g>
+    <g transform="translate(30 0)">
+      <rect x="-4" y="-2" width="8" height="12"/>
+      <path d="M-5 -2 L0 -12 L5 -2 Z"/>
+      <rect x="-0.7" y="-17" width="1.4" height="5"/>
+    </g>
+    <!-- large central arched portal (cut-out) -->
+    <path d="M-9 50 L-9 28 a9 9 0 0 1 18 0 L9 50 Z" fill="#2b2622"/>
+    <!-- flanking windows (cut-outs) -->
+    <rect x="-28" y="22" width="8" height="16" rx="3" fill="#2b2622"/>
+    <rect x="20" y="22" width="8" height="16" rx="3" fill="#2b2622"/>
+    <!-- ornamental string course -->
+    <rect x="-36" y="20" width="72" height="2" fill="#2b2622" opacity="0.25"/>
+    <text x="0" y="66" text-anchor="middle" font-family="'Georgia',serif" font-style="italic" font-size="13" fill="#e9e3db" letter-spacing="0.3">Третьяковская галерея</text>
+  </g>
+
+</g>
     </svg>
 
     <!-- terracotta POI pins -->
