@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · center-focus-carousel · r1864 (3-up panels, centre in focus + sides dimmed insets, ‹ N/5 › rotates which is centred)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · center-focus-carousel
+================================================================================
+  r1864's /comfort feature carousel — a row of vertical PANELS where the CENTRE panel is in
+  FOCUS (larger + bright + caption lit), the side panels are DIMMED peek-insets (smaller +
+  darkened) with edge-peek; round ‹ › arrows (+ N/TOTAL counter) rotate WHICH panel is centred.
+  Each panel = image + caption bottom-left. Distinct from fullscreen-media-carousel (one
+  full-bleed slide). Harvested from D_r1864 (r18641 /comfort ЛИФТЫ / ОСТЕКЛЕНИЕ / ...). NO WebGL.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#161a16; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:#efe9df;font-family:'Inter',system-ui,sans-serif}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--paper);opacity:.5;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .cfc-stage{ --cfc-ground:#1f2520; --cfc-ink:#efe9df; --cfc-line:#8d8a82;
+    --cfc-serif:'Playfair Display',Georgia,serif; --cfc-sans:'Inter',sans-serif;
+    --cfc-panel-w:30vw; --cfc-aspect:3/4; --cfc-gap:1.2rem; --cfc-cap:1.2vw; }
+  .cfc-head{ text-align:center; font-family:var(--cfc-serif); text-transform:uppercase;
+    font-size:2.4vw; letter-spacing:.02em; margin:0 5vw 4vh; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — панелі зʼявляються; центральна у фокусі (більша + яскрава), бічні приглушені інсети; ‹ › обертає фокус</div>
+
+  <section class="cfc-stage" id="comfort">
+    <h2 class="cfc-head">Комфорт и сервис</h2>
+    <div class="cfc-viewport">
+      <div class="cfc-rail">
+        <div class="cfc-panel"><div class="cfc-panel-img"><img src="renders/macro-roof.webp" alt=""></div><div class="cfc-panel-cap">Лифты</div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><img src="renders/day-front.webp" alt=""></div><div class="cfc-panel-cap">Остекление</div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><img src="renders/macro-pergola.webp" alt=""></div><div class="cfc-panel-cap">Инженерные системы</div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><img src="renders/terrace-04.webp" alt=""></div><div class="cfc-panel-cap">Безопасность</div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><img src="renders/macro-table.webp" alt=""></div><div class="cfc-panel-cap">Сервисное обслуживание</div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><img src="renders/night-front.webp" alt=""></div><div class="cfc-panel-cap">Паркинг</div></div>
+      </div>
+    </div>
+    <div class="cfc-nav">
+      <button class="cfc-prev" aria-label="попередня">‹</button>
+      <span class="cfc-counter">01 / 06</span>
+      <button class="cfc-next" aria-label="наступна">›</button>
+    </div>
+  </section>
+
+  <div class="spacer">комфорт — показано</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__cfc = CenterFocusCarousel.create('#comfort', { start:'top 74%', sideScale:0.9, sideDim:0.45, slideDur:0.7, ease:'power3.out', loop:true, once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>
