@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · room-dolly-scroll · gapsy (multi-layer parallax fakes a forward camera dolly, NO WebGL)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · room-dolly-scroll  (gapsy basket B — fake-3D, honest approximation)
+================================================================================
+  gapsy's home is a live-WebGL 3D studio walk (scroll = camera deeper into the room). We do
+  NOT copy the WebGL. This is the NO-WebGL APPROXIMATION: a pinned scroll-scrub drives a
+  multi-layer parallax (each layer data-depth grows + drifts at its own rate) so you read as
+  flying INTO the scene; a focal headline arrives at the end. For higher fidelity, feed a
+  pre-rendered fly-through frame sequence into the sibling scroll-scrub-video brick.
+  Harvested from D_gapsy (A home). OUR QUADRO renders as layers. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --studio:#f2f2f0; --ink:#16150f; --red:#f0473e; --display:'Anton',sans-serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--studio);color:var(--ink);font-family:var(--sans)}
+  .spacer{height:110vh;display:grid;place-items:center;background:var(--studio);color:var(--ink);opacity:.45;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+
+  .rds-stage{ --rds-bg:#dfe0dc; }
+  /* scrim per layer for depth legibility (baked, static) */
+  .rds-layer::after{content:'';position:absolute;inset:0}
+  .rds-layer[data-depth="0.1"]::after{background:rgba(20,18,15,.18)}
+  .rds-layer[data-depth="0.9"]::after{background:linear-gradient(180deg,rgba(20,18,15,.05),rgba(20,18,15,.35))}
+
+  /* the focal 3D-text-style headline the camera arrives at */
+  .arrive-in h1{font-family:var(--display);font-size:8vw;line-height:.9;color:var(--red);
+    text-shadow:0 6px 0 #b5342c, 0 12px 30px rgba(176,52,44,.4)}
+  .arrive-in .sub{font-family:var(--sans);font-size:.8rem;letter-spacing:.28em;text-transform:uppercase;color:var(--ink);margin-top:1.2rem;opacity:.7}
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — камера «летить» вглиб кімнати (multi-layer parallax, NO WebGL)</div>
+
+  <section class="rds-stage" id="room">
+    <!-- far -> near (back wall barely moves; foreground rushes & grows) -->
+    <div class="rds-layer" data-depth="0.1"><img src="renders/day-front.webp" alt="far wall"></div>
+    <div class="rds-layer" data-depth="0.5"><img src="renders/terrace.webp" alt="mid object"></div>
+    <div class="rds-layer" data-depth="0.7"><img src="renders/aerial.webp" alt="floor"></div>
+    <div class="rds-layer" data-depth="0.9"><img src="renders/macro-pergola.webp" alt="foreground"></div>
+
+    <!-- focal wall headline the camera arrives at -->
+    <div data-arrive class="arrive-in">
+      <div>
+        <h1>FROM COOL IDEA<br>INSANELY GREAT</h1>
+        <div class="sub">Gapsy-style camera dolly · no WebGL</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer">камера прибула — фокальний заголовок на «стіні»</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__rds = RoomDollyScroll.create('#room', { dollyGain:1.6, driftY:120, arriveAt:0.55, pinFactor:1.8, ease:'none', manageLenis:false });
+  })();
+</script>
+</body>
+</html>

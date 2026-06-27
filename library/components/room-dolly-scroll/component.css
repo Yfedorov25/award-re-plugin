@@ -1,0 +1,15 @@
+/* ROOM-DOLLY-SCROLL · component.css
+   A NO-WebGL approximation of a forward camera dolly: stacked full-bleed layers each with a
+   data-depth grow + drift at different rates on a pinned scroll, so the viewer reads as
+   flying into the scene; a focal headline arrives at the end. transform: scale + translateY
+   + opacity only. NO mix-blend over the layers. NO WebGL. */
+.rds-stage { position: relative; height: 100vh; overflow: hidden;
+  background: var(--rds-bg, #f2f2f0); }
+
+.rds-layer { position: absolute; inset: 0; will-change: transform, opacity;
+  transform-origin: 50% 50%; backface-visibility: hidden; }
+.rds-layer img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* the focal "wall" block the camera arrives at (e.g. a 3D-text headline) */
+[data-arrive] { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center;
+  text-align: center; pointer-events: none; opacity: 0; will-change: transform, opacity; }
