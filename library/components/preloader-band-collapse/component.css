@@ -1,0 +1,12 @@
+/* PRELOADER-BAND-COLLAPSE · component.css
+   The dark panel covers the hero; on reveal it collapses vertically (clip-path inset)
+   to a centre band -> 0, uncovering the hero top+bottom. The wordmark layer sits above
+   and persists. clip-path + opacity (+ optional mark transform) only. NO WebGL. */
+.pbc-stage { position: fixed; inset: 0; z-index: 9990; overflow: hidden; }
+.pbc-panel { position: absolute; inset: 0; z-index: 2; background: var(--pbc-bg, #1e1a17);
+  will-change: clip-path, opacity; }
+.pbc-mark  { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center;
+  pointer-events: none; }
+.pbc-counter { position: absolute; left: clamp(20px,3vw,40px); bottom: clamp(20px,4vh,40px);
+  z-index: 4; color: var(--pbc-ink, #f4f1ea); font-variant-numeric: tabular-nums; }
+/* NO mix-blend / NO backdrop on the panel. */
