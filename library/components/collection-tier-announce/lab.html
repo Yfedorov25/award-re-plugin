@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · collection-tier-announce · r1864 (tier bands: serif title + stat-row + dual-image split + framed CTA; ground theme tweens green→taupe→cream across tiers)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · collection-tier-announce
+================================================================================
+  r1864's /collection — a vertical STACK of TIER bands, each = giant serif TITLE + body +
+  STAT-ROW (big numerals: высота / спальни / площадь) + framed CTA + DUAL-IMAGE split
+  (interior + city-view). Each tier ANNOUNCES on enter AND the page GROUND theme TWEENS
+  dark-green -> taupe -> cream. Harvested from D_r1864 (r18643 ИСТОРИЧЕСКАЯ -> ЧАСТНАЯ ->
+  С ТЕРРАСАМИ -> ВИЛЛА -> ПЕНТХАУСЫ). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#211c1b; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:#e7e2d6;font-family:'Inter',system-ui,sans-serif}
+  .spacer{height:80vh;display:grid;place-items:center;background:var(--paper);opacity:.5;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .cta-stage{ --cta-serif:'Playfair Display',Georgia,serif; --cta-sans:'Inter',sans-serif;
+    --cta-title:3.4vw; --cta-num:2.2vw; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — кожен тір оголошується (заголовок + статистика + 2 фото), фон перетікає green → taupe → cream</div>
+
+  <section class="cta-stage" id="collection">
+
+    <!-- TIER 1 — ИСТОРИЧЕСКАЯ КОЛЛЕКЦИЯ (dark green) -->
+    <div class="cta-tier" data-theme='{"bg":"#27302a","ink":"#e7e2d6","dim":"#a6ab9d","line":"rgba(231,226,214,.22)"}'>
+      <div class="cta-head"><h2 class="cta-title">Историческая коллекция</h2><a class="cta-cta" href="#">Выбрать апартаменты →</a></div>
+      <p class="cta-body">Исторические апартаменты «Резиденции 1864» — аутентичные пространства с высокими сводами и краснокирпичной кладкой середины XIX века.</p>
+      <div class="cta-stats">
+        <div class="cta-stat"><div class="cta-num">3,4–4</div><div class="cta-lab">Высота исторических кирпичных сводов, м</div></div>
+        <div class="cta-stat"><div class="cta-num">1–2</div><div class="cta-lab">Спальни</div></div>
+        <div class="cta-stat"><div class="cta-num">105–165</div><div class="cta-lab">Площадь, м²</div></div>
+      </div>
+      <div class="cta-split"><div class="cta-img"><img src="renders/terrace-02.webp" alt=""></div><div class="cta-img"><img src="renders/macro-roof.webp" alt=""></div></div>
+    </div>
+
+    <!-- TIER 2 — ЧАСТНАЯ КОЛЛЕКЦИЯ (taupe) -->
+    <div class="cta-tier" data-theme='{"bg":"#48403b","ink":"#ece6dc","dim":"#b9b0a4","line":"rgba(236,230,220,.20)"}'>
+      <div class="cta-head"><h2 class="cta-title">Частная коллекция</h2><a class="cta-cta" href="#">Выбрать апартаменты →</a></div>
+      <p class="cta-body">Камерные резиденции с авторскими планировками и панорамным остеклением — приватность в самом центре столицы.</p>
+      <div class="cta-stats">
+        <div class="cta-stat"><div class="cta-num">3,4</div><div class="cta-lab">Высота потолков, м</div></div>
+        <div class="cta-stat"><div class="cta-num">1–4</div><div class="cta-lab">Спальни</div></div>
+        <div class="cta-stat"><div class="cta-num">125–370</div><div class="cta-lab">Площадь, м²</div></div>
+      </div>
+      <div class="cta-split"><div class="cta-img"><img src="renders/day-front.webp" alt=""></div><div class="cta-img"><img src="renders/aerial.webp" alt=""></div></div>
+    </div>
+
+    <!-- TIER 3 — С ТЕРРАСАМИ (warm taupe) -->
+    <div class="cta-tier" data-theme='{"bg":"#5a514a","ink":"#efe9df","dim":"#c4bbae","line":"rgba(239,233,223,.20)"}'>
+      <div class="cta-head"><h2 class="cta-title">С террасами</h2><a class="cta-cta" href="#">Выбрать апартаменты →</a></div>
+      <p class="cta-body">Апартаменты с собственными террасами и видом на исторический центр — открытый воздух на высоте.</p>
+      <div class="cta-stats">
+        <div class="cta-stat"><div class="cta-num">3,4</div><div class="cta-lab">Высота потолков, м</div></div>
+        <div class="cta-stat"><div class="cta-num">1–4</div><div class="cta-lab">Спальни</div></div>
+        <div class="cta-stat"><div class="cta-num">145–365</div><div class="cta-lab">Площадь, м²</div></div>
+      </div>
+      <div class="cta-split"><div class="cta-img"><img src="renders/terrace-04.webp" alt=""></div><div class="cta-img"><img src="renders/day-34.webp" alt=""></div></div>
+    </div>
+
+    <!-- TIER 4 — ВИЛЛА (light taupe) -->
+    <div class="cta-tier" data-theme='{"bg":"#8c8278","ink":"#fbf7ef","dim":"#e6ddcf","line":"rgba(251,247,239,.22)"}'>
+      <div class="cta-head"><h2 class="cta-title">Вилла</h2><a class="cta-cta" href="#">Выбрать апартаменты →</a></div>
+      <p class="cta-body">Двухуровневые виллы с приватными входами и максимальными метражами — формат загородного дома в сердце города.</p>
+      <div class="cta-stats">
+        <div class="cta-stat"><div class="cta-num">4,5</div><div class="cta-lab">Высота потолков, м</div></div>
+        <div class="cta-stat"><div class="cta-num">4</div><div class="cta-lab">Спальни</div></div>
+        <div class="cta-stat"><div class="cta-num">745</div><div class="cta-lab">Площадь, м²</div></div>
+        <div class="cta-stat"><div class="cta-num">170</div><div class="cta-lab">Терраса, м²</div></div>
+      </div>
+      <div class="cta-split"><div class="cta-img"><img src="renders/night-front.webp" alt=""></div><div class="cta-img"><img src="renders/scene18.webp" alt=""></div></div>
+    </div>
+
+    <!-- TIER 5 — ПЕНТХАУСЫ (cream) -->
+    <div class="cta-tier" data-theme='{"bg":"#e7e0d2","ink":"#2c2823","dim":"#7a7468","line":"rgba(44,40,35,.18)"}'>
+      <div class="cta-head"><h2 class="cta-title">Пентхаусы</h2><a class="cta-cta" href="#">Выбрать апартаменты →</a></div>
+      <p class="cta-body">Видовые пентхаусы верхних этажей с панорамой Москвы 360° — высшая ступень коллекции.</p>
+      <div class="cta-stats">
+        <div class="cta-stat"><div class="cta-num">3,4–7,5</div><div class="cta-lab">Высота потолков, м</div></div>
+        <div class="cta-stat"><div class="cta-num">5–7</div><div class="cta-lab">Спальни</div></div>
+        <div class="cta-stat"><div class="cta-num">623–987</div><div class="cta-lab">Площадь, м²</div></div>
+        <div class="cta-stat"><div class="cta-num">558–664</div><div class="cta-lab">Терраса, м²</div></div>
+      </div>
+      <div class="cta-split"><div class="cta-img"><img src="renders/day-09.webp" alt=""></div><div class="cta-img"><img src="renders/night-34.webp" alt=""></div></div>
+    </div>
+
+  </section>
+
+  <div class="spacer">коллекция оголошена</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__cta = CollectionTierAnnounce.create('#collection', { start:'top 72%', themeStart:'top 55%', revealDur:1.0, themeDur:0.6, ease:'power3.out', clipFrom:'bottom', once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>
