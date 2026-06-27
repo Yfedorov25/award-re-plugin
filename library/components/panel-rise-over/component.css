@@ -1,0 +1,19 @@
+/* PANEL-RISE-OVER · component.css
+   The next section is a coloured PANEL with a big rounded top edge that rises from below
+   (translateY 100% -> 0) and slides OVER the previous section, flipping the theme; its
+   content fades + lifts in during the rise. transform: translateY (panel + content) +
+   opacity (content) + a static border-radius only. NO mix-blend / NO backdrop. NO WebGL. */
+.pro-stage { position: relative; height: 100vh; overflow: hidden; }
+
+/* the OUTGOING section — sits behind, full-bleed, holds while the panel covers it */
+.pro-prev { position: absolute; inset: 0; z-index: 1; will-change: transform;
+  background: var(--pro-prev-bg, #6b5e4f); color: var(--pro-prev-ink, #f4f1ea); }
+
+/* the RISING panel — its own colour (theme-flip), a big rounded leading edge, rises over prev */
+.pro-panel { position: absolute; inset: 0; z-index: 2; will-change: transform;
+  transform: translateY(100%); overflow: hidden;
+  background: var(--pro-panel-bg, #e6e0d4); color: var(--pro-panel-ink, #1e1a17);
+  box-shadow: 0 -24px 60px rgba(30,26,23,.22); /* a soft lip-shadow under the rounded edge */ }
+
+/* content that reveals during the rise */
+.pro-rise { will-change: transform, opacity; }
