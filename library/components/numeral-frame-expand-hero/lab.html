@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · numeral-frame-expand-hero · r1864 (outline numerals → frame expands to full photo → serif title → pan → exit)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · numeral-frame-expand-hero
+================================================================================
+  r1864's signature hero — one pinned scroll-narrative: outline numerals "1864" with a small
+  framed view inside; the frame EXPANDS to a full-bleed photo (clip + scale + img fade) while
+  the numerals fade; the serif title fades in; a parallax pan; then exit opacity->0 + rise.
+  Harvested from D_r1864. OUR QUADRO renders. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --warm-black:#211c1b; --ink:#efe9e3; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--warm-black);color:var(--ink);font-family:var(--sans)}
+  /* the light section the hero rises into */
+  .next{min-height:120vh;background:#f1efe9;color:#211c1b;display:grid;place-items:center;text-align:center}
+  .next h2{font-family:var(--serif);font-size:4vw;text-transform:uppercase;letter-spacing:.04em}
+
+  .nfe-hero{ --nfe-bg:#211c1b; --nfe-ink:#efe9e3; --nfe-stroke:rgba(239,233,227,.45);
+    --nfe-serif:'Playfair Display',serif; --nfe-sans:'Inter',sans-serif;
+    --nfe-num:32vw; --nfe-title:4.4vw; }
+  /* persistent header like r1864 */
+  .bar{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:space-between;
+    padding:3vh 3vw;font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--ink);opacity:.85}
+  .bar .logo{font-family:var(--serif);font-size:1.4rem;letter-spacing:.08em}
+</style>
+</head>
+<body>
+
+  <section class="nfe-hero" id="hero">
+    <div class="bar"><div class="logo">1864</div><div>Выбрать апартаменты &nbsp;·&nbsp; +7 (495) 280-70-70</div></div>
+
+    <div class="nfe-bg">
+      <div class="nfe-frame"><img src="renders/aerial.webp" alt=""></div>
+    </div>
+
+    <div class="nfe-numerals"><div class="digits">1864</div></div>
+
+    <div class="nfe-title">Уровень жизни<br>класса de luxe<br>без компромиссов</div>
+    <div class="nfe-sub">Где творится история страны и создаются произведения искусства</div>
+  </section>
+
+  <section class="next"><h2>Частная коллекция</h2></section>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__nfe = NumeralFrameExpandHero.create('#hero', { frameInset:34, frameScale:0.62, panY:120, exitY:160, pinFactor:2.4, ease:'power2.out', manageLenis:false });
+  })();
+</script>
+</body>
+</html>
