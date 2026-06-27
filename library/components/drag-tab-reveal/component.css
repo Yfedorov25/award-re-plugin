@@ -1,0 +1,34 @@
+/* DRAG-TAB-REVEAL · component.css
+   An edge-anchored panel sits mostly off-screen with a grab-tab ("Pull Me") on its visible
+   edge; drag the tab to pull the panel out, release past a threshold to snap open. The tab
+   rides the panel's edge. transform: translateX (panel) + opacity only. NO mix-blend /
+   NO backdrop. NO WebGL. */
+.dtr-stage { position: fixed; inset: 0; pointer-events: none; z-index: var(--dtr-z, 60); }
+
+/* the sliding panel — anchored to an edge, sized by --dtr-w; closed = pushed off the edge */
+.dtr-panel { position: absolute; top: 0; bottom: 0; width: var(--dtr-w, 360px);
+  pointer-events: auto; will-change: transform;
+  background: var(--dtr-bg, #16150f); color: var(--dtr-ink, #f4f1ea);
+  box-shadow: 0 0 60px rgba(0,0,0,.28); }
+.dtr--left  .dtr-panel { left: 0; }
+.dtr--right .dtr-panel { right: 0; }
+
+/* the grab-tab rides the panel's INNER edge, sticking out past it */
+.dtr-tab { position: absolute; top: 50%; transform: translateY(-50%);
+  display: inline-flex; align-items: center; gap: .5rem; cursor: grab; user-select: none;
+  padding: .9rem 1.1rem; border-radius: 0 10px 10px 0;
+  background: var(--dtr-tab-bg, #16150f); color: var(--dtr-tab-ink, #f4f1ea);
+  font-size: .82rem; letter-spacing: .04em; white-space: nowrap; touch-action: none; }
+.dtr-tab:active { cursor: grabbing; }
+.dtr--left  .dtr-tab { left: 100%; border-radius: 0 10px 10px 0; }
+.dtr--right .dtr-tab { right: 100%; border-radius: 10px 0 0 10px; }
+
+/* a little chevron that flips with the open state */
+.dtr-tab::after { content: '›'; display: inline-block; font-size: 1.05em; line-height: 1;
+  transition: transform 300ms cubic-bezier(.22,1,.36,1); }
+.dtr--left  .dtr-tab::after { content: '›'; }
+.dtr--right .dtr-tab::after { content: '‹'; }
+.dtr-stage.is-open.dtr--left  .dtr-tab::after { transform: rotate(180deg); }
+.dtr-stage.is-open.dtr--right .dtr-tab::after { transform: rotate(180deg); }
+
+.dtr-content { height: 100%; overflow-y: auto; padding: var(--dtr-pad, 3rem 2rem); }

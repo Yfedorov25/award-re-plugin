@@ -2015,6 +2015,83 @@
     "_path": "library/components/de-bleed/",
     "_variantsResolved": []
   },
+  "drag-tab-reveal": {
+    "id": "drag-tab-reveal",
+    "name": "Drag-tab reveal (an edge-anchored panel with a 'Pull Me' grab-tab; drag the tab to pull the drawer out, release past a threshold to snap open; click toggles, label + chevron flip)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "DragTabReveal.create(target, opts)  // target = .dtr-stage > .dtr-panel(.dtr-tab(.dtr-tab-label) + .dtr-content). opts: { side, threshold, duration, ease, openLabel, closedLabel }.",
+      "module": "iife",
+      "returns": "{ open(), close(), toggle(), set(p), isOpen(), destroy }"
+    },
+    "meaning": {
+      "what": "gapsystudio's 'Pull Me' drawer — an edge-anchored panel sits mostly off-screen with a small grab-tab on its visible edge. You DRAG the tab to pull the panel out (it follows the pointer); release past a threshold and it SNAPS open, otherwise snaps back. Click toggles; Enter/Space too. The tab label + chevron flip with the open state. Pointer move/up tracked on WINDOW (a drag that leaves the tab still ends cleanly).",
+      "when": "A secondary panel you want PRESENT but out of the way — contact details, a quick menu, a brief, filters — surfaced by a playful, tactile handle instead of a plain button. The 'Pull Me' tab invites interaction (it reads as physical), and the drag gives a sense of weight. Use it for a persistent contact/CTA drawer on an inner page, or anywhere a peek-tab + pull is more inviting than a hamburger.",
+      "lands": "You notice a little dark tab clinging to the edge of the screen that says 'Pull Me'. You grab it and drag — a panel slides out from the edge following your hand, and if you pull far enough it snaps fully open; let go too early and it springs back. Tap it instead and it just opens. The label flips to 'Close' with the arrow turning around. It feels like opening a real drawer, not clicking a menu.",
+      "not_when": "The primary navigation (use a proper nav / menu). Content that must always be visible (don't hide it behind a pull). Mobile where an edge-drag fights the browser's back-swipe gesture (test, or move the tab inward). When there's nothing worth a tactile reveal (a plain button is honest). Stacking several edge-tabs on the same side (they collide)."
+    },
+    "source": {
+      "grammar": "gapsy /about: a dark rounded 'Pull Me' tab pinned half-off the far-left edge; a draggable handle that pulls out a hidden panel/drawer from the edge — a tactile UI cue.",
+      "recording": "apps/quadro/.award-re/teardowns/D_gapsy_video.md (C /about; gapsystudio.com, NO-WebGL basket A)",
+      "registry_ref": [
+        "C-drag-tab-reveal-gapsy"
+      ]
+    },
+    "stack": "vanilla (transform-driven; Pointer Events; no GSAP needed)",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "triggered (drag / click / keyboard), not scroll",
+    "timing_layer": [
+      "D-interaction"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "contact-drawer",
+      "utility-panel",
+      "quick-menu"
+    ],
+    "combines_with": [
+      "script-overline-display-pair",
+      "menu-tracked-stagger",
+      "coords-corner-frame"
+    ],
+    "anti_combos": [
+      "primary-nav",
+      "multiple-same-edge-tabs"
+    ],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "an edge-anchored .dtr-panel sits off its edge by its full width except a .dtr-tab grab-handle on the visible edge (side: left | right)",
+      "dragging the tab toward centre pulls the panel out (translateX follows the pointer, clamped 0..width, no transition while dragging)",
+      "on release: a flick (|dx|>60) opens/closes by direction; else snap to open/closed by p>=threshold, with the cubic-bezier transition; a tap (no move) toggles",
+      "pointer move/up/cancel tracked on WINDOW so a drag that leaves the tab / goes off-window still ends + settles (the F-08 drag law)",
+      "open()/close()/toggle() animate + flip the tab label (Pull Me <-> Close) + chevron; set(p) is a PURE position; isOpen() reports state",
+      "transform: translateX + opacity only; JS toggles .is-open + swaps label; NO mix-blend / NO backdrop; NO WebGL; reduced-motion -> instant snap; keyboard (Enter/Space) toggles",
+      "asset-substitution gate: a dark panel with contact/utility content over OUR QUADRO page + warm palette; window.__LAB_OK__ on init"
+    ],
+    "gate": {
+      "probe": "Open lab.html. __LAB_OK__ true. A 'Pull Me' tab clings to the left edge with the panel hidden. Drag the tab right past ~40% => the drawer snaps open + label flips to 'Close'; a small drag snaps back; a click toggles; a drag released off-window still settles. Triggered (NOT scroll) -> verify the drag-follow + threshold snap + label flip + the off-window settle (F-08), and run the TRIGGERED smoothness probe (arm the meter, cycle drag+click)."
+    },
+    "note": "|",
+    "_path": "library/components/drag-tab-reveal/",
+    "_variantsResolved": []
+  },
   "dual-panel-menu": {
     "id": "dual-panel-menu",
     "name": "Dual-panel menu (cream nav from the left + dark identity from the right meet at a centre seam)",
