@@ -1,0 +1,33 @@
+/* LINE-ART-LOCATION-MAP · component.css
+   A monochrome line-art district map: thin (~1px) cream strokes on a brown field (NO
+   fills, NO colour). Inline SVG roads draw in; a target-marker marks the project; POI
+   labels on leader-lines ladder up bottom-to-top. stroke-dashoffset + transform + opacity
+   only. NO mix-blend / NO backdrop. NO WebGL. */
+.lam-stage { position: relative; height: 100vh; overflow: hidden;
+  background: var(--lam-bg, #6b5e4f); color: var(--lam-ink, #f4f1ea); }
+
+/* the inline SVG map — thin cream strokes, NO fills */
+.lam-map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.lam-map [data-draw], .lam-map .lam-road { fill: none;
+  stroke: var(--lam-stroke, #e6e0d4); stroke-width: var(--lam-w, 1);
+  stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+  will-change: stroke-dashoffset; }
+.lam-map .lam-road--minor { opacity: .5; }
+
+/* target-marker (ringed dot / crosshair) — the project */
+.lam-map [data-target] { will-change: transform, opacity; }
+.lam-map [data-target] .ring { fill: none; stroke: var(--lam-ink, #f4f1ea); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.lam-map [data-target] .core { fill: var(--lam-ink, #f4f1ea); }
+
+/* POIs — DOM, positioned by left/top; each = a leader-line + a dot + a label */
+.lam-poi { position: absolute; will-change: transform, opacity; }
+.lam-poi .lam-leader { position: absolute; left: 0; bottom: 0; width: 1px;
+  height: var(--lam-leader, 46px); background: var(--lam-stroke, #e6e0d4); opacity: .7;
+  transform-origin: bottom center; transform: scaleY(0); will-change: transform; }
+.lam-poi .lam-dot { position: absolute; left: -3px; top: calc(-1 * var(--lam-leader, 46px) - 3px);
+  width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--lam-ink, #f4f1ea);
+  background: var(--lam-bg, #6b5e4f); }
+.lam-poi .lam-label { position: absolute; left: 10px; top: calc(-1 * var(--lam-leader, 46px) - 14px);
+  white-space: nowrap; font-size: .8rem; letter-spacing: .04em; color: var(--lam-ink, #f4f1ea); }
+.lam-poi .lam-label .dist { display: block; font-size: .64rem; letter-spacing: .14em;
+  text-transform: uppercase; opacity: .6; margin-top: .15rem; }
