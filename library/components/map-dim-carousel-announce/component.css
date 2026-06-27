@@ -1,0 +1,78 @@
+/* MAP-DIM-CAROUSEL-ANNOUNCE · component.css
+   r1864 /location: a POI map dims to a backdrop while a giant serif headline + a rail of N
+   location cards announce over it. opacity + transform only. NO mix-blend over the map. NO WebGL. */
+
+.mdc-stage {
+  position: relative; min-height: 100vh; overflow: hidden;
+  background: var(--mdc-ground, #2c2724); color: var(--mdc-cream, #e7e2d6);
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+
+/* ---- the dimmable map backdrop ---------------------------------------- */
+.mdc-map {
+  position: absolute; inset: 0; z-index: 0; transform-origin: 50% 50%;
+  will-change: opacity, transform; background: var(--mdc-ground, #2c2724);
+}
+.mdc-map svg, .mdc-map img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+/* a wash so the headline always reads over the (still partly-lit) map */
+.mdc-stage::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(28,24,22,.55) 0%, rgba(28,24,22,.20) 38%, rgba(28,24,22,.70) 100%);
+}
+
+/* ---- the announce overlay --------------------------------------------- */
+.mdc-overlay { position: relative; z-index: 2; display: flex; flex-direction: column; height: 100%; min-height: 100vh; }
+.mdc-headline {
+  font-family: var(--mdc-serif, 'Playfair Display', Georgia, serif); font-weight: 400;
+  text-transform: uppercase; font-size: var(--mdc-headline, 3.1vw); line-height: 1.16;
+  letter-spacing: .02em; text-align: center; margin: 14vh auto 0; max-width: 22ch;
+  opacity: 0; will-change: transform, opacity;
+}
+.mdc-sub {
+  font-family: var(--mdc-sans, 'Inter', system-ui, sans-serif); font-size: .78rem;
+  line-height: 1.9; letter-spacing: .14em; text-transform: uppercase; text-align: center;
+  color: var(--mdc-cream-dim, #c9c4b6); max-width: 52ch; margin: 1.4rem auto 0;
+  opacity: 0; will-change: transform, opacity;
+}
+
+/* ---- the card rail ----------------------------------------------------- */
+.mdc-rail-wrap { margin-top: auto; padding: 0 0 6vh; overflow: hidden; }
+.mdc-rail {
+  display: flex; gap: var(--mdc-gap, 1.4rem); padding: 0 4vw; will-change: transform;
+}
+.mdc-card { flex: 0 0 var(--mdc-card-w, 19vw); opacity: 0; will-change: transform, opacity; }
+.mdc-card-img {
+  width: 100%; aspect-ratio: 4 / 3.2; background-size: cover; background-position: center;
+  border-radius: 2px; overflow: hidden;
+}
+.mdc-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mdc-card-cap {
+  font-family: var(--mdc-sans, 'Inter', system-ui, sans-serif); font-size: .68rem;
+  letter-spacing: .16em; text-transform: uppercase; line-height: 1.5; text-align: center;
+  margin-top: 1rem; color: var(--mdc-cream, #e7e2d6);
+}
+
+/* ---- nav: prev + circular arrow --------------------------------------- */
+.mdc-nav {
+  position: absolute; right: 4vw; top: 50%; transform: translateY(-50%); z-index: 3;
+  display: inline-flex; align-items: center; gap: .8rem; opacity: 0; will-change: opacity;
+}
+.mdc-arrow, .mdc-prev {
+  width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--mdc-cream-dim, #8d8a82);
+  background: rgba(28,24,22,.35); color: var(--mdc-cream, #e7e2d6); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; line-height: 1;
+  transition: background .24s, color .24s, border-color .24s; padding: 0; backdrop-filter: none;
+}
+.mdc-arrow:hover, .mdc-prev:hover { background: var(--mdc-cream, #e7e2d6); color: var(--mdc-ground, #2c2724); border-color: var(--mdc-cream, #e7e2d6); }
+
+/* ---- static fallback --------------------------------------------------- */
+.mdc-static .mdc-map { opacity: .3; }
+.mdc-static .mdc-headline, .mdc-static .mdc-sub, .mdc-static .mdc-card, .mdc-static .mdc-nav { opacity: 1; transform: none; }
+.mdc-static .mdc-rail-wrap { overflow-x: auto; }
+
+@media (max-width: 820px) {
+  .mdc-headline { font-size: 7.5vw; }
+  .mdc-card { flex-basis: 64vw; }
+  .mdc-nav { display: none; }
+  .mdc-rail-wrap { overflow-x: auto; }
+}
