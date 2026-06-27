@@ -37,7 +37,7 @@
     options = options || {};
     var opt = {
       chaos: options.chaos != null ? options.chaos : 38,
-      charWin: options.charWin != null ? options.charWin : 0.16,
+      charWin: options.charWin != null ? options.charWin : 0.07,
       pinFactor: options.pinFactor != null ? options.pinFactor : 1.2,
       ease: options.ease || 'power3.out',
       seed: options.seed != null ? options.seed : 7,
@@ -96,7 +96,11 @@
         var tx = inv * (opt.chaos * 0.13 + opt.chaos * 0.32 * k); // rightward only (x of translate3d)
         var ls = smear * (0.08 + 0.20 * k);          // extra letter-spacing on the unsettled tail (em)
         var sc = 1 - inv * (0.06 + 0.05 * k);        // slight shrink while unsettled, never > 1
-        c.style.opacity = (0.10 + 0.90 * lp).toFixed(3);
+        // OPACITY: chars AHEAD of the edge are INVISIBLE (0), not a grey floor — the whole
+        // passage is never shown at once. A char fades 0 -> 1 only WITHIN its own window, and
+        // faster than the spatial collapse (op uses sqrt(lp)) so the head reads solid while the
+        // edge is still a faint smear and the tail ahead doesn't exist yet (the bydorr format).
+        c.style.opacity = Math.sqrt(lp).toFixed(3);
         c.style.letterSpacing = ls.toFixed(4) + 'em';
         c.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,0,0) scale(' + sc.toFixed(4) + ')';
       }
