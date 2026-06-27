@@ -31,3 +31,32 @@
   white-space: nowrap; font-size: .8rem; letter-spacing: .04em; color: var(--lam-ink, #f4f1ea); }
 .lam-poi .lam-label .dist { display: block; font-size: .64rem; letter-spacing: .14em;
   text-transform: uppercase; opacity: .6; margin-top: .15rem; }
+
+/* ============================================================
+   VARIANT · .lam--street  (the finest "street-map" look — a richer light-field theme)
+   Same engine, different look: thin SAGE strokes on a warm-PAPER field, optional vineyard
+   HATCHING fills, a LABEL-PILL project marker (instead of the crosshair), and small named
+   POI pins with icons. All still stroke/transform/opacity — NO Google/Mapbox, NO WebGL.
+   ============================================================ */
+.lam--street { --lam-bg: #f1efe9; --lam-stroke: #b8bda8; --lam-ink: #5a5f50; --lam-w: 1; }
+/* vineyard / texture areas: a hatched fill via repeating-linear-gradient (static, GPU-safe) */
+.lam--street .lam-hatch { fill: none; }
+.lam--street [data-hatch] { opacity: .5; }
+.lam--street .lam-park { fill: rgba(120,140,95,.10); stroke: none; }
+.lam--street .lam-water { fill: rgba(120,150,165,.14); stroke: none; }
+/* a label-PILL project marker (the finest "finest" pill) replaces the crosshair */
+.lam-pin { position: absolute; transform: translate(-50%, -50%); will-change: transform, opacity;
+  z-index: 3; }
+.lam--street .lam-pin .pill { display: inline-block; padding: .45rem 1rem; border-radius: 6px;
+  background: #fff; box-shadow: 0 6px 22px rgba(30,26,23,.14);
+  font-family: var(--lam-serif, Georgia, serif); font-style: italic; font-size: 1.4rem;
+  color: #2a2a24; white-space: nowrap; }
+.lam--street .lam-pin .stem { display: block; width: 1px; height: 14px; margin: 0 auto;
+  background: var(--lam-ink, #5a5f50); }
+/* small named POI pins with an icon glyph (finest look) */
+.lam--street .lam-poi .lam-leader { background: var(--lam-stroke, #b8bda8); opacity: .8; }
+.lam--street .lam-poi .lam-dot { border-color: var(--lam-ink, #5a5f50); background: #fff; }
+.lam--street .lam-poi .lam-label { color: var(--lam-ink, #5a5f50); font-style: italic; }
+.lam-poi .lam-ico { position: absolute; left: -7px; top: calc(-1 * var(--lam-leader, 46px) - 7px);
+  width: 15px; height: 15px; display: grid; place-items: center; font-size: 11px;
+  color: var(--lam-ink, #5a5f50); }

@@ -53,7 +53,10 @@
     if (!stage) { try { global.__LAB_OK__ = true; } catch (e) {} return { error: 'no target' }; }
 
     var draws = [].slice.call(stage.querySelectorAll('[data-draw]'));
+    // the project marker: either the SVG crosshair [data-target] (default look) OR the
+    // street-variant's HTML label-pill .lam-pin. Both reveal the same way.
     var target0 = stage.querySelector('[data-target]');
+    var pin = stage.querySelector('.lam-pin');
     // POIs sorted BOTTOM-to-TOP (lowest on screen reveals first)
     var pois = [].slice.call(stage.querySelectorAll('[data-poi]')).sort(function (a, b) {
       return b.getBoundingClientRect().top - a.getBoundingClientRect().top;
@@ -82,13 +85,18 @@
       draws.forEach(function (pa, i) {
         if (lens[i]) pa.style.strokeDashoffset = (lens[i] * (1 - dp)).toFixed(1);
       });
-      // target marker over 0.30..0.62
+      // target marker over 0.30..0.62 (SVG crosshair — scale-in-place via fill-box)
+      var tp = efOut(clamp01((p - 0.30) / 0.32));
       if (target0) {
-        var tp = efOut(clamp01((p - 0.30) / 0.32));
         target0.style.opacity = tp.toFixed(3);
         target0.style.transform = 'scale(' + (0.7 + tp * 0.3).toFixed(3) + ')';
         target0.style.transformOrigin = 'center';
         target0.style.transformBox = 'fill-box';
+      }
+      // street-variant label-pill marker — same window; HTML element, keep its translate(-50%,-50%)
+      if (pin) {
+        pin.style.opacity = tp.toFixed(3);
+        pin.style.transform = 'translate(-50%,-50%) scale(' + (0.85 + tp * 0.15).toFixed(3) + ')';
       }
       // POIs ladder up over 0.45..1, each in its own window (bottom-to-top)
       var N = pois.length;

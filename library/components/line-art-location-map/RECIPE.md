@@ -16,7 +16,7 @@ meaning:
 source:
   grammar: "11tanjung D2: a vector line-art map (thin ~1px cream stroke on brown, NOT Google/Mapbox): inline-SVG roads + a target-marker of the project + POIs with leader-lines, appearing with a bottom-to-top stagger on reveal. GSAP stagger opacity/y on ScrollTrigger."
   recording: "apps/quadro/.award-re/teardowns/D_11tanjung_video.md (D2 line-art-location-map; cousin of Springs watercolor-svg-map but line-art monochrome + leader-lines)"
-  registry_ref: ["D2-line-art-location-map-11tanjung"]
+  registry_ref: ["D2-line-art-location-map-11tanjung", "F5-line-art-street-map-finest (variant)"]
 stack: "vanilla + GSAP 3.12.5 + ScrollTrigger (+ guarded Lenis 1.1.13)"
 webgl: false
 motion_props: [stroke-dashoffset, transform, opacity]
@@ -92,3 +92,6 @@ Leader-line scaleY 0 → 0.70 → 1. Roads draw by p=0.55, the target fades in o
 CENTRE (676,418 in a 1280×800 viewport = the map middle, NOT the corner — the outer translate
 survives), the POIs ladder bottom-to-top. Probe (4× CPU throttle, scrolled into view): 1/353
 long frames (0.3%), 59.9fps → PASS. Zero console errors.
+
+## Variant — .lam--street (finest street-map look)
+The same engine, a light theme: add class `.lam--street` for thin SAGE strokes on warm PAPER, optional vineyard HATCHING fills (an svg `<pattern>`) + `.lam-park`/`.lam-water` area fills, a LABEL-PILL project marker (`.lam-pin` with a `.pill` + `.stem`, e.g. "finest") instead of the SVG crosshair, and named POI pins with icon glyphs (`.lam-ico`). The JS reveals `.lam-pin` on the same window as `[data-target]`. Proven (finest F5): paper bg #f1efe9 + sage stroke #b8bda8, pill marker reveals (op 0→1, keeps translate(-50%,-50%)), POIs ladder, 0.2% jank @ 59.9fps. Confirmed the SAME class as the 11tanjung default (a richer light variant), NOT a separate brick — kept as one engine to avoid a near-twin in the base.
