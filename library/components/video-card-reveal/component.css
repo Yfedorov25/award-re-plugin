@@ -1,0 +1,62 @@
+/* VIDEO-CARD-REVEAL · component.css
+   to-place.co.jp's full-bleed video handoff: pinned, wheel-stepped, input-locked stack of
+   full-viewport <video> panels wiping vertically; fixed play-pause + waveform chrome above.
+   transform(translateY, scale) + opacity only. NO mix-blend. NO WebGL. */
+
+.vcr-stage { position: relative; height: 100vh; overflow: hidden; background: var(--vcr-ground, #1c1b19); }
+
+.vcr-viewport { position: absolute; inset: 0; }
+.vcr-card {
+  position: absolute; inset: 0; will-change: transform, opacity; transform-origin: 50% 50%;
+  overflow: hidden; background: var(--vcr-ground, #1c1b19);
+}
+.vcr-card video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+}
+/* a soft backing visible only during the inset/scale settle (no persistent overlay) */
+.vcr-card::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 0 rgba(0,0,0,0); }
+
+/* ---- fixed chrome (ABOVE the video, never moves during a wipe) ---- */
+.vcr-chrome { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+.vcr-wordmark {
+  position: absolute; left: var(--vcr-pad, 40px); top: var(--vcr-pad, 38px);
+  display: inline-flex; align-items: center; gap: .7rem;
+  font-family: var(--vcr-serif, 'Playfair Display', Georgia, serif); font-weight: 400;
+  letter-spacing: .15em; text-transform: uppercase; font-size: 1rem; color: #fff;
+}
+.vcr-wordmark .vcr-dia { width: 22px; height: 22px; border: 1px solid #fff; transform: rotate(45deg); opacity: .85; }
+
+/* circular play/pause toggle + waveform top-right */
+.vcr-toggle {
+  position: absolute; right: var(--vcr-pad, 40px); top: var(--vcr-pad, 34px);
+  width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,.7);
+  background: rgba(20,18,16,.25); display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; pointer-events: auto; transition: background .24s, border-color .24s;
+}
+.vcr-toggle:hover { background: rgba(255,255,255,.92); }
+.vcr-toggle:hover .vcr-bar { background: #1c1b19; }
+.vcr-wave { display: inline-flex; align-items: flex-end; gap: 2px; height: 20px; }
+.vcr-bar { width: 2px; height: 100%; background: #fff; transform-origin: 50% 100%; transform: scaleY(.4); }
+/* animate the bars only while playing */
+.vcr-wave.is-playing .vcr-bar { animation: vcr-bar 0.8s ease-in-out infinite; }
+.vcr-wave.is-playing .vcr-bar:nth-child(2) { animation-duration: 1.0s; animation-delay: .1s; }
+.vcr-wave.is-playing .vcr-bar:nth-child(3) { animation-duration: .68s; animation-delay: .2s; }
+.vcr-wave.is-playing .vcr-bar:nth-child(4) { animation-duration: .92s; animation-delay: .05s; }
+.vcr-wave.is-playing .vcr-bar:nth-child(5) { animation-duration: .76s; animation-delay: .15s; }
+/* paused -> bars freeze flat (a pause read) */
+.vcr-toggle.is-paused .vcr-bar { animation: none !important; transform: scaleY(.25); }
+@keyframes vcr-bar { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+
+/* optional tiny index counter bottom-right */
+.vcr-index {
+  position: absolute; right: var(--vcr-pad, 40px); bottom: var(--vcr-pad, 34px);
+  font-family: var(--vcr-sans, 'Inter', system-ui, sans-serif); font-size: .74rem;
+  letter-spacing: .22em; color: rgba(255,255,255,.85); font-variant-numeric: tabular-nums;
+}
+
+/* ---- static / reduced-motion / mobile fallback: native vertical scroll-snap ---- */
+.vcr-static { height: auto; overflow: visible; scroll-snap-type: y mandatory; }
+.vcr-static .vcr-viewport { position: static; }
+.vcr-static .vcr-card { position: relative; height: 100vh; scroll-snap-align: start; transform: none !important; opacity: 1 !important; }
+.vcr-static .vcr-chrome { position: fixed; }
