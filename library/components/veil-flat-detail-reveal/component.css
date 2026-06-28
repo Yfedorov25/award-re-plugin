@@ -1,0 +1,63 @@
+/* VEIL-FLAT-DETAIL-REVEAL · component.css
+   EVER L3: a fixed-overlay flat detail reached via a dark veil; two-tone (grey-blue rail + lighter
+   plan canvas); air-luxury rail + clean plan. transform + opacity (+ stroke-dashoffset) only.
+   NO mix-blend. NO WebGL. */
+
+.vfd-overlay { position: fixed; inset: 0; z-index: 9000; visibility: hidden; }
+
+/* the dark veil (covers / uncovers; hides the content swap) */
+.vfd-veil { position: fixed; inset: 0; z-index: 9999; background: var(--vfd-veil, #2c343a);
+  transform: translateY(-100%); will-change: transform; }
+
+/* the flat page (light theme), two-tone split */
+.vfd-page { position: absolute; inset: 0; z-index: 9001; display: grid;
+  grid-template-columns: var(--vfd-rail-w, 340px) 1fr; background: var(--vfd-rail-bg, #aeb8bd);
+  color: var(--vfd-ink, #20272c); font-family: var(--vfd-sans, 'Inter', system-ui, sans-serif); }
+
+/* header */
+.vfd-head { position: absolute; left: 0; right: 0; top: 0; height: 64px; z-index: 9002;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 3vw; }
+.vfd-back { display: inline-flex; align-items: center; gap: .6rem; font-size: .7rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--vfd-ink, #20272c); cursor: pointer; background: none; border: 0; }
+.vfd-back__o { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(32,39,44,.4); display: inline-flex; align-items: center; justify-content: center; }
+.vfd-word { font-family: var(--vfd-serif, 'Playfair Display', Georgia, serif); letter-spacing: .18em; font-size: 1rem; }
+
+/* LEFT data rail — air is the luxury */
+.vfd-rail { display: flex; flex-direction: column; justify-content: center; gap: 1.2rem; padding: 12vh 2.4vw; will-change: transform, opacity; }
+.vfd-crumbs { position: absolute; top: 72px; left: 3vw; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; opacity: .55; }
+.vfd-type { font-family: var(--vfd-serif, serif); font-weight: 300; font-size: 2.6rem; line-height: 1; }
+.vfd-sub { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; opacity: .65; }
+.vfd-area { font-family: var(--vfd-serif, serif); font-weight: 300; font-size: 2rem; line-height: 1; margin-top: 1.4rem; }
+.vfd-price { font-size: 1.4rem; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.vfd-reserve { margin-top: 1rem; width: 100%; padding: 1.1rem; border-radius: 32px; border: 0;
+  background: var(--vfd-dark, #2c343a); color: #fff; font-size: .78rem; letter-spacing: .16em;
+  text-transform: uppercase; cursor: pointer; transition: opacity .2s; }
+.vfd-reserve.is-disabled { opacity: .4; cursor: default; }
+.vfd-rail__icons { display: inline-flex; gap: .7rem; }
+.vfd-rail__icons button { width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(32,39,44,.3); background: none; cursor: pointer; }
+.vfd-similar { align-self: flex-start; display: inline-flex; align-items: center; gap: .5rem; padding: .6rem 1.2rem;
+  border: 1px solid rgba(32,39,44,.3); border-radius: 999px; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; background: none; cursor: pointer; }
+
+/* CENTER plan canvas — distinct LIGHTER tone (the two-tone split IS the design) */
+.vfd-canvas { position: relative; background: var(--vfd-canvas-bg, #d7dde2); display: grid; place-items: center; overflow: hidden; }
+.vfd-plan { width: 56%; max-height: 64vh; will-change: transform, opacity; }
+.vfd-plan svg { width: 100%; height: 100%; display: block; }
+.vfd-plan__peri { fill: none; stroke: var(--vfd-wall, #20272c); stroke-width: 3; }
+
+/* locator chips (bottom of canvas) */
+.vfd-locators { position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%); z-index: 3;
+  display: inline-flex; align-items: flex-end; gap: 1.6rem; will-change: opacity; opacity: .9; }
+.vfd-floorchip svg, .vfd-sitechip svg, .vfd-compass svg { display: block; }
+.vfd-floorchip [data-nr], .vfd-sitechip [data-block] { fill: none; stroke: #8a949b; stroke-width: 1; }
+.vfd-floorchip [data-nr].is-active, .vfd-sitechip [data-block].is-active { fill: var(--vfd-dark, #2c343a); stroke: var(--vfd-dark, #2c343a); }
+
+/* the single sculptural flourish straddling the seam */
+.vfd-seed { position: absolute; left: var(--vfd-rail-w, 340px); top: 50%; transform: translate(-50%, -50%); z-index: 4;
+  width: 92px; height: 150px; will-change: opacity; pointer-events: none; filter: drop-shadow(0 14px 24px rgba(20,24,28,.25)); }
+.vfd-seed svg { width: 100%; height: 100%; display: block; }
+
+@media (max-width: 820px) {
+  .vfd-page { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .vfd-seed { display: none; }
+  .vfd-plan { width: 78%; }
+}

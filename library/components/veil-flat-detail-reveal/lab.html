@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · veil-flat-detail-reveal · EVER (dark veil → calm two-tone flat detail: clean plan canvas + air-luxury spec rail + locator chips; single-page modal, no router)</title>
+<!--
+================================================================================
+  TECHNIQUE LAB · veil-flat-detail-reveal  (EVER visual-search Level 3)
+================================================================================
+  The calm single-unit detail, reached via a dark full-screen VEIL (cover -> hold -> uncover, NO
+  spinner) as a SINGLE-PAGE fixed-overlay MODAL. Two-tone: grey-blue spec rail (big type / area /
+  price / one Reserve CTA — AIR is the luxury) beside a distinct LIGHTER plan canvas. Clean plan
+  fades-up (+ perimeter draw); locator chips (floor wireframe w/ THIS unit dark + compass + site
+  map w/ THIS building dark) + a sculptural seed stagger in last. Harvested from
+  D_ever_visualsearch_video.md (§4). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{ --slate:#2b343b; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{ background:var(--slate); color:#e7e2d6; font-family:'Inter',system-ui,sans-serif; min-height:100vh; }
+  .vfd-overlay{ --vfd-veil:#2c343a; --vfd-rail-bg:#aeb8bd; --vfd-canvas-bg:#d7dde2; --vfd-ink:#20272c;
+    --vfd-dark:#2c343a; --vfd-wall:#20272c; --vfd-rail-w:340px;
+    --vfd-serif:'Playfair Display',Georgia,serif; --vfd-sans:'Inter',sans-serif; }
+  /* launcher (stands in for the floorplate's '+' clicks) */
+  .launch{ min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.4rem; }
+  .launch h1{ font-family:var(--vfd-serif); font-weight:300; font-size:2vw; letter-spacing:.04em; opacity:.9; }
+  .launch p{ opacity:.5; font-size:.8rem; letter-spacing:.1em; }
+  .launch__row{ display:flex; gap:1rem; }
+  .launch__btn{ padding:1rem 2rem; border-radius:999px; border:1px solid rgba(255,255,255,.3); background:none; color:#e7e2d6; cursor:pointer; font-size:.8rem; letter-spacing:.12em; }
+  .launch__btn:hover{ background:#c2724e; border-color:#c2724e; color:#1c1b19; }
+</style>
+</head>
+<body>
+  <section class="launch">
+    <h1>Numbered floorplate → click a unit "+"</h1>
+    <p>(стенд: кнопки замість пілюль; кожна викликає open(unit) — темна вуаль → калм деталь)</p>
+    <div class="launch__row">
+      <button class="launch__btn" data-unit="282">№ 282 · 3E · 60.1 м²</button>
+      <button class="launch__btn" data-unit="297">№ 297 · 2E · 43.1 м²</button>
+      <button class="launch__btn" data-unit="291">№ 291 · 1E · sold</button>
+    </div>
+  </section>
+
+  <!-- the ONE fixed overlay node (data swapped per unit) -->
+  <div class="vfd-overlay" id="flat">
+    <div class="vfd-veil"></div>
+    <div class="vfd-page">
+      <div class="vfd-head">
+        <button class="vfd-back"><span class="vfd-back__o">&larr;</span> back to the floor</button>
+        <span class="vfd-word">ever</span>
+        <span style="width:120px"></span>
+      </div>
+      <div class="vfd-crumbs">Visual selection › Building 5 › Floor 28 › №282</div>
+
+      <div class="vfd-rail">
+        <div class="vfd-type">3E</div>
+        <div class="vfd-sub">5 Housing / 28 floor</div>
+        <div class="vfd-area">60.1 M²</div>
+        <div class="vfd-price">23 330 820 ₽</div>
+        <button class="vfd-reserve">Reserve</button>
+        <div class="vfd-rail__icons"><button aria-label="favourite">&#9825;</button><button aria-label="compare">&#8646;</button></div>
+        <button class="vfd-similar">Similar apartments &#8595;</button>
+      </div>
+
+      <div class="vfd-canvas">
+        <div class="vfd-plan"></div>
+        <div class="vfd-locators">
+          <div class="vfd-floorchip"></div>
+          <div class="vfd-compass"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="none" stroke="#8a949b"/><path d="M20 5 L24 20 L20 35 L16 20 Z" fill="#2c343a"/><text x="20" y="14" text-anchor="middle" font-size="7" fill="#2c343a">N</text></svg></div>
+          <div class="vfd-sitechip"></div>
+        </div>
+        <div class="vfd-seed"><svg viewBox="0 0 92 150"><ellipse cx="46" cy="80" rx="34" ry="64" fill="#efe9df"/><path d="M46 18 C 30 60, 30 110, 46 145 C 62 110, 62 60, 46 18 Z" fill="#e6ddcf" opacity=".8"/><path d="M46 20 C 46 60, 46 110, 46 144" stroke="#cfc4b2" stroke-width="1" fill="none"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+<script src="component.js"></script>
+<script>
+  // a clean inline apartment plan (walls path + a perimeter path for the draw-in + room labels)
+  function planSVG(label){
+    return '<svg viewBox="0 0 600 380" xmlns="http://www.w3.org/2000/svg">' +
+      '<path class="vfd-plan__peri" d="M40 40 H560 V340 H40 Z"/>' +
+      '<path d="M300 40 V200 M300 200 H560 M40 200 H180 M180 200 V340 M180 270 H300 M300 200 V340" fill="none" stroke="#7e878d" stroke-width="1.5"/>' +
+      '<rect x="52" y="52" width="20" height="20" fill="#cdd2d6" stroke="#9aa1a8"/>' +
+      '<text x="170" y="130" font-family="Inter" font-size="13" fill="#5a636a">Кухня-гостиная 28.4</text>' +
+      '<text x="430" y="130" font-family="Inter" font-size="13" fill="#5a636a">Спальня 16.2</text>' +
+      '<text x="110" y="280" font-family="Inter" font-size="13" fill="#5a636a">Прихожая</text>' +
+      '<text x="240" y="320" font-family="Inter" font-size="13" fill="#5a636a">С/у</text>' +
+      '<text x="430" y="290" font-family="Inter" font-size="13" fill="#5a636a">Спальня 12.1</text>' +
+      '</svg>';
+  }
+  function floorChip(activeNr){
+    var cells=''; for(var i=0;i<6;i++){ var nr=292+i; cells+='<rect data-nr="'+nr+'" x="'+(6+i*14)+'" y="6" width="12" height="14"/>'; }
+    for(var j=0;j<6;j++){ var nr2=286+j; cells+='<rect data-nr="'+nr2+'" x="'+(6+j*14)+'" y="24" width="12" height="14"/>'; }
+    return '<svg viewBox="0 0 90 44" width="90" height="44">'+cells+'</svg>';
+  }
+  function siteChip(activeBlock){
+    var b=''; for(var i=0;i<4;i++){ b+='<rect data-block="'+(i+1)+'" x="'+(8+i*30)+'" y="'+(40-(i%2)*8)+'" width="22" height="'+(60+(i%2)*8)+'"/>'; }
+    return '<svg viewBox="0 0 130 110" width="130" height="110">'+b+'</svg>';
+  }
+  var UNITS = {
+    '282': { type:'3E', sub:'5 Housing / 28 floor', areaM2:60.1, price:23330820, status:'sale', crumbs:'Visual selection › Building 5 › Floor 28 › №282', floorNr:294, siteBlock:2, planSVG:planSVG('3E'), floorChipSVG:floorChip(294), siteChipSVG:siteChip(2) },
+    '297': { type:'2E', sub:'5 Housing / 28 floor', areaM2:43.1, price:17671000, status:'sale', crumbs:'Visual selection › Building 5 › Floor 28 › №297', floorNr:297, siteBlock:2, planSVG:planSVG('2E'), floorChipSVG:floorChip(297), siteChipSVG:siteChip(2) },
+    '291': { type:'1E', sub:'5 Housing / 28 floor', areaM2:33.6, price:13120000, status:'sold', crumbs:'Visual selection › Building 5 › Floor 28 › №291', floorNr:291, siteBlock:2, planSVG:planSVG('1E'), floorChipSVG:floorChip(291), siteChipSVG:siteChip(2) }
+  };
+  window.__vfd = VeilFlatDetailReveal.create('#flat', {
+    veilColor:'#2c343a', coverDur:0.4, holdDur:0.3, uncoverDur:0.45, ease:'expo.out', drawPlan:true,
+    onReserve:function(u){ console.log('reserve', u && u.type); },
+    onClose:function(){ console.log('closed'); }
+  });
+  document.querySelectorAll('.launch__btn').forEach(function(b){ b.addEventListener('click', function(){ window.__vfd.open(UNITS[b.dataset.unit]); }); });
+</script>
+</body>
+</html>
