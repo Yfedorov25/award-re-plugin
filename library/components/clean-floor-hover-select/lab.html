@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · clean-floor-hover-select · EVER (per-floor PERSPECTIVE polygon highlight that rides the building — anti-crooked — + a y-tracking tooltip card)</title>
+<!--
+================================================================================
+  TECHNIQUE LAB · clean-floor-hover-select  (EVER visual-search Level 1)
+================================================================================
+  Pick a FLOOR on a static near-elevation building render. THE ANTI-CROOKED CORE: one <svg> over
+  the render with viewBox LOCKED to the render's intrinsic px; each floor is a hand-traced
+  PERSPECTIVE polygon (corner-wrapping chevron of two quads) so the highlight RIDES the building.
+  Hover -> terracotta fill + dark top-edge stroke; ONE tooltip card whose y TWEENS to the floor.
+  Here the "render" is a synthetic inline-SVG tower built from the SAME geometry as the bands, so
+  the bands provably ride the perspective. In production: a real <img> render + bands[] data.
+  Harvested from D_ever_visualsearch_video.md (§2). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{ --slate:#2b343b; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{ background:var(--slate); color:#eee; font-family:'Inter',system-ui,sans-serif; }
+  .cfh-stage{ --cfh-bg:#2b343b; --cfh-ink:#eee; --cfh-accent:#c2724e; --cfh-accent-deep:#9a3b2e;
+    --cfh-sold:#6b7480; --cfh-card-bg:#e3cdbd; --cfh-card-ink:#3a3330; --cfh-fill-on:.45;
+    --cfh-serif:'Playfair Display',Georgia,serif; --cfh-sans:'Inter',sans-serif;
+    --cfh-housing:6vw; --cfh-card-w:210px; --cfh-card-x:4vw; }
+  /* the synthetic building render fills the render box just like an <img class="cfh-img"> would */
+  .cfh-render .cfh-buildimg{ position:absolute; inset:0; width:100%; height:100%; }
+  .nav{ position:absolute; left:0; right:0; top:0; height:64px; display:flex; align-items:center; justify-content:center;
+    z-index:5; font-family:var(--cfh-serif); letter-spacing:.2em; font-size:1.1rem; color:#eee; opacity:.92; }
+</style>
+</head>
+<body>
+  <div class="nav">ever</div>
+  <section class="cfh-stage" id="vs">
+    <h2 class="cfh-housing">Housing 5</h2>
+    <div class="cfh-back"><span class="cfh-back__o">&larr;</span> Back to plan</div>
+
+    <div class="cfh-render">
+      <svg class="cfh-buildimg" viewBox="0 0 1400 1000" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#323c44"/><stop offset="1" stop-color="#2b343b"/></linearGradient></defs>
+  <rect x="0" y="0" width="1400" height="1000" fill="url(#sky)"/>
+  <!-- a dimmed neighbour tower (left) so the chosen one pops -->
+  <polygon points="120,420 300,360 300,880 120,900" fill="#262e35" opacity="0.6"/>
+  <polygon points="300,360 360,345 360,860 300,880" fill="#1f262c" opacity="0.6"/>
+  <!-- the CHOSEN building -->
+  <polygon points="360,250 820,150 820,900 360,830" fill="#3a4650"/>
+  <polygon points="820,150 1180,300 1180,790 820,900" fill="#2c353d"/>
+  <polygon points="374,265 461,247 461,312 374,327" fill="#2f3a44" opacity="0.9"/><polygon points="489,241 576,223 576,293 489,308" fill="#2f3a44" opacity="0.9"/><polygon points="604,217 691,199 691,274 604,289" fill="#2f3a44" opacity="0.9"/><polygon points="719,193 806,175 806,255 719,269" fill="#2f3a44" opacity="0.9"/><polygon points="837,179 923,213 923,285 837,258" fill="#202831" opacity="0.92"/><polygon points="957,227 1043,261 1043,323 957,296" fill="#202831" opacity="0.92"/><polygon points="1077,274 1163,308 1163,362 1077,334" fill="#202831" opacity="0.92"/><polygon points="374,362 461,349 461,415 374,424" fill="#2f3a44" opacity="0.9"/><polygon points="489,345 576,333 576,403 489,412" fill="#2f3a44" opacity="0.9"/><polygon points="604,329 691,316 691,391 604,400" fill="#2f3a44" opacity="0.9"/><polygon points="719,312 806,299 806,379 719,388" fill="#2f3a44" opacity="0.9"/><polygon points="837,302 923,326 923,398 837,381" fill="#202831" opacity="0.92"/><polygon points="957,335 1043,359 1043,422 957,405" fill="#202831" opacity="0.92"/><polygon points="1077,368 1163,392 1163,445 1077,428" fill="#202831" opacity="0.92"/><polygon points="374,460 461,452 461,518 374,522" fill="#2f3a44" opacity="0.9"/><polygon points="489,450 576,443 576,513 489,517" fill="#2f3a44" opacity="0.9"/><polygon points="604,440 691,433 691,508 604,512" fill="#2f3a44" opacity="0.9"/><polygon points="719,431 806,424 806,503 719,507" fill="#2f3a44" opacity="0.9"/><polygon points="837,425 923,438 923,510 837,504" fill="#202831" opacity="0.92"/><polygon points="957,444 1043,457 1043,520 957,513" fill="#202831" opacity="0.92"/><polygon points="1077,462 1163,475 1163,529 1077,522" fill="#202831" opacity="0.92"/><polygon points="374,557 461,555 461,621 374,620" fill="#2f3a44" opacity="0.9"/><polygon points="489,555 576,553 576,623 489,622" fill="#2f3a44" opacity="0.9"/><polygon points="604,552 691,550 691,625 604,624" fill="#2f3a44" opacity="0.9"/><polygon points="719,550 806,548 806,627 719,626" fill="#2f3a44" opacity="0.9"/><polygon points="837,548 923,551 923,623 837,627" fill="#202831" opacity="0.92"/><polygon points="957,552 1043,555 1043,618 957,622" fill="#202831" opacity="0.92"/><polygon points="1077,556 1163,559 1163,613 1077,616" fill="#202831" opacity="0.92"/><polygon points="374,655 461,658 461,724 374,717" fill="#2f3a44" opacity="0.9"/><polygon points="489,659 576,663 576,733 489,726" fill="#2f3a44" opacity="0.9"/><polygon points="604,664 691,667 691,742 604,735" fill="#2f3a44" opacity="0.9"/><polygon points="719,668 806,672 806,751 719,744" fill="#2f3a44" opacity="0.9"/><polygon points="837,671 923,664 923,736 837,750" fill="#202831" opacity="0.92"/><polygon points="957,661 1043,653 1043,716 957,730" fill="#202831" opacity="0.92"/><polygon points="1077,650 1163,643 1163,696 1077,711" fill="#202831" opacity="0.92"/><polygon points="374,752 461,761 461,827 374,815" fill="#2f3a44" opacity="0.9"/><polygon points="489,764 576,773 576,843 489,831" fill="#2f3a44" opacity="0.9"/><polygon points="604,776 691,784 691,859 604,847" fill="#2f3a44" opacity="0.9"/><polygon points="719,787 806,796 806,876 719,863" fill="#2f3a44" opacity="0.9"/><polygon points="837,794 923,776 923,848 837,873" fill="#202831" opacity="0.92"/><polygon points="957,769 1043,751 1043,814 957,839" fill="#202831" opacity="0.92"/><polygon points="1077,744 1163,727 1163,780 1077,805" fill="#202831" opacity="0.92"/>
+  <!-- ground -->
+  <rect x="0" y="900" width="1400" height="100" fill="#222a30"/>
+</svg>
+      <!-- THE BRICK: the locked-viewBox floor-overlay (engine fills polygons from bands[]) -->
+      <svg class="cfh-floors" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="cfh-card">
+      <div class="cfh-card__num">28</div>
+      <div class="cfh-card__lab">FLOOR</div>
+      <div class="cfh-card__sub">&mdash;</div>
+    </div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  window.__cfh = CleanFloorHoverSelect.create('#vs', {
+    imgW: 1400, imgH: 1000, fit: 'contain',
+    bands: [{"floor":28,"label":"FLOOR","sub":"2 apartments from 31.4 mln","status":"live","points":"360,250 820,150 1180,300 1180,382 820,275 360,347","anchor":{"x":360,"y":298}},{"floor":27,"label":"FLOOR","sub":"1 apartment from 28.9 mln","status":"live","points":"360,347 820,275 1180,382 1180,463 820,400 360,443","anchor":{"x":360,"y":395}},{"floor":26,"label":"FLOOR","sub":"3 apartments from 24.1 mln","status":"live","points":"360,443 820,400 1180,463 1180,545 820,525 360,540","anchor":{"x":360,"y":492}},{"floor":25,"label":"FLOOR","sub":"1 apartment from 23.2 mln","status":"live","points":"360,540 820,525 1180,545 1180,627 820,650 360,637","anchor":{"x":360,"y":588}},{"floor":24,"label":"FLOOR","sub":"Sold out","status":"sold","points":"360,637 820,650 1180,627 1180,708 820,775 360,733","anchor":{"x":360,"y":685}},{"floor":23,"label":"FLOOR","sub":"Apartments not on sale","status":"sold","points":"360,733 820,775 1180,708 1180,790 820,900 360,830","anchor":{"x":360,"y":782}}],
+    fillOn: 0.45, hoverDur: 0.16, cardDur: 0.18, ease: 'power2.out',
+    onSelect: function(floor){ console.log('select floor', floor); document.querySelector('.cfh-housing').textContent = 'Floor ' + floor; }
+  });
+</script>
+</body>
+</html>

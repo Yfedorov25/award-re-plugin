@@ -1870,6 +1870,89 @@
     "_path": "library/components/center-seam-split/",
     "_variantsResolved": []
   },
+  "clean-floor-hover-select": {
+    "id": "clean-floor-hover-select",
+    "name": "Clean floor-hover select (pick a floor on a static building render; each floor is a hand-traced PERSPECTIVE polygon — a corner-wrapping two-quad chevron in a viewBox-locked SVG — so the terracotta highlight RIDES the building instead of floating flat; one tooltip card y-tracks the hovered floor)",
+    "level": 2,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "CleanFloorHoverSelect.create(target, opts)  // target = .cfh-stage > .cfh-render( img.cfh-img + svg.cfh-floors ) + .cfh-card( .cfh-card__num + .cfh-card__lab + .cfh-card__sub ). opts: { imgW, imgH, bands:[{floor,label,sub,status,points,anchor}], fit, fillOn, hoverDur, cardDur, ease, onSelect }.",
+      "module": "iife",
+      "returns": "{ set(floor), select(floor), clear(), bands, destroy }"
+    },
+    "meaning": {
+      "what": "EVER visual-search LEVEL 1 — pick a FLOOR on a static near-elevation building render, with the razor-clean floor highlight EVER has. THE ANTI-CROOKED CORE: one <svg> over the <img> with viewBox LOCKED to the render's intrinsic pixel size + preserveAspectRatio MATCHING the img fit (so SVG units == image pixels at every screen size); each floor is a hand-traced PERSPECTIVE polygon (corner-wrapping chevron of two quads) so the highlight RIDES the building's perspective. Hover -> terracotta fill + dark top-edge stroke; ONE tooltip card whose y tweens to the hovered floor.",
+      "when": "The floor-pick step of a visual-search / unit-selector on a real building render (elevation or 3/4) — when you want the floor highlight to sit FLUSH on the building's perspective, not as a crooked flat bar. This is the fix for the crooked floor-hover lines in smarts/towns. Use it as Level 1 of a building→floor→unit drill-down (pairs with numbered-floorplate-select for Level 2). Any premium RE site whose hero is a building render and needs an elegant floor selector.",
+      "lands": "A lit tower on a dark field; as the cursor moves up the building a clean terracotta band lights exactly on a floor's window row — and it bends at the building's near corner, sloping down the front face and up the side face, sitting flush like it's painted on the glass. A small card glides alongside naming the floor and its offer. It reads as precise and architectural, never a sticker floating over a photo.",
+      "not_when": "Axis-aligned hotspots over a flat/orthographic plan (use isometric-building-unit-selector). A site/aerial plan with building pills + POI (that's Level 0 — out of this brick's scope). When you have no per-floor traced geometry (you MUST trace the polygons over the render once — guessed coords land between window rows and look amateur). A scroll-driven reveal (this is hover/click). Live 3D (banned + worse than a well-traced SVG)."
+    },
+    "source": {
+      "grammar": "EVER /visual-search/5: chosen building full-color (others dimmed), giant HOUSING N terracotta wordmark, Back-to-plan pill; hovering a floor lights a clean terracotta band that bends at the building corner + a left tooltip card that tracks the band's Y; sold floors highlight but show 'Apartments not on sale'.",
+      "recording": "apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (§2; Brick A / Level 1 of the EVER visual-search harvest). Smarts retrofit: SMARTS_VS_UPGRADE_ever-model.md (FIX 1).",
+      "registry_ref": [
+        "ever-clean-floor-hover-select"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 (no ScrollTrigger)",
+    "webgl": false,
+    "motion_props": [
+      "fill-opacity",
+      "stroke-opacity",
+      "transform",
+      "opacity"
+    ],
+    "trigger": "hover/click (no scroll)",
+    "timing_layer": [
+      "I-interactive",
+      "T-visual-search"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "visual-search",
+      "floor-select",
+      "unit-selector"
+    ],
+    "combines_with": [
+      "numbered-floorplate-select",
+      "veil-flat-detail-reveal",
+      "isometric-building-unit-selector"
+    ],
+    "anti_combos": [
+      "scroll-driven",
+      "webgl-3d"
+    ],
+    "gated_by": [
+      "R_no_webgl",
+      "R_perf_limits"
+    ],
+    "variants": [
+      "isometric-building-unit-selector"
+    ],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "ONE svg.cfh-floors over the render with viewBox LOCKED to the render's intrinsic px + preserveAspectRatio matching the img fit (NOT 'none' over object-fit:cover)",
+      "each floor = a hand-traced 6-point PERSPECTIVE polygon (corner-wrapping chevron: front face + side face sharing the near-corner edge), top/bottom edges parallel to each face's floor-lines",
+      "adjacent floors SHARE vertices (floor N bottom == floor N+1 top) -> zero gaps/overlap",
+      "hover -> band fill 0->~0.45 terracotta + a darker-red top-edge stroke (~1.5-2px); fast (~150ms), subtle, no flash",
+      "ONE tooltip card whose y GSAP-tweens to the hovered floor's anchor/centroid Y + swaps text (never re-mounted); CSS ::after triangle pointer aimed at the band",
+      "sold / not-on-sale floors highlight cooler (grey-blue) + show a card with no buy CTA; geometry lives in bands[] DATA, not hand-typed HTML",
+      "SVG fill/stroke + transform + opacity only; NO mix-blend / NO WebGL; reduced-motion or <=820px -> a floor button-list; window.__LAB_OK__ on init"
+    ],
+    "gate": {
+      "probe": "Open lab.html. __LAB_OK__ true. Hover up the building: a clean terracotta band lights on each floor's window row and BENDS at the building corner (rides the perspective — not a flat horizontal bar); the one tooltip card glides to the hovered floor + swaps text; a sold floor highlights cooler with 'not on sale'; click fires onSelect. Verify the locked viewBox, the chevron bands (sloped + shared vertices), the y-tracking tooltip, + fps. Drive hover via real mouseenter on .cfh-band; screenshot a mid-building floor to see the corner bend."
+    },
+    "note": "|",
+    "_path": "library/components/clean-floor-hover-select/",
+    "_variantsResolved": []
+  },
   "compass-rose-section-divider": {
     "id": "compass-rose-section-divider",
     "name": "Compass-rose section-divider (a thin line-art compass-rose / quatrefoil ornament that draws + scales + fades in as a section announces itself, above a kicker + giant serif title + body + framed CTA)",
