@@ -47,6 +47,7 @@
       vbH: options.vbH || 0,
       units: options.units || [],
       pillR: options.pillR != null ? options.pillR : 15,
+      pillFont: options.pillFont != null ? options.pillFont : 0, // viewBox units; 0 = use CSS px font
       hoverFill: options.hoverFill != null ? options.hoverFill : 0.12,
       hoverDur: options.hoverDur != null ? options.hoverDur : 0.18,
       ease: options.ease || 'power2.out',
@@ -122,10 +123,13 @@
         g.setAttribute('transform', 'translate(' + c.x.toFixed(1) + ' ' + c.y.toFixed(1) + ')');
         var circ = doc.createElementNS(SVGNS, 'circle'); circ.setAttribute('r', opt.pillR); circ.setAttribute('class', 'nfp-pill__bg');
         var txt = doc.createElementNS(SVGNS, 'text'); txt.setAttribute('class', 'nfp-pill__nr'); txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('dy', '0.34em'); txt.textContent = u.nr;
+        // pillFont (viewBox units) sizes the number in SVG space for small viewBoxes — inline style beats the CSS px rule
+        if (opt.pillFont) txt.style.fontSize = opt.pillFont + 'px';
         g.appendChild(circ); g.appendChild(txt);
         // live units get a '+' affordance (hidden until hover)
         if ((u.status || 'sale') === 'sale') {
           var plus = doc.createElementNS(SVGNS, 'text'); plus.setAttribute('class', 'nfp-pill__plus'); plus.setAttribute('text-anchor', 'middle'); plus.setAttribute('dy', '0.34em'); plus.textContent = '+';
+          if (opt.pillFont) plus.style.fontSize = (opt.pillFont * 1.15).toFixed(2) + 'px';
           g.appendChild(plus);
         }
         zones.appendChild(g);

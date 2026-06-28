@@ -36,13 +36,19 @@
 .nfp-foot.is-sale.is-hover { fill-opacity: var(--nfp-hover-fill, .12); }
 .nfp-foot.is-sold.is-hover, .nfp-foot.is-reserved.is-hover { fill: var(--nfp-dead, #6b7480); fill-opacity: .16; }
 
-/* number pills at computed centroids */
-.nfp-pill { cursor: pointer; transition: transform .18s ease; transform-box: fill-box; transform-origin: center; }
-.nfp-pill__bg { fill: #fff; stroke: var(--nfp-pill-bd, #c4c9cd); stroke-width: 1; transition: stroke .18s ease; }
-.nfp-pill__nr { fill: var(--nfp-pill-ink, #3a4047); font-family: var(--nfp-sans, 'Inter', sans-serif); font-size: 13px; font-weight: 500; }
+/* number pills at computed centroids.
+   NOTE: the pill <g> carries an inline transform="translate(cx cy)" set by JS. We must NOT put a
+   CSS `transform` on .nfp-pill (CSS transform OVERRIDES the SVG transform attribute → the pill
+   jumps to the SVG origin 0,0 = top-left, and the '+' flies to the corner). So the hover "grow"
+   is done on the CIRCLE's radius (r via attr is animated through a transform on the circle, whose
+   own origin is its centre) + stroke, never on the <g>. */
+.nfp-pill { cursor: pointer; }
+.nfp-pill__bg { fill: #fff; stroke: var(--nfp-pill-bd, #c4c9cd); stroke-width: 1;
+  transition: stroke .18s ease, fill .18s ease, transform .18s ease;
+  transform-box: fill-box; transform-origin: center; }
+.nfp-pill__nr { fill: var(--nfp-pill-ink, #3a4047); font-family: var(--nfp-sans, 'Inter', sans-serif); font-size: 13px; font-weight: 500; transition: opacity .18s ease; }
 .nfp-pill__plus { fill: var(--nfp-accent, #c2724e); font-family: var(--nfp-sans, sans-serif); font-size: 15px; opacity: 0; transition: opacity .18s ease; }
-.nfp-pill.is-sale.is-hover { transform: scale(1.1); }
-.nfp-pill.is-sale.is-hover .nfp-pill__bg { stroke: var(--nfp-accent, #c2724e); }
+.nfp-pill.is-sale.is-hover .nfp-pill__bg { stroke: var(--nfp-accent, #c2724e); transform: scale(1.1); }
 .nfp-pill.is-sale.is-hover .nfp-pill__nr { opacity: 0; }
 .nfp-pill.is-sale.is-hover .nfp-pill__plus { opacity: 1; }
 .nfp-pill.is-sold .nfp-pill__bg, .nfp-pill.is-reserved .nfp-pill__bg { fill: #d7dade; }

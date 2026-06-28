@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMARTS FIX-2 prototype · numbered-floorplate-select on REAL smarts floor-2 data (18 units)</title>
+<!-- PROTOTYPE: smarts Агрономічне floor-2 (18 real units from units.json) on a CLEAN redrawn plan
+     via numbered-floorplate-select. Shows exactly how the smarts visual-search floor view looks
+     after FIX 2 (numbered clean plan instead of raw floor-std.webp + text wall). NO WebGL. -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{ --slate:#0b1f1a; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{ background:#0e1b16; color:#e7e2d6; font-family:'Inter',system-ui,sans-serif; }
+  /* smarts palette: dark green-black ground, warm accent */
+  .nfp-stage{ --nfp-bg:#0e1b16; --nfp-ink:#e7e2d6; --nfp-plate:#e9ecee; --nfp-accent:#b06a3e;
+    --nfp-dead:#6b7480; --nfp-pill-bd:#c4c9cd; --nfp-pill-ink:#3a4047;
+    --nfp-serif:'Playfair Display',Georgia,serif; --nfp-sans:'Inter',sans-serif;
+    --nfp-rail:230px; --nfp-hover-fill:.14; }
+  .nav{ position:absolute; left:0; right:0; top:0; height:56px; display:flex; align-items:center; justify-content:center; z-index:6; font-family:var(--nfp-serif); letter-spacing:.16em; font-size:1rem; opacity:.9; }
+  .brd{ position:absolute; left:4vw; top:60px; font-size:.64rem; letter-spacing:.12em; text-transform:uppercase; opacity:.5; z-index:6; }
+</style></head>
+<body>
+  <div class="nav">Агрономічне · вибір квартири</div>
+  <div class="brd">Вибір квартири — 2-й поверх</div>
+  <section class="nfp-stage" id="fp">
+    <div class="nfp-rail">
+      <div class="nfp-back"><span class="nfp-back__o">&larr;</span> До будівлі</div>
+      <div class="nfp-floornum">2</div>
+      <div class="nfp-floorsel">Поверх &#9662;</div>
+      <div class="nfp-rail__div"></div>
+      <div class="nfp-locator">
+        <svg viewBox="0 0 80 60" aria-hidden="true"><rect x="8" y="8" width="64" height="14" fill="#586" opacity=".35"/><rect x="8" y="24" width="64" height="14" fill="#b06a3e"/><rect x="8" y="40" width="64" height="14" fill="#586" opacity=".35"/></svg>
+        <svg class="nfp-compass" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20" fill="none" stroke="#e7e2d6" stroke-opacity=".4"/><path d="M22 6 L26 22 L22 38 L18 22 Z" fill="#e7e2d6" opacity=".7"/><text x="22" y="15" text-anchor="middle" font-size="7" fill="#e7e2d6" opacity=".7">N</text></svg>
+      </div>
+    </div>
+    <div class="nfp-stagecard">
+      <svg class="nfp-plan" viewBox="0 0 100 44.08" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect x="-2" y="-2" width="104" height="48.08" fill="#e9ecee"/><rect x="2" y="0.6" width="96" height="42.879999999999995" fill="#ffffff"/><g data-sec="sec0"><!-- ===== PERIMETER (heavy) ===== -->
+<path d="M2.2 0.6 L33.33 0.6" stroke="#1e2227" stroke-width="0.45" fill="none"/>
+<path d="M2.2 43.5 L33.33 43.5" stroke="#1e2227" stroke-width="0.45" fill="none"/>
+<path d="M2.2 0.6 L2.2 17.6 M2.2 25.4 L2.2 43.5" stroke="#1e2227" stroke-width="0.45" fill="none"/>
+
+<!-- ===== LEFT EDGE LOGGIAS / BALCONIES (hatched thin) ===== -->
+<rect x="2.2" y="2.4" width="2.5" height="9.6" fill="#ffffff" stroke="#cfd4d8" stroke-width="0.14"/>
+<g stroke="#cfd4d8" stroke-width="0.07">
+<line x1="2.2" y1="3.6" x2="4.7" y2="2.4"/><line x1="2.2" y1="5.4" x2="4.7" y2="4.2"/><line x1="2.2" y1="7.2" x2="4.7" y2="6.0"/><line x1="2.2" y1="9.0" x2="4.7" y2="7.8"/><line x1="2.2" y1="10.8" x2="4.7" y2="9.6"/><line x1="2.2" y1="12.0" x2="4.7" y2="11.4"/>
+</g>
+<rect x="2.2" y="13.0" width="2.5" height="4.0" fill="#ffffff" stroke="#cfd4d8" stroke-width="0.14"/>
+<g stroke="#cfd4d8" stroke-width="0.07">
+<line x1="2.2" y1="14.2" x2="4.7" y2="13.0"/><line x1="2.2" y1="16.0" x2="4.7" y2="14.8"/><line x1="2.2" y1="17.0" x2="3.4" y2="16.4"/>
+</g>
+<rect x="2.2" y="26.6" width="2.5" height="4.0" fill="#ffffff" stroke="#cfd4d8" stroke-width="0.14"/>
+<g stroke="#cfd4d8" stroke-width="0.07">
+<line x1="2.2" y1="27.8" x2="4.7" y2="26.6"/><line x1="2.2" y1="29.6" x2="4.7" y2="28.4"/><line x1="2.2" y1="30.6" x2="3.4" y2="30.0"/>
+</g>
+<rect x="2.2" y="32.0" width="2.5" height="9.6" fill="#ffffff" stroke="#cfd4d8" stroke-width="0.14"/>
+<g stroke="#cfd4d8" stroke-width="0.07">
+<line x1="2.2" y1="33.2" x2="4.7" y2="32.0"/><line x1="2.2" y1="35.0" x2="4.7" y2="33.8"/><line x1="2.2" y1="36.8" x2="4.7" y2="35.6"/><line x1="2.2" y1="38.6" x2="4.7" y2="37.4"/><line x1="2.2" y1="40.4" x2="4.7" y2="39.2"/><line x1="2.2" y1="41.6" x2="4.7" y2="40.4"/>
+</g>
+
+<!-- ===== UNIT-DIVIDING WALLS (medium) — top row units 3 / 4 / 6 ===== -->
+<path d="M4.7 0.6 L4.7 17.6" stroke="#7e878d" stroke-width="0.22" fill="none"/>
+<path d="M14.4 0.6 L14.4 17.6" stroke="#1e2227" stroke-width="0.30" fill="none"/>
+<path d="M24.1 0.6 L24.1 17.6" stroke="#1e2227" stroke-width="0.30" fill="none"/>
+
+<!-- ===== TOP ROW: living rooms (Загальна кімната) ===== -->
+<rect x="4.9" y="0.8" width="9.3" height="11.4" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<rect x="14.6" y="0.8" width="9.3" height="11.4" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<rect x="24.3" y="0.8" width="9.03" height="11.4" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<!-- kitchen counter hints (top) -->
+<rect x="7.0" y="0.8" width="2.4" height="1.0" fill="none" stroke="#cfd4d8" stroke-width="0.12"/>
+<rect x="16.7" y="0.8" width="2.4" height="1.0" fill="none" stroke="#cfd4d8" stroke-width="0.12"/>
+<rect x="26.4" y="0.8" width="2.4" height="1.0" fill="none" stroke="#cfd4d8" stroke-width="0.12"/>
+<line x1="13.2" y1="3.0" x2="14.2" y2="3.0" stroke="#cfd4d8" stroke-width="0.12"/>
+<line x1="22.9" y1="3.0" x2="23.9" y2="3.0" stroke="#cfd4d8" stroke-width="0.12"/>
+
+<!-- ===== TOP ROW: halls (Передпокій) + bathrooms (Санвузол) row, y~12.2..17.6 ===== -->
+<!-- partition between living above and hall/bath below -->
+<path d="M4.9 12.2 L14.2 12.2 M14.6 12.2 L23.9 12.2 M24.3 12.2 L33.33 12.2" stroke="#7e878d" stroke-width="0.22" fill="none"/>
+<!-- bathroom boxes (Санвузол) -->
+<rect x="7.4" y="12.4" width="3.6" height="5.0" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<rect x="17.1" y="12.4" width="3.6" height="5.0" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<rect x="26.8" y="12.4" width="3.6" height="5.0" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<!-- bathroom fixtures (shower square + wc circle) -->
+<rect x="7.7" y="12.8" width="1.5" height="1.5" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<circle cx="9.9" cy="15.6" r="0.45" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<rect x="17.4" y="12.8" width="1.5" height="1.5" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<circle cx="19.6" cy="15.6" r="0.45" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<rect x="27.1" y="12.8" width="1.5" height="1.5" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<circle cx="29.3" cy="15.6" r="0.45" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+
+<!-- ===== CENTRAL CORRIDOR BAND (horizontal, light-filled) ===== -->
+<rect x="2.2" y="17.6" width="31.13" height="7.8" fill="#f1f3f4" stroke="none"/>
+<path d="M2.2 17.6 L33.33 17.6 M2.2 25.4 L33.33 25.4" stroke="#1e2227" stroke-width="0.30" fill="none"/>
+<line x1="2.2" y1="21.5" x2="33.33" y2="21.5" stroke="#cfd4d8" stroke-width="0.10" stroke-dasharray="0.6 0.5"/>
+
+<!-- ===== BOTTOM ROW: halls + bathrooms (top of lower units 2 / 5 / 8) ===== -->
+<path d="M4.7 25.4 L4.7 43.5" stroke="#7e878d" stroke-width="0.22" fill="none"/>
+<path d="M14.4 25.4 L14.4 43.5" stroke="#1e2227" stroke-width="0.30" fill="none"/>
+<path d="M24.1 25.4 L24.1 43.5" stroke="#1e2227" stroke-width="0.30" fill="none"/>
+<!-- bathroom boxes lower -->
+<rect x="7.4" y="26.6" width="3.6" height="5.0" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<rect x="17.1" y="26.6" width="3.6" height="5.0" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<rect x="7.7" y="29.6" width="1.5" height="1.5" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<circle cx="9.9" cy="27.4" r="0.45" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<rect x="17.4" y="29.6" width="1.5" height="1.5" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<circle cx="19.6" cy="27.4" r="0.45" fill="none" stroke="#cfd4d8" stroke-width="0.10"/>
+<!-- partition between hall/bath and living below -->
+<path d="M4.9 31.8 L14.2 31.8 M14.6 31.8 L23.9 31.8" stroke="#7e878d" stroke-width="0.22" fill="none"/>
+
+<!-- ===== BOTTOM ROW: living rooms (Загальна кімната) ===== -->
+<rect x="4.9" y="32.0" width="9.3" height="11.3" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<rect x="14.6" y="32.0" width="9.3" height="11.3" fill="#ffffff" stroke="#7e878d" stroke-width="0.22"/>
+<!-- kitchen hints bottom -->
+<rect x="7.0" y="42.3" width="2.4" height="1.0" fill="none" stroke="#cfd4d8" stroke-width="0.12"/>
+<rect x="16.7" y="42.3" width="2.4" height="1.0" fill="none" stroke="#cfd4d8" stroke-width="0.12"/>
+
+<!-- ===== STAIR CORE (right side of crop, dashed shaft + steps) ===== -->
+<rect x="24.3" y="32.0" width="9.03" height="11.3" fill="#ffffff" stroke="#cfd4d8" stroke-width="0.14" stroke-dasharray="0.7 0.5"/>
+<rect x="24.6" y="32.6" width="3.9" height="10.2" fill="#ffffff" stroke="#1e2227" stroke-width="0.18"/>
+<g stroke="#7e878d" stroke-width="0.12">
+<line x1="24.6" y1="33.6" x2="28.5" y2="33.6"/><line x1="24.6" y1="34.6" x2="28.5" y2="34.6"/><line x1="24.6" y1="35.6" x2="28.5" y2="35.6"/><line x1="24.6" y1="36.6" x2="28.5" y2="36.6"/><line x1="24.6" y1="37.6" x2="28.5" y2="37.6"/>
+</g>
+<path d="M24.6 42.8 L28.5 38.6" stroke="#1e2227" stroke-width="0.14" fill="none"/>
+<!-- dashed measure ticks in shaft right half -->
+<g stroke="#cfd4d8" stroke-width="0.10" stroke-dasharray="0.5 0.4">
+<line x1="29.4" y1="33.0" x2="29.4" y2="42.6"/><line x1="30.8" y1="33.0" x2="30.8" y2="42.6"/><line x1="32.2" y1="33.0" x2="32.2" y2="42.6"/>
+</g>
+
+<!-- ===== COLUMNS (small) ===== -->
+<rect x="14.25" y="17.7" width="0.4" height="0.4" fill="#cdd2d6" stroke="#7e878d" stroke-width="0.06"/>
+<rect x="23.95" y="17.7" width="0.4" height="0.4" fill="#cdd2d6" stroke="#7e878d" stroke-width="0.06"/>
+<rect x="14.25" y="24.9" width="0.4" height="0.4" fill="#cdd2d6" stroke="#7e878d" stroke-width="0.06"/>
+<rect x="23.95" y="24.9" width="0.4" height="0.4" fill="#cdd2d6" stroke="#7e878d" stroke-width="0.06"/>
+<rect x="4.5" y="17.7" width="0.4" height="0.4" fill="#cdd2d6" stroke="#7e878d" stroke-width="0.06"/>
+<rect x="4.5" y="24.9" width="0.4" height="0.4" fill="#cdd2d6" stroke="#7e878d" stroke-width="0.06"/>
+
+<!-- ===== DOOR SWING ARCS (thin) ===== -->
+<!-- top halls: entry from corridor up into hall -->
+<path d="M5.6 17.4 A1.6 1.6 0 0 1 7.2 15.8" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<path d="M15.3 17.4 A1.6 1.6 0 0 1 16.9 15.8" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<path d="M25.0 17.4 A1.6 1.6 0 0 1 26.6 15.8" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<!-- top bathroom doors -->
+<path d="M11.0 15.6 A1.4 1.4 0 0 0 9.6 14.2" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<path d="M20.7 15.6 A1.4 1.4 0 0 0 19.3 14.2" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<!-- bottom halls: entry from corridor down into hall -->
+<path d="M5.6 25.6 A1.6 1.6 0 0 0 7.2 27.2" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<path d="M15.3 25.6 A1.6 1.6 0 0 0 16.9 27.2" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<!-- bottom bathroom doors -->
+<path d="M11.0 29.8 A1.4 1.4 0 0 1 9.6 31.2" stroke="#b9bfc4" stroke-width="0.12" fill="none"/>
+<path d="M20.7 29.8 A1.4 1.4 0 0 1 19.3 31.2" stroke="#b9bfc4" stroke-width="0.12" fill="none"/></g>
+<g data-sec="sec1"><!-- ===== SEC1 CENTER THIRD  x:33.33..66.66  y:0..44.08 ===== -->
+<!-- corridor light-filled strip (Коридор) -->
+<rect x="33.33" y="20.4" width="33.33" height="4.6" fill="#f1f3f4"/>
+
+<!-- room white fills: TOP row large rooms (Загальна) -->
+<rect x="34.0" y="1.2" width="6.1" height="11.5" fill="#ffffff"/>
+<rect x="40.7" y="1.2" width="7.2" height="11.5" fill="#ffffff"/>
+<rect x="51.9" y="1.2" width="7.2" height="11.5" fill="#ffffff"/>
+<rect x="59.7" y="1.2" width="6.1" height="11.5" fill="#ffffff"/>
+<!-- TOP row hall+san band -->
+<rect x="34.0" y="13.2" width="6.1" height="6.4" fill="#ffffff"/>
+<rect x="40.7" y="13.2" width="7.2" height="6.4" fill="#ffffff"/>
+<rect x="51.9" y="13.2" width="7.2" height="6.4" fill="#ffffff"/>
+<rect x="59.7" y="13.2" width="6.1" height="6.4" fill="#ffffff"/>
+<!-- BOTTOM row san+hall band -->
+<rect x="34.0" y="25.6" width="6.1" height="6.6" fill="#ffffff"/>
+<rect x="40.7" y="25.6" width="7.2" height="6.6" fill="#ffffff"/>
+<rect x="51.9" y="25.6" width="7.2" height="6.6" fill="#ffffff"/>
+<rect x="59.7" y="25.6" width="6.1" height="6.6" fill="#ffffff"/>
+<!-- BOTTOM row large rooms (Загальна) -->
+<rect x="34.0" y="32.8" width="6.1" height="10.0" fill="#ffffff"/>
+<rect x="40.7" y="32.8" width="7.2" height="10.0" fill="#ffffff"/>
+<rect x="51.9" y="32.8" width="7.2" height="10.0" fill="#ffffff"/>
+<rect x="59.7" y="32.8" width="6.1" height="10.0" fill="#ffffff"/>
+
+<!-- ===== PARTITION WALLS (medium #7e878d ~0.22) ===== -->
+<!-- TOP row: between Загальна (above) and hall/san (below) -->
+<line x1="34.0" y1="12.95" x2="40.1" y2="12.95" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="40.7" y1="12.95" x2="47.9" y2="12.95" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="51.9" y1="12.95" x2="59.1" y2="12.95" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="59.7" y1="12.95" x2="65.8" y2="12.95" stroke="#7e878d" stroke-width="0.22"/>
+<!-- TOP row: hall|san vertical divider inside units 10,11 -->
+<line x1="44.3" y1="13.2" x2="44.3" y2="19.6" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="55.5" y1="13.2" x2="55.5" y2="19.6" stroke="#7e878d" stroke-width="0.22"/>
+<!-- BOTTOM row: between san/hall (above) and Загальна (below) -->
+<line x1="34.0" y1="32.55" x2="40.1" y2="32.55" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="40.7" y1="32.55" x2="47.9" y2="32.55" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="51.9" y1="32.55" x2="59.1" y2="32.55" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="59.7" y1="32.55" x2="65.8" y2="32.55" stroke="#7e878d" stroke-width="0.22"/>
+<!-- BOTTOM row: san|hall vertical divider inside units 9,12 -->
+<line x1="38.5" y1="25.6" x2="38.5" y2="32.2" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="48.0" y1="25.6" x2="48.0" y2="32.2" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="51.9" y1="25.6" x2="51.9" y2="32.2" stroke="#7e878d" stroke-width="0.22"/>
+<line x1="61.3" y1="25.6" x2="61.3" y2="32.2" stroke="#7e878d" stroke-width="0.22"/>
+
+<!-- ===== UNIT-DIVIDING PARTY WALLS (perimeter weight #1e2227 ~0.45) ===== -->
+<!-- vertical party walls TOP block -->
+<rect x="40.1" y="1.2" width="0.6" height="18.4" fill="#1e2227"/>
+<rect x="47.9" y="1.2" width="0.6" height="18.4" fill="#1e2227"/>
+<rect x="51.3" y="1.2" width="0.6" height="18.4" fill="#1e2227"/>
+<rect x="59.1" y="1.2" width="0.6" height="18.4" fill="#1e2227"/>
+<rect x="33.5" y="1.2" width="0.5" height="18.4" fill="#1e2227"/>
+<rect x="65.8" y="1.2" width="0.5" height="18.4" fill="#1e2227"/>
+<!-- vertical party walls BOTTOM block -->
+<rect x="40.1" y="25.6" width="0.6" height="17.2" fill="#1e2227"/>
+<rect x="47.9" y="25.6" width="0.6" height="17.2" fill="#1e2227"/>
+<rect x="51.3" y="25.6" width="0.6" height="17.2" fill="#1e2227"/>
+<rect x="59.1" y="25.6" width="0.6" height="17.2" fill="#1e2227"/>
+<rect x="33.5" y="25.6" width="0.5" height="17.2" fill="#1e2227"/>
+<rect x="65.8" y="25.6" width="0.5" height="17.2" fill="#1e2227"/>
+
+<!-- ===== PERIMETER / CORRIDOR WALLS (heavy #1e2227 ~0.45) ===== -->
+<!-- top outer edge -->
+<line x1="33.33" y1="1.2" x2="66.66" y2="1.2" stroke="#1e2227" stroke-width="0.45"/>
+<!-- corridor-facing wall, TOP block bottom -->
+<line x1="33.33" y1="19.7" x2="40.4" y2="19.7" stroke="#1e2227" stroke-width="0.45"/>
+<line x1="40.7" y1="19.7" x2="48.2" y2="19.7" stroke="#1e2227" stroke-width="0.45"/>
+<line x1="51.6" y1="19.7" x2="59.4" y2="19.7" stroke="#1e2227" stroke-width="0.45"/>
+<line x1="59.7" y1="19.7" x2="66.66" y2="19.7" stroke="#1e2227" stroke-width="0.45"/>
+<!-- corridor-facing wall, BOTTOM block top -->
+<line x1="33.33" y1="25.3" x2="40.4" y2="25.3" stroke="#1e2227" stroke-width="0.45"/>
+<line x1="40.7" y1="25.3" x2="48.2" y2="25.3" stroke="#1e2227" stroke-width="0.45"/>
+<line x1="51.6" y1="25.3" x2="59.4" y2="25.3" stroke="#1e2227" stroke-width="0.45"/>
+<line x1="59.7" y1="25.3" x2="66.66" y2="25.3" stroke="#1e2227" stroke-width="0.45"/>
+<!-- bottom outer edge -->
+<line x1="33.33" y1="42.8" x2="66.66" y2="42.8" stroke="#1e2227" stroke-width="0.45"/>
+
+<!-- ===== STAIR CORE (center) — dashed outline + steps ===== -->
+<rect x="48.5" y="13.4" width="2.8" height="6.0" fill="#ffffff" stroke="#7e878d" stroke-width="0.16" stroke-dasharray="0.6 0.4"/>
+<line x1="48.5" y1="14.2" x2="51.3" y2="14.2" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="15.0" x2="51.3" y2="15.0" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="15.8" x2="51.3" y2="15.8" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="16.6" x2="51.3" y2="16.6" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="17.4" x2="51.3" y2="17.4" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="18.2" x2="51.3" y2="18.2" stroke="#1e2227" stroke-width="0.12"/>
+<!-- stair core lower (bottom block) -->
+<rect x="48.5" y="25.6" width="2.8" height="6.0" fill="#ffffff" stroke="#7e878d" stroke-width="0.16" stroke-dasharray="0.6 0.4"/>
+<line x1="48.5" y1="26.4" x2="51.3" y2="26.4" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="27.2" x2="51.3" y2="27.2" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="28.0" x2="51.3" y2="28.0" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="28.8" x2="51.3" y2="28.8" stroke="#1e2227" stroke-width="0.12"/>
+<line x1="48.5" y1="29.6" x2="51.3" y2="29.6" stroke="#1e2227" stroke-width="0.12"/>
+
+<!-- ===== DOOR SWING ARCS (#b9bfc4 ~0.12) ===== -->
+<!-- TOP hall doors to corridor -->
+<path d="M37.0 19.7 A2.2 2.2 0 0 1 39.2 17.5" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<path d="M43.0 19.7 A2.2 2.2 0 0 1 45.2 17.5" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<path d="M54.0 19.7 A2.2 2.2 0 0 0 51.8 17.5" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<path d="M62.5 19.7 A2.2 2.2 0 0 0 60.3 17.5" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<!-- TOP san internal doors -->
+<path d="M45.0 13.4 A1.6 1.6 0 0 1 46.6 15.0" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<path d="M55.0 13.4 A1.6 1.6 0 0 0 53.4 15.0" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<!-- BOTTOM hall doors to corridor -->
+<path d="M43.5 25.3 A2.2 2.2 0 0 0 41.3 27.5" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<path d="M56.5 25.3 A2.2 2.2 0 0 1 58.7 27.5" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<!-- BOTTOM san internal doors -->
+<path d="M39.2 31.8 A1.6 1.6 0 0 1 37.6 30.2" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+<path d="M60.8 31.8 A1.6 1.6 0 0 0 62.4 30.2" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+
+<!-- ===== COLUMNS (#cdd2d6 small rects) ===== -->
+<rect x="40.15" y="19.7" width="0.5" height="0.5" fill="#cdd2d6"/>
+<rect x="47.95" y="19.7" width="0.5" height="0.5" fill="#cdd2d6"/>
+<rect x="51.35" y="19.7" width="0.5" height="0.5" fill="#cdd2d6"/>
+<rect x="59.15" y="19.7" width="0.5" height="0.5" fill="#cdd2d6"/>
+<rect x="40.15" y="24.8" width="0.5" height="0.5" fill="#cdd2d6"/>
+<rect x="47.95" y="24.8" width="0.5" height="0.5" fill="#cdd2d6"/>
+<rect x="51.35" y="24.8" width="0.5" height="0.5" fill="#cdd2d6"/>
+<rect x="59.15" y="24.8" width="0.5" height="0.5" fill="#cdd2d6"/>
+
+<!-- ===== light interior hints: kitchen counters / niches (#cfd4d8 ~0.14) ===== -->
+<line x1="43.0" y1="1.4" x2="45.6" y2="1.4" stroke="#cfd4d8" stroke-width="0.14"/>
+<line x1="45.6" y1="1.4" x2="45.6" y2="4.6" stroke="#cfd4d8" stroke-width="0.14"/>
+<line x1="53.4" y1="1.4" x2="56.0" y2="1.4" stroke="#cfd4d8" stroke-width="0.14"/>
+<line x1="53.4" y1="1.4" x2="53.4" y2="4.6" stroke="#cfd4d8" stroke-width="0.14"/>
+<line x1="36.0" y1="32.9" x2="38.6" y2="32.9" stroke="#cfd4d8" stroke-width="0.14"/>
+<line x1="61.4" y1="32.9" x2="63.6" y2="32.9" stroke="#cfd4d8" stroke-width="0.14"/></g>
+<g data-sec="sec2"><!-- ===================== SECTION 2 (RIGHT THIRD) x:66.66..100 ===================== -->
+<g>
+  <!-- room white fills (drawn first, under the walls) -->
+  <!-- TOP band apartments -->
+  <rect x="67.0" y="1.4" width="6.6" height="13.8" fill="#ffffff"/>   <!-- 15 Загальна -->
+  <rect x="74.7" y="1.4" width="9.4" height="13.8" fill="#ffffff"/>   <!-- 16 Загальна -->
+  <rect x="90.0" y="1.4" width="9.6" height="13.8" fill="#ffffff"/>   <!-- 19 Загальна -->
+  <rect x="67.0" y="15.6" width="3.5" height="3.9" fill="#ffffff"/>   <!-- 15 Санвузол -->
+  <rect x="70.8" y="15.6" width="2.8" height="3.9" fill="#ffffff"/>   <!-- 15 Передпокій -->
+  <rect x="74.7" y="15.6" width="4.3" height="3.9" fill="#ffffff"/>   <!-- 16 Передпокій -->
+  <rect x="79.3" y="15.6" width="3.4" height="3.9" fill="#ffffff"/>   <!-- 16 Санвузол -->
+  <rect x="83.0" y="15.6" width="1.1" height="3.9" fill="#ffffff"/>   <!-- 16 service stub -->
+  <rect x="90.0" y="15.6" width="3.5" height="3.9" fill="#ffffff"/>   <!-- 19 Санвузол -->
+  <rect x="93.8" y="15.6" width="5.8" height="3.9" fill="#ffffff"/>   <!-- 19 Передпокій -->
+  <rect x="66.66" y="15.6" width="0.9" height="3.9" fill="#ffffff"/>  <!-- 14 Санвузол sliver -->
+  <!-- BOTTOM band apartments -->
+  <rect x="66.66" y="24.2" width="2.4" height="6.0" fill="#ffffff"/>  <!-- 13 Передпокій -->
+  <rect x="74.7" y="24.2" width="4.3" height="6.0" fill="#ffffff"/>   <!-- 17 Передпокій -->
+  <rect x="79.3" y="24.2" width="3.4" height="6.0" fill="#ffffff"/>   <!-- 17 Санвузол -->
+  <rect x="89.4" y="24.2" width="3.4" height="6.0" fill="#ffffff"/>   <!-- 18 Санвузол -->
+  <rect x="93.5" y="24.2" width="6.1" height="6.0" fill="#ffffff"/>   <!-- 18 Передпокій -->
+  <rect x="74.7" y="30.6" width="9.4" height="12.7" fill="#ffffff"/>  <!-- 17 Загальна -->
+  <rect x="90.0" y="30.6" width="9.6" height="12.7" fill="#ffffff"/>  <!-- 18 Загальна -->
+  <rect x="66.66" y="30.6" width="6.4" height="12.7" fill="#ffffff"/> <!-- 13 Загальна / stair zone -->
+
+  <!-- ===== central CORRIDOR band (light strip) ===== -->
+  <rect x="66.66" y="19.5" width="33.34" height="4.7" fill="#f1f3f4"/>
+
+  <!-- ===== balcony / loggia hatched fills at edges ===== -->
+  <rect x="67.0" y="0.0" width="32.6" height="1.4" fill="#f6f7f8"/>     <!-- top loggia strip -->
+  <rect x="66.66" y="43.3" width="32.94" height="0.78" fill="#f6f7f8"/><!-- bottom loggia strip -->
+
+  <!-- ============ PARTITION WALLS (medium #7e878d ~0.22) ============ -->
+  <!-- unit dividers TOP -->
+  <line x1="73.6" y1="1.2" x2="73.6" y2="19.5" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="84.1" y1="1.2" x2="84.1" y2="19.5" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="89.5" y1="1.2" x2="89.5" y2="19.5" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="66.9" y1="1.2" x2="66.9" y2="19.5" stroke="#7e878d" stroke-width="0.22"/>
+  <!-- horizontal split: Загальна above / hall+bath below (TOP) -->
+  <line x1="66.66" y1="15.4" x2="84.1" y2="15.4" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="89.5" y1="15.4" x2="99.6" y2="15.4" stroke="#7e878d" stroke-width="0.22"/>
+  <!-- TOP small-room partitions (hall vs bath) -->
+  <line x1="70.6" y1="15.4" x2="70.6" y2="19.5" stroke="#7e878d" stroke-width="0.22"/> <!-- 15 bath|hall -->
+  <line x1="79.1" y1="15.4" x2="79.1" y2="19.5" stroke="#7e878d" stroke-width="0.22"/> <!-- 16 hall|bath -->
+  <line x1="82.9" y1="15.4" x2="82.9" y2="19.5" stroke="#7e878d" stroke-width="0.22"/> <!-- 16 bath|stub -->
+  <line x1="93.6" y1="15.4" x2="93.6" y2="19.5" stroke="#7e878d" stroke-width="0.22"/> <!-- 19 bath|hall -->
+  <!-- unit dividers BOTTOM -->
+  <line x1="73.6" y1="24.2" x2="73.6" y2="43.3" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="84.1" y1="24.2" x2="84.1" y2="43.3" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="89.5" y1="24.2" x2="89.5" y2="43.3" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="69.2" y1="24.2" x2="69.2" y2="43.3" stroke="#7e878d" stroke-width="0.22"/> <!-- 13 hall|stair -->
+  <!-- horizontal split: hall+bath above / Загальна below (BOTTOM) -->
+  <line x1="73.6" y1="30.4" x2="84.1" y2="30.4" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="89.5" y1="30.4" x2="99.6" y2="30.4" stroke="#7e878d" stroke-width="0.22"/>
+  <line x1="66.66" y1="30.4" x2="69.2" y2="30.4" stroke="#7e878d" stroke-width="0.22"/>
+  <!-- BOTTOM small-room partitions -->
+  <line x1="79.1" y1="24.2" x2="79.1" y2="30.4" stroke="#7e878d" stroke-width="0.22"/> <!-- 17 hall|bath -->
+  <line x1="82.9" y1="24.2" x2="82.9" y2="30.4" stroke="#7e878d" stroke-width="0.22"/> <!-- 17 bath edge -->
+  <line x1="89.5" y1="27.0" x2="93.0" y2="27.0" stroke="#7e878d" stroke-width="0.22"/> <!-- 18 bath inner -->
+  <line x1="93.0" y1="24.2" x2="93.0" y2="30.4" stroke="#7e878d" stroke-width="0.22"/> <!-- 18 bath|hall -->
+
+  <!-- light interior secondary lines (#cfd4d8 ~0.14) -->
+  <line x1="76.9" y1="15.6" x2="76.9" y2="19.3" stroke="#cfd4d8" stroke-width="0.14"/>
+  <line x1="91.6" y1="24.4" x2="91.6" y2="26.9" stroke="#cfd4d8" stroke-width="0.14"/>
+  <line x1="68.0" y1="31.0" x2="68.0" y2="42.8" stroke="#cfd4d8" stroke-width="0.14"/>
+
+  <!-- ============ STAIR CORE (apartment 13 zone) ============ -->
+  <!-- dashed shaft outline -->
+  <rect x="69.6" y="30.9" width="3.6" height="11.8" fill="none" stroke="#7e878d" stroke-width="0.16" stroke-dasharray="0.6 0.4"/>
+  <!-- run of steps (treads) -->
+  <line x1="69.9" y1="31.5" x2="72.9" y2="31.5" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="32.3" x2="72.9" y2="32.3" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="33.1" x2="72.9" y2="33.1" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="33.9" x2="72.9" y2="33.9" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="34.7" x2="72.9" y2="34.7" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="35.5" x2="72.9" y2="35.5" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="36.3" x2="72.9" y2="36.3" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="37.1" x2="72.9" y2="37.1" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="37.9" x2="72.9" y2="37.9" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="38.7" x2="72.9" y2="38.7" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="39.5" x2="72.9" y2="39.5" stroke="#1e2227" stroke-width="0.12"/>
+  <!-- stair center stringer + landing -->
+  <line x1="71.4" y1="31.5" x2="71.4" y2="39.9" stroke="#1e2227" stroke-width="0.12"/>
+  <line x1="69.9" y1="39.9" x2="72.9" y2="39.9" stroke="#7e878d" stroke-width="0.16"/>
+  <!-- direction arrow -->
+  <path d="M 71.4 40.7 L 70.7 41.6 M 71.4 40.7 L 72.1 41.6" fill="none" stroke="#1e2227" stroke-width="0.1"/>
+
+  <!-- ============ DOOR SWINGS (#b9bfc4 ~0.12) ============ -->
+  <!-- TOP: 15 hall->corridor, 16 hall, 19 hall -->
+  <path d="M 71.0 19.3 A 1.4 1.4 0 0 1 72.4 17.9" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <path d="M 75.1 19.3 A 1.5 1.5 0 0 1 76.6 17.8" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <path d="M 93.9 19.3 A 1.5 1.5 0 0 1 95.4 17.8" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <!-- TOP: bath doors -->
+  <path d="M 79.4 16.0 A 1.2 1.2 0 0 1 80.6 17.2" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <path d="M 90.3 16.0 A 1.2 1.2 0 0 1 91.5 17.2" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <path d="M 67.3 16.0 A 1.1 1.1 0 0 1 68.4 17.1" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <!-- BOTTOM: 17 hall->corridor, 18 hall, 13 hall -->
+  <path d="M 75.1 24.4 A 1.5 1.5 0 0 1 76.6 25.9" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <path d="M 93.7 24.4 A 1.5 1.5 0 0 1 95.2 25.9" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <path d="M 67.0 24.4 A 1.3 1.3 0 0 1 68.3 25.7" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <!-- BOTTOM: bath doors + Загальна doors -->
+  <path d="M 79.4 30.2 A 1.2 1.2 0 0 0 80.6 29.0" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+  <path d="M 89.8 30.2 A 1.2 1.2 0 0 0 91.0 29.0" fill="none" stroke="#b9bfc4" stroke-width="0.12"/>
+
+  <!-- ============ COLUMNS (#cdd2d6 small rects) ============ -->
+  <rect x="73.4" y="14.9" width="0.5" height="0.7" fill="#cdd2d6"/>
+  <rect x="83.9" y="14.9" width="0.5" height="0.7" fill="#cdd2d6"/>
+  <rect x="89.3" y="14.9" width="0.5" height="0.7" fill="#cdd2d6"/>
+  <rect x="73.4" y="30.0" width="0.5" height="0.7" fill="#cdd2d6"/>
+  <rect x="83.9" y="30.0" width="0.5" height="0.7" fill="#cdd2d6"/>
+  <rect x="89.3" y="30.0" width="0.5" height="0.7" fill="#cdd2d6"/>
+
+  <!-- ============ BALCONY / LOGGIA outlines (thin) ============ -->
+  <rect x="84.4" y="0.2" width="4.8" height="1.0" fill="none" stroke="#cfd4d8" stroke-width="0.14"/>
+  <line x1="84.4" y1="0.7" x2="89.2" y2="0.7" stroke="#cfd4d8" stroke-width="0.1"/>
+  <rect x="84.4" y="42.9" width="4.8" height="1.0" fill="none" stroke="#cfd4d8" stroke-width="0.14"/>
+  <line x1="84.4" y1="43.4" x2="89.2" y2="43.4" stroke="#cfd4d8" stroke-width="0.1"/>
+
+  <!-- ============ BUILDING PERIMETER (heavy #1e2227 ~0.45) ============ -->
+  <!-- top edge -->
+  <line x1="66.66" y1="1.2" x2="99.6" y2="1.2" stroke="#1e2227" stroke-width="0.45"/>
+  <!-- right edge (closes the floor) -->
+  <line x1="99.6" y1="1.2" x2="99.6" y2="43.3" stroke="#1e2227" stroke-width="0.45"/>
+  <!-- bottom edge -->
+  <line x1="66.66" y1="43.3" x2="99.6" y2="43.3" stroke="#1e2227" stroke-width="0.45"/>
+  <!-- corridor inner edges (top & bottom of light strip = heavy structural) -->
+  <line x1="66.66" y1="19.5" x2="99.6" y2="19.5" stroke="#1e2227" stroke-width="0.3"/>
+  <line x1="66.66" y1="24.2" x2="99.6" y2="24.2" stroke="#1e2227" stroke-width="0.3"/>
+</g></g></svg>
+      <svg class="nfp-zones" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="nfp-card"><span class="nfp-card__type"></span><span><span class="nfp-card__nr"></span><br><span class="nfp-card__area"></span></span><span class="nfp-card__price"></span></div>
+    </div>
+  </section>
+<script src="component.js"></script>
+<script>
+  window.__nfp = NumberedFloorplateSelect.create('#fp', {
+    vbW: 100, vbH: 44.08,
+    units: [{"nr":1,"type":"27","area":27.06,"price":25707,"status":"sale","points":"0.11,23.67 10.76,23.67 10.76,43.53 0.11,43.53"},{"nr":2,"type":"27","area":27.06,"price":25707,"status":"sale","points":"0.11,0.76 10.76,0.76 10.76,20.41 0.11,20.41"},{"nr":3,"type":"27","area":27.06,"price":25707,"status":"sold","points":"10.76,0.76 21.40,0.76 21.40,20.41 10.76,20.41"},{"nr":4,"type":"27","area":27.06,"price":25707,"status":"sale","points":"10.76,23.67 21.40,23.67 21.40,43.53 10.76,43.53"},{"nr":5,"type":"24","area":23.76,"price":22572,"status":"sale","points":"21.40,0.76 30.89,0.76 30.89,20.41 21.40,20.41"},{"nr":6,"type":"24","area":23.76,"price":22572,"status":"reserved","points":"30.89,0.76 40.38,0.76 40.38,20.41 30.89,20.41"},{"nr":7,"type":"27","area":26.74,"price":25403,"status":"sale","points":"30.89,23.67 40.38,23.67 40.38,43.53 30.89,43.53"},{"nr":8,"type":"27","area":27.06,"price":25707,"status":"sold","points":"40.38,23.67 50.00,23.67 50.00,43.53 40.38,43.53"},{"nr":9,"type":"24","area":24.13,"price":22924,"status":"sale","points":"40.38,0.76 50.00,0.76 50.00,20.41 40.38,20.41"},{"nr":10,"type":"24","area":24.13,"price":22924,"status":"reserved","points":"50.00,0.76 59.62,0.76 59.62,20.41 50.00,20.41"},{"nr":11,"type":"27","area":27.06,"price":25707,"status":"sale","points":"50.00,23.67 59.62,23.67 59.62,43.53 50.00,43.53"},{"nr":12,"type":"27","area":26.69,"price":25356,"status":"sold","points":"59.62,23.67 69.11,23.67 69.11,43.53 59.62,43.53"},{"nr":13,"type":"24","area":23.76,"price":22572,"status":"sale","points":"59.62,0.76 69.11,0.76 69.11,20.41 59.62,20.41"},{"nr":14,"type":"24","area":23.76,"price":22572,"status":"sale","points":"69.11,0.76 78.60,0.76 78.60,20.41 69.11,20.41"},{"nr":15,"type":"27","area":27.06,"price":25707,"status":"sold","points":"78.60,0.76 89.24,0.76 89.24,20.41 78.60,20.41"},{"nr":16,"type":"27","area":27.06,"price":25707,"status":"sale","points":"78.60,23.67 89.24,23.67 89.24,43.53 78.60,43.53"},{"nr":17,"type":"27","area":27.06,"price":25707,"status":"reserved","points":"89.24,23.67 99.88,23.67 99.88,43.53 89.24,43.53"},{"nr":18,"type":"27","area":27.06,"price":25707,"status":"sale","points":"89.24,0.76 99.88,0.76 99.88,20.41 89.24,20.41"}],
+    pillR: 1.9, pillFont: 1.9, hoverFill: 0.14, hoverDur: 0.18, ease:'power2.out',
+    fmtPrice: function(n){ return n!=null ? '$'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ') : ''; },
+    onSelect: function(nr,u){ document.querySelector('.brd').textContent = 'Вибір квартири — 2-й поверх — № '+nr+' ('+u.type+' м², '+u.area+' м²)'; }
+  });
+</script>
+</body></html>
