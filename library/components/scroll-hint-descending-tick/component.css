@@ -1,0 +1,53 @@
+/* SCROLL-HINT-DESCENDING-TICK · component.css
+   to-place.co.jp's scroll bait: a serif "scroll" label over a faint vertical track with a bright
+   tick autoplaying downward (drip + empty beat), gated to the first viewport, swapping to
+   audio-bars on scroll. transform + opacity only. NO mix-blend. NO WebGL.
+   Contrast IS the effect: ultra-bright tick (#fff) on a near-invisible track (~12%). */
+
+.shd-hint {
+  position: fixed; right: var(--shd-right, 48px); bottom: var(--shd-bottom, 48px); z-index: 40;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  pointer-events: none;
+}
+/* fade only the label+track between states — the bars are a sibling that survives the gone-state */
+.shd-label, .shd-track { opacity: 0; transition: opacity .6s ease; }
+.shd-hint.shd-active .shd-label, .shd-hint.shd-active .shd-track { opacity: 1; }
+.shd-hint.shd-gone .shd-label, .shd-hint.shd-gone .shd-track { opacity: 0; }
+
+.shd-label {
+  font-family: var(--shd-serif, 'Playfair Display', Georgia, serif);
+  font-size: var(--shd-label-size, 13px); letter-spacing: .04em; text-transform: lowercase;
+  color: rgba(255, 255, 255, .8);
+}
+
+.shd-track {
+  position: relative; width: 1px; height: 100px; overflow: hidden;
+  background: rgba(255, 255, 255, .12);
+}
+.shd-tick {
+  position: absolute; left: 0; top: 0; width: 1px; height: 22px;
+  background: #fff; transform-origin: 50% 0; will-change: transform, opacity; opacity: 0;
+}
+
+/* the audio-bars glyph that replaces the hint after scroll (the "now playing" state) */
+.shd-bars {
+  position: absolute; right: 0; bottom: 0; display: none; align-items: flex-end; gap: 3px; height: 22px;
+}
+.shd-bars.is-on { display: inline-flex; }
+.shd-bar { width: 2px; height: 100%; background: rgba(255, 255, 255, .85); transform-origin: 50% 100%; transform: scaleY(.35); }
+
+/* dark-on-light variant (a light hero) */
+.shd-hint--ink .shd-label { color: rgba(20, 20, 20, .75); }
+.shd-hint--ink .shd-track { background: rgba(20, 20, 20, .14); }
+.shd-hint--ink .shd-tick { background: #141414; box-shadow: 0 0 6px rgba(20, 20, 20, .35) !important; }
+.shd-hint--ink .shd-bar { background: rgba(20, 20, 20, .8); }
+
+@media (prefers-reduced-motion: reduce) {
+  .shd-tick { animation: shd-pulse 2.4s ease-in-out infinite !important; transform: translateY(38%) !important; }
+}
+
+@media (max-width: 820px) {
+  /* mobile: centre at the bottom, shorter track, tap-safe margin (do NOT just shrink the desktop widget) */
+  .shd-hint { right: 50%; bottom: var(--shd-bottom-m, 24px); transform: translateX(50%); }
+  .shd-track { height: var(--shd-track-h-m, 64px); }
+}

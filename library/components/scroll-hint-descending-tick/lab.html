@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · scroll-hint-descending-tick · to-place (a serif 'scroll' label over a faint track with a bright tick autoplaying downward; fades + swaps to audio-bars on scroll)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · scroll-hint-descending-tick
+================================================================================
+  to-place.co.jp's scroll BAIT — a serif "scroll" label over a faint vertical track with a bright
+  TICK that AUTOPLAYS descending top->bottom (drip + empty beat), gated to the FIRST viewport,
+  fading + swapping to an audio-bars glyph once you scroll. Convinces a STATIONARY user (scroll=0)
+  that the page scrolls. NOT a scrollbar thumb (it autoplays at rest). Harvested from
+  D_toplace_video.md (§2). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  /* warm charcoal — NOT #000 (kills the premium read) */
+  :root{ --charcoal:#1c1b19; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{ background:var(--charcoal); color:#fff; font-family:var(--sans); }
+
+  /* the first viewport (hero) — the only screen the hint lives on */
+  .hero{ position:relative; height:100vh; overflow:hidden;
+    background:radial-gradient(120% 90% at 88% 92%, #232220 0%, #1c1b19 60%); }
+  .wordmark{ position:absolute; left:48px; top:40px; display:flex; align-items:center; gap:.8rem;
+    font-family:var(--serif); letter-spacing:.15em; font-size:1.05rem; }
+  .wordmark .dia{ width:26px; height:26px; border:1px solid #fff; transform:rotate(45deg); opacity:.85; }
+  .menu-dot{ position:absolute; right:40px; top:34px; width:36px; height:36px; border-radius:50%; background:#fff; opacity:.92; }
+  .ghost{ position:absolute; left:0; right:0; bottom:6vh; text-align:center; font-family:var(--serif);
+    font-size:24vw; line-height:1; color:rgba(255,255,255,.04); letter-spacing:.04em; pointer-events:none; user-select:none; }
+  .more{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    font-family:var(--serif); font-size:1rem; letter-spacing:.12em; color:#1c1b19; background:#fff;
+    border-radius:999px; padding:1rem 4rem; }
+
+  /* a tall body below so the gate (fade-out -> audio-bars) is testable */
+  .below{ min-height:200vh; background:#15140f; display:grid; place-items:center;
+    color:rgba(255,255,255,.4); font-size:.85rem; letter-spacing:.2em; text-transform:uppercase; }
+  .shd-hint{ --shd-serif:var(--serif); }
+</style>
+</head>
+<body>
+
+  <section class="hero" id="hero">
+    <div class="wordmark"><span class="dia"></span>TO PLACE</div>
+    <div class="menu-dot"></div>
+    <div class="ghost">VOICE</div>
+    <div class="more">MORE</div>
+
+    <!-- THE BRICK: the scroll hint (engine builds label/track/tick/bars if omitted) -->
+    <div class="shd-hint" id="hint"></div>
+  </section>
+
+  <section class="below">скрол далі — підказка згасає й перетворюється на audio-bars (стан «грає»)</section>
+
+<script src="component.js"></script>
+<script>
+  window.__shd = ScrollHintDescendingTick.create('#hint', {
+    label:'scroll', trackH:100, tickH:22, tickMin:8, cycle:1.9, gap:0.15, glow:true,
+    gateTo:'#hero', swapToBars:true, autoplay:true
+  });
+</script>
+</body>
+</html>
