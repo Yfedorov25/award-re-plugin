@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--material-carousel · Матеріали зблизька (harness)</title>
+<!--
+  SECTION-VARIANT · architecture--material-carousel · "Матеріали зблизька"
+  ----------------------------------------------------------------------------
+  Architecture as TACTILITY: a row of tall material panels, each held inside a
+  fixed editorial ARCH-OVAL frame. The CENTRE panel is in focus (scale 1,
+  brightness 1, caption lit); the sides are dimmed peek-insets (scale 0.9,
+  brightness 0.45). The visitor rotates focus with the round prev / next arrows
+  (and a N / TOTAL counter, click-a-side-to-centre, drag). Each panel is one
+  thing the house is MADE of, given its moment.
+
+  HONEST MATERIAL SET (every image PROVES its label, geometry-consistent with the
+  real QUADRO flat-roof townhouse; was: misleading macro-roof terrace + day-08 lawn):
+    01 Перголи  -> macro-pergola.webp     (dark timber + steel soffit, tactile macro)
+    02 Тераса   -> terrace-03.webp        (native portrait: decking + steel + view)
+    03 Дерево   -> macro-table.webp       (native macro: warm timber decking , OPENS CENTRED)
+    04 Дах      -> terrace-05.webp        (native portrait: the actual flat white roof slab, top-down)
+    05 Скління  -> day-34-portrait.webp   (native portrait: full-height glazing on the real facade)
+  Four of five are native portrait (0.667) so the 0.78 oval barely crops; per-panel
+  object-position vertically centres each subject in the tall window (crop fix).
+
+  GRAMMAR stolen real:
+    - Springs terrace CAROUSEL (D_springs CLIP B): one portrait frame in focus,
+      caption to the side, 1px outline round arrows, ~0.8s expo-out, restrained.
+      Centre-focus + side-dim + edge-peek = r1864 /comfort 3-up (the atom).
+    - EVER portrait OVAL (D_Ever_architecture): clip-path ellipse, static mask,
+      media sits inside; caption beneath in micro-caps. Used here as a STATIC
+      frame (drive:'none') so it adds NO second pin and no raf fight.
+
+  PIN BUDGET = 0. center-focus-carousel owns_pin:false; its only ScrollTrigger is
+  a NON-pin onEnter stagger (no pin:true). oval-mask owns_pin:false, drive:'none'
+  (zero ScrollTriggers). Harness creates no pin. expectPins:0, pinOwner:'none'.
+  [data-render-surface] = the centre panel's oval image wrap (probe asserts a
+  decoded img at non-zero size). NO WebGL / NO mix-blend / NO backdrop. Motion
+  only on transform / opacity / filter. Lenis owned by the carousel atom.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/center-focus-carousel/component.css">
+<link rel="stylesheet" href="../../components/oval-mask/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* ============================================================
+     variant SKIN only , the scaffold owns the rails + tokens.
+     Material-carousel palette: warm stone ground, lime-washed cream ink.
+     ============================================================ */
+  :root{
+    --mc-ground:#1c1f1b;        /* deep olive-charcoal field */
+    --mc-ink:#ece4d6;           /* warm parchment */
+    --mc-muted:rgba(236,228,214,.56);
+    --mc-line:rgba(236,228,214,.34);
+    --mc-accent:#b07a4e;        /* clay (the brick the house is made of) */
+  }
+
+  /* the stage is NOT pinned here; it sizes to its content. Override the
+     scaffold's fixed 100vh stage so the rail + rails of type breathe. */
+  #combo.combo-stage{ height:auto; min-height:100vh; overflow:visible;
+    background:var(--mc-ground); display:flex; flex-direction:column; justify-content:center;
+    padding-block:clamp(80px,12vh,200px); }
+
+  /* ---- editorial rail of type above the row (block 3: side air clamp) ---- */
+  .mc-rail{ display:flex; align-items:flex-end; justify-content:space-between; gap:clamp(24px,5vw,80px);
+    padding-inline:clamp(20px,5vw,80px); margin-bottom:clamp(40px,6vh,72px); }
+  .mc-eyebrow{ font:500 .8rem/1 var(--combo-sans); letter-spacing:.05em; text-transform:uppercase;
+    color:var(--mc-accent); display:flex; align-items:center; gap:.7em; }
+  .mc-eyebrow::before{ content:''; width:34px; height:1px; background:var(--mc-accent); display:inline-block; }
+  .mc-title{ font-family:var(--combo-serif); font-weight:300; font-size:clamp(40px,7vw,120px);
+    line-height:.92; letter-spacing:-.035em; color:var(--mc-ink); margin:0; }
+  .mc-lede{ max-width:34ch; font:400 clamp(15px,1.15vw,18px)/1.5 var(--combo-sans);
+    color:var(--mc-muted); margin:0; align-self:flex-end; }
+
+  /* ---- carousel skin: tall ARCH-OVAL panels, caption beneath ---- */
+  .cfc-stage{ --cfc-ground:transparent; --cfc-ink:var(--mc-ink); --cfc-line:var(--mc-line);
+    --cfc-serif:'Fraunces',Georgia,serif; --cfc-sans:'Inter',system-ui,sans-serif;
+    --cfc-panel-w:26vw; --cfc-aspect:auto; --cfc-gap:clamp(20px,3vw,52px); }
+  .cfc-stage{ padding:0; background:transparent; overflow:visible; }
+  .cfc-viewport{ overflow:visible; }
+  .cfc-rail{ padding:0 clamp(20px,5vw,80px); align-items:flex-start; }
+
+  /* the panel is a column: oval window + caption beneath it (Ever portrait-oval grammar) */
+  .cfc-panel{ flex:0 0 var(--cfc-panel-w); aspect-ratio:auto; background:transparent;
+    border-radius:0; overflow:visible; display:flex; flex-direction:column; }
+  /* suppress the atom's rectangular bottom scrim , the oval clip frames the media instead */
+  .cfc-panel::after{ display:none; }
+
+  /* the oval image window: this is the [data-render-surface] / [data-oval-mask] */
+  .mc-oval{ position:relative; width:100%; aspect-ratio:.78 / 1;
+    box-shadow:0 24px 60px -28px rgba(0,0,0,.7); }
+  .mc-oval img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+    -webkit-user-drag:none; }
+  /* a soft inner ring so the oval reads as a framed object, not a hole */
+  .mc-oval::after{ content:''; position:absolute; inset:0; border-radius:50% / 50%;
+    box-shadow:inset 0 0 0 1px rgba(236,228,214,.18); pointer-events:none; }
+
+  /* caption sits BELOW the oval, micro-caps + serif material name */
+  .cfc-panel-cap{ position:static; left:auto; bottom:auto; z-index:auto;
+    margin-top:clamp(16px,2.2vh,28px); text-align:center; will-change:opacity; }
+  .mc-cap-index{ display:block; font:500 .68rem/1 var(--combo-sans); letter-spacing:.05em;
+    text-transform:uppercase; color:var(--mc-accent); margin-bottom:.55em; }
+  .mc-cap-name{ display:block; font-family:'Fraunces',Georgia,serif; font-weight:400;
+    font-size:clamp(18px,1.5vw,26px); line-height:1.05; letter-spacing:-.01em; color:var(--mc-ink);
+    text-transform:none; }
+  .mc-cap-note{ display:block; margin-top:.5em; font:400 .82rem/1.4 var(--combo-sans);
+    color:var(--mc-muted); max-width:24ch; margin-inline:auto; }
+
+  /* nav: 1px outline round arrows + tabular counter, centred under the row */
+  .cfc-nav{ float:none; margin:clamp(40px,6vh,72px) auto 0; justify-content:center;
+    display:flex; align-items:center; gap:1.4rem; }
+  .cfc-prev,.cfc-next{ width:54px; height:54px; border:1px solid var(--mc-line);
+    transition:background .3s cubic-bezier(.22,1,.36,1), color .3s cubic-bezier(.22,1,.36,1),
+               border-color .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1); }
+  .cfc-prev:hover,.cfc-next:hover{ background:var(--mc-ink); color:var(--mc-ground);
+    border-color:var(--mc-ink); transform:scale(1.04); }
+  .cfc-prev:active,.cfc-next:active{ transform:scale(.97); }
+  .cfc-counter{ color:var(--mc-ink); letter-spacing:.26em; font-size:.78rem; }
+
+  @media (prefers-reduced-motion: reduce){
+    .cfc-panel{ filter:none !important; }
+  }
+  @media (max-width:820px){
+    .mc-rail{ flex-direction:column; align-items:flex-start; gap:18px; }
+    .mc-lede{ align-self:flex-start; }
+    .cfc-panel{ flex-basis:72vw; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--material-carousel">
+
+    <div class="mc-rail">
+      <div>
+        <div class="mc-eyebrow">З чого зроблено</div>
+        <h2 class="mc-title">Матеріали зблизька</h2>
+      </div>
+      <p class="mc-lede">Дім, який видно на дотик. Дерево, сталь, скло, тераса, дах. Кожен матеріал отримує свою хвилину у фокусі.</p>
+    </div>
+
+    <div class="cfc-stage" id="materials">
+      <div class="cfc-viewport">
+        <div class="cfc-rail">
+
+          <!-- 01 ПЕРГОЛИ , true tactile macro: dark timber soffit + steel posts (jury-approved). -->
+          <div class="cfc-panel">
+            <div class="mc-oval" data-oval-mask data-render-surface>
+              <img class="ovm__media" style="object-position:50% 40%" src="renders/macro-pergola.webp" alt="дерев'яний підбій перголи зблизька">
+            </div>
+            <div class="cfc-panel-cap">
+              <span class="mc-cap-index">01</span>
+              <span class="mc-cap-name">Перголи</span>
+              <span class="mc-cap-note">Дерево і сталь, що тримають тінь над терасою.</span>
+            </div>
+          </div>
+
+          <!-- 02 ТЕРАСА , native-portrait terrace: decking + steel posts + view (the real building). -->
+          <div class="cfc-panel">
+            <div class="mc-oval" data-oval-mask>
+              <img class="ovm__media" style="object-position:50% 58%" src="renders/terrace-03.webp" alt="тераса з дерев'яним настилом зблизька">
+            </div>
+            <div class="cfc-panel-cap">
+              <span class="mc-cap-index">02</span>
+              <span class="mc-cap-name">Тераса</span>
+              <span class="mc-cap-note">Настил, що виводить кімнату назовні.</span>
+            </div>
+          </div>
+
+          <!-- 03 ДЕРЕВО (opens centred, go(2)) , warm timber decking close-up (jury-approved tactile macro). -->
+          <div class="cfc-panel">
+            <div class="mc-oval" data-oval-mask>
+              <img class="ovm__media" style="object-position:50% 56%" src="renders/macro-table.webp" alt="тепла фактура дерев'яного настилу зблизька">
+            </div>
+            <div class="cfc-panel-cap">
+              <span class="mc-cap-index">03</span>
+              <span class="mc-cap-name">Дерево</span>
+              <span class="mc-cap-note">Тепла фактура, яку хочеться торкнути.</span>
+            </div>
+          </div>
+
+          <!-- 04 ДАХ , native-portrait top-down of the actual flat white roof slab + parapet of THIS house. -->
+          <div class="cfc-panel">
+            <div class="mc-oval" data-oval-mask>
+              <img class="ovm__media" style="object-position:50% 42%" src="renders/terrace-05.webp" alt="пласка покрівля та парапет будинку згори">
+            </div>
+            <div class="cfc-panel-cap">
+              <span class="mc-cap-index">04</span>
+              <span class="mc-cap-name">Дах</span>
+              <span class="mc-cap-note">Пласка лінія, що тримає силует.</span>
+            </div>
+          </div>
+
+          <!-- 05 СКЛІННЯ , native-portrait facade: full-height dark glazing strips on the real building. -->
+          <div class="cfc-panel">
+            <div class="mc-oval" data-oval-mask>
+              <img class="ovm__media" style="object-position:50% 52%" src="renders/day-34-portrait.webp" alt="фасад з панорамним склінням на повний зріст">
+            </div>
+            <div class="cfc-panel-cap">
+              <span class="mc-cap-index">05</span>
+              <span class="mc-cap-name">Скління</span>
+              <span class="mc-cap-note">Світло на повний зріст, від підлоги до даху.</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="cfc-nav">
+        <button class="cfc-prev" aria-label="попередній матеріал">‹</button>
+        <span class="cfc-counter">03 / 05</span>
+        <button class="cfc-next" aria-label="наступний матеріал">›</button>
+      </div>
+    </div>
+
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then cited atoms (canon deps first) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/oval-mask/component.js"></script>
+  <script src="../../components/center-focus-carousel/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // (1) oval-mask = STATIC editorial arch frame on every panel image.
+      //     drive:'none' -> ZERO ScrollTriggers, no raf drift -> no pin, no fight
+      //     with the carousel. It only sets the ellipse clip + over-scale on the media.
+      SectionHarness.ranOK('oval-mask', function () {
+        window.__ovals = window.OvalMask.init('[data-oval-mask]', {
+          ratio: 0.78, scale: 1.08, parallax: 0, drive: 'none'
+        });
+      });
+
+      // (2) center-focus-carousel = the rotation engine. owns_pin:false; its only
+      //     ScrollTrigger is a NON-pin onEnter stagger (no pin:true) -> 0 pins.
+      //     It owns Lenis (manageLenis:true) for the smooth-scroll feel.
+      SectionHarness.ranOK('center-focus-carousel', function () {
+        window.__cfc = window.CenterFocusCarousel.create('#materials', {
+          start: 'top 76%', sideScale: 0.9, sideDim: 0.45, slideDur: 0.8,
+          ease: 'power3.out', loop: true, once: true, manageLenis: true
+        });
+        // open centred on a real material so the first read is "in focus", not edge.
+        if (window.__cfc && window.__cfc.go) window.__cfc.go(2);
+      });
+
+      // pure-interactive section: no scroll pin owned by anyone.
+      SectionHarness.declare({
+        pinOwner: 'none', expectPins: 0,
+        atomsCited: ['center-focus-carousel', 'oval-mask']
+      });
+    })();
+  </script>
+</body>
+</html>

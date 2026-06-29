@@ -40,7 +40,8 @@ const fail = (id, m) => errors.push(`[${id}] ${m}`);
 const warn = (id, m) => warns.push(`[${id}] ${m}`);
 const skip = (id, m) => skips.push(`[${id}] ${m}`);
 
-function dirs(p) { return existsSync(p) ? readdirSync(p).filter(n => statSync(join(p, n)).isDirectory()) : []; }
+// _-prefixed dirs are infrastructure (e.g. combos/_scaffold), not library entries — skip them everywhere
+function dirs(p) { return existsSync(p) ? readdirSync(p).filter(n => !n.startsWith('_') && statSync(join(p, n)).isDirectory()) : []; }
 const BANNED_RE = /\b(width|height|left|top|right|bottom|margin)\s*:/i; // crude; only flag in animate-ish contexts below
 const VIDEO_RE = /\.currentTime\s*=/;
 
@@ -134,12 +135,15 @@ for (const [id, e] of Object.entries(combos)) {
     if (owner && owner !== 'none' && owner !== 0) warn(id, `conversion gate declares a pin owner (${owner}) — gates should hold zero pins`);
     continue;
   }
-  // count atoms whose component owns_pin true
+  // count atoms whose component owns_pin true.
+  // `pin_killed: [ids]` in the combo front-matter declares an owns_pin atom whose pin is killed
+  // at wire-time (so only one real pin exists at runtime) — a legit compose pattern; subtract those.
+  const killed = new Set((Array.isArray(e.pin_killed) ? e.pin_killed : (e.pin_killed ? [e.pin_killed] : [])).map(String));
   const pinOwners = uses.filter(u => {
     const atom = (u && typeof u === 'object') ? u.atom : u;
-    return components[atom] && components[atom].owns_pin === true;
+    return components[atom] && components[atom].owns_pin === true && !killed.has(atom);
   }).map(u => (u && typeof u === 'object') ? u.atom : u);
-  if (pinOwners.length > 1) fail(id, `more than one owns_pin atom in stack: ${pinOwners.join(', ')} (R_pin_budget: one pin-owner per section)`);
+  if (pinOwners.length > 1) fail(id, `more than one owns_pin atom in stack: ${pinOwners.join(', ')} (R_pin_budget: one pin-owner per section; add pin_killed:[id] if one is killed at wire-time)`);
   if (pinOwners.length === 1 && owner && owner !== pinOwners[0])
     warn(id, `pin.owner '${owner}' != the owns_pin atom '${pinOwners[0]}'`);
   if (pinOwners.length === 0 && (!owner || owner === 'none'))
@@ -226,6 +230,14 @@ async function headless() {
 }
 
 await headless();
+
+/* ---- combine-graph integrity gate: fails on genuine casing typos in combine/variant refs ---- */
+try {
+  const { execSync } = await import('node:child_process');
+  execSync('node scripts/combine-graph.mjs', { cwd: ROOT, stdio: 'inherit' });
+} catch {
+  errors.push('combine-graph: genuine typo(s) in combines_with/variants — see output above');
+}
 
 /* ---- report ---- */
 console.log(`\n=== library-verify ===`);

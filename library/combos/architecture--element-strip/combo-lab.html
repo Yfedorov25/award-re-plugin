@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture element-strip · Стрічка деталей (center-focus-carousel)</title>
+<!--
+  VARIANT: architecture--element-strip  ·  role: architecture  ·  atom: center-focus-carousel
+  ------------------------------------------------------------------------------------------
+  THE IDEA (and why it sidesteps the correspondence trap entirely):
+    NO markers on a photo. A HORIZONTAL STRIP of the building's own elements. Each panel is a
+    BIG render that IS its element, with its own caption plus a material spec. The CENTRE panel
+    is in focus (scale 1, full brightness, its caption plus spec lit); the sides are dimmed
+    peek-insets (scale .9, brightness down). You drag, press the arrows, or click a side to
+    rotate which element is in focus.
+    Correspondence is structural here: a panel cannot lie about itself. The facade panel shows
+    the facade render, the glazing panel shows the glazed volume, the pergola panel shows the
+    timber soffit, the roof-crown panel shows the parapet plane, the rooftop panel shows the
+    deck. One element per panel, one honest caption per element. No number on the wrong thing,
+    and NO furniture posing as architecture.
+
+  ASSET TRUTH (verified by eye before wiring, the two hard lessons):
+    01 фасад    -> day-34.webp       frontal facade plane: white render band, glazing bands, grey plinth, recessed entrance.
+    02 скління  -> terrace-02.webp   the glazed corner VOLUME at 3/4: panoramic windows wrap two storeys. Distinct angle and subject from 01.
+    03 пергола  -> macro-pergola.webp tight timber-soffit macro against sky. A pure element close-up, zero furniture.
+    04 вінець   -> terrace-05.webp   top-down of the whole roof volume: white parapet box plus flat membrane. The roof GEOMETRY, not its furnishing.
+    05 покрівля -> macro-roof.webp   the rooftop DECK surface: terrace board meeting white parapet meeting the water edge. Honest junction read.
+    macro-table.webp was DROPPED: it shows dining chairs and a table, i.e. furniture, not a building element.
+
+  HARNESS CONTRACT: interactive rotation, NO scroll pin -> declare({ pinOwner:'none',
+    expectPins:0 }). The atom paints real renders; the centre panel's image wrapper carries
+    [data-render-surface] so the extended probe sees a decoded image at non-zero size.
+    SectionHarness.boot() first; the real atom is wrapped in ranOK('center-focus-carousel').
+    We do NOT set __LAB_OK__ ourselves; the combo-scaffold probe owns it.
+
+  ENGINE LAWS: transform plus opacity plus filter(brightness) only. NO WebGL, NO mix-blend,
+    NO backdrop-filter, NO canvas, NO video.currentTime, NO animating width|height|top|left|margin.
+    will-change is armed transiently around each rotation and cleared on settle (see wiring).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../../components/center-focus-carousel/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* VARIANT SKIN ONLY. The atom (component.css) owns the rail/panel/focus geometry. */
+
+  /* deep gallery field, generous air, asymmetric editorial frame */
+  .es-stage {
+    --cfc-ground: #15120e;          /* deep field */
+    --cfc-ink: #f1ece1;             /* cream foreground */
+    --cfc-line: rgba(241,236,225,.34);
+    --cfc-serif: 'Fraunces', Georgia, serif;
+    --cfc-sans: 'Inter', system-ui, sans-serif;
+    --cfc-gap: clamp(1rem, 1.6vw, 1.8rem);
+    --cfc-panel-w: clamp(300px, 38vw, 560px);
+    --cfc-aspect: 7 / 5;           /* landscape element cases. our renders are wide, and the caption fits in 100vh */
+    height: 100vh; display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(32px, 5vh, 80px) 0 clamp(28px, 4vh, 64px);
+  }
+  /* the [data-render-surface] is a .cfc-panel-img inside a .cfc-panel; the scaffold default
+     (position:absolute; inset:0) is exactly what .cfc-panel-img wants, no override needed. */
+
+  /* header band: eyebrow plus display title, asymmetric, left-weighted */
+  .es-head {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem;
+    margin: 0 clamp(20px, 5vw, 80px) clamp(20px, 3.4vh, 40px);
+  }
+  .es-head__lead { max-width: 40ch; }
+  .es-eyebrow {
+    font: 600 clamp(11px, .74rem, 13px)/1 var(--cfc-sans);
+    letter-spacing: .22em; text-transform: uppercase; color: var(--combo-accent);
+    margin: 0 0 clamp(12px, 1.6vh, 20px);
+  }
+  .es-title {
+    font-family: var(--cfc-serif); font-weight: 300;
+    font-size: clamp(40px, 6.4vw, 104px); line-height: .94; letter-spacing: -.03em;
+    margin: 0; color: var(--cfc-ink);
+  }
+  .es-title em { font-style: italic; font-weight: 400; }
+  .es-note {
+    font: 400 clamp(13px, .92rem, 16px)/1.5 var(--cfc-sans);
+    color: rgba(241,236,225,.62); max-width: 30ch; margin: 0; text-align: right;
+    align-self: flex-end;
+  }
+
+  /* panel caption: element name (serif) plus a material spec line under it.
+     the atom toggles .cfc-panel-cap opacity (1 on focus, 0 on sides); we just style it richer. */
+  .es-stage .cfc-panel-cap {
+    left: clamp(16px, 1.8vw, 28px); bottom: clamp(18px, 2.4vh, 30px);
+    right: clamp(16px, 1.8vw, 28px);
+    font-size: clamp(18px, 1.5vw, 30px); letter-spacing: .02em; text-transform: none;
+    font-weight: 400; line-height: 1.04;
+    text-shadow: 0 2px 24px rgba(0,0,0,.55);
+    /* the atom animates caption opacity only during a rotation; no permanent layer needed */
+    will-change: auto;
+  }
+  .es-stage .cfc-panel-cap .es-cap-idx {
+    display: block; font-family: var(--cfc-sans); font-weight: 600;
+    font-size: clamp(10px, .68rem, 12px); letter-spacing: .2em; text-transform: uppercase;
+    color: var(--combo-accent); margin: 0 0 .5rem;
+  }
+  .es-stage .cfc-panel-cap .es-cap-spec {
+    display: block; font-family: var(--cfc-sans); font-weight: 500;
+    font-size: clamp(11px, .76rem, 13px); letter-spacing: .04em; line-height: 1.35;
+    color: rgba(241,236,225,.84); margin: .55rem 0 0; max-width: 26ch;
+  }
+  /* a hairline atop the focused panel's caption to read as a spec-card edge */
+  .es-stage .cfc-panel-cap::before {
+    content: ''; display: block; width: 34px; height: 1px;
+    background: var(--combo-accent); margin: 0 0 clamp(10px, 1.4vh, 16px);
+  }
+
+  /* a thin frame plus corner read on the FOCUSED panel only (focus is .is-focus, set by us) */
+  .es-stage .cfc-panel { border-radius: 3px; }
+  .es-stage .cfc-panel::before {
+    content: ''; position: absolute; inset: 10px; z-index: 3; pointer-events: none;
+    border: 1px solid rgba(241,236,225,.0); border-radius: 2px;
+    transition: border-color .5s cubic-bezier(.22,1,.36,1);
+  }
+  .es-stage .cfc-panel.is-focus::before { border-color: rgba(241,236,225,.42); }
+
+  /* nav row: left hint plus right arrows-and-counter (the atom drives prev/next/counter) */
+  .es-controls {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: clamp(22px, 3.4vh, 44px) clamp(20px, 5vw, 80px) 0;
+  }
+  .es-hint {
+    font: 600 clamp(10px, .68rem, 12px)/1 var(--cfc-sans);
+    letter-spacing: .2em; text-transform: uppercase; color: rgba(241,236,225,.5); margin: 0;
+  }
+  .es-stage .cfc-nav { margin: 0; float: none; }
+  .es-stage .cfc-counter { color: var(--cfc-ink); }
+
+  /* hover affordance on the side panels: a touch brighter to say clickable */
+  .es-stage .cfc-panel { transition: filter .4s cubic-bezier(.22,1,.36,1); cursor: pointer; }
+  .es-stage .cfc-panel.is-focus { cursor: default; }
+
+  /* tighter mobile: the atom switches to native overflow-x under 820px */
+  @media (max-width: 820px) {
+    .es-stage { height: auto; padding: 64px 0; }
+    .es-head { flex-direction: column; align-items: flex-start; }
+    .es-note { text-align: left; align-self: flex-start; }
+    .es-stage .cfc-panel-cap { opacity: 1 !important; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .es-stage .cfc-panel::before { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="strip" class="cfc-stage es-stage" data-combo="architecture--element-strip">
+    <header class="es-head">
+      <div class="es-head__lead">
+        <p class="es-eyebrow">Архітектура · вул. Замкова</p>
+        <h2 class="es-title">Будинок<br>по <em>деталях</em></h2>
+      </div>
+      <p class="es-note">Пʼять елементів. Один у фокусі. Решта чекають за краєм.</p>
+    </header>
+
+    <div class="cfc-viewport">
+      <div class="cfc-rail">
+
+        <!-- 01 ФАСАД. clean frontal render. carries the render-surface for the probe. -->
+        <div class="cfc-panel">
+          <div class="cfc-panel-img" data-render-surface><img src="renders/day-34.webp" alt="Фасад: біла штукатурка, скляні смуги, цоколь у клінкері"></div>
+          <div class="cfc-panel-cap">
+            <span class="es-cap-idx">01 · фасад</span>
+            Тиха площина
+            <span class="es-cap-spec">Біла мінеральна штукатурка, цоколь у клінкері. Без декору. Тон тримає геометрія.</span>
+          </div>
+        </div>
+
+        <!-- 02 СКЛІННЯ. glazed corner VOLUME at 3/4, distinct from the flat frontal 01 -->
+        <div class="cfc-panel">
+          <div class="cfc-panel-img"><img src="renders/terrace-02.webp" alt="Скління: панорамні вітрини огортають кут будинку у два поверхи"></div>
+          <div class="cfc-panel-cap">
+            <span class="es-cap-idx">02 · скління</span>
+            Кут зі скла
+            <span class="es-cap-spec">Панорамні вітрини огортають кут у два поверхи. Теплий профіль, потрійний пакет.</span>
+          </div>
+        </div>
+
+        <!-- 03 ПЕРГОЛА. timber soffit macro, pure element close-up, zero furniture -->
+        <div class="cfc-panel">
+          <div class="cfc-panel-img"><img src="renders/macro-pergola.webp" alt="Пергола: деревʼяний софіт із ламелей термодерева над терасою"></div>
+          <div class="cfc-panel-cap">
+            <span class="es-cap-idx">03 · пергола</span>
+            Теплий софіт
+            <span class="es-cap-spec">Ламель з термодерева над терасою. Кидає мʼяку тінь, мʼякшить білий бетон.</span>
+          </div>
+        </div>
+
+        <!-- 04 ВІНЕЦЬ. top-down roof volume: white parapet box plus flat membrane. roof GEOMETRY. -->
+        <div class="cfc-panel">
+          <div class="cfc-panel-img"><img src="renders/terrace-05.webp" alt="Вінець: пласка покрівля, білий парапетний обʼєм над будинком, вид згори"></div>
+          <div class="cfc-panel-cap">
+            <span class="es-cap-idx">04 · вінець</span>
+            Рівний верх
+            <span class="es-cap-spec">Пласка покрівля, білий парапетний обʼєм. Жодного схилу. Рівна лінія по всьому периметру.</span>
+          </div>
+        </div>
+
+        <!-- 05 ПОКРІВЛЯ. rooftop DECK surface: board meets white parapet meets the water edge. honest junction. -->
+        <div class="cfc-panel">
+          <div class="cfc-panel-img"><img src="renders/macro-roof.webp" alt="Покрівля: терасна дошка зустрічає білий парапет і край води нагорі"></div>
+          <div class="cfc-panel-cap">
+            <span class="es-cap-idx">05 · покрівля</span>
+            Друга земля
+            <span class="es-cap-spec">Терасна дошка нагорі. Сходиться з білим парапетом і краєм води. Ще поверх життя.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="es-controls">
+      <p class="es-hint">тягни · або стрілки</p>
+      <div class="cfc-nav">
+        <button class="cfc-prev" aria-label="попередній елемент">‹</button>
+        <span class="cfc-counter">01 / 05</span>
+        <button class="cfc-next" aria-label="наступний елемент">›</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold plus adapters, then the cited atom, then ONE inline wiring script -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/center-focus-carousel/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      var cfc;
+      // REAL atom: the centre-focus element strip. Interactive (arrows / drag / click), NO pin.
+      SectionHarness.ranOK('center-focus-carousel', function () {
+        cfc = window.CenterFocusCarousel.create('#strip', {
+          start: 'top 78%',
+          sideScale: 0.9,
+          sideDim: 0.46,
+          slideDur: 0.7,
+          ease: 'power3.out',
+          loop: true,
+          once: true,
+          manageLenis: false   // harness page owns no Lenis here; native scroll is fine for a non-pinned section
+        });
+        window.__cfc = cfc;
+      });
+
+      var stage = document.querySelector('#strip');
+      var rail = stage.querySelector('.cfc-rail');
+      var panels = [].slice.call(stage.querySelectorAll('.cfc-panel'));
+      var caps = panels.map(function (p) { return p.querySelector('.cfc-panel-cap'); });
+      var counter = stage.querySelector('.cfc-counter');
+
+      // ── TRANSIENT will-change MANAGER (jury red-flag #4: never hold layers permanently) ──
+      // The atom's component.css sets a PERMANENT will-change on .cfc-rail / .cfc-panel /
+      // .cfc-panel-cap. We may not edit the atom, so here we clear those layers on settle and
+      // arm them only for the duration of a rotation (slideDur) plus a small buffer. Result:
+      // layers exist exactly while transform/filter/opacity are animating, never at idle.
+      var SETTLE_MS = 750 * 0.7 + 120; // slideDur (0.7s) -> ms + buffer
+      var settleTimer = null;
+      function armLayers() {
+        if (rail) rail.style.willChange = 'transform';
+        panels.forEach(function (p) { p.style.willChange = 'transform, filter'; });
+        caps.forEach(function (c) { if (c) c.style.willChange = 'opacity'; });
+      }
+      function clearLayers() {
+        if (rail) rail.style.willChange = 'auto';
+        panels.forEach(function (p) { p.style.willChange = 'auto'; });
+        caps.forEach(function (c) { if (c) c.style.willChange = 'auto'; });
+      }
+      function pulseLayers() {
+        armLayers();
+        if (settleTimer) clearTimeout(settleTimer);
+        settleTimer = setTimeout(clearLayers, SETTLE_MS);
+      }
+
+      // FOCUS-FRAME skin: mirror the atom's centred index onto an .is-focus class so the thin
+      // frame plus corner read draws only on the element in focus. We read the counter (the atom
+      // keeps it as "NN / NN") and re-derive the active index after every rotate. Pure skin.
+      function syncFocus() {
+        if (!counter) return;
+        var m = /(\d+)\s*\/\s*(\d+)/.exec(counter.textContent || '');
+        var idx = m ? (parseInt(m[1], 10) - 1) : 0;
+        panels.forEach(function (p, i) { p.classList.toggle('is-focus', i === idx); });
+        pulseLayers(); // a rotation just happened (counter changed) -> arm, then settle
+      }
+      syncFocus();
+      if (window.MutationObserver && counter) {
+        new MutationObserver(syncFocus).observe(counter, { childList: true, characterData: true, subtree: true });
+      }
+
+      // After the scroll-into-view ENTER one-shot completes, clear the enter-stagger layers.
+      // The ENTER tween runs ~1.0s; clear a touch after so we never hold layers at rest.
+      setTimeout(clearLayers, 1400);
+
+      // CONTRACT: interactive rotation, no scroll pin.
+      SectionHarness.declare({
+        pinOwner: 'none',
+        expectPins: 0,
+        atomsCited: ['center-focus-carousel']
+      });
+    })();
+  </script>
+</body>
+</html>

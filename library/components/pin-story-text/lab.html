@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · pin-story-text · pinned scroll-lock text sequencer (one block at a time)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · pin-story-text   ·   owns_pin = true
+================================================================================
+  A PINNED SCROLL-LOCK TEXT SEQUENCER. The section pins; as the visitor scrolls,
+  a sequence of text BLOCKS arrives ONE AT A TIME in a clean, considered
+  composition: block settles -> HOLDS alone -> leaves (rises + fades) as the next
+  enters. NEVER two blocks overlapping, NEVER a full-screen wall.
+
+  BACKGROUND-AGNOSTIC: the component owns the pin + the text story, NOT the media.
+  Here it composes OVER a static render (renders/day-34.webp). Swap the bg for a
+  video / colour field with no change to the component.
+
+  ENGINE LAWS: transform(translateY) + opacity only. NO mix-blend, NO
+  backdrop-filter, NO WebGL, NO width/height/top/left animation. set(p) PURE.
+  reduced-motion -> static stacked list (no pin). Fraunces + Inter; bronze accent;
+  Ukrainian copy; ZERO em/en-dash.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- eager-preload the background render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-34.webp">
+
+<link rel="stylesheet" href="component.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --cream:#f0e9d2; --bronze:#c08a4e; --ink:#0c0c0a; }
+  *{margin:0;box-sizing:border-box}
+  html,body{background:var(--ink);color:var(--cream);font-family:'Inter',system-ui,sans-serif}
+
+  /* a lead-in so the pin has somewhere to start from */
+  .lead{height:60vh;display:flex;align-items:flex-end;padding:0 6vw 8vh}
+  .lead h1{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(28px,4vw,56px);letter-spacing:-.02em;opacity:.5}
+
+  /* the pinned hero host. The component builds its text stage INTO this; the
+     background render is a child media layer the host owns (not the component). */
+  #hero{position:relative}
+  #hero .pst__bg{
+    position:absolute;inset:0;z-index:1;
+    background:#0c0c0a;
+  }
+  #hero .pst__bg img{
+    width:100%;height:100%;object-fit:cover;display:block;
+    transform:translateZ(0);
+  }
+  #hero .pst__scrim{
+    position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(90deg,rgba(8,8,8,.62) 0%,rgba(8,8,8,.30) 42%,rgba(8,8,8,.06) 100%);
+  }
+
+  .outro{height:80vh;display:flex;align-items:center;justify-content:center;padding:0 6vw}
+  .outro h2{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(26px,3.6vw,52px);letter-spacing:-.02em;text-align:center;opacity:.7}
+  .outro em{font-style:italic;color:var(--bronze)}
+</style>
+</head>
+<body>
+
+  <section class="lead"><h1>Гортайте далі.</h1></section>
+
+  <!-- the pinned host. Background render is owned by the host; the text story is
+       owned by the component (PinStoryText builds .pst__stage into #hero). -->
+  <section id="hero">
+    <div class="pst__bg" data-render-surface>
+      <img src="renders/day-34.webp" alt="Дім над водою">
+    </div>
+    <div class="pst__scrim"></div>
+  </section>
+
+  <section class="outro"><h2>Один дім, у якому <em>хочеться лишитися</em>.</h2></section>
+
+<script src="component.js"></script>
+<script>
+  /* the pin-story-text demo: four UA text blocks revealing ONE AT A TIME over a
+     static render. Sparse, premium copy; zero em/en-dash. */
+  window.__PST = PinStoryText.create('#hero', {
+    end: '+=320%',
+    scrub: 1,
+    hold: 0.42,
+    ease: 'air',
+    manageLenis: true,
+    blocks: [
+      { eyebrow: 'QUADRO HOUSE', align: 'left',
+        title: 'Дім, що <em>стоїть на воді</em>.',
+        body: 'Один берег. Чотири стіни. Тиша, яку чути.' },
+      { eyebrow: 'РОЗТАШУВАННЯ', align: 'center',
+        title: 'Сім хвилин <em>до центру</em>.',
+        body: 'І жодної хвилини зайвого шуму.' },
+      { eyebrow: 'ПРОСТІР', align: 'lower-left',
+        title: 'Світло, що <em>заходить само</em>.',
+        body: 'Високі вікна тримають ранок до самого вечора.' },
+      { eyebrow: 'ЗАПРОШЕННЯ', align: 'center',
+        title: 'Лишайтеся <em>тут</em>.',
+        body: 'Приходьте подивитися, поки берег ще вільний.' }
+    ]
+  });
+</script>
+
+</body>
+</html>

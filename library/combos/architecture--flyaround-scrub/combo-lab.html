@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>architecture--flyaround-scrub, Обліт (section variant)</title>
+<!--
+  SECTION VARIANT: architecture--flyaround-scrub · "Обліт"  (role: architecture, MODE: scroll)
+  ============================================================================================
+  CREATIVE INTENT: a cinematic FLY-AROUND of the building. 120 sequential arrival frames
+  (renders/arrival-frames/f_001..f_120) are scrubbed by ONE pinned scroll so the scroll IS
+  the camera turning around the house. The PRIMARY ATOM cited is vertical-slide (the film-
+  advance lineage / fallback frame-advance grammar). For a TRUE 120-frame continuous camera
+  move WITHOUT WebGL and WITHOUT canvas drawImage, the load-bearing engine is the NEW
+  frame-scrub-img atom (an <img>.src swap on rAF-throttled, idx-deduped scroll progress, every
+  frame decode()'d off-DOM up front). frame-scrub-img owns_pin:true => THE ATOM owns the one
+  pin; the harness does NOT call SectionHarness.pin. Captions ride the SAME pin via the atom's
+  onUpdate(fn) hook (no second pin). ERA(149) / Ever(1333) data-sequence grammar.
+  The probe passes only if: exactly 1 pin, the cited atom ran, a [data-render-surface]
+  painted a decoded image, 0 real console errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../../components/frame-scrub-img/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* ── variant SKIN only, the scaffold owns the rails, the atom owns the frame box ── */
+
+  /* the section is the atom's pinned stage; it is the [data-render-surface] */
+  #combo.fsi-stage { background:#06090d; }
+
+  /* a deeper, cooler grade than the atom default to push the architecture forward
+     and keep rail type legible over a bright sky or a dark facade alike */
+  .fsi-frame { filter:saturate(1.04) contrast(1.07) brightness(.975) hue-rotate(-3deg); }
+
+  /* ── corner meta · upper-left rail (holds; generous air) ── */
+  .arc__meta {
+    position:absolute; z-index:6; top:clamp(80px,12vh,160px); left:clamp(20px,5vw,80px);
+    color:var(--combo-cream); pointer-events:none;
+  }
+  .arc__eyebrow {
+    font:500 .72rem/1 var(--combo-sans); letter-spacing:.4em; text-transform:uppercase;
+    color:#dcb27e; display:flex; align-items:center; gap:.85rem;
+  }
+  .arc__eyebrow::before { content:""; width:32px; height:1px; background:#c4915a; flex:0 0 auto; }
+
+  /* ── section title · lower-left rail (the heroic line) ── */
+  .arc__title-wrap {
+    position:absolute; z-index:6; left:clamp(20px,5vw,80px); bottom:clamp(56px,12vh,128px);
+    max-width:18ch; pointer-events:none; color:var(--combo-cream);
+  }
+  .arc__title {
+    font-family:var(--combo-serif); font-weight:300;
+    font-size:clamp(40px,7vw,120px); line-height:.94; letter-spacing:-.035em;
+    color:#f4efe6; text-shadow:0 2px 48px rgba(0,0,0,.55);
+  }
+  .arc__title em { font-style:italic; color:#dcb27e; font-weight:400; }
+  .arc__body {
+    margin-top:clamp(16px,2.2vh,28px); max-width:34ch;
+    font:400 clamp(15px,1.15vw,18px)/1.55 var(--combo-sans); color:#cdd6e6;
+    text-shadow:0 1px 22px rgba(0,0,0,.55);
+  }
+
+  /* ── chapter index · lower-right rail (advances with the camera) ── */
+  .arc__index {
+    position:absolute; z-index:6; right:clamp(20px,5vw,80px); bottom:clamp(56px,12vh,128px);
+    text-align:right; pointer-events:none; color:var(--combo-cream);
+  }
+  .arc__index-now {
+    font-family:var(--combo-serif); font-style:italic; font-weight:300;
+    font-size:clamp(28px,4vw,56px); line-height:1; color:#dcb27e;
+  }
+  .arc__index-label {
+    margin-top:.7rem; font:500 .68rem/1.3 var(--combo-sans); letter-spacing:.32em;
+    text-transform:uppercase; color:#9fb0cc;
+  }
+
+  /* ── thin progress rail · right edge ── */
+  .arc__rail {
+    position:absolute; z-index:6; right:clamp(12px,2.4vw,30px); top:24%; bottom:24%;
+    width:2px; background:rgba(208,222,248,.12); border-radius:2px; overflow:hidden; pointer-events:none;
+  }
+  .arc__rail-fill {
+    position:absolute; left:0; top:0; width:100%; height:100%;
+    background:linear-gradient(to bottom,#dcb27e,#c4915a);
+    transform:scaleY(0); transform-origin:top center; will-change:transform;
+  }
+
+  @media (max-width:820px){
+    .arc__title-wrap{ bottom:clamp(40px,9vh,80px); max-width:90vw; }
+    .arc__index,.arc__rail{ display:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <!-- the section IS the atom's pinned stage AND the [data-render-surface] -->
+  <section id="combo" class="combo-stage fsi-stage" data-render-surface data-combo="architecture--flyaround-scrub" aria-label="Архітектура, обліт будинку">
+    <img class="fsi-frame" alt="Обліт будинку, кадр послідовності">
+
+    <div class="arc__meta">
+      <div class="arc__eyebrow">QUADRO · архітектура</div>
+    </div>
+
+    <div class="arc__title-wrap" data-spine>
+      <h2 class="arc__title">Дім, який <em>обходиш очима</em></h2>
+      <p class="arc__body">Тепла цегла, глибокі тераси, скління від підлоги. Один поворот камери, і видно кожну грань.</p>
+    </div>
+
+    <div class="arc__index">
+      <div class="arc__index-now" data-face>фасад</div>
+      <div class="arc__index-label">грань <span data-face-num>01</span> з 04</div>
+    </div>
+
+    <div class="arc__rail"><div class="arc__rail-fill" id="railFill"></div></div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (canon FIRST: nothing canon here beyond GSAP/Lenis) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/frame-scrub-img/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      if (window.CustomEase && window.gsap && !gsap.parseEase('expo.out')) {
+        try { CustomEase.create('expo.out', '0.16,1,0.3,1'); } catch (e) {}
+      }
+
+      var fsi;
+      // RENDER + ENGINE job: the 120-frame fly-around scrubbed by ONE pinned scroll.
+      // frame-scrub-img owns_pin:true => THE ATOM owns the pin (harness does NOT pin).
+      SectionHarness.ranOK('frame-scrub-img', function () {
+        fsi = window.FrameScrubImg.create('#combo', {
+          framePath: 'renders/arrival-frames/',
+          pattern: 'f_###.webp',
+          count: 120, from: 1, pad: 3,
+          pinFactor: 2.6,   // ~2.6 viewports of scroll for one full turn, unhurried
+          hold: 0.07        // hold the climax frame for the last 7% (a breath at the close)
+        });
+        window.__fsi = fsi;
+      });
+
+      // The 4 architectural faces the camera passes (sells the BUILDING, not mood).
+      var FACES = [
+        { at: 0.00, word: 'фасад',  num: '01' },  // arrival, the front
+        { at: 0.30, word: 'тераси', num: '02' },  // the deep terraces turn into view
+        { at: 0.58, word: 'скління', num: '03' }, // glazing / corner glass
+        { at: 0.82, word: 'покрівля', num: '04' } // roofline / detail at the climax
+      ];
+      var faceEl  = document.querySelector('[data-face]');
+      var faceNum = document.querySelector('[data-face-num]');
+      var railFill = document.getElementById('railFill');
+      var spine = document.querySelector('[data-spine]');
+      var lastFace = -1;
+
+      function expoOut(t){ return t===1?1:1-Math.pow(2,-10*t); }
+
+      // Couple the captions + index + rail to the ATOM's OWN pin (no second pin).
+      if (fsi && fsi.onUpdate) {
+        fsi.onUpdate(function (p) {
+          // progress rail (transform only)
+          if (railFill) railFill.style.transform = 'scaleY(' + p.toFixed(4) + ')';
+          // title settle: rises + clarifies over the first 14% of the turn, then holds
+          if (spine && window.gsap) {
+            var s = expoOut(Math.min(1, p / 0.14));
+            window.gsap.set(spine, { y: (1 - s) * 26, opacity: 0.35 + s * 0.65 });
+          }
+          // chapter index advances with the camera (UI swap, deduped)
+          var fi = 0;
+          for (var i = 0; i < FACES.length; i++) { if (p >= FACES[i].at) fi = i; }
+          if (fi !== lastFace) {
+            lastFace = fi;
+            if (faceEl && window.gsap) {
+              window.gsap.fromTo(faceEl, { opacity: 0, y: 8 },
+                { opacity: 1, y: 0, duration: 0.4, ease: 'expo.out', overwrite: true,
+                  onStart: function(){ faceEl.textContent = FACES[fi].word; } });
+            } else if (faceEl) { faceEl.textContent = FACES[fi].word; }
+            if (faceNum) faceNum.textContent = FACES[fi].num;
+          }
+        });
+      }
+
+      // ONE pin, owned by the engine atom.
+      SectionHarness.declare({
+        pinOwner: 'frame-scrub-img', expectPins: 1,
+        atomsCited: ['frame-scrub-img', 'vertical-slide', 'corner-frame-meta', 'scroll-indicator']
+      });
+    })();
+  </script>
+</body>
+</html>

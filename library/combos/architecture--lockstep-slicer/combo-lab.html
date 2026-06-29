@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>architecture · lockstep-slicer · Розкрій (section-variant)</title>
+<!--
+================================================================================
+  SECTION VARIANT · architecture--lockstep-slicer · "Розкрій"   (status: candidate)
+================================================================================
+  Springs' signature "Open the doors" COUPLED-SPLIT, ported to the ARCHITECTURE
+  chapter. ONE pinned scroll (owned by the dual-slicer ENGINE) drives TWO systems
+  in lockstep off one position:
+    RIGHT  = a vertical CLIP-PATH RENDER STRIP. Two frame-matched 16:9 exterior
+             renders stacked; the incoming (lower) render is revealed UPWARD by
+             shrinking its top inset (inset(100% 0 0 0) -> inset(0)), a crisp
+             full-width horizontal seam travelling up, scroll-scrubbed 1:1,
+             reversible. Lower covers upper. NOT a fade, NOT two opposite slides.
+    LEFT   = SIMULTANEOUSLY the heading reveals per-line (each line rises from
+             under an overflow:hidden clip) AND the macro-pergola detail inset
+             rises from below, both on the SAME scroll. The render leads; the
+             cream serif settles a beat behind (the Springs "image first, word
+             confirms" cadence, frame-cited f_017->f_018 in the teardown).
+  Reveals the BUILDING across two viewpoints in lockstep: the day front facade
+  hands off to the terrace, while the headline assembles and the pergola macro
+  lifts into place. Several things gliding together off one scroll = "more
+  custom than EVER".
+
+  PIN BUDGET = 1, owned by the ENGINE (dual-slicer owns_pin:true). The harness
+  creates NO pin; it only declares the contract + wraps the atom in ranOK.
+  dual-slicer also manages Lenis itself (manageLenis default true); we do NOT
+  double-manage it; we only load the Lenis CDN it reaches for.
+
+  data-render-surface rides on .ds-right (the strip the renders paint into; the
+  first .ds-render opens at inset(0) so it paints full-size for the probe).
+
+  BANS honoured: NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO
+  video.currentTime. Motion only on clip-path / transform / opacity. Renders via
+  renders -> apps/quadro/public/proto (frame-matched 16:9 pair, seam aligns).
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="renders/day-front.webp">
+<link rel="preload" as="image" href="renders/terrace-02.webp">
+<link rel="stylesheet" href="../../components/dual-slicer/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* ---- variant SKIN only (the atom owns the two-column scaffold + strip stack;
+         the scaffold owns the rails). Quiet stone palette: architecture, not mood. ---- */
+  :root {
+    --ar-bg:    #14120e;   /* near-black warm field behind everything */
+    --ar-panel: #1d1a14;   /* left copy panel, deep umber-charcoal */
+    --ar-panel2:#16130d;   /* gradient foot */
+    --ar-cream: #efe8da;   /* primary cream text */
+    --ar-muted: #9b9385;   /* muted stone for body */
+    --ar-line:  rgba(239,232,218,.16);  /* hairline border */
+    --ar-accent:#c2a878;   /* warm brass eyebrow */
+    --serif: 'Fraunces', Georgia, serif;
+    --sans:  'Inter', system-ui, sans-serif;
+  }
+  html, body { background: var(--ar-bg); }
+
+  /* the section field + a hard hairline seam at the column split (Springs reads the seam) */
+  .ds-stage { background: linear-gradient(104deg, var(--ar-panel) 0%, var(--ar-panel2) 50%, var(--ar-bg) 50%); }
+  .ds-right::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1px;
+    background: var(--ar-line); z-index: 5; pointer-events: none; }
+
+  /* LEFT copy column, generous air, 8pt rhythm */
+  .ds-left { color: var(--ar-cream);
+    padding-top: clamp(80px, 12vh, 200px); padding-bottom: clamp(80px, 12vh, 200px);
+    padding-left: clamp(20px, 5vw, 80px); padding-right: clamp(20px, 4vw, 64px); }
+
+  /* eyebrow: uppercase 12px ls +0.05em (criteria block 1.5) */
+  .ds-eyebrow { color: var(--ar-accent); font: 500 12px/1 var(--sans);
+    letter-spacing: .26em; text-transform: uppercase; margin-bottom: 40px;
+    display: inline-flex; align-items: center; gap: 14px; }
+  .ds-eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--ar-accent); display: inline-block; }
+
+  /* heading: display serif, dense lh, negative tracking (criteria block 1) */
+  .ds-head { margin-bottom: 32px; }
+  .ds-head .ds-line { display: block; overflow: hidden; }
+  .ds-head .ds-line__i { display: block; font-family: var(--serif); font-weight: 300;
+    font-size: clamp(40px, 7vw, 120px); line-height: .96; letter-spacing: -.03em;
+    color: var(--ar-cream); }
+
+  /* body: clean sans, muted, ~150 chars, 8pt-rhythm gap from heading */
+  .ds-body { color: var(--ar-muted); font: 400 clamp(15px, 1.15vw, 18px)/1.62 var(--sans);
+    max-width: 42ch; }
+
+  /* the rising inset = a MACRO architectural detail (pergola), not a portrait.
+     square-ish, hairline frame, soft floor shadow; rises on the same scroll. */
+  .ds-inset { margin-top: 48px; width: clamp(180px, 19vw, 268px); aspect-ratio: 1 / 1;
+    border: 1px solid var(--ar-line); box-shadow: 0 40px 70px -34px rgba(0,0,0,.7);
+    position: relative; }
+  .ds-inset::after { content: "ДЕТАЛЬ · ПЕРГОЛА"; position: absolute; left: 12px; bottom: 10px;
+    font: 500 9.5px/1 var(--sans); letter-spacing: .2em; color: var(--ar-cream);
+    text-shadow: 0 1px 8px rgba(0,0,0,.8); z-index: 2; }
+
+  /* RIGHT render strip skin: the renders paint here; an editorial top+bottom scrim.
+     The wide 16:9 facade renders carry a parking foreground in their lower band; the
+     deeper foot of this scrim lets that asphalt recede into shadow so the white facade
+     reads as the focal subject (art-directed crop without zooming/distorting the frame-
+     matched pair). NO mix-blend / NO backdrop over the scrubbed surface (atom law). */
+  .ds-right { background: var(--ar-bg); }
+  .ds-render::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg,
+      rgba(8,7,5,.34) 0%, rgba(8,7,5,0) 22%, rgba(8,7,5,0) 50%,
+      rgba(8,7,5,.30) 78%, rgba(8,7,5,.62) 100%); }
+
+  /* a small caption riding the bottom-right of the strip, the "viewpoint" label */
+  .ar-strip-cap { position: absolute; z-index: 6; right: clamp(20px, 3vw, 48px); bottom: clamp(22px, 5vh, 56px);
+    font: 500 11px/1 var(--sans); letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ar-cream); text-shadow: 0 1px 10px rgba(0,0,0,.75); pointer-events: none; }
+
+  /* static fallback skin (reduced-motion / <=820px): keep the air, stack cleanly */
+  .ds-stage.ds-static { background: var(--ar-bg); }
+  @media (max-width: 820px) {
+    .ds-stage { background: var(--ar-bg); }
+    .ds-left { padding: clamp(48px, 9vh, 88px) clamp(20px, 6vw, 40px); }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <!-- the ENGINE pins THIS .ds-stage; data-combo for trace, id for the atom target -->
+  <section class="ds-stage" id="slicer" data-combo="architecture--lockstep-slicer">
+
+    <!-- LEFT: per-line heading reveal + body + rising macro-detail inset (one scroll) -->
+    <div class="ds-left">
+      <div class="ds-eyebrow">Архітектура</div>
+      <div class="ds-head">
+        <span class="ds-line"><span class="ds-line__i">Фасад</span></span>
+        <span class="ds-line"><span class="ds-line__i">відкриває</span></span>
+        <span class="ds-line"><span class="ds-line__i">терасу.</span></span>
+      </div>
+      <p class="ds-body">Цегла, скло і дерево тераси. Геометрія, що працює на тишу, а не на показ. Кожна лінія витримує дотик і час.</p>
+      <div class="ds-inset"><img src="renders/macro-pergola.webp" alt="QUADRO, макро деталь пергола"></div>
+    </div>
+
+    <!-- RIGHT: the vertical clip-path render strip. Two frame-matched 16:9 exterior
+         views: the day front facade hands off UPWARD to the terrace.
+         data-render-surface rides on the FIRST .ds-render (the painted box), NOT on
+         .ds-right: the scaffold forces [data-render-surface] to position:absolute;inset:0,
+         which on .ds-right would pull the whole right column out of the flex split and
+         make it full-bleed over the left copy. The atom already gives .ds-render
+         position:absolute;inset:0, so the surface marker lands where it belongs and the
+         50/50 column seam is preserved. -->
+    <div class="ds-right">
+      <div class="ds-render" data-render-surface><img src="renders/day-front.webp" alt="QUADRO, фасад удень"></div>
+      <div class="ds-render"><img src="renders/terrace-02.webp" alt="QUADRO, тераса"></div>
+      <div class="ar-strip-cap">QUADRO · два ракурси</div>
+    </div>
+
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited ENGINE atom (canon dep order), then the wiring -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/dual-slicer/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // dual-slicer is an ENGINE: it OWNS the single pin and manages Lenis itself.
+      // We only run its wiring inside ranOK so the honest probe can see it fired.
+      SectionHarness.ranOK('dual-slicer', function () {
+        window.__arSlicer = window.DualSlicer.init('#slicer', {
+          lerp: 0.1,          // engine law: Lenis lerp 0.1
+          pinFactor: 1.5,     // generous pin length so the lockstep reads unhurried
+          headingLines: '.ds-head .ds-line',
+          inset: '.ds-inset'
+        });
+      });
+
+      // ONE pin, owned by the engine. Harness creates none.
+      SectionHarness.declare({
+        pinOwner: 'dual-slicer',
+        expectPins: 1,
+        atomsCited: ['dual-slicer']
+      });
+    })();
+  </script>
+</body>
+</html>

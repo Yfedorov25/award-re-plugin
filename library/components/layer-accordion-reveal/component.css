@@ -1,0 +1,173 @@
+/* ============================================================
+   LAYER-ACCORDION-REVEAL · component.css
+   The slabs are identical full-rack-width layers stacked at the same origin.
+   JS writes --x (left edge, % of rack) and --w (visible width, % of rack) per slab.
+   Position = transform: translateX(--x). Visible width = clip-path inset on the right.
+   ONLY transform + clip-path + opacity + filter transition. No layout property animates.
+   ============================================================ */
+
+.lar-rack {
+  --lar-ease: cubic-bezier(.22,1,.36,1);
+  --lar-dur: .62s;
+  --lar-ui-dur: .34s;
+  --lar-ink: #f4efe6;
+  --lar-spine-bg: rgba(15,13,10,.42);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* one full-rack-width layer per slab; only the clipped band is visible */
+.lar-slab {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;          /* FIXED - never animated */
+  height: 100%;
+  transform: translateX(var(--x, 0%));
+  /* show only the band [0 .. --w] of this layer; collapse the rest from the right */
+  clip-path: inset(0 calc(100% - var(--w, 25%)) 0 0);
+  transition:
+    transform var(--lar-dur) var(--lar-ease),
+    clip-path var(--lar-dur) var(--lar-ease),
+    filter var(--lar-dur) var(--lar-ease);
+  will-change: transform, clip-path;
+  cursor: pointer;
+  outline: none;
+  background: #0e0c0a;
+}
+
+/* the render fills its visible band; cover so a strip shows a true vertical SLICE
+   and the open slab shows the component near-full (no image swap, no geometry jump) */
+.lar-shot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.lar-shot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--lar-pos, 50% 42%);
+  display: block;
+  transform: scale(1.015);
+  transition: transform var(--lar-dur) var(--lar-ease);
+}
+.lar-slab.is-open .lar-shot img { transform: scale(1); }
+.lar-slab.is-strip .lar-shot img { transform: scale(1.06); }     /* gentle push-in on the spines */
+.lar-slab.is-strip { filter: brightness(.82) saturate(.92); }    /* the open slab reads brightest */
+.lar-slab.is-open  { filter: brightness(1); }
+
+/* a hairline seam edge so the slabs read as distinct slices (drawn, not margin) */
+.lar-slab::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 1px;
+  background: rgba(244,239,230,.16);
+  transition: opacity var(--lar-ui-dur) var(--lar-ease);
+}
+.lar-slab.is-open::after { opacity: 0; }
+
+/* VERTICAL SPINE - the collapsed identity (index + rotated label), shown on strips */
+.lar-spine {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%;
+  padding: 18px 0 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: var(--lar-ink);
+  background: linear-gradient(to top, var(--lar-spine-bg), transparent 78%);
+  opacity: 1;
+  transition: opacity var(--lar-ui-dur) var(--lar-ease);
+  pointer-events: none;
+}
+.lar-spine__n {
+  font: 600 11px/1 'Inter', system-ui, sans-serif;
+  letter-spacing: .14em;
+  opacity: .72;
+}
+.lar-spine__t {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font: 600 12px/1 'Inter', system-ui, sans-serif;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lar-slab.is-open .lar-spine { opacity: 0; }
+
+/* PLATE - the open identity: kicker + big serif label + material spec, bottom-left */
+.lar-plate {
+  position: absolute;
+  left: clamp(22px, 3vw, 48px);
+  bottom: clamp(26px, 5vh, 56px);
+  max-width: 30ch;
+  color: var(--lar-ink);
+  text-shadow: 0 2px 26px rgba(0,0,0,.5);
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--lar-ui-dur) var(--lar-ease),
+    transform var(--lar-ui-dur) var(--lar-ease);
+  transition-delay: 0s;
+  pointer-events: none;
+}
+.lar-slab.is-open .lar-plate {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: .12s;       /* let the slab open first, then the words land */
+}
+.lar-kicker {
+  display: block;
+  font: 600 11px/1 'Inter', system-ui, sans-serif;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  opacity: .72;
+  margin-bottom: 14px;
+}
+.lar-label {
+  display: block;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(2.1rem, 4.4vw, 4rem);
+  line-height: .98;
+  letter-spacing: -.02em;
+}
+.lar-spec {
+  display: block;
+  margin-top: 16px;
+  font: 400 clamp(.92rem, 1.2vw, 1.08rem)/1.45 'Inter', system-ui, sans-serif;
+  color: rgba(244,239,230,.82);
+  max-width: 26ch;
+}
+
+/* focus ring for keyboard reach (drawn, no layout shift) */
+.lar-slab:focus-visible { box-shadow: inset 0 0 0 2px rgba(244,239,230,.7); }
+
+/* ---- STATIC fallback (reduced-motion / touch): a calm labelled list ---- */
+.lar-rack.lar-static .lar-slab {
+  transition: none;
+  will-change: auto;
+  filter: none;
+}
+.lar-rack.lar-static .lar-slab .lar-shot img { transform: none; }
+.lar-rack.lar-static .lar-slab .lar-spine { opacity: 0; }
+.lar-rack.lar-static .lar-slab .lar-plate {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  transition-delay: 0s;
+}
+.lar-rack.lar-static .lar-label { font-size: clamp(1.3rem, 3.6vw, 2rem); }
+.lar-rack.lar-static .lar-spec { display: none; }   /* keep the list tidy when many slabs share width */
+
+@media (prefers-reduced-motion: reduce) {
+  .lar-slab, .lar-shot img, .lar-spine, .lar-plate { transition: none !important; }
+}

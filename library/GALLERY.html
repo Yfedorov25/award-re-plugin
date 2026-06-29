@@ -1,0 +1,849 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>award-re · галерея прийомів по секціях</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--cream:#f4efe6;--ink:#2c2620;--bg:#16130f;--card:#1c1813;--line:rgba(244,239,230,.12);--serif:'Fraunces',Georgia,serif;--sans:'Inter',system-ui,sans-serif;--brick:#b56a4a}
+  *{margin:0;box-sizing:border-box}body{background:var(--bg);color:var(--cream);font-family:var(--sans);line-height:1.5}
+  a{color:inherit}
+  .head{padding:48px clamp(20px,5vw,72px) 22px;border-bottom:1px solid var(--line)}
+  .head h1{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.01em}
+  .head .sub{opacity:.6;margin-top:.5rem;max-width:80ch}
+  .gapbar{margin-top:18px;font-size:.86rem;line-height:1.9;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:8px;padding:14px 18px}
+  .gapbar b{color:var(--brick);letter-spacing:.04em}
+  .filters{position:sticky;top:0;z-index:30;background:rgba(22,19,15,.94);backdrop-filter:none;border-bottom:1px solid var(--line);padding:12px clamp(20px,5vw,72px);display:flex;gap:8px;flex-wrap:wrap}
+  .filters button{font:600 .7rem/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--cream);background:transparent;border:1px solid var(--line);padding:.5rem .85rem;border-radius:999px;cursor:pointer}
+  .filters button.on{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+  .lane{padding:30px clamp(20px,5vw,72px);border-bottom:1px solid var(--line)}
+  .lanehd{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px 18px;margin-bottom:18px}
+  .lanehd h2{font-family:var(--serif);font-weight:300;font-size:clamp(1.5rem,3vw,2.2rem)}
+  .cnt{font-family:var(--sans);font-size:.9rem;margin-left:.5rem;opacity:.9}
+  .cnt.GAP{color:#e0664c}.cnt.thin{color:#d9a441}
+  .tier{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;padding:.35rem .7rem;border-radius:999px;border:1px solid var(--line);opacity:.85}
+  .tier--core{color:#9ec0a0;border-color:rgba(158,192,160,.5)}
+  .tier--common{color:#cdbf9a}
+  .tier--custom{color:#c98a72;border-color:rgba(201,138,114,.5)}
+  .job{grid-column:1/-1;opacity:.55;font-size:.9rem;margin-top:-4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:20px}
+  .card{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--card);display:flex;flex-direction:column}
+  .prev{position:relative;aspect-ratio:16/10;overflow:hidden;background:#000}
+  .prev iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .noprev{display:grid;place-items:center;height:100%;opacity:.4;font-size:.8rem}
+  .meta{padding:13px 15px 16px}
+  .meta .id{font-family:var(--serif);font-size:1.06rem}.meta .id b{font-weight:400}
+  .meta p{font-size:.8rem;opacity:.62;margin-top:6px}
+  .rib{font:600 .56rem/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;padding:.3rem .5rem;border-radius:3px;margin-right:.5em;vertical-align:middle}
+  .rib--sec{background:var(--brick);color:#fff}.rib--mech{background:rgba(244,239,230,.14);color:var(--cream)}
+  .rib--base{background:#9ec0a0;color:var(--ink)}.rib--cand{background:rgba(181,106,74,.25);color:#d9a441;border:1px solid rgba(217,164,65,.5)}
+  /* the section-variant strip — the assembled base units, set above the atoms */
+  .vbadge{font:600 .7rem/1 var(--sans);letter-spacing:.06em;color:#9ec0a0;margin-left:.6rem}
+  .vstrip{border:1px solid rgba(158,192,160,.35);background:linear-gradient(180deg,rgba(158,192,160,.06),rgba(0,0,0,.18));border-radius:10px;padding:16px 18px 20px;margin-bottom:22px}
+  .vstrip__hd{font:600 .72rem/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#9ec0a0;margin-bottom:14px}
+  .vstrip__hd .vcnt{background:#9ec0a0;color:var(--ink);border-radius:999px;padding:.1rem .5rem;font-size:.66rem}
+  .vstrip__hint{display:block;text-transform:none;letter-spacing:0;font-weight:400;opacity:.55;color:var(--cream);margin-top:5px}
+  .grid--variant{grid-template-columns:repeat(auto-fill,minmax(420px,1fr))}
+  .card--variant{border-color:rgba(158,192,160,.4)}
+  .card--variant .prev{aspect-ratio:16/9}
+  .uses{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+  .uses span{font:500 .6rem/1 var(--sans);letter-spacing:.02em;opacity:.7;border:1px solid var(--line);border-radius:3px;padding:.3rem .45rem}
+  .acts{margin-top:11px}.acts .play{font:600 .66rem/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;padding:.5rem .8rem;border:1px solid var(--line);border-radius:3px;text-decoration:none}
+  .empty{padding:26px;border:1px dashed rgba(224,102,76,.5);border-radius:8px;color:#e0664c;font-size:.95rem}
+  .foot{padding:24px clamp(20px,5vw,72px) 80px;opacity:.5;font-size:.82rem}
+</style></head><body>
+<div class="head">
+  <h1>Галерея прийомів — по секціях</h1>
+  <p class="sub">45 зібраних варіантів секцій + 103 прийомів-цеглинок, розкладені по 19 канонічних секціях нерухомості (CORE / COMMON / CUSTOM). Зелена смуга вгорі лейну — ВАРІАНТИ СЕКЦІЇ (базові одиниці, які ти оцінюєш). Нижче — прийоми, з яких вони зібрані. Кожна картка жива, відкрий щоб покрутити.</p>
+  <div class="gapbar">
+    <div>🟢 <b>ГЛИБОКО:</b> Hero(28) · Architecture(20) · Location(11) · Interiors(4) · Units(3) · Gallery(5) · Amenities(5) · Trust(10) · Visual search(3)</div>
+    <div>🟡 <b>ТОНКО:</b> Floor plan(1) · CTA / Contact(2) · Manifesto(2)</div>
+    <div>🔴 <b>ПРОГАЛИНИ (добрати):</b> Facts / Specs(0) · Price(0) · Compare(0) · Commercial(0) · Invest(0) · Scenarios / Fork(0) · 3D tour(0)</div>
+  </div>
+</div>
+<div class="filters">
+  <button class="on" data-f="all">усі</button>
+  <button data-f="core">CORE</button>
+  <button data-f="common">COMMON</button>
+  <button data-f="custom">CUSTOM</button>
+  <button data-f="gap">тільки прогалини</button>
+</div>
+<section class="lane" data-tier="core">
+    <div class="lanehd">
+      <h2>Hero <span class="cnt deep">🟢 28</span> <span class="vbadge">▣ 11 варіанти</span></h2>
+      <span class="tier tier--core">CORE</span>
+      <p class="job">Opening full-bleed first impression; sets price-tier and atmosphere in one frame.</p>
+    </div>
+    <div class="vstrip">
+      <div class="vstrip__hd">ВАРІАНТИ СЕКЦІЇ <span class="vcnt">11</span> <span class="vstrip__hint">зібрані з прийомів нижче — це базові одиниці, які ти оцінюєш на борді</span></div>
+      <div class="grid grid--variant"><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--day-to-night-living/combo-lab.html" title="hero--day-to-night-living"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Дім, що дихає світлом</b></div><p>A PINNED hero where ONE scroll scrubs the SAME exterior view from full day into lit-window night (day-34 &lt;-&gt; night-34, same house, same window): daynight-scroll-scrub owns the pin and ramps the night layer's OPACITY over</p><div class="uses"><span>daynight-scroll-scrub</span><span>daynight-engine</span><span>mask-up-title</span><span>theme-tween</span></div>
+      <div class="acts"><a class="play" href="combos/hero--day-to-night-living/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--house-reveals-on-scroll/combo-lab.html" title="hero--house-reveals-on-scroll"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Дім розкривається</b></div><p>A PINNED, scroll-locked hero where the HOUSE reveals itself. At the top a dark cover hides the building behind a vertical centre seam. As the visitor scrolls, the seam PARTS from the centre outward (center-seam-split) wh</p><div class="uses"><span>pin-story-text</span><span>center-seam-split</span><span>render-scroll-scale</span><span>corner-frame-meta</span></div>
+      <div class="acts"><a class="play" href="combos/hero--house-reveals-on-scroll/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--numeral-frame-sequence/combo-lab.html" title="hero--numeral-frame-sequence"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Число, що стає світом</b></div><p>A cinematic title sequence built on a giant STROKE-ONLY outline numeral that holds a small framed glimpse of the building inside its counters. On one pinned scroll the aperture dilates to a full-bleed photograph while th</p><div class="uses"><span>numeral-frame-expand-hero</span><span>corner-frame-meta</span><span>theme-tween</span></div>
+      <div class="acts"><a class="play" href="combos/hero--numeral-frame-sequence/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--oblit-river-scrub/combo-lab.html" title="hero--oblit-river-scrub"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Обліт над водою</b></div><p>A REWORK of the laggy hero--scroll-piloted-flyaround. ONE pinned scroll-scrub paints a 160-frame aerial OBLIT over the water toward the house, frame by frame, to a 2d canvas (scroll-scrub-video, the Apple/AirPods techniq</p><div class="uses"><span>scroll-scrub-video</span><span>pin-story-text</span><span>corner-frame-meta</span></div>
+      <div class="acts"><a class="play" href="combos/hero--oblit-river-scrub/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--preloader-parts-to-hero/combo-lab.html" title="hero--preloader-parts-to-hero"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Очікування як ритуал</b></div><p>A hero whose FIRST beat is the wait itself. A band-collapse preloader (a dark panel with the brand wordmark centred and a live 0 to 100 counter bottom-left) holds as a REAL network gate over the heavy hero render. The re</p><div class="uses"><span>preloader-band-collapse</span><span>center-seam-split</span><span>mask-up-title</span><span>content-stage-cascade</span></div>
+      <div class="acts"><a class="play" href="combos/hero--preloader-parts-to-hero/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--seam-cascade-arrival/combo-lab.html" title="hero--seam-cascade-arrival"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Дім, що відкривається</b></div><p>The page-enter AS a hero. A dark CENTRE SEAM parts and the hero render SURFACES and BRIGHTENS through the widening gap, then the serif title rises from under a baseline mask, and the eyebrow, body, corner-frame brackets,</p><div class="uses"><span>render-slice-reveal</span><span>center-seam-split</span><span>mask-up-title</span><span>content-stage-cascade</span><span>corner-frame-meta</span></div>
+      <div class="acts"><a class="play" href="combos/hero--seam-cascade-arrival/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--split-word-deep/combo-lab.html" title="hero--split-word-deep"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Слово за словом</b></div><p>A DEEP, PINNED rework of the typographic hero where the TYPE is the heroic moment, told as FOUR sequenced beats off ONE scroll-lock (one pin, pinSpacing) so STRICTLY ONE composed text block shows at a time. Beat 1: the k</p><div class="uses"><span>render-scroll-scale</span><span>split-word-headline</span><span>pin-story-text</span><span>corner-frame-meta</span></div>
+      <div class="acts"><a class="play" href="combos/hero--split-word-deep/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--tilted-mosaic-world/combo-lab.html" title="hero--tilted-mosaic-world"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Світ, зібраний в один настрій</b></div><p>A HERO that is not one stock photo but a WHOLE WORLD: 12 varied frame-of-life renders (exteriors, garden, aerial, terrace, material macro, interior, dusk) laid out as a CSS grid and rotated + scaled as ONE rigid tilted p</p><div class="uses"><span>rotated-mosaic-hero</span><span>mask-up-title</span><span>theme-tween</span><span>scroll-hint-descending-tick</span></div>
+      <div class="acts"><a class="play" href="combos/hero--tilted-mosaic-world/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--video-bg-text-scrub/combo-lab.html" title="hero--video-bg-text-scrub"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Ріка тече, слова приходять</b></div><p>A PINNED hero where an AUTOPLAY river video plays ON ITS OWN as cinema (loop, muted, playsinline, poster) while the section scroll-LOCKS and ONE pinned scroll scrubs the TEXT story: pin-story-text owns the single pin and</p><div class="uses"><span>pin-story-text</span><span>corner-frame-meta</span><span>theme-tween</span></div>
+      <div class="acts"><a class="play" href="combos/hero--video-bg-text-scrub/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero--wordmark-docks-to-nav/combo-lab.html" title="hero--wordmark-docks-to-nav"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Бренд, що сідає в навігацію</b></div><p>11tanjung's signature hero: the GIANT italic wordmark scroll-scrubs scale + translateY DOWN and DOCKS into a frosted top-centre nav pill — the same DOM node the whole way (no swap). As the mark clears the centre band, th</p><div class="uses"><span>hero-title-to-nav-pill</span><span>render-scroll-scale</span><span>blur-reveal-stagger-title</span><span>corner-frame-meta</span></div>
+      <div class="acts"><a class="play" href="combos/hero--wordmark-docks-to-nav/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/hero-puzzle-monument/combo-lab.html" title="hero-puzzle-monument"></iframe></div>
+    <div class="meta"><div class="id"><b>Self-assembling cover hero</b></div><p>Scattered blurred fragments fly home into one full-bleed monument while the serif title reveals word-by-word and the indicator hands you down.</p><div class="uses"><span>puzzle-image</span><span>parallax-depth</span><span>splitLines</span><span>appear</span><span>scroll-indicator</span></div>
+      <div class="acts"><a class="play" href="combos/hero-puzzle-monument/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div></div>
+    </div>
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/bleeding-wordmark/lab.html" title="bleeding-wordmark"></iframe></div>
+    <div class="meta"><div class="id"><b>bleeding-wordmark</b></div><p>The oversized SECTION WORD that bleeds off the panel/viewport edge — the EVER 'ARCHITECTURE / INTERIOR / TERRITORY', Springs 'Wellness / Nature / Place' signature. Three things make it VI-grade rather than a big &lt;h2&gt;: (1</p>
+      <div class="acts"><a class="play" href="components/bleeding-wordmark/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/blur-reveal-stagger-title/lab.html" title="blur-reveal-stagger-title"></iframe></div>
+    <div class="meta"><div class="id"><b>blur-reveal-stagger-title</b></div><p>11tanjung's headline reveal — a multi-line display title MATERIALISES via a per-word gaussian blur(20px-&gt;0) + opacity(0-&gt;1), staggered ~100ms per word, with NO translate. A frosted focus-pull: the words don't move, they </p>
+      <div class="acts"><a class="play" href="components/blur-reveal-stagger-title/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/circular-ui-language/lab.html" title="circular-ui-language"></iframe></div>
+    <div class="meta"><div class="id"><b>circular-ui-language</b></div><p>The ONE circular UI vocabulary EVER + Springs share, made consistent: ring buttons, ← → outline arrows, a '+' expander that rotates to ×, a teardrop map pin, circular POI chips, and a centre wordmark that COLLAPSES to a </p>
+      <div class="acts"><a class="play" href="components/circular-ui-language/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/content-stage-cascade/lab.html" title="content-stage-cascade"></iframe></div>
+    <div class="meta"><div class="id"><b>content-stage-cascade</b></div><p>Saisei's content-reveal choreographer — after a page opens, its elements appear in a FIXED depth order: background -&gt; accent (awards) -&gt; title -&gt; meta -&gt; header LAST, with a small stagger between groups. It does not inve</p>
+      <div class="acts"><a class="play" href="components/content-stage-cascade/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/coords-corner-frame/lab.html" title="coords-corner-frame"></iframe></div>
+    <div class="meta"><div class="id"><b>coords-corner-frame</b></div><p>A SURVEYOR/draughting metadata frame over a full-bleed stage. Four draughting TICK-CORNERS (crosshair L-brackets) are drawn into place via stroke-dashoffset, then a small all-caps tracked readout reveals staggered: a COO</p>
+      <div class="acts"><a class="play" href="components/coords-corner-frame/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/corner-frame-meta/lab.html" title="corner-frame-meta"></iframe></div>
+    <div class="meta"><div class="id"><b>corner-frame-meta</b></div><p>Saisei's corner meta — small all-caps tracked labels at the FOUR CORNERS of a full-bleed frame (eyebrow top-left, location bottom-left, type/year bottom-right, index right-centre), fading in staggered. The framed composi</p>
+      <div class="acts"><a class="play" href="components/corner-frame-meta/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/daynight-engine/lab.html" title="daynight-engine"></iframe></div>
+    <div class="meta"><div class="id"><b>daynight-engine</b></div><p>The user's SIGNATURE real-estate move, reduced to one engine: two frame-matched media of the SAME scene (a daytime render + a nighttime render) stacked in one box, with a single normalized progress t (0=day, 1=night) dri</p>
+      <div class="acts"><a class="play" href="components/daynight-engine/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/daynight-scroll-scrub/lab.html" title="daynight-scroll-scrub"></iframe></div>
+    <div class="meta"><div class="id"><b>daynight-scroll-scrub</b></div><p>The day↔night canon driven by scroll. A pinned hero holds while you scroll ~110% of viewport-height, and across that distance the daytime render dissolves into the nighttime render. Two cinematic layers ride the SAME pro</p>
+      <div class="acts"><a class="play" href="components/daynight-scroll-scrub/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/fluid-type-sizing/lab.html" title="fluid-type-sizing"></iframe></div>
+    <div class="meta"><div class="id"><b>fluid-type-sizing</b></div><p>The giant-word SIZING ENGINE harvested from the live EVER site. Measured live at 3 viewports: EVER's hero word is ALWAYS (viewport - 2*gutter) wide (gutter ramps 20px@768 -&gt; 50px@1440 -&gt; 70px@1920 ≈ clamp(20px,3.6vw,70px</p>
+      <div class="acts"><a class="play" href="components/fluid-type-sizing/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/hero-title-to-nav-pill/lab.html" title="hero-title-to-nav-pill"></iframe></div>
+    <div class="meta"><div class="id"><b>hero-title-to-nav-pill</b></div><p>11tanjung's signature move — the full-screen cursive hero wordmark scroll-scrubs scale + translateY DOWN into a small frosted-glass pill fixed at top-centre. It is the SAME DOM node the whole way (no swap): giant title -</p>
+      <div class="acts"><a class="play" href="components/hero-title-to-nav-pill/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/hero-video-render-rotator/lab.html" title="hero-video-render-rotator"></iframe></div>
+    <div class="meta"><div class="id"><b>hero-video-render-rotator</b></div><p>crownd/finest's hero — a full-bleed hero whose BACKGROUND is a crossfading SLIDESHOW that mixes VIDEO clips and RENDER stills, while a big serif WORDMARK stays FIXED and persistent over all of them (the title never moves</p>
+      <div class="acts"><a class="play" href="components/hero-video-render-rotator/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/mask-up-title/lab.html" title="mask-up-title"></iframe></div>
+    <div class="meta"><div class="id"><b>mask-up-title</b></div><p>Saisei's big-title reveal — a large serif title RISES from under a baseline mask, line by line (overflow:hidden wrapper + the inner line translateY(110% -&gt; 0)), staggered, expo.out. Not a fade — the words slide up from b</p>
+      <div class="acts"><a class="play" href="components/mask-up-title/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/numeral-frame-expand-hero/lab.html" title="numeral-frame-expand-hero"></iframe></div>
+    <div class="meta"><div class="id"><b>numeral-frame-expand-hero</b></div><p>r1864's signature hero — one continuous pinned scroll-narrative in 4 stages: (A) FRAME-EXPAND: giant outline numerals on warm-black with a small framed view sitting INSIDE the numeral row; on scroll the frame expands to </p>
+      <div class="acts"><a class="play" href="components/numeral-frame-expand-hero/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/oval-mask/lab.html" title="oval-mask"></iframe></div>
+    <div class="meta"><div class="id"><b>oval-mask</b></div><p>EVER's portrait OVAL with media inside — the hero 'eveR' oval (a looping muted video between the wordmark letters), the ARCHITECTURE/INTERIOR ovals. A fixed-shape ellipse clip-path on a wrap; the media INSIDE parallaxes </p>
+      <div class="acts"><a class="play" href="components/oval-mask/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/pin-story-text/lab.html" title="pin-story-text"></iframe></div>
+    <div class="meta"><div class="id"><b>pin-story-text</b></div><p>A PINNED scroll-lock text sequencer. The section pins (pin:true, pinSpacing:true) and the page HOLDS while the story plays. As the visitor scrolls, a sequence of text blocks arrives ONE AT A TIME in a clean, considered c</p>
+      <div class="acts"><a class="play" href="components/pin-story-text/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/portrait-vertical-hero/lab.html" title="portrait-vertical-hero"></iframe></div>
+    <div class="meta"><div class="id"><b>portrait-vertical-hero</b></div><p>A composed PORTRAIT 9:16 hero PLATE — the editorial vertical hero for mobile-first / portrait-render sites. ONE create() call builds, from data, a centred portrait plate: a 9:16 framed render (object-fit cover, the hero </p>
+      <div class="acts"><a class="play" href="components/portrait-vertical-hero/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/puzzle-image/lab.html" title="puzzle-image"></iframe></div>
+    <div class="meta"><div class="id"><b>puzzle-image</b></div><p>BASE = pz1 center-out. Slices ONE WIDE LANDSCAPE (16:9) render into a 5×8 grid of CSS-sprite tiles that fly home from a blurred dark-field scatter on scroll CENTER-OUT (outer tiles fly from further via a radial reach bia</p>
+      <div class="acts"><a class="play" href="components/puzzle-image/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/render-scroll-scale/lab.html" title="render-scroll-scale"></iframe></div>
+    <div class="meta"><div class="id"><b>render-scroll-scale</b></div><p>The bare hero LAYER that breathes — a fixed clipping frame holding ONE full-bleed render (&lt;img&gt;/&lt;video&gt;). As progress goes 0 -&gt; 1 the render SCALES scaleFrom -&gt; scaleTo (a scroll-scrubbed push-in) with an optional small </p>
+      <div class="acts"><a class="play" href="components/render-scroll-scale/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/render-slice-reveal/lab.html" title="render-slice-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>render-slice-reveal</b></div><p>Saisei's render reveal — a new full-bleed render appears through a black centre SLICE that opens (power2.in: a hairline that dwells then rips), and a dark VEIL over the render clears IN SYNC with the slice, so the render</p>
+      <div class="acts"><a class="play" href="components/render-slice-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/room-dolly-scroll/lab.html" title="room-dolly-scroll"></iframe></div>
+    <div class="meta"><div class="id"><b>room-dolly-scroll</b></div><p>gapsystudio's HOME camera-dolly, done WITHOUT WebGL — a pinned scroll-scrub drives a multi-layer parallax that fakes a forward dolly into a scene. Each layer carries a data-depth (0 far .. 1 near); on scroll the near lay</p>
+      <div class="acts"><a class="play" href="components/room-dolly-scroll/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/rotated-mosaic-hero/lab.html" title="rotated-mosaic-hero"></iframe></div>
+    <div class="meta"><div class="id"><b>rotated-mosaic-hero</b></div><p>Springs' signature HERO — a grid of ~9-12 photo tiles rotated as ONE rigid plane (~-8 to -10deg) and scaled so its corners cover the viewport, bound by a colour MULTIPLY WASH (~55-65%) that unifies the disparate photos i</p>
+      <div class="acts"><a class="play" href="components/rotated-mosaic-hero/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/scroll-hint-descending-tick/lab.html" title="scroll-hint-descending-tick"></iframe></div>
+    <div class="meta"><div class="id"><b>scroll-hint-descending-tick</b></div><p>to-place.co.jp's scroll BAIT — a small serif 'scroll' label over a faint vertical TRACK with a bright TICK that AUTOPLAYS descending top→bottom (a 'drip down the line' + an empty beat between drips), gated to the FIRST v</p>
+      <div class="acts"><a class="play" href="components/scroll-hint-descending-tick/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/scroll-scrub-video/lab.html" title="scroll-scrub-video"></iframe></div>
+    <div class="meta"><div class="id"><b>scroll-scrub-video</b></div><p>Scroll-scrubs an architect's camera move (a 3D fly-around / descent, 5-20s) frame by frame as you scroll — the Apple/AirPods technique. A pre-extracted numbered image sequence (ffmpeg) is preloaded and the right frame is</p>
+      <div class="acts"><a class="play" href="components/scroll-scrub-video/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/section-pager/lab.html" title="section-pager"></iframe></div>
+    <div class="meta"><div class="id"><b>section-pager</b></div><p>The WHEEL-HIJACK FULLPAGE PAGER — the engine BOTH EVER and most Vide-Infra 'section curtain' sites run, harvested ONE-TO-ONE from the live EVER site (read off its real landing.js + measured live). It is NOT scroll-scrubb</p>
+      <div class="acts"><a class="play" href="components/section-pager/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/split-word-headline/lab.html" title="split-word-headline"></iframe></div>
+    <div class="meta"><div class="id"><b>split-word-headline</b></div><p>A PER-WORD split headline reveal. The atom takes an element holding a headline, splits it into per-word spans (each WORD wrapped in its own overflow:hidden clip row), and reveals the words with a wave stagger: each word </p>
+      <div class="acts"><a class="play" href="components/split-word-headline/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/stroke-draw-title/lab.html" title="stroke-draw-title"></iframe></div>
+    <div class="meta"><div class="id"><b>stroke-draw-title</b></div><p>Saisei's homepage title reveal — the big serif word is drawn as OUTLINE STROKES that trace the letter contours (SVG stroke-dashoffset full-&gt;0), then the FILL fades in, so the title writes itself onto the dark hero before</p>
+      <div class="acts"><a class="play" href="components/stroke-draw-title/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/theme-tween/lab.html" title="theme-tween"></iframe></div>
+    <div class="meta"><div class="id"><b>theme-tween</b></div><p>EVER's per-section COLOR ENGINE — the slate -&gt; brown -&gt; green identity where the whole chrome (background, ink, accent, header, and any modal) recolors as each section comes on screen, TWEENED across the seam (not a hard</p>
+      <div class="acts"><a class="play" href="components/theme-tween/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/venn-ring-portal-reveal/lab.html" title="venn-ring-portal-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>venn-ring-portal-reveal</b></div><p>11tanjung's signature content reveal — a row of N outline circles that overlap like a venn diagram. On ONE pinned scroll-scrub the SIDE circles do a stroke-width radial fill (thin ring -&gt; solid disc) then hollow + shrink</p>
+      <div class="acts"><a class="play" href="components/venn-ring-portal-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="core">
+    <div class="lanehd">
+      <h2>Architecture <span class="cnt deep">🟢 20</span> <span class="vbadge">▣ 17 варіанти</span></h2>
+      <span class="tier tier--core">CORE</span>
+      <p class="job">The building/house as object — exterior, facade, materials, why it looks this way.</p>
+    </div>
+    <div class="vstrip">
+      <div class="vstrip__hd">ВАРІАНТИ СЕКЦІЇ <span class="vcnt">17</span> <span class="vstrip__hint">зібрані з прийомів нижче — це базові одиниці, які ти оцінюєш на борді</span></div>
+      <div class="grid grid--variant"><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--brick-to-house/combo-lab.html" title="architecture--brick-to-house"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Від фактури до дому</b></div><p>An editorial architecture beat that reads the building from its material outward. ONE pinned scroll drives a two-beat film inside a single clipping frame: BEAT 1 holds on the MATERIAL macro (the QUADRO terrace pergola ju</p><div class="uses"><span>scroll-zoom-image-pair</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--brick-to-house/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--collage-inspect/combo-lab.html" title="architecture--collage-inspect"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Колаж, що відкривається</b></div><p>The EVER editorial material-collage — round + tall-rect + far-rect tiles drifting at parallax depth behind a giant fluid-fit word 'архітектура', sparse Fedoriv meta, an '01' counter — DEEPENED with an interactive INSPECT</p><div class="uses"><span>parallax-collage</span><span>fluid-type-sizing</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--collage-inspect/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--depth-portal/combo-lab.html" title="architecture--depth-portal"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Крізь шари дому</b></div><p>Scroll THROUGH layered planes of the building (facade, material macro, roofline, whole house) sitting at different Z-depths, one continuous signed-depth gesture, frames snapping to slots.</p><div class="uses"><span>depth-stack</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--depth-portal/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--element-strip/combo-lab.html" title="architecture--element-strip"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Стрічка деталей — a horizontal centre-focus STRIP of the building's own elements (no markers on a photo); each panel IS its element with a caption + material spec, the centre one in focus, the sides dimmed peek-insets, ‹ › / drag rotate the focus</b></div><p>The ARCHITECTURE chapter built as a horizontal STRIP of the building's own elements rather than numbered hotspots on one photo. Five big element renders sit in a rail; the centre one is in focus (full size, full brightne</p><div class="uses"><span>center-focus-carousel</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--element-strip/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--flyaround-scrub/combo-lab.html" title="architecture--flyaround-scrub"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Обліт</b></div><p>The ARCHITECTURE chapter as a cinematic FLY-AROUND of the building. 120 sequential arrival frames are scrubbed by ONE pinned scroll so the scroll IS the camera turning around the house. A single on-screen &lt;img&gt; swaps its</p><div class="uses"><span>frame-scrub-img</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--flyaround-scrub/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--hover-the-building/combo-lab.html" title="architecture--hover-the-building"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Будинок реагує, hover the building itself (dim+blur the rest, the touched element stays lit, label grows from it)</b></div><p>You hover the BUILDING ITSELF, not a number stuck on the wall. Invisible perspective zones are hand-traced over the REAL parts of a clean frontal facade (roof parapet / upper glazing / lower terrace glazing / recessed en</p><div class="uses"><span>clean-floor-hover-select</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--hover-the-building/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--layered-build/combo-lab.html" title="architecture--layered-build"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Дім по шарах</b></div><p>Scroll THROUGH four Z-planes of ONE building read as an architect reads it: 01 ФОРМА the street volume, 02 МАТЕРІАЛ the timber pergola up close, 03 ВІНЕЦЬ the rooftop crown against the sky, 04 ЦІЛІСТЬ the same volume who</p><div class="uses"><span>depth-stack</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--layered-build/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--lockstep-slicer/combo-lab.html" title="architecture--lockstep-slicer"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Розкрій</b></div><p>The architecture chapter as Springs' 'Open the doors' COUPLED-SPLIT. ONE pinned scroll, owned by the dual-slicer ENGINE, drives TWO systems in lockstep off one position: the RIGHT column is a vertical CLIP-PATH RENDER ST</p><div class="uses"><span>dual-slicer</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--lockstep-slicer/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--material-carousel/combo-lab.html" title="architecture--material-carousel"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Матеріали зблизька</b></div><p>A row of tall material panels, each held inside a fixed editorial ARCH-OVAL frame. The CENTRE panel is in focus (scale 1, brightness 1, caption lit); the sides are dimmed peek-insets (scale 0.9, brightness 0.45) with edg</p><div class="uses"><span>center-focus-carousel</span><span>oval-mask</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--material-carousel/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--material-collage/combo-lab.html" title="architecture--material-collage"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Прості обриси, виразні матеріали</b></div><p>An EVER-class editorial collage: a giant fluid-fit word behind, MATERIAL and clean-form render tiles drifting at different depths as you scroll, with sparse premium meta copy. Every tile foregrounds a material (timber, g</p><div class="uses"><span>parallax-collage</span><span>fluid-type-sizing</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--material-collage/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--plus-hotspots/combo-lab.html" title="architecture--plus-hotspots"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Розглянь зблизька — facade + plus-hotspots that zoom into the material</b></div><p>A frontal QUADRO facade with FOUR small '+' hotspots, each ANCHORED to a real exterior element (white roof parapet, upper full-height glazing, the timber soffit of the upper-storey overhang, the lower terrace behind the </p><div class="uses"><span>veil-flat-detail-reveal</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--plus-hotspots/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--section-accordion/combo-lab.html" title="architecture--section-accordion"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Дім у розрізі</b></div><p>An INTERACTIVE architecture chapter built as a horizontal accordion of FOUR big renders, one open at a time. The building is shown у розрізі as peer components - Вінець (покрівля) / Пергола (тінь) / Фасад (оболонка) / Ос</p><div class="uses"><span>layer-accordion-reveal</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--section-accordion/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--spec-builds/combo-lab.html" title="architecture--spec-builds"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Аркуш фактів</b></div><p>A pinned full-bleed MEDIA STEPPER that turns the building's hard facts into visual facts. ONE real QUADRO exterior render is the WHOLE background; four typographic steps float over it, each a DIFFERENT text TYPE, never a</p><div class="uses"><span>media-step-switch</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--spec-builds/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--veil-detail/combo-lab.html" title="architecture--veil-detail"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Завіса деталі</b></div><p>A calm architecture OVERVIEW render (day-front) carries three element triggers (glazing, pergola, terrace). Click one and a dark VEIL does COVER -&gt; HOLD (swap content unseen) -&gt; UNCOVER onto a calm two-tone DETAIL of tha</p><div class="uses"><span>veil-flat-detail-reveal</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--veil-detail/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--floor-inspect/combo-lab.html" title="architecture--floor-inspect"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--cand">кандидат</span><b>Поверхи</b></div><p>An INTERACTIVE architecture section on ONE building render. A single &lt;svg&gt; is locked to the render's intrinsic pixels (viewBox 0 0 1920 1080, preserveAspectRatio matching the img fit) and over the facade sit THREE hand-t</p><div class="uses"><span>clean-floor-hover-select</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--floor-inspect/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/interiors-cards-cursor/combo-lab.html" title="interiors-cards-cursor"></iframe></div>
+    <div class="meta"><div class="id"><b>Interiors deck with custom cursor</b></div><p>A pinned horizontal card deck swipes through interior renders; a custom cursor + decode-gate intros + reveal + a ticking counter ride the spine's single progress.</p><div class="uses"><span>cards-swipe</span><span>parallax-depth</span><span>custom-cursor</span><span>reveal</span><span>appear</span><span>counter</span></div>
+      <div class="acts"><a class="play" href="combos/interiors-cards-cursor/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/story-stepper-render-focus/combo-lab.html" title="story-stepper-render-focus"></iframe></div>
+    <div class="meta"><div class="id"><b>Pinned render-focus scrollytelling</b></div><p>A pinned stepper walks through N labelled renders; each step the heading ticks, the render crossfades into focus, split-line copy + reveal + cursor + depth ride the spine's single progress.</p><div class="uses"><span>focus-render-switch</span><span>parallax-depth</span><span>reveal</span><span>splitLines</span><span>custom-cursor</span><span>counter</span></div>
+      <div class="acts"><a class="play" href="combos/story-stepper-render-focus/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div></div>
+    </div>
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/our-house-at-dusk/lab.html" title="our-house-at-dusk"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--sec">секція</span><b>our-house-at-dusk</b></div><p>An exterior before/after SECTION: a wide elevation of the house presented as one surface split by a draggable vertical seam. The canon clips the evening still in as the seam sweeps (reveal:'seam'); the seam reads as the </p>
+      <div class="acts"><a class="play" href="components/our-house-at-dusk/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/brand-overlay-crossfade/lab.html" title="brand-overlay-crossfade"></iframe></div>
+    <div class="meta"><div class="id"><b>brand-overlay-crossfade</b></div><p>Springs' brand-tinted reveal — the section PINS full-screen on a full-bleed photo dipped in the brand colour, and while pinned a brand-colour WASH tints from full to 0 ON THE WHOLE FRAME, so the photo is seen surfacing f</p>
+      <div class="acts"><a class="play" href="components/brand-overlay-crossfade/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/daynight-center-seam/lab.html" title="daynight-center-seam"></iframe></div>
+    <div class="meta"><div class="id"><b>daynight-center-seam</b></div><p>The day↔night canon parted from the CENTRE — the Saisei dialect. Unlike V3 (one seam follows the cursor), here BOTH halves part outward from a vertical centre line and the EVENING render is revealed in the widening centr</p>
+      <div class="acts"><a class="play" href="components/daynight-center-seam/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/daynight-masked-windows/lab.html" title="daynight-masked-windows"></iframe></div>
+    <div class="meta"><div class="id"><b>daynight-masked-windows</b></div><p>The day↔night canon as a per-window MASK: the building stays in its DAYTIME render the whole time, and only the WINDOWS turn to night, each lighting at its own staggered threshold. Mechanically it is the canon (window.Da</p>
+      <div class="acts"><a class="play" href="components/daynight-masked-windows/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/daynight-portal-reveal/lab.html" title="daynight-portal-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>daynight-portal-reveal</b></div><p>The day↔night canon revealed as a PORTAL — the evening blooms outward in a growing circle from a point the visitor TAPS (a lit window, a 'turn on the evening' hotspot). It is the canon's manual driver + portal reveal (ni</p>
+      <div class="acts"><a class="play" href="components/daynight-portal-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/de-bleed/lab.html" title="de-bleed"></iframe></div>
+    <div class="meta"><div class="id"><b>de-bleed</b></div><p>EVER's de-bleed / re-bleed — a full-bleed photo SCALES/INSETS into a contained editorial card on scroll (a giant wordmark sitting BEHIND it, revealed in the freed gutters), the editorial copy + decor rising in around it;</p>
+      <div class="acts"><a class="play" href="components/de-bleed/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/depth-stack/lab.html" title="depth-stack"></iframe></div>
+    <div class="meta"><div class="id"><b>depth-stack</b></div><p>A pinned scroll-scrub deck of layered planes painted from one continuous signed depth (d = i - prog) that move through Z — dealt forward-and-down into a fanned hand (deal-fan), or flown THROUGH as a tunnel of portal-plan</p>
+      <div class="acts"><a class="play" href="components/depth-stack/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/exploded-stack-inspect/lab.html" title="exploded-stack-inspect"></iframe></div>
+    <div class="meta"><div class="id"><b>exploded-stack-inspect</b></div><p>An architect pulls a model apart. N building-component planes (roof / top volume / facade / base+terrace) sit collapsed in an axon-skewed stack; on entry they SEPARATE vertically with depth (translateY + a small parallax</p>
+      <div class="acts"><a class="play" href="components/exploded-stack-inspect/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/focus-render-switch/lab.html" title="focus-render-switch"></iframe></div>
+    <div class="meta"><div class="id"><b>focus-render-switch</b></div><p>A pinned section steps through N renders; each step the heading ticks up through a slot while the active render crossfades into focus with a slow Ken-Burns hold.</p>
+      <div class="acts"><a class="play" href="components/focus-render-switch/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/layer-accordion-reveal/lab.html" title="layer-accordion-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>layer-accordion-reveal</b></div><p>A building shown у розрізі as BIG renders side by side: N vertical slabs, one open at a time. At rest each slab is a narrow STRIP with a vertical spine label; HOVER (or focus / click) a slab and it EXPANDS to a near-full</p>
+      <div class="acts"><a class="play" href="components/layer-accordion-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/masked-heritage-split/lab.html" title="masked-heritage-split"></iframe></div>
+    <div class="meta"><div class="id"><b>masked-heritage-split</b></div><p>r1864's /history split — a LEFT dark-green serif NARRATIVE panel (giant ALL-CAPS title + small sans body + an artwork CREDIT caption + a 'NN / N' counter + a circular arrow) beside a RIGHT full-bleed HERITAGE-ARTWORK pan</p>
+      <div class="acts"><a class="play" href="components/masked-heritage-split/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/oval-mask-reveal/lab.html" title="oval-mask-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>oval-mask-reveal</b></div><p>r1864's section media-reveal — an ARCHED / OVAL mask over a photo that REVEALS by ANIMATING the mask GEOMETRY on section enter: it starts as a thin centred vertical SLIT and GROWS outward into a full arch (rounded/pointe</p>
+      <div class="acts"><a class="play" href="components/oval-mask-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/parallax-collage/lab.html" title="parallax-collage"></iframe></div>
+    <div class="meta"><div class="id"><b>parallax-collage</b></div><p>The EVER 'Architecture' editorial-collage ENGINE, harvested from the live site. A composition of THREE things: (1) a STATIC editorial GRID of media tiles with DIFFERENT masks (EVER: a round 420x345 tile + a tall 420x730 </p>
+      <div class="acts"><a class="play" href="components/parallax-collage/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/persistent-index-menu/lab.html" title="persistent-index-menu"></iframe></div>
+    <div class="meta"><div class="id"><b>persistent-index-menu</b></div><p>Springs' Wellness amenity menu (Spa/Yoga/Fitness/Café) — a list-index &lt;-&gt; (media + copy) binding. SPLIT layout: media LEFT (a hard rectangle window), a PERSISTENT serif INDEX + body copy RIGHT, over a constant gradient g</p>
+      <div class="acts"><a class="play" href="components/persistent-index-menu/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/portrait-carousel/lab.html" title="portrait-carousel"></iframe></div>
+    <div class="meta"><div class="id"><b>portrait-carousel</b></div><p>Springs' terrace CAROUSEL — an arrow-driven portrait carousel where slides change by a VERTICAL SLICE/PUSH inside a fixed portrait frame (NEXT: the incoming image slides UP from the bottom and the outgoing rides off the </p>
+      <div class="acts"><a class="play" href="components/portrait-carousel/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/scroll-clip-rise/lab.html" title="scroll-clip-rise"></iframe></div>
+    <div class="meta"><div class="id"><b>scroll-clip-rise</b></div><p>Saisei's text+image SECTION reveal — as the section scrolls into view, each element RISES from under a bottom mask: a vertical portrait photo grows up like a column on the LEFT, and the body copy on the RIGHT reveals LIN</p>
+      <div class="acts"><a class="play" href="components/scroll-clip-rise/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/section-rise-into-view/lab.html" title="section-rise-into-view"></iframe></div>
+    <div class="meta"><div class="id"><b>section-rise-into-view</b></div><p>crownd/finest's section entrance — a whole full-bleed MEDIA BLOCK rises up from below (translateY riseY -&gt; 0) and fades in (0 -&gt; 1) as it scrolls into view, ONCE, power3.out, with a hair of scale-settle. The simplest, li</p>
+      <div class="acts"><a class="play" href="components/section-rise-into-view/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/slicer-reveal/lab.html" title="slicer-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>slicer-reveal</b></div><p>A SAISEI-grade editorial showcase where each CONTAINED render (~50vw, never full-screen) sits in a sticky stage and is REVEALED by a hard-edged horizontal clip that opens LEFT-&gt;RIGHT (clip-path inset(0 100% 0 0) -&gt; inset</p>
+      <div class="acts"><a class="play" href="components/slicer-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/vertical-curtain-wipe/lab.html" title="vertical-curtain-wipe"></iframe></div>
+    <div class="meta"><div class="id"><b>vertical-curtain-wipe</b></div><p>Springs' section ENTRY wipe — a panel enters as a hard VERTICAL seam wiping left-&gt;right and PARKING at the column split (~50%), while the outgoing full-bleed image CROP-ZOOMS (scale up + origin shift) to recompose into t</p>
+      <div class="acts"><a class="play" href="components/vertical-curtain-wipe/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/vertical-slide/lab.html" title="vertical-slide"></iframe></div>
+    <div class="meta"><div class="id"><b>vertical-slide</b></div><p>A pinned vertical film-advance where big render+caption cels rise one per scroll-step on a single rigid track (one track.y translateY) through a void LARGER than the viewport, so the outgoing cel fully exits before the i</p>
+      <div class="acts"><a class="play" href="components/vertical-slide/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="core">
+    <div class="lanehd">
+      <h2>Floor plan <span class="cnt thin">🟡 1</span></h2>
+      <span class="tier tier--core">CORE</span>
+      <p class="job">The actual layout(s) drilled into; max 2 full plans; villa = single, ЖК = numbered plate.</p>
+    </div>
+    
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/horizontal-spec-carousel/lab.html" title="horizontal-spec-carousel"></iframe></div>
+    <div class="meta"><div class="id"><b>horizontal-spec-carousel</b></div><p>11tanjung's plans carousel — a row of landscape cards on a track that translateX one STEP at a time, with EDGE-PEEK (the next card's edge shows past the active one). A vertical-pill arrow sits in the gap (next / prev); e</p>
+      <div class="acts"><a class="play" href="components/horizontal-spec-carousel/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="core">
+    <div class="lanehd">
+      <h2>Location <span class="cnt deep">🟢 11</span> <span class="vbadge">▣ 10 варіанти</span></h2>
+      <span class="tier tier--core">CORE</span>
+      <p class="job">Where it sits + what is nearby; real OSM map, not drawn on the eye.</p>
+    </div>
+    <div class="vstrip">
+      <div class="vstrip__hd">ВАРІАНТИ СЕКЦІЇ <span class="vcnt">10</span> <span class="vstrip__hint">зібрані з прийомів нижче — це базові одиниці, які ти оцінюєш на борді</span></div>
+      <div class="grid grid--variant"><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--arched-window-place/combo-lab.html" title="location--arched-window-place"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Вікно на місце</b></div><p>A ceremonial single-photo aperture for the location beat. A classical centred arch (a portico window) opens from a thin vertical slit into a full arched aperture onto ONE surroundings photograph, the image easing back to</p><div class="uses"><span>oval-mask-reveal</span><span>numeral-odometer-roll</span></div>
+      <div class="acts"><a class="play" href="combos/location--arched-window-place/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--architects-sketch/combo-lab.html" title="location--architects-sketch"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Схема від руки</b></div><p>The LOCATION beat rendered as an architect's hand-sketch: a MONOCHROME pen drawing of с. Агрономічне, thin (~1px) cream strokes on a brown drafting field, NO fills, NO colour photography, NO Google / NO Mapbox / NO tiles</p><div class="uses"><span>line-art-location-map</span><span>coords-corner-frame</span></div>
+      <div class="acts"><a class="play" href="combos/location--architects-sketch/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--concierge-radiate/combo-lab.html" title="location--concierge-radiate"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Все поруч</b></div><p>A hand-illustrated warm cream-paper map of the district whose language is LINES: thin leader-threads radiate from YOUR DOOR to the 6 real named daily places, each thread carrying its real walk-minute figure. On scroll th</p><div class="uses"><span>pin-story-text</span><span>district-radiates</span><span>numeral-frame-expand-hero</span></div>
+      <div class="acts"><a class="play" href="combos/location--concierge-radiate/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--day-in-the-area/combo-lab.html" title="location--day-in-the-area"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>День у районі</b></div><p>The ONE map-less location section. A pinned scroll-scrub paints a 160-frame REAL AREA CLIP (the river / the neighbourhood) to a canvas (scroll-scrub-video, the lag-free Apple/AirPods technique: createImageBitmap decode-o</p><div class="uses"><span>scroll-scrub-video</span><span>pin-story-text</span></div>
+      <div class="acts"><a class="play" href="combos/location--day-in-the-area/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--dive-to-the-gate/combo-lab.html" title="location--dive-to-the-gate"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Місто, район, ділянка</b></div><p>The LOCATION section as one continuous SCALE dive, not a map. ONE shared focal point (the real Агрономічне site) is zoomed through three acts that match-cut on that point: МІСТО (the region, cool grey-green, the real hig</p><div class="uses"><span>zoom-to-the-door</span><span>district-radiates</span></div>
+      <div class="acts"><a class="play" href="combos/location--dive-to-the-gate/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--minutes-as-hero/combo-lab.html" title="location--minutes-as-hero"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Хвилини — головне</b></div><p>The LOCATION section answered as TYPOGRAPHY, not cartography: one wall-tall Fraunces minute number owns the screen and ROLLS per pinned step (9 -&gt; 18 -&gt; 15 -&gt; 10 -&gt; 10 -&gt; 9 хвилин пішки) as you scroll the six real daily </p><div class="uses"><span>minutes-bloom</span><span>numeral-odometer-roll</span><span>scroll-indicator</span></div>
+      <div class="acts"><a class="play" href="combos/location--minutes-as-hero/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--nearby-in-photographs/combo-lab.html" title="location--nearby-in-photographs"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Поруч, у фото</b></div><p>The location section as REAL-PHOTO CARD-RAIL. The OSM map the visitor was reading DIMS (opacity 1 -&gt; 0.28, an OPACITY-ONLY fade so the heavy SVG never re-rasters) to a dark stage; an eyebrow, a giant Fraunces statement a</p><div class="uses"><span>map-dim-carousel-announce</span><span>poi-caption-carousel</span></div>
+      <div class="acts"><a class="play" href="combos/location--nearby-in-photographs/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--raster-tile-bloom/combo-lab.html" title="location--raster-tile-bloom"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Агрономічне з висоти</b></div><p>The PHOTOGRAPHIC-map member of the location family. A pre-baked STATIC mosaic of raster map tiles (plain &lt;img&gt;, NO canvas, NO live tile server) is the medium: every tile force-decodes up front (decode-guard against black</p><div class="uses"><span>pin-story-text</span><span>raster-tile-reveal</span><span>coords-corner-frame</span></div>
+      <div class="acts"><a class="play" href="combos/location--raster-tile-bloom/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--surveyed-route-map/combo-lab.html" title="location--surveyed-route-map"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Маршрут по справжніх вулицях</b></div><p>The realistic etalon of the LOCATION section (the smarts variant). A dark, baked OSM VECTOR district of с. Агрономічне rendered as real geography: road hierarchy by class (hwy / main / mid / minor / faint with dual casin</p><div class="uses"><span>locmap-engine</span><span>theme-tween</span></div>
+      <div class="acts"><a class="play" href="combos/location--surveyed-route-map/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/location--ten-minute-reach/combo-lab.html" title="location--ten-minute-reach"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--base">БАЗА</span><b>Десять хвилин пішки</b></div><p>The LOCATION section as COVERAGE, not distance. A soft warm walking-reach isochrone (a SHAPE, not a line, a counted minute, a tile, a route or a photo) floods over a cream illustrated map of с. Агрономічне; every daily p</p><div class="uses"><span>reach-ribbon</span><span>numeral-frame-expand-hero</span></div>
+      <div class="acts"><a class="play" href="combos/location--ten-minute-reach/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div></div>
+    </div>
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/district-radiates/lab.html" title="district-radiates"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--sec">секція</span><b>district-radiates</b></div><p>An editorial, hand-illustrated proximity map: the location section drawn as a concierge's note rather than a surveyed widget. Warm cream paper, a soft slate river, two sage parks, a few hair-thin roads (NOT a dense 823-b</p>
+      <div class="acts"><a class="play" href="components/district-radiates/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/minutes-bloom/lab.html" title="minutes-bloom"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--sec">секція</span><b>minutes-bloom</b></div><p>The location beat with TIME as the hero instead of the map. A pinned section steps through the daily places one at a time as you scroll: for each, a huge editorial minute number counts up from zero to its value (nine, te</p>
+      <div class="acts"><a class="play" href="components/minutes-bloom/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/reach-ribbon/lab.html" title="reach-ribbon"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--sec">секція</span><b>reach-ribbon</b></div><p>The location beat reframed as COVERAGE rather than distance: instead of lines, a counter, or a zoom, one soft organic walking-reach isochrone is drawn on the illustrated map and you simply see how much life falls inside </p>
+      <div class="acts"><a class="play" href="components/reach-ribbon/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/zoom-to-the-door/lab.html" title="zoom-to-the-door"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--sec">секція</span><b>zoom-to-the-door</b></div><p>A three-act scroll cinema that answers the three questions a buyer asks, in order, at the right scale: where is this (the region), what is around it (the district), and what exactly is mine (the plot). As you scroll the </p>
+      <div class="acts"><a class="play" href="components/zoom-to-the-door/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/line-art-location-map/lab.html" title="line-art-location-map"></iframe></div>
+    <div class="meta"><div class="id"><b>line-art-location-map</b></div><p>11tanjung's WHERE beat — a hand-authored, MONOCHROME line-art district map: thin (~1px) cream strokes on a brown field (NO Google / NO Mapbox, NO fills, NO colour). Inline SVG roads draw in (stroke-dashoffset), a target-</p>
+      <div class="acts"><a class="play" href="components/line-art-location-map/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/locmap-engine/lab.html" title="locmap-engine"></iframe></div>
+    <div class="meta"><div class="id"><b>locmap-engine</b></div><p>The award-grade location map, reduced to one engine: a hand-built SVG of REAL baked OpenStreetMap geography (roads as a dual casing+stroke hierarchy, building footprints with ~1/9 deterministically lit warm windows, gree</p>
+      <div class="acts"><a class="play" href="components/locmap-engine/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/map-dim-carousel-announce/lab.html" title="map-dim-carousel-announce"></iframe></div>
+    <div class="meta"><div class="id"><b>map-dim-carousel-announce</b></div><p>r1864's /location announce — a POI MAP that DIMS (opacity 1 -&gt; ~0.3) + pushes back (scale 1 -&gt; 1.04) to become a dark BACKDROP as the section enters, while a giant serif HEADLINE + sub rise over it and a RAIL of N locati</p>
+      <div class="acts"><a class="play" href="components/map-dim-carousel-announce/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/numeral-odometer-roll/lab.html" title="numeral-odometer-roll"></iframe></div>
+    <div class="meta"><div class="id"><b>numeral-odometer-roll</b></div><p>The PURE numeral ODOMETER-ROLL mechanic, EXTRACTED out of stat-odometer's own pinned ScrollTrigger so other atoms can borrow the roll WITHOUT importing stat-odometer's pin. A vertical strip of numbers (.nor-num, one per </p>
+      <div class="acts"><a class="play" href="components/numeral-odometer-roll/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/poi-caption-carousel/lab.html" title="poi-caption-carousel"></iframe></div>
+    <div class="meta"><div class="id"><b>poi-caption-carousel</b></div><p>r1864's standalone POI card-rail — a horizontal row of place cards, EACH with its CAPTION directly UNDER the card (the caption travels WITH the card), advancing in a BIG STEP via round ‹ › arrows (page-by-page, not one c</p>
+      <div class="acts"><a class="play" href="components/poi-caption-carousel/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/raster-tile-reveal/lab.html" title="raster-tile-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>raster-tile-reveal</b></div><p>The first PHOTOGRAPHIC-map medium in the location family — a genuinely NEW medium root, not a reskin. Every other location atom is hand-drawn SVG or vector-baked OSM line-art; this one shows a REAL raster map: a pre-bake</p>
+      <div class="acts"><a class="play" href="components/raster-tile-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/river-tinted-poi-map/lab.html" title="river-tinted-poi-map"></iframe></div>
+    <div class="meta"><div class="id"><b>river-tinted-poi-map</b></div><p>r1864's drawn location map — the third map dialect. A hand-styled vector district map on a warm-taupe / near-black field: a winding slate-blue river band, filled green park blobs, a thin road network, white landmark glyp</p>
+      <div class="acts"><a class="play" href="components/river-tinted-poi-map/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="core">
+    <div class="lanehd">
+      <h2>CTA / Contact <span class="cnt thin">🟡 2</span> <span class="vbadge">▣ 1 варіант</span></h2>
+      <span class="tier tier--core">CORE</span>
+      <p class="job">The conversion close — one quiet action to a lead.</p>
+    </div>
+    <div class="vstrip">
+      <div class="vstrip__hd">ВАРІАНТИ СЕКЦІЇ <span class="vcnt">1</span> <span class="vstrip__hint">зібрані з прийомів нижче — це базові одиниці, які ти оцінюєш на борді</span></div>
+      <div class="grid grid--variant"><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/conversion-quiet-gate/combo-lab.html" title="conversion-quiet-gate"></iframe></div>
+    <div class="meta"><div class="id"><b>Quiet conversion gate</b></div><p>Motion budget drops to near-zero: one entrance fade then dead-still; hover-only micro-interactions (swap + hairline draw + cursor), no pin, no scrub, no climax.</p><div class="uses"><span>reveal</span><span>parallax-depth</span><span>custom-cursor</span></div>
+      <div class="acts"><a class="play" href="combos/conversion-quiet-gate/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div></div>
+    </div>
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/drag-tab-reveal/lab.html" title="drag-tab-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>drag-tab-reveal</b></div><p>gapsystudio's 'Pull Me' drawer — an edge-anchored panel sits mostly off-screen with a small grab-tab on its visible edge. You DRAG the tab to pull the panel out (it follows the pointer); release past a threshold and it S</p>
+      <div class="acts"><a class="play" href="components/drag-tab-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/themed-contact-map/lab.html" title="themed-contact-map"></iframe></div>
+    <div class="meta"><div class="id"><b>themed-contact-map</b></div><p>r1864's /contacts map — the river-tinted-poi-map DIALECT stripped to a SINGLE destination: the warm-taupe drawn district map (river + parks + roads + a few orienting landmark glyphs) carries ONE pin — the 'ОФИС ПРОДАЖ' (</p>
+      <div class="acts"><a class="play" href="components/themed-contact-map/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="common">
+    <div class="lanehd">
+      <h2>Manifesto <span class="cnt thin">🟡 2</span> <span class="vbadge">▣ 1 варіант</span></h2>
+      <span class="tier tier--common">COMMON</span>
+      <p class="job">Positioning / big-idea statement; act-words, the project thesis.</p>
+    </div>
+    <div class="vstrip">
+      <div class="vstrip__hd">ВАРІАНТИ СЕКЦІЇ <span class="vcnt">1</span> <span class="vstrip__hint">зібрані з прийомів нижче — це базові одиниці, які ти оцінюєш на борді</span></div>
+      <div class="grid grid--variant"><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/manifesto-flip-draw/combo-lab.html" title="manifesto-flip-draw"></iframe></div>
+    <div class="meta"><div class="id"><b>Theme-flip manifesto with self-drawing hairlines</b></div><p>A statement assembles word-by-word as the section flips theme (dark&lt;-&gt;light); self-drawing hairlines stroke in and reveal copy + depth ride the same scroll.</p><div class="uses"><span>puzzle-text</span><span>theme-flip</span><span>reveal</span><span>parallax-depth</span></div>
+      <div class="acts"><a class="play" href="combos/manifesto-flip-draw/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div></div>
+    </div>
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/editorial-act-crossfade/lab.html" title="editorial-act-crossfade"></iframe></div>
+    <div class="meta"><div class="id"><b>editorial-act-crossfade</b></div><p>11tanjung's editorial acts — ONE pinned scroll-progress drives N acts that cross-fade through 4 synchronized layers at once: (1) a full-bleed image that push-zooms scale(1 -&gt; 1.12) across its window and cross-fades into </p>
+      <div class="acts"><a class="play" href="components/editorial-act-crossfade/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/scramble-settle-text/lab.html" title="scramble-settle-text"></iframe></div>
+    <div class="meta"><div class="id"><b>scramble-settle-text</b></div><p>bydorr's text reveal — a TYPEWRITER FRONT that advances left-to-right on scroll: a SOLID settled head, a NARROW scramble EDGE (3-5 chars: a translucent baseline smear — extra letter-spacing + slight rightward x + slight </p>
+      <div class="acts"><a class="play" href="components/scramble-settle-text/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="common">
+    <div class="lanehd">
+      <h2>Interiors <span class="cnt deep">🟢 4</span></h2>
+      <span class="tier tier--common">COMMON</span>
+      <p class="job">Inside spaces / rooms / the life lived here (job = room walkthrough).</p>
+    </div>
+    
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/apartment-day-grid/lab.html" title="apartment-day-grid"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--sec">секція</span><b>apartment-day-grid</b></div><p>MODEL A of the day/night interior question: ALL rooms on screen at once, in a grid, and one scroll (07:00 -&gt; 23:00) drives EVERY room's lighting TOGETHER. At 11:00 every room is at 11:00; at 19:00 every room is at 19:00.</p>
+      <div class="acts"><a class="play" href="components/apartment-day-grid/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/room-pick-day-scrub/lab.html" title="room-pick-day-scrub"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--sec">секція</span><b>room-pick-day-scrub</b></div><p>MODEL C of the day/night interior question: a grid of rooms; click one and it expands full-screen (FLIP), and THERE you scrub its OWN full day 07:00 -&gt; 23:00 with a draggable time slider (or wheel). Back closes it; pick </p>
+      <div class="acts"><a class="play" href="components/room-pick-day-scrub/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/daynight-cursor-seam/lab.html" title="daynight-cursor-seam"></iframe></div>
+    <div class="meta"><div class="id"><b>daynight-cursor-seam</b></div><p>The day↔night canon driven by the CURSOR over a SEAM — the Smarts dialect. Moving the pointer across the card slides a vertical splitline; to the day side is the daytime render, to the evening side the nighttime one, mee</p>
+      <div class="acts"><a class="play" href="components/daynight-cursor-seam/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/daynight-toggle/lab.html" title="daynight-toggle"></iframe></div>
+    <div class="meta"><div class="id"><b>daynight-toggle</b></div><p>The cleanest, dependency-light day&lt;-&gt;night control — the TOWNS dialect. A rounded pill labelled 'День / Ніч' with a sliding accent THUMB; tapping a side snaps the WHOLE scene between a day still and a night still via an </p>
+      <div class="acts"><a class="play" href="components/daynight-toggle/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="common">
+    <div class="lanehd">
+      <h2>Units <span class="cnt deep">🟢 3</span></h2>
+      <span class="tier tier--common">COMMON</span>
+      <p class="job">The inventory/typologies — which homes exist (types, apartment mix, spec).</p>
+    </div>
+    
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/collection-tier-announce/lab.html" title="collection-tier-announce"></iframe></div>
+    <div class="meta"><div class="id"><b>collection-tier-announce</b></div><p>r1864's /collection — a vertical STACK of TIER bands, each announcing a product tier with a giant serif TITLE + a small body + a STAT-ROW (big serif numerals + small labels: высота / спальни / площадь / терраса) + a fram</p>
+      <div class="acts"><a class="play" href="components/collection-tier-announce/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/dual-image-split-stat/lab.html" title="dual-image-split-stat"></iframe></div>
+    <div class="meta"><div class="id"><b>dual-image-split-stat</b></div><p>r1864's apartment-type gallery — a CAROUSEL where each slide is a DUAL-IMAGE SPLIT (left interior + right city-view, side by side) with a STAT-ROW OVERLAID across the bottom (площадь / спальни / высота) + a type TITLE ov</p>
+      <div class="acts"><a class="play" href="components/dual-image-split-stat/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/veil-flat-detail-reveal/lab.html" title="veil-flat-detail-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>veil-flat-detail-reveal</b></div><p>EVER visual-search LEVEL 3 — the calm single-unit detail, reached via a dark full-screen VEIL (close→hold→open) as a SINGLE-PAGE fixed-overlay MODAL (not a route). Two-tone: a grey-blue LEFT data rail (big type / area / </p>
+      <div class="acts"><a class="play" href="components/veil-flat-detail-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="common">
+    <div class="lanehd">
+      <h2>Gallery <span class="cnt deep">🟢 5</span> <span class="vbadge">▣ 4 варіанти</span></h2>
+      <span class="tier tier--common">COMMON</span>
+      <p class="job">Atmospheric image/video reel (job = atmosphere, distinct from interiors).</p>
+    </div>
+    <div class="vstrip">
+      <div class="vstrip__hd">ВАРІАНТИ СЕКЦІЇ <span class="vcnt">4</span> <span class="vstrip__hint">зібрані з прийомів нижче — це базові одиниці, які ти оцінюєш на борді</span></div>
+      <div class="grid grid--variant"><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--dusk-seam/combo-lab.html" title="architecture--dusk-seam"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--cand">кандидат</span><b>Дім, що зустрічає присмерк</b></div><p>The whole exterior crosses day into dusk down a centre seam as you scroll, lit windows and path lights arriving with the evening.</p><div class="uses"><span>daynight-center-seam</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--dusk-seam/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--material-portal-bloom/combo-lab.html" title="architecture--material-portal-bloom"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--cand">кандидат</span><b>Вечір розквітає зсередини</b></div><p>A growing warm circle blooms outward from a lit window, sweeping the day exterior into evening as you scroll; the circular edge stays visible across the whole scroll and only fills the frame near the end.</p><div class="uses"><span>daynight-portal-reveal</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--material-portal-bloom/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/architecture--windows-light-up/combo-lab.html" title="architecture--windows-light-up"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--cand">кандидат</span><b>Коли вечір вмикає світло</b></div><p>As you scroll, the day building holds while its windows ignite one by one into the dusk, the house coming alive at evening.</p><div class="uses"><span>daynight-masked-windows</span></div>
+      <div class="acts"><a class="play" href="combos/architecture--windows-light-up/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/lifestyle-deck-fan/combo-lab.html" title="lifestyle-deck-fan"></iframe></div>
+    <div class="meta"><div class="id"><b>Lifestyle deck-fan climax</b></div><p>Four stacked life-shot cards fan out to the corners on one pinned scrub while paired captions cross-fade, a counter ticks, and depth rides the same progress.</p><div class="uses"><span>slide-out-img-text</span><span>counter</span><span>parallax-depth</span><span>reveal</span></div>
+      <div class="acts"><a class="play" href="combos/lifestyle-deck-fan/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div></div>
+    </div>
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/cards-swipe/lab.html" title="cards-swipe"></iframe></div>
+    <div class="meta"><div class="id"><b>cards-swipe</b></div><p>Pinned scrub timeline: a render dissolves, a cream card slides up over the dark hero, then becomes a horizontal deck swiped sideways by scroll.</p>
+      <div class="acts"><a class="play" href="components/cards-swipe/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/fullscreen-media-carousel/lab.html" title="fullscreen-media-carousel"></iframe></div>
+    <div class="meta"><div class="id"><b>fullscreen-media-carousel</b></div><p>crownd/finest's interior gallery — a FULL-BLEED carousel where each slide fills the whole viewport EDGE-TO-EDGE (no card chrome, no peek), swiping one full width at a time via round ‹ › arrows / drag / wheel / keyboard. </p>
+      <div class="acts"><a class="play" href="components/fullscreen-media-carousel/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/slide-out-img-text/lab.html" title="slide-out-img-text"></iframe></div>
+    <div class="meta"><div class="id"><b>slide-out-img-text</b></div><p>A stacked hand of image cards fans out to four corners on a pinned scrub while paired captions cross-fade and a ghost letter/word bleeds behind — the lifestyle 'show life' climax.</p>
+      <div class="acts"><a class="play" href="components/slide-out-img-text/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/stacked-pairs/lab.html" title="stacked-pairs"></iframe></div>
+    <div class="meta"><div class="id"><b>stacked-pairs</b></div><p>A VERTICAL RHYTHM of distinct full-screen sections (NOT a pinned stepper). Each section = TEXT on the LEFT (~38%) + a BIG contained fixed-size RENDER on the RIGHT (~62%, 84vh, clean rounded-left frame, ~2cm gap, a thin b</p>
+      <div class="acts"><a class="play" href="components/stacked-pairs/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/video-card-reveal/lab.html" title="video-card-reveal"></iframe></div>
+    <div class="meta"><div class="id"><b>video-card-reveal</b></div><p>to-place.co.jp's full-bleed video handoff — a PINNED, wheel/touch-STEPPED, input-LOCKED stack of full-viewport &lt;video&gt; panels where each discrete step WIPES the next video VERTICALLY over the last (new panel rises from t</p>
+      <div class="acts"><a class="play" href="components/video-card-reveal/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="common">
+    <div class="lanehd">
+      <h2>Amenities <span class="cnt deep">🟢 5</span></h2>
+      <span class="tier tier--common">COMMON</span>
+      <p class="job">Outdoor/shared assets — yard, courtyard, landscape, water, terrace.</p>
+    </div>
+    
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/center-focus-carousel/lab.html" title="center-focus-carousel"></iframe></div>
+    <div class="meta"><div class="id"><b>center-focus-carousel</b></div><p>r1864's /architecture + /comfort feature carousel — a row of vertical PANELS where the CENTRE panel is in FOCUS (scale 1 + full brightness, its caption lit) and the side panels are DIMMED peek-insets (smaller + darkened,</p>
+      <div class="acts"><a class="play" href="components/center-focus-carousel/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/facilities-hover-accordion/lab.html" title="facilities-hover-accordion"></iframe></div>
+    <div class="meta"><div class="id"><b>facilities-hover-accordion</b></div><p>11tanjung's facilities row — N image cards in a flex row (flex: 1 1 0). Hovering a card makes it GROW (flex-grow ~3.5, width ~17% -&gt; ~45%) while its neighbours shrink (~13%); the active card's LABEL fades in (opacity 0 -</p>
+      <div class="acts"><a class="play" href="components/facilities-hover-accordion/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/floating-product-orbit/lab.html" title="floating-product-orbit"></iframe></div>
+    <div class="meta"><div class="id"><b>floating-product-orbit</b></div><p>gapsystudio's services 'product on a pedestal' — a staged object floating above a red plinth that IDLES with a slow float + tiny rotate and TILTS toward the pointer (rotateX/rotateY parallax in a CSS perspective scene), </p>
+      <div class="acts"><a class="play" href="components/floating-product-orbit/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/script-overline-display-pair/lab.html" title="script-overline-display-pair"></iframe></div>
+    <div class="meta"><div class="id"><b>script-overline-display-pair</b></div><p>gapsystudio's services type-pair — a small HANDWRITTEN SCRIPT overline (in quotes) above a HUGE CONDENSED display title. On scroll-into-view the script fades + lifts in first, then the display title reveals LINE BY LINE </p>
+      <div class="acts"><a class="play" href="components/script-overline-display-pair/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/scroll-zoom-image-pair/lab.html" title="scroll-zoom-image-pair"></iframe></div>
+    <div class="meta"><div class="id"><b>scroll-zoom-image-pair</b></div><p>crownd/finest's editorial pair — a portrait render in a fixed clipping frame on one side + a serif heading/body on the other. As the section passes through the viewport the image SCALES UP within its frame (a scroll-scru</p>
+      <div class="acts"><a class="play" href="components/scroll-zoom-image-pair/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="common">
+    <div class="lanehd">
+      <h2>Trust <span class="cnt deep">🟢 10</span> <span class="vbadge">▣ 1 варіант</span></h2>
+      <span class="tier tier--common">COMMON</span>
+      <p class="job">Credibility — developer, guarantees, timeline, materials-proof.</p>
+    </div>
+    <div class="vstrip">
+      <div class="vstrip__hd">ВАРІАНТИ СЕКЦІЇ <span class="vcnt">1</span> <span class="vstrip__hint">зібрані з прийомів нижче — це базові одиниці, які ти оцінюєш на борді</span></div>
+      <div class="grid grid--variant"><div class="card card--variant">
+    <div class="prev"><iframe loading="lazy" src="combos/benefit-wipe-band/combo-lab.html" title="benefit-wipe-band"></iframe></div>
+    <div class="meta"><div class="id"><b>Wavy-seam benefit band</b></div><p>A pinned band steps through N benefit statements; each step a wavy seam wipes the next full-bleed media in, with reveal copy and depth riding the same progress.</p><div class="uses"><span>media-step-switch</span><span>parallax-depth</span><span>reveal</span></div>
+      <div class="acts"><a class="play" href="combos/benefit-wipe-band/combo-lab.html" target="_blank">відкрити секцію ↗</a></div></div>
+  </div></div>
+    </div>
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/avatar-card-carousel/lab.html" title="avatar-card-carousel"></iframe></div>
+    <div class="meta"><div class="id"><b>avatar-card-carousel</b></div><p>gapsystudio's team carousel — a row of PORTRAIT cards (people / avatars), SEVERAL visible at once (perView), that translateX one card at a time. Under each card a NAME + ROLE caption. Below the row a horizontal PROGRESS-</p>
+      <div class="acts"><a class="play" href="components/avatar-card-carousel/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/dual-slicer/lab.html" title="dual-slicer"></iframe></div>
+    <div class="meta"><div class="id"><b>dual-slicer</b></div><p>Springs' signature 'Open the doors' COUPLED-SPLIT section, harvested from the frame-by-frame teardown of springs.estate. ONE pinned scroll range drives TWO independent systems in one column-pair at once: the RIGHT column</p>
+      <div class="acts"><a class="play" href="components/dual-slicer/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/frame-scrub-img/lab.html" title="frame-scrub-img"></iframe></div>
+    <div class="meta"><div class="id"><b>frame-scrub-img</b></div><p>A scroll-scrubbed IMAGE SEQUENCE, the no-WebGL, no-canvas way to drive a true continuous camera move (a fly-around, an arrival, a construction timelapse) off ONE pinned scroll. A single on-screen &lt;img&gt; has its .src swapp</p>
+      <div class="acts"><a class="play" href="components/frame-scrub-img/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/media-step-switch/lab.html" title="media-step-switch"></iframe></div>
+    <div class="meta"><div class="id"><b>media-step-switch</b></div><p>A PINNED full-bleed MEDIA STEPPER. The full-bleed render/video is the WHOLE background; typographic text steps float OVER it. Each step is a DIFFERENT text TYPE — (1) BIG STATEMENT, (2) VIDEO BEAT, (3) QUOTE, (4) NUMBER/</p>
+      <div class="acts"><a class="play" href="components/media-step-switch/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/orbit-stage-3d/lab.html" title="orbit-stage-3d"></iframe></div>
+    <div class="meta"><div class="id"><b>orbit-stage-3d</b></div><p>AN INTERACTIVE 3D ORBIT STAGE. LEFT ~70% is a LIVE 3D scene you ORBIT with the mouse (a Draco-glb house model on its full yard); RIGHT ~30% is a TUNING panel of controls that change the scene in REAL TIME (Світло: exposu</p>
+      <div class="acts"><a class="play" href="components/orbit-stage-3d/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/puzzle-text/lab.html" title="puzzle-text"></iframe></div>
+    <div class="meta"><div class="id"><b>puzzle-text</b></div><p>A SAISEI-style paired beat. A big contained QUADRO render slab (~45vw) sits on one side; the confident statement lives in the facing CREAM AIR COLUMN. The statement's WORDS (always opaque) start GRAY and displaced on BOT</p>
+      <div class="acts"><a class="play" href="components/puzzle-text/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/slice-clip/lab.html" title="slice-clip"></iframe></div>
+    <div class="meta"><div class="id"><b>slice-clip</b></div><p>A pinned frs3 COMPOSITION — a numbered spec-RAIL on one side (38%), a BIG contained fixed-size RENDER on the other (62%), ~2cm gap, bronze accent — where each beat the render SWAPS via a CLEAN CLIP-PATH WIPE. TWO stacked</p>
+      <div class="acts"><a class="play" href="components/slice-clip/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/stat-odometer/lab.html" title="stat-odometer"></iframe></div>
+    <div class="meta"><div class="id"><b>stat-odometer</b></div><p>Springs' '3 / 9 / 10 / 16' pinned STAT-CARD slider — the most engineered module, harvested from the frame-by-frame teardown. ONE pinned scroll range steps through N data points; on EACH step FOUR different mechanics fire</p>
+      <div class="acts"><a class="play" href="components/stat-odometer/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/vertical-awards-rail/lab.html" title="vertical-awards-rail"></iframe></div>
+    <div class="meta"><div class="id"><b>vertical-awards-rail</b></div><p>Saisei's awards rail — small award badges with VERTICAL text (writing-mode), pinned to the RIGHT edge, stacked, sliding IN from the right (translateX) after the page settles. set(p) scrubs.</p>
+      <div class="acts"><a class="play" href="components/vertical-awards-rail/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/watercolor-svg-map/lab.html" title="watercolor-svg-map"></iframe></div>
+    <div class="meta"><div class="id"><b>watercolor-svg-map</b></div><p>Springs' LOCATION beat — a cream watercolor-style district map (inline SVG: soft park blobs, a blue river, thin roads) rises from below over a dark leaf bg and PINS; a dark teardrop brand pin + circular POI chips settle </p>
+      <div class="acts"><a class="play" href="components/watercolor-svg-map/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="common">
+    <div class="lanehd">
+      <h2>Facts / Specs <span class="cnt GAP">🔴 0</span></h2>
+      <span class="tier tier--common">COMMON</span>
+      <p class="job">Hard-number spec sheet — area, rooms, year, stories, plot.</p>
+    </div>
+    
+    <div class="empty">🔴 Прогалина — жодного прийому. Сюди добираємо.</div>
+  </section><section class="lane" data-tier="custom">
+    <div class="lanehd">
+      <h2>Price <span class="cnt GAP">🔴 0</span></h2>
+      <span class="tier tier--custom">CUSTOM</span>
+      <p class="job">Explicit pricing climax (townhouse/single-asset); hidden until data confirmed.</p>
+    </div>
+    
+    <div class="empty">🔴 Прогалина — жодного прийому. Сюди добираємо.</div>
+  </section><section class="lane" data-tier="custom">
+    <div class="lanehd">
+      <h2>Visual search <span class="cnt deep">🟢 3</span></h2>
+      <span class="tier tier--custom">CUSTOM</span>
+      <p class="job">Interactive unit selector — building -&gt; floor -&gt; unit with available/sold/reserved.</p>
+    </div>
+    
+    <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/clean-floor-hover-select/lab.html" title="clean-floor-hover-select"></iframe></div>
+    <div class="meta"><div class="id"><b>clean-floor-hover-select</b></div><p>EVER visual-search LEVEL 1 — pick a FLOOR on a static near-elevation building render, with the razor-clean floor highlight EVER has. THE ANTI-CROOKED CORE: one &lt;svg&gt; over the &lt;img&gt; with viewBox LOCKED to the render's int</p>
+      <div class="acts"><a class="play" href="components/clean-floor-hover-select/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/isometric-building-unit-selector/lab.html" title="isometric-building-unit-selector"></iframe></div>
+    <div class="meta"><div class="id"><b>isometric-building-unit-selector</b></div><p>r1864's visual-search — the conversion core. A pre-rendered ISOMETRIC building image with an SVG overlay of unit/section hotspots, a horizontal filter bar (коллекция / секция / кол-во спален / площадь), a РАЗВЕРНУТЬ (exp</p>
+      <div class="acts"><a class="play" href="components/isometric-building-unit-selector/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/numbered-floorplate-select/lab.html" title="numbered-floorplate-select"></iframe></div>
+    <div class="meta"><div class="id"><b>numbered-floorplate-select</b></div><p>EVER visual-search LEVEL 2 — pick a UNIT on a CLEAN REDRAWN vector floor plan where the NUMBER IS the UI. The substrate is inline SVG line-art (white room fills, hairline partitions, heavy perimeter, hatched columns); ea</p>
+      <div class="acts"><a class="play" href="components/numbered-floorplate-select/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+  </section><section class="lane" data-tier="custom">
+    <div class="lanehd">
+      <h2>Compare <span class="cnt GAP">🔴 0</span></h2>
+      <span class="tier tier--custom">CUSTOM</span>
+      <p class="job">Side-by-side weigh of options (unit vs unit, this vs alternative).</p>
+    </div>
+    
+    <div class="empty">🔴 Прогалина — жодного прийому. Сюди добираємо.</div>
+  </section><section class="lane" data-tier="custom">
+    <div class="lanehd">
+      <h2>Commercial <span class="cnt GAP">🔴 0</span></h2>
+      <span class="tier tier--custom">CUSTOM</span>
+      <p class="job">Ground-floor / mixed-use commercial offer.</p>
+    </div>
+    
+    <div class="empty">🔴 Прогалина — жодного прийому. Сюди добираємо.</div>
+  </section><section class="lane" data-tier="custom">
+    <div class="lanehd">
+      <h2>Invest <span class="cnt GAP">🔴 0</span></h2>
+      <span class="tier tier--custom">CUSTOM</span>
+      <p class="job">Investment thesis + calculators (installment, ROI, rental).</p>
+    </div>
+    
+    <div class="empty">🔴 Прогалина — жодного прийому. Сюди добираємо.</div>
+  </section><section class="lane" data-tier="custom">
+    <div class="lanehd">
+      <h2>Scenarios / Fork <span class="cnt GAP">🔴 0</span></h2>
+      <span class="tier tier--custom">CUSTOM</span>
+      <p class="job">Audience branching — self-living vs investor; a day in the life; choose-your-journey.</p>
+    </div>
+    
+    <div class="empty">🔴 Прогалина — жодного прийому. Сюди добираємо.</div>
+  </section><section class="lane" data-tier="custom">
+    <div class="lanehd">
+      <h2>3D tour <span class="cnt GAP">🔴 0</span></h2>
+      <span class="tier tier--custom">CUSTOM</span>
+      <p class="job">Immersive 3D — walkthrough, GLB viewer, orbit, roof on/off (iframe-modal, no inline WebGL).</p>
+    </div>
+    
+    <div class="empty">🔴 Прогалина — жодного прийому. Сюди добираємо.</div>
+  </section>
+<section class="lane" data-tier="mech">
+  <div class="lanehd"><h2>Прийоми-реви <span class="cnt">9</span></h2>
+  <span class="tier">МЕХАНІКА</span><p class="job">Переходи, прелоадери, меню, теми, абстрактні reveal — падають у будь-яку секцію, не є секцією самі.</p></div>
+  <div class="grid"><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/center-seam-split/lab.html" title="center-seam-split"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>center-seam-split</b></div><p>Saisei's signature primitive — a vertical centre seam that OPENS (a fill splits from the centre line outward, revealing what's behind) or CLOSES (two halves slide from the edges to a centre seam, covering what's behind).</p>
+      <div class="acts"><a class="play" href="components/center-seam-split/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/compass-rose-section-divider/lab.html" title="compass-rose-section-divider"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>compass-rose-section-divider</b></div><p>r1864's section-announce — a thin line-art compass-rose / quatrefoil ornament (concentric circles + a 4-petal flower + N/S/E/W rays + a centre dot) that DRAWS + scales + fades in as a section announces itself, above a sm</p>
+      <div class="acts"><a class="play" href="components/compass-rose-section-divider/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/dual-panel-menu/lab.html" title="dual-panel-menu"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>dual-panel-menu</b></div><p>Saisei's overlay menu — two panels of OPPOSITE colour slide in from opposite edges to a centre seam: a CREAM nav panel from the LEFT and a DARK identity/contact panel from the RIGHT, meeting at a 50/50 split. The colour </p>
+      <div class="acts"><a class="play" href="components/dual-panel-menu/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/grid-skeleton-draw/lab.html" title="grid-skeleton-draw"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>grid-skeleton-draw</b></div><p>Saisei's grid skeleton — the next page's vertical column RULES stroke in (scaleY 0-&gt;1) on the interstitial, drawing the incoming page's layout grid before the content arrives ('the page sketches its skeleton'). draw() bu</p>
+      <div class="acts"><a class="play" href="components/grid-skeleton-draw/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/menu-tracked-stagger/lab.html" title="menu-tracked-stagger"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>menu-tracked-stagger</b></div><p>gapsystudio's overlay menu — a FULL-SCREEN overlay (not a sliding panel) on the studio field. LEFT: a big condensed nav whose items are GHOST-GREY by default and go SOLID on hover, with the current page kept RED. RIGHT: </p>
+      <div class="acts"><a class="play" href="components/menu-tracked-stagger/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/monogram-ring-loader/lab.html" title="monogram-ring-loader"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>monogram-ring-loader</b></div><p>Saisei's interstitial loader — a centred brand monogram (木 / a logo glyph) fades in, a thin SVG ring strokes ON around it (stroke-dashoffset full-&gt;0), and the next page's grid skeleton (vertical column rules) strokes in </p>
+      <div class="acts"><a class="play" href="components/monogram-ring-loader/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/panel-rise-over/lab.html" title="panel-rise-over"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>panel-rise-over</b></div><p>11tanjung's section hand-off — the NEXT section is a coloured PANEL with a big rounded top edge (border-radius ~40-60px) that RISES from below (translateY 100% -&gt; 0) and slides OVER the previous section, flipping the the</p>
+      <div class="acts"><a class="play" href="components/panel-rise-over/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/preloader-band-collapse/lab.html" title="preloader-band-collapse"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>preloader-band-collapse</b></div><p>11tanjung's intro — a dark full-screen preloader (a cursive wordmark centred + a fake 0-&gt;100 counter) that, when ready, COLLAPSES VERTICALLY into a thin horizontal band at the centre and vanishes, revealing the hero SIMU</p>
+      <div class="acts"><a class="play" href="components/preloader-band-collapse/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div><div class="card">
+    <div class="prev"><iframe loading="lazy" src="components/row-wipe-hover/lab.html" title="row-wipe-hover"></iframe></div>
+    <div class="meta"><div class="id"><span class="rib rib--mech">прийом-рев</span><b>row-wipe-hover</b></div><p>Saisei's list-row hover — hovering a nav row: a tan highlight BAND wipes left-&gt;right across the row, a baseline UNDERLINE grows from the left, and the row's ordinal glyph FLIPS to a theme-kanji (ordinal &lt;-&gt; theme). The s</p>
+      <div class="acts"><a class="play" href="components/row-wipe-hover/lab.html" target="_blank">відкрити ↗</a></div></div>
+  </div></div>
+</section>
+
+<div class="foot">Згенеровано scripts/library-gallery.mjs зі SECTIONS.yaml + RECIPE-фронтматерів. Не редагувати вручну. Сервер: <code>cd library && python3 -m http.server 8820</code> → відкрий <code>http://localhost:8820/GALLERY.html</code> (так і прийоми <code>components/…</code>, і варіанти секцій <code>combos/…</code> завантажуються в картки).</div>
+<script>
+  var btns=[].slice.call(document.querySelectorAll('.filters button'));
+  btns.forEach(function(b){b.addEventListener('click',function(){btns.forEach(function(x){x.classList.toggle('on',x===b)});var f=b.dataset.f;
+    document.querySelectorAll('.lane').forEach(function(l){var t=l.dataset.tier;var n=+(l.querySelector('.cnt')||{}).textContent?.replace(/\D/g,'')||0;
+      var show = f==='all' ? true : f==='gap' ? (l.querySelector('.empty')!=null) : (t===f);
+      l.style.display=show?'':'none';});});});
+</script>
+</body></html>

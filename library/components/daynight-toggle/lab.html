@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · daynight-toggle · V1 button toggle (Towns dialect)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · daynight-toggle  (variation V1 — the TOWNS dialect)
+================================================================================
+  The cleanest day<->night: a pill "День / Ніч" with a sliding accent THUMB that
+  snaps the whole scene between day and night (opacity reveal). Harvested 1:1 from
+  Towns (apps/towns plan.js setMode + app.css .plan__daynight/.plan__dn-thumb).
+
+  This brick does NOT re-implement the crossfade — it DRIVES the canon engine:
+    window.DayNight.create(frame, { mode:'manual', reveal:'opacity', glow:true })
+  and the pill calls dn.set(0|1). The OPACITY crossfade timing lives in the canon.
+
+  Load order (MUST): canon css -> this css -> GSAP -> CANON js -> this js.
+  NO WebGL / NO mix-blend / NO backdrop-filter (opacity + transform + gradient only).
+  window.__LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- canon stage/seam/tag styles FIRST, then this variation's chrome -->
+<link rel="stylesheet" href="../daynight-engine/component.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --cream:#f1ebd6; --ink:#20272c; --accent:#c8a86b;
+         --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#0c0c0a;color:var(--cream);font-family:var(--sans);overflow:hidden;display:grid;place-items:center}
+
+  .frame{position:relative;width:min(92vw,1180px);aspect-ratio:16/9;border-radius:6px;overflow:hidden;
+    box-shadow:0 30px 90px rgba(0,0,0,.5)}
+
+  /* caption over the scene */
+  .cap{position:absolute;z-index:6;left:clamp(20px,4vw,56px);top:clamp(20px,5vh,48px);max-width:24ch;pointer-events:none}
+  .cap h1{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,5vw,3.8rem);line-height:.98;letter-spacing:-.01em;
+    text-shadow:0 2px 22px rgba(0,0,0,.5)}
+  .cap p{margin-top:.55rem;font-size:clamp(.78rem,1.2vw,.95rem);opacity:.88;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+
+  /* the pill sits bottom-centre inside the frame */
+  .dock{position:absolute;z-index:7;left:50%;bottom:clamp(18px,4vh,40px);transform:translateX(-50%)}
+
+  /* a tiny replay affordance, out of the way */
+  .replay{position:fixed;z-index:9999;right:18px;bottom:18px;
+    font:600 .62rem/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--cream);
+    background:rgba(12,12,11,.6);border:1px solid rgba(241,235,214,.26);border-radius:6px;padding:.55rem .8rem;cursor:pointer}
+  .replay:hover{border-color:rgba(241,235,214,.5)}
+
+  /* the lab tunes the pill to the warm scene palette via the brick's CSS vars */
+  .frame .dnt__pill{ --dnt-accent:var(--accent); --dnt-on:var(--ink);
+    --dnt-idle:rgba(241,235,214,.7); --dnt-font:var(--sans);
+    --dnt-track:rgba(20,26,33,.5); --dnt-track-line:rgba(241,235,214,.22); }
+</style>
+</head>
+<body>
+
+  <div class="frame" id="frame">
+    <!-- two frame-matched stills of the SAME exterior (real Higgsfield day/night pair) -->
+    <div class="cap"><h1>Той самий дім.<br>Один дотик до вечора.</h1><p>Натисніть «Ніч» і подивіться, як засвічуються вікна. Та сама геометрія, інше світло.</p></div>
+    <div class="dock" id="dock"></div>
+  </div>
+
+  <button class="replay" id="replay">Спочатку</button>
+
+<!-- the CANON first, then this variation -->
+<script src="../daynight-engine/component.js"></script>
+<script src="component.js"></script>
+<script>
+  (function () {
+    var frame = document.getElementById('frame');
+    var dock = document.getElementById('dock');
+
+    var DAY = 'renders/dn-ext-day.webp';
+    var NIGHT = 'renders/dn-ext-night.webp';
+
+    // build the toggle on the FRAME (the canon stage fills the frame; the pill is appended to it),
+    // then relocate the pill to the bottom-centre dock anchor for the calm Towns placement.
+    var dn = window.DayNightToggle.create(frame, {
+      dayMedia: DAY,
+      nightMedia: NIGHT,
+      labels: ['День', 'Ніч'],
+      accent: '#c8a86b',
+      glow: true,
+      start: 0
+    });
+    if (dn && dn.pill) dock.appendChild(dn.pill);
+
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // gentle autoplay demo: drift to night, hold, drift back — so a screen-record shows the move
+    var demoTimers = [];
+    function clearDemo() { demoTimers.forEach(clearTimeout); demoTimers = []; }
+    function runDemo() {
+      clearDemo();
+      dn.day();
+      if (reduced) { dn.night(); return; }
+      demoTimers.push(setTimeout(function () { dn.night(); }, 1100));
+      demoTimers.push(setTimeout(function () { dn.day(); }, 4200));
+    }
+    runDemo();
+
+    // user interaction with the pill cancels the demo so manual control is exact
+    if (dn && dn.pill) dn.pill.addEventListener('pointerdown', clearDemo, { once: false });
+
+    document.getElementById('replay').addEventListener('click', runDemo);
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

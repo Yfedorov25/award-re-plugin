@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>hero--tilted-mosaic-world — Світ, зібраний в один настрій (harness lab)</title>
+<!--
+  HERO VARIANT: hero--tilted-mosaic-world  ·  section role: hero  ·  status: candidate
+  CLASS: scroll (parallax plane drift, no pin)  ·  PIN OWNER: none  ·  expectPins: 0
+
+  THE MECHANIC ROOT (unmistakable in a screenshot, distinct from the other nine heroes):
+  Not one full-bleed photo — a WHOLE WORLD. 12 varied frame-of-life renders laid out as a
+  CSS grid, then rotated + scaled as ONE rigid tilted plane (angle -8.5deg, scale 1.42) and
+  bound by a deep brand-green multiply wash that unifies the disparate photos into one calm
+  field. On scroll the entire plane drifts up as a single body (rotated rows travel different
+  screen-Y = free depth, no per-tile speed, NO pin). A giant Fraunces title rises line-by-line
+  from under baseline masks; theme-tween sets the green/cream mood; a descending scroll-tick
+  baits continuation from the dead first screen.
+
+  SCROLL-HERO LAW obeyed: no video.currentTime scrub. Non-pinned hero -> a LOAD-IN timeline
+  reveals the title (B-entrance); the only scroll-linked motion is the plane parallax (A-ambient,
+  rotated-mosaic-hero's own non-pinning ScrollTrigger). No pin is created by anyone.
+
+  ATOMS CITED (ids only; never inlined): rotated-mosaic-hero (the tilted plane + parallax),
+  mask-up-title (the line-by-line title rise), theme-tween (mood colour), and
+  scroll-hint-descending-tick (the scroll bait).
+
+  mix-blend NOTE: rotated-mosaic-hero's .rmh-wash uses mix-blend:multiply, but it is BAKED INTO
+  the rigid plane (the wash + tiles transform together as one body; the blend is never recomputed
+  over a separately-scrubbed surface). This is the documented allowed mix-blend spot (catalog P18),
+  not a violation. No backdrop-filter, no WebGL, no canvas anywhere.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- cited atoms' component.css (canon first) + the shared scaffold rails -->
+<link rel="stylesheet" href="../../components/rotated-mosaic-hero/component.css">
+<link rel="stylesheet" href="../../components/theme-tween/component.css">
+<link rel="stylesheet" href="../../components/mask-up-title/component.css">
+<link rel="stylesheet" href="../../components/scroll-hint-descending-tick/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ===== variant SKIN only (the scaffold + atoms own the rails/mechanic) ===== */
+
+  /* the hero takes its mood from theme-tween via the shared --bg/--ink/--accent vars.
+     deep landscaped-green field behind the mosaic, warm cream ink for the title. */
+  #hero { background: var(--bg, #20302a); }
+
+  /* the solid colour field behind the rotated mosaic (= the green calm bed) */
+  .rmh-bg { background:
+      radial-gradient(120% 90% at 28% 14%, rgba(53,74,62,.0), rgba(13,20,16,.62) 78%),
+      var(--bg, #20302a); }
+
+  /* THE WASH: a single deep-green veil multiplied over the whole tilted plane (baked in,
+     transforms with the plane). This is what fuses 12 different photos into one field. */
+  .rmh-wash { background:
+      linear-gradient(168deg, rgba(31,49,40,.30) 0%, rgba(20,31,25,.66) 58%, rgba(11,18,14,.82) 100%); }
+
+  /* content layer sits over the plane; we anchor the title bottom-left and give it air */
+  .rmh-content { padding: clamp(28px,5vw,84px); z-index: 6; }
+
+  .tmw-eyebrow {
+    font-family: var(--combo-sans);
+    font-size: clamp(11px,1vw,13px); font-weight: 500; letter-spacing: .26em;
+    text-transform: uppercase; color: var(--ink, #ecdfce);
+    opacity: 0; transform: translateY(8px);
+    display: inline-flex; align-items: center; gap: 12px;
+    text-shadow: 0 1px 18px rgba(0,0,0,.55); margin-bottom: clamp(14px,2.4vh,26px);
+  }
+  .tmw-eyebrow::before { content: ""; width: 34px; height: 1px; background: var(--accent, #c79a6b); opacity: .85; }
+
+  .tmw-title {
+    font-family: var(--combo-serif); font-weight: 300; color: var(--ink, #f3e8d8);
+    font-size: clamp(40px, 7vw, 120px); line-height: .94; letter-spacing: -.035em;
+    max-width: 15ch; text-shadow: 0 4px 40px rgba(0,0,0,.5);
+  }
+  .tmw-title em { font-style: italic; font-weight: 400; color: var(--accent, #d6a875); }
+  /* mask-up-title clips each .mut-line; we give the inner span a touch of bottom room so
+     descenders/italic are never sheared by the baseline mask */
+  .tmw-title .mut-line { padding-bottom: .04em; }
+
+  .tmw-body {
+    font-family: var(--combo-sans); font-size: clamp(14px,1.15vw,17px); line-height: 1.5;
+    font-weight: 400; color: var(--ink, #e7d9c6); opacity: 0; transform: translateY(12px);
+    max-width: 34ch; margin-top: clamp(18px,3vh,34px);
+    text-shadow: 0 1px 16px rgba(0,0,0,.55);
+  }
+
+  /* grain — dozed material depth over the calm field (opacity only, no blend, static) */
+  .tmw-grain { position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: .05;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>"); }
+
+  /* position the scroll-hint inside the hero (bottom-right), ink-light on the dark field */
+  .shd-hint { position: absolute; right: clamp(24px,4vw,64px); bottom: clamp(24px,5vh,64px); z-index: 7; }
+
+  /* the lab's lead spacer recolours with the hero so the dead first screen reads on-brand */
+  .combo-pre, .combo-post { background: var(--bg, #20302a); color: rgba(236,223,206,.4); }
+
+  @media (max-width: 820px) {
+    .tmw-title { max-width: 11ch; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* atoms each fall back to static; reveal copy without transform */
+    .tmw-eyebrow, .tmw-body { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">мозаїка життя ↓</div>
+
+  <!-- HERO: a tilted mosaic world. data-theme feeds theme-tween the hero's mood. -->
+  <section id="hero" class="rmh-stage combo-stage" data-combo="hero--tilted-mosaic-world"
+           data-theme data-theme-bg="#20302a" data-theme-ink="#f1e6d6" data-theme-accent="#cf9f6c">
+    <div class="rmh-bg"></div>
+
+    <!-- THE PLANE: rotated + scaled rigid body; rotated-mosaic-hero builds the 12 tiles into .rmh-grid -->
+    <div class="rmh-plane">
+      <div class="rmh-grid" data-render-surface></div>   <!-- 12 decoded <img> tiles paint here -->
+      <div class="rmh-wash"></div>
+    </div>
+
+    <div class="tmw-grain"></div>
+
+    <div class="rmh-content">
+      <div class="tmw-eyebrow" data-eyebrow>вул. Замкова · таунхаус</div>
+      <h1 class="tmw-title" id="title">
+        <span class="mut-line"><span>Світ, зібраний</span></span>
+        <span class="mut-line"><span>в один <em>настрій</em></span></span>
+      </h1>
+      <p class="tmw-body" data-body>Ранок на терасі, зелень за вікном, тиша двору. Дванадцять кадрів одного життя, складених в одне поле.</p>
+    </div>
+
+    <!-- scroll bait: autoplays at rest, gated to the hero -->
+    <div class="shd-hint" id="hint"></div>
+  </section>
+
+  <div class="combo-post" data-theme data-theme-bg="#20302a" data-theme-ink="#f1e6d6" data-theme-accent="#cf9f6c">наступна секція</div>
+
+  <!-- scaffold + adapters, then cited atoms (canon first), then ONE inline boot script -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/rotated-mosaic-hero/component.js"></script>
+  <script src="../../components/theme-tween/component.js"></script>
+  <script src="../../components/mask-up-title/component.js"></script>
+  <script src="../../components/scroll-hint-descending-tick/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      // add expo.out as a named ease alongside the house 'air' (durations: drama title rise)
+      if (window.CustomEase && window.gsap && !window.gsap.parseEase('expoOut')) {
+        try { window.CustomEase.create('expoOut', '0.16,1,0.3,1'); } catch (e) {}
+      }
+      var gsap = window.gsap;
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // 12 varied frame-of-life tiles = the WHOLE WORLD (exteriors / garden / aerial /
+      // terrace / macro / interior / dusk). Cars-free; no near-dup adjacency.
+      var TILES = [
+        'renders/day-34.webp',       // 1  clean frontal exterior
+        'renders/terrace-03.webp',   // 2  rooftop pergola dining
+        'renders/macro-pergola.webp',// 3  material macro (pergola underside)
+        'renders/aerial.webp',       // 4  garden top-down
+        'renders/dn-int-day.webp',   // 5  interior living / kitchen
+        'renders/day-07.webp',       // 6  garden pavilion
+        'renders/terrace-04.webp',   // 7  lounge top-down
+        'renders/macro-roof.webp',   // 8  rooftop deck macro
+        'renders/scene18.webp',      // 9  dusk garden + firepit (tonal contrast)
+        'renders/dn-int2-day.webp',  // 10 interior sofa
+        'renders/day-09.webp',       // 11 firepit garden day
+        'renders/macro-table.webp'   // 12 terrace dining macro
+      ];
+
+      // ---- ATOM 1 (owner-first by job): rotated-mosaic-hero — the tilted plane + parallax.
+      // It lays out the 4x3 grid, rotates/scales the rigid plane, and (with GSAP+ST) creates
+      // its OWN NON-PINNING ScrollTrigger that drifts the whole plane up. No pin is created.
+      var planeEl = document.querySelector('.rmh-plane');
+      if (planeEl) gsap && gsap.set(planeEl, { opacity: 0 }); // hold until tiles decode (decode-guard)
+
+      SectionHarness.ranOK('rotated-mosaic-hero', function () {
+        window.RotatedMosaicHero.init('#hero', {
+          tiles: TILES, cols: 4, rows: 3,
+          angle: -8.5, scale: 1.6, wash: 1, // scale 1.6 so the tilted plane corners over-cover the 16:9 viewport
+          parallax: 16, gutter: 10
+        });
+      });
+
+      // DECODE-GUARD: never reveal an undecoded <img> (= black flicker). Force-decode every
+      // tile, THEN fade the rigid plane in as one body. Hidden imgs still decode here because
+      // they are attached + visible (opacity is on the parent plane, not display:none).
+      function revealPlane() {
+        if (!planeEl) return;
+        if (gsap) gsap.to(planeEl, { opacity: 1, duration: reduced ? 0 : 1.1, ease: 'power2.out' });
+        else planeEl.style.opacity = '1';
+      }
+      var imgs = [].slice.call(document.querySelectorAll('.rmh-grid img'));
+      if (imgs.length) {
+        Promise.all(imgs.map(function (im) {
+          if (im.decode) return im.decode().catch(function () {});
+          return new Promise(function (r) { im.complete ? r() : (im.onload = im.onerror = r); });
+        })).then(revealPlane);
+        // safety net: never hold the plane hidden past 1.6s even if a decode hangs
+        setTimeout(revealPlane, 1600);
+      } else { revealPlane(); }
+
+      // ---- ATOM 2: theme-tween — sets the hero's mood colour (green/cream/copper) on :root.
+      // The hero + the post-spacer carry data-theme; the engine lerps the chrome to the
+      // centred section's palette. Modals reading var(--bg) etc. inherit it for free.
+      SectionHarness.ranOK('theme-tween', function () {
+        window.ThemeTween.init({
+          sectionSelector: '[data-theme]',
+          vars: ['--bg', '--ink', '--accent'],
+          ease: 0.1
+        });
+      });
+
+      // ---- ATOM 3: mask-up-title — the giant serif title rises line-by-line from under
+      // baseline masks (expo.out). NON-PINNED hero => a LOAD-IN timeline (play once), per the
+      // scroll-hero law, not a scrub. B-entrance layer.
+      SectionHarness.ranOK('mask-up-title', function () {
+        var title = window.MaskUpTitle.create('#title', {
+          stagger: 0.14, duration: 1.05, ease: 'expoOut', from: 118
+        });
+        if (reduced) { title.set(1); }
+        else {
+          // small hold so the mosaic reads first, then the title prints up
+          gsap && gsap.delayedCall(0.35, function () { title.play(); });
+        }
+      });
+
+      // ---- the eyebrow + body ride the same load-in beat (transform/opacity only) ----
+      if (!reduced && gsap) {
+        gsap.to('[data-eyebrow]', { opacity: 1, y: 0, duration: 0.8, ease: 'air', delay: 0.25 });
+        gsap.to('[data-body]',    { opacity: 1, y: 0, duration: 0.9, ease: 'air', delay: 0.85,
+          onComplete: function () { gsap.set('[data-eyebrow],[data-body]', { clearProps: 'willChange' }); } });
+      }
+
+      // ---- ATOM 4: scroll-hint-descending-tick — the scroll bait. AUTOPLAYS at rest
+      // (A-ambient), gated to the hero, swaps to bars once scrolled. Ink-light on the dark field.
+      SectionHarness.ranOK('scroll-hint-descending-tick', function () {
+        window.ScrollHintDescendingTick.create('#hint', {
+          label: 'гортайте', trackH: 96, tickH: 20, tickMin: 7, cycle: 1.9, gap: 0.16,
+          glow: true, gateTo: '#hero', swapToBars: true, autoplay: true
+        });
+      });
+
+      // CONTRACT: pin owner is NONE (rotated-mosaic-hero parallax is non-pinning; the title is
+      // a load-in timeline). Zero pinned ScrollTriggers on the page.
+      SectionHarness.declare({
+        pinOwner: 'none', expectPins: 0,
+        atomsCited: ['rotated-mosaic-hero', 'theme-tween', 'mask-up-title', 'scroll-hint-descending-tick']
+      });
+    })();
+  </script>
+</body>
+</html>

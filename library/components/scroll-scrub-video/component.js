@@ -49,6 +49,13 @@
       preloadMin: options.preloadMin != null ? options.preloadMin : 0.5,
       cover: options.cover !== false,
       dprCap: options.dprCap != null ? options.dprCap : 1.25,
+      // optional hard cap on the canvas BACKING-STORE width (px). The frames are a
+      // fixed native size (e.g. 1280px); a canvas wider than that only UPSCALES them
+      // (blurrier) AND makes every drawImage fill more pixels (= scrub cost). Capping
+      // the backing store at/under the frame width keeps it crisp (no upscale) and
+      // paints the cheapest fill. CSS still stretches the canvas to 100% of the stage.
+      // Off by default (other combos keep DPR-only sizing); opt-in per scrub.
+      maxCanvasW: options.maxCanvasW != null ? options.maxCanvasW : 0,
       manageLenis: options.manageLenis !== false
     };
 
@@ -99,8 +106,15 @@
     var dpr = Math.min(global.devicePixelRatio || 1, dprCap);
     function resize() {
       var w = stage.clientWidth, h = stage.clientHeight;
-      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
-      canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+      var bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+      // hard-cap the backing store so we never upscale past the frame width (cheaper
+      // fill, no blur). Keep aspect by scaling height by the same factor.
+      if (opt.maxCanvasW && bw > opt.maxCanvasW) {
+        var k = opt.maxCanvasW / bw;
+        bw = opt.maxCanvasW; bh = Math.round(bh * k);
+      }
+      canvas.width = bw; canvas.height = bh;
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; // CSS stretches to fill
       ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'low'; // cheap scale (reset on resize)
       paint(curIdx, true);
     }

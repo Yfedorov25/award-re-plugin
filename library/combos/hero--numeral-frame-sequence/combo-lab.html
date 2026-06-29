@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>hero--numeral-frame-sequence · Число, що стає світом (harness combo)</title>
+<!--
+  HERO VARIANT: hero--numeral-frame-sequence  ·  "Число, що стає світом"
+  CLASS: scroll (pinned 4-stage)  ·  PIN OWNER: numeral-frame-expand-hero (owns the one pin)
+
+  MECHANIC ROOT (the distinct thing, unmistakable in a screenshot):
+    A giant STROKE-ONLY outline numeral "34" (the real house number of вул. Замкова, 34, the
+    very building in the render) holds a SMALL framed glimpse of the house inside its counters;
+    on one pinned scroll that aperture DILATES to a full-bleed photograph while the outline
+    digits dissolve, the serif title rises from under, a slow parallax pan, then the whole hero
+    rises out as the next (lighter) section arrives, the page theme tweening with it.
+
+  COMPOSITION (one scroll bus, owned by numeral-frame-expand-hero):
+    - numeral-frame-expand-hero  OWNS the pin (pinFactor 2.4 -> ~2.4 viewports). Its PURE set(p)
+      runs A frame-expand -> B title-in -> C parallax-pan -> D exit-rise. The render it paints
+      lives in [data-render-surface]. THE one heroic moment.
+    - corner-frame-meta  is a PURE set(p) atom: the four corner labels (address / metric /
+      status / index) ride the SAME scroll progress, fading in as the frame opens. No second pin.
+    - theme-tween  recolors the root --bg/--ink/--accent across the hero->next seam (rAF +
+      IntersectionObserver, owns NO pin) so the page theme tweens WITH the exit-rise.
+
+  Cited ids (never inline their code): numeral-frame-expand-hero, corner-frame-meta, theme-tween.
+  Asset-truth: renders/day-34.webp = the real building, 1920x1080, cars-free landscape crop.
+  ZERO em/en-dash anywhere. NO WebGL, NO mix-blend, NO backdrop, NO video.currentTime scrub.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../../components/numeral-frame-expand-hero/component.css">
+<link rel="stylesheet" href="../../components/corner-frame-meta/component.css">
+<link rel="stylesheet" href="../../components/theme-tween/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ---- variant SKIN only (the atoms own the rails / the mechanic) ---- */
+
+  /* drive the hero atom's CSS tokens: warm-black field, cream ink, terracotta stroke,
+     Fraunces display. The hero atom reads these var()s. */
+  .nfe-hero {
+    --nfe-bg: #16130f;
+    --nfe-ink: #f4efe6;
+    --nfe-stroke: rgba(181,106,74,.62);     /* terracotta outline for the numerals */
+    --nfe-serif: 'Fraunces', Georgia, serif;
+    --nfe-sans: 'Inter', system-ui, sans-serif;
+    --nfe-num: clamp(38vw, 46vh, 62vw);     /* the giant aperture numeral */
+    --nfe-title: clamp(2.2rem, 5.4vw, 5.6rem);
+  }
+  /* tighten the digits to read as one address, premium tracking */
+  .nfe-numerals .digits {
+    letter-spacing: -.02em; font-weight: 400; font-optical-sizing: auto;
+    text-shadow: none;
+  }
+  /* the serif title: stack the line + a fine kicker, both centred over the photo */
+  .nfe-title .t-line {
+    display: block; font-weight: 300; letter-spacing: -.02em; line-height: .96;
+    text-transform: none; text-shadow: 0 2px 30px rgba(8,6,4,.55);
+  }
+  .nfe-title .t-kicker {
+    display: block; margin-top: clamp(14px, 2.2vh, 26px);
+    font-family: var(--nfe-sans); font-weight: 500; font-size: clamp(.62rem, .8vw, .76rem);
+    letter-spacing: .26em; text-transform: uppercase; opacity: .82;
+  }
+  /* sub-line copy: sparse, proof, low and centred (atom positions it at bottom 22vh) */
+  .nfe-sub { font-family: var(--nfe-sans); max-width: 30ch; margin: 0 auto;
+    letter-spacing: .14em; }
+
+  /* corner-frame-meta labels: cream, tracked, riding the same scroll. The atom fades
+     them in via set(p); CSS only places + styles them. */
+  #hero [data-corner] {
+    z-index: 5; color: var(--nfe-ink, #f4efe6); font-family: var(--nfe-sans);
+    font-size: clamp(10px, .76vw, 12px); letter-spacing: .2em;
+    text-shadow: 0 1px 14px rgba(8,6,4,.6);
+  }
+  #hero [data-corner] b { font-weight: 600; letter-spacing: .14em; }
+  #hero [data-corner] span { opacity: .6; }
+
+  /* the next section: a lighter plate so theme-tween has somewhere to travel to.
+     It binds its chrome to the tweened root vars. */
+  .next {
+    min-height: 90vh; display: grid; place-items: center; text-align: center;
+    background: var(--bg); color: var(--ink);
+    transition: none; /* color comes from the rAF tween, not CSS */
+  }
+  .next__eyebrow { font: 600 .7rem/1 'Inter', sans-serif; letter-spacing: .26em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 1.1rem; }
+  .next__h { font-family: 'Fraunces', Georgia, serif; font-weight: 300;
+    font-size: clamp(2rem, 5vw, 4.2rem); line-height: 1; letter-spacing: -.02em; max-width: 16ch; }
+
+  /* WILL-CHANGE HYGIENE (perf): the hero atom's component.css hard-codes will-change on
+     six layers so the scroll-scrub stays on the GPU. Leaving them promoted forever is the
+     only perf smell, so this variant ARMS them only while the one-shot is live and RELEASES
+     them once the hero has settled (scrubbed to the ends or the exit-rise is done). The
+     script toggles .nfe-rest on the hero; resting overrides win because they are scoped +
+     !important. Re-arming on re-scrub is automatic (the class comes off). */
+  .nfe-hero.nfe-rest,
+  .nfe-hero.nfe-rest .nfe-bg,
+  .nfe-hero.nfe-rest .nfe-frame,
+  .nfe-hero.nfe-rest .nfe-numerals,
+  .nfe-hero.nfe-rest .nfe-title,
+  .nfe-hero.nfe-rest .nfe-sub { will-change: auto !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nfe-hero,
+    .nfe-hero .nfe-bg, .nfe-hero .nfe-frame, .nfe-hero .nfe-numerals,
+    .nfe-hero .nfe-title, .nfe-hero .nfe-sub { will-change: auto !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">прокрутіть нижче</div>
+
+  <!-- ============ THE HERO (numeral-frame-expand-hero owns the pin) ============ -->
+  <!-- theme attrs on the hero so theme-tween starts from the warm-black field -->
+  <section id="hero" class="nfe-hero combo-stage" data-combo="hero--numeral-frame-sequence"
+           data-theme data-theme-bg="#16130f" data-theme-ink="#f4efe6" data-theme-accent="#b56a4a">
+
+    <!-- the full-bleed photo layer; this IS the render surface the probe checks -->
+    <div class="nfe-bg" data-render-surface>
+      <div class="nfe-frame">
+        <img src="renders/day-34.webp" alt="Будинок на вул. Замковій, 34, денне світло"
+             decoding="async" fetchpriority="high">
+      </div>
+    </div>
+
+    <!-- the giant stroke-only outline numeral = the meaningful house number -->
+    <div class="nfe-numerals" aria-hidden="true">
+      <div class="digits">34</div>
+    </div>
+
+    <!-- the serif display title that rises from under as the frame opens -->
+    <h1 class="nfe-title">
+      <span class="t-line">Число, що стає світом</span>
+      <span class="t-kicker">вул. Замкова, 34</span>
+    </h1>
+
+    <!-- sparse proof sub-line -->
+    <p class="nfe-sub">Шість домів. Власна вулиця. Початок числа.</p>
+
+    <!-- corner-frame-meta: four corner labels riding the same scroll -->
+    <div class="nfe-meta">
+      <div data-corner="tl"><b>ЕРУ ДІМ</b></div>
+      <div data-corner="bl"><span>широта</span> 49.84 N</div>
+      <div data-corner="br"><span>статус</span> <b>ЗАСЕЛЕННЯ 2026</b></div>
+      <div data-corner="rc">N&deg;34</div>
+    </div>
+  </section>
+
+  <!-- ============ NEXT SECTION (theme-tween travels into it) ============ -->
+  <section class="next" data-theme data-theme-bg="#ece4d6" data-theme-ink="#2a2420" data-theme-accent="#b56a4a">
+    <div>
+      <div class="next__eyebrow">далі</div>
+      <div class="next__h">Місце, де число вже стало адресою</div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (engine atom first), then ONE inline script -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/numeral-frame-expand-hero/component.js"></script>
+  <script src="../../components/corner-frame-meta/component.js"></script>
+  <script src="../../components/theme-tween/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // DECODE-GUARD: force-decode the full-bleed render before anything reveals it,
+      // so the aperture never opens onto an undecoded (black) frame.
+      function decodeHeroImg() {
+        var im = document.querySelector('#hero .nfe-frame img');
+        if (im && im.decode) { return im.decode().catch(function () {}); }
+        return Promise.resolve();
+      }
+
+      // DETERMINISTIC READY SIGNAL (red-flag fix): the cited atoms' component.js scripts are
+      // classic blocking <script src> tags, so on a correctly served page their globals exist
+      // before this runs. But headless boots can race (an atom script still parsing). Rather
+      // than read the globals synchronously and throw, we WAIT in a bounded rAF loop until
+      // gsap + ScrollTrigger + all three atom factories are present, THEN wire once. So the
+      // lab boots the SAME way every load: the engine never half-instantiates.
+      function depsReady() {
+        return !!(window.gsap && window.ScrollTrigger &&
+                  window.NumeralFrameExpandHero &&
+                  window.CornerFrameMeta && window.ThemeTween);
+      }
+      function whenReady(run) {
+        if (depsReady()) { run(); return; }
+        var t0 = performance.now();
+        (function spin() {
+          if (depsReady()) { run(); return; }
+          if (performance.now() - t0 > 5000) { run(); return; } // bounded: let ranOK record the truth
+          requestAnimationFrame(spin);
+        })();
+      }
+
+      whenReady(function () {
+        var hero, meta;
+
+        // (1) THE PIN OWNER + the one heroic moment. numeral-frame-expand-hero builds its own
+        //     pinned ScrollTrigger; the harness creates NO section pin (pinOwner != 'harness').
+        SectionHarness.ranOK('numeral-frame-expand-hero', function () {
+          hero = window.NumeralFrameExpandHero.create('#hero', {
+            frameInset: 36,        // counters of the outline numeral hold a small framed view
+            frameScale: 0.60,      // the glimpse opens from ~60% to full-bleed
+            panY: 130,             // slow parallax drift of the embankment
+            exitY: 170,            // exit-rise into the next section
+            pinFactor: 2.4,        // ~2.4 viewports, one continuous narrative
+            ease: 'expo.out',
+            manageLenis: false     // harness/lab owns no Lenis; native scroll is fine for the probe
+          });
+          window.__hero = hero;
+        });
+
+        // (2) corner-frame-meta: PURE set(p). NO own pin. Welded to the hero's scroll bus below.
+        SectionHarness.ranOK('corner-frame-meta', function () {
+          meta = window.CornerFrameMeta.create('#hero', { sel: '[data-corner]', stagger: 0.1 });
+          if (meta && meta.set) meta.set(0);     // start hidden; the scroll fades them in
+          window.__meta = meta;
+        });
+
+        // (3) theme-tween: recolors the root vars across the hero -> next seam. Owns NO pin.
+        SectionHarness.ranOK('theme-tween', function () {
+          window.__theme = window.ThemeTween.init({
+            sectionSelector: '[data-theme]',
+            vars: ['--bg', '--ink', '--accent'],
+            ease: 0.1
+          });
+        });
+
+        // WELD corner-frame-meta + will-change hygiene to the hero's SINGLE scroll WITHOUT a
+        // second ScrollTrigger and WITHOUT a second pin. The engine atom captured its own
+        // onUpdate at create time, so we read THAT one trigger's progress on the shared
+        // gsap.ticker and drive the side-effects from it. One scroll owner, one pin.
+        //
+        // (a) corners ramp in across the frame-open window (p 0.10 -> 0.45), then hold; PURE set(p).
+        //
+        // (b) WILL-CHANGE HYGIENE (perf). The atom's component.css promotes 6 layers permanently.
+        //     We ARM them the instant the hero starts moving and RELEASE them (.nfe-rest) only
+        //     after the scroll has been IDLE at an end for a beat. The release is DEBOUNCED and
+        //     never toggles mid-scrub: rapidly flipping will-change while scrubbing thrashes the
+        //     compositor (measured: dropped frames climb run-over-run). So we arm once, hold
+        //     armed through the whole scrub, and demote a single time once the hero truly rests
+        //     at the top (p~0) or past the exit (p~1). Re-arms once on the next move.
+        var heroEl = document.getElementById('hero');
+        if (hero && hero.trigger && window.gsap) {
+          var trig = hero.trigger, lastP = -1, lastMp = -1, armed = false, idleTO = null;
+          function arm() { if (!armed) { heroEl.classList.remove('nfe-rest'); armed = true; } }
+          function rest() { if (armed) { heroEl.classList.add('nfe-rest'); armed = false; } }
+          heroEl.classList.add('nfe-rest');           // boot at rest: GPU layers released until first move
+          window.gsap.ticker.add(function () {
+            var p = trig.progress;
+            if (p === lastP) return;                  // resting frame: one cheap compare, no work
+            lastP = p;
+            arm();                                    // hero is moving -> promote once, hold armed (no thrash)
+            var mp = (p - 0.10) / (0.45 - 0.10);
+            mp = mp < 0 ? 0 : mp > 1 ? 1 : mp;
+            if (meta && meta.set && Math.abs(mp - lastMp) > 0.002) { meta.set(mp); lastMp = mp; }
+            // debounced settle: only release after motion stops AND the hero is at an end
+            if (idleTO) clearTimeout(idleTO);
+            idleTO = setTimeout(function () {
+              if (p <= 0.01 || p >= 0.99) rest();     // truly settled at top or past exit -> demote once
+            }, 360);
+          });
+        }
+
+        // decode the hero render before the gate inspects the painted surface
+        decodeHeroImg();
+
+        // CONTRACT: the engine atom owns the one pin; the other two own none.
+        SectionHarness.declare({
+          pinOwner: 'numeral-frame-expand-hero',
+          expectPins: 1,
+          atomsCited: ['numeral-frame-expand-hero', 'corner-frame-meta', 'theme-tween']
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

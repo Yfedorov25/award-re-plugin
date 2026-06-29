@@ -1,0 +1,31 @@
+/* DAYNIGHT-CENTER-SEAM · component.css   (V5 chrome — the SAISEI centre-seam dialect)
+   The CANON (../daynight-engine/component.css) already styles the stage (.dn), the day/night
+   layers, and the corner tags (.dn__tag--day / .dn__tag--night). This file ONLY adds the
+   variation chrome: the 2px centre seam line that rides the parting and fades as the gap
+   opens. opacity / transform / gradient only — no mix-blend, no backdrop. */
+
+/* --- the centre seam: a fixed cream hairline down the middle, glowing softly. It does NOT
+       move (the parting opens around it); it fades from solid (closed) to gone (open),
+       opacity driven inline by set(t). --- */
+.dn .dncenter__seam {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(243, 241, 236, 0) 0%,
+    rgba(243, 241, 236, 0.85) 18%,
+    rgba(243, 241, 236, 0.85) 82%,
+    rgba(243, 241, 236, 0) 100%
+  );
+  box-shadow: 0 0 22px rgba(243, 241, 236, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dn .dncenter__seam { display: none; }   /* static end state has no parting line */
+}

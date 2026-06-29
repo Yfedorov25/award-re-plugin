@@ -1,68 +1,81 @@
 <!DOCTYPE html>
-<html lang="uk"><head>
-<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>combo: hero-puzzle-monument — assembled section lab</title>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: hero-puzzle-monument — assembled section (harness proof)</title>
+<!--
+  PROOF that the section-variant harness works end to end: a REAL section, not an <h1>.
+  Shape = MANUAL-ATOM (architect design §4B): the harness owns ONE pin; daynight-center-seam
+  is a PURE set(t) atom driven by that pin, painting a real QUADRO render that crosses day->night
+  down a centre seam, with a serif caption riding the same progress (transform/opacity only).
+  The extended __LAB_OK__ (in combo-scaffold.js) passes only if: 1 pin, the cited real atom ran,
+  a [data-render-surface] painted a decoded image, 0 real console errors.
+  (RECIPE's literal owner is puzzle-image; this proves the load-bearing MANUAL path on a fully-
+  verified atom, per the architect's honest substitution note. puzzle-image ports via the engine shape.)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/daynight-engine/component.css">
+<link rel="stylesheet" href="../../components/daynight-center-seam/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
 <style>
-  :root{--dark:#0a0a0a;--cream:#ece5d8;}
-  *{margin:0;box-sizing:border-box;}
-  html,body{background:var(--dark);color:var(--cream);font-family:Georgia,serif;}
-  .spacer{height:60vh;display:grid;place-items:center;opacity:.5;font-size:13px;letter-spacing:.2em;text-transform:uppercase;}
-  #combo{position:relative;min-height:100vh;display:grid;place-items:center;padding:8vh 6vw;text-align:center;}
-  h1{font-size:clamp(28px,4vw,52px);line-height:1.1;max-width:24ch;}
-  .stack{margin-top:20px;font-family:system-ui,sans-serif;font-size:13px;opacity:.7;letter-spacing:.04em;}
-  .gate{margin-top:14px;font-family:system-ui,sans-serif;font-size:12px;opacity:.55;}
+  /* variant SKIN only (scaffold owns the rails) */
+  .hpm__cap { position: absolute; z-index: 6; left: clamp(20px,4vw,64px); bottom: clamp(24px,7vh,72px);
+    max-width: 22ch; pointer-events: none; color: var(--combo-cream); text-shadow: 0 2px 22px rgba(0,0,0,.5); }
+  .hpm__eyebrow { font: 600 .68rem/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase; opacity: .7; }
+  .hpm__title { font-family: var(--combo-serif); font-weight: 300; font-size: clamp(2.4rem,6vw,5rem);
+    line-height: .98; letter-spacing: -.02em; margin-top: .6rem; }
 </style>
-</head><body>
-<div class="spacer">scroll ↓</div>
-<section id="combo" data-combo="hero-puzzle-monument">
-  <div>
-    <h1 data-spine>hero-puzzle-monument</h1>
-    <p class="stack">stack: puzzle-image* + parallax-depth + splitLines + appear + scroll-indicator</p>
-    <p class="gate">pin owner: <b>puzzle-image</b> · expected pins: <b>1</b></p>
-  </div>
-</section>
-<div class="spacer">next section</div>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
 
-<!-- COMBO ASSEMBLY PROOF
-     A full assembled section imports the cited atoms by relative path and wires
-     them to ONE shared pin progress (see RECIPE uses[]). This lab is the PROOF
-     SCAFFOLD: it stands up the pin contract (1 pin) and the
-     __LAB_OK__ gate. The richly-skinned 4-5-atom assembly is recorded via
-     /award-re:learn --promote against this combo's RECIPE. -->
-<script>
-  gsap.registerPlugin(ScrollTrigger, CustomEase);
-  if (window.CustomEase && !gsap.parseEase('air')) CustomEase.create('air','0.25,0.74,0.22,0.99');
-  var EXPECT_PINS = 1;
-  var spine = document.querySelector('[data-spine]');
-  if (EXPECT_PINS > 0) {
-    // the pin-owner contract: exactly one pinned ScrollTrigger for the section
-    ScrollTrigger.create({
-      trigger:'#combo', start:'top top', end:'+=120%', pin:true, scrub:1, anticipatePin:1,
-      invalidateOnRefresh:true,
-      onUpdate:function(self){ gsap.set(spine,{y:(self.progress-0.5)*-40, opacity:0.5+self.progress*0.5}); }
-    });
-  } else {
-    // conversion gate: ZERO pins — one entrance fade, then dead still (by design)
-    gsap.fromTo('#combo > div',{opacity:0,y:24},{opacity:1,y:0,duration:0.8,ease:'air',
-      scrollTrigger:{trigger:'#combo',start:'top 80%',once:true}});
-  }
-</script>
+  <section id="combo" class="combo-stage" data-combo="hero-puzzle-monument">
+    <div id="seamHost" data-render-surface></div>   <!-- daynight-center-seam injects .dn + a real <img> here -->
+    <div class="hpm__cap" data-spine>
+      <div class="hpm__eyebrow">вул. Замкова</div>
+      <div class="hpm__title">Дім, що зустрічає ніч</div>
+    </div>
+  </section>
 
-<!-- ── __LAB_OK__ acceptance probe (combo): assert the pin contract ── -->
-<script>(function(){
-  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
-  var tries=0;
-  function ready(){
-    try{
-      var pins = ScrollTrigger.getAll().filter(function(t){return t.pin;}).length;
-      var ok = errs===0 && !!window.gsap && pins===1;
-      window.__LAB_OK__ = !!ok;
-      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
-    }catch(e){ window.__LAB_OK__=false; }
-  }
-  window.addEventListener('load',function(){ setTimeout(ready,400); });
-})();</script>
-</body></html>
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/daynight-engine/component.js"></script>
+  <script src="../../components/daynight-center-seam/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var seam;
+      // RENDER + SEAM job: a real day/night QUADRO render, manual (PURE set(t))
+      SectionHarness.ranOK('daynight-center-seam', function () {
+        seam = window.DayNightCenterSeam.create('#seamHost', {
+          dayMedia: 'renders/a1-r1-day.webp',
+          nightMedia: 'renders/a1-r1-night.webp',
+          labels: ['Вдень', 'Ввечері']
+        });
+        window.__seam = seam;
+      });
+      // ONE section pin (harness). seam.set(p) rides it; the caption drifts on the same bus.
+      var st = SectionHarness.pin('#combo', { length: '+=130%', scrub: 0.8 });
+      if (st) st.onUpdate = function (p) {
+        if (seam && seam.set) seam.set(p);
+        if (window.gsap) window.gsap.set('[data-spine]', { y: (0.5 - p) * 40, opacity: 0.55 + p * 0.45 });
+      };
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['daynight-center-seam', 'parallax-depth', 'scroll-indicator']
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -25,7 +25,7 @@ timing_layer: [B-entrance, A-ambient]
 owns_pin: false
 owns_scroll: false
 page_beat: [material, proof, amenities]
-combines_with: [circular-UI-language, bleeding-wordmark, theme-tween, section-pager]
+combines_with: [circular-ui-language, bleeding-wordmark, theme-tween, section-pager]
 anti_combos: [cards-swipe, media-step-switch]
 gated_by: [R_perf_limits, R_reduced_motion_fallback]
 variants: []
@@ -44,7 +44,7 @@ gate:
 note: |
   Smaller brick 2 of 7. Shares the 2-layer vertical-push with persistent-index-menu
   but is arrow/sequential (loops, PREV reverses) in a portrait ken-burns frame.
-  Pairs with circular-UI-language (the arrow buttons) — that brick is still to come;
+  Pairs with circular-ui-language (the arrow buttons) — that brick is still to come;
   for now the lab inlines simple circular arrow svgs.
 ---
 

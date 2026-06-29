@@ -1,0 +1,56 @@
+/* OUR-HOUSE-AT-DUSK · component.css  (A7)
+   Chrome only — the canon (daynight-engine, reveal:seam) owns the day/evening clip wipe.
+   opacity / transform / clip-path / gradient only. NO WebGL, NO mix-blend, NO backdrop-filter. */
+
+.ohd {
+  --brass: #c8a96a;
+  --cream: #f1ebd6;
+}
+
+/* C1 fix: the canon (.dn__seamline) draws its OWN round ⇆ grip + hairline; this section draws its
+   own brass grip + line (.ohd__grip / .ohd__handle::before). Two stacked grips/lines = a junior
+   double-image. Hide the canon's seam chrome inside this section and keep only the brass one. */
+.ohd .dn__seamline { background: transparent !important; box-shadow: none !important; }
+.ohd .dn__seamline::after { display: none !important; }
+
+/* the glow group — clipped to the evening (left of seam) side; GPU-promoted so the clip + the
+   per-window opacity ramps stay on the compositor. */
+.ohd__glows {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  will-change: clip-path; transform: translateZ(0);
+}
+
+/* per-window warm glow: the night crop + an amber bloom (::after) */
+.ohd__win {
+  position: absolute; pointer-events: none; opacity: 0; border-radius: 2px;
+  background-repeat: no-repeat;
+}
+.ohd__win::after {
+  content: ""; position: absolute; inset: -24%;
+  background: radial-gradient(58% 58% at 50% 52%, rgba(247, 206, 142, 0.6) 0%, rgba(247, 206, 142, 0.2) 42%, transparent 72%);
+  border-radius: 50%;
+}
+
+/* the draggable seam handle (rides the canon's own .dn__seamline) */
+.ohd__handle {
+  position: absolute; z-index: 7; top: 0; bottom: 0; left: 45%;
+  width: 0; padding: 0; border: 0; background: transparent;
+  transform: translateX(-50%); cursor: ew-resize;
+}
+.ohd__grip {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--cream); color: #20272c;
+  display: grid; place-items: center; font-size: 1.1rem;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.4);
+}
+.ohd__handle:focus-visible { outline: none; }
+.ohd__handle:focus-visible .ohd__grip { box-shadow: 0 0 0 3px var(--brass), 0 6px 22px rgba(0, 0, 0, 0.4); }
+
+/* a soft vertical line marking the seam, just under the grip (the canon also draws .dn__seamline;
+   this reinforces it in brass on the evening side). */
+.ohd__handle::before {
+  content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, transparent, rgba(241, 235, 214, 0.85) 14%, rgba(241, 235, 214, 0.85) 86%, transparent);
+}

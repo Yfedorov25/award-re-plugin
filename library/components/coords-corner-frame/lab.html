@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · coords-corner-frame · surveyed-drawing metadata frame (tick-corners + coords + scale + north)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · coords-corner-frame
+================================================================================
+  A SURVEYED-DRAWING metadata frame over a dark map field. Four draughting
+  TICK-CORNERS (crosshair L-brackets) draw in via stroke-dashoffset, then a small
+  all-caps tracked readout reveals staggered: a COORDINATE readout (lat/long), a
+  SCALE BAR (0 ... 500 m), a NORTH arrow, and corner LABELS.
+
+  Distinct from corner-frame-meta (Saisei editorial corner labels). This is the
+  surveyor/draughting frame. Demonstrated over a faint road sketch built from REAL
+  OSM data of Агрономічне (the same baked OSM the location maps use). NO WebGL,
+  NO canvas. window.__LAB_OK__ when wired + painted.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --field:#0e0f0d; --ink:#e9e6dd; --accent:#d98a3b; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#070806;color:var(--ink);font-family:'IBM Plex Mono',ui-monospace,monospace;
+    display:grid;place-items:center;min-height:100vh;padding:6vmin}
+
+  /* the full-bleed stage the frame sits over */
+  .stage{
+    position:relative; width:min(92vw,1100px); aspect-ratio:16/10;
+    background:
+      radial-gradient(120% 90% at 62% 40%, #16170f 0%, #0e0f0d 55%, #0a0b08 100%);
+    overflow:hidden; border-radius:2px;
+    --ccf-ink:#e9e6dd; --ccf-accent:#d98a3b;
+  }
+  /* faint road sketch - built from REAL OSM, not invented */
+  .stage svg.sketch{ position:absolute; inset:0; width:100%; height:100%; }
+  .road-faint{ fill:none; stroke:rgba(233,230,221,.07); stroke-width:.8; }
+  .road-minor{ fill:none; stroke:rgba(233,230,221,.12); stroke-width:1; }
+  .road-mid{ fill:none; stroke:rgba(233,230,221,.18); stroke-width:1.4; }
+  .road-main{ fill:none; stroke:rgba(217,138,59,.28); stroke-width:1.8; }
+  .road-hwy{ fill:none; stroke:rgba(217,138,59,.22); stroke-width:1.6; }
+  .site-dot{ fill:var(--accent); }
+  .site-ring{ fill:none; stroke:rgba(217,138,59,.5); stroke-width:1.2; }
+  .poi-dot{ fill:rgba(233,230,221,.5); }
+
+  .hud{ position:fixed; left:18px; bottom:16px; font-size:.62rem; letter-spacing:.18em;
+    text-transform:uppercase; color:rgba(233,230,221,.5) }
+  .hud b{ color:var(--accent); font-weight:500 }
+  button.replay{ position:fixed; right:18px; bottom:16px; background:transparent;
+    border:1px solid rgba(233,230,221,.3); color:rgba(233,230,221,.8);
+    font:inherit; font-size:.6rem; letter-spacing:.2em; text-transform:uppercase;
+    padding:.5rem .9rem; cursor:pointer; border-radius:2px }
+  input.scrub{ position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
+    width:min(46vw,360px); accent-color:var(--accent) }
+</style>
+</head>
+<body>
+
+  <div class="stage" id="stage">
+    <svg class="sketch" id="sketch" preserveAspectRatio="xMidYMid slice"></svg>
+  </div>
+
+  <div class="hud">локація · <b>Агрономічне</b> · реальний OSM</div>
+  <input class="scrub" id="scrub" type="range" min="0" max="1000" value="1000" title="set(p) scrub">
+  <button class="replay" id="replay">програти знову</button>
+
+<script src="component.js"></script>
+<script type="module">
+  import { OSM } from './osm-agronomichne.js';
+
+  // ---- paint the faint road sketch from REAL OSM (a clean window round the site)
+  const VB = { x0:300, y0:-50, w:900, h:810 };
+  const sk = document.getElementById('sketch');
+  sk.setAttribute('viewBox', `${VB.x0} ${VB.y0} ${VB.w} ${VB.h}`);
+  function inWin(pts){ return pts.some(([x,y]) => x>=VB.x0-220 && x<=VB.x0+VB.w+220 && y>=VB.y0-220 && y<=VB.y0+VB.h+220); }
+  let painted = 0;
+  OSM.roads.forEach(r => {
+    if (!inWin(r.pts)) return;
+    const d = 'M ' + r.pts.map(([x,y]) => x.toFixed(1)+' '+y.toFixed(1)).join(' L ');
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d', d);
+    p.setAttribute('class', 'road-' + r.cls);
+    sk.appendChild(p); painted++;
+  });
+  // site marker (real projected site)
+  const ring = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  ring.setAttribute('cx', OSM.site.x); ring.setAttribute('cy', OSM.site.y); ring.setAttribute('r', 16);
+  ring.setAttribute('class','site-ring'); sk.appendChild(ring);
+  const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  dot.setAttribute('cx', OSM.site.x); dot.setAttribute('cy', OSM.site.y); dot.setAttribute('r', 4.5);
+  dot.setAttribute('class','site-dot'); sk.appendChild(dot);
+  // real POIs as faint dots
+  OSM.pois.forEach(po => {
+    if (po.x<VB.x0||po.x>VB.x0+VB.w||po.y<VB.y0||po.y>VB.y0+VB.h) return;
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', po.x); c.setAttribute('cy', po.y); c.setAttribute('r', 3);
+    c.setAttribute('class','poi-dot'); sk.appendChild(c);
+  });
+
+  // ---- wire the atom over the stage. Real coords of Агрономічне (Kharkiv). ----
+  const frame = window.CoordsCornerFrame.create('#stage', {
+    coords: '49.18N 28.33E',
+    scale:  '0 ... 500 м',
+    north:  true,
+    labels: { tl:'локація', bl:'агрономічне', br:'м 1:5000', rc:'index 01' },
+    ease:   'air',
+    stagger: 0.09,
+    dur: 0.7,
+    tick: 0.55
+  });
+  window.__frame = frame;
+
+  // run the staggered intro once
+  frame.reveal();
+
+  // scrub demonstrates the PURE reversible set(p)
+  const scrub = document.getElementById('scrub');
+  scrub.addEventListener('input', () => { frame.hide(); frame.set(scrub.value/1000); });
+  document.getElementById('replay').addEventListener('click', () => { frame.hide(); frame.reveal(); scrub.value = 1000; });
+
+  // mark the lab good once wired AND the field is actually painted
+  if (painted > 0) { try { window.__LAB_OK__ = true; } catch(e){} }
+</script>
+</body>
+</html>

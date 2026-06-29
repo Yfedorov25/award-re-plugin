@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · zoom-to-the-door · three-act scroll cinema (місто → район → ділянка)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · zoom-to-the-door
+================================================================================
+  A three-act scroll cinema that DIVES from the region to your front gate. As you scroll the pinned
+  section, three hand-illustrated frames MATCH-CUT through a shared focal point (village dot -> home
+  -> parcel, all at viewBox 500,300): the outgoing act scales up and out, the incoming act starts
+  small and settles, so it reads as one continuous zoom, not three fades. Each act warms in palette;
+  a breadcrumb rail tracks the scale; the payoff is your hatched plot with dimensions.
+  NO WebGL, NO tiles. window.__LAB_OK__.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+<style>
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:#e8dfcf;font-family:'Inter',system-ui,sans-serif}
+  .pre,.post{height:100vh;display:grid;place-items:center;color:#8a8073;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+  <div class="pre">скрол ↓</div>
+
+  <section class="ztd" data-ztd-act="0">
+    <div class="ztd-wrap">
+      <div class="ztd-frame">
+
+        <!-- breadcrumb rail -->
+        <nav class="ztd-rail" data-ztd-rail aria-label="Масштаб карти"></nav>
+
+        <!-- the three stacked acts. FOCAL POINT of every act = viewBox (500,300) so the dive
+             match-cuts on a continuous point. Each card pairs an act with its caption (the static
+             mobile path keeps the pairing). -->
+        <div class="ztd-acts">
+
+          <!-- ACT 1 — МІСТО (sparse regional schematic; focal = the village warm dot at 500,300) -->
+          <div class="ztd-card" data-card="0">
+            <div class="ztd-act" data-act="0">
+              <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Регіон: місто, шосе, село за 12 хвилин">
+                <!-- highway from the city (top-left) diving through the focal village to the bottom-right -->
+                <path data-draw class="ztd-line ztd-line--strong" d="M120 130 C260 200 380 250 500 300 C640 360 780 430 960 520"/>
+                <path data-draw class="ztd-line" d="M500 300 C560 360 620 380 720 380"/>
+                <path data-draw class="ztd-line" d="M500 300 C440 240 400 210 340 180"/>
+                <!-- the city = the Вінниця cluster, moved to the TOP-LEFT (clear of the caption's bottom-left zone) -->
+                <circle class="ztd-dot" cx="150" cy="120" r="9"/>
+                <circle class="ztd-dot" cx="182" cy="142" r="6"/>
+                <circle class="ztd-dot" cx="128" cy="146" r="5"/>
+                <text class="ztd-label--lg" x="150" y="84" text-anchor="middle">Вінниця</text>
+                <!-- the village = one warm dot AT THE FOCAL POINT -->
+                <circle class="ztd-warm" cx="500" cy="300" r="7"/>
+                <circle data-draw class="ztd-home__ring" cx="500" cy="300" r="17" fill="none"/>
+                <text class="ztd-tag" x="500" y="272" text-anchor="middle">Агрономічне</text>
+                <text class="ztd-label" x="500" y="392" text-anchor="middle">12 хв до міста</text>
+              </svg>
+            </div>
+            <div class="ztd-cap" data-cap="0">
+              <p class="k">/ Масштаб 01 · Місто</p>
+              <h3>За дванадцять хвилин <em>до міста.</em></h3>
+              <p>Тихе село на Гніванському шосе, у дванадцяти хвилинах від Вінниці.</p>
+            </div>
+          </div>
+
+          <!-- ACT 2 — РАЙОН (the district; focal = home at 500,300) -->
+          <div class="ztd-card" data-card="1">
+            <div class="ztd-act" data-act="1">
+              <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Район: дім, річка, парки, щоденні місця пішки">
+                <path class="ztd-park" d="M120 150 C160 110 240 108 286 144 C330 178 318 250 258 270 C190 292 86 214 120 150 Z"/>
+                <path class="ztd-park" d="M720 400 C784 380 858 408 866 468 C874 528 800 560 732 540 C674 522 664 442 720 400 Z"/>
+                <path data-draw class="ztd-river" d="M-20 90 C170 130 300 80 430 160 C560 238 545 360 430 440 C330 508 400 560 600 600"/>
+                <path data-draw class="ztd-line ztd-line--strong" d="M-20 320 C220 304 420 340 500 320 C700 280 880 330 1020 316"/>
+                <path data-draw class="ztd-line" d="M500 -20 C486 150 520 300 484 450 C462 540 500 600 486 620"/>
+                <path data-draw class="ztd-line" d="M500 300 Q420 270 360 240"/>
+                <path data-draw class="ztd-line" d="M500 300 Q560 250 600 210"/>
+                <path data-draw class="ztd-line" d="M500 300 Q420 380 360 430"/>
+                <path data-draw class="ztd-line" d="M500 300 Q580 380 640 430"/>
+                <circle class="ztd-dot" cx="360" cy="240" r="5.5"/><text class="ztd-label" x="360" y="226" text-anchor="middle">Супермаркет</text>
+                <circle class="ztd-dot" cx="600" cy="210" r="5.5"/><text class="ztd-label" x="600" y="196" text-anchor="middle">Аптека</text>
+                <circle class="ztd-dot" cx="360" cy="430" r="5.5"/><text class="ztd-label" x="360" y="452" text-anchor="middle">Школа</text>
+                <circle class="ztd-dot" cx="640" cy="430" r="5.5"/><text class="ztd-label" x="640" y="452" text-anchor="middle">Парк</text>
+                <circle class="ztd-home__ring" cx="500" cy="300" r="15"/>
+                <circle class="ztd-home__core" cx="500" cy="300" r="3.4"/>
+                <text class="ztd-tag" x="500" y="334" text-anchor="middle">Ваш дім</text>
+              </svg>
+            </div>
+            <div class="ztd-cap" data-cap="1">
+              <p class="k">/ Масштаб 02 · Район</p>
+              <h3>Чотири щоденних місця <em>пішки.</em></h3>
+              <p>Школа, ринок, аптека, парк. Усе, що формує день, навколо вашого дому.</p>
+            </div>
+          </div>
+
+          <!-- ACT 3 — ДІЛЯНКА (the plot; focal = parcel center at 500,300; warm + intimate) -->
+          <div class="ztd-card" data-card="2">
+            <div class="ztd-act" data-act="2">
+              <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Ділянка: 22,5 сотки на Гніванському шосе, ваша адреса">
+                <defs>
+                  <pattern id="ztdHatch" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                    <rect width="9" height="9" fill="rgba(181,106,74,.08)"/>
+                    <line x1="0" y1="0" x2="0" y2="9" stroke="rgba(181,106,74,.5)" stroke-width="1.2"/>
+                  </pattern>
+                </defs>
+                <!-- highway frontage along the bottom -->
+                <path data-draw class="ztd-line ztd-line--strong" d="M-20 512 C260 496 520 500 760 488 C880 482 960 486 1020 482"/>
+                <!-- frontage label moved to the BOTTOM-RIGHT (clear of the caption's bottom-left zone) -->
+                <text class="ztd-label" x="940" y="540" text-anchor="end">Гніванське шосе</text>
+                <!-- the parcel, centered on the focal point 500,300 -->
+                <path data-draw class="ztd-parcel" d="M300 150 L700 138 L716 452 L316 468 Z"/>
+                <!-- dimension lines, attached to the parcel edges -->
+                <line class="ztd-dim" x1="300" y1="120" x2="700" y2="108"/>
+                <line class="ztd-dim" x1="300" y1="114" x2="300" y2="156"/><line class="ztd-dim" x1="700" y1="102" x2="700" y2="144"/>
+                <text class="ztd-dim__t" x="500" y="100" text-anchor="middle">45 м</text>
+                <line class="ztd-dim" x1="746" y1="138" x2="762" y2="452"/>
+                <line class="ztd-dim" x1="710" y1="138" x2="752" y2="138"/><line class="ztd-dim" x1="726" y1="452" x2="768" y2="452"/>
+                <text class="ztd-dim__t" x="788" y="300" text-anchor="middle" transform="rotate(90 788 300)">50 м</text>
+                <text class="ztd-dim__t" x="508" y="296" text-anchor="middle" style="font-size:26px">22,5 сотки</text>
+                <circle class="ztd-home__core" cx="508" cy="330" r="3.6"/>
+                <text class="ztd-tag" x="508" y="360" text-anchor="middle">Ваша адреса</text>
+                <!-- nearest places tied to the parcel with leader ticks -->
+                <line class="ztd-tick" x1="300" y1="300" x2="150" y2="300"/>
+                <circle class="ztd-dot" cx="138" cy="300" r="5"/><text class="ztd-label" x="138" y="286" text-anchor="middle">Школа · 9 хв</text>
+                <line class="ztd-tick" x1="716" y1="300" x2="862" y2="300"/>
+                <circle class="ztd-dot" cx="874" cy="300" r="5"/><text class="ztd-label" x="874" y="286" text-anchor="middle">Парк · 6 хв</text>
+              </svg>
+            </div>
+            <div class="ztd-cap" data-cap="2">
+              <p class="k">/ Масштаб 03 · Ділянка</p>
+              <h3>Двадцять дві з половиною сотки. <em>Ваша адреса.</em></h3>
+              <p>Власна ділянка на фасаді шосе. Сорок п'ять на пʼятдесят метрів простору, який стане домом.</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="post">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    window.__ztd = window.ZoomToTheDoor.create('.ztd', { scrub: 0.7 });
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

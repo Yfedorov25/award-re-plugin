@@ -25,7 +25,7 @@ timing_layer: [B-entrance, A-ambient]
 owns_pin: false
 owns_scroll: false
 page_beat: [material, proof, amenities]
-combines_with: [theme-tween, bleeding-wordmark, section-pager, circular-UI-language]
+combines_with: [theme-tween, bleeding-wordmark, section-pager, circular-ui-language]
 anti_combos: [media-step-switch, cards-swipe]
 gated_by: [R_perf_limits, R_anti_combos, R_reduced_motion_fallback]
 variants: []

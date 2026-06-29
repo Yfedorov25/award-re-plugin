@@ -1,0 +1,59 @@
+/* DAYNIGHT-TOGGLE · component.css   (variation V1 — the TOWNS dialect)
+   The pill chrome ONLY. The stage / layers / glow are the canon
+   (load ../daynight-engine/component.css first).
+   1:1 with the Towns seed: .plan__daynight / .plan__dn-thumb (app.css L261-266).
+   transform / color transition only — NO mix-blend, NO backdrop-filter, NO WebGL. */
+
+.dnt__pill {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--dnt-track, rgba(20, 26, 33, 0.42));
+  border: 1px solid var(--dnt-track-line, rgba(241, 235, 214, 0.22));
+  border-radius: 999px;
+  padding: 0.28rem;                 /* Towns seed pad */
+  z-index: 6;
+}
+
+.dnt__btn {
+  position: relative;
+  z-index: 1;                       /* over the thumb */
+  flex: 1 1 auto;
+  font: 600 0.82rem/1 var(--dnt-font, 'Inter', system-ui, sans-serif);
+  letter-spacing: 0.02em;
+  color: var(--dnt-idle, rgba(241, 235, 214, 0.62));
+  background: transparent;
+  border: 0;
+  padding: 0.46rem 1.1rem;          /* Towns seed */
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.4s var(--dnt-ease, cubic-bezier(0.22, 1, 0.36, 1));
+}
+.dnt__btn:focus-visible {
+  outline: 2px solid var(--dnt-accent, #c8a86b);
+  outline-offset: 2px;
+}
+.dnt__btn.is-on {
+  color: var(--dnt-on, #20272c);    /* legible on the accent thumb */
+}
+
+/* the sliding accent pill — z-index 0, behind the labels, slides 0 -> 100% */
+.dnt__thumb {
+  position: absolute;
+  z-index: 0;
+  top: 0.28rem;
+  left: 0.28rem;
+  width: calc(50% - 0.28rem);       /* Towns seed: half the track minus one pad */
+  height: calc(100% - 0.56rem);
+  background: var(--dnt-accent, #c8a86b);
+  border-radius: 999px;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.4s var(--dnt-ease, cubic-bezier(0.22, 1, 0.36, 1)); /* Towns 0.4s slide */
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dnt__thumb { transition: none; }
+  .dnt__btn { transition: none; }
+}

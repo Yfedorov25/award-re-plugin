@@ -1,0 +1,30 @@
+/* DAYNIGHT-ENGINE · component.css
+   The signature day<->night primitive. opacity / clip-path / gradient only — NO WebGL.
+   The engine injects .dn (stage) > .dn__day + .dn__night (+ optional glow/scrim/tags/seamline).
+   Host just needs a sized box. */
+
+.dn { position: absolute; inset: 0; overflow: hidden; }
+.dn__layer { position: absolute; inset: 0; }
+.dn__layer img, .dn__layer video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* the night layer carries the reveal (opacity OR clip-path); GPU-promoted via will-change inline. */
+.dn__night { z-index: 2; }
+.dn__glow { z-index: 3; }
+.dn__scrim { z-index: 3; }
+
+/* seam handle (cursor / seam reveals) — a thin moving line with a round ⇆ grip (Smarts dialect) */
+.dn__seamline { background: var(--dn-seam, #f3f1ec); box-shadow: 0 0 18px rgba(0,0,0,0.35); }
+.dn__seamline::after {
+  content: "⇆"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 44px; height: 44px; border-radius: 50%; background: var(--dn-seam, #f3f1ec); color: #20272c;
+  display: grid; place-items: center; font-size: 1rem;
+}
+.dn__seamline[style*="height"]::after { /* horizontal seam keeps the round grip centred too */ }
+
+/* static UX corner tags */
+.dn__tag {
+  position: absolute; z-index: 5; bottom: 1rem; font-size: 0.66rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #f3f1ec; text-shadow: 0 1px 10px rgba(0,0,0,0.55); pointer-events: none;
+}
+.dn__tag--day { left: 1.2rem; }
+.dn__tag--night { right: 1.2rem; }

@@ -1,0 +1,101 @@
+/* MINUTES-BLOOM · component.css
+   Time as the hero. A pinned section: a huge editorial minute number counts up while a quiet
+   illustrated map draws a single arc to the active place. Warm cream paper, terracotta accent.
+   stroke-dashoffset + transform + opacity only. NO WebGL, NO mix-blend, NO backdrop-filter. */
+
+.mb {
+  --mb-paper-1: #f4efe6; --mb-paper-2: #ece4d6;
+  --mb-ink: #2c2620; --mb-soft: #5c5347;
+  --mb-river: #c2cdd1; --mb-park: #d2dac4; --mb-road: #c8bca8;
+  --mb-accent: #b56a4a; --mb-accent-ink: #9a5238; --mb-arc: #c8895f;
+  --mb-label-idle: #453f37;
+  --mb-serif: 'Fraunces', Georgia, serif; --mb-sans: 'Inter', system-ui, sans-serif;
+  color: var(--mb-ink);
+  background: linear-gradient(160deg, var(--mb-paper-1), var(--mb-paper-2));
+}
+
+.mb-wrap { position: relative; }
+.mb-grid { display: grid; grid-template-columns: 1fr; gap: 0; min-height: 100vh; align-items: stretch; }
+@media (min-width: 940px) { .mb-grid { grid-template-columns: 1fr 1fr; } }
+
+/* LEFT — the time hero */
+.mb-hero { display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(2.4rem, 7vh, 6rem) clamp(1.6rem, 4vw, 4.6rem); gap: 0.4rem; position: relative; }
+.mb-kicker { font: 600 0.72rem/1 var(--mb-sans); letter-spacing: 0.26em; text-transform: uppercase;
+  color: var(--mb-accent-ink); margin-bottom: 1.4rem; }
+.mb-read { display: flex; align-items: baseline; gap: 0.5rem; }
+.mb-num { font-family: var(--mb-serif); font-weight: 300; font-size: clamp(6rem, 18vw, 15rem); line-height: 0.82;
+  letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--mb-ink); }
+.mb-unit { font-family: var(--mb-serif); font-weight: 300; font-size: clamp(1.6rem, 3vw, 2.6rem); color: var(--mb-soft); }
+.mb-name { font-family: var(--mb-serif); font-weight: 300; font-style: italic; font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+  line-height: 1.08; margin-top: 1.1rem; color: var(--mb-accent-ink); }
+.mb-mode { font: 500 0.8rem/1 var(--mb-sans); letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--mb-soft); margin-top: 0.8rem; }
+.mb-lead { font: 400 0.95rem/1.6 var(--mb-sans); color: var(--mb-soft); max-width: 34ch; margin-top: 2rem; }
+
+/* the step rail — 3px visual bar with a >=24px tall hit area (background-clip:content-box) */
+.mb-rail { display: flex; gap: 0.5rem; margin-top: 2.2rem; }
+.mb-rail__dot { width: 26px; height: 24px; padding: 10px 0; border: none; box-sizing: border-box;
+  background: rgba(44,38,32,0.16); background-clip: content-box; border-radius: 2px;
+  cursor: pointer; transition: background 0.3s; }
+.mb-rail__dot:hover { background: rgba(44,38,32,0.32); background-clip: content-box; }
+.mb-rail__dot.is-on { background: var(--mb-accent); background-clip: content-box; }
+.mb-rail__dot:focus-visible { outline: 2px solid var(--mb-accent-ink); outline-offset: 2px; }
+
+/* static fallback list (mobile + reduced-motion): hidden until .mb-static */
+.mb-static-list { display: none; list-style: none; margin: 1.6rem 0 0; padding: 0;
+  border-top: 1px solid rgba(44,38,32,0.12); }
+.mb-static-list li { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 1rem;
+  padding: 0.7rem 0; border-bottom: 1px solid rgba(44,38,32,0.1); }
+.mb-static-list .pn { font: 500 0.98rem var(--mb-sans); }
+.mb-static-list .pm { font-family: var(--mb-serif); font-weight: 300; font-size: 1.3rem;
+  font-variant-numeric: tabular-nums; color: var(--mb-ink); }
+.mb-static-list .pm b { font-weight: 300; }
+.mb.mb-static .mb-static-list { display: block; }
+.mb.mb-static .mb-rail { display: none; }
+/* in the static state the giant number + map stay (a calm hero), the list carries the full content */
+
+/* RIGHT — the quiet illustrated map */
+.mb-stage { position: relative; overflow: hidden; min-height: 56vh; }
+@media (min-width: 940px) { .mb-stage { min-height: 100vh; } }
+.mb-map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.92; }
+
+.mb-river { fill: none; stroke: var(--mb-river); stroke-width: 20; stroke-linecap: round; stroke-linejoin: round; }
+.mb-park { fill: var(--mb-park); stroke: none; }
+.mb-road { fill: none; stroke: var(--mb-road); stroke-width: 1.5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+
+/* POI dots in the SVG sit quiet; the active one lifts */
+.mb-poi circle { fill: var(--mb-paper-1); stroke: var(--mb-road); stroke-width: 1.6; transition: stroke 0.3s; }
+.mb-poi.is-active circle { stroke: var(--mb-accent); }
+
+/* POI LABELS are DOM (positioned via CTM, never clipped by the slice box) */
+/* idle labels carry the OTHER places' names (wayfinding meaning), so they stay >= WCAG AA:
+   a darker muted ink (--mb-label-idle) at 0.78 reads ~4.96:1 on the cream label chip yet still
+   sits visibly quieter than the active terracotta label (opacity 1, bold). */
+.mb-plabel { position: absolute; transform: translate(-50%, -160%); pointer-events: none;
+  font: 500 12px var(--mb-sans); color: var(--mb-label-idle); opacity: 0.78; white-space: nowrap;
+  background: rgba(244,239,230,0.7); padding: 0.05rem 0.32rem; border-radius: 3px;
+  transition: opacity 0.3s, color 0.3s; }
+.mb-plabel .dot { display: none; }
+.mb-plabel.is-active { opacity: 1; color: var(--mb-accent-ink); font-weight: 600; }
+
+/* the active arc + its endpoint dot */
+.mb-arc { fill: none; stroke: var(--mb-arc); stroke-width: 2; stroke-linecap: round; }
+.mb-arc__dot { fill: var(--mb-accent); opacity: 0; }
+
+/* home marker */
+.mb-home__ring { fill: none; stroke: var(--mb-accent); stroke-width: 1.4; }
+.mb-home__ring--2 { opacity: 0.5; }
+.mb-home__core { fill: var(--mb-accent); }
+.mb-home__tag { fill: var(--mb-ink); font: 600 12px var(--mb-sans); letter-spacing: 0.16em;
+  text-transform: uppercase; text-anchor: middle; }
+
+/* static state (mobile / reduced-motion): the map becomes a short calm backdrop above the
+   number + full list; no pin, everything readable in one screen of normal scroll. */
+.mb.mb-static .mb-grid { grid-template-columns: 1fr; }
+.mb.mb-static .mb-stage { min-height: 42vh; order: -1; }
+.mb.mb-static .mb-hero { padding-top: clamp(1.6rem, 4vh, 3rem); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mb-poi circle, .mb-plabel { transition: none; }
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · district-radiates · editorial illustrated proximity map (threads radiate from your door)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · district-radiates
+================================================================================
+  An EDITORIAL, hand-illustrated proximity map on warm cream PAPER. A soft river curve, two sage
+  parks, a few hair-thin roads (NOT a dark 823-building OSM sea). The home is one terracotta ringed
+  marker; the daily places are named pins. On scroll-in the river + roads draw, the home blooms,
+  then thin leader-threads RADIATE to each place one by one as the minutes rise. Hover a row/pin and
+  its thread lights, the rest calm. Light, airy, premium. NO WebGL, NO tiles. window.__LAB_OK__.
+
+  preserveAspectRatio="none" so the hand-art fills the stage and the %-positioned DOM pins align
+  exactly with their viewBox thread endpoints (the river-tinted-poi-map fidelity lesson).
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:#ece4d6;font-family:'Inter',system-ui,sans-serif}
+  .pre,.post{height:60vh;display:grid;place-items:center;color:#8a8073;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+  <div class="pre">скрол ↓</div>
+
+  <section class="dr">
+    <div class="dr-grid">
+
+      <!-- EDITORIAL COLUMN -->
+      <div class="dr-col">
+        <p class="dr-kicker">/ Локація</p>
+        <h2 class="dr-h">Усе, що потрібно дню,<br><em>намальовано від ваших дверей.</em></h2>
+        <p class="dr-lead">Школа, ринок, аптека, парк. Не кілометри на схемі, а кілька хвилин пішки. Ось ваш квартал, накреслений від порога.</p>
+
+        <div class="dr-legend" role="list">
+          <div class="dr-row" data-dr-row="school" tabindex="0" role="listitem" aria-label="Школа і садок, 9 хвилин пішки">
+            <span class="nm">Школа і садок</span><span class="mins"><b>9</b><span class="u">хв</span></span></div>
+          <div class="dr-row" data-dr-row="shop" tabindex="0" role="listitem" aria-label="Супермаркет, 9 хвилин пішки">
+            <span class="nm">Супермаркет</span><span class="mins"><b>9</b><span class="u">хв</span></span></div>
+          <div class="dr-row" data-dr-row="apteka" tabindex="0" role="listitem" aria-label="Аптека, 10 хвилин пішки">
+            <span class="nm">Аптека</span><span class="mins"><b>10</b><span class="u">хв</span></span></div>
+          <div class="dr-row" data-dr-row="post" tabindex="0" role="listitem" aria-label="Нова Пошта, 10 хвилин пішки">
+            <span class="nm">Нова Пошта</span><span class="mins"><b>10</b><span class="u">хв</span></span></div>
+          <div class="dr-row" data-dr-row="park" tabindex="0" role="listitem" aria-label="Парк біля річки, 6 хвилин пішки">
+            <span class="nm">Парк біля річки</span><span class="mins"><b>6</b><span class="u">хв</span></span></div>
+          <div class="dr-row" data-dr-row="cafe" tabindex="0" role="listitem" aria-label="Кав'ярня на площі, 7 хвилин пішки">
+            <span class="nm">Кав'ярня на площі</span><span class="mins"><b>7</b><span class="u">хв</span></span></div>
+        </div>
+      </div>
+
+      <!-- THE ILLUSTRATED MAP -->
+      <div class="dr-stage">
+        <!-- preserveAspectRatio="xMidYMid slice": UNIFORM scale so circles (home, pulse, parks)
+             stay round. Pins are positioned in JS by mapping their viewBox coords through the SVG
+             CTM, so they align with thread ends regardless of the slice crop. -->
+        <svg class="dr-map" viewBox="0 0 1000 760" preserveAspectRatio="xMidYMid slice" role="img"
+             aria-label="Намальована мапа кварталу: дім у центрі, денні місця поруч, з хвилинами пішки">
+          <!-- sage parks -->
+          <path class="dr-park" d="M120 250 C170 196 270 190 322 234 C372 276 356 360 286 386 C206 416 78 322 120 250 Z"/>
+          <path class="dr-park" d="M700 470 C772 446 858 478 866 548 C874 618 792 660 716 636 C652 616 638 512 700 470 Z"/>
+          <!-- soft river curving through -->
+          <path data-river class="dr-river" d="M-40 120 C180 170 320 110 470 210 C620 308 600 470 470 560 C360 636 430 740 660 800"/>
+          <!-- thin roads -->
+          <path data-draw class="dr-road dr-road--main" d="M-40 390 C220 372 430 420 560 392 C760 350 900 410 1040 392"/>
+          <path data-draw class="dr-road dr-road--main" d="M520 -40 C504 180 540 360 500 560 C476 690 520 800 504 840"/>
+          <path data-draw class="dr-road" d="M-40 580 C240 560 420 612 600 586 C820 556 960 600 1040 588"/>
+          <path data-draw class="dr-road" d="M230 -40 C222 180 188 340 270 500 C330 612 300 760 318 840"/>
+          <path data-draw class="dr-road" d="M820 -40 C812 180 858 360 800 540 C764 668 820 800 804 840"/>
+
+          <!-- threads layer (component.js draws into here, UNDER the home so the marker sits on top) -->
+          <g data-threads></g>
+
+          <!-- home marker (terracotta rings); data-cx/cy = home center in viewBox units. The tag
+               sits BELOW the marker, clear of the thread convergence above it. -->
+          <g class="dr-home-anchor" data-home-anchor data-cx="500" data-cy="380">
+            <g data-home transform="translate(500 380)">
+              <circle class="dr-home__pulse" r="14"/>
+              <circle class="dr-home__ring" r="15"/>
+              <circle class="dr-home__ring dr-home__ring--2" r="8"/>
+              <circle class="dr-home__core" r="3.4"/>
+              <text class="dr-home__tag" y="34">Ваш дім</text>
+            </g>
+          </g>
+        </svg>
+
+        <!-- POI pins (DOM). Positioned in JS from data-tx/data-ty (viewBox coords) via the CTM, so
+             the DOT lands exactly on its thread end. Balanced radial spread around home (500,380):
+             apteka up, shop up-left, school down-left, park left, cafe down, post right. -->
+        <div class="dr-poi dr-poi--up" data-poi="apteka" data-tx="470" data-ty="150">
+          <span class="lbl">Аптека <span class="m">10 хв</span></span><span class="dot"></span></div>
+        <div class="dr-poi dr-poi--left" data-poi="shop" data-tx="250" data-ty="250">
+          <span class="lbl">Супермаркет <span class="m">9 хв</span></span><span class="dot"></span></div>
+        <div class="dr-poi dr-poi--left" data-poi="park" data-tx="170" data-ty="440">
+          <span class="lbl">Парк біля річки <span class="m">6 хв</span></span><span class="dot"></span></div>
+        <div class="dr-poi dr-poi--down" data-poi="school" data-tx="330" data-ty="600">
+          <span class="dot"></span><span class="lbl">Школа і садок <span class="m">9 хв</span></span></div>
+        <div class="dr-poi dr-poi--down" data-poi="cafe" data-tx="610" data-ty="610">
+          <span class="dot"></span><span class="lbl">Кав'ярня на площі <span class="m">7 хв</span></span></div>
+        <div class="dr-poi dr-poi--right" data-poi="post" data-tx="820" data-ty="320">
+          <span class="dot"></span><span class="lbl">Нова Пошта <span class="m">10 хв</span></span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="post">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    window.__dr = window.DistrictRadiates.create('.dr', { draw: true, stagger: 0.14, duration: 0.9, start: 'top 72%', once: true });
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

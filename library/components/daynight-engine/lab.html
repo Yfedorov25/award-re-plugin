@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · daynight-engine · the day↔night canon (one engine, driver × reveal)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · daynight-engine  (THE CANON)
+================================================================================
+  Two frame-matched media of the SAME scene (day + night), one normalized progress
+  t (0..1) drives the reveal. t=0 = day, t=1 = night. This is the user's signature
+  feature, distilled from three shipped sites: Towns (toggle/opacity),
+  Nahirna (scrub/opacity + glow + scrim), Smarts (cursor/seam clip-path).
+
+  This lab proves the engine is PURE: a manual slider writes set(t) and you watch
+  the same house go from noon to night. Buttons swap the REVEAL axis live
+  (opacity / seam-x / seam-y / portal) on the SAME engine — proving driver × reveal.
+
+  NO WebGL (opacity + clip-path + gradient only). window.__LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --cream:#f1ebd6; --ink:#20272c; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#0c0c0a;color:var(--cream);font-family:var(--sans);overflow:hidden;display:grid;place-items:center}
+
+  .frame{position:relative;width:min(92vw,1180px);aspect-ratio:16/9;border-radius:6px;overflow:hidden;
+    box-shadow:0 30px 90px rgba(0,0,0,.5)}
+
+  /* caption over the scene */
+  .cap{position:absolute;z-index:6;left:clamp(20px,4vw,56px);bottom:clamp(20px,5vh,48px);max-width:22ch;pointer-events:none}
+  .cap h1{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,5vw,4rem);line-height:.96;letter-spacing:-.01em;
+    text-shadow:0 2px 22px rgba(0,0,0,.5)}
+  .cap p{margin-top:.5rem;font-size:clamp(.78rem,1.2vw,.95rem);opacity:.85;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+
+  /* controls */
+  .panel{position:fixed;z-index:9999;left:50%;bottom:18px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+    background:rgba(12,12,11,.6);border:1px solid rgba(241,235,214,.22);border-radius:10px;padding:10px 16px;backdrop-filter:none}
+  .panel label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .panel input[type=range]{width:min(46vw,320px);accent-color:#e8c9a0}
+  .seg{display:inline-flex;gap:4px}
+  .seg button{font:500 .62rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--cream);
+    background:transparent;border:1px solid rgba(241,235,214,.32);padding:.5rem .7rem;border-radius:4px;cursor:pointer}
+  .seg button.on{background:#e8c9a0;color:#20272c;border-color:#e8c9a0}
+  .tval{font-variant-numeric:tabular-nums;font-size:.7rem;opacity:.8;min-width:3.4ch;text-align:right}
+</style>
+</head>
+<body>
+
+  <div class="frame" id="frame">
+    <!-- two frame-matched stills of the SAME exterior (real Higgsfield day/night pair) -->
+    <div class="cap"><h1>Той самий дім.<br>Тепер вечір.</h1><p>День → ніч однією шкалою. Та сама геометрія, змінюється лише світло.</p></div>
+  </div>
+
+  <div class="panel">
+    <div>
+      <label>Прогрес дня → ночі</label><br>
+      <input id="t" type="range" min="0" max="1" step="0.001" value="0">
+    </div>
+    <span class="tval" id="tval">день</span>
+    <div>
+      <label>Reveal</label><br>
+      <div class="seg" id="seg">
+        <button data-rev="opacity" class="on">opacity</button>
+        <button data-rev="seam-x">seam→</button>
+        <button data-rev="seam-y">sky↓</button>
+        <button data-rev="portal">portal</button>
+      </div>
+    </div>
+  </div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    var frame = document.getElementById('frame');
+    var slider = document.getElementById('t');
+    var tval = document.getElementById('tval');
+
+    var DAY = 'renders/dn-ext-day.webp';
+    var NIGHT = 'renders/dn-ext-night.webp';
+
+    var dn = null;
+    function build(rev) {
+      if (dn) { dn.destroy(); }
+      var o = { dayMedia: DAY, nightMedia: NIGHT, mode: 'manual',
+                glow: true, scrim: 0.0, labels: ['День', 'Ніч'] };
+      if (rev === 'seam-x') { o.reveal = 'seam'; o.seamAxis = 'x'; o.seamFrom = 'right'; }
+      else if (rev === 'seam-y') { o.reveal = 'seam'; o.seamAxis = 'y'; o.seamFrom = 'top'; }
+      else if (rev === 'portal') { o.reveal = 'portal'; o.portalOrigin = '60% 52%'; }
+      else { o.reveal = 'opacity'; }
+      dn = window.DayNight.create(frame, o);
+      dn.set(parseFloat(slider.value));
+    }
+    build('opacity');
+
+    var autoTween = null;
+    function killAuto() { if (autoTween) { autoTween.kill(); autoTween = null; } }
+
+    slider.addEventListener('input', function () {
+      var v = parseFloat(slider.value);
+      dn.set(v);
+      tval.textContent = v < 0.04 ? 'день' : v > 0.96 ? 'ніч' : (v < 0.5 ? 'присмерк' : 'сутінки');
+    });
+    // user interaction stops the demo autoplay so manual control is exact
+    slider.addEventListener('pointerdown', killAuto);
+
+    var seg = document.getElementById('seg');
+    seg.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-rev]'); if (!b) return;
+      killAuto();
+      seg.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      build(b.getAttribute('data-rev'));
+    });
+
+    // gentle autoplay demo: ease t 0->1 once so a screen-record shows the move
+    if (window.gsap && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      var o = { v: 0 };
+      autoTween = gsap.to(o, { v: 1, duration: 4.5, delay: 0.8, ease: 'sine.inOut', yoyo: true, repeat: 1,
+        onUpdate: function () { slider.value = o.v; dn.set(o.v); },
+        onComplete: function () { autoTween = null; } });
+    }
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

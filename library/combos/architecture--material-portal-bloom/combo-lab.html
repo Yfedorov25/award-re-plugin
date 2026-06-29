@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--material-portal-bloom · Вечір розквітає зсередини</title>
+<!--
+  SECTION VARIANT · architecture--material-portal-bloom · "Vechir rozkvitaye zseredyny"
+  ----------------------------------------------------------------------------------
+  Shape = MANUAL-ATOM (gold template 4B): the HARNESS owns ONE pin; the cited atom
+  daynight-portal-reveal builds the canon with reveal:"portal" (night clip-path =
+  circle(t*145% at origin)) over a lit window at 60% 62%. We drive the canon's PURE
+  set(t) from the single harness pin, so the dusk blooms outward from the glow as you
+  scroll.
+
+  THREE THINGS THIS LAB GETS RIGHT (skeptic fixes):
+  1) THE CIRCLE READS AS A CIRCLE. The canon maps r = t*145%, and full-cover at this
+     origin/aspect happens at t ~= 0.59 (any t past that is off-screen, no visible
+     change). So we do NOT scroll t 0->1 linearly (that front-loads: t=0.5 already
+     swallows the frame). We remap pin progress p -> canon t = ease(p) * T_FILL where
+     T_FILL = 0.64 (just past full cover). The warm circular edge therefore grows
+     visibly across the WHOLE scroll and only fills near the end.
+  2) THE BODY COPY CLEARS THE BRIGHT PIXELS. The note is pinned to the far lower-left
+     edge (away from the bright center-right lit-window cluster), and a LEFT-anchored
+     legibility scrim (linear-gradient, opacity ramped with t) rises only behind the
+     caption column as evening arrives. The bright glow stays the hero.
+  3) NO CLICK-TO-BREAK. The atom binds host.click -> bloomAt (destroy + recreate canon)
+     UNCONDITIONALLY of hotspot:false. Scroll is the only driver here, so (a) we swallow
+     clicks on the host in the CAPTURE phase before the atom's bubble listener can fire,
+     and (b) we never cache pr.dn -- we re-read the getter every pin update, so even a
+     hypothetical recreate could not desync the scrub.
+
+  __LAB_OK__ passes only if: 1 pin, the cited real atom ran, a [data-render-surface]
+  painted a decoded image, 0 real console errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/daynight-engine/component.css">
+<link rel="stylesheet" href="../../components/daynight-portal-reveal/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the rails) */
+  .mpb__host { position: absolute; inset: 0; }
+
+  /* LEFT-anchored legibility scrim, ramped with t (opacity only) so the caption clears
+     the bright pixels as evening arrives. The bright center-right glow stays untouched.
+     Pure linear-gradient + opacity -> GPU-compositable, no mix-blend / backdrop-filter. */
+  .mpb__scrim { position: absolute; z-index: 5; inset: 0; pointer-events: none; opacity: 0;
+    background: linear-gradient(105deg,
+      rgba(8,7,6,.78) 0%, rgba(8,7,6,.62) 18%, rgba(8,7,6,.30) 38%, transparent 58%); }
+
+  /* the architecture render reads as the hero; the text sits far from the glow, lower-left edge */
+  .mpb__cap { position: absolute; z-index: 6; left: clamp(20px,4.5vw,68px); bottom: clamp(26px,8vh,80px);
+    max-width: 22ch; pointer-events: none; color: var(--combo-cream);
+    text-shadow: 0 2px 22px rgba(0,0,0,.55); }
+  .mpb__eyebrow { font: 600 .66rem/1 var(--combo-sans); letter-spacing: .22em; text-transform: uppercase; opacity: .68; }
+  .mpb__title { font-family: var(--combo-serif); font-weight: 300; font-size: clamp(2.4rem,6.2vw,5.2rem);
+    line-height: .96; letter-spacing: -.02em; margin-top: .7rem; }
+  .mpb__note { margin-top: 1rem; max-width: 20ch; font: 400 clamp(.82rem,1.1vw,.96rem)/1.5 var(--combo-sans);
+    opacity: .85; }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--material-portal-bloom">
+    <div class="mpb__host" id="portalHost" data-render-surface></div>   <!-- portal-reveal injects .dn + a real <img> pair here -->
+    <div class="mpb__scrim" data-scrim></div>
+    <div class="mpb__cap" data-spine>
+      <div class="mpb__eyebrow">Архітектура</div>
+      <div class="mpb__title">Вечір розквітає зсередини</div>
+      <p class="mpb__note">Світло з вікна розходиться теплим колом, і той самий дім стає вечором.</p>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/daynight-engine/component.js"></script>
+  <script src="../../components/daynight-portal-reveal/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var pr;
+      // canon t at which the circle fully covers the frame at origin 60% 62% / ~16:9 is ~0.59.
+      // Drive t only up to T_FILL (just past it) so the circular edge stays VISIBLE the whole
+      // scroll and never wastes range on an off-screen circle.
+      var T_FILL = 0.64;
+
+      // RENDER + PORTAL job: a real day/night QUADRO exterior pair, manual canon (PURE set(t)),
+      // reveal:"portal" with the circle centred over the lit window (60% 62%).
+      SectionHarness.ranOK('daynight-portal-reveal', function () {
+        pr = window.DayNightPortalReveal.create('#portalHost', {
+          dayMedia: 'renders/dn-ext-day.webp',
+          nightMedia: 'renders/dn-ext-night.webp',
+          origin: '60% 62%',          // bloom centre over a lit window
+          duration: 1.6,
+          hotspot: false,             // scroll drives the bloom; no click-to-bloom affordance
+          labels: ['День', 'Вечір']
+        });
+        window.__portal = pr;
+      });
+
+      // CLICK-TO-BREAK GUARD: the atom binds host.click -> bloomAt() regardless of hotspot:false.
+      // Scroll is the only driver, so swallow clicks on the host in the CAPTURE phase (runs before
+      // the atom's bubble-phase listener on the same node) so bloomAt can never destroy+recreate
+      // the canon mid-scrub. pointer-events stay on so reduced-motion / focus behaviour is intact.
+      var hostEl = document.querySelector('#portalHost');
+      if (hostEl) {
+        hostEl.addEventListener('click', function (e) {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+        }, true);
+      }
+
+      // Remap pin progress -> canon t. CRITICAL: the bloom must NOT use an ease-OUT (the house
+      // 'air' ease rushes t up early and re-creates the front-loading bug -- the circle covers
+      // the frame by p~0.25). We use a gentle ease-IN (slow start, fill toward the end) so the
+      // circular edge stays a visible sub-frame circle across the middle of the scroll and only
+      // reaches full cover (t ~= 0.59) near p=1. Mapped to t = easeIn(p) * T_FILL.
+      // Never caches pr.dn -- re-reads the live getter each frame.
+      function easeIn(p) { return p * (0.45 + 0.55 * p); }   // mild quadratic ease-in, easeIn(1)=1
+      function tFor(p) { return easeIn(p) * T_FILL; }
+
+      // ONE section pin (harness). dn.set(t) scrubs the circular dusk bloom; caption + scrim
+      // ride the same bus. dn re-read each update so a recreate (if it ever happened) can't desync.
+      var st = SectionHarness.pin('#combo', { end: '+=140%', scrub: 0.8 });
+      if (st) st.onUpdate = function (p) {
+        var dn = pr && pr.dn;          // LIVE getter, never a stale cached ref
+        var t = tFor(p);
+        if (dn && dn.set) dn.set(t);
+        if (window.gsap) {
+          window.gsap.set('[data-spine]', { y: (0.5 - p) * 40, opacity: 0.6 + p * 0.4 });
+          window.gsap.set('[data-scrim]', { opacity: p * 0.72 });   // legibility rises with evening
+        }
+      };
+
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['daynight-portal-reveal']
+      });
+    })();
+  </script>
+</body>
+</html>

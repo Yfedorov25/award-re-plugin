@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: hero--video-bg-text-scrub · "Ріка тече, слова приходять"</title>
+<!--
+  HERO VARIANT · hero--video-bg-text-scrub · "Ріка тече, слова приходять"
+  ============================================================================
+  THE MECHANIC ROOT (unmistakable in a screenshot, not just in code):
+    An AUTOPLAY river video plays ON ITS OWN as cinema (loop, muted, playsinline)
+    behind a section that PINS and scroll-LOCKS. The scroll does NOT touch the
+    video — it drives the TEXT: three sparse lines arrive ONE AT A TIME, each in
+    its own considered corner of the frame, while the page field cools from
+    river-day into dusk. The river keeps flowing; the words keep arriving. The
+    page holds until the story is told, then releases. No other hero in the family
+    lets the media run free while one pinned scroll sequences the words over it.
+
+  THE SCROLL-HERO LAW (obeyed to the letter):
+    NEVER scrub video.currentTime. The <video> is a plain autoplay loop — its own
+    clock. Scroll drives ONLY the text story (transform/opacity) and a CSS-var
+    field tint. This is the lag-free oblit: no frame work, no decoder lag, buttery.
+
+  WHY DISTINCT (vs the nine other heroes + the frame-scrub oblit sibling):
+    - not a load-in arrival, not a flyaround, not a day/night dissolve of a still:
+      it is a LIVE moving video that runs by itself UNDER a pinned text sequence.
+    - the sibling oblit (scroll-scrub-video, canvas-2d frames) scrubs the picture;
+      THIS one lets the picture run and scrubs the WORDS. Owner asked for both.
+
+  THE ONE PIN (pin budget = 1):
+    pin-story-text OWNS the single pinned ScrollTrigger (pin:true, pinSpacing:true).
+    The harness creates NO section pin. corner-frame-meta + theme-tween are pin-less
+    (fade-in-once / colour-lerp), so the budget stays at exactly one.
+
+  COMPOSITION (owner's pass-1 fix): the three blocks NEVER overlap and are NEVER a
+    full-screen wall — each is width-constrained and anchored to a DIFFERENT corner
+    (left / lower-left / center), and the engine keeps exactly one fully visible at
+    a time: it settles, HOLDS alone, then lifts away as the next arrives.
+
+  HARD ANTI (obeyed): NO video.currentTime scrub, NO mix-blend, NO backdrop-filter,
+    NO WebGL, NO width/height/top/left animation. Motion = transform/opacity/CSS-var
+    colour only. Cars-free asset (river clip + day-34 poster — the real building,
+    same view). Ukrainian, Fedoriv voice, sparse, ZERO em/en-dash.
+  DECODE-GUARD: text-only story (no undecoded <img> reveal). The video shows its
+    poster (a decoded webp) until the first frame paints, so the surface is never black.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- eager-preload the poster so the surface paints a decoded image immediately (no black flash) -->
+<link rel="preload" as="image" href="renders/clip-river-poster.webp">
+
+<link rel="stylesheet" href="../../components/pin-story-text/component.css">
+<link rel="stylesheet" href="../../components/corner-frame-meta/component.css">
+<link rel="stylesheet" href="../../components/theme-tween/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the stage rails; the cited atoms own pin/labels/colour). */
+  :root {
+    /* the page field cools across the seam: river-day -> dusk. theme-tween lerps these. */
+    --field-day:   #d9ddda;   /* cool river daylight at the hero (paper-cool) */
+    --field-dusk:  #11161a;   /* dusk-water field after the hero               */
+    /* the cited atoms read these for the text colour over the video */
+    --pst-ink:    #f4f1ea;
+    --pst-accent: #cdb89a;    /* warm sand against cool water */
+  }
+
+  body { background: var(--bg, var(--field-day)); }
+  /* the spacers carry the page field so the WHOLE page is seen cooling across the seam */
+  .combo-pre  { background: var(--field-day);  color: rgba(20,28,32,.45); }
+  .combo-post { background: var(--field-dusk); color: rgba(205,184,154,.62); }
+
+  /* the pinned hero host. pin-story-text builds its .pst__stage INTO #hero (it owns the
+     pin + the text). The autoplay VIDEO is a sibling layer the host owns, NOT the atom. */
+  #hero { position: relative; height: 100vh; overflow: hidden; }
+
+  /* the autoplay river video — its OWN clock, never currentTime-scrubbed */
+  #hero .hv__bg { position: absolute; inset: 0; z-index: 1; background: #0d1216; }
+  #hero .hv__bg video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    transform: scale(1.04) translateZ(0); transform-origin: 52% 48%;  /* gentle weight, no layout */
+  }
+  /* poster fallback image lives inside the video element's `poster`; this is the decode-safe
+     first paint the probe sees as a painted [data-render-surface]. */
+
+  /* a soft legibility scrim graded for a left/lower-left/center text path; pure gradient, no blend */
+  #hero .hv__scrim {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(8,12,15,.34) 0%, rgba(8,12,15,0) 26%, rgba(8,12,15,0) 58%, rgba(8,12,15,.52) 100%),
+      linear-gradient(90deg, rgba(8,12,15,.40) 0%, rgba(8,12,15,.10) 46%, rgba(8,12,15,0) 78%);
+  }
+
+  /* corner-frame-meta labels: positioned by the atom's own CSS (the four corners); this only
+     skins their type colour over the video. They read as an authored plate, not a slide. */
+  #hero [data-corner] { z-index: 6; color: var(--pst-ink); font-family: var(--combo-sans);
+    font-weight: 600; text-shadow: 0 1px 14px rgba(0,0,0,.55); }
+  #hero [data-corner] b { font-weight: 600; color: var(--pst-accent); }
+
+  /* a quiet scroll hint, fades as the pin engages (pure opacity, no layout) */
+  #hero .hv__hint { position: absolute; z-index: 6; left: 50%; bottom: clamp(20px, 4vh, 40px);
+    transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--pst-ink); font: 600 10px/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    opacity: .7; pointer-events: none; text-shadow: 0 1px 12px rgba(0,0,0,.5); }
+  #hero .hv__hint span { width: 1px; height: 34px; background: linear-gradient(var(--pst-ink), transparent); opacity: .6; }
+
+  /* the pst title sits at Fraunces display scale; the atom's CSS already gives clamp(40px,7vw,120px) */
+  .pst__title { text-shadow: 0 2px 26px rgba(0,0,0,.42); }
+  .pst__body  { text-shadow: 0 1px 14px rgba(0,0,0,.4); }
+  .pst__eyebrow { text-shadow: 0 1px 10px rgba(0,0,0,.5); }
+</style>
+</head>
+<body>
+  <div class="combo-pre">гортайте</div>
+
+  <!-- the pinned hero. The autoplay video + scrim + corner labels are the HOST's layers;
+       pin-story-text builds its text stage into #hero and OWNS the single pin. -->
+  <section id="hero"
+           data-theme data-theme-bg="#d9ddda" data-theme-ink="#1a2228" data-theme-accent="#9c7d57">
+
+    <div class="hv__bg" data-render-surface>
+      <video autoplay loop muted playsinline preload="auto"
+             poster="renders/clip-river-poster.webp"
+             aria-label="Ріка біля дому, відео">
+        <source src="renders/clip-river-lite.webm" type="video/webm">
+        <source src="renders/clip-river-lite.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="hv__scrim"></div>
+
+    <!-- corner-frame-meta: four authored labels (the atom fades them in once) -->
+    <div data-corner="tl">QUADRO HOUSE</div>
+    <div data-corner="bl">над <b>рікою</b></div>
+    <div data-corner="br">резиденція &middot; 2026</div>
+    <div data-corner="rc">01</div>
+
+    <div class="hv__hint" id="heroHint">скрол<span></span></div>
+  </section>
+
+  <!-- the post-section carries the DUSK theme so theme-tween cools the field across the seam -->
+  <section class="combo-post"
+           data-theme data-theme-bg="#11161a" data-theme-ink="#e9eef0" data-theme-accent="#cdb89a">
+    далі
+  </section>
+
+  <!-- scaffold + adapters, then the cited atoms, then ONE inline orchestration script -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/pin-story-text/component.js"></script>
+  <script src="../../components/corner-frame-meta/component.js"></script>
+  <script src="../../components/theme-tween/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      /* The autoplay video is the host's. Kick play() defensively (some headless / policy
+         contexts pause muted autoplay); never touches currentTime. */
+      var vid = document.querySelector('#hero .hv__bg video');
+      if (vid) { try { var pr = vid.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} }
+
+      /* ----------------------------------------------------------------------
+         PIN-STORY-TEXT — OWNS the one pin. Three sparse UA lines arrive ONE AT A
+         TIME over the running river, each in a different considered corner:
+           1) left      — the place
+           2) lower-left — the proof (sparse, anchored low)
+           3) center    — the invitation
+         The atom keeps exactly one block fully visible at a time (settle, HOLD,
+         lift away as the next enters) — never overlapping, never a full-screen wall.
+      ---------------------------------------------------------------------- */
+      var story = null;
+      SectionHarness.ranOK('pin-story-text', function () {
+        story = window.PinStoryText.create('#hero', {
+          end: '+=260%',
+          scrub: 1,
+          hold: 0.46,          /* generous settle so each line reads alone */
+          ease: 'air',
+          manageLenis: true,   /* the lab owns its smoother (no host page here) */
+          blocks: [
+            { eyebrow: 'НАД РІКОЮ', align: 'left',
+              title: 'Ріка тече, <em>слова приходять</em>.',
+              body: 'Один берег. Своя вода. Тиша, яку чути.' },
+            { eyebrow: 'ВІДСТАНЬ', align: 'lower-left',
+              title: 'Сім хвилин <em>до центру</em>.',
+              body: 'І жодної хвилини зайвого шуму.' },
+            { eyebrow: 'ЗАПРОШЕННЯ', align: 'center',
+              title: 'Лишіться <em>на березі</em>.',
+              body: 'Приходьте подивитися, поки вода ще ваша.' }
+          ]
+        });
+        window.__story = story;
+      });
+
+      /* ----------------------------------------------------------------------
+         CORNER-FRAME-META — the four authored labels fade in once (staggered),
+         turning the running video into a framed plate. Pin-less.
+      ---------------------------------------------------------------------- */
+      var meta = null;
+      SectionHarness.ranOK('corner-frame-meta', function () {
+        meta = window.CornerFrameMeta.create('#hero', { stagger: 0.1, dur: 0.6, ease: 'power2.out' });
+        if (meta && meta.reveal) meta.reveal();
+        window.__meta = meta;
+      });
+
+      /* ----------------------------------------------------------------------
+         THEME-TWEEN — cools the page FIELD across the hero -> post seam
+         (river-day --bg #d9ddda -> dusk #11161a), so the whole canvas cools as
+         the words finish. Colour custom-properties only. Pin-less.
+      ---------------------------------------------------------------------- */
+      var theme = null;
+      SectionHarness.ranOK('theme-tween', function () {
+        theme = window.ThemeTween.init({
+          sectionSelector: '[data-theme]',
+          vars: ['--bg', '--ink', '--accent'],
+          ease: 0.1
+        });
+        window.__theme = theme;
+      });
+
+      /* quiet scroll hint fades out as the visitor begins (opacity only, NON-pinning ST so
+         the pin budget stays at exactly one — owned by pin-story-text). */
+      var hint = document.getElementById('heroHint');
+      if (hint && window.gsap && window.ScrollTrigger) {
+        window.gsap.to(hint, {
+          opacity: 0, ease: 'none',
+          scrollTrigger: { trigger: '#hero', start: 'top top', end: '+=22%', scrub: true }
+        });
+      }
+
+      /* TELL THE PROBE THE CONTRACT: pin-story-text owns the one pin; expectPins:1. */
+      SectionHarness.declare({
+        pinOwner: 'pin-story-text',
+        expectPins: 1,
+        atomsCited: ['pin-story-text', 'corner-frame-meta', 'theme-tween']
+      });
+    })();
+  </script>
+</body>
+</html>

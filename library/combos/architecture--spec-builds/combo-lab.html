@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: architecture--spec-builds · Аркуш фактів (harness binder)</title>
+<!--
+================================================================================
+  SECTION VARIANT · architecture--spec-builds · "Аркуш фактів" · MODE: scroll
+================================================================================
+  PRIMARY ATOM (verified, owns_pin:true): media-step-switch (MediaStepSwitch.init)
+  PIN OWNER: media-step-switch (the ENGINE owns the single pin; harness pins 0).
+
+  CREATIVE INTENT (architecture, sell the BUILDING):
+  A pinned full-bleed MEDIA STEPPER. One real QUADRO render is the WHOLE
+  background; four typographic steps float over it, each a DIFFERENT text TYPE:
+    01 BIG STATEMENT  : the form (huge serif headline, lower-left)
+    02 NUMBER / FACT  : a fact that COUNTS UP (one big figure + unit) with a
+                        self-drawing SVG underline (stroke-dashoffset, ERA/AIR
+                        visualizationLines grammar) landing under the number.
+    03 MATERIAL line  : the surface named in a quiet centred italic line.
+    04 QUOTE          : a felt sentence, set apart by thin bronze rules.
+  Each beat: TEXT settles FIRST, a PAUSE, THEN the media crossfades (engine law).
+
+  SWAP MECHANISM (engine-owned, never see-through / never a seam): two stacked
+  FULL-BLEED GPU <layer>s. Outgoing sits underneath FULLY OPAQUE the whole beat;
+  incoming sits on top and fades opacity 0->1. Same rect => a crossfade, not a
+  diptych, not a blank. We pre-build the stage DOM so the engine wires our OWN
+  architecture copy (it only auto-builds an EMPTY host); NO video step here (the
+  river clip is atmosphere, out of scope): four image steps, geometry-consistent
+  (all the SAME white modern house: form -> terrace context -> roof decking ->
+  return to the whole), so there is no geometry jump.
+
+  COUNT-UP + SVG UNDERLINE: driven by ONE extra NON-pinning ScrollTrigger on the
+  same section (0 pins added; the scaffold counts only pinning triggers). It is a
+  PURE fn of progress: it reads the same beat math the engine uses and maps the
+  NUMBER beat's settle window to (a) a tabular-num count 0 -> 240 and (b) the
+  underline draw stroke-dashoffset L -> 0. Reversible, scrub-smooth.
+
+  ENGINE LAWS honoured: Lenis 1.1.13 lerp 0.09 -> gsap.ticker -> ScrollTrigger.update
+  (the engine manages it); transform / opacity / stroke-dashoffset only; GPU layers;
+  NO WebGL, NO mix-blend, NO backdrop-filter, NO clip-path on the full surface,
+  NO video.currentTime. Fraunces + Inter; bronze #c08a4e. Ukrainian Fedoriv copy,
+  ZERO em-dash / ZERO en-dash. reduced-motion / <=820px -> the engine's static deck.
+
+  RENDERS (copy-pasted from the proto symlink; same property, frame-consistent):
+    renders/day-front.webp  (the whole building, steps 01 + 04)
+    renders/terrace.webp    (same building, roof-terrace context, step 02)
+    renders/macro-roof.webp (the wood decking detail, step 03)
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- eager-preload the first full-bleed render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-front.webp">
+
+<!-- the cited atom's canonical skin, then the scaffold rails -->
+<link rel="stylesheet" href="../../components/media-step-switch/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<!-- GSAP 3.12.5 + Lenis 1.1.13 (the engine manages Lenis) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* ---- variant SKIN only (the engine + its component.css own the motion + the
+     full-bleed stage; this skin adds the two architecture-specific moment types
+     that the canonical MOMENT_HTML does not ship: a MATERIAL line + a NUMBER with
+     a self-drawing SVG underline). 8pt rhythm, generous air, bronze tokens. ---- */
+
+  /* (02) NUMBER / FACT : one big counting figure, lower-left, with the self-draw
+     underline. Reuses the canonical .m-number scale; we only add the SVG rail. */
+  .m-number .figure{ position:relative; }
+  .specline{ position:absolute; left:0; bottom:-14px; width:clamp(180px,30vw,420px); height:10px;
+    overflow:visible; pointer-events:none; }
+  .specline path{ fill:none; stroke:var(--bronze); stroke-width:2; stroke-linecap:round;
+    /* drawn by JS via stroke-dashoffset (ERA/AIR visualizationLines grammar) */
+    stroke-dasharray:1; stroke-dashoffset:1; will-change:stroke-dashoffset; }
+
+  /* (03) MATERIAL : a quiet centred line that NAMES the surface; a thin bronze
+     spec-rule above it, an uppercase material label below. Distinct TYPE from the
+     other three (not a statement, not a number, not a felt quote). */
+  .m-material{ left:50%; top:50%; transform:translate(-50%,-50%); width:min(820px,88vw);
+    text-align:center; }
+  .m-material .matrule{ width:46px; height:1px; margin:0 auto 1.4em; background:var(--bronze); opacity:.85; }
+  .m-material .matline{ font-family:var(--serif); font-weight:300; font-size:clamp(1.7rem,3.6vw,3.1rem);
+    line-height:1.18; letter-spacing:-.012em; color:#fbf6ec; text-shadow:0 2px 30px rgba(0,0,0,.34); }
+  .m-material .matline em{ font-style:italic; color:var(--bronze-soft); font-weight:400; }
+  .m-material .matlabel{ margin-top:1.5em; font-size:.64rem; letter-spacing:.36em; text-transform:uppercase;
+    color:var(--bronze-soft); }
+
+  /* keep the combo spacers reading on the cream stage (the engine pins #combo) */
+  .combo-pre, .combo-post{ color: var(--ink); }
+</style>
+</head>
+<body>
+  <div class="combo-pre">Гортайте</div>
+
+  <!-- The pinned full-bleed stage. PRE-BUILT so the engine wires OUR architecture
+       copy (MediaStepSwitch.buildStage only fills an EMPTY host). The engine owns
+       the pin on this element. [data-render-surface] on layerA (holds the eager
+       day-front render) is what the harness probe asserts painted. -->
+  <section id="combo" class="pin combo-stage" data-combo="architecture--spec-builds">
+    <div class="media" id="media">
+      <div class="layer" id="layerA" data-render-surface>
+        <img id="imgA" src="renders/day-front.webp" alt="QUADRO HOUSE, екстер'єр" fetchpriority="high" decoding="async">
+      </div>
+      <div class="layer" id="layerB">
+        <img id="imgB" src="renders/terrace.webp" alt="QUADRO HOUSE, тераса" decoding="async">
+      </div>
+      <div class="grade"></div>
+
+      <div class="stage-text">
+        <!-- 01 BIG STATEMENT : the form -->
+        <div class="moment m-statement" id="mStatement">
+          <span class="eyebrow">Архітектура</span>
+          <h2>Один обʼєм, <em>дві лінії світла</em></h2>
+        </div>
+
+        <!-- 02 NUMBER / FACT : counts up, with the self-drawing underline -->
+        <div class="moment m-number" id="mNumber">
+          <span class="label">площа під одним дахом</span>
+          <div class="figure">
+            <span class="num" id="specNum">0</span><span class="unit">м²</span>
+            <svg class="specline" id="specLine" viewBox="0 0 420 10" preserveAspectRatio="none" aria-hidden="true">
+              <path id="specPath" d="M2 7 C 120 1, 300 1, 418 7"></path>
+            </svg>
+          </div>
+          <p class="foot">Два рівні, плаский дах, суцільне скління у повний зріст.</p>
+        </div>
+
+        <!-- 03 MATERIAL : names the surface -->
+        <div class="moment m-material" id="mMaterial">
+          <div class="matrule"></div>
+          <div class="matline">Тиньк, <em>термодерево</em>, темний алюміній.</div>
+          <div class="matlabel">матеріали фасаду</div>
+        </div>
+
+        <!-- 04 QUOTE : the felt sentence -->
+        <div class="moment m-quote" id="mQuote">
+          <div class="rule"></div>
+          <blockquote>Дім читається з вулиці за три секунди, а живеться в ньому роками.</blockquote>
+          <div class="rule"></div>
+          <cite>про форму</cite>
+        </div>
+      </div>
+
+      <span class="vtag" id="vtag">Відео</span>
+      <div class="counter" id="counter">01 / 04</div>
+      <div class="stepper" id="stepper"></div>
+      <span class="credit">Візуалізація</span>
+      <div class="progress"><div class="progress__fill" id="progFill"></div></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- the static fallback host (reduced-motion / <=820px). Filled by the engine. -->
+  <div class="static" id="static"></div>
+
+  <!-- scaffold + adapters, then the cited atom (canon deps already loaded above) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/media-step-switch/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // FOUR steps, FOUR text TYPES, NO video. Each names its media + the .moment
+      // it lights + its own entry direction. The engine wires to our pre-built DOM
+      // (it skips buildStage because #media already exists), so it uses OUR copy.
+      var STEPS = [
+        { media:"renders/day-front.webp",  el:"mStatement", type:"BIG STATEMENT",
+          enter:{x:-46,y:0},  title:"Один обʼєм, дві лінії світла" },
+        { media:"renders/terrace.webp",    el:"mNumber",    type:"NUMBER",
+          enter:{x:-40,y:0},  objPos:"50% 56%", title:"240 м під одним дахом" },
+        { media:"renders/macro-roof.webp", el:"mMaterial",  type:"MATERIAL",
+          enter:{x:0,y:30},   objPos:"50% 50%", title:"Тиньк, термодерево, алюміній" },
+        { media:"renders/day-front.webp",  el:"mQuote",     type:"QUOTE",
+          enter:{x:0,y:34},   title:"Читається за три секунди" }
+      ];
+
+      var msw;
+      // OWNER atom: media-step-switch builds + owns the single pin + manages Lenis.
+      SectionHarness.ranOK('media-step-switch', function () {
+        msw = window.MediaStepSwitch.init('#combo', { steps: STEPS, pinFactor: 1.7, lerp: 0.09 });
+        window.__msw = msw;
+      });
+
+      // ---- count-up + self-drawing underline on the NUMBER beat ----
+      // ONE extra NON-pinning ScrollTrigger (adds 0 pins). It mirrors the engine's
+      // beat math so the figure counts AND the line draws exactly while step 02 is
+      // settling, and reverse cleanly on scroll-up. PURE fn of progress.
+      (function wireSpec () {
+        var g = window.gsap, ST = window.ScrollTrigger;
+        if (!g || !ST || !msw || msw.static || !msw.trigger) return;
+
+        var numEl  = document.getElementById('specNum');
+        var pathEl = document.getElementById('specPath');
+        if (!numEl || !pathEl) return;
+
+        // arm the SVG path for a stroke-dashoffset draw (real geometric length)
+        var L = pathEl.getTotalLength();
+        pathEl.style.strokeDasharray  = L;
+        pathEl.style.strokeDashoffset = L;
+
+        var N = STEPS.length, DWELL = 0.88, TARGET = 240;
+        var numLast = -1, drawLast = -1;
+        var airE = g.parseEase('air') || function (t) { return t; };
+
+        // map global pin progress -> the per-beat math the engine uses, then read
+        // the window where step index 1 (the NUMBER) is the SETTLED step.
+        function tick(self) {
+          var prog = self.progress;
+          var pp = Math.min(1, prog / DWELL);
+          var p  = pp * (N - 1);            // 0..N-1 across the beats
+          // step 1 (NUMBER) reads from the moment its incoming-fade completes in
+          // beat 0 (~p 0.86) until its outgoing-fade starts in beat 1 (~p 1.40).
+          // Drive the count + draw across p in [0.62 .. 1.40] => lands as it settles.
+          var d = g.utils.clamp(0, 1, (p - 0.62) / (1.40 - 0.62));
+          var e = airE(d);
+
+          var val = Math.round(e * TARGET);
+          if (val !== numLast) { numLast = val; numEl.textContent = val; }
+
+          var off = Math.round((1 - e) * L * 100) / 100;
+          if (off !== drawLast) { drawLast = off; pathEl.style.strokeDashoffset = off; }
+        }
+
+        ST.create({
+          trigger: msw.trigger.trigger || '#combo',   // ride the same pinned range
+          start: 'top top',
+          end: '+=' + Math.round(window.innerHeight * (N - 1) * 1.7),
+          scrub: true,            // NO pin:true here => 0 extra pins
+          onUpdate: tick
+        });
+        tick({ progress: 0 });    // correct on load
+      })();
+
+      // declare the contract: the ENGINE owns the one pin.
+      SectionHarness.declare({
+        pinOwner: 'media-step-switch',
+        expectPins: 1,
+        atomsCited: ['media-step-switch']
+      });
+    })();
+  </script>
+</body>
+</html>

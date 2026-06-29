@@ -16,7 +16,8 @@ const REGISTRY = join(ROOT, 'skills', 'grammar', 'references', '_REGISTRY_TID.md
 
 function dirs(p) {
   if (!existsSync(p)) return [];
-  return readdirSync(p).filter(n => statSync(join(p, n)).isDirectory());
+  // _-prefixed dirs are infrastructure (e.g. combos/_scaffold), not library entries — skip them
+  return readdirSync(p).filter(n => !n.startsWith('_') && statSync(join(p, n)).isDirectory());
 }
 
 function collectVariants(compDir) {

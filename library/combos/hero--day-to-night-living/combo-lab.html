@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: hero--day-to-night-living · "Дім, що дихає світлом"</title>
+<!--
+  HERO VARIANT · hero--day-to-night-living · "Дім, що дихає світлом"
+  ============================================================================
+  THE MECHANIC ROOT (unmistakable in a screenshot, not just in code):
+    ONE pinned scroll scrubs the SAME exterior view from full DAY into lit-window
+    NIGHT (day-34 <-> night-34, same house, same window), the serif title MASKS UP
+    line-by-line, and the WHOLE PAGE FIELD tweens warm -> dark in lockstep with the
+    dissolve. The house literally breathes light, then exhales the dark — the page
+    darkens around it. No other hero recolours the page off the same day/night scrub.
+
+  WHY DISTINCT (vs the other nine heroes):
+    - not a load-in arrival, not a flyaround, not a wordmark dock, not a mosaic:
+      it is a PINNED day->night DISSOLVE welded to a page-wide warm->dark recolour.
+      The signal is the colour temperature of the entire frame sliding cool/dark.
+
+  THE COUPLING (one scroll beat, one pin owner):
+    daynight-scroll-scrub OWNS the pin. It wraps the canon daynight-engine in
+    mode:'scrub' reveal:'opacity' (night.opacity ramps 0->1 over the SAME view),
+    raises a warm window-glow + a legibility scrim, and exposes scrub t via onUpdate.
+    Off that ONE t we ALSO:
+      • mask-up-title.play() once at intro (title rises from under the baseline mask),
+        then its lines drift up a hair as the night settles (PURE set on the same t),
+      • theme-tween owns the page chrome across the section seam (hero=warm ->
+        post=dark), AND we lerp a page-field tint warm->dark live off the scrub t so
+        the whole field darkens WITH the windows lighting.
+
+  HARD ANTI (obeyed): never blend day/night (NO mix-blend) — the engine ramps night
+    OPACITY over an identical frame, GPU-composited. Never scrub video.currentTime —
+    two registered <img> frames, opacity reveal. ONE pin (daynight-scroll-scrub).
+    transform/opacity/clip-path/filter + CSS-var colour only. NO WebGL, NO backdrop.
+  DECODE-GUARD: both frames force-decode() before the intro reveals the title, so the
+    night frame never flashes black through the rising opacity.
+  Asset-truth: renders/day-34.webp + renders/night-34.webp — the SAME building, the
+    cars-free frontal pair, 1920x1080, frame-matched.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/daynight-engine/component.css">
+<link rel="stylesheet" href="../../components/daynight-scroll-scrub/component.css">
+<link rel="stylesheet" href="../../components/mask-up-title/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the stage rails; daynight-* own the render + chrome).
+     The page FIELD reads warm->dark CSS vars that theme-tween + the scrub drive. */
+  :root {
+    --field-warm: #efe6d6;     /* dawn-paper field at t=0 (warm) */
+    --field-dark: #14110c;     /* night field at t=1 (dark)      */
+    --ink-warm:   #2c2620;
+    --ink-dark:   #efe6d6;
+    --accent-warm:#b07a4e;
+    --accent-dark:#e8c9a0;     /* warm lamp glow accent at night */
+    /* live page-field vars the scrub lerps (start warm) */
+    --field: var(--field-warm);
+    --field-ink: var(--ink-warm);
+  }
+  body { background: var(--field); transition: none; }
+  /* the pre/post spacers carry the page field so the WHOLE page is seen recolouring */
+  .combo-pre  { background: var(--field); color: color-mix(in srgb, var(--field-ink) 55%, transparent); }
+  .combo-post { background: var(--field-dark); color: color-mix(in srgb, var(--accent-dark) 70%, transparent); }
+
+  /* the hero render surface fills the stage; daynight-scroll-scrub injects .dn here */
+  #heroStage { inset: 0; }
+  /* a very slow, almost-still settle on the frame: life without motion-noise (no layout).
+     will-change ONLY on the layer the night-opacity ramp continuously composites; the day
+     layer is static and does not declare it. */
+  #heroStage .dn__layer img { transform: scale(1.045); transform-origin: 54% 50%; }
+  #heroStage .dn__night { will-change: opacity; }
+
+  /* the title well — lower-left, anchored to the scrim, ABOVE the daynight caption layer.
+     The well is WIDE enough to hold the longest logical line on ONE row; per-line nowrap
+     guarantees the Big Idea reads as words, never a vertical syllable stack.
+     will-change:transform is legitimate here: the scrub continuously nudges the well's y. */
+  .dtn__well { position: absolute; z-index: 12; left: clamp(20px, 5vw, 72px); right: clamp(20px, 5vw, 72px);
+    bottom: clamp(44px, 12vh, 120px); max-width: min(92vw, 60rem); pointer-events: none;
+    will-change: transform; }
+  .dtn__eyebrow { font: 600 clamp(10px, .82vw, 12px)/1 var(--combo-sans);
+    letter-spacing: .26em; text-transform: uppercase; color: var(--combo-cream);
+    margin-bottom: clamp(16px, 2.4vh, 26px);
+    text-shadow: 0 1px 14px rgba(0,0,0,.6); }
+  .dtn__eyebrow b { font-weight: 600; color: var(--accent, var(--accent-warm)); }  /* theme-tween drives --accent across the seam */
+  .dtn__title { font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(38px, 6.4vw, 104px); line-height: .98; letter-spacing: -.034em;
+    color: var(--combo-cream); text-shadow: 0 3px 34px rgba(0,0,0,.46); }
+  .dtn__title .mut-line { display: block; padding-bottom: .06em; }
+  /* each logical line stays on ONE row: the inner moving span is the mask-up wrapper's
+     child (translateY channel), the line itself never wraps to a syllable stack. */
+  .dtn__title .mut-line > span { display: block; white-space: nowrap; }
+  /* the last word warms with the lit windows (pure colour, no blend) */
+  .dtn__title .dtn__warm { color: color-mix(in srgb, var(--accent-dark) 92%, #fff); }
+  .dtn__body { margin-top: clamp(18px, 2.6vh, 30px); max-width: 34ch;
+    font: 400 clamp(14px, 1.05vw, 16.5px)/1.6 var(--combo-sans);
+    color: var(--combo-cream);
+    text-shadow: 0 1px 14px rgba(0,0,0,.55); }
+
+  /* corner meta — the authored-plate tell, top corners, assembles with the title.
+     VISIBLE at rest (opacity:1); the intro tweens FROM 0 so a from() lands on a visible plate. */
+  .dtn__meta { position: absolute; z-index: 12; top: clamp(20px, 4.5vh, 48px);
+    left: clamp(20px, 5vw, 64px); right: clamp(20px, 5vw, 64px);
+    display: flex; justify-content: space-between; pointer-events: none;
+    font: 500 clamp(10px, .78vw, 12px)/1 var(--combo-sans); letter-spacing: .2em;
+    text-transform: uppercase; color: var(--combo-cream); }
+  .dtn__meta span { text-shadow: 0 1px 12px rgba(0,0,0,.6); }
+  .dtn__meta b { font-weight: 600; color: var(--accent, var(--accent-dark)); }  /* theme-tween-driven */
+
+  @media (prefers-reduced-motion: reduce) {
+    /* reduced-motion: page settles to the night field, the engine shows the lit night */
+    :root { --field: var(--field-dark); --field-ink: var(--ink-dark); }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">день ↓ настає вечір</div>
+
+  <!-- hero section carries its WARM theme; the post section carries the DARK theme.
+       theme-tween reads these and tints the page chrome across the seam. -->
+  <section id="combo" class="combo-stage" data-combo="hero--day-to-night-living"
+           data-theme data-theme-bg="#efe6d6" data-theme-ink="#2c2620" data-theme-accent="#b07a4e">
+
+    <!-- the render surface: daynight-scroll-scrub injects .dn (day + night + glow + scrim) here -->
+    <div id="heroStage" data-render-surface></div>
+
+    <!-- corner meta (authored plate) -->
+    <div class="dtn__meta">
+      <span data-meta>вул. Замкова</span>
+      <span data-meta>6 таунхаусів · <b>82&#8201;м&#178;</b></span>
+    </div>
+
+    <!-- the title well: eyebrow + mask-up-title + body. The scrub atom builds the
+         render + glow + scrim + scroll hint; this title is mask-up-title's job. -->
+    <div class="dtn__well">
+      <div class="dtn__eyebrow">Від світанку <b>до вечора</b></div>
+      <h1 class="dtn__title" id="heroTitle" aria-label="Дім, що дихає світлом">
+        <span class="mut-line"><span>Дім, що</span></span>
+        <span class="mut-line"><span>дихає <span class="dtn__warm">світлом</span></span></span>
+      </h1>
+      <p class="dtn__body">Той самий двір, те саме вікно. Гортайте, і будинок засвічується зсередини.</p>
+    </div>
+  </section>
+
+  <!-- post: the night field. Same building idea, page has exhaled into the dark. -->
+  <section class="combo-post" data-theme data-theme-bg="#14110c" data-theme-ink="#efe6d6" data-theme-accent="#e8c9a0">
+    вечір настав
+  </section>
+
+  <!-- scaffold + adapters, then the cited atoms (canon FIRST: daynight-engine before its scrub dialect) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/daynight-engine/component.js"></script>
+  <script src="../../components/daynight-scroll-scrub/component.js"></script>
+  <script src="../../components/mask-up-title/component.js"></script>
+  <script src="../../components/theme-tween/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var g = window.gsap;
+      // expo.out as a named ease for the title rise (air is registered by boot)
+      if (window.CustomEase && g && !g.parseEase('expoOut')) {
+        try { window.CustomEase.create('expoOut', '0.16,1,0.3,1'); } catch (e) {}
+      }
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var scrub, title, theme;
+
+      // ── PAGE FIELD warm->dark, lerped LIVE off the scrub t (the page breathes with
+      //    the house). Pure CSS-var colour: no layout, no blend. Lives alongside
+      //    theme-tween (different var namespace) so the two never fight. ──
+      var rootStyle = document.documentElement.style;
+      function mix(a, b, t) {  // a,b = [r,g,b] 0..255 ; perceptual-ish via simple lerp
+        return 'rgb(' + Math.round(a[0] + (b[0]-a[0])*t) + ',' +
+                        Math.round(a[1] + (b[1]-a[1])*t) + ',' +
+                        Math.round(a[2] + (b[2]-a[2])*t) + ')';
+      }
+      var FIELD_WARM = [239,230,214], FIELD_DARK = [20,17,12];
+      var INK_WARM   = [44,38,32],    INK_DARK   = [239,230,214];
+      function paintField(t) {
+        rootStyle.setProperty('--field',     mix(FIELD_WARM, FIELD_DARK, t));
+        rootStyle.setProperty('--field-ink', mix(INK_WARM,   INK_DARK,   t));
+      }
+      paintField(0);
+
+      // ── OWNER-FIRST: daynight-scroll-scrub owns the ONE pin (wraps daynight-engine
+      //    canon in mode:'scrub'). It registers the TWO frames (same view) and ramps
+      //    night OPACITY + warm glow + scrim over the pinned scroll. ──
+      SectionHarness.ranOK('daynight-scroll-scrub', function () {
+        if (!window.DayNight) throw new Error('daynight-engine canon missing');
+        scrub = window.DayNightScrub.create('#heroStage', {
+          dayMedia:   'renders/day-34.webp',
+          nightMedia: 'renders/night-34.webp',
+          // PIN the section (normal flow) so pinSpacing extends the document and the
+          // full day->night range is scrollable; INJECT the render into #heroStage.
+          scrub: { trigger: '#combo', start: 'top top', end: '+=130%', pin: true, scrub: true },
+          glow: true,         // warm window-glow rises with t (the house lights up)
+          scrim: 0.55,        // legibility scrim deepens so the title stays readable
+          headline: [],       // NO headline here — mask-up-title owns the hero title
+          hint: 'гортайте, настає вечір',
+          onUpdate: function (t) {
+            // 1) the whole page field darkens warm->dark WITH the dissolve (always)
+            paintField(t);
+            // 2) the title well settles + the body recedes as night arrives. Gated to
+            //    AFTER the intro so the scrub never fights the intro fade-in at t~0.
+            //    (transform/opacity only; the intro owns the line RISE, this only nudges.)
+            if (g && window.__INTRO_DONE__) {
+              g.set('.dtn__well', { y: -t * 22 });
+              g.set('.dtn__body', { opacity: 1 - t * 0.4 });
+            }
+          }
+        });
+        window.__scrub = scrub;
+      });
+
+      // daynight-engine canon runs INSIDE the scrub dialect — record it cited; do NOT
+      // create a second engine instance (one render surface, one pin).
+      SectionHarness.ranOK('daynight-engine', function () {
+        if (!window.DayNight) throw new Error('daynight-engine canon missing');
+        if (!scrub || !scrub.dn) throw new Error('scrub did not wrap the canon');
+      });
+
+      // ── TITLE: mask-up-title (lines start hidden below the baseline, rise at intro) ──
+      SectionHarness.ranOK('mask-up-title', function () {
+        title = window.MaskUpTitle.create('#heroTitle', {
+          stagger: 0.13, duration: 1.0, ease: 'expoOut', from: 116
+        });
+        title.set(0); // hidden below the mask, ready for the intro
+      });
+
+      // ── THEME: theme-tween owns the page CHROME colour across the section seam
+      //    (hero WARM -> post DARK). The hero<->post handoff is its job; the in-pin
+      //    field recolour is the scrub's paintField above. ──
+      SectionHarness.ranOK('theme-tween', function () {
+        theme = window.ThemeTween.init({
+          root: document.documentElement,
+          sectionSelector: '[data-theme]',
+          vars: ['--bg', '--ink', '--accent'],   // reads data-theme-bg / -ink / -accent
+          ease: 0.1
+        });
+      });
+
+      // ── INTRO (ONCE, not tied to scrub): decode-guard BOTH frames, then rise the
+      //    title + assemble eyebrow/meta/body. The scrub stays at t=0 (full day). ──
+      function runIntro() {
+        if (reduced) {
+          if (title) title.set(1);
+          paintField(1);
+          g && g.set(['.dtn__eyebrow', '.dtn__body', '[data-meta]'], { opacity: 1 });
+          window.__INTRO_DONE__ = true;
+          return;
+        }
+        // DECODE-GUARD: never reveal onto an undecoded frame (= black flash through opacity)
+        var imgs = document.querySelectorAll('#heroStage img');
+        var jobs = [];
+        imgs.forEach(function (im) { if (im.decode) jobs.push(im.decode().catch(function () {})); });
+        Promise.all(jobs.length ? jobs : [Promise.resolve()]).then(function () {
+          // base rest state is VISIBLE (CSS opacity:1) — from() rises 0->1 and lands on the
+          // authored plate; the eyebrow/meta/address PROOF is readable at the hero rest state.
+          var tl = g.timeline({ defaults: { ease: 'expoOut' } });
+          tl.from('.dtn__eyebrow', { opacity: 0, y: 16, duration: 0.9 }, 0.1);
+          tl.add(function () { if (title) title.play(); }, 0.35);
+          tl.from('.dtn__body', { opacity: 0, y: 18, duration: 1.0 }, 0.9);
+          tl.from('[data-meta]', { opacity: 0, y: -10, duration: 0.7, stagger: 0.1 }, 0.5);
+          tl.eventCallback('onComplete', function () { window.__INTRO_DONE__ = true; });
+        });
+      }
+
+      // declare the contract BEFORE the probe samples it: scrub owns the ONE pin
+      SectionHarness.declare({
+        pinOwner: 'daynight-scroll-scrub', expectPins: 1,
+        atomsCited: ['daynight-scroll-scrub', 'daynight-engine', 'mask-up-title', 'theme-tween']
+      });
+
+      if (g) runIntro();
+      else if (title) title.set(1);
+    })();
+  </script>
+</body>
+</html>

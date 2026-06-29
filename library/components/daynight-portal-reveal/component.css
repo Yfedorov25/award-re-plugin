@@ -1,0 +1,64 @@
+/* DAYNIGHT-PORTAL-REVEAL · component.css   (V9 chrome — portal bloom from a click)
+   The CANON (../daynight-engine/component.css) already styles the stage (.dn), the
+   day/night layers (the night carries the clip-path circle reveal), and the День/Вечір
+   corner tags. This file ONLY adds the variation chrome: the pulsing hotspot dot that
+   invites the first touch and fades after use. opacity / transform / gradient only —
+   no mix-blend, no backdrop-filter, no WebGL. */
+
+/* the stage reads as touchable */
+.dn { cursor: pointer; }
+
+/* --- the pulsing hotspot at the default origin (a lit window) inviting the first touch --- */
+.dnpr__hotspot {
+  position: absolute;
+  z-index: 6;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;           /* centre on its left/top % position */
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f3e4c4;
+  box-shadow: 0 0 0 0 rgba(243, 228, 196, 0.55);
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  animation: dnpr-pulse 2.2s ease-out infinite;
+}
+/* a soft halo ring so the dot reads as a "turn on the evening" affordance, not a bug */
+.dnpr__hotspot::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  border: 1px solid rgba(243, 228, 196, 0.45);
+  opacity: 0.6;
+  transform: scale(0.7);
+  animation: dnpr-ring 2.2s ease-out infinite;
+  pointer-events: none;
+}
+.dnpr__hotspot.is-gone {
+  opacity: 0;
+  transform: scale(0.5);
+  animation: none;
+}
+
+@keyframes dnpr-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(243, 228, 196, 0.55); }
+  70%  { box-shadow: 0 0 0 18px rgba(243, 228, 196, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(243, 228, 196, 0); }
+}
+@keyframes dnpr-ring {
+  0%   { transform: scale(0.7); opacity: 0.6; }
+  70%  { transform: scale(1.5); opacity: 0; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dnpr__hotspot { display: none; }
+  .dn { cursor: default; }
+}

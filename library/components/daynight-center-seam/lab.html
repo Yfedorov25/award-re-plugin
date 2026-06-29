@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · daynight-center-seam · V5 centre-seam split (both halves part from the centre)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · daynight-center-seam  (V5 — the SAISEI centre-seam dialect)
+================================================================================
+  Two frame-matched stills of the SAME facade (day + evening). Unlike V3 (one seam
+  follows the cursor), here BOTH halves part from the CENTRE: a vertical centre line
+  opens outward and the evening render is revealed in the widening centre gap.
+
+  It is a VARIATION, not a new engine: it loads the canon (window.DayNight) in
+  mode:"manual" reveal:"opacity" so the canon stacks day + night, then OVERRIDES the
+  night clip-path with a centre-parting inset on each t.
+
+  This lab autoplays the part-open once, then stays fully interactive: a slider scrubs
+  the parting and a "Показати ще раз" replays the demo. set(t) is PURE (0=day, 1=evening).
+
+  NO WebGL (opacity + clip-path + gradient only). window.__LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../daynight-engine/component.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --cream:#f1ebd6; --ink:#20272c; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#0c0c0a;color:var(--cream);font-family:var(--sans);overflow:hidden;display:grid;place-items:center}
+
+  .frame{position:relative;width:min(92vw,1180px);aspect-ratio:16/9;border-radius:6px;overflow:hidden;
+    box-shadow:0 30px 90px rgba(0,0,0,.5)}
+
+  /* caption over the scene */
+  .cap{position:absolute;z-index:6;left:clamp(20px,4vw,56px);bottom:clamp(20px,5vh,48px);max-width:24ch;pointer-events:none}
+  .cap h1{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,5vw,3.9rem);line-height:.96;letter-spacing:-.01em;
+    text-shadow:0 2px 22px rgba(0,0,0,.5)}
+  .cap p{margin-top:.5rem;font-size:clamp(.78rem,1.2vw,.95rem);opacity:.85;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+
+  /* controls */
+  .panel{position:fixed;z-index:9999;left:50%;bottom:18px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center;
+    background:rgba(12,12,11,.6);border:1px solid rgba(241,235,214,.22);border-radius:10px;padding:10px 16px}
+  .panel label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .panel input[type=range]{width:min(46vw,340px);accent-color:#e8c9a0}
+  .tval{font-variant-numeric:tabular-nums;font-size:.7rem;opacity:.8;min-width:5ch;text-align:right}
+  .replay{font:500 .62rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--cream);
+    background:transparent;border:1px solid rgba(241,235,214,.32);padding:.55rem .8rem;border-radius:4px;cursor:pointer}
+  .replay:hover{background:#e8c9a0;color:#20272c;border-color:#e8c9a0}
+</style>
+</head>
+<body>
+
+  <div class="frame" id="frame">
+    <!-- two frame-matched stills of the SAME exterior (real Higgsfield day/night pair, 16:9) -->
+    <div class="cap"><h1>Вдень фасад.<br>Ввечері дім.</h1><p>Світло народжується з середини.</p></div>
+  </div>
+
+  <div class="panel">
+    <div>
+      <label>Розкриття з середини</label><br>
+      <input id="t" type="range" min="0" max="1" step="0.001" value="0">
+    </div>
+    <span class="tval" id="tval">день</span>
+    <button class="replay" id="replay">Показати ще раз</button>
+  </div>
+
+<!-- load order: canon CSS + brick CSS (head) -> GSAP (head) -> canon JS -> brick JS -->
+<script src="../daynight-engine/component.js"></script>
+<script src="component.js"></script>
+<script>
+  (function () {
+    var frame = document.getElementById('frame');
+    var slider = document.getElementById('t');
+    var tval = document.getElementById('tval');
+    var replay = document.getElementById('replay');
+
+    var DAY = 'renders/dn-ext-day.webp';
+    var NIGHT = 'renders/dn-ext-night.webp';
+
+    var cs = window.DayNightCenterSeam.create(frame, {
+      dayMedia: DAY,
+      nightMedia: NIGHT,
+      labels: ['Вдень', 'Ввечері']
+    });
+
+    function tLabel(v) {
+      return v < 0.04 ? 'день' : v > 0.96 ? 'вечір' : (v < 0.5 ? 'присмерк' : 'сутінки');
+    }
+
+    var autoTween = null;
+    function killAuto() { if (autoTween) { autoTween.kill(); autoTween = null; } }
+
+    slider.addEventListener('input', function () {
+      var v = parseFloat(slider.value);
+      cs.set(v);
+      tval.textContent = tLabel(v);
+    });
+    // user interaction stops the demo so manual control is exact
+    slider.addEventListener('pointerdown', killAuto);
+
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // gentle autoplay demo: part the centre open 0->1 once so a screen-record shows the move
+    function playDemo() {
+      if (!window.gsap || reduced) {
+        slider.value = 1; cs.set(1); tval.textContent = tLabel(1);
+        return;
+      }
+      killAuto();
+      var o = { v: parseFloat(slider.value) || 0 };
+      autoTween = gsap.to(o, {
+        v: 1, duration: 4.2, delay: 0.8, ease: 'sine.inOut', yoyo: true, repeat: 1,
+        onUpdate: function () { slider.value = o.v; cs.set(o.v); tval.textContent = tLabel(o.v); },
+        onComplete: function () { autoTween = null; }
+      });
+    }
+    replay.addEventListener('click', playDemo);
+
+    if (reduced) { slider.value = 1; cs.set(1); tval.textContent = tLabel(1); }
+    else { playDemo(); }
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

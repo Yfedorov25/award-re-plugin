@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: hero--seam-cascade-arrival — "Дім, що відкривається"</title>
+<!--
+  HERO VARIANT · hero--seam-cascade-arrival · "Дім, що відкривається"
+  ============================================================================
+  The page-enter AS a hero (Saisei authored-arrival). NOT a pinned scroll hero:
+  a LOAD-IN cascade timeline, render fixed behind, pin budget = 0.
+
+  THE MECHANIC ROOT (what makes it unmistakable on screen):
+    a dark CENTRE SEAM parts and the hero render SURFACES + BRIGHTENS through the
+    widening gap, then the title rises from under a mask, and the corner-meta +
+    eyebrow assemble LAST. Work first, interface last.
+
+  THE CASCADE (one GSAP load-in timeline, no ScrollTrigger):
+    0  dark field, render hidden behind render-slice-reveal (slice shut + veil dark)
+    1  HEROIC MOMENT: render-slice-reveal.set(0->1) drama 1.4s power2.in — the centre
+       seam peels centre->edges, the render surfaces and the dark veil clears in sync
+    2  mask-up-title.play() — serif title rises line-by-line from under a baseline mask
+    3  content-stage-cascade.play() — eyebrow + body fade, then corner-frame-meta LAST
+
+  Atoms cited (inline-flow, owner-first):
+    render-slice-reveal  (composes center-seam-split — the ONE cover; do NOT add a 2nd)
+    center-seam-split    (the seam engine, composed by render-slice-reveal)
+    mask-up-title        (title rises under mask)
+    content-stage-cascade(orchestrates eyebrow/body -> chrome LAST)
+    corner-frame-meta    (corner labels fade in, last)
+
+  PIN: owner=none, count=0 (declare expectPins:0). No video.currentTime. No WebGL.
+  No mix-blend / no backdrop. transform/opacity/clip-path only. Decode-guard on the
+  hero img before the seam opens (no black flicker through the gap).
+  Asset: ONE cars-free exterior renders/day-34.webp (1920x1080 landscape).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/center-seam-split/component.css">
+<link rel="stylesheet" href="../../components/render-slice-reveal/component.css">
+<link rel="stylesheet" href="../../components/mask-up-title/component.css">
+<link rel="stylesheet" href="../../components/content-stage-cascade/component.css">
+<link rel="stylesheet" href="../../components/corner-frame-meta/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the stage rails) */
+
+  /* the hero render-slice stage fills the whole stage; render-slice-reveal injects
+     its slice cover over THIS element, and the veil + render markup live inside it. */
+  #arrivalStage { inset: 0; }
+  #arrivalStage .rsr-render img { /* slow, almost-still ken-burns drift adds life without motion-noise */
+    transform: scale(1.06); transform-origin: 52% 46%; will-change: transform; }
+  /* a soft bottom-up gradient so the cream type reads on the bright render (no backdrop-filter) */
+  .sca__grade { position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background: linear-gradient(180deg, rgba(10,9,7,.34) 0%, rgba(10,9,7,0) 26%,
+      rgba(10,9,7,0) 52%, rgba(10,9,7,.30) 74%, rgba(10,9,7,.72) 100%); }
+
+  /* the framed plate — corners + content sit above the render */
+  #frame { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+
+  /* hairline corner-frame brackets (the "authored plate" tell) */
+  .sca__bracket { position: absolute; width: clamp(26px,3.4vw,44px); height: clamp(26px,3.4vw,44px);
+    border: 0 solid rgba(244,239,230,.42); opacity: 0; will-change: opacity; }
+  .sca__bracket--tl { left: clamp(20px,4vw,52px); top: clamp(20px,4.5vh,52px); border-top-width: 1px; border-left-width: 1px; }
+  .sca__bracket--tr { right: clamp(20px,4vw,52px); top: clamp(20px,4.5vh,52px); border-top-width: 1px; border-right-width: 1px; }
+  .sca__bracket--bl { left: clamp(20px,4vw,52px); bottom: clamp(20px,4.5vh,52px); border-bottom-width: 1px; border-left-width: 1px; }
+  .sca__bracket--br { right: clamp(20px,4vw,52px); bottom: clamp(20px,4.5vh,52px); border-bottom-width: 1px; border-right-width: 1px; }
+
+  /* corner-frame-meta labels (styled by us; positioned by the atom's CSS) */
+  #frame [data-corner] { color: var(--combo-cream); font-family: var(--combo-sans);
+    font-size: clamp(10px,.78vw,12px); font-weight: 500; letter-spacing: .18em;
+    text-transform: uppercase; opacity: 0; text-shadow: 0 1px 14px rgba(0,0,0,.5); }
+  #frame [data-corner] b { font-weight: 600; }
+
+  /* the title block, lower-left, anchored to the bottom gradient.
+     width is in px (NOT ch) — ch would be measured in the inherited sans, not the
+     106px serif, and would crush the heroic line to fragments. The serif lives on
+     the well so any residual ch math resolves in the display face. */
+  .sca__well { position: absolute; z-index: 5; left: clamp(20px,5vw,72px);
+    bottom: clamp(40px,9vh,96px); max-width: min(92vw, 880px);
+    font-family: var(--combo-serif); pointer-events: none; }
+  .sca__eyebrow { font: 600 clamp(10px,.8vw,12px)/1 var(--combo-sans);
+    letter-spacing: .26em; text-transform: uppercase; color: var(--combo-cream);
+    opacity: 0; margin-bottom: clamp(14px,2vh,22px); will-change: opacity, transform;
+    text-shadow: 0 1px 14px rgba(0,0,0,.55); }
+  .sca__title { font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(40px,7.4vw,118px); line-height: .94; letter-spacing: -.035em;
+    color: var(--combo-cream); text-shadow: 0 3px 30px rgba(0,0,0,.42); }
+  /* each masked line is its OWN block; the moving span stays on ONE line and sizes to
+     its content (no wrap), so the .mut-line overflow:hidden mask never clips it
+     horizontally — it only ever clips the vertical rise. */
+  .sca__title .mut-line { display: block; }
+  .sca__title .mut-line > span { display: block; white-space: nowrap; }
+  .sca__body { margin-top: clamp(16px,2.4vh,28px); max-width: 30ch;
+    font: 400 clamp(14px,1.05vw,16.5px)/1.55 var(--combo-sans);
+    color: var(--combo-cream); opacity: 0; will-change: opacity;
+    text-shadow: 0 1px 14px rgba(0,0,0,.55); }
+
+  /* a quiet "scroll" cue assembling last — pure decoration, part of the chrome cascade */
+  .sca__cue { position: absolute; z-index: 6; left: 50%; bottom: clamp(20px,3.4vh,34px);
+    transform: translateX(-50%); display: flex; align-items: center; gap: .6rem; opacity: 0;
+    color: var(--combo-cream); font: 600 10px/1 var(--combo-sans); letter-spacing: .24em;
+    text-transform: uppercase; will-change: opacity; pointer-events: none; }
+  .sca__cue::after { content: ""; width: 1px; height: 26px;
+    background: linear-gradient(180deg, rgba(244,239,230,.7), rgba(244,239,230,0)); }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* atoms handle their own reduced state; ensure the framed copy is simply present */
+    .sca__eyebrow, .sca__body, .sca__bracket, #frame [data-corner], .sca__cue { opacity: 1 !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">arrival ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="hero--seam-cascade-arrival">
+
+    <!-- render-slice-reveal stage: the ONE cover (slice) lives here; render is fixed behind -->
+    <div id="arrivalStage" class="rsr-stage" data-render-surface>
+      <div class="rsr-render"><img id="heroImg" src="renders/day-34.webp" alt="Дім на вул. Замковій, денний фасад"></div>
+      <div class="rsr-veil" id="veil"></div>
+    </div>
+
+    <div class="sca__grade"></div>
+
+    <!-- the framed plate: corner brackets + corner-frame-meta labels (assemble LAST) -->
+    <div id="frame">
+      <span class="sca__bracket sca__bracket--tl"></span>
+      <span class="sca__bracket sca__bracket--tr"></span>
+      <span class="sca__bracket sca__bracket--bl"></span>
+      <span class="sca__bracket sca__bracket--br"></span>
+      <div data-corner="tl">вул. Замкова</div>
+      <div data-corner="bl">Денний фасад</div>
+      <div data-corner="br">6 таунхаусів · <b>82&#8201;м&#178;</b></div>
+    </div>
+
+    <!-- the title well: eyebrow + masked title + body -->
+    <div class="sca__well">
+      <div class="sca__eyebrow">Перший погляд</div>
+      <h1 class="sca__title" id="heroTitle" aria-label="Дім, що відкривається">
+        <span class="mut-line"><span>Дім, що</span></span>
+        <span class="mut-line"><span>відкривається</span></span>
+      </h1>
+      <p class="sca__body">Світло, тераса, власне небо над дахом. Заходьте першими.</p>
+    </div>
+
+    <div class="sca__cue">далі</div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon dep FIRST: center-seam-split before render-slice-reveal) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/center-seam-split/component.js"></script>
+  <script src="../../components/render-slice-reveal/component.js"></script>
+  <script src="../../components/mask-up-title/component.js"></script>
+  <script src="../../components/content-stage-cascade/component.js"></script>
+  <script src="../../components/corner-frame-meta/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var g = window.gsap;
+      // expo.out as a named ease for the cascade group rhythm (air is registered by boot)
+      if (window.CustomEase && g && !g.parseEase('expoOut')) {
+        try { window.CustomEase.create('expoOut', '0.16,1,0.3,1'); } catch (e) {}
+      }
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var slice, title, cascade, meta;
+
+      // ── owner-first: render-slice-reveal (composes center-seam-split = the seam engine) ──
+      SectionHarness.ranOK('render-slice-reveal', function () {
+        slice = window.RenderSliceReveal.create('#arrivalStage', {
+          veil: 0.96,            // start near-black over the render
+          fill: '#0e0e0c',       // the dark seam that parts
+          duration: 1.4, ease: 'power2.in',  // Saisei open curve (hairline dwells, then rips)
+          veilEase: 0.92,        // render reaches full brightness slightly before the seam fully clears
+          z: 60
+        });
+        slice.reset();           // shut + dark, ready for the arrival
+        window.__slice = slice;
+      });
+
+      // center-seam-split runs as the engine INSIDE render-slice-reveal — record it as cited,
+      // do NOT create a standalone cover (that would be a 2nd cover fighting the slice).
+      SectionHarness.ranOK('center-seam-split', function () {
+        if (!window.CenterSeamSplit) throw new Error('center-seam-split engine missing');
+        if (slice && slice.seam) slice.seam(); // forces the composed seam to instantiate
+      });
+
+      // ── title: mask-up-title (lines start hidden below the baseline) ──
+      SectionHarness.ranOK('mask-up-title', function () {
+        title = window.MaskUpTitle.create('#heroTitle', {
+          stagger: 0.14, duration: 0.95, ease: 'expo.out', from: 116
+        });
+        title.reset();
+      });
+
+      // ── chrome LAST: content-stage-cascade -> corner-frame-meta ──
+      SectionHarness.ranOK('corner-frame-meta', function () {
+        meta = window.CornerFrameMeta.create('#frame', { stagger: 0.1, dur: 0.6, ease: 'power2.out' });
+        meta.set(0);
+      });
+
+      SectionHarness.ranOK('content-stage-cascade', function () {
+        cascade = window.ContentStageCascade.create({
+          gap: 0.14,
+          stages: [
+            { el: '.sca__eyebrow', kind: 'slide-x', from: -22, dur: 0.6, ease: 'expoOut' },
+            { el: '.sca__body',    kind: 'fade',    dur: 0.7,  ease: 'power2.out', gapAfter: 0.2 },
+            { el: '.sca__bracket', kind: 'fade',    dur: 0.7,  ease: 'power2.out', stagger: 0.06 },
+            // chrome LAST: corner meta labels + scroll cue assemble after the work
+            { el: '#__metaProxy', kind: 'fn', fn: function () { if (meta) meta.reveal(); }, gapAfter: 0.08 },
+            { el: '.sca__cue',    kind: 'fade',    dur: 0.6,  ease: 'power2.out' }
+          ]
+        });
+        cascade.reset();
+      });
+
+      // after the one-shot cascade, no element should keep a will-change hint alive
+      // (a persistent compositor layer is a junior red flag — clear it on arrival end).
+      function clearArrivalWillChange() {
+        var els = document.querySelectorAll(
+          '#heroImg, .sca__eyebrow, .sca__body, .sca__bracket, .sca__cue, .sca__title .mut-line > span');
+        for (var i = 0; i < els.length; i++) els[i].style.willChange = 'auto';
+      }
+
+      // ── the LOAD-IN arrival timeline (no ScrollTrigger, no pin) ──
+      function runArrival() {
+        if (reduced) {
+          if (slice) slice.set(1);
+          if (title) title.set(1);
+          if (cascade) cascade.play();   // reduced -> instant shown inside the atoms
+          clearArrivalWillChange();
+          window.__ARRIVAL_DONE__ = true;
+          return;
+        }
+        var img = document.getElementById('heroImg');
+        // DECODE-GUARD: never open the seam onto an undecoded img (= black flicker in the gap)
+        var ready = (img && img.decode) ? img.decode().catch(function () {}) : Promise.resolve();
+        ready.then(function () {
+          var tl = g.timeline({ defaults: { ease: 'power2.out' } });
+          // 1) HEROIC MOMENT: seam parts, render surfaces + brightens (1.4s drama)
+          tl.to({ p: 0 }, {
+            p: 1, duration: 1.4, ease: 'power2.in',
+            onUpdate: function () { if (slice) slice.set(this.targets()[0].p); }
+          }, 0.15);
+          // slow ken-burns settle on the render (life without motion-noise).
+          // CLEAR will-change the instant the one-shot drift lands (no persistent GPU layer).
+          tl.fromTo('#heroImg', { scale: 1.06 }, { scale: 1.0, duration: 3.0, ease: 'power1.out',
+            onComplete: function () { img.style.willChange = 'auto'; } }, 0.15);
+          // 2) title rises from under the mask (overlaps the last third of the seam)
+          tl.add(function () { if (title) title.play(); }, 1.15);
+          // 3) chrome assembles LAST (eyebrow -> body -> brackets -> corner-meta -> cue),
+          //    then drop every one-shot will-change so nothing keeps a live compositor layer.
+          tl.add(function () { if (cascade) cascade.play(function () {
+            clearArrivalWillChange();
+            window.__ARRIVAL_DONE__ = true;
+          }); }, 1.85);
+        });
+      }
+
+      // declare the contract BEFORE the probe samples it: load-in hero, ZERO pins
+      SectionHarness.declare({
+        pinOwner: 'none', expectPins: 0,
+        atomsCited: ['render-slice-reveal', 'center-seam-split', 'mask-up-title', 'content-stage-cascade', 'corner-frame-meta']
+      });
+
+      if (g) runArrival();
+      else { if (slice) slice.set(1); if (title) title.set(1); }
+    })();
+  </script>
+</body>
+</html>

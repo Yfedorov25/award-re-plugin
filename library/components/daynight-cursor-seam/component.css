@@ -1,0 +1,50 @@
+/* DAYNIGHT-CURSOR-SEAM · component.css   (V3 chrome — the SMARTS dialect)
+   The CANON (../daynight-engine/component.css) already styles the stage (.dn),
+   the day/night layers, the seam line (.dn__seamline) + its round ⇆ grip
+   (.dn__seamline::after), and the corner tags (.dn__tag--day / .dn__tag--night).
+   This file ONLY adds the variation chrome: the fading curtain hint, plus a touch of
+   Smarts seam polish. opacity / transform / gradient only — no mix-blend, no backdrop. */
+
+/* --- Smarts seam dialect: the splitline is a cream hairline with a soft drop, and the
+       ⇆ grip reads like a draggable handle (the canon already paints it #f3f1ec). --- */
+.dn .dn__seamline { --dn-seam: #f3f1ec; }
+.dn .dn__seamline::after {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s ease;
+}
+/* on a fine-pointer device, the grip nudges when the seam is the focal handle */
+@media (hover: hover) {
+  .dn:hover .dn__seamline::after { transform: translate(-50%, -50%) scale(1.06); }
+}
+/* touch: make the grip clearly a draggable thumb */
+@media (hover: none) {
+  .dn .dn__seamline::after { width: 50px; height: 50px; font-size: 1.15rem; }
+}
+
+/* --- the fading curtain HINT (Smarts «проведіть, щоб настав вечір») --- */
+.dncs__hint {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.55rem 1.1rem;
+  border: 1px solid rgba(243, 241, 236, 0.5);
+  border-radius: 999px;
+  font: 500 0.64rem/1 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f3f1ec;
+  background: linear-gradient(180deg, rgba(20, 24, 28, 0.32), rgba(20, 24, 28, 0.5));
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+.dncs__hint.is-gone { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dncs__hint { display: none; }
+  .dn .dn__seamline::after { transition: none; }
+}

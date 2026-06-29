@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · our-house-at-dusk · шов день -> вечір, вікна загораються в такт (A7)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · our-house-at-dusk  (A7 — exterior day/night, the seam that lights the house)
+================================================================================
+  A wide elevation of the house at blue hour as one before/after surface: LEFT of a vertical
+  seam = cold afternoon, RIGHT = warm evening. Drag the seam and the CANON (window.DayNight,
+  reveal:'seam') clips the evening still in as the seam sweeps. THE TWIST: the windows ignite
+  one by one ONLY as the seam physically passes their band, and the warm glow is masked to the
+  evening side -- so the life in the windows is exclusive to the part of the day you have swept
+  into evening. The seam is the storyteller; pulling it right brings the house to life.
+
+  Thin orchestrator: the seam clip lives in the canon; this file adds the draggable handle + the
+  window-ignition glow. NO WebGL (clip-path / opacity / gradient only). __LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../daynight-engine/component.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --cream:#f1ebd6; --ink:#20272c; --brass:#c8a96a; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#0a0b0e;color:var(--cream);font-family:var(--sans);overflow:hidden;display:grid;place-items:center}
+
+  /* the wide elevation surface — 16:9 (zero crop of the render) */
+  .ohd{position:relative;width:min(92vw,1240px);aspect-ratio:16/9;border-radius:6px;overflow:hidden;
+    box-shadow:0 30px 90px rgba(0,0,0,.5)}
+
+  /* a real scrim plate so the white lockup never washes out over the bright (day) side */
+  .ohd::after{content:"";position:absolute;z-index:7;left:0;bottom:0;width:60%;height:62%;pointer-events:none;
+    background:linear-gradient(to top right, rgba(10,11,14,.62) 0%, rgba(10,11,14,.28) 38%, transparent 66%)}
+
+  /* the quiet bottom-left lockup */
+  .lockup{position:absolute;z-index:8;left:clamp(20px,3.5vw,48px);bottom:clamp(20px,5vh,44px);max-width:30ch;pointer-events:none}
+  .lockup .eyebrow{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;opacity:.75;margin-bottom:.5rem;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+  .lockup h1{font-family:var(--serif);font-weight:300;font-size:clamp(1.6rem,3.2vw,2.8rem);line-height:1.0;letter-spacing:-.01em;text-shadow:0 2px 20px rgba(0,0,0,.55)}
+  .lockup p{margin-top:.5rem;font-size:clamp(.74rem,1vw,.9rem);opacity:.86;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+
+  .panel{position:fixed;z-index:9999;left:50%;bottom:18px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+    background:rgba(10,11,14,.62);border:1px solid rgba(200,169,106,.3);border-radius:10px;padding:9px 16px}
+  .panel label{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+  .btn{font:500 .6rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--cream);
+    background:transparent;border:1px solid rgba(200,169,106,.4);padding:.55rem .8rem;border-radius:4px;cursor:pointer}
+  .btn:hover{border-color:var(--brass);color:#f7ce8e}
+  .hint{font-size:.58rem;opacity:.55;letter-spacing:.04em}
+</style>
+</head>
+<body>
+
+  <div class="ohd" id="ohd">
+    <div class="lockup">
+      <div class="eyebrow">Один дім, два різні життя</div>
+      <h1>Вечір настає лише там, куди Ви його ведете.</h1>
+      <p id="lead">Тягніть шов праворуч. Вечір йде за ним, і вікна загораються в такт.</p>
+    </div>
+    <!-- OurHouseAtDusk.create mounts the canon seam + glow here -->
+  </div>
+
+  <div class="panel">
+    <label>Перетягніть круглий шов · день зліва, вечір справа</label>
+    <span class="hint">стрілки ← → · Home/End</span>
+    <button class="btn" id="evening" type="button">Повний вечір</button>
+    <button class="btn" id="reset" type="button">Знову день</button>
+  </div>
+
+<!-- LOAD ORDER: canon JS first, then this section -->
+<script src="../daynight-engine/component.js"></script>
+<script src="component.js"></script>
+<script>
+  (function () {
+    var host = document.getElementById('ohd');
+
+    var dusk = window.OurHouseAtDusk.create(host, {
+      dayMedia: 'renders/dn-ext-day.webp',
+      nightMedia: 'renders/dn-ext-night.webp',
+      start: 0.42
+    });
+    window.__ohd = dusk;   // exposed for headless verification
+
+    // reduced-motion: the seam is parked mid-frame (static split), so reframe the copy from a drag
+    // instruction to a description of what is already on screen.
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var lead = document.getElementById('lead');
+      if (lead) lead.textContent = 'Ліворуч вечір, праворуч день. Вікна світяться лише там, де вже настав вечір.';
+    }
+
+    document.getElementById('evening').addEventListener('click', function () { dusk.tweenTo(1); });
+    document.getElementById('reset').addEventListener('click', function () { dusk.tweenTo(0.06); });
+
+    // a gentle one-time demo so a screen-record shows the windows igniting as the seam sweeps
+    var demo = null, userTookOver = false;
+    function killDemo() { userTookOver = true; if (demo) { demo.kill(); demo = null; } }
+    window.__killDemo = killDemo;
+    host.addEventListener('pointerdown', killDemo, true);
+    host.addEventListener('keydown', killDemo, true);
+
+    if (window.gsap && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      var o = { v: 0.10 };
+      dusk.set(0.10);
+      demo = gsap.timeline({ delay: 0.7, onComplete: function () { demo = null; } })
+        .to(o, { v: 0.96, duration: 4.2, ease: 'power1.inOut', onUpdate: upd })
+        .to(o, { v: 0.42, duration: 1.8, ease: 'power2.inOut', onUpdate: upd }, '+=0.5');
+      function upd() { if (userTookOver) { if (demo) { demo.kill(); demo = null; } return; } dusk.set(o.v); }
+    }
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

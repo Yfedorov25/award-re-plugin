@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · reach-ribbon · what fits inside ten minutes (a soft reach isochrone)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · reach-ribbon
+================================================================================
+  Coverage, not distance. One soft organic reach-ribbon (the walking-reach isochrone) is drawn on an
+  illustrated cream map: its outline strokes in, a warm fill floods it, every daily place INSIDE
+  lights warm while the one or two just OUTSIDE stay faint with a "+N хв" note. A 5/10-minute toggle
+  grows the ribbon. The message lands at a glance: how much life fits in ten minutes. NO WebGL.
+  window.__LAB_OK__.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:#ece4d6;font-family:'Inter',system-ui,sans-serif}
+  .pre,.post{height:60vh;display:grid;place-items:center;color:#8a8073;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+  <div class="pre">скрол ↓</div>
+
+  <section class="rr">
+    <div class="rr-grid">
+
+      <!-- EDITORIAL COLUMN -->
+      <div class="rr-col">
+        <p class="rr-kicker">/ Поряд пішки</p>
+        <h2 class="rr-h">Скільки життя вміщається <em>у кілька хвилин.</em></h2>
+        <p class="rr-lead">Усе, до чого можна дійти пішки, поки не охолола кава. Тепла зона навколо дому, а не кілометри на карті.</p>
+
+        <div class="rr-countline">
+          <span class="rr-count" data-rr-count aria-live="polite">0</span>
+          <span class="rr-countcap">щоденних місць у межах теплої зони</span>
+        </div>
+
+        <div class="rr-toggle" data-rr-toggle role="group" aria-label="Радіус пішої досяжності">
+          <button type="button" data-min="5" aria-pressed="false">5 хвилин</button>
+          <button type="button" data-min="10" aria-pressed="true">10 хвилин</button>
+        </div>
+
+        <div class="rr-legend" role="list">
+          <div class="rr-row" data-rr-row="park" tabindex="0" role="listitem" aria-label="Парк біля річки, 4 хвилини пішки"><span class="mk"></span><span class="nm">Парк біля річки</span><span class="tm">4 хв</span></div>
+          <div class="rr-row" data-rr-row="cafe" tabindex="0" role="listitem" aria-label="Кав'ярня на площі, 5 хвилин пішки"><span class="mk"></span><span class="nm">Кав'ярня на площі</span><span class="tm">5 хв</span></div>
+          <div class="rr-row" data-rr-row="school" tabindex="0" role="listitem" aria-label="Школа і садок, 7 хвилин пішки"><span class="mk"></span><span class="nm">Школа і садок</span><span class="tm">7 хв</span></div>
+          <div class="rr-row" data-rr-row="shop" tabindex="0" role="listitem" aria-label="Супермаркет, 8 хвилин пішки"><span class="mk"></span><span class="nm">Супермаркет</span><span class="tm">8 хв</span></div>
+          <div class="rr-row" data-rr-row="apteka" tabindex="0" role="listitem" aria-label="Аптека, 9 хвилин пішки"><span class="mk"></span><span class="nm">Аптека</span><span class="tm">9 хв</span></div>
+          <div class="rr-row" data-rr-row="post" tabindex="0" role="listitem" aria-label="Нова Пошта, 13 хвилин пішки"><span class="mk"></span><span class="nm">Нова Пошта</span><span class="tm">13 хв</span></div>
+          <div class="rr-row" data-rr-row="gym" tabindex="0" role="listitem" aria-label="Спортзал, 15 хвилин пішки"><span class="mk"></span><span class="nm">Спортзал</span><span class="tm">15 хв</span></div>
+        </div>
+      </div>
+
+      <!-- THE ILLUSTRATED MAP -->
+      <div class="rr-stage">
+        <!-- preserveAspectRatio: "slice" (fill) on desktop; component.js swaps to "meet" (letterbox,
+             nothing cropped) at <=940px so the south lobe + the farthest pins (gym/post) never clip. -->
+        <svg class="rr-map" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice" role="img"
+             aria-label="Намальована мапа: тепла зона десятихвилинної пішої досяжності навколо дому з місцями всередині">
+          <!-- paper geography -->
+          <path class="rr-park" d="M120 230 C170 176 270 170 322 214 C372 256 356 340 286 366 C206 396 78 302 120 230 Z"/>
+          <path class="rr-park" d="M740 540 C812 516 898 548 906 618 C914 688 832 730 756 706 C692 686 678 582 740 540 Z"/>
+          <path class="rr-river" d="M-40 140 C180 190 320 130 470 230 C620 328 600 500 470 600 C360 676 430 760 660 800"/>
+          <path class="rr-road" d="M-40 420 C220 402 430 450 560 422 C760 380 900 440 1040 422"/>
+          <path class="rr-road" d="M500 -40 C486 200 520 380 484 600 C462 720 500 820 486 860"/>
+          <path class="rr-road" d="M230 -40 C222 200 188 380 270 540 C330 652 300 800 318 860"/>
+          <path class="rr-road" d="M820 -40 C812 200 858 380 800 580 C764 720 820 860 804 880"/>
+
+          <!-- reach ribbons = LOBED isochrones (irregular, bulging along roads, pinched at the
+               river crossing) — authored from streets, not a perfect oval. data-ribbon = minutes.
+               5-min encloses park(560,470)+cafe(430,475); 10-min adds school(372,300)+shop(652,292)+apteka(316,512).
+               post(812,232) + gym(214,700) stay outside both. -->
+          <path data-ribbon="5" class="rr-ribbon" d="M500 332 C566 318 626 344 638 396 C648 438 632 486 596 510 C548 540 470 544 420 522 C376 502 352 470 356 432 C360 388 392 356 432 346 C458 340 478 338 500 332 Z"/>
+          <path data-ribbon="10" class="rr-ribbon" d="M500 196 C588 184 654 214 690 270 C716 312 706 360 720 404 C732 452 716 520 668 558 C618 596 540 600 480 592 C408 582 336 600 292 560 C250 522 256 470 248 420 C240 360 268 296 326 262 C372 234 414 252 452 226 C470 212 480 200 500 196 Z"/>
+
+          <!-- home marker -->
+          <g data-home-anchor data-cx="500" data-cy="400">
+            <g transform="translate(500 400)">
+              <circle class="rr-home__pulse" r="13"/>
+              <circle class="rr-home__ring" r="15"/>
+              <circle class="rr-home__core" r="3.4"/>
+              <text class="rr-home__tag" y="-24">Ваш дім</text>
+            </g>
+          </g>
+        </svg>
+
+        <!-- POI pins (DOM). data-tx/ty = viewBox coords (distance from home rises with data-min);
+             component.js positions via CTM, tests inside/outside each ribbon, and drives the "+"
+             prefix from the live state. Edge POIs anchor their label inward (--l / --r). -->
+        <div class="rr-poi" data-poi="park"   data-tx="560" data-ty="470" data-min="4"  data-name="Парк"><span class="dot"></span><span class="lbl">Парк <span class="x">4 хв</span></span></div>
+        <div class="rr-poi" data-poi="cafe"   data-tx="430" data-ty="475" data-min="5"  data-name="Кав'ярня"><span class="dot"></span><span class="lbl">Кав'ярня <span class="x">5 хв</span></span></div>
+        <div class="rr-poi" data-poi="school" data-tx="372" data-ty="300" data-min="7"  data-name="Школа"><span class="dot"></span><span class="lbl">Школа <span class="x">7 хв</span></span></div>
+        <div class="rr-poi" data-poi="shop"   data-tx="652" data-ty="292" data-min="8"  data-name="Супермаркет"><span class="dot"></span><span class="lbl">Супермаркет <span class="x">8 хв</span></span></div>
+        <div class="rr-poi" data-poi="apteka" data-tx="316" data-ty="512" data-min="9"  data-name="Аптека"><span class="dot"></span><span class="lbl">Аптека <span class="x">9 хв</span></span></div>
+        <div class="rr-poi rr-poi--lr" data-poi="post" data-tx="812" data-ty="232" data-min="13" data-name="Нова Пошта"><span class="dot"></span><span class="lbl">Нова Пошта <span class="x">13 хв</span></span></div>
+        <div class="rr-poi rr-poi--rl" data-poi="gym"  data-tx="214" data-ty="700" data-min="15" data-name="Спортзал"><span class="dot"></span><span class="lbl">Спортзал <span class="x">15 хв</span></span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="post">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    window.__rr = window.ReachRibbon.create('.rr', { reach: 10 });
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

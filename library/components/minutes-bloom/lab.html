@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · minutes-bloom · time is the hero (scroll-scrubbed minute counters + map arcs)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · minutes-bloom
+================================================================================
+  Time is the hero, the map is a quiet backdrop. A pinned section steps through the daily places as
+  you scroll: a HUGE editorial minute number counts up (0 -> N), the place name blooms, and on the
+  faded illustrated map a single thin arc draws from the home to that place. NO WebGL. __LAB_OK__.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+<style>
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:#ece4d6;font-family:'Inter',system-ui,sans-serif}
+  .pre,.post{height:100vh;display:grid;place-items:center;color:#8a8073;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+  <div class="pre">скрол ↓</div>
+
+  <section class="mb">
+    <div class="mb-wrap">
+      <div class="mb-grid">
+
+        <!-- LEFT — the time hero -->
+        <div class="mb-hero">
+          <p class="mb-kicker">/ Скільки хвилин до життя</p>
+          <div class="mb-read">
+            <span class="mb-num" data-mb-num>0</span>
+            <span class="mb-unit" data-mb-unit>хв</span>
+          </div>
+          <p class="mb-name" data-mb-name>Школа і садок</p>
+          <p class="mb-mode" data-mb-mode>пішки</p>
+          <p class="mb-lead" data-mb-lead>Прокрутіть. Кожне місце, що формує день, рахується від ваших дверей.</p>
+          <div class="mb-rail" data-mb-rail></div>
+          <!-- static fallback list (mobile + reduced-motion): every place + its minutes -->
+          <ul class="mb-static-list" data-mb-static></ul>
+        </div>
+
+        <!-- RIGHT — the quiet illustrated map -->
+        <div class="mb-stage">
+          <svg class="mb-map" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice" role="img"
+               aria-label="Тиха намальована мапа кварталу: дім і денні місця, з хвилинами пішки">
+            <path class="mb-park" d="M120 250 C170 196 270 190 322 234 C372 276 356 360 286 386 C206 416 78 322 120 250 Z"/>
+            <path class="mb-park" d="M720 520 C792 496 878 528 886 598 C894 668 812 710 736 686 C672 666 658 562 720 520 Z"/>
+            <path class="mb-river" d="M-40 130 C180 180 320 120 470 220 C620 318 600 480 470 580 C360 656 430 760 660 820"/>
+            <path class="mb-road" d="M-40 410 C220 392 430 440 560 412 C760 370 900 430 1040 412"/>
+            <path class="mb-road" d="M520 -40 C504 200 540 380 500 600 C476 720 520 820 504 860"/>
+            <path class="mb-road" d="M230 -40 C222 200 188 360 270 520 C330 632 300 760 318 860"/>
+            <path class="mb-road" d="M820 -40 C812 200 858 380 800 560 C764 700 820 820 804 860"/>
+
+            <!-- the active arc layer -->
+            <g data-mb-arc></g>
+
+            <!-- POIs: coords kept in a SAFE CENTRAL BAND (x 300..700, y 250..610) so the slice crop
+                 never hides the arc endpoint at any stage aspect. Labels are DOM (component.js) and
+                 render outside the SVG box, so they are never clipped either. -->
+            <g class="mb-poi" data-poi="park"   data-tx="320" data-ty="470" data-min="6"  data-name="Парк біля річки" data-mode="пішки"><circle cx="320" cy="470" r="5.5"/></g>
+            <g class="mb-poi" data-poi="cafe"   data-tx="610" data-ty="560" data-min="7"  data-name="Кав'ярня на площі" data-mode="пішки"><circle cx="610" cy="560" r="5.5"/></g>
+            <g class="mb-poi" data-poi="school" data-tx="430" data-ty="600" data-min="9"  data-name="Школа і садок" data-mode="пішки"><circle cx="430" cy="600" r="5.5"/></g>
+            <g class="mb-poi" data-poi="shop"   data-tx="330" data-ty="290" data-min="9"  data-name="Супермаркет" data-mode="пішки"><circle cx="330" cy="290" r="5.5"/></g>
+            <g class="mb-poi" data-poi="apteka" data-tx="560" data-ty="270" data-min="10" data-name="Аптека" data-mode="пішки"><circle cx="560" cy="270" r="5.5"/></g>
+            <g class="mb-poi" data-poi="city"   data-tx="690" data-ty="380" data-min="12" data-name="Центр міста" data-mode="авто"><circle cx="690" cy="380" r="5.5"/></g>
+
+            <!-- home marker -->
+            <g data-home-anchor data-cx="500" data-cy="420">
+              <g data-home transform="translate(500 420)">
+                <circle class="mb-home__ring" r="15"/>
+                <circle class="mb-home__ring mb-home__ring--2" r="8"/>
+                <circle class="mb-home__core" r="3.4"/>
+                <text class="mb-home__tag" y="34">Ваш дім</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="post">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    window.__mb = window.MinutesBloom.create('.mb', { pin: true, scrub: 0.6 });
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

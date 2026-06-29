@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--brick-to-house — assembled section (harness proof)</title>
+<!--
+  SECTION VARIANT · architecture--brick-to-house · "Від фактури до дому"  (SCROLL)
+  ------------------------------------------------------------------------------
+  Shape = MANUAL-ATOM. The harness owns ONE pin on #combo. The cited real atom
+  scroll-zoom-image-pair supplies the frame contract (.szp-stage/.szp-figure/.szp-frame
+  /.szp-copy[data-zoomcopy]) and its PURE apply/set(p) (scroll-scrubbed Ken-Burns bound
+  to the clipping frame, scale 1.0->1.14). We kill the atom's OWN auto-trigger so the
+  harness pin is the single scroll driver, then drive two facade BEATS off that one pin.
+
+  COPY-TO-FRAME TRUTH (jury blocker fixed): renders/macro-pergola.webp shows the QUADRO
+  terrace pergola junction up close: dark TIMBER soffit slats + matte DARK ALUMINIUM posts.
+  There is NO clinker brick in any QUADRO render (the house is white plaster + dark glazing,
+  renders/day-front.webp), so the BEAT 1 copy names ONLY what the frame shows: timber +
+  aluminium + warm tactile grain. The false "клінкерна цегла" claim is removed everywhere.
+
+    beat 1 (p 0 -> .50)  the MATERIAL macro (renders/macro-pergola.webp = timber soffit +
+                         dark aluminium posts) is the hero, zooming inside the frame. copy: "Тепла фактура".
+    cross  (p .42 -> .58) macro recedes / facade rises, a clean opacity crossfade.
+    beat 2 (p .50 -> 1)  the whole house (renders/day-front.webp = white plaster + glazing)
+                         is the hero, the zoom continues. copy swaps to "Цілий дім". the read:
+                         from the material in the hand to the whole house it builds.
+
+  Springs F-grammar stolen: ONE big poetic sentence per beat, named choreography, restrained
+  reveal (ease .25,.74,.22,.99 register; house 'air' for the copy lift), crownd/finest F3
+  (framed render scroll-zooms beside held serif copy).
+  Engine laws: transform scale/translateY + opacity + overflow-clip (frame) only. NO WebGL,
+  NO mix-blend, NO backdrop-filter, NO width/height/top/left. will-change cleared after lift.
+  The extended __LAB_OK__ (combo-scaffold.js) passes only if: exactly 1 pin, the cited real
+  atom ran without throwing, a [data-render-surface] painted a decoded image, 0 console errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/scroll-zoom-image-pair/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ============================ variant SKIN only (scaffold owns the rails) ============================ */
+  /* dark warm field; the render is the hero, the type lives on a rail with generous air. */
+  #combo { background: #14110d; }
+
+  /* the stage: editorial L/R pair, render left, type on the right rail. asymmetric on purpose. */
+  .b2h__stage {
+    position: absolute; inset: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(28px, 5vw, 80px);
+    padding: clamp(80px, 12vh, 200px) clamp(20px, 5vw, 80px);
+    background: transparent; color: var(--combo-cream);
+  }
+
+  /* the clipping frame holds BOTH renders stacked; the zoom is bound inside it (overflow:hidden). */
+  .b2h__figure { position: relative; height: min(76vh, 760px); }
+  .b2h__frame {
+    position: absolute; inset: 0; overflow: hidden; border-radius: 3px;
+    box-shadow: 0 40px 120px -40px rgba(0,0,0,.7);
+  }
+  .b2h__frame img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+    transform-origin: 50% 50%; will-change: transform; backface-visibility: hidden;
+  }
+  /* the macro sits above the facade until the crossfade hands off */
+  .b2h__frame--macro  { z-index: 2; }
+  .b2h__frame--facade { z-index: 1; opacity: 0; }
+
+  /* subtle materiality: a soft top-down vignette grounds the render in the warm-dark field
+     (criterion 40, dosed depth). static overlay, NOT mix-blend, NOT backdrop-filter. */
+  .b2h__figure::after {
+    content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: 3px;
+    background:
+      linear-gradient(180deg, rgba(20,17,13,.22) 0%, rgba(20,17,13,0) 22%, rgba(20,17,13,0) 70%, rgba(20,17,13,.42) 100%),
+      radial-gradient(130% 90% at 50% 38%, rgba(20,17,13,0) 58%, rgba(20,17,13,.34) 100%);
+  }
+
+  /* a hairline frame index, top-left of the figure — "technical precision" label */
+  .b2h__index {
+    position: absolute; z-index: 3; top: clamp(14px, 3vh, 26px); left: clamp(14px, 2vw, 26px);
+    font: 500 12px/1 var(--combo-sans); letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(244,239,230,.82); text-shadow: 0 1px 18px rgba(0,0,0,.6);
+  }
+  .b2h__index b { font-weight: 600; }
+
+  /* the held editorial copy on the right rail. children lift in a progressive stagger on enter. */
+  .b2h__copy { max-width: 30ch; }
+  .b2h__lift { opacity: 0; transform: translateY(26px); will-change: transform, opacity; }
+  .b2h__eyebrow {
+    font: 500 12px/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase;
+    color: var(--combo-accent);
+  }
+  .b2h__heads { position: relative; margin-top: clamp(20px, 3.2vh, 34px); min-height: 3.2em; }
+  .b2h__head {
+    position: absolute; inset: 0;
+    font-family: var(--combo-serif); font-weight: 300; font-style: italic;
+    font-size: clamp(40px, 5.2vw, 92px); line-height: .96; letter-spacing: -.03em;
+    color: var(--combo-cream); margin: 0;
+  }
+  .b2h__head em { font-style: normal; color: var(--combo-accent); }
+  .b2h__head--two { opacity: 0; }
+
+  .b2h__body {
+    margin-top: clamp(24px, 3.6vh, 40px); max-width: 34ch;
+    font: 400 clamp(15px, 1.05vw, 18px)/1.7 var(--combo-sans);
+    color: rgba(244,239,230,.78);
+  }
+
+  /* a thin progress rule — beat 1 -> beat 2, the spine of the read */
+  .b2h__rail { margin-top: clamp(28px, 4vh, 48px); }
+  .b2h__line { position: relative; height: 1px; background: rgba(244,239,230,.16); overflow: hidden; }
+  .b2h__line i {
+    position: absolute; inset: 0; transform-origin: 0 50%; transform: scaleX(0);
+    background: var(--combo-accent); will-change: transform;
+  }
+  .b2h__legend {
+    display: flex; justify-content: space-between; margin-top: 10px;
+    font: 500 11px/1 var(--combo-sans); letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(244,239,230,.5);
+  }
+  .b2h__legend span.is-now { color: var(--combo-cream); }
+
+  /* reduced-motion / narrow: both renders shown, copy revealed, no transform driving */
+  @media (prefers-reduced-motion: reduce) {
+    .b2h__frame--facade { opacity: 1; }
+    .b2h__lift { opacity: 1 !important; transform: none !important; }
+  }
+  @media (max-width: 820px) {
+    .b2h__stage { grid-template-columns: 1fr; gap: 28px; }
+    .b2h__figure { height: 48vh; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--brick-to-house">
+    <!-- the atom's contract markup. #szpStage = .szp-stage; .szp-frame img = the MACRO the atom drives.
+         the render-surface is the macro frame (the atom paints + scrubs it). -->
+    <div class="b2h__stage szp-stage" id="szpStage">
+      <div class="b2h__figure szp-figure">
+        <div class="b2h__frame b2h__frame--macro szp-frame" data-render-surface>
+          <img src="renders/macro-pergola.webp" alt="тимбер пергола й темний алюміній зблизька, макрозйомка" decoding="async">
+        </div>
+        <div class="b2h__frame b2h__frame--facade" aria-hidden="true">
+          <img src="renders/day-front.webp" alt="фасад будинку на вул. Замкова" decoding="async">
+        </div>
+        <div class="b2h__index"><b id="b2hIdx">01</b> &nbsp;/&nbsp; <span id="b2hIdxLabel">фактура</span></div>
+      </div>
+
+      <div class="b2h__copy szp-copy" data-zoomcopy>
+        <div class="b2h__eyebrow b2h__lift">вул. Замкова</div>
+        <div class="b2h__heads b2h__lift">
+          <h2 class="b2h__head b2h__head--one">Тепла <em>фактура</em></h2>
+          <h2 class="b2h__head b2h__head--two">Цілий <em>дім</em></h2>
+        </div>
+        <p class="b2h__body b2h__lift" id="b2hBody">Тимбер перголи, темний алюміній, тепла фактура під рукою. Деталі, які тримають дім роками.</p>
+        <div class="b2h__rail b2h__lift">
+          <div class="b2h__line"><i></i></div>
+          <div class="b2h__legend">
+            <span class="is-now" id="b2hLeft">фактура</span>
+            <span id="b2hRight">дім</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (canon FIRST), then the wiring -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/scroll-zoom-image-pair/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var g = window.gsap;
+
+      // ---- BEAT figures + copy nodes ----
+      var macroImg  = document.querySelector('.b2h__frame--macro img');
+      var facadeFr  = document.querySelector('.b2h__frame--facade');
+      var facadeImg = facadeFr.querySelector('img');
+      var headOne   = document.querySelector('.b2h__head--one');
+      var headTwo   = document.querySelector('.b2h__head--two');
+      var bodyEl    = document.getElementById('b2hBody');
+      var idxEl     = document.getElementById('b2hIdx');
+      var fill      = document.querySelector('.b2h__line i');
+      var idxLabel  = document.getElementById('b2hIdxLabel');
+      var legL      = document.getElementById('b2hLeft');
+      var legR      = document.getElementById('b2hRight');
+
+      var BODY_ONE = 'Тимбер перголи, темний алюміній, тепла фактура під рукою. Деталі, які тримають дім роками.';
+      var BODY_TWO = 'Та сама пергола, той самий алюміній, зібрані у фасад. Дім, у який повертаєшся.';
+      var bodySwapped = false;
+
+      // ---- the cited REAL atom: supplies the frame contract + a PURE apply for the MACRO zoom.
+      // we use it for set(p); we KILL its own auto-trigger so the harness pin is the only driver.
+      var szp = null;
+      SectionHarness.ranOK('scroll-zoom-image-pair', function () {
+        szp = window.ScrollZoomImagePair.create('#szpStage', {
+          zoomFrom: 1.0, zoomTo: 1.14, ease: 'none',
+          revealCopy: false, manageLenis: false
+        });
+        // the atom paints the macro + applies scale; drop its auto ScrollTrigger so we own the scroll.
+        if (szp && szp.trigger && szp.trigger.kill) szp.trigger.kill();
+        if (szp && szp.reveal && szp.reveal.kill) szp.reveal.kill();
+        window.__szp = szp;
+      });
+
+      // ---- the SINGLE pin (harness). p (0..1) drives the whole two-beat film. ----
+      var st = SectionHarness.pin('#combo', { start: 'top top', end: '+=200%', scrub: 0.7 });
+
+      // CustomEase strength curves so the crossfade lands crisp, not linear
+      var inOut = (window.CustomEase && CustomEase.create) ? CustomEase.create('b2hX', '0.65,0,0.35,1') : null;
+      function clamp01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+      function smooth(t){ return inOut ? g.parseEase('b2hX')(clamp01(t)) : clamp01(t); }
+      // copy lift on enter (once): the four rows rise in a PROGRESSIVE stagger (eyebrow ->
+      // heads -> body -> rail), each +0.07s, on the house 'air' ease. content-pace 0.9s.
+      // one heroic, choreographed entrance, then will-change is cleared.
+      var lifted = false;
+      function liftCopy(){
+        if (lifted) return; lifted = true;
+        g.to('.b2h__lift', {
+          opacity: 1, y: 0, duration: 0.9, ease: 'air',
+          stagger: { each: 0.07, from: 'start' },
+          onComplete: function(){ g.set('.b2h__lift', { clearProps: 'willChange' }); }
+        });
+      }
+
+      if (st) st.onUpdate = function (p) {
+        // ----- BEAT 1: macro zoom over its first half (atom's pure set) -----
+        // map p 0->0.5 to the atom's 0->1 so the macro fully completes its frame-zoom by mid.
+        if (szp && szp.set) szp.set(clamp01(p / 0.5));
+
+        // ----- CROSSFADE macro -> facade (p .42 -> .58) -----
+        var x = smooth((p - 0.42) / 0.16);            // 0..1 across the seam window
+        g.set('.b2h__frame--facade', { opacity: x });
+        g.set('.b2h__frame--macro',  { opacity: 0.18 + (1 - x) * 0.82 }); // macro recedes, never fully blank
+
+        // ----- BEAT 2: facade continues the zoom over its second half -----
+        var p2 = clamp01((p - 0.5) / 0.5);
+        var facScale = 1.0 + p2 * 0.10;               // gentle continued Ken-Burns on the facade
+        var facY = (0.5 - p2) * 14;                    // tiny rise as it settles
+        facadeImg.style.transform = 'translateY(' + facY.toFixed(1) + 'px) scale(' + facScale.toFixed(4) + ')';
+
+        // ----- COPY: serif title crossfade beat1 -> beat2 (same seam window) -----
+        g.set(headOne, { opacity: 1 - x, y: -x * 10 });
+        g.set(headTwo, { opacity: x, y: (1 - x) * 10 });
+        // body + legend + index swap at the seam midpoint
+        if (x > 0.5 && !bodySwapped) { bodySwapped = true; bodyEl.textContent = BODY_TWO;
+          idxEl.textContent = '02'; idxLabel.textContent = 'фасад';
+          legL.classList.remove('is-now'); legR.classList.add('is-now'); }
+        if (x <= 0.5 && bodySwapped) { bodySwapped = false; bodyEl.textContent = BODY_ONE;
+          idxEl.textContent = '01'; idxLabel.textContent = 'фактура';
+          legR.classList.remove('is-now'); legL.classList.add('is-now'); }
+
+        // ----- the progress rail tracks p (beat 1 -> beat 2) -----
+        if (fill) fill.style.transform = 'scaleX(' + p.toFixed(3) + ')';
+
+        // copy lifts once the section is engaged
+        if (p > 0.02) liftCopy();
+      };
+
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['scroll-zoom-image-pair']
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+/* ============================================================================
+   PIN-STORY-TEXT · component.css
+   ----------------------------------------------------------------------------
+   Block positions + typography. NO-OVERLAP BY LAYOUT: every block is absolutely
+   positioned inside ONE fixed-rect stage; the engine keeps exactly one block at
+   opacity:1 at a time, so even when two anchors coincide there is never a
+   visible collision. Blocks are constrained in width (never a full-screen wall).
+   Motion is applied inline by the engine (transform/opacity only).
+   ============================================================================ */
+
+.pst {
+  position: relative;
+  width: 100%;
+  height: 100vh;            /* the pinned viewport */
+  overflow: hidden;
+  color: var(--pst-ink, #f0e9d2);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* the text layer: full-bleed, holds the stacked blocks */
+.pst__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;     /* text story is non-interactive over media */
+}
+
+/* ---- a single text block ---- */
+.pst__block {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: min(46ch, 52vw);   /* constrained — NOT a full-screen wall */
+  will-change: transform, opacity;
+}
+
+/* alignment variants = considered compositions, each anchored differently */
+.pst__block--left {
+  left: 6vw;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: left;
+}
+.pst__block--center {
+  left: 50%;
+  top: 50%;
+  width: min(40ch, 72vw);
+  transform: translate(-50%, -50%);
+  text-align: center;
+  align-items: center;
+}
+.pst__block--lower-left {
+  left: 6vw;
+  bottom: 12vh;
+  text-align: left;
+}
+
+/* the engine overwrites .style.transform per frame; the variant transforms above
+   are the at-rest anchor baked into the engine's y=0 state via these classes ONLY
+   when the engine has NOT written a transform yet (first paint). To keep the
+   anchor + the engine's translate3d composable, anchors are expressed as inset
+   offsets, and centring uses translate via a wrapper-free approach: the engine
+   adds translate3d(0,Ypx,0) which the browser composes after the class transform.
+   For center/left the at-rest translate is required, so we fold it into position. */
+
+/* fold the at-rest centring into positioning so the engine's translate3d is purely
+   additive vertical motion (no transform conflict) */
+.pst__block--center { transform: none; left: 50%; margin-left: min(-20ch, -36vw); }
+.pst__block--left   { transform: none; top: 38vh; }
+
+/* ---- typography ---- */
+.pst__eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--pst-accent, #c08a4e);
+}
+.pst__title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(40px, 7vw, 120px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.pst__title em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--pst-accent, #c08a4e);
+}
+.pst__body {
+  font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+  line-height: 1.55;
+  max-width: 38ch;
+  opacity: 0.86;
+  margin: 0;
+}
+
+/* ============================================================================
+   reduced-motion / static branch: a clean stacked list, no pin, no overlap
+   ============================================================================ */
+.pst--static {
+  height: auto;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+.pst--static .pst__deck {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 8vh, 7rem);
+  padding: 12vh 6vw;
+  width: 100%;
+}
+.pst--static .pst__block {
+  position: relative;
+  inset: auto;
+  left: auto; top: auto; bottom: auto;
+  transform: none !important;
+  margin: 0;
+  max-width: min(50ch, 90vw);
+  opacity: 1;
+  visibility: visible;
+}
+.pst--static .pst__block--center { align-items: flex-start; text-align: left; margin-left: 0; }
+
+@media (max-width: 720px) {
+  .pst__block { max-width: 86vw; left: 7vw; }
+  .pst__block--center { left: 7vw; margin-left: 0; width: 86vw; align-items: flex-start; text-align: left; }
+  .pst__block--left { top: 34vh; }
+}

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo architecture veil-detail, Завіса деталі (interactive drill-down)</title>
+<!--
+  SECTION VARIANT, architecture veil-detail, "Завіса деталі", INTERACTIVE (no scroll pin)
+  ============================================================================================
+  A calm architecture OVERVIEW render (day-front) carries three element triggers. Click one and a
+  dark VEIL does COVER, HOLD (swap content unseen), UNCOVER onto a calm two-tone DETAIL of that
+  element, a framed macro render (the node and material), a single one-line spec on an air-luxury
+  rail, a locator chip, a back. The veil hides the swap so it reads as ONE considered gesture.
+  Grammar stolen from silver-pinewood.com architecture chapter, section.ui dark plus reveal, a
+  surgical typed drill-down per element, AIR is the luxury (D_SilverPinewood_architecture 2/4).
+  PRIMARY ATOM (unmodified), veil-flat-detail-reveal, a fixed-overlay MODAL, no router.
+
+  HONESTY FIX (jury): every trigger is now PROVEN by its render. day-front shows a flat-roof white
+  townhouse with a continuous glazing band, a wood-slat pergola, a wood-deck roof terrace. There is
+  no steel standing-seam roof and no granite anywhere in the asset set, so the false roof/steel and
+  terrace/granite beats were re-aimed to elements the renders literally contain:
+    glazing  -> terrace-02.webp (the dark-framed glass band of the facade, aluminium)
+    pergola  -> macro-pergola.webp (the dark timber slats over steel posts, kept, material honest)
+    terrace  -> terrace-04.webp  (the wood-deck roof terrace and its parapet edge)
+  Pergola and terrace both genuinely live on the roof (see terrace.webp), so both hotspots sit on
+  the parapet roofline of day-front, and glazing sits on the upper window band. Image and claim agree.
+
+  WILL-CHANGE FIX (jury): the variant overrides the atom's persistent will-change to auto and drops
+  it from the looping pulse, then toggles will-change transiently in JS only during each one-shot
+  reveal and clears it (clearProps willChange) once the reveal finishes. GPU layers are not held.
+
+  expectPins:0 (modal interaction, no scroll pin). The overview render carries [data-render-surface].
+  __LAB_OK__ set by the scaffold when, 0 pins (declared), the cited atom ran, the surface painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/veil-flat-detail-reveal/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (the scaffold owns the stage box plus render-surface defaults) */
+
+  /* the overview stage reads as a dark editorial chapter, not a bright catalogue card */
+  .av-stage { background: var(--combo-bg); }
+  .av-surface::after { /* a calm graded veil over the render so the type plus triggers read */
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(14,12,9,.42) 0%, rgba(14,12,9,.04) 32%, rgba(14,12,9,.10) 60%, rgba(14,12,9,.62) 100%); }
+  .av-surface img { transform: scale(1.04); }
+
+  /* the section type, generous air on the rail, asymmetric (block 3 / block 16) */
+  .av-copy { position: absolute; z-index: 4; left: clamp(20px,5vw,80px); top: clamp(40px,10vh,120px);
+    max-width: 30ch; color: var(--combo-cream); pointer-events: none; }
+  .av-eyebrow { font: 500 .78rem/1 var(--combo-sans); letter-spacing: .22em; text-transform: uppercase;
+    opacity: .72; display: flex; align-items: center; gap: .7rem; }
+  .av-eyebrow::before { content: ''; width: 30px; height: 1px; background: currentColor; opacity: .6; }
+  .av-title { font-family: var(--combo-serif); font-weight: 300; font-size: clamp(40px,7vw,120px);
+    line-height: .94; letter-spacing: -.035em; margin-top: clamp(16px,2.4vh,24px); }
+  .av-body { font: 400 clamp(14px,1.05vw,17px)/1.5 var(--combo-sans); letter-spacing: .005em;
+    opacity: .82; margin-top: clamp(16px,2.4vh,24px); max-width: 34ch; }
+
+  /* the hint, low-right, sparse (block 5 label register) */
+  .av-hint { position: absolute; z-index: 4; right: clamp(20px,5vw,80px); bottom: clamp(40px,9vh,96px);
+    font: 500 .72rem/1 var(--combo-sans); letter-spacing: .18em; text-transform: uppercase;
+    color: var(--combo-cream); opacity: .6; pointer-events: none; }
+
+  /* the element TRIGGERS painted on the overview (the obvious affordance) */
+  .av-hot { position: absolute; z-index: 5; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+    border: 0; padding: 0; background: none; cursor: pointer; color: var(--combo-cream);
+    -webkit-tap-highlight-color: transparent; }
+  .av-hot__ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(244,239,230,.55);
+    transform: scale(1); transition: transform .35s var(--av-ease, cubic-bezier(.22,1,.36,1)),
+      border-color .35s ease, background-color .35s ease; }
+  /* the ambient pulse loops, no persistent will-change (jury), opacity+transform are cheap */
+  .av-hot__pulse { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(244,239,230,.5); }
+  .av-hot__plus { position: absolute; inset: 0; display: grid; place-items: center;
+    font: 300 1.5rem/1 var(--combo-serif); }
+  .av-hot__plus::before, .av-hot__plus::after { content: ''; position: absolute; background: currentColor;
+    transition: transform .35s var(--av-ease, cubic-bezier(.22,1,.36,1)); }
+  .av-hot__plus::before { width: 16px; height: 1.5px; }
+  .av-hot__plus::after { width: 1.5px; height: 16px; }
+  .av-hot__tip { position: absolute; left: 50%; top: calc(100% + 12px); transform: translate(-50%, 6px);
+    white-space: nowrap; font: 500 .68rem/1 var(--combo-sans); letter-spacing: .14em; text-transform: uppercase;
+    color: var(--combo-cream); opacity: 0; transition: opacity .3s ease, transform .3s var(--av-ease, cubic-bezier(.22,1,.36,1));
+    text-shadow: 0 1px 14px rgba(0,0,0,.7); pointer-events: none; }
+  .av-hot:hover .av-hot__ring, .av-hot:focus-visible .av-hot__ring { transform: scale(1.18);
+    border-color: var(--combo-cream); background: rgba(181,106,74,.16); }
+  .av-hot:hover .av-hot__plus::before { transform: rotate(90deg); }
+  .av-hot:hover .av-hot__plus::after { transform: rotate(90deg); }
+  .av-hot:hover .av-hot__tip, .av-hot:focus-visible .av-hot__tip { opacity: .92; transform: translate(-50%, 0); }
+  .av-hot:focus-visible { outline: none; }
+  .av-hot:focus-visible .av-hot__ring { border-color: var(--combo-accent); }
+
+  /* trigger placement on day-front, glazing on the window band, pergola and terrace on the roofline */
+  .av-hot--glazing { left: 50%;   top: 42%; }
+  .av-hot--pergola { left: 68%;   top: 24%; }
+  .av-hot--terrace { left: 33%;   top: 24%; }
+
+  /* the DETAIL overlay SKIN (theme tokens for the unmodified atom) */
+  .vfd-overlay { --vfd-veil:#16130f; --vfd-rail-bg:#1b1814; --vfd-canvas-bg:#100e0b; --vfd-ink:#f4efe6;
+    --vfd-dark:#b56a4a; --vfd-wall:#b56a4a; --vfd-rail-w:clamp(300px,28vw,420px);
+    --vfd-serif:'Fraunces',Georgia,serif; --vfd-sans:'Inter',system-ui,sans-serif; }
+  .vfd-page { color: var(--vfd-ink); }
+  .vfd-head { height: clamp(64px,9vh,96px); padding: 0 clamp(20px,5vw,80px); }
+  .vfd-back { color: var(--vfd-ink); font-size: .7rem; letter-spacing: .16em; }
+  .vfd-back__o { border-color: rgba(244,239,230,.4); color: var(--vfd-ink); }
+  .vfd-word { font-family: var(--vfd-serif); font-weight: 300; letter-spacing: .26em; opacity: .8; font-size: .9rem; }
+  .vfd-crumbs { top: clamp(74px,10vh,104px); left: clamp(20px,5vw,80px); opacity: .5; letter-spacing: .14em; }
+
+  /* rail, ONE one-line spec, big serif name, generous air */
+  .vfd-rail { padding: 0 clamp(24px,3vw,56px); gap: 1rem; justify-content: center; }
+  .vfd-type { font-family: var(--vfd-serif); font-weight: 300; font-size: clamp(34px,3.6vw,58px);
+    line-height: .98; letter-spacing: -.02em; }
+  .vfd-sub { font-size: .72rem; letter-spacing: .18em; opacity: .58; }
+  .av-spec { font: 400 clamp(14px,1.05vw,17px)/1.55 var(--vfd-sans); letter-spacing: .005em;
+    opacity: .8; max-width: 26ch; margin-top: 1.2rem; }
+  .av-meta { display: flex; gap: clamp(20px,2.4vw,40px); margin-top: 1.8rem; }
+  .av-meta__cell { display: flex; flex-direction: column; gap: .4rem; }
+  .av-meta__k { font: 500 .62rem/1 var(--vfd-sans); letter-spacing: .16em; text-transform: uppercase; opacity: .5; }
+  .av-meta__v { font-family: var(--vfd-serif); font-weight: 300; font-size: 1.5rem; line-height: 1;
+    font-variant-numeric: tabular-nums; }
+
+  /* canvas, a framed macro render plate (not a tiny apartment plan) */
+  .vfd-canvas { background: var(--vfd-canvas-bg); }
+  .vfd-plan { width: clamp(62%,66vw,72%); max-height: 76vh; aspect-ratio: 4 / 3;
+    box-shadow: 0 30px 70px -28px rgba(0,0,0,.7); }
+  .vfd-plan svg { width: 100%; height: 100%; display: block; }
+  .vfd-plan__img { width: 100%; height: 100%; }
+  .vfd-plan__peri { fill: none; stroke: var(--vfd-wall, #b56a4a); stroke-width: 2; opacity: .9; }
+  .vfd-plan__cap { position: absolute; left: clamp(16px,2vw,28px); bottom: clamp(14px,2vh,22px); z-index: 3;
+    font: 500 .64rem/1.2 var(--vfd-sans); letter-spacing: .12em; text-transform: uppercase;
+    color: var(--vfd-ink); opacity: .55; max-width: 22ch; }
+
+  /* locator chip, the element's place on a simple section silhouette (THIS element dark) */
+  .vfd-locators { gap: 1.2rem; }
+  .vfd-floorchip [data-nr], .vfd-sitechip [data-block] { stroke: rgba(244,239,230,.32); }
+  .vfd-floorchip [data-nr].is-active, .vfd-sitechip [data-block].is-active {
+    fill: var(--vfd-dark, #b56a4a); stroke: var(--vfd-dark, #b56a4a); }
+  .vfd-seed { display: none; } /* no apartment-seed flourish in an architecture detail */
+
+  /* WILL-CHANGE override (jury): the atom declares will-change persistently on these; pin it to auto
+     here so no GPU layer is held. JS toggles it transiently only during each one-shot reveal. */
+  .vfd-veil, .vfd-rail, .vfd-plan, .vfd-locators, .vfd-seed { will-change: auto; }
+
+  @media (max-width: 820px) {
+    .av-title { font-size: clamp(36px,11vw,64px); }
+    .av-hot { width: 52px; height: 52px; }
+    .vfd-plan { width: 84%; aspect-ratio: 3 / 2; }
+    .av-meta { gap: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .av-hot__pulse { display: none; }
+    .av-surface img { transform: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage av-stage" data-combo="architecture--veil-detail">
+    <!-- the calm OVERVIEW render is the hero; this element carries [data-render-surface] -->
+    <div class="av-surface" data-render-surface>
+      <img src="renders/day-front.webp" alt="Архітектурний образ" decoding="async">
+    </div>
+
+    <div class="av-copy" data-reveal>
+      <div class="av-eyebrow">вул. Замкова</div>
+      <h2 class="av-title">Деталь</h2>
+      <p class="av-body">Подивіться зблизька. Скління, пергола, тераса, кожен вузол відкривається окремо.</p>
+    </div>
+
+    <!-- the obvious affordance, three element triggers, each proven by its own macro render -->
+    <button class="av-hot av-hot--glazing" data-el="glazing" aria-label="Відкрити деталь, скління">
+      <span class="av-hot__pulse" aria-hidden="true"></span>
+      <span class="av-hot__ring" aria-hidden="true"></span>
+      <span class="av-hot__plus" aria-hidden="true"></span>
+      <span class="av-hot__tip">Скління</span>
+    </button>
+    <button class="av-hot av-hot--pergola" data-el="pergola" aria-label="Відкрити деталь, пергола">
+      <span class="av-hot__pulse" aria-hidden="true"></span>
+      <span class="av-hot__ring" aria-hidden="true"></span>
+      <span class="av-hot__plus" aria-hidden="true"></span>
+      <span class="av-hot__tip">Пергола</span>
+    </button>
+    <button class="av-hot av-hot--terrace" data-el="terrace" aria-label="Відкрити деталь, тераса">
+      <span class="av-hot__pulse" aria-hidden="true"></span>
+      <span class="av-hot__ring" aria-hidden="true"></span>
+      <span class="av-hot__plus" aria-hidden="true"></span>
+      <span class="av-hot__tip">Тераса</span>
+    </button>
+
+    <div class="av-hint">Натисніть вузол</div>
+  </section>
+
+  <!-- the ONE fixed overlay node (data swapped per element) -->
+  <div class="vfd-overlay" id="detail">
+    <div class="vfd-veil"></div>
+    <div class="vfd-page">
+      <div class="vfd-head">
+        <button class="vfd-back"><span class="vfd-back__o">&larr;</span> назад до образу</button>
+        <span class="vfd-word">замкова</span>
+        <span style="width:120px"></span>
+      </div>
+      <div class="vfd-crumbs"></div>
+
+      <div class="vfd-rail">
+        <div class="vfd-type"></div>
+        <div class="vfd-sub"></div>
+        <p class="av-spec"></p>
+        <div class="av-meta">
+          <div class="av-meta__cell"><span class="av-meta__k">Матеріал</span><span class="av-meta__v av-meta__mat"></span></div>
+          <div class="av-meta__cell"><span class="av-meta__k av-meta__dimk">Виліт</span><span class="av-meta__v av-meta__dim"></span></div>
+        </div>
+      </div>
+
+      <div class="vfd-canvas">
+        <div class="vfd-plan"></div>
+        <div class="vfd-plan__cap"></div>
+        <div class="vfd-locators">
+          <div class="vfd-floorchip"></div>
+          <div class="vfd-compass"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="none" stroke="rgba(244,239,230,.32)"/><path d="M20 5 L24 20 L20 35 L16 20 Z" fill="#b56a4a"/><text x="20" y="13" text-anchor="middle" font-size="7" fill="rgba(244,239,230,.8)">N</text></svg></div>
+          <div class="vfd-sitechip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold plus adapters, then the cited atom -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/veil-flat-detail-reveal/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      if (window.CustomEase && window.gsap && !window.gsap.parseEase('expo')) {
+        try { window.CustomEase.create('expo', '0.16,1,0.3,1'); } catch (e) {}
+      }
+
+      // a macro-render PLATE as the detail "plan", an <image> of the element plus a framing
+      // perimeter that draws in via stroke-dashoffset (the atom's signature reveal stays intact).
+      function platePlan(src, alt) {
+        return '<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+          '<image class="vfd-plan__img" href="' + src + '" xlink:href="' + src + '" x="0" y="0" width="400" height="300" preserveAspectRatio="xMidYMid slice"><title>' + alt + '</title></image>' +
+          '<path class="vfd-plan__peri" d="M10 10 H390 V290 H10 Z"/>' +
+          '</svg>';
+      }
+      // section-silhouette locator chip, the element marked dark on a simple house section.
+      // glazing = the upper window band, pergola and terrace = the roof line.
+      function sectionChip(activeNr) {
+        var parapet = '<line data-nr="terrace" x1="14" y1="24" x2="78" y2="24" stroke-width="2"/>';
+        var body    = '<rect data-nr="body" x="14" y="24" width="64" height="36" fill="none"/>';
+        var band    = '<rect data-nr="glazing" x="18" y="34" width="56" height="10" fill="none"/>';
+        var perg     = '<rect data-nr="pergola" x="78" y="22" width="14" height="2" fill="none"/>' +
+                       '<line data-nr="pergola" x1="80" y1="24" x2="80" y2="38" stroke-width="1"/>' +
+                       '<line data-nr="pergola" x1="90" y1="24" x2="90" y2="38" stroke-width="1"/>';
+        return '<svg viewBox="0 0 100 66" width="100" height="66">' + parapet + body + band + perg + '</svg>';
+      }
+      // tiny site chip, the element's footprint marked among the row
+      function siteChip(activeBlock) {
+        var b = ''; for (var i = 0; i < 6; i++) { b += '<rect data-block="' + (i + 1) + '" x="' + (6 + i * 19) + '" y="8" width="15" height="22"/>'; }
+        return '<svg viewBox="0 0 120 40" width="120" height="40">' + b + '</svg>';
+      }
+
+      // each element is PROVEN by its render (jury honesty fix). The two meta cells adapt their key,
+      // the second cell is "Крок" / "Ритм" / "Глибина" per element, never a false "Виліт".
+      var ELS = {
+        glazing: {
+          type: 'Скління', sub: 'Стрічкове вікно', crumbs: 'Архітектура › Образ › Скління',
+          floorNr: 'glazing', siteBlock: 3,
+          planSVG: platePlan('renders/terrace-02.webp', 'Деталь скління'),
+          floorChipSVG: sectionChip('glazing'), siteChipSVG: siteChip(3),
+          spec: 'Скло від підлоги до стелі в темному алюмінії. Вулиця заходить у кімнату цілий день.',
+          mat: 'Алюміній', dimK: 'Висота', dim: '2,7 м', cap: 'Макро, фасадне скління'
+        },
+        pergola: {
+          type: 'Пергола', sub: 'Дерев’яний ритм', crumbs: 'Архітектура › Образ › Пергола',
+          floorNr: 'pergola', siteBlock: 4,
+          planSVG: platePlan('renders/macro-pergola.webp', 'Деталь перголи'),
+          floorChipSVG: sectionChip('pergola'), siteChipSVG: siteChip(4),
+          spec: 'Дерев’яні рейки на сталевих опорах. Брус тримає тінь над терасою цілий день.',
+          mat: 'Дерево', dimK: 'Крок рейки', dim: '120 мм', cap: 'Макро, брус перголи'
+        },
+        terrace: {
+          type: 'Тераса', sub: 'Дах як кімната', crumbs: 'Архітектура › Образ › Тераса',
+          floorNr: 'terrace', siteBlock: 2,
+          planSVG: platePlan('renders/terrace-04.webp', 'Деталь тераси'),
+          floorChipSVG: sectionChip('terrace'), siteChipSVG: siteChip(2),
+          spec: 'Палубна дошка на даху, парапет по краю. Друга вітальня просто неба над містом.',
+          mat: 'Дерево', dimK: 'Площа', dim: '34 м²', cap: 'Макро, палуба тераси'
+        }
+      };
+
+      var vfd;
+      // RENDER plus MODAL job, the unmodified veil-flat-detail-reveal atom (no router, no pin)
+      SectionHarness.ranOK('veil-flat-detail-reveal', function () {
+        vfd = window.VeilFlatDetailReveal.create('#detail', {
+          veilColor: '#16130f', coverDur: 0.4, holdDur: 0.3, uncoverDur: 0.45, ease: 'expo',
+          drawPlan: true,
+          onClose: function () {}
+        });
+        window.__vfd = vfd;
+        // fill the architecture-only slots (spec line, the two meta cells, the second meta key,
+        // plate caption) alongside open(), revealed by the rail fade
+        var pageSpec = document.querySelector('.av-spec');
+        var matEl = document.querySelector('.av-meta__mat');
+        var dimEl = document.querySelector('.av-meta__dim');
+        var dimKEl = document.querySelector('.av-meta__dimk');
+        var capEl = document.querySelector('.vfd-plan__cap');
+
+        // WILL-CHANGE one-shot helper (jury), promote the revealing layers just for the reveal,
+        // then clear after the reveal finishes so no GPU layer is held persistently.
+        var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var layers = ['.vfd-veil', '.vfd-rail', '.vfd-plan', '.vfd-locators'];
+        var clearCall = null;
+        function promoteThenClear() {
+          if (!window.gsap || reduced) return;
+          window.gsap.set(layers, { willChange: 'transform, opacity' });
+          if (clearCall) clearCall.kill();
+          // cover 0.4 + hold 0.3 + uncover 0.45 + reveal 0.45 + perimeter (delay 0.1 + 0.6) ~= 2.0s
+          clearCall = window.gsap.delayedCall(2.1, function () {
+            window.gsap.set(layers, { clearProps: 'willChange' });
+          });
+        }
+
+        function openEl(key) {
+          var u = ELS[key]; if (!u || !vfd) return;
+          promoteThenClear();
+          vfd.open(u);
+          if (pageSpec) pageSpec.textContent = u.spec;
+          if (matEl) matEl.textContent = u.mat;
+          if (dimKEl) dimKEl.textContent = u.dimK;
+          if (dimEl) dimEl.textContent = u.dim;
+          if (capEl) capEl.textContent = u.cap;
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('.av-hot'), function (btn) {
+          btn.addEventListener('click', function () { openEl(btn.dataset.el); });
+        });
+      });
+
+      // the ambient trigger-pulse plus the on-load reveal of the section copy (one heroic in-view beat)
+      if (window.gsap && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        window.gsap.fromTo('.av-copy', { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0, duration: 1.0, ease: 'air', delay: 0.15 });
+        window.gsap.fromTo('.av-hot', { autoAlpha: 0, scale: 0.6 }, { autoAlpha: 1, scale: 1, duration: 0.7, ease: 'air', stagger: 0.12, delay: 0.5 });
+        window.gsap.set('.av-hot__pulse', { transformOrigin: '50% 50%' });
+        window.gsap.fromTo('.av-hot__pulse',
+          { scale: 1, opacity: 0.5 },
+          { scale: 2.1, opacity: 0, duration: 2.4, ease: 'expo', repeat: -1, stagger: { each: 0.8, repeat: -1 } });
+      }
+
+      // PURE INTERACTIVE, a modal, no scroll pin. expectPins must be 0.
+      SectionHarness.declare({
+        pinOwner: 'none', expectPins: 0,
+        atomsCited: ['veil-flat-detail-reveal']
+      });
+    })();
+  </script>
+</body>
+</html>

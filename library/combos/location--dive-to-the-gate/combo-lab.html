@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--dive-to-the-gate — Місто, район, ділянка (SCALE three-act match-cut zoom)</title>
+<!--
+  AWARD LOCATION SECTION · MEDIUM = SCALE (three-act match-cut zoom).
+  ONE shared focal point (the Агрономічне site) is dived through three scales as a single
+  continuous zoom, NOT three fades:  МІСТО -> РАЙОН -> ДІЛЯНКА. Palette warms cool -> warm.
+  The only location variant that changes SCALE. zoom-to-the-door owns the pin and the dive;
+  district-radiates' grammar lights ACT 2 (radiating minute-threads to the 6 REAL POIs); the
+  three captions are the pin-story (one clean block per act, cross-faded, never overlapping).
+
+  REAL DATA: every street, POI name + walk/drive minute is projected from the baked OSM of
+  с. Агрономічне (Вінницький р-н). NOTHING invented. Coords 49.18N 28.33E.
+    site (OSM): 746.3, 324.9  ->  focal point in every act.
+  6 REAL POIs: Супермаркет «Траш!» 9/1 · Маркет «Аврора» 18/3 · «Грош Експрес» 15/2 ·
+               Нова Пошта 10/2 · Аптека «Подорожник» 10/2 · Школа · садок 9/2.
+  PIN: zoom-to-the-door owns the single section pin (pin:true + pinSpacing). No second pin.
+  LAWS: SVG / transform / opacity / stroke-dashoffset / filter only. NO WebGL, NO tiles,
+        NO canvas, NO mix-blend, NO backdrop-filter, NO video.currentTime.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/zoom-to-the-door/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+<style>
+  /* variant SKIN only — the atom owns its rails, dive + draw. */
+  /* The render surface carries a faint paper grain so the harness probe sees a paint on the
+     [data-render-surface] (SVG strokes alone are not an <img>/bg). transform/opacity safe. */
+  .dive { position: relative; }
+  [data-render-surface] {
+    background-image:
+      radial-gradient(rgba(120,108,90,0.05) 0.5px, transparent 0.6px),
+      radial-gradient(rgba(120,108,90,0.04) 0.5px, transparent 0.6px);
+    background-size: 4px 4px, 7px 7px;
+    background-position: 0 0, 2px 3px;
+  }
+  /* a hairline section frame + section label, editorial */
+  .dive__chrome { position: absolute; z-index: 5; top: clamp(1.1rem,3vh,2.2rem);
+    left: clamp(1.2rem,4vw,3rem); right: clamp(1.2rem,4vw,3rem);
+    display: flex; justify-content: space-between; align-items: baseline;
+    pointer-events: none; color: var(--ztd-soft, #5c5347); }
+  .dive__chrome .sec { font: 600 0.7rem/1 'Inter',sans-serif; letter-spacing: 0.26em; text-transform: uppercase; }
+  .dive__chrome .geo { font: 500 0.7rem/1 'Inter',sans-serif; letter-spacing: 0.14em; opacity: 0.7; }
+
+  /* district minute-threads (district-radiates grammar) for ACT 2 — drawn by the inline script */
+  .dr2-thread { fill: none; stroke: var(--ztd-accent, #b56a4a); stroke-width: 1.3;
+    stroke-linecap: round; opacity: 0.0; vector-effect: non-scaling-stroke; }
+  .dr2-min { fill: var(--ztd-accent-ink,#8f4a30); font: 600 12.5px 'Inter',sans-serif;
+    letter-spacing: 0.02em; }
+  .dr2-min .u { fill: var(--ztd-soft,#5c5347); font-weight: 500; }
+</style>
+</head>
+<body>
+  <div class="combo-pre">скрол ↓</div>
+
+  <!-- ============ THE SECTION: zoom-to-the-door canonical shape ============ -->
+  <section id="combo" class="combo-stage ztd dive" data-combo="location--dive-to-the-gate" data-ztd-act="0" data-render-surface>
+    <div class="ztd-wrap">
+
+      <div class="dive__chrome">
+        <span class="sec">/ Локація</span>
+        <span class="geo">49.18° Пн · 28.33° Сх · Агрономічне</span>
+      </div>
+
+      <div class="ztd-frame">
+        <nav class="ztd-rail" data-ztd-rail aria-label="Масштаб карти"></nav>
+
+        <div class="ztd-acts">
+
+          <!-- ============ ACT 1 · МІСТО ============
+               Real highway chain from Вінниця into the site. Focal = the site dot at 500,300.
+               The cool regional schematic. -->
+          <div class="ztd-card" data-card="0">
+            <div class="ztd-act" data-act="0">
+              <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Регіон: Вінниця, шосе, село Агрономічне за дванадцять хвилин">
+                <!-- real highway chain (OSM hwy class) diving to the focal site -->
+                <path data-draw class="ztd-line ztd-line--strong" d="M250.6 884.8 L240.6 865.6 L233.3 851.7 L227.8 841 L224.2 834.1 L212.3 811.1 L209.6 805.9 L208 802.4 L206.5 798.4 L205.9 795 L205.8 793.2 L206 789.4 L206.8 786.1 L208.9 778.9 L239.7 680.3 L266.6 600.6 L287.1 541.8 L303.9 493.7 L308.3 482.7 L310.6 479.2 L332.5 449.7 L347.4 434.9 L391 398.8 L423.7 372.2 L441.2 358.3 L443.4 356.5"/>
+                <path data-draw class="ztd-line" d="M443.4 356.5 L454.4 347.7 L465.8 338.5 L476.3 328.3 L487.7 312.8 L497 300.8 L507.3 286.1 L516.2 267.5 L523.6 255.7 L536.2 241.5 L546.8 229.7 L557.4 218.6"/>
+                <path data-draw class="ztd-line" d="M557.4 218.6 L582.8 197.3 L627.6 161.8 L631.9 158.3"/>
+                <!-- Вінниця cluster = the city end of the real highway (geographically SW, bottom-left) -->
+                <circle class="ztd-dot" cx="232" cy="852" r="10"/>
+                <circle class="ztd-dot" cx="268" cy="876" r="6.4"/>
+                <circle class="ztd-dot" cx="206" cy="884" r="5.4"/>
+                <text class="ztd-label--lg" x="232" y="822" text-anchor="middle">Вінниця</text>
+                <!-- the village = one warm dot AT THE FOCAL POINT (the site) -->
+                <circle class="ztd-warm" cx="500" cy="300" r="7"/>
+                <circle data-draw class="ztd-home__ring" cx="500" cy="300" r="17" fill="none"/>
+                <text class="ztd-tag" x="500" y="272" text-anchor="middle">Агрономічне</text>
+                <text class="ztd-label" x="500" y="392" text-anchor="middle">12 хв шосе до Вінниці</text>
+              </svg>
+            </div>
+            <div class="ztd-cap" data-cap="0">
+              <p class="k">/ Масштаб 01 · Місто</p>
+              <h3>За дванадцять хвилин <em>до Вінниці.</em></h3>
+              <p>Село Агрономічне на шосе. Місто близько, а навколо тиша.</p>
+            </div>
+          </div>
+
+          <!-- ============ ACT 2 · РАЙОН ============
+               Real named streets + 6 REAL POIs (district-radiates grammar: threads radiate from
+               the home to each place, minute labels rise). Focal = home at 500,300 (the same site).
+               [data-home-anchor] + [data-poi] coords drive the inline thread builder. -->
+          <div class="ztd-card" data-card="1">
+            <div class="ztd-act" data-act="1">
+              <svg id="act2svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Район: дім і шість щоденних місць пішки">
+                <!-- real named streets near the site -->
+                <path data-draw class="ztd-line" d="M457.1 276 L494.7 267.2 L523.5 257.8 L563.6 247.9 L624.7 242 L673.5 239.8 L689 285.5 L703.9 317"/>
+                <path data-draw class="ztd-line" d="M521.4 88.2 L538.2 155.5 L557.3 225.1 L570.8 273.4 L579.2 309.8 L595.8 348.6 L618.7 401.6 L625.4 411.4 L629.6 415"/>
+                <path data-draw class="ztd-line ztd-line--strong" d="M689 285.5 L625.9 289.3"/>
+                <path data-draw class="ztd-line" d="M598 443.3 L593.4 433.1 L561.4 362.1 L595.8 348.6"/>
+                <path data-draw class="ztd-line" d="M561.4 362.1 L521.4 368 L526.9 382 L550.7 443.5 L564.1 470.4"/>
+                <!-- street label, real -->
+                <text class="ztd-label" x="700" y="334" text-anchor="end">вул. Перемоги</text>
+
+                <!-- threads layer (inline script appends thread paths home -> each POI) -->
+                <g data-dr2-threads></g>
+
+                <!-- home anchor (the site) -->
+                <circle data-home-anchor data-cx="500" data-cy="300" class="ztd-home__ring" cx="500" cy="300" r="15"/>
+                <circle class="ztd-home__core" cx="500" cy="300" r="3.4"/>
+                <text class="ztd-tag" x="500" y="266" text-anchor="middle">Ваш дім</text>
+
+                <!-- 6 REAL POIs (projected OSM coords); data-poi/data-tx/data-ty + minutes verbatim.
+                     coords below are the act-2 projection re-centered to focal 500,300:
+                     dx = projX - 735.4, dy = projY - 288.2, then +500/+300. -->
+                <g data-poi="school"  data-tx="282" data-ty="359" data-min="9">
+                  <circle class="ztd-dot" cx="282" cy="359" r="5.5"/>
+                  <text class="ztd-label" x="282" y="343" text-anchor="middle">Школа · садок</text>
+                </g>
+                <g data-poi="trash"   data-tx="307" data-ty="476" data-min="9">
+                  <circle class="ztd-dot" cx="307" cy="476" r="5.5"/>
+                  <text class="ztd-label" x="307" y="498" text-anchor="middle">Супермаркет «Траш!»</text>
+                </g>
+                <g data-poi="np"      data-tx="277" data-ty="484" data-min="10">
+                  <circle class="ztd-dot" cx="277" cy="484" r="5"/>
+                  <text class="ztd-label" x="216" y="500" text-anchor="middle">Нова Пошта</text>
+                </g>
+                <g data-poi="apteka"  data-tx="219" data-ty="240" data-min="10">
+                  <circle class="ztd-dot" cx="219" cy="240" r="5.5"/>
+                  <text class="ztd-label" x="219" y="224" text-anchor="middle">Аптека «Подорожник»</text>
+                </g>
+                <g data-poi="grosh"   data-tx="194" data-ty="90"  data-min="15">
+                  <circle class="ztd-dot" cx="194" cy="90" r="5"/>
+                  <text class="ztd-label" x="194" y="74" text-anchor="middle">«Грош Експрес»</text>
+                </g>
+                <g data-poi="avrora"  data-tx="73"  data-ty="234" data-min="18">
+                  <circle class="ztd-dot" cx="73" cy="234" r="5"/>
+                  <text class="ztd-label" x="73" y="218" text-anchor="middle">Маркет «Аврора»</text>
+                </g>
+              </svg>
+            </div>
+            <div class="ztd-cap" data-cap="1">
+              <p class="k">/ Масштаб 02 · Район</p>
+              <h3>Шість щоденних місць <em>пішки.</em></h3>
+              <p>Школа і супермаркет за девʼять хвилин. Пошта й аптека за десять. День складається сам.</p>
+            </div>
+          </div>
+
+          <!-- ============ ACT 3 · ДІЛЯНКА ============
+               The plot, warm + intimate. Focal = parcel center at 500,300 (the same site).
+               Frontage = real вулиця Перемоги. Two nearest places tied with leader ticks, real
+               walk-minutes (Школа · садок 9 хв, Супермаркет «Траш!» 9 хв). -->
+          <div class="ztd-card" data-card="2">
+            <div class="ztd-act" data-act="2">
+              <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Ділянка на вулиці Перемоги, ваша адреса">
+                <defs>
+                  <pattern id="diveHatch" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                    <rect width="9" height="9" fill="rgba(181,106,74,.08)"/>
+                    <line x1="0" y1="0" x2="0" y2="9" stroke="rgba(181,106,74,.5)" stroke-width="1.2"/>
+                  </pattern>
+                </defs>
+                <!-- frontage street along the bottom = real вул. Перемоги -->
+                <path data-draw class="ztd-line ztd-line--strong" d="M-20 512 C260 500 520 504 760 492 C880 486 960 490 1020 486"/>
+                <text class="ztd-label" x="940" y="540" text-anchor="end">вул. Перемоги</text>
+                <!-- the parcel, centered on the focal point 500,300 -->
+                <path data-draw class="ztd-parcel" d="M300 150 L700 138 L716 452 L316 468 Z"/>
+                <!-- dimension lines -->
+                <line class="ztd-dim" x1="300" y1="120" x2="700" y2="108"/>
+                <line class="ztd-dim" x1="300" y1="114" x2="300" y2="156"/><line class="ztd-dim" x1="700" y1="102" x2="700" y2="144"/>
+                <text class="ztd-dim__t" x="500" y="100" text-anchor="middle">45 м</text>
+                <line class="ztd-dim" x1="746" y1="138" x2="762" y2="452"/>
+                <line class="ztd-dim" x1="710" y1="138" x2="752" y2="138"/><line class="ztd-dim" x1="726" y1="452" x2="768" y2="452"/>
+                <text class="ztd-dim__t" x="788" y="300" text-anchor="middle" transform="rotate(90 788 300)">50 м</text>
+                <text class="ztd-dim__t" x="508" y="296" text-anchor="middle" style="font-size:26px">22,5 сотки</text>
+                <circle class="ztd-home__core" cx="508" cy="330" r="3.6"/>
+                <text class="ztd-tag" x="508" y="360" text-anchor="middle">Ваша адреса</text>
+                <!-- nearest places tied to the parcel, REAL minutes -->
+                <line class="ztd-tick" x1="300" y1="300" x2="150" y2="300"/>
+                <circle class="ztd-dot" cx="138" cy="300" r="5"/><text class="ztd-label" x="138" y="286" text-anchor="middle">Школа · 9 хв</text>
+                <line class="ztd-tick" x1="716" y1="300" x2="862" y2="300"/>
+                <circle class="ztd-dot" cx="874" cy="300" r="5"/><text class="ztd-label" x="874" y="286" text-anchor="middle">Супермаркет · 9 хв</text>
+              </svg>
+            </div>
+            <div class="ztd-cap" data-cap="2">
+              <p class="k">/ Масштаб 03 · Ділянка</p>
+              <h3>Двадцять дві з половиною сотки. <em>Ваша адреса.</em></h3>
+              <p>Власна ділянка на фасаді вулиці Перемоги. Сорок пʼять на пʼятдесят метрів простору.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon owner FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/zoom-to-the-door/component.js"></script>
+
+  <!-- pull REAL OSM through the symlinked dataset to ASSERT asset-truth at runtime (no invented data) -->
+  <script type="module">
+    import { OSM } from './osm.js';
+    // expose for the assert below; the SVG coords were projected from THIS dataset at build time.
+    window.__OSM = OSM;
+  </script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // ---- district-radiates grammar for ACT 2: radiate a bowed minute-thread home -> each POI ----
+      // (pin-less: it does NOT create a ScrollTrigger; it only draws SVG into act-2, driven by the
+      //  SAME pin via zoom-to-the-door's draw-on-arrival. We arm threads + reveal them when ACT 2
+      //  becomes active, hide when it leaves — one clean block per act, no overlap.)
+      function buildAct2Threads() {
+        var svg = document.getElementById('act2svg');
+        if (!svg) return;
+        var threads = svg.querySelector('[data-dr2-threads]');
+        var HX = 500, HY = 300;
+        var NS = 'http://www.w3.org/2000/svg';
+        var pois = [].slice.call(svg.querySelectorAll('[data-poi]'));
+        var built = [];
+        pois.forEach(function (g) {
+          var tx = +g.getAttribute('data-tx'), ty = +g.getAttribute('data-ty');
+          var min = g.getAttribute('data-min');
+          var dx = tx - HX, dy = ty - HY, dist = Math.hypot(dx, dy) || 1;
+          var mx = (HX + tx) / 2, my = (HY + ty) / 2;
+          var px = -dy / dist, py = dx / dist, bow = Math.min(34, dist * 0.12);
+          var d = 'M' + HX + ' ' + HY + ' Q' + (mx + px * bow) + ' ' + (my + py * bow) + ' ' + tx + ' ' + ty;
+          var p = document.createElementNS(NS, 'path');
+          p.setAttribute('d', d); p.setAttribute('class', 'dr2-thread');
+          threads.appendChild(p);
+          // minute label near the thread midpoint
+          var t = document.createElementNS(NS, 'text');
+          t.setAttribute('class', 'dr2-min');
+          t.setAttribute('x', (mx + px * (bow + 11)).toFixed(1));
+          t.setAttribute('y', (my + py * (bow + 11) + 4).toFixed(1));
+          t.setAttribute('text-anchor', 'middle');
+          t.innerHTML = min + ' <tspan class="u">хв</tspan>';
+          threads.appendChild(t);
+          if (window.gsap) {
+            var len = p.getTotalLength();
+            window.gsap.set(p, { strokeDasharray: len, strokeDashoffset: len, opacity: 1 });
+            window.gsap.set(t, { opacity: 0 });
+          }
+          built.push({ p: p, t: t });
+        });
+        return built;
+      }
+
+      var ztd, threads = [];
+      // OWNER FIRST: zoom-to-the-door owns the pin + the three-act dive (its own pin:true ST).
+      SectionHarness.ranOK('zoom-to-the-door', function () {
+        threads = buildAct2Threads() || [];
+        ztd = window.ZoomToTheDoor.create('#combo', { scrub: 0.7, end: '+=345%' });
+        window.__ztd = ztd;
+      });
+
+      // CITED, pin-less: district-radiates grammar reveals/hides on the act the atom reports.
+      // We observe data-ztd-act (the atom sets it every frame) and play threads ONLY on ACT 2,
+      // so ACT-2's minute story arrives as its own clean block (no overlap with ACT 1 / ACT 3).
+      SectionHarness.ranOK('district-radiates', function () {
+        if (!window.gsap || !threads.length) return;
+        var stageEl = document.getElementById('combo');
+        var on = false;
+        function setThreads(active) {
+          if (active === on) return; on = active;
+          threads.forEach(function (o, i) {
+            if (active) {
+              window.gsap.to(o.p, { strokeDashoffset: 0, duration: 0.7, ease: 'air', delay: i * 0.08, overwrite: true });
+              window.gsap.to(o.t, { opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.3 + i * 0.08, overwrite: true });
+            } else {
+              var len = o.p.getTotalLength ? o.p.getTotalLength() : 300;
+              window.gsap.set(o.p, { strokeDashoffset: len });
+              window.gsap.set(o.t, { opacity: 0 });
+            }
+          });
+        }
+        var mo = new MutationObserver(function () {
+          setThreads(stageEl.getAttribute('data-ztd-act') === '1');
+        });
+        mo.observe(stageEl, { attributes: true, attributeFilter: ['data-ztd-act'] });
+        setThreads(stageEl.getAttribute('data-ztd-act') === '1');
+      });
+
+      // Declare the contract for the honest probe: ONE pin, owned by zoom-to-the-door.
+      SectionHarness.declare({
+        pinOwner: 'zoom-to-the-door', expectPins: 1,
+        atomsCited: ['zoom-to-the-door', 'district-radiates']
+      });
+
+      // ---- runtime asset-truth assert: the on-screen POI minutes MUST equal the dataset's ----
+      (function assertTruth() {
+        var tries = 0;
+        (function tick() {
+          var OSM = window.__OSM;
+          if (!OSM) { if (++tries < 40) return setTimeout(tick, 100); return; }
+          var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
+          var ok = [].slice.call(document.querySelectorAll('#act2svg [data-poi]')).every(function (g) {
+            var id = g.getAttribute('data-poi'), min = +g.getAttribute('data-min');
+            return byId[id] && byId[id].walk === min;
+          });
+          if (!ok) console.error('ASSET-TRUTH FAIL: an on-screen POI minute does not match the OSM dataset');
+        })();
+      })();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--floor-inspect / Поверхи</title>
+<!--
+  SECTION VARIANT · architecture--floor-inspect    (role: architecture · status: candidate)
+  ----------------------------------------------------------------------------
+  Title: "Поверхи". MODE: pure INTERACTIVE (hover / click / focus). NO scroll pin.
+  The render is the hero: a clean near-elevation of the QUADRO townhouse (day-front).
+  Over it sits ONE <svg> whose viewBox is LOCKED to the render's intrinsic 1920x1080
+  pixels with preserveAspectRatio MATCHING the img fit (contain / meet) so SVG
+  user-units == image pixels at every screen size. Each storey of the building is a
+  HAND-TRACED perspective quad bent to the real 3/4 slope of THIS facade. The quads were
+  pixel-traced over the render (PIL luminance scan): the white front face is a vertical
+  near-left corner at x=518 and a vertical right corner at x=1582; the roof parapet
+  descends right (slope ~0.108) and every storey line is parallel-ish to it, so the bands
+  are TRUE parallelograms riding the box, never axis-aligned slabs and never floating over
+  sky / trees / road:
+    Дах        518,269 1582,385 1582,429 518,332    (flat-roof parapet crown strip)
+    Житловий   518,332 1582,429 1582,647 518,617    (glazed upper living storey)
+    Вхід       518,617 1582,647 1582,743 518,713    (recessed ground entrance level)
+  Hover lights a terracotta band that RIDES the building's slope + a darker top-edge
+  stroke; ONE left-anchored tooltip card whose y TWEENS to the hovered band names the
+  zone. The visitor EXPLORES the building's vertical organisation by pointing at it.
+
+  WHY THIS LANDS (award lineage): Silver Pinewood #architecture is a gravity / perspective
+  -locked SELECT, a hand-built inline-SVG overlay (no map provider, no WebGL) where the
+  highlight obeys the building's geometry, not a flat rectangle. EVER visual-search Level 1
+  is the per-floor pick with the razor-clean band our smarts lacked. Here that grammar is
+  turned on a SINGLE house: not "pick a flat to buy", but "read how the house is built,
+  storey by storey", the architecture beat.
+
+  PIN SHAPE = NONE. The atom clean-floor-hover-select creates NO ScrollTrigger (it is a
+  pointer/GSAP tween engine). The section needs no scroll choreography, the interaction
+  IS the section. -> pinOwner:'none', expectPins:0.
+
+  MOTION: SVG fill-opacity + stroke-opacity (CSS transition .16s) for the band light;
+  GSAP transform/opacity on the card y-track (.18s, expo-class ease); a one-time affordance
+  pulse on the living band. transform / opacity / fill / stroke ONLY. NO WebGL. NO
+  mix-blend. NO backdrop-filter. will-change on the card cleared after it settles.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="renders/day-front.webp">
+
+<!-- cited atom's component.css + the shared rails -->
+<link rel="stylesheet" href="../../components/clean-floor-hover-select/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ============ variant SKIN only (scaffold owns the rails) ============ */
+
+  /* local named eases (block 4): air is registered by the scaffold; expo for the card snap */
+  :root {
+    --ease-air: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --t-ui: .16s;                 /* band light (block 4: UI .2-.4s; a band is a sub-UI flick) */
+    --t-card: .18s;               /* the tooltip y-track */
+    --hair: rgba(220, 197, 183, .26);
+    --accent: var(--combo-accent);          /* terracotta #b56a4a */
+    --accent-deep: #8c3f2a;
+  }
+
+  /* the stage is the dark gallery field; the render is centred + letterboxed (contain),
+     so the WHOLE facade is always visible (never cover-cropped, the building is the sell). */
+  #combo { background:
+      radial-gradient(120% 90% at 50% 12%, #1d1a15 0%, var(--combo-bg) 72%); }
+
+  /* the atom's stage fills the combo stage; its own min-height:100vh matches the full-bleed box */
+  .cfh-stage {
+    position: absolute; inset: 0; min-height: 0; background: transparent;
+    /* atom tokens, re-skinned to the combo terracotta-on-warm-dark system (block 2) */
+    --cfh-bg: transparent;
+    --cfh-ink: var(--combo-ink);
+    --cfh-accent: var(--accent);
+    --cfh-accent-deep: var(--accent-deep);
+    --cfh-card-bg: var(--combo-cream);
+    --cfh-card-ink: #2a2521;
+    --cfh-fill-on: .42;
+    --cfh-serif: var(--combo-serif);
+    --cfh-sans: var(--combo-sans);
+    --cfh-card-w: 224px;
+    --cfh-card-x: clamp(20px, 5vw, 80px);   /* side gutter (block 3) */
+  }
+
+  /* contain so nothing of the facade is ever clipped; a soft grade unifies the render (block 7) */
+  .cfh-img { object-fit: contain; filter: saturate(.98) contrast(1.02); }
+
+  /* the band: a hair stroke even at rest so the affordance is READABLE before hover
+     (block 5: obvious affordance), terracotta fill only on hover */
+  .cfh-band {
+    stroke-width: 1.4; stroke-opacity: .22;
+    transition: fill-opacity var(--t-ui) ease, stroke-opacity var(--t-ui) ease;
+  }
+  .cfh-band.is-hover { stroke-opacity: 1; }
+
+  /* the tooltip card: premium warm card, tabular serif numeral, sparse meta (blocks 1,7) */
+  .cfh-card {
+    padding: 1.05rem 1.25rem 1.15rem; border-radius: 2px;
+    box-shadow: 0 24px 60px -28px rgba(0,0,0,.7);
+    border: 1px solid rgba(42,37,33,.08);
+  }
+  .cfh-card__num { font-weight: 300; font-size: 2.5rem; letter-spacing: -.02em; }
+  .cfh-card__lab { font-weight: 600; font-size: .62rem; letter-spacing: .22em; opacity: .55; }
+  .cfh-card__sub { font-size: .8rem; line-height: 1.5; opacity: .82; }
+
+  /* ---- section chrome on the rails, generous air (block 3) ---- */
+  .fi-eyebrow {
+    position: absolute; left: clamp(20px,5vw,80px); top: clamp(80px,12vh,200px); z-index: 5;
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .24em; text-transform: uppercase;
+    color: var(--accent); margin: 0;
+  }
+  .fi-title {
+    position: absolute; left: clamp(20px,5vw,80px); top: calc(clamp(80px,12vh,200px) + 1.6rem); z-index: 5;
+    margin: 0; max-width: 9ch;
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(40px, 7vw, 120px); line-height: .92; letter-spacing: -.03em;
+    color: var(--combo-ink);
+  }
+  .fi-hint {
+    position: absolute; left: clamp(20px,5vw,80px); bottom: clamp(80px,12vh,200px); z-index: 5;
+    margin: 0; max-width: 26ch;
+    font-family: var(--combo-sans); font-weight: 400; font-size: clamp(.82rem,1vw,.95rem);
+    line-height: 1.62; color: rgba(244,239,230,.58);
+  }
+  .fi-hint__dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-right: .55rem; vertical-align: baseline;
+    transform: translateY(-1px);
+  }
+
+  /* the left RAIL of zone ticks, a persistent, sparse index of the three storeys.
+     each tick lights with its band (block 5: cross-feedback) and is itself hoverable. */
+  .fi-rail {
+    position: absolute; left: clamp(20px,5vw,80px); top: 50%; transform: translateY(-50%); z-index: 5;
+    display: flex; flex-direction: column; gap: 0; pointer-events: none;
+  }
+  .fi-tick {
+    display: grid; grid-template-columns: 22px auto; align-items: center; gap: .9rem;
+    padding: .9rem 0; pointer-events: auto; cursor: pointer;
+  }
+  .fi-tick__line { height: 1px; background: var(--hair); transition: background-color var(--t-ui) ease, transform var(--t-ui) ease; transform-origin: left; }
+  .fi-tick__lab {
+    font: 600 .64rem/1 var(--combo-sans); letter-spacing: .18em; text-transform: uppercase;
+    color: rgba(244,239,230,.5); transition: color var(--t-ui) ease;
+  }
+  .fi-tick.is-on .fi-tick__line { background: var(--accent); transform: scaleX(1.7); }
+  .fi-tick.is-on .fi-tick__lab { color: var(--combo-ink); }
+
+  /* reduced-motion: the atom already drops to a button list; just kill our transitions */
+  @media (prefers-reduced-motion: reduce) {
+    .cfh-band, .cfh-card, .fi-tick__line, .fi-tick__lab { transition: none !important; }
+    .fi-rail { display: none; }
+  }
+  /* on the atom's narrow / reduced fallback (.cfh-static), hide our overlay rail + hint:
+     the atom renders its own floor-button list instead. */
+  .cfh-static ~ .fi-rail, .cfh-static ~ .fi-hint { display: none; }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--floor-inspect">
+
+    <!-- the atom stage. .cfh-render carries [data-render-surface] (it holds the decoded img). -->
+    <section class="cfh-stage" id="fi">
+      <div class="cfh-render" data-render-surface>
+        <img class="cfh-img" src="renders/day-front.webp" width="1920" height="1080"
+             alt="Фасад таунхауса QUADRO, денний ракурс">
+        <!-- THE BRICK: the locked-viewBox floor overlay (engine fills polygons from bands[]) -->
+        <svg class="cfh-floors" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <!-- the ONE y-tracking tooltip card (engine fills + tweens its y) -->
+      <div class="cfh-card">
+        <div class="cfh-card__num">2</div>
+        <div class="cfh-card__lab">РІВЕНЬ</div>
+        <div class="cfh-card__sub">&nbsp;</div>
+      </div>
+    </section>
+
+    <!-- section chrome (sparse, premium, on the rails) -->
+    <p class="fi-eyebrow">QUADRO · Архітектура</p>
+    <h2 class="fi-title">Поверхи</h2>
+
+    <!-- the left rail index of the three storeys; mirrors + drives the bands -->
+    <div class="fi-rail" aria-hidden="true">
+      <div class="fi-tick" data-floor="3"><span class="fi-tick__line"></span><span class="fi-tick__lab">Дах</span></div>
+      <div class="fi-tick" data-floor="2"><span class="fi-tick__line"></span><span class="fi-tick__lab">Житловий</span></div>
+      <div class="fi-tick" data-floor="1"><span class="fi-tick__line"></span><span class="fi-tick__lab">Вхід</span></div>
+    </div>
+
+    <p class="fi-hint"><span class="fi-hint__dot"></span>Наведіть на рівень будинку, щоб роздивитися, як він влаштований.</p>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (no canon deps; it is standalone) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/clean-floor-hover-select/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // ---- the three storey bands, PIXEL-traced over day-front.webp (1920x1080). The white
+      //      front face has a vertical near corner at x=518 and a vertical right corner at
+      //      x=1582; the parapet top descends right (518,269 -> 1582,385), so each band is a
+      //      TRUE parallelogram parallel-ish to that slope, riding the box, not a flat slab.
+      //      points order = top-left, top-right, bottom-right, bottom-left (clockwise). ----
+      var BANDS = [
+        { floor: 3, label: 'ДАХ', sub: 'Плаский дах. Парапет ховає інженерію, лінія покрівлі чиста.',
+          status: 'live', points: '518,269 1582,385 1582,429 518,332', anchor: { x: 518, y: 300 } },
+        { floor: 2, label: 'ЖИТЛОВИЙ', sub: 'Спальний рівень. Вікна на всю стіну, світло від ранку до вечора.',
+          status: 'live', points: '518,332 1582,429 1582,647 518,617', anchor: { x: 518, y: 474 } },
+        { floor: 1, label: 'ВХІД', sub: 'Партер. Власний вхід, скління до підлоги, машина під вікнами.',
+          status: 'live', points: '518,617 1582,647 1582,743 518,713', anchor: { x: 518, y: 665 } }
+      ];
+
+      var cfh = null;
+
+      // ---- RENDER + SELECT job: the atom paints the day-front render, builds the locked-
+      // viewBox SVG bands, and runs the hover light + y-tracking card. It owns NO pin. ----
+      SectionHarness.ranOK('clean-floor-hover-select', function () {
+        cfh = window.CleanFloorHoverSelect.create('#fi', {
+          imgW: 1920, imgH: 1080, fit: 'contain',
+          bands: BANDS,
+          fillOn: 0.42, hoverDur: 0.16, cardDur: 0.18, ease: 'power3.out',
+          onSelect: function (floor) {
+            // a quiet confirm: pulse the chosen band's tick (no navigation in the lab)
+            var tick = document.querySelector('.fi-tick[data-floor="' + floor + '"]');
+            if (tick && window.gsap) {
+              window.gsap.fromTo(tick.querySelector('.fi-tick__line'),
+                { scaleX: 2.4 }, { scaleX: 1.7, duration: 0.5, ease: 'air' });
+            }
+          }
+        });
+        window.__cfh = cfh;
+      });
+
+      // ---- cross-link the LEFT RAIL ticks <-> the bands so the index lights with the storey
+      // (block 5: every interaction has reciprocal feedback). Pure class toggles + the atom's
+      // own set()/clear(); no second engine, no pin. ----
+      var ticks = Array.prototype.slice.call(document.querySelectorAll('.fi-tick'));
+      var card = document.querySelector('.cfh-card');
+      function lightTick(floor) {
+        ticks.forEach(function (t) { t.classList.toggle('is-on', t.getAttribute('data-floor') === String(floor)); });
+      }
+      // bands -> ticks: mirror the atom's hover onto the rail
+      if (cfh && cfh.bands) {
+        cfh.bands.forEach(function (b) {
+          b.el.addEventListener('mouseenter', function () { lightTick(b.data.floor); });
+        });
+        var svg = document.querySelector('.cfh-floors');
+        if (svg) svg.addEventListener('mouseleave', function () { lightTick(null); });
+      }
+      // ticks -> bands: hovering the index drives the same band + card via the atom's API
+      ticks.forEach(function (t) {
+        var f = t.getAttribute('data-floor');
+        t.addEventListener('mouseenter', function () { if (cfh && cfh.set) cfh.set(f); lightTick(f); });
+        t.addEventListener('mouseleave', function () { if (cfh && cfh.clear) cfh.clear(); lightTick(null); });
+        t.addEventListener('click', function () { if (cfh && cfh.select) cfh.select(f); });
+      });
+
+      // clear the card's resting will-change once it settles hidden (project scroll-perf law:
+      // no persistent compositor layer); the atom re-tweens y on the next hover.
+      if (card && window.gsap) {
+        card.addEventListener('transitionend', function () {});
+        // GSAP tweens autoAlpha; when fully hidden, drop the hint.
+        var clearWC = function () { if (parseFloat(getComputedStyle(card).opacity) === 0) card.style.willChange = 'auto'; };
+        document.querySelector('.cfh-floors') && document.querySelector('.cfh-floors')
+          .addEventListener('mouseleave', function () { setTimeout(clearWC, 260); });
+      }
+
+      // ---- a ONE-TIME affordance pulse on the living band, so the interaction is discoverable
+      // on a still screen (block 5: make the affordance obvious). Fires once after paint, gated
+      // by reduced-motion, leaves no residual state. ----
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced && window.gsap) {
+        var livingBand = document.querySelector('.cfh-band[data-floor="2"]');
+        if (livingBand) {
+          window.gsap.fromTo(livingBand,
+            { attr: { 'fill-opacity': 0 }, 'stroke-opacity': .22 },
+            { attr: { 'fill-opacity': .16 }, 'stroke-opacity': .55, duration: .9, delay: .7,
+              ease: 'air', yoyo: true, repeat: 1,
+              onComplete: function () { window.gsap.set(livingBand, { attr: { 'fill-opacity': 0 }, clearProps: 'strokeOpacity' }); } });
+        }
+      }
+
+      // PIN BUDGET: this section is pure interaction; it owns NO scroll pin.
+      SectionHarness.declare({
+        pinOwner: 'none', expectPins: 0,
+        atomsCited: ['clean-floor-hover-select']
+      });
+    })();
+  </script>
+</body>
+</html>

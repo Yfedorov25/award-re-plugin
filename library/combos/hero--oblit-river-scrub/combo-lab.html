@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: hero--oblit-river-scrub · "Обліт над водою"</title>
+<!--
+  HERO VARIANT · hero--oblit-river-scrub · "Обліт над водою"
+  ============================================================================
+  REWORK of hero--scroll-piloted-flyaround. The first pass LAGGED (frame-scrub-img =
+  <img>.src swap, decode-jank ~19%) AND read primitive (no real pin: elements appeared
+  and the page dumped them DOWN toward a section that did not exist; text was bulky /
+  full-screen / overlapping). This rework FIXES ALL OF THAT.
+
+  THE MECHANIC ROOT (unmistakable in a screenshot, not just in code):
+    ONE pinned scroll-scrub paints a 160-frame CAMERA OBLIT over the water/building to a
+    <canvas> (scroll-scrub-video = the Apple/AirPods technique: createImageBitmap decode-
+    once + drawImage, ZERO decoder lag, locked ~60fps, NOT video.currentTime). As you
+    scroll, the camera flies over the river toward the house, frame-by-frame, gliding and
+    reversible. No other hero scrubs a real aerial obliter over water. The lag-free oblit.
+
+  THE FIX FOR THE OWNER'S 3 HARD REQUIREMENTS:
+    1. REAL PIN  — scroll-scrub-video owns ONE pinned ScrollTrigger (pin:true,
+       pinSpacing:true). The section SCROLL-LOCKS while the oblit plays; it does NOT dump
+       the elements down toward a phantom next section. Releases only when the move ends.
+    2. PIN-STORY TEXT, SEQUENCED, NEVER OVERLAPPING — pin-story-text rides the SAME pin
+       (NO second pin). Three sparse lines arrive ONE AT A TIME, each in its OWN considered
+       composition (lower-left -> centre -> left). One settles, HOLDS, lifts away as the
+       next rises. Never two blocks colliding, never a full-screen wall (each <=46ch/52vw).
+    3. DEPTH / WOW — the HOUSE reveals AS the camera flies (the frames literally fly the
+       building into frame over the water) AND the text reveals one by one in lockstep:
+       the two owner-named directions ("full scroll of the house" + "text by sequential
+       reveal") welded onto ONE pinned scrub. corner-frame-meta frames it as an authored
+       plate (4 corner labels assemble once piloting begins).
+
+  THE COUPLING (one scroll beat, one pin owner):
+    scroll-scrub-video OWNS the single pin and exposes its ScrollTrigger (returns
+    { trigger }). On the gsap.ticker we READ that trigger's progress and drive, PURELY:
+      • pin-story-text.set(p) — the sequenced text story (its OWN self-pin is killed at
+        wire-time so the scrub stays the only pin owner; we keep just its pure set()),
+      • corner-frame-meta.reveal() — once, the instant piloting begins,
+      • a quiet scaleY progress hairline (GPU, transform only).
+
+  HARD ANTI (obeyed): NO video.currentTime scrub (canvas-2d frame-scrub IS the lag-free
+    oblit). NO WebGL (2d canvas). NO mix-blend / NO backdrop-filter over the canvas. Motion
+    ONLY transform/opacity/clip-path/filter/scaleY. ONE pin (scroll-scrub-video).
+  DECODE-GUARD: the stage carries a STATIC day-34 poster as its CSS background (the SAME
+    cars-free view) so there is never a black flash before the canvas paints frame 1, and
+    the preload veil (0..100) holds until enough frames decode.
+  ASSET-TRUTH: renders/river-frames/f_001.jpg .. f_160.jpg (the extracted clip-river oblit,
+    160 frames, 1280x720) + renders/day-34.webp poster (same view, cars-free landscape).
+    Copy describes the aerial arrival over the water. Sparse UA, Fedoriv voice, zero dashes.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- cited atoms' component.css (canon order), then the scaffold rails -->
+<link rel="stylesheet" href="../../components/scroll-scrub-video/component.css">
+<link rel="stylesheet" href="../../components/pin-story-text/component.css">
+<link rel="stylesheet" href="../../components/corner-frame-meta/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* ---- variant SKIN only (scroll-scrub-video owns the stage box + pin; scaffold owns rails) ---- */
+  :root {
+    --oblit-bg:    #0b1311;   /* deep water-green field behind the canvas */
+    --oblit-ink:   #f1ece0;   /* cream foreground */
+    --oblit-accent:#be8a55;   /* warm bronze accent */
+  }
+  body { background: var(--oblit-bg); }
+
+  /* HERO opens ON THE WATER: collapse the lab lead-in to ZERO so scroll 0 paints the
+     oblit edge-to-edge (no dark band above the pinned stage). The pin still gets its
+     full pinFactor*innerHeight range below. */
+  .combo-pre { height: 0; margin: 0; padding: 0; overflow: hidden; }
+
+  /* the scroll-scrub-video stage IS the render surface box. It is the single pinned
+     section. DECODE-GUARD: a static day-34 poster as the stage background means the
+     probe sees a painted surface AND there is never a black flash before frame 1 paints
+     (the canvas composites over the poster, then the preload veil lifts). The
+     background-image is a STATIC layout prop, never animated -> no jank, no banned tween. */
+  #oblit.ssv-stage[data-render-surface] {
+    position: relative; inset: auto; width: 100%; height: 100vh;
+    background-color: var(--oblit-bg);
+    background-image: url("renders/day-34.webp");
+    background-size: cover;
+    background-position: 50% 46%;
+    --ssv-bg: #0b1311;
+    --ssv-ink: var(--oblit-ink);
+  }
+  /* preload veil over the dark field, bronze counter, lifts when frames decode */
+  #oblit .ssv-preload { color: var(--oblit-ink); background: var(--oblit-bg);
+    font-family: var(--combo-sans); font-weight: 300; }
+
+  /* a quiet bottom scrim so the sequenced copy reads over any frame. STATIC gradient,
+     never a filter over the scrubbed canvas, never blends. */
+  .oblit__scrim { position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background:
+      linear-gradient(to top,    rgba(7,11,10,.62) 0%, rgba(7,11,10,0) 42%),
+      linear-gradient(to bottom, rgba(7,11,10,.34) 0%, rgba(7,11,10,0) 30%); }
+
+  /* the pin-story text layer sits ABOVE canvas + scrim. pin-story-text builds its
+     .pst__stage inside #oblit; we theme it here (cream ink, bronze accent, shadows). */
+  #oblit.pst { color: var(--oblit-ink); }
+  #oblit .pst__stage { z-index: 6; }
+  #oblit .pst__eyebrow { color: var(--oblit-accent); text-shadow: 0 1px 16px rgba(6,9,8,.6); }
+  #oblit .pst__title   { color: var(--oblit-ink); text-shadow: 0 3px 38px rgba(6,9,8,.5);
+    --pst-accent: var(--oblit-accent); }
+  #oblit .pst__title em { color: var(--oblit-accent); }
+  #oblit .pst__body    { color: var(--oblit-ink); opacity: .9; text-shadow: 0 1px 18px rgba(6,9,8,.6); }
+
+  /* corner-frame-meta: the 4 corner labels frame the oblit as an authored plate.
+     Placement is the atom's [data-corner] CSS; only colour/size/shadow set here. */
+  .oblit__plate { position: absolute; inset: 0; z-index: 7; pointer-events: none;
+    color: var(--oblit-ink); }
+  .oblit__plate [data-corner] { color: var(--oblit-ink); font-family: var(--combo-sans);
+    font-weight: 500; opacity: .9; text-shadow: 0 1px 18px rgba(6,9,8,.62); }
+  .oblit__plate [data-corner="rc"] { font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }
+  .oblit__plate [data-corner="br"] b,
+  .oblit__plate [data-corner="bl"] b { color: var(--oblit-accent); font-weight: 600; }
+
+  /* the "you pilot the shot" progress hairline, right-centre rail, scaleY off p (GPU). */
+  .oblit__progress { position: absolute; z-index: 7; right: clamp(24px, 4vw, 56px);
+    top: 50%; height: clamp(72px, 13vh, 140px); width: 1px;
+    transform: translateY(-50%); pointer-events: none;
+    background: linear-gradient(to bottom, rgba(241,236,224,.14), rgba(241,236,224,.46)); }
+  .oblit__progress i { position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    transform-origin: top center; transform: scaleY(0);
+    background: var(--oblit-ink); will-change: transform; }
+
+  @media (prefers-reduced-motion: reduce), (max-width: 820px) {
+    .oblit__progress { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <!-- scroll-scrub-video stage = the single pinned render surface. canvas paints the
+       160-frame river oblit; the static day-34 poster (CSS bg) is the decode-guard. -->
+  <section id="oblit" class="combo-stage ssv-stage" data-render-surface data-combo="hero--oblit-river-scrub">
+    <canvas class="ssv-canvas"></canvas>
+    <div class="oblit__scrim"></div>
+
+    <!-- corner-frame-meta plate: assembles once piloting begins. ASSET-TRUTH: copy
+         describes the aerial arrival over the water toward the house. -->
+    <div id="plate" class="oblit__plate">
+      <span data-corner="tl">Власний берег</span>
+      <span data-corner="bl">Над водою</span>
+      <span data-corner="br">Обліт &middot; <b>160 кадрів</b></span>
+      <span data-corner="rc" class="oblit__idx">001 / 160</span>
+    </div>
+
+    <div class="oblit__progress"><i></i></div>
+    <!-- pin-story-text builds its .pst__stage (the 3 sequenced blocks) into #oblit at boot -->
+    <div class="ssv-preload">0%</div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then cited atoms (canon order: engine that owns the pin first),
+       then ONE inline orchestration -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/scroll-scrub-video/component.js"></script>
+  <script src="../../components/pin-story-text/component.js"></script>
+  <script src="../../components/corner-frame-meta/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var g = window.gsap;
+      var ST = window.ScrollTrigger;
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var narrow  = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+
+      var idxEl = document.querySelector('.oblit__idx');
+      var bar   = document.querySelector('.oblit__progress i');
+      var FRAMES = 160;
+
+      // ── 1) THE PIN: scroll-scrub-video OWNS the single pinned scroll-scrub. It preloads
+      //    the 160 river frames (createImageBitmap, decode-once) and paints the right frame
+      //    to the <canvas> on scroll — the lag-free oblit. We let it manage its own Lenis so
+      //    the scrub is Lenis-smoothed (one scroll owner). ──
+      var scrub;
+      SectionHarness.ranOK('scroll-scrub-video', function () {
+        scrub = window.ScrollScrubVideo.init('#oblit', {
+          frames: 'renders/river-frames/f_', count: 160, pad: 3, ext: '.jpg', start: 1,
+          pinFactor: 2.4,    // a generous pin so the oblit + the 3-line story breathe
+          lerp: 0.16,        // glassy frame-index smoothing
+          preloadMin: 0.45,  // decode ~45% before lifting the veil; rest lazy
+          // PERF: this is a MOVING aerial backdrop behind a scrim + text, not a pixel-
+          // peep still. The frames are 1280x720; we cap the canvas backing store so
+          // drawImage never upscales AND fills the fewest pixels per scroll frame (the
+          // dominant scrub cost). CSS stretches the canvas to fill the stage, and the
+          // motion + scrim hide the modest downscale. This is the lever that keeps the
+          // river scrub at 60fps even under heavy CPU throttle.
+          maxCanvasW: 960,
+          manageLenis: true
+        });
+        window.__scrub = scrub;
+      });
+
+      // ── 2) PIN-STORY TEXT: build the 3 sparse sequenced blocks + get the PURE set(p).
+      //    The atom's create() makes its OWN pinned ScrollTrigger; we KILL that trigger so
+      //    the scrub stays the only pin owner (PIN BUDGET = 1), keeping just its set() +
+      //    its built DOM. We then drive set(p) off the scrub's progress on the ticker.
+      //    Three considered compositions, one at a time, never overlapping, never a wall. ──
+      var pst;
+      SectionHarness.ranOK('pin-story-text', function () {
+        pst = window.PinStoryText.create('#oblit', {
+          blocks: [
+            { eyebrow: 'Власний берег', align: 'lower-left',
+              title: 'Спускаємось<br>до води', at: 0.20 },
+            { eyebrow: 'Тиша, якої немає в місті', align: 'center',
+              title: 'Тут вода<br>замість сусідів', at: 0.52 },
+            { align: 'left',
+              title: 'Дім<br>на <em>березі</em>',
+              body: 'Камера у вашому темпі. Кадр за кадром, уперед і назад.', at: 0.84 }
+          ],
+          end: '+=160%', scrub: 1, hold: 0.42, ease: 'air'
+        });
+        // PIN BUDGET = 1: drop pin-story-text's OWN pin; the scrub owns the only pin.
+        // We keep its pure set() and its DOM. (reduced-motion static branch returns
+        // trigger:null, nothing to kill — it stacks the blocks with no pin.)
+        if (pst && pst.trigger && pst.trigger.kill) { try { pst.trigger.kill(); } catch (e) {} }
+        pst && pst.set && pst.set(0);
+      });
+
+      // ── 3) CORNER-FRAME-META: the authored-plate tell. Revealed ONCE the instant the
+      //    oblit begins (staggered). Placement is the atom's [data-corner] CSS. ──
+      var meta;
+      SectionHarness.ranOK('corner-frame-meta', function () {
+        meta = window.CornerFrameMeta.create('#plate', { stagger: 0.09, dur: 0.55, ease: 'power2.out' });
+      });
+
+      // ── COUPLING: read the scrub's pinned-trigger progress on the gsap.ticker and drive,
+      //    PURELY (transform/opacity/scaleY only), the sequenced text + the plate + the
+      //    progress hairline + the frame-index readout. NO second pin, NO second scroll owner. ──
+      var revealed = false;
+      function drive(p) {
+        p = p < 0 ? 0 : (p > 1 ? 1 : p);
+        if (pst && pst.set) pst.set(p);                          // the sequenced text story
+        if (bar && g) g.set(bar, { scaleY: p });                 // the pilot hairline
+        if (idxEl) {                                             // frame-exact readout
+          var f = Math.round(p * (FRAMES - 1)) + 1;
+          idxEl.textContent = (f < 10 ? '00' : f < 100 ? '0' : '') + f + ' / 160';
+        }
+        if (!revealed && p > 0.012) { revealed = true; meta && meta.reveal && meta.reveal(); }
+      }
+
+      // reduced-motion / narrow: scroll-scrub-video returns { static:true } (no pin, last
+      // frame painted) and pin-story-text returns its static stacked deck (no pin). Show
+      // the plate + settle the readout; expectPins becomes 0 on this branch.
+      var liveScrub = scrub && !scrub.static && scrub.trigger;
+      if (liveScrub) {
+        g.ticker.add(function () { drive(scrub.trigger.progress || 0); });
+        drive(0);
+        SectionHarness.declare({
+          pinOwner: 'scroll-scrub-video', expectPins: 1,
+          atomsCited: ['scroll-scrub-video', 'pin-story-text', 'corner-frame-meta']
+        });
+      } else {
+        // static fallback: no pinned trigger exists; the plate + readout settle shown.
+        meta && meta.reveal && meta.reveal();
+        if (idxEl) idxEl.textContent = '160 / 160';
+        SectionHarness.declare({
+          pinOwner: 'none', expectPins: 0,
+          atomsCited: ['scroll-scrub-video', 'pin-story-text', 'corner-frame-meta']
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

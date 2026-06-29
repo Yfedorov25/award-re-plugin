@@ -1,0 +1,18 @@
+/* RENDER-SCROLL-SCALE · component.css
+   A fixed clipping frame holding ONE full-bleed render that scales up on scroll. The frame
+   clips (overflow:hidden); the render is the only moving part — transform scale/translateY.
+   No copy, no layout — a bare hero background layer. NO mix-blend / NO backdrop. NO WebGL. */
+
+/* the clipping frame — the scale is bound inside it */
+.rss-frame { position: relative; overflow: hidden;
+  width: 100%; height: var(--rss-h, 100vh);
+  background: var(--rss-bg, #0c0b08); }
+
+/* the single full-bleed render — the only moving element */
+.rss-render { position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transform-origin: 50% 50%; will-change: transform;
+  transform: scale(var(--rss-from, 1)); }
+
+/* static branch (reduced-motion / narrow): hold at scaleFrom, drop will-change */
+.rss-static .rss-render { will-change: auto; }

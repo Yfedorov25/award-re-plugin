@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--architects-sketch · Схема від руки</title>
+<!--
+  SECTION VARIANT · location--architects-sketch (role: location).
+  MEDIUM = PEN-SKETCH. A MONOCHROME architect's hand-sketch of с. Агрономічне: thin (~1px) cream
+  strokes on a brown drafting field. NO fills, NO colour photography, NO Google / NO Mapbox / NO tiles.
+  The REAL OSM roads (80 streets, baked from osm-agronomichne.js) DRAW in via stroke-dashoffset; a
+  ringed crosshair marks the real site point; the 6 REAL POIs ladder up on hairline leader-lines with
+  their real minutes; and as the section pins, each POI's REAL Dijkstra walking route draws along the
+  actual streets. coords-corner-frame frames it as a drafting plate (49.18N 28.33E, scale bar, north).
+
+  Shape = ENGINE-ATOM-DRIVEN-BY-HARNESS-PIN. line-art-location-map is owns_pin=FALSE (its own
+  scroll-into-view trigger is KILLED at wire-time so it does not auto-play); the HARNESS owns the ONE
+  section pin and scrubs lam.set(p) + frame.set(p) 1:1, reversible. Over the pinned range the section
+  STEPS through the 6 POIs: the active route draws, prior fades, and ONE pin-story block is legible at a
+  time (eyebrow + POI name + real minutes), cross-faded so two are never legible at once.
+
+  asset-truth: streets + routes + POI names + minutes are the REAL baked OSM (Траш! 9хв, Аврора 18хв,
+  Грош Експрес 15хв, Нова Пошта 10хв, Подорожник 10хв, Школа·садок 9хв). __LAB_OK__ (combo-scaffold.js)
+  passes only if: 1 pin, the cited real atoms ran, [data-render-surface] painted (the drafting field),
+  0 real console errors. Motion: stroke-dashoffset / transform / opacity / filter only. NO WebGL.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/line-art-location-map/component.css">
+<link rel="stylesheet" href="../../components/coords-corner-frame/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the rails). stroke-dashoffset / transform / opacity / filter only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin. */
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* a warm drafting register: dark brown field, cream ink, terracotta accent on the live route */
+  #combo.combo-stage { background: #211a13; }
+
+  /* THE RENDER SURFACE = the brown DRAFTING FIELD (a real CSS background-image so the honest
+     paint-probe sees a painted surface, and the medium reads as paper on a drafting table). The
+     line-art SVG mounts on top of it; line-art-location-map reads its --lam-* tokens. */
+  .as__field {
+    --lam-bg: transparent; --lam-stroke: #e9e1d2; --lam-ink: #f4efe4; --lam-w: 1;
+    background-color: #221a12;
+    background-image:
+      radial-gradient(130% 100% at 30% 22%, rgba(60,48,34,.55), rgba(20,15,10,0) 60%),
+      radial-gradient(90% 80% at 82% 56%, rgba(181,106,74,.10), rgba(181,106,74,0) 55%),
+      linear-gradient(rgba(233,225,210,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(233,225,210,.045) 1px, transparent 1px),
+      linear-gradient(160deg, #2a2017 0%, #1b140d 100%);
+    background-size: auto, auto, 38px 38px, 38px 38px, auto;
+  }
+  /* the SVG sits inside the field. the atom's .lam-stage rules also apply; we re-point colour tokens. */
+  .as__field .lam-map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* keep the drawn ink hairline-thin and warm; faint roads dimmer (the medium's hand-sketch grade) */
+  .as__field .lam-map .lam-road { stroke: #e9e1d2; }
+  .as__field .lam-map .lam-road--faint { opacity: .34; }
+  .as__field .lam-map .lam-road--minor { opacity: .56; }
+  .as__field .lam-map .lam-road--mid   { opacity: .82; }
+  .as__field .lam-map .lam-road--main,
+  .as__field .lam-map .lam-road--hwy   { opacity: 1; }
+  .as__field .lam-map [data-target] .ring,
+  .as__field .lam-map [data-target] line { stroke: #f6f0e4; }
+  .as__field .lam-map [data-target] .core { fill: #f6f0e4; }
+  .as__field .lam-map [data-target] line { stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+
+  /* the LIVE route layer: the active POI's REAL Dijkstra path, drawn in terracotta over the streets */
+  .as-route { fill: none; stroke: var(--as-accent, #cf8a5e); stroke-width: 2.1;
+    stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+    opacity: 0; will-change: stroke-dashoffset, opacity; }
+
+  /* POI markers (atom-styled .lam-poi): warm hairline leaders + small serif labels */
+  .as__field .lam-poi .lam-leader { background: #e9e1d2; opacity: .55; --lam-leader: 40px; }
+  .as__field .lam-poi .lam-dot { border-color: #f4efe4; background: #221a12; }
+  .as__field .lam-poi .lam-label b { font-family: var(--combo-serif); font-weight: 400; font-size: .92rem;
+    letter-spacing: -.01em; color: #f4efe4; }
+  .as__field .lam-poi .lam-label .dist { font-size: .58rem; letter-spacing: .16em; opacity: .55; }
+  /* the active POI gets a brighter dot + accent label (set via .is-active) */
+  .as__field .lam-poi.is-active .lam-dot { border-color: var(--as-accent, #cf8a5e); background: var(--as-accent, #cf8a5e); }
+  .as__field .lam-poi.is-active .lam-label b { color: #f7efe2; }
+  .as__field .lam-poi.is-active .lam-leader { opacity: .9; }
+  .as__field .lam-poi { transition: opacity .35s var(--ease-air); }
+
+  /* the section's own standing label (top-left) */
+  .as__label { position: absolute; z-index: 8; top: clamp(20px,5vh,52px); left: clamp(22px,5vw,72px);
+    font: 600 .64rem/1.5 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(244,239,228,.6); max-width: 24ch; }
+  .as__label b { display: block; font-weight: 600; color: rgba(244,239,228,.4); letter-spacing: .2em;
+    margin-top: .35rem; font-size: .58rem; }
+
+  /* ---- the reading rail: a fixed eyebrow + ONE stepping story block (no two legible at once) ---- */
+  .as__rail { position: absolute; z-index: 8; left: clamp(22px,5vw,72px); bottom: clamp(28px,8vh,80px);
+    width: min(32ch, 42vw); pointer-events: none; }
+  @media (min-width: 980px) { .as__rail { left: auto; right: clamp(28px,5vw,84px); width: min(28ch,32vw); } }
+
+  .as__eyebrow { margin: 0 0 clamp(1rem,2.6vh,1.7rem); font: 600 .66rem/1 var(--combo-sans);
+    letter-spacing: .28em; text-transform: uppercase; color: rgba(244,239,228,.6); }
+
+  .as__story { position: relative; min-height: clamp(132px, 22vh, 196px); }
+  .as__block { position: absolute; inset: 0; opacity: 0; transform: translateY(16px);
+    will-change: opacity, transform; }
+  .as__no { font: 600 .68rem/1 var(--combo-sans); letter-spacing: .22em;
+    color: var(--as-accent, #cf8a5e); font-variant-numeric: tabular-nums; }
+  .as__place { font-family: var(--combo-serif); font-weight: 300; font-size: clamp(2.1rem,4.6vw,3.6rem);
+    line-height: .98; letter-spacing: -.03em; color: #f6f0e4; margin: clamp(.5rem,1.5vh,.95rem) 0 0; }
+  .as__time { margin-top: clamp(.7rem,2vh,1.25rem); font: 400 .9rem/1.55 var(--combo-sans);
+    letter-spacing: .01em; color: rgba(244,239,228,.78); }
+  .as__time b { font-weight: 600; color: #f6f0e4; font-variant-numeric: tabular-nums; }
+
+  /* slim step ticks: one per real POI, the walked ones filled */
+  .as__steps { position: absolute; z-index: 8; left: clamp(22px,5vw,72px); bottom: clamp(20px,5vh,46px);
+    display: flex; gap: 8px; pointer-events: none; }
+  @media (max-width: 979px) { .as__steps { bottom: auto; top: clamp(64px,9vh,96px); } }
+  .as__tick { width: 24px; height: 2px; background: rgba(244,239,228,.18); transform-origin: left center;
+    transition: background .3s var(--ease-air), transform .3s var(--ease-air); }
+  .as__tick.on { background: var(--as-accent, #cf8a5e); transform: scaleX(1.04); }
+
+  /* harmonise the coords-corner-frame chrome with the cream/terracotta register */
+  .as__field .ccf-overlay { --ccf-ink: #efe8da; --ccf-ink-dim: rgba(239,232,218,.6);
+    --ccf-accent: #cf8a5e; --ccf-tick-stroke: #efe8da; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .as__block { transition: none; }
+    .as-route { opacity: .85; }
+  }
+  @media (max-width: 979px) {
+    .as__rail { right: auto; left: clamp(18px,5vw,40px); bottom: clamp(20px,6vh,52px); width: min(30ch,82vw); }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--architects-sketch">
+
+    <!-- THE RENDER SURFACE: the brown drafting field. line-art-location-map + coords-corner-frame mount here. -->
+    <div class="as__field lam-stage" id="plate" data-render-surface>
+
+      <!-- the hand-sketch: REAL OSM roads (stroke-dashoffset draw) + REAL Dijkstra routes + site crosshair -->
+      <svg class="lam-map" viewBox="255 35 600 560" preserveAspectRatio="xMidYMid meet">
+        <!-- 80 REAL streets of с. Агрономічне, baked from osm-agronomichne.js (faint -> prominent) -->
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 704.7 366.9 L 712.0 376.2 L 726.8 380.3 L 730.6 378.9 L 734.2 377.6 L 767.5 367.6 L 783.0 368.1"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 312.0 194.9 L 349.8 349.1 L 359.2 387.1 L 402.0 377.4 L 417.4 378.2 L 423.8 409.9 L 439.2 406.4 L 432.6 375.1 L 417.4 378.2"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 444.9 115.1 L 511.2 101.2"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 503.5 408.5 L 340.2 445.6"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 522.7 324.9 L 532.1 323.2 L 535.8 341.2"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 492.4 352.8 L 500.5 340.2 L 521.0 335.9 L 522.7 324.9 L 519.0 305.1"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 500.5 229.9 L 498.8 221.1 L 509.3 218.8"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 560.1 199.6 L 532.0 206.2 L 529.7 209.1 L 529.0 214.7 L 529.7 221.9 L 529.7 233.7 L 532.1 251.8 L 500.2 258.8 L 474.3 264.1"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 533.8 194.9 L 535.1 200.3"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 492.1 208.0 L 494.2 209.0 L 505.5 206.7 L 514.8 205.3 L 535.1 200.3 L 549.9 196.5 L 558.7 194.1"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 492.1 208.0 L 492.8 206.2 L 494.4 203.9 L 499.5 202.3 L 533.8 194.9 L 544.6 192.6 L 547.1 193.6 L 549.9 196.5"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 466.5 216.2 L 482.7 213.7 L 484.9 213.1 L 486.9 212.2 L 488.6 211.4 L 492.1 208.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 726.8 380.3 L 744.0 389.5 L 757.2 396.6 L 820.6 430.7 L 841.3 450.5 L 860.8 468.3 L 867.6 472.0 L 869.0 474.0 L 870.3 475.9 L 871.2 481.2 L 874.9 506.7"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 734.2 377.6 L 734.0 373.7 L 735.2 364.2 L 737.6 359.2 L 742.1 352.6"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 508.8 227.6 L 511.6 240.1 L 518.0 239.0 L 517.4 236.4 L 529.7 233.7"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 456.5 254.4 L 472.1 251.6"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 495.7 369.8 L 477.1 373.3 L 473.0 356.3"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 757.5 616.5 L 808.2 589.1"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 590.8 310.9 L 581.1 313.2 L 579.1 316.0 L 582.9 336.2 L 581.5 338.4 L 547.2 345.6 L 549.5 355.7"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 754.5 299.7 L 764.2 302.6 L 778.7 303.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 479.3 292.2 L 494.0 289.1 L 504.4 286.6 L 508.2 280.9 L 504.0 262.7 L 500.2 258.8"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 604.4 481.0 L 666.6 557.5 L 666.2 561.3 L 608.6 606.6"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 468.7 614.9 L 469.2 609.8 L 471.0 604.9 L 524.9 561.5"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 413.2 169.0 L 422.1 226.3 L 427.6 271.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 244.8 210.8 L 290.1 390.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 340.2 445.6 L 377.5 611.8"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 524.5 508.6 L 533.3 506.0 L 565.9 496.3 L 567.1 495.5 L 579.0 486.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 568.7 473.0 L 571.9 471.5 L 579.0 486.0 L 579.9 488.0 L 566.4 498.4 L 533.9 508.6 L 533.3 506.0 L 531.7 498.3 L 537.8 501.3 L 564.1 493.9 L 574.1 486.0 L 568.7 473.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 519.4 484.1 L 537.9 479.5 L 525.5 422.7 L 507.3 426.7"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 537.9 479.5 L 539.8 488.7 L 540.3 489.3 L 541.1 489.4 L 557.5 483.9 L 558.2 483.4 L 558.3 482.4 L 535.1 420.1 L 525.5 422.7"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 593.3 321.8 L 614.2 315.3 L 619.5 332.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 446.5 144.8 L 444.2 148.2 L 446.8 160.6 L 455.5 158.4 L 460.2 157.2 L 461.1 154.4 L 459.4 154.3 L 457.7 153.9 L 456.4 152.9 L 455.5 151.6 L 453.6 144.7 L 451.8 143.6 L 446.5 144.8"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 546.2 296.2 L 544.2 289.5 L 542.5 280.7 L 539.1 262.6"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 542.5 280.7 L 532.4 282.9 L 531.7 285.2 L 534.7 299.9"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 435.2 80.7 L 418.3 86.2 L 417.4 86.5 L 405.2 93.6 L 410.3 112.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 418.3 86.2 L 415.6 76.4 L 403.7 79.6 L 399.9 66.1"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 405.2 93.6 L 396.1 96.0"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 403.7 79.6 L 391.6 83.5"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 466.5 216.2 L 454.3 217.9 L 432.7 221.6"/>
+        <path class="lam-road lam-road--faint" data-draw style="stroke-width:0.55" d="M 401.4 172.0 L 403.8 185.0 L 402.7 191.6 L 399.2 196.3 L 386.2 199.0"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 483.5 313.4 L 519.0 305.1 L 534.7 299.9 L 546.2 296.2 L 556.3 292.9 L 584.0 286.8 L 599.5 284.1 L 641.7 281.3 L 687.8 279.2 L 702.4 322.3 L 712.2 347.0 L 716.5 352.1"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 398.1 172.8 L 383.4 121.9 L 383.2 121.1 L 378.3 103.6 L 374.8 91.1 L 351.2 12.3"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 544.2 136.0 L 558.7 194.1 L 560.1 199.6 L 561.7 205.7 L 578.1 265.3 L 584.0 286.8 L 590.8 310.9 L 593.3 321.8 L 595.1 329.8 L 598.8 345.3 L 614.4 381.9 L 636.1 432.0 L 637.5 434.9 L 638.7 437.0 L 639.5 438.1 L 640.2 439.1 L 642.4 441.2 L 646.4 444.6"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 561.7 205.7 L 580.7 200.4 L 564.3 131.3"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 616.5 471.3 L 613.5 464.5 L 612.2 461.7 L 582.0 394.7 L 614.4 381.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 843.7 59.3 L 839.1 30.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 650.1 364.7 L 663.5 400.5 L 666.9 407.5 L 671.5 411.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 495.7 369.8 L 507.6 367.1 L 535.6 360.7 L 541.4 358.7 L 549.5 355.7 L 575.0 350.3 L 598.8 345.3"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 582.0 394.7 L 544.2 400.2 L 549.4 413.5 L 571.9 471.5 L 579.0 486.0 L 579.9 488.0 L 584.5 496.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 641.7 281.3 L 642.9 325.9 L 643.4 349.8 L 643.7 352.5 L 644.4 355.3 L 645.3 357.8 L 646.8 360.6 L 650.1 364.7 L 651.9 365.7 L 655.1 366.1 L 657.9 366.3 L 696.4 363.0 L 698.9 363.0 L 701.1 363.8 L 704.7 366.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 776.8 46.7 L 839.1 30.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 730.7 87.9 L 725.5 59.2 L 723.8 50.9 L 721.9 48.3 L 719.2 48.0 L 681.6 55.9 L 553.7 88.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 572.2 37.4 L 587.3 6.6"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 560.6 57.0 L 495.0 72.5 L 469.6 79.4 L 437.0 87.2"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 489.3 39.4 L 539.9 26.6 L 541.7 26.7 L 543.4 27.2 L 545.1 28.2 L 562.1 52.1"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 495.0 72.5 L 488.5 43.6 L 489.3 39.4 L 494.8 7.6"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 503.8 410.2 L 503.5 408.5 L 502.5 404.0 L 499.4 388.2 L 496.7 374.8 L 495.7 369.8 L 494.8 365.1 L 492.4 352.8"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 572.2 37.4 L 569.2 41.7 L 562.1 52.1 L 561.3 54.5 L 560.6 57.0 L 553.7 88.9 L 544.4 125.2 L 543.8 127.6 L 543.6 129.5 L 543.6 131.5 L 544.2 136.0"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 772.5 13.9 L 776.8 46.7 L 780.7 76.1"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 259.8 207.3 L 243.9 150.8"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 290.6 199.9 L 243.9 38.2"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 312.5 77.4 L 330.4 137.2 L 345.3 186.3"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 296.5 147.3 L 314.0 143.0 L 330.4 137.2 L 347.4 131.6 L 347.1 130.2 L 315.2 17.2"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 754.5 299.7 L 740.1 290.3 L 713.5 280.3"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 469.9 238.0 L 500.5 229.9 L 508.8 227.6 L 529.7 221.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 575.9 503.8 L 612.6 549.4"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 517.8 550.2 L 524.9 561.5"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 549.6 524.9 L 555.4 532.9 L 556.8 540.8 L 608.6 606.6"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 349.8 349.1 L 403.8 334.3 L 441.9 323.9 L 458.3 319.4 L 483.5 313.4"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 347.4 131.6 L 383.4 121.9"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 614.1 118.2 L 631.8 186.4"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 455.5 158.4 L 451.8 143.6 L 444.9 115.1 L 437.0 87.2 L 435.2 80.7"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 492.4 352.8 L 483.5 313.4 L 479.3 292.2 L 474.3 264.1 L 472.1 251.6 L 469.9 238.0 L 466.5 216.2 L 455.5 158.4"/>
+        <path class="lam-road lam-road--minor" data-draw style="stroke-width:0.85" d="M 531.1 539.5 L 529.5 531.8 L 528.0 525.3 L 526.0 515.8 L 524.5 508.6 L 519.4 484.1 L 507.3 426.7 L 503.8 410.2"/>
+        <path class="lam-road lam-road--mid" data-draw style="stroke-width:1.1" d="M 455.5 158.4 L 446.8 160.6 L 413.2 169.0 L 401.4 172.0 L 398.1 172.8 L 345.3 186.3 L 312.0 194.9 L 290.6 199.9 L 259.8 207.3 L 245.1 210.8 L 234.0 213.4"/>
+        <path class="lam-road lam-road--mid" data-draw style="stroke-width:1.1" d="M 843.7 59.3 L 802.6 70.3 L 780.7 76.1 L 730.7 87.9 L 671.3 102.9 L 614.1 118.2"/>
+        <path class="lam-road lam-road--mid" data-draw style="stroke-width:1.1" d="M 614.1 118.2 L 564.3 131.3 L 544.2 136.0 L 465.2 155.9 L 462.3 156.7 L 460.2 157.2 L 455.5 158.4"/>
+        <path class="lam-road lam-road--main" data-draw style="stroke-width:1.5" d="M 702.4 322.3 L 642.9 325.9"/>
+        <path class="lam-road lam-road--hwy" data-draw style="stroke-width:1.7" d="M 531.1 539.5 L 540.7 532.0 L 542.7 530.4 L 549.6 524.9 L 573.1 506.1 L 575.9 503.8 L 584.5 496.9 L 604.4 481.0 L 616.5 471.3 L 626.0 463.7 L 634.2 456.4 L 640.4 450.6 L 646.4 444.6 L 656.2 432.3 L 671.5 411.9 L 699.7 373.7 L 704.7 366.9 L 706.8 364.2 L 708.6 362.0 L 716.5 352.1 L 735.0 328.0 L 754.5 299.7 L 774.2 272.0 L 776.8 266.8 L 789.8 240.1 L 807.9 201.4 L 812.0 193.8 L 816.0 186.5 L 822.4 175.3 L 826.4 169.3 L 831.0 162.7 L 836.0 156.6 L 853.2 136.4 L 883.8 102.7"/>
+        <path class="lam-road lam-road--hwy" data-draw style="stroke-width:1.7" d="M 456.3 599.4 L 471.5 587.3 L 517.8 550.2 L 522.7 546.4 L 527.1 542.9 L 531.1 539.5"/>
+        <!-- live walking routes (real Dijkstra paths), drawn one at a time as the section steps -->
+        <path class="as-route" data-route="school" d="M 735.1 328.0 L 716.5 352.1 L 708.6 362.0 L 706.8 364.3 L 704.8 366.9 L 699.7 373.7 L 671.5 411.9 L 656.2 432.3 L 646.4 444.6 L 642.4 441.2 L 640.3 439.1 L 639.5 438.1 L 638.7 436.9 L 637.5 434.9 L 636.1 432.0 L 614.4 381.9 L 582.0 394.7 L 544.2 400.2"/>
+        <path class="as-route" data-route="np" d="M 735.1 328.0 L 716.5 352.1 L 708.6 362.0 L 706.8 364.3 L 704.8 366.9 L 699.7 373.7 L 671.5 411.9 L 656.2 432.3 L 646.4 444.6 L 640.4 450.6 L 634.2 456.4 L 626.0 463.7 L 616.5 471.3 L 604.4 481.0 L 584.5 496.9 L 579.9 488.0 L 579.0 486.0 L 567.1 495.5 L 565.9 496.3 L 533.3 506.0 L 531.7 498.4 L 537.8 501.3"/>
+        <path class="as-route" data-route="trash" d="M 735.1 328.0 L 716.5 352.1 L 708.6 362.0 L 706.8 364.3 L 704.8 366.9 L 699.7 373.7 L 671.5 411.9 L 656.2 432.3 L 646.4 444.6 L 640.4 450.6 L 634.2 456.4 L 626.0 463.7 L 616.5 471.3 L 604.4 481.0 L 584.5 496.9 L 579.9 488.0 L 579.0 486.0 L 571.9 471.5 L 568.7 473.0 L 574.0 486.0 L 564.1 493.9"/>
+        <path class="as-route" data-route="apteka" d="M 735.1 328.0 L 716.5 352.1 L 712.2 347.0 L 702.5 322.3 L 687.8 279.2 L 641.7 281.3 L 599.5 284.2 L 584.0 286.8 L 556.3 292.9 L 546.2 296.2 L 534.7 299.9 L 518.9 305.1 L 483.5 313.4 L 479.3 292.2 L 474.3 264.1"/>
+        <path class="as-route" data-route="grosh" d="M 735.1 328.0 L 716.5 352.1 L 712.2 347.0 L 702.5 322.3 L 687.8 279.2 L 641.7 281.3 L 599.5 284.2 L 584.0 286.8 L 578.1 265.3 L 561.7 205.7 L 560.1 199.7 L 558.7 194.1 L 544.2 136.1 L 465.2 155.9 L 462.3 156.7 L 460.2 157.2 L 461.1 154.4 L 459.3 154.4 L 457.8 153.9 L 456.4 152.9 L 455.5 151.5 L 453.6 144.7 L 451.8 143.6"/>
+        <path class="as-route" data-route="avrora" d="M 735.1 328.0 L 716.5 352.1 L 712.2 347.0 L 702.5 322.3 L 687.8 279.2 L 641.7 281.3 L 599.5 284.2 L 584.0 286.8 L 578.1 265.3 L 561.7 205.7 L 560.1 199.7 L 558.7 194.1 L 544.2 136.1 L 465.2 155.9 L 462.3 156.7 L 460.2 157.2 L 455.5 158.4 L 446.8 160.6 L 413.2 169.0 L 401.4 172.0 L 398.1 172.8 L 345.3 186.3"/>
+        <!-- the real site point: a ringed survey crosshair -->
+        <g transform="translate(746.3 324.9)">
+          <g data-target>
+            <circle class="ring" r="30"/>
+            <circle class="ring" r="15"/>
+            <circle class="core" r="3.4"/>
+            <line x1="-40" y1="0" x2="-34" y2="0"/>
+            <line x1="34" y1="0" x2="40" y2="0"/>
+            <line x1="0" y1="-40" x2="0" y2="-34"/>
+            <line x1="0" y1="34" x2="0" y2="40"/>
+          </g>
+        </g>
+      </svg>
+
+      <!-- the 6 REAL POIs on hairline leader-lines (atom ladders them bottom-to-top) -->
+      <div class="lam-poi" data-poi data-id="school" style="left:47.57%;top:61.68%">
+        <span class="lam-leader"></span><span class="lam-dot"></span>
+        <span class="lam-label"><b>Школа · садок</b><span class="dist">9 хв пішки</span></span>
+      </div>
+      <div class="lam-poi" data-poi data-id="np" style="left:46.72%;top:82.77%">
+        <span class="lam-leader"></span><span class="lam-dot"></span>
+        <span class="lam-label"><b>Нова Пошта</b><span class="dist">10 хв пішки</span></span>
+      </div>
+      <div class="lam-poi" data-poi data-id="trash" style="left:51.57%;top:81.41%">
+        <span class="lam-leader"></span><span class="lam-dot"></span>
+        <span class="lam-label"><b>Супермаркет «Траш!»</b><span class="dist">9 хв пішки</span></span>
+      </div>
+      <div class="lam-poi" data-poi data-id="apteka" style="left:37.68%;top:41.64%">
+        <span class="lam-leader"></span><span class="lam-dot"></span>
+        <span class="lam-label"><b>Аптека «Подорожник»</b><span class="dist">10 хв пішки</span></span>
+      </div>
+      <div class="lam-poi" data-poi data-id="grosh" style="left:33.67%;top:16.29%">
+        <span class="lam-leader"></span><span class="lam-dot"></span>
+        <span class="lam-label"><b>«Грош Експрес»</b><span class="dist">15 хв пішки</span></span>
+      </div>
+      <div class="lam-poi" data-poi data-id="avrora" style="left:14.73%;top:40.73%">
+        <span class="lam-leader"></span><span class="lam-dot"></span>
+        <span class="lam-label"><b>Маркет «Аврора»</b><span class="dist">18 хв пішки</span></span>
+      </div>
+    </div>
+
+    <p class="as__label">Схема від руки<b>с. Агрономічне · за даними OpenStreetMap</b></p>
+
+    <div class="as__rail">
+      <p class="as__eyebrow">5 хвилин від Вінниці</p>
+      <div class="as__story" data-story></div>
+    </div>
+
+    <div class="as__steps" data-steps></div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon map engine FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/line-art-location-map/component.js"></script>
+  <script src="../../components/coords-corner-frame/component.js"></script>
+
+  <!-- ONE module script: imports the REAL baked OSM, wires the two cited atoms by hand -->
+  <script type="module">
+    import { OSM } from './osm.js';   // asset-truth: the real с. Агрономічне dataset
+
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---- ATOM 1 · line-art-location-map (owns_pin FALSE) ----------------------------------------
+    // It reads our static [data-draw] roads + [data-target] crosshair + .lam-poi markers and returns
+    // a PURE set(p) scrub of the whole pen-sketch reveal. We KILL its own onEnter trigger so ONLY the
+    // harness pin drives set(p) (no auto-play, no second trigger fighting the scrub).
+    var lam;
+    SectionHarness.ranOK('line-art-location-map', function () {
+      lam = window.LineArtLocationMap.create('#plate', {
+        draw: true, stagger: 0.09, duration: 0.7, ease: 'power2.out',
+        start: 'top 78%', once: true, manageLenis: false
+      });
+      if (lam && lam.trigger && lam.trigger.kill) lam.trigger.kill();   // harness owns the scroll; no auto-play
+      if (lam && lam.set) lam.set(REDUCED ? 1 : 0);   // reduced-motion: the whole sketch shown, no scrub needed
+      window.__asLam = lam;
+    });
+
+    // ---- ATOM 2 · coords-corner-frame (owns_pin FALSE) ------------------------------------------
+    // Injects the drafting plate over the field: survey crosshair corners that DRAW, a coordinate
+    // readout, a scale bar, a north arrow, corner labels. set(p) is a PURE scrub we ride on the pin.
+    var frame;
+    SectionHarness.ranOK('coords-corner-frame', function () {
+      frame = window.CoordsCornerFrame.create('#plate', {
+        coords: '49.18N 28.33E',
+        scale: '0 ... 500 м',
+        north: true,
+        labels: { tl: 'План локації', bl: 'Масштаб', br: 'Аркуш 01', rc: 'OSM · 2026' },
+        ease: 'air', stagger: 0.08, dur: 0.7
+      });
+      if (frame && frame.set) frame.set(REDUCED ? 1 : 0);   // reduced-motion: plate fully drawn
+      window.__asFrame = frame;
+    });
+
+    // ---- the REAL POI tour order (verbatim names + real minutes) --------------------------------
+    var ORDER = ['school', 'np', 'trash', 'apteka', 'grosh', 'avrora'];
+    var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
+    var STORY = [{"i":0,"id":"school","label":"Школа · садок","walk":9,"drive":2,"m":800},{"i":1,"id":"np","label":"Нова Пошта","walk":10,"drive":2,"m":800},{"i":2,"id":"trash","label":"Супермаркет «Траш!»","walk":9,"drive":1,"m":700},{"i":3,"id":"apteka","label":"Аптека «Подорожник»","walk":10,"drive":2,"m":900},{"i":4,"id":"grosh","label":"«Грош Експрес»","walk":15,"drive":2,"m":1200},{"i":5,"id":"avrora","label":"Маркет «Аврора»","walk":18,"drive":3,"m":1500}];
+
+    // ---- build the stepping story blocks + step ticks from the REAL POIs ------------------------
+    var storyEl = document.querySelector('[data-story]');
+    var stepsEl = document.querySelector('[data-steps]');
+    var blocks = STORY.map(function (p, i) {
+      var b = document.createElement('div');
+      b.className = 'as__block'; b.dataset.idx = i;
+      b.innerHTML =
+        '<div class="as__no">' + String(i + 1).padStart(2, '0') + ' / ' + String(STORY.length).padStart(2, '0') + '</div>' +
+        '<h3 class="as__place">' + p.label + '</h3>' +
+        '<p class="as__time"><b>' + p.walk + ' хв</b> пішки · <b>' + p.drive + ' хв</b> авто · ' + p.m + ' м</p>';
+      storyEl.appendChild(b);
+      var t = document.createElement('span'); t.className = 'as__tick'; stepsEl.appendChild(t);
+      return b;
+    });
+    // first block composed before scroll; every OTHER block is hard 0 + hidden (no orphan can persist)
+    if (gsap) { gsap.set(blocks[0], { opacity: 1, y: 0, visibility: 'visible' }); blocks.slice(1).forEach(function (b) { gsap.set(b, { opacity: 0, y: 14, visibility: 'hidden' }); }); }
+
+    // ---- route + POI marker handles (the live "live my life from here" proof) -------------------
+    var routeEls = {}; STORY.forEach(function (p) { routeEls[p.id] = document.querySelector('.as-route[data-route="' + p.id + '"]'); });
+    var poiEls = {}; STORY.forEach(function (p) { poiEls[p.id] = document.querySelector('.lam-poi[data-id="' + p.id + '"]'); });
+    // prime each route's dashoffset so it can DRAW in (stroke-dashoffset, not width/length)
+    Object.keys(routeEls).forEach(function (id) {
+      var el = routeEls[id]; if (!el) return;
+      var L = 0; try { L = el.getTotalLength(); } catch (e) {}
+      el.__len = L; if (L) { el.style.strokeDasharray = L; el.style.strokeDashoffset = L; }
+    });
+
+    function drawRoute(id, show) {
+      var el = routeEls[id]; if (!el) return;
+      var L = el.__len || 0;
+      if (!gsap || REDUCED) { el.style.opacity = show ? '.85' : '0'; el.style.strokeDashoffset = show ? '0' : L; return; }
+      gsap.killTweensOf(el);
+      if (show) {
+        el.style.opacity = '1';
+        gsap.fromTo(el, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: 0.7, ease: 'power2.out',
+          onComplete: function () { el.style.willChange = ''; } });
+      } else {
+        gsap.to(el, { opacity: 0, duration: 0.3, ease: 'power2.in' });
+      }
+    }
+
+    // ---- the stepping mechanic: ONE block legible at a time (cross-fade), active route + POI ----
+    var shown = -1;
+    function showStep(i) {
+      if (i === shown) return;
+      var prev = shown; shown = i;
+      stepsEl.querySelectorAll('.as__tick').forEach(function (t, k) { t.classList.toggle('on', k <= i); });
+
+      // route layer: draw the new real path, fade the old
+      if (prev >= 0) drawRoute(STORY[prev].id, false);
+      drawRoute(STORY[i].id, true);
+
+      // POI marker emphasis: only the active one is "is-active", others dim a touch
+      Object.keys(poiEls).forEach(function (id) { var el = poiEls[id]; if (el) { el.classList.remove('is-active'); el.style.opacity = '.5'; } });
+      var ap = poiEls[STORY[i].id]; if (ap) { ap.classList.add('is-active'); ap.style.opacity = '1'; }
+
+      // text: legibility is a PURE FUNCTION of the active step. NOT a prev->next cross-fade
+      // (that fed only blocks[prev], so a fast scrub that skipped indices left every skipped
+      // block stuck at opacity 1 -> several story blocks ghosting at once). Instead, ONE
+      // deterministic pass over EVERY block: each non-active block is KILLED (killTweensOf, so
+      // no in-flight rise can climb back to 1 after a set) then hard-zeroed + hidden; only the
+      // active block tweens 0 -> 1. Exactly one block is ever above 0, settled or mid-scrub.
+      if (!gsap || REDUCED) {
+        blocks.forEach(function (b, k) { b.style.opacity = k === i ? '1' : '0'; b.style.visibility = k === i ? 'visible' : 'hidden'; });
+        return;
+      }
+      blocks.forEach(function (b, k) {
+        if (k !== i) { gsap.killTweensOf(b); gsap.set(b, { opacity: 0, y: 14, visibility: 'hidden', willChange: 'auto' }); }
+      });
+      var nb = blocks[i];
+      nb.style.visibility = 'visible'; nb.style.willChange = 'opacity, transform';
+      gsap.fromTo(nb, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'air', overwrite: true,
+        onComplete: function () { nb.style.willChange = ''; } });
+    }
+
+    // ---- the ONE section pin (harness owns it). Scroll scrubs the sketch + frame, then steps POIs --
+    var st = SectionHarness.pin('#combo', { start: 'top top', end: '+=' + (STORY.length * 100 + 60) + '%', scrub: 0.6 });
+    if (st) {
+      st.onUpdate = function (p) {
+        // first ~38% of the pin: the pen-sketch + plate frame DRAW in (pure scrub of both atoms).
+        // reduced-motion: keep them fully drawn (no scrub-back), only the POI tour still steps.
+        var drawP = REDUCED ? 1 : Math.min(1, p / 0.38);
+        if (lam && lam.set) lam.set(drawP);
+        if (frame && frame.set) frame.set(drawP);
+        // remaining range: STEP through the 6 real POIs (route + text), one at a time
+        var tourP = Math.max(0, (p - 0.38) / 0.62);
+        var idx = Math.min(STORY.length - 1, Math.max(0, Math.floor(tourP * (STORY.length - 0.001))));
+        showStep(idx);
+      };
+    } else {
+      // no GSAP / reduced: show the finished sketch + the first real route statically
+      if (lam && lam.set) lam.set(1);
+      if (frame && frame.set) frame.set(1);
+      showStep(0);
+    }
+
+    // declare the contract for the honest probe (ONLY the two cited atoms; harness owns the single pin)
+    SectionHarness.declare({
+      pinOwner: 'harness', expectPins: 1,
+      atomsCited: ['line-art-location-map', 'coords-corner-frame']
+    });
+  </script>
+</body>
+</html>
