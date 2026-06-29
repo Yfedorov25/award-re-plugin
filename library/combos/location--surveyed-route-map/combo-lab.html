@@ -5,22 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>combo: location--surveyed-route-map · Маршрут по справжніх вулицях</title>
 <!--
-  SECTION VARIANT, location--surveyed-route-map (role: location).
-  MEDIUM = SURVEYED-REALISM (the smarts etalon, variant #5). A dark, baked OSM VECTOR district
-  of с. Агрономічне: real road hierarchy by class, 823 building footprints with deterministic
-  warm-lit windows (a town at dusk), the site anchored inside a true-scale 10-minute walking ring.
+  SECTION VARIANT, location--surveyed-route-map (role: location). MAP-STYLE = DARK DUSK (the ideal).
+  CONTROLLED-INTERACTIVE model (the smarts Агрономічне model): a dense, real baked OSM district of
+  с. Агрономічне (real road hierarchy by class, 823 building footprints with deterministic warm-lit
+  windows, the site parcel inside a true-scale 10-minute walking ring) REVEALS on scroll-in once.
+  After that there is NO pin and NO forced stepping: the USER clicks (or hovers) any of the 6 real
+  POIs, on the map or in the side list, and THAT draws the real Dijkstra route along the actual
+  streets while a walking dot travels it and the live minute counter shows the honest walk-time.
+  Two-way hover (pin <-> list row). theme-tween warms the chrome to dusk on scroll. This is
+  locmap-engine's native interaction; no scroll-lock, the visitor drives.
 
-  Shape = ENGINE-ATOM-DRIVEN-BY-HARNESS-PIN: locmap-engine is owns_pin=FALSE (it builds the SVG +
-  draws routes; its reveal/parallax triggers do NOT pin). The harness owns the ONE section pin.
-  As you scroll the pinned range, the section STEPS through the 6 REAL POIs one at a time:
-  each step calls map.select(id) -> a Dijkstra route DRAWS along the actual streets, a walking
-  dot travels it, and the live minute counter grows to the REAL walk-time. theme-tween tweens the
-  dusk tone of the chrome across the same scroll. ONE clean pin-story text block per step
-  (eyebrow + POI name + real minutes), cross-faded so two are never legible at once.
-
-  asset-truth: streets/footprints from osm-agronomichne.js; POI names + minutes are the 6 real
-  ones (Траш! 9хв, Аврора 18хв, Грош Експрес 15хв, Нова Пошта 10хв, Подорожник 10хв, Школа·садок 9хв).
-  __LAB_OK__ (combo-scaffold.js) passes only if: 1 pin, the cited real atoms ran, the
+  asset-truth: streets/footprints from osm-agronomichne.js; POI names + minutes are the 6 real ones
+  (Траш! 9хв, Аврора 18хв, Грош Експрес 15хв, Нова Пошта 10хв, Подорожник 10хв, Школа·садок 9хв).
+  __LAB_OK__ passes only if: 0 pins (pin-less click section), the cited real atoms ran, the
   [data-render-surface] painted (the baked dusk field), 0 real console errors. NO WebGL/canvas/tiles.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,100 +31,73 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
 
 <style>
-  /* variant SKIN only (scaffold owns the rails). transform / opacity / clip-path / filter only.
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
      NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin. */
+  :root { --srm-eyebrow: rgba(243,241,236,.62); --ease-air: cubic-bezier(.22,1,.36,1); }
 
-  :root {
-    /* the dusk register theme-tween lerps toward as the section centres */
-    --srm-eyebrow: rgba(243,241,236,.62);
-    --ease-air: cubic-bezier(.22,1,.36,1);
-  }
+  /* the stage is a full-viewport map + a reading rail; the section is a normal-flow block (no pin) */
+  #combo.combo-stage { background: #0b0a08; min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
 
-  /* the pinned stage carries the map on the left and a quiet reading rail on the right.
-     on desktop the map gets the room; the rail floats over the lower district at the right. */
-  #combo.combo-stage { background: #0b0a08; }
-
-  /* the render surface = the baked surveyed FIELD the streets sit on. A real CSS
-     background-image (dusk paper) so the honest paint-probe sees a painted surface,
-     AND the medium reads warm-dark like a town at last light. The SVG mounts inside it. */
+  /* the render surface = the baked surveyed FIELD (dusk paper) the streets sit on */
   .srm__field {
+    position: absolute; inset: 0;
     background-image:
       radial-gradient(125% 95% at 38% 26%, rgba(34,28,20,.0), rgba(11,10,8,.92) 78%),
       radial-gradient(70% 60% at 72% 78%, rgba(176,106,79,.10), rgba(176,106,79,0) 60%),
       radial-gradient(120% 100% at 40% 30%, #1a160f, #0b0a08);
   }
-  /* locmap-engine reads its own --lm-* tokens; we re-point the active brick to the tweened accent */
   .srm__field { --lm-accent: var(--accent, #b06a4f); --lm-accent-soft: #c98a72; }
-
-  /* the SVG the engine injects fills the field */
   .srm__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-  /* ---- the reading rail: eyebrow (fixed) + ONE stepping story block ---- */
-  .srm__rail {
-    position: absolute; z-index: 8;
-    left: clamp(20px, 4vw, 64px); bottom: clamp(26px, 7vh, 72px);
-    width: min(34ch, 46vw); pointer-events: none;
-  }
-  @media (min-width: 900px) {
-    .srm__rail { left: auto; right: clamp(24px, 4vw, 72px); width: min(30ch, 34vw); }
-  }
-
-  .srm__eyebrow {
-    font: 600 .68rem/1 var(--combo-sans);
-    letter-spacing: .26em; text-transform: uppercase;
-    color: var(--srm-eyebrow);
-    margin: 0 0 clamp(.9rem, 2.4vh, 1.6rem);
-    text-shadow: 0 1px 16px rgba(0,0,0,.55);
-  }
-  .srm__coords {
-    display: block; margin-top: .5rem;
-    font: 500 .64rem/1.4 var(--combo-sans);
-    letter-spacing: .12em; color: rgba(243,241,236,.34); text-transform: none;
-  }
-
-  /* the stepping story stage holds N stacked blocks; only one is legible at a time */
-  .srm__story { position: relative; min-height: clamp(124px, 20vh, 184px); }
-  .srm__block {
-    position: absolute; inset: 0; opacity: 0; will-change: opacity, transform;
-    transform: translateY(14px);
-  }
-  .srm__no {
-    font: 600 .7rem/1 var(--combo-sans); letter-spacing: .2em;
-    color: var(--accent, #c98a72); font-variant-numeric: tabular-nums;
-    text-shadow: 0 1px 14px rgba(0,0,0,.5);
-  }
-  .srm__place {
-    font-family: var(--combo-serif); font-weight: 300;
-    font-size: clamp(2rem, 4vw, 3.4rem); line-height: .98; letter-spacing: -.03em;
-    color: var(--combo-cream); margin: clamp(.5rem,1.4vh,.9rem) 0 0;
-    text-shadow: 0 2px 26px rgba(0,0,0,.55);
-  }
-  .srm__time {
-    margin-top: clamp(.7rem, 1.8vh, 1.2rem);
-    font: 500 .92rem/1.5 var(--combo-sans); letter-spacing: .02em;
-    color: rgba(243,241,236,.82); text-shadow: 0 1px 14px rgba(0,0,0,.5);
-  }
-  .srm__time b { font-weight: 600; color: var(--combo-cream); font-variant-numeric: tabular-nums; }
-
-  /* a slim step progress, one tick per real POI, the active one filled */
-  .srm__steps {
-    position: absolute; z-index: 8; left: clamp(20px, 4vw, 64px); bottom: clamp(20px, 5vh, 44px);
-    display: flex; gap: 8px; pointer-events: none;
-  }
-  @media (max-width: 899px) { .srm__steps { bottom: auto; top: clamp(18px, 4vh, 40px); } }
-  .srm__tick { width: 26px; height: 2px; background: rgba(243,241,236,.18); transform-origin: left center; }
-  .srm__tick.on { background: var(--accent, #c98a72); }
-
-  /* the standing eyebrow top-left (the section's own label) */
+  /* the standing section label top-left */
   .srm__label {
     position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
     font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
-    color: rgba(243,241,236,.58); text-shadow: 0 1px 14px rgba(0,0,0,.5);
+    color: rgba(243,241,236,.58); text-shadow: 0 1px 14px rgba(0,0,0,.5); pointer-events: none;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .srm__block { transition: none; }
+  /* ---- the reading rail: eyebrow + a CLICKABLE list of the 6 real POIs ---- */
+  .srm__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(22px, 6vh, 56px);
+    width: min(40ch, 88vw);
   }
+  @media (min-width: 900px) {
+    .srm__rail { left: auto; right: clamp(24px, 4vw, 60px); top: 50%; bottom: auto;
+      transform: translateY(-50%); width: min(32ch, 34vw); }
+  }
+  .srm__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: var(--srm-eyebrow); margin: 0 0 .5rem; text-shadow: 0 1px 16px rgba(0,0,0,.55);
+  }
+  .srm__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.7rem, 3vw, 2.7rem); line-height: 1.0; letter-spacing: -.03em;
+    color: var(--combo-cream); margin: 0 0 .4rem; text-shadow: 0 2px 26px rgba(0,0,0,.55);
+  }
+  .srm__hint {
+    font: 500 .76rem/1.45 var(--combo-sans); letter-spacing: .01em;
+    color: rgba(243,241,236,.55); margin: 0 0 clamp(.9rem, 2vh, 1.4rem);
+    text-shadow: 0 1px 14px rgba(0,0,0,.5);
+  }
+  .srm__coords {
+    display: block; margin-top: .4rem;
+    font: 500 .62rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(243,241,236,.34); text-transform: none;
+  }
+  /* the list the engine fills with .lm-row rows (click + hover drives the route) */
+  .srm__list { display: block; }
+
+  /* the engine's .lm-row styling is themed for dark already (component.css); a touch of polish so
+     the rows read as the interactive control on the dusk field */
+  .srm__field { --lm-ink: #f3f1ec; }
+  .srm__rail .lm-row { padding: .62rem 0; border-bottom: 1px solid rgba(243,241,236,.1);
+    text-shadow: 0 1px 12px rgba(0,0,0,.5); transition: background .25s, padding-left .25s; }
+  .srm__rail .lm-row:hover, .srm__rail .lm-row.is-on { background: rgba(243,241,236,.05); padding-left: .5rem; }
+
+  .combo-pre, .combo-post { background: #100e0b; color: rgba(243,241,236,.4); }
+
+  @media (prefers-reduced-motion: reduce) { .srm__rail .lm-row { transition: none; } }
 </style>
 </head>
 <body data-theme data-theme-bg="#0b0a08" data-theme-ink="#f3f1ec" data-theme-accent="#c98a72">
@@ -136,135 +106,53 @@
   <section id="combo" class="combo-stage" data-combo="location--surveyed-route-map"
            data-theme data-theme-bg="#13110c" data-theme-ink="#f3f1ec" data-theme-accent="#c98a72">
 
-    <!-- the baked surveyed field + the side list host. locmap-engine injects the SVG here. -->
+    <!-- the baked surveyed field. locmap-engine injects the SVG here. -->
     <div class="srm__field lm" data-lm-stage data-render-surface></div>
 
     <p class="srm__label">с. Агрономічне · за даними OpenStreetMap</p>
 
     <div class="srm__rail">
-      <p class="srm__eyebrow">Маршрут по справжніх вулицях
+      <p class="srm__eyebrow">Маршрут по справжніх вулицях</p>
+      <h2 class="srm__title">Що поруч</h2>
+      <p class="srm__hint">Натисніть місце, щоб побачити шлях і час пішки.
         <span class="srm__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
       </p>
-
-      <!-- the stepping story: ONE block legible at a time (built from the 6 real POIs) -->
-      <div class="srm__story" data-srm-story></div>
+      <!-- the engine fills this with clickable rows (two-way synced with the map pins) -->
+      <div class="srm__list" data-lm-list></div>
     </div>
-
-    <!-- side list the engine fills (hidden off-screen; it powers click-to-select + a11y) -->
-    <div data-lm-list hidden></div>
-
-    <div class="srm__steps" data-srm-steps></div>
   </section>
 
   <div class="combo-post">наступна секція</div>
 
-  <!-- scaffold + adapters, then the cited atoms (canon engine FIRST) -->
   <script src="../_scaffold/combo-scaffold.js"></script>
   <script src="../_scaffold/adapters.js"></script>
   <script src="../../components/locmap-engine/component.js"></script>
   <script src="../../components/theme-tween/component.js"></script>
 
-  <!-- ONE module script: imports the REAL baked OSM, wires the cited atoms by hand. -->
   <script type="module">
     import { OSM } from './osm.js';
-
     SectionHarness.boot();
 
-    var gsap = window.gsap;
-    var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // the 6 REAL POIs, in a walking order that reads as a tour (verbatim names + minutes)
-    var ORDER = ['school', 'np', 'trash', 'apteka', 'grosh', 'avrora'];
-    var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
-    var POIS = ORDER.map(function (id) { return byId[id]; }).filter(Boolean);
-
-    // ---- ENGINE job: the baked surveyed map (owns_pin=FALSE; pinless reveal/parallax) ----
-    var map;
+    // ---- ENGINE: the baked dusk map. owns_pin FALSE; reveal on scroll-in; CLICK/HOVER drives route ----
     SectionHarness.ranOK('locmap-engine', function () {
-      map = window.LocMap.create('#combo', {
+      var map = window.LocMap.create('#combo', {
         data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
-        mScale: 2.6,
-        walkMin: 10,
-        modes: ['loc'],            // single medium: places only, no infra tabs
-        route: true,               // draw the Dijkstra route + walker + live minute counter
-        reveal: { start: 'top 75%', once: true },
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true,
+        reveal: { start: 'top 70%', once: true },
         parallax: { green: 1.2, buildings: 2, pins: 3 },
         ease: 'award'
       });
       window.__srmMap = map;
     });
 
-    // ---- THEME job: dusk tone tweened on :root as the section centres (color vars only) ----
+    // ---- THEME: dusk recolour on scroll (color vars only) ----
     SectionHarness.ranOK('theme-tween', function () {
-      window.ThemeTween.init({
-        root: document.documentElement,
-        sectionSelector: '[data-theme]',
-        vars: ['--bg', '--ink', '--accent'],
-        ease: 0.12
-      });
+      window.ThemeTween.init({ root: document.documentElement, sectionSelector: '[data-theme]',
+        vars: ['--bg', '--ink', '--accent'], ease: 0.12 });
     });
 
-    // ---- build the stepping story blocks + the step ticks from the REAL POIs ----
-    var storyEl = document.querySelector('[data-srm-story]');
-    var stepsEl = document.querySelector('[data-srm-steps]');
-    var blocks = POIS.map(function (p, i) {
-      var b = document.createElement('div');
-      b.className = 'srm__block'; b.dataset.idx = i;
-      b.innerHTML =
-        '<div class="srm__no">' + String(i + 1).padStart(2, '0') + ' / ' + String(POIS.length).padStart(2, '0') + '</div>' +
-        '<h3 class="srm__place">' + p.label + '</h3>' +
-        '<p class="srm__time"><b>' + p.walk + ' хв</b> пішки · <b>' + p.drive + ' хв</b> авто · ' + p.m + ' м</p>';
-      storyEl.appendChild(b);
-      var t = document.createElement('span'); t.className = 'srm__tick'; stepsEl.appendChild(t);
-      return b;
-    });
-
-    // first block visible from the start so the surface reads composed before scroll
-    if (gsap) gsap.set(blocks[0], { opacity: 1, y: 0 });
-
-    // ---- the stepping mechanic: ONE block legible at a time, never overlapping ----
-    var shown = -1;
-    function showStep(i) {
-      if (i === shown) return;
-      var prev = shown; shown = i;
-      // step ticks
-      stepsEl.querySelectorAll('.srm__tick').forEach(function (t, k) { t.classList.toggle('on', k <= i); });
-      // draw the REAL route for this POI (engine: Dijkstra draw + walker + live minute counter)
-      if (map && map.select) map.select(POIS[i].id);
-
-      if (!gsap || REDUCED) {
-        blocks.forEach(function (b, k) { b.style.opacity = k === i ? '1' : '0'; });
-        return;
-      }
-      // cross-fade so no two blocks are legible at once: out the old, in the new after it clears
-      if (prev >= 0 && blocks[prev]) {
-        gsap.to(blocks[prev], { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in',
-          onComplete: function () { blocks[prev].style.willChange = ''; } });
-      }
-      var nb = blocks[i];
-      gsap.fromTo(nb, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'air',
-        delay: prev >= 0 ? 0.18 : 0, onComplete: function () { nb.style.willChange = ''; } });
-    }
-
-    // ---- the ONE section pin (harness owns it). Scroll -> step index -> select + story ----
-    var st = SectionHarness.pin('#combo', { start: 'top top', end: '+=' + (POIS.length * 90) + '%', scrub: 0.6 });
-    if (st) {
-      st.onUpdate = function (p) {
-        // map scroll progress to a POI step (a little dwell on the first and last)
-        var idx = Math.round(gsap.utils.clamp(0, POIS.length - 1, p * POIS.length - 0.5 + 0.5));
-        idx = Math.min(POIS.length - 1, Math.max(0, Math.floor(p * (POIS.length - 0.001))));
-        showStep(idx);
-      };
-    } else {
-      // no GSAP / reduced: show the first POI route statically
-      showStep(0);
-    }
-
-    // declare the contract for the honest probe
-    SectionHarness.declare({
-      pinOwner: 'harness', expectPins: 1,
-      atomsCited: ['locmap-engine', 'theme-tween']
-    });
+    // pin-less, controlled-interactive section: the visitor clicks to draw routes. 0 pins.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine', 'theme-tween'] });
   </script>
 </body>
 </html>
