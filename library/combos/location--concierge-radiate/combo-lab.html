@@ -1,390 +1,441 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>combo: location--concierge-radiate · Все поруч (harness)</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--concierge-radiate · Все поруч, від ваших дверей</title>
 <!--
-================================================================================
-  SECTION VARIANT: location--concierge-radiate · "Все поруч"
-  MEDIUM: ILLUSTRATED MAP (radiating leader-threads). Hand-drawn warm cream PAPER;
-  the language is LINES. Thin leader-threads stitch from YOUR DOOR to the 6 real
-  named places, each carrying its real walk-minute figure. Drawn, warm, editorial.
-  The radiating thread is the unique mark: nothing else on the page draws
-  connecting lines. This is NOT a tiles map, NOT a vector survey, NOT a video.
-  A screenshot reads instantly as a hand-illustrated proximity drawing.
---------------------------------------------------------------------------------
-  ASSET-TRUTH (failure #1): geometry, names and minutes come from the REAL OSM bake
-  of с. Агрономічне (import { OSM } from './osm.js'). The door is OSM.site; the 6
-  POIs are OSM.pois verbatim (real label + real walk-minutes); the arteries are real
-  named streets (вул. Перемоги / Грушевського / Елітна) simplified to a hand-drawn
-  line; the parks are real OSM green shapes. NOTHING is invented.
---------------------------------------------------------------------------------
-  CITED ATOMS (ids, never inlined twice):
-  - district-radiates  : the MEDIUM. Builds the threads home->POI, draws roads,
-  blooms the door, splays the leader-lines + minute labels,
-  hover-focuses a row/pin. Self-triggers (NON-pin).
-  - pin-story-text  : OWNS THE ONE PIN (scroll-lock). Sequences a sparse line per
-  cluster, one clean block at a time, never overlapping.
-  - numeral-frame-expand-hero : its set(p) NUMERAL treatment, on a cream plate, with
-  NO photo frame. Its OWN trigger is KILLED (pin_killed) and
-  its set(p) is driven off the ONE pin -> the big editorial
-  total "6" + caption rise then exit with the map. No 2nd pin.
-  PIN BUDGET: exactly ONE pinned ScrollTrigger (pin-story-text). data-render-surface =
-  the cream-paper stage (.dr-stage; a warm gradient counts as a painted surface).
-  LAWS: SVG / transform / opacity / clip-path / stroke-dashoffset only. NO WebGL,
-  NO mix-blend, NO backdrop-filter, NO canvas, NO video.currentTime.
-================================================================================
--->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  SECTION VARIANT, location--concierge-radiate (role: location).
+  MAP-STYLE = LIGHT EDITORIAL + RADIATING THREADS over a real dense map. The SAME dense real OSM
+  district of с. Агрономічне as the surveyed-route-map ideal (real road hierarchy by class, 823
+  building footprints, the site parcel inside a true-scale 10-minute walking ring, real Dijkstra
+  routes drawn along the actual streets with a walking dot and a live minute counter), re-rendered
+  in a DIFFERENT cartographic TREATMENT: a light cream-day editorial plan (cream paper, dark-ink
+  roads, warm-grey footprints, one terracotta accent), NO warm-lit windows. The realism is identical
+  to the ideal (same baked OSM, same routes); only the palette and line/fill treatment differ.
 
-<!-- GSAP first (engine + scaffold register against this one source) -->
+  SIGNATURE on top of the real map: thin terracotta LEADER-THREADS splay from the REAL site
+  (OSM.site 746,325) to each of the 6 REAL POIs, each carrying its real walk-minute, drawn in the
+  engine's OWN SVG coordinate space (viewBox 120 -20 1060 660) so they land exactly on the real POI
+  coords. The threads are the mark; the dense real map is the base.
+
+  Shape = ENGINE-ATOM-DRIVEN-BY-HARNESS-PIN: locmap-engine (owns_pin=FALSE) bakes the SVG + draws
+  routes; the harness owns the ONE section pin. On scroll-in the threads radiate (stroke-dashoffset).
+  As you scroll the pinned range the section STEPS through the 6 REAL POIs one at a time: each step
+  calls map.select(id) -> the real Dijkstra route DRAWS along the actual streets, a walking dot rides
+  it, the live minute counter grows to the REAL walk-time, and the matching thread lights. ONE clean
+  story block per step (number + POI name + real minutes), cross-faded so two are never legible at once.
+
+  asset-truth: streets/footprints from osm-agronomichne.js; site = OSM.site; the 6 threads + POI
+  names + minutes are the 6 REAL POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв,
+  Грош Експрес 15хв, Аврора 18хв). A module island asserts the thread targets equal the OSM coords.
+  __LAB_OK__ passes only if: 1 pin, the cited real atom ran, [data-render-surface] painted (the cream
+  paper), 0 real console errors. NO WebGL/canvas/tiles/mix-blend/backdrop-filter.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
 
-<!-- cited atoms' CSS + the shared scaffold rails -->
-<link rel="stylesheet" href="../../components/district-radiates/component.css" />
-<link rel="stylesheet" href="../../components/pin-story-text/component.css" />
-<link rel="stylesheet" href="../../components/numeral-frame-expand-hero/component.css" />
-<link rel="stylesheet" href="../_scaffold/combo-scaffold.css" />
-
 <style>
-  /* variant SKIN only. The atom CSS owns the map, the threads, the legend; the
-  scaffold owns the spacers. This trims the section to the "Все поруч" voice. */
-  .combo-pre, .combo-post { background: #ece4d6; color: rgba(60,52,42,.5); }
+  /* variant SKIN only (scaffold owns the rails). transform / opacity / clip-path / filter /
+     stroke-dashoffset only. NO mix-blend, NO backdrop-filter, NO animating width/height/top/left. */
 
-  /* the pinned host = the whole illustrated-map section. pin-story-text pins THIS. */
-  #loc { position: relative; }
-  .dr { min-height: 100vh; }
-  .dr-grid { min-height: 100vh; }
-
-  /* PERF: hint the static SVG map onto its own paint layer WITHOUT a transform (a
-  transform on .dr-map would shift its getScreenCTM and break the atom's CTM-based POI
-  dot placement). `will-change: opacity` promotes a compositor layer harmlessly so the
-  pin's wrapper transform composites the pre-painted map rather than repainting the
-  cream gradient + roads every frame. No geometry change -> POI dots stay on threads. */
-  .dr-map { will-change: opacity; }
-
-  /* render surface: the cream PAPER stage. A warm paper gradient is the medium's
-  own look AND a non-"none" backgroundImage, so the honest probe sees it painted. */
-  .dr-stage[data-render-surface] {
-  background:
-  radial-gradient(120% 90% at 78% 30%, #f6f1e8 0%, #efe7da 52%, #e7ddcc 100%);
+  /* LIGHT EDITORIAL / CREAM-DAY PALETTE: re-point every engine token to a cream-paper register
+     with dark-ink roads, warm-grey footprints, ONE terracotta accent. Same engine, different paint
+     (the whole "different map style"); the threads are the signature mark drawn on top. */
+  #combo.combo-stage,
+  .cr__field {
+    --lm-ink: #2a2118;            /* dark warm ink foreground (roads, type) */
+    --lm-bg-1: #f3ede1;          /* cream paper */
+    --lm-bg-2: #f3ede1;          /* road casing = cream halo so dark strokes separate on paper */
+    --lm-accent: #b15a36;        /* terracotta, the single editorial accent (parcel + active route) */
+    --lm-accent-soft: #c47a55;
   }
-  /* a hair of warm paper tone on the editorial column so the seam reads as ONE sheet */
-  .dr { background: linear-gradient(170deg, #f5f0e7, #ece3d4); }
+  #combo.combo-stage { background: #f3ede1; color: #2a2118; }
 
-  /* pin-story-text stage sits OVER the map (pointer-events:none) and is skinned to
-  INK on cream - its default cream-on-dark tokens are inverted for the paper field. */
-  .pst { height: 100vh; --pst-ink: #2c2620; --pst-accent: #9a5238; }
-  .pst__stage { z-index: 6; }
-  .pst__block { gap: .7rem; }
-  .pst__eyebrow { color: var(--pst-accent); }
-  /* keep the sequenced cluster lines sparse + lower-left so they never cover the threads */
-  .pst__title { font-weight: 300; font-size: clamp(34px, 4.6vw, 78px); line-height: 1.0;
-  letter-spacing: -.02em; color: var(--pst-ink); text-shadow: 0 1px 18px rgba(245,240,231,.9); }
-  .pst__title em { color: var(--pst-accent); font-style: italic; font-weight: 400; }
-  .pst__body { color: #5c5347; opacity: 1; max-width: 30ch;
-  text-shadow: 0 1px 14px rgba(245,240,231,.95); }
-  .pst__block--lower-left { left: clamp(1.6rem, 4vw, 4.4rem); bottom: 9vh; max-width: 34ch; }
-
-  /* editorial NUMERAL plate (numeral-frame-expand-hero set(p), photo frame absent).
-  Override the atom's full-bleed dark hero into a CONTAINED cream plate, top-left,
-  over the map. Big outline total "6" + caption. No bg photo, ink stroke on cream. */
-  .nfe-hero {
-  position: absolute; inset: auto auto auto 0; top: 7vh; left: clamp(1.6rem,4vw,4.4rem);
-  height: auto; width: min(34ch, 40vw); background: transparent; overflow: visible;
-  z-index: 7; pointer-events: none;
-  --nfe-serif: 'Fraunces', Georgia, serif; --nfe-sans: 'Inter', system-ui, sans-serif;
-  --nfe-ink: #2c2620; --nfe-stroke: rgba(154,82,56,.42);
+  /* the render surface = cream PAPER. A real CSS background (a hairline warm grain over the cream)
+     so the honest paint-probe sees a painted surface AND the sheet reads like printed editorial stock. */
+  .cr__field {
+    background-color: #f3ede1;
+    background-image:
+      radial-gradient(125% 95% at 76% 26%, rgba(255,251,243,.9) 0%, rgba(243,237,225,0) 56%),
+      radial-gradient(rgba(42,33,24,.020) 0.5px, transparent 0.6px),
+      radial-gradient(rgba(42,33,24,.014) 0.5px, transparent 0.6px);
+    background-size: 100% 100%, 4px 4px, 7px 7px;
+    background-position: 0 0, 0 0, 2px 3px;
   }
-  .nfe-hero .nfe-bg, .nfe-hero .nfe-bg::after { display: none; }  /* no photo layer */
-  .nfe-hero .nfe-numerals { position: relative; inset: auto; display: block; place-items: initial; }
-  .nfe-hero .nfe-numerals .digits { font-size: clamp(120px, 16vw, 240px); line-height: .82;
-  -webkit-text-stroke: 1.4px var(--nfe-stroke); text-stroke: 1.4px var(--nfe-stroke);
-  color: transparent; display: block; }
-  .nfe-hero .nfe-title { position: relative; inset: auto; display: block; place-items: initial;
-  text-align: left; text-transform: none; font-weight: 300; font-size: clamp(1rem, 1.5vw, 1.3rem);
-  line-height: 1.2; letter-spacing: 0; color: #5c5347; margin-top: .2rem; max-width: 24ch; }
-  .nfe-hero .nfe-sub { position: relative; left: auto; right: auto; bottom: auto; text-align: left;
-  margin-top: .9rem; color: var(--nfe-stroke); }
-  @media (max-width: 939px) { .nfe-hero { display: none; } }  /* on 1-col, the plate yields to the legend */
+  .cr__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the engine's stage gradient would re-tint the field; force the flat cream paper under the SVG */
+  .cr__field.lm__stage, .cr__field.lm { background-color: #f3ede1; }
 
-  /* reduced-motion: the static drawn map + a quiet stacked text deck (atoms handle it) */
+  /* ---- LIGHT EDITORIAL MAP TREATMENT: redraw the engine's SVG classes ink-on-cream ---- */
+  /* green demoted to a faint sage wash so the cream sheet stays editorial */
+  .cr__field .lm-gw--green { fill: rgba(96,116,84,.10); }
+  .cr__field .lm-gw--water { fill: rgba(96,128,150,.12); }
+
+  /* buildings: warm-grey footprints, hairline ink stroke, a printed cadastral plan.
+     NO lit windows in cream-day: the --lit class renders like every other footprint. */
+  .cr__field .lm-bld      { fill: rgba(42,33,24,.075); stroke: rgba(42,33,24,.14); stroke-width: 0.5; }
+  .cr__field .lm-bld--lit { fill: rgba(42,33,24,.075); stroke: rgba(42,33,24,.14); animation: none; }
+
+  /* road hierarchy: DARK INK strokes over a CREAM halo casing, so the grid reads crisp on the
+     warm-grey footprint field. Widths kept from the engine ranking; casing is the cream halo. */
+  .cr__field .lm-rdc { stroke: #f3ede1; }
+  .cr__field .lm-rd--hwy   { stroke: rgba(42,33,24,.86); }
+  .cr__field .lm-rd--main  { stroke: rgba(177,90,54,.72); }   /* the main artery picks up the accent */
+  .cr__field .lm-rd--mid   { stroke: rgba(42,33,24,.46); }
+  .cr__field .lm-rd--minor { stroke: rgba(42,33,24,.28); }
+  .cr__field .lm-rd--faint { stroke: rgba(42,33,24,.13); }
+  .cr__field .lm-rdname { fill: rgba(42,33,24,.5); }
+
+  /* parcel: terracotta hatch + stroke; tag in ink. (engine hatch uses brick rgba, override to warm) */
+  .cr__field #lmHatch rect { fill: rgba(177,90,54,.10); }
+  .cr__field #lmHatch line { stroke: rgba(177,90,54,.7); }
+  .cr__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.7; }
+  .cr__field .lm-pulse  { stroke: var(--lm-accent); }
+  .cr__field .lm-sitetag { fill: #2a2118; }
+
+  /* walking ring: thin warm dashed */
+  .cr__field .lm-ring  { stroke: rgba(42,33,24,.26); }
+  .cr__field .lm-ringt { fill: rgba(42,33,24,.5); }
+
+  /* numbered POIs: cream disc, ink ring, ink numeral; active flips to the terracotta accent */
+  .cr__field .lm-pt circle { fill: #fbf6ec; stroke: rgba(42,33,24,.7); stroke-width: 1.4; }
+  .cr__field .lm-pt text   { fill: #2a2118; }
+  .cr__field .lm-pt:hover circle, .cr__field .lm-pt.is-on circle { fill: var(--lm-accent); stroke: #fbf6ec; }
+
+  /* the active Dijkstra route + walker + live badge (the engine accent) */
+  .cr__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.2; }
+  .cr__field .lm-walker { fill: var(--lm-accent); stroke: #fbf6ec; }
+  .cr__field .lm-livet  { fill: #fbf6ec; }
+  .cr__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* ---- THE SIGNATURE: radiating leader-threads (authored layer, viewBox units) ----
+     A thin terracotta hairline bows from the real site to each real POI, with an open ring on the
+     POI end and the real walk-minute in ink. Drawn in via stroke-dashoffset. Only stroke/opacity. */
+  .cr-threads .cr-thread {
+    fill: none; stroke: var(--lm-accent-soft); stroke-width: 1.4;
+    stroke-linecap: round; opacity: .9;
+  }
+  .cr-threads .cr-thread.is-on { stroke: var(--lm-accent); stroke-width: 2; }
+  .cr-threads .cr-thread.is-dim { opacity: .32; }
+  .cr-threads .cr-end { fill: #fbf6ec; stroke: var(--lm-accent); stroke-width: 1.5; }
+  .cr-threads .cr-end.is-on { fill: var(--lm-accent); stroke: #fbf6ec; }
+  .cr-threads .cr-mlabel {
+    fill: #2a2118; font: 600 12.5px/1 'Inter', system-ui, sans-serif;
+    letter-spacing: .02em; font-variant-numeric: tabular-nums;
+    paint-order: stroke; stroke: rgba(251,246,236,.92); stroke-width: 3.4px; stroke-linejoin: round;
+  }
+  .cr-threads .cr-mlabel.is-on { fill: var(--lm-accent); }
+
+  /* ---- the reading rail (ink on cream): eyebrow + ONE stepping story block ---- */
+  .cr__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(26px, 7vh, 72px);
+    width: min(34ch, 46vw); pointer-events: none;
+  }
+  @media (min-width: 900px) {
+    .cr__rail { left: auto; right: clamp(24px, 4vw, 72px); width: min(30ch, 34vw); }
+  }
+  .cr__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans);
+    letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(42,33,24,.6); margin: 0 0 clamp(.9rem, 2.4vh, 1.6rem);
+  }
+  .cr__coords {
+    display: block; margin-top: .5rem;
+    font: 500 .64rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(42,33,24,.42); text-transform: none;
+  }
+  .cr__story { position: relative; min-height: clamp(124px, 20vh, 184px); }
+  .cr__block {
+    position: absolute; inset: 0; opacity: 0; will-change: opacity, transform;
+    transform: translateY(14px);
+  }
+  .cr__no {
+    font: 600 .7rem/1 var(--combo-sans); letter-spacing: .2em;
+    color: var(--lm-accent); font-variant-numeric: tabular-nums;
+  }
+  .cr__place {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(2rem, 4vw, 3.4rem); line-height: .98; letter-spacing: -.03em;
+    color: #2a2118; margin: clamp(.5rem,1.4vh,.9rem) 0 0;
+  }
+  .cr__time {
+    margin-top: clamp(.7rem, 1.8vh, 1.2rem);
+    font: 500 .92rem/1.5 var(--combo-sans); letter-spacing: .02em;
+    color: rgba(42,33,24,.78);
+  }
+  .cr__time b { font-weight: 600; color: #2a2118; font-variant-numeric: tabular-nums; }
+
+  /* a slim step progress, one tick per real POI, the active one filled terracotta */
+  .cr__steps {
+    position: absolute; z-index: 8; left: clamp(20px, 4vw, 64px); bottom: clamp(20px, 5vh, 44px);
+    display: flex; gap: 8px; pointer-events: none;
+  }
+  @media (max-width: 899px) { .cr__steps { bottom: auto; top: clamp(18px, 4vh, 40px); } }
+  .cr__tick { width: 26px; height: 2px; background: rgba(42,33,24,.2); transform-origin: left center; }
+  .cr__tick.on { background: var(--lm-accent); }
+
+  /* the standing section label top-left */
+  .cr__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
+    font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(42,33,24,.56);
+  }
+  .combo-pre, .combo-post { background: #ece4d6; color: rgba(42,33,24,.45); }
+
+  @media (prefers-reduced-motion: reduce) { .cr__block { transition: none; } }
 </style>
 </head>
 <body>
+  <div class="combo-pre">scroll ↓</div>
 
-<div class="combo-pre">локація</div>
+  <section id="combo" class="combo-stage" data-combo="location--concierge-radiate">
 
-<!-- THE ILLUSTRATED-MAP SECTION. pin-story-text pins #loc; district-radiates draws
-  the cream-paper map + the radiating leader-threads inside .dr. -->
-<section id="loc">
-  <div class="dr">
-  <div class="dr-grid">
+    <!-- the cream paper field + the side list host. locmap-engine injects the SVG here. -->
+    <div class="cr__field lm" data-lm-stage data-render-surface></div>
 
-  <!-- EDITORIAL COLUMN: the readable legend (real places + real walk-minutes) -->
-  <div class="dr-col">
-  <p class="dr-kicker">/ Локація</p>
-  <h2 class="dr-h">Усе, що потрібно дню,<br><em>намальовано від ваших дверей.</em></h2>
-  <p class="dr-lead">Не кілометри на схемі, а кілька хвилин пішки. Кожна нитка тягнеться від вашого порога до реального місця в Агрономічному.</p>
+    <p class="cr__label">с. Агрономічне · за даними OpenStreetMap</p>
 
-  <div class="dr-legend" role="list">
-  <div class="dr-row" data-dr-row="school" tabindex="0" role="listitem" aria-label="Школа і садок, 9 хвилин пішки">
-  <span class="nm">Школа · садок</span><span class="mins"><b>9</b><span class="u">хв</span></span></div>
-  <div class="dr-row" data-dr-row="trash" tabindex="0" role="listitem" aria-label="Супермаркет Траш, 9 хвилин пішки">
-  <span class="nm">Супермаркет «Траш!»</span><span class="mins"><b>9</b><span class="u">хв</span></span></div>
-  <div class="dr-row" data-dr-row="np" tabindex="0" role="listitem" aria-label="Нова Пошта, 10 хвилин пішки">
-  <span class="nm">Нова Пошта</span><span class="mins"><b>10</b><span class="u">хв</span></span></div>
-  <div class="dr-row" data-dr-row="apteka" tabindex="0" role="listitem" aria-label="Аптека Подорожник, 10 хвилин пішки">
-  <span class="nm">Аптека «Подорожник»</span><span class="mins"><b>10</b><span class="u">хв</span></span></div>
-  <div class="dr-row" data-dr-row="grosh" tabindex="0" role="listitem" aria-label="Грош Експрес, 15 хвилин пішки">
-  <span class="nm">«Грош Експрес»</span><span class="mins"><b>15</b><span class="u">хв</span></span></div>
-  <div class="dr-row" data-dr-row="avrora" tabindex="0" role="listitem" aria-label="Маркет Аврора, 18 хвилин пішки">
-  <span class="nm">Маркет «Аврора»</span><span class="mins"><b>18</b><span class="u">хв</span></span></div>
-  </div>
-  </div>
+    <div class="cr__rail">
+      <p class="cr__eyebrow">Все поруч
+        <span class="cr__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+      <div class="cr__story" data-cr-story></div>
+    </div>
 
-  <!-- THE ILLUSTRATED MAP. viewBox = the REAL OSM window 193 6 703 612 around the
-  door (746,324) and the 6 POIs. Roads/parks are real OSM geometry simplified
-  to a hand-drawn line. data-render-surface on the cream stage. -->
-  <div class="dr-stage" data-render-surface>
-  <svg class="dr-map" viewBox="193 6 703 612" preserveAspectRatio="xMidYMid slice" role="img"
-  aria-label="Намальована мапа Агрономічного: ваш дім у центрі, денні місця поруч, з хвилинами пішки">
-  <!-- REAL OSM green shapes, simplified -> sage parks -->
-  <path class="dr-park" d="M126 274 L129 296 L131 312 L144 336 L146 363 L160 381 L185 392 L213 388 L231 366 L234 332 L220 296 L196 276 L160 270 Z"/>
-  <path class="dr-park" d="M491 407 L503 404 L519 540 L527 533 L525 509 L507 427 L503 409 Z"/>
+    <!-- side list the engine fills (hidden off-screen; powers click-to-select + a11y) -->
+    <div data-lm-list hidden></div>
 
-  <!-- REAL named arteries (вул. Грушевського / Елітна / Перемоги), simplified.
-  Hair-thin hand-drawn ink, NOT an 823-building OSM sea. -->
-  <path data-draw class="dr-road dr-road--main" d="M484 313 L535 300 L556 293 L642 281 L702 322 L717 352"/>
-  <path data-draw class="dr-road dr-road--main" d="M544 136 L562 206 L593 322 L614 382 L640 438 L646 445"/>
-  <path data-draw class="dr-road" d="M702 322 L643 326"/>
-  <path data-draw class="dr-road" d="M642 281 L644 353 L652 366 L696 363 L705 367"/>
-  <path data-draw class="dr-road" d="M535 300 L470 360 L430 470 L420 560"/>
+    <div class="cr__steps" data-cr-steps></div>
+  </section>
 
-  <!-- threads layer (component.js draws home->POI leader-lines here, UNDER the door) -->
-  <g data-threads></g>
+  <div class="combo-post">наступна секція</div>
 
-  <!-- THE DOOR: real site OSM.site = (746,324). Terracotta ringed marker. -->
-  <g class="dr-home-anchor" data-home-anchor data-cx="746" data-cy="325">
-  <g data-home transform="translate(746 325)">
-  <circle class="dr-home__pulse" r="14"/>
-  <circle class="dr-home__ring" r="15"/>
-  <circle class="dr-home__ring dr-home__ring--2" r="8"/>
-  <circle class="dr-home__core" r="3.4"/>
-  <text class="dr-home__tag" y="34">Ваш дім</text>
-  </g>
-  </g>
-  </svg>
+  <!-- scaffold + adapters, then the cited atom (canon engine) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
 
-  <!-- POI pins (DOM). data-tx/data-ty = the REAL OSM POI coords; component.js maps
-  them through the SVG CTM so each .dot lands exactly on its thread end. Label
-  side splays outward from the door (746,325): all POIs lie to its left/below. -->
-  <div class="dr-poi dr-poi--left" data-poi="school" data-tx="540" data-ty="380">
-  <span class="lbl">Школа · садок <span class="m">9 хв</span></span><span class="dot"></span></div>
-  <div class="dr-poi dr-poi--down" data-poi="trash" data-tx="564" data-ty="491">
-  <span class="dot"></span><span class="lbl">Супермаркет «Траш!» <span class="m">9 хв</span></span></div>
-  <div class="dr-poi dr-poi--left" data-poi="np" data-tx="535" data-ty="499">
-  <span class="lbl">Нова Пошта <span class="m">10 хв</span></span><span class="dot"></span></div>
-  <div class="dr-poi dr-poi--up" data-poi="apteka" data-tx="481" data-ty="268">
-  <span class="lbl">Аптека «Подорожник» <span class="m">10 хв</span></span><span class="dot"></span></div>
-  <div class="dr-poi dr-poi--up" data-poi="grosh" data-tx="457" data-ty="126">
-  <span class="lbl">«Грош Експрес» <span class="m">15 хв</span></span><span class="dot"></span></div>
-  <div class="dr-poi dr-poi--left" data-poi="avrora" data-tx="343" data-ty="263">
-  <span class="lbl">Маркет «Аврора» <span class="m">18 хв</span></span><span class="dot"></span></div>
+  <script type="module">
+    import { OSM } from './osm.js';
 
-  <!-- EDITORIAL NUMERAL PLATE (numeral-frame-expand-hero set(p); NO photo frame).
-  The big outline total + caption; driven off the ONE pin (trigger killed). -->
-  <div class="nfe-hero" id="loc-numeral" aria-hidden="true">
-  <div class="nfe-numerals"><span class="digits">6</span></div>
-  <div class="nfe-title">місць щоденного життя</div>
-  <div class="nfe-sub">пішки, від ваших дверей</div>
-  </div>
-  </div>
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var NS = 'http://www.w3.org/2000/svg';
 
-  </div>
-  </div>
-</section>
+    // the 6 REAL POIs, in a walking order that reads as a tour (verbatim names + minutes)
+    var ORDER = ['school', 'np', 'trash', 'apteka', 'grosh', 'avrora'];
+    var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
+    var POIS = ORDER.map(function (id) { return byId[id]; }).filter(Boolean);
+    var SITE = { x: OSM.site.x, y: OSM.site.y };
 
-<div class="combo-post">все поруч</div>
+    // ---- ENGINE job: the dense real map, re-themed light-editorial via CSS (owns_pin=FALSE) ----
+    var map;
+    SectionHarness.ranOK('locmap-engine', function () {
+      map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6,
+        walkMin: 10,
+        modes: ['loc'],
+        flicker: { rate: 1e9 },    // cream-day: NO lit windows (rate huge -> none light)
+        route: true,
+        reveal: { start: 'top 75%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award'
+      });
+      window.__crMap = map;
+    });
 
-<!-- scaffold + adapters FIRST (rails + honest gate), then cited atoms' components -->
-<script src="../_scaffold/combo-scaffold.js"></script>
-<script src="../_scaffold/adapters.js"></script>
-<script src="../../components/district-radiates/component.js"></script>
-<script src="../../components/pin-story-text/component.js"></script>
-<script src="../../components/numeral-frame-expand-hero/component.js"></script>
+    // ---- SIGNATURE: append the radiating leader-threads INTO the engine's baked SVG ----
+    // One bowed quadratic path per REAL POI from SITE -> poi (control offset perpendicular to the
+    // radius, the smarts thread math), an open ring on the POI end, the real walk-minute as text.
+    // All in viewBox units, so the threads land EXACTLY on the real POI coords at any viewport.
+    var threadEls = {};   // id -> { path, end, label, len }
+    (function buildThreads() {
+      var svg = map && map.svg ? map.svg : document.querySelector('#combo .lm__map');
+      if (!svg) return;
+      var g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'cr-threads');
+      g.setAttribute('data-cr-threads', '');
+      g.setAttribute('aria-hidden', 'true');
+      POIS.forEach(function (p) {
+        var dx = p.x - SITE.x, dy = p.y - SITE.y;
+        var dist = Math.hypot(dx, dy) || 1;
+        var mx = (SITE.x + p.x) / 2, my = (SITE.y + p.y) / 2;
+        // perpendicular to the radius, a gentle consistent bow so threads splay (not straight spokes)
+        var nx = -dy / dist, ny = dx / dist;
+        var bow = Math.min(46, dist * 0.13);
+        var qx = mx + nx * bow, qy = my + ny * bow;
+        // stop the thread a touch short of the pin disc so the open ring reads as the terminus
+        var ex = p.x - (dx / dist) * 13, ey = p.y - (dy / dist) * 13;
+        var path = document.createElementNS(NS, 'path');
+        path.setAttribute('class', 'cr-thread');
+        path.setAttribute('data-id', p.id);
+        // stamp the REAL POI target coord this thread was built FROM (for the asset-truth island)
+        path.setAttribute('data-tx', Math.round(p.x)); path.setAttribute('data-ty', Math.round(p.y));
+        path.setAttribute('d', 'M' + SITE.x.toFixed(1) + ' ' + SITE.y.toFixed(1) +
+          ' Q' + qx.toFixed(1) + ' ' + qy.toFixed(1) + ' ' + ex.toFixed(1) + ' ' + ey.toFixed(1));
+        g.appendChild(path);
+        var end = document.createElementNS(NS, 'circle');
+        end.setAttribute('class', 'cr-end');
+        end.setAttribute('data-id', p.id);
+        end.setAttribute('cx', ex.toFixed(1)); end.setAttribute('cy', ey.toFixed(1));
+        end.setAttribute('r', 3.4);
+        g.appendChild(end);
+        // minute label, nudged outward along the radius so it sits beyond the ring, never on the pin
+        var lx = p.x + (dx / dist) * 18, ly = p.y + (dy / dist) * 18 + 4;
+        var label = document.createElementNS(NS, 'text');
+        label.setAttribute('class', 'cr-mlabel');
+        label.setAttribute('data-id', p.id);
+        label.setAttribute('x', lx.toFixed(1)); label.setAttribute('y', ly.toFixed(1));
+        label.setAttribute('text-anchor', dx >= 0 ? 'start' : 'end');
+        label.textContent = p.walk + ' хв';
+        g.appendChild(label);
+        threadEls[p.id] = { path: path, end: end, label: label, len: 0 };
+      });
+      svg.appendChild(g);
+      // measure once for the dashoffset radiate-in
+      Object.keys(threadEls).forEach(function (id) {
+        var t = threadEls[id];
+        try { t.len = t.path.getTotalLength(); } catch (e) { t.len = 220; }
+      });
+    })();
 
-<!-- the dataset is ESM (export const OSM). Use a module island to ASSERT asset-truth:
-  verify the baked door + POI coords against OSM before the section wires. -->
-<script type="module">
-  import { OSM } from './osm.js';
-  window.__OSM__ = OSM;
-  // asset-truth assertion: the door + every POI coord in the markup must equal the
-  // real OSM data (rounded). Catches any hand-typed drift away from the bake.
-  (function assertTruth() {
-  var ok = true, why = [];
-  var anchor = document.querySelector('[data-home-anchor]');
-  if (anchor) {
-  if (Math.round(OSM.site.x) !== +anchor.getAttribute('data-cx')) { ok = false; why.push('door.x'); }
-  if (Math.round(OSM.site.y) !== +anchor.getAttribute('data-cy')) { ok = false; why.push('door.y'); }
-  }
-  OSM.pois.forEach(function (poi) {
-  var el = document.querySelector('[data-poi="' + poi.id + '"]');
-  if (!el) { ok = false; why.push(poi.id + ':missing'); return; }
-  if (Math.round(poi.x) !== +el.getAttribute('data-tx')) { ok = false; why.push(poi.id + '.tx'); }
-  if (Math.round(poi.y) !== +el.getAttribute('data-ty')) { ok = false; why.push(poi.id + '.ty'); }
-  });
-  window.__ASSET_TRUTH__ = { ok: ok, why: why };
-  if (!ok) console.warn('asset-truth drift:', why.join(', '));
-  })();
-</script>
+    // radiate the threads in (stroke-dashoffset), staggered, on scroll-in. NON-pin trigger so it
+    // never contends for the single section pin. Reduced-motion -> threads shown final/static.
+    function radiateThreads() {
+      var ids = POIS.map(function (p) { return p.id; });
+      if (!gsap || REDUCED) {
+        ids.forEach(function (id) {
+          var t = threadEls[id]; if (!t) return;
+          if (gsap) gsap.set([t.path, t.end, t.label], { opacity: 1 });
+          else { t.path.style.opacity = 1; t.end.style.opacity = 1; t.label.style.opacity = 1; }
+        });
+        return;
+      }
+      ids.forEach(function (id) {
+        var t = threadEls[id]; if (!t) return;
+        gsap.set(t.path, { strokeDasharray: t.len, strokeDashoffset: t.len, opacity: 0.9 });
+        gsap.set([t.end, t.label], { opacity: 0 });
+      });
+      if (window.ScrollTrigger) {
+        window.ScrollTrigger.create({
+          trigger: '#combo', start: 'top 70%', once: true,
+          onEnter: function () {
+            ids.forEach(function (id, k) {
+              var t = threadEls[id]; if (!t) return;
+              gsap.to(t.path, { strokeDashoffset: 0, duration: 0.95, delay: 0.25 + k * 0.13,
+                ease: 'air', onComplete: function () { t.path.style.willChange = ''; } });
+              gsap.to([t.end, t.label], { opacity: 1, duration: 0.4, delay: 0.6 + k * 0.13, ease: 'air' });
+            });
+          }
+        });
+      } else {
+        ids.forEach(function (id) {
+          var t = threadEls[id]; if (!t) return;
+          gsap.set(t.path, { strokeDashoffset: 0 }); gsap.set([t.end, t.label], { opacity: 1 });
+        });
+      }
+    }
+    radiateThreads();
 
-<script>
-  (function () {
-  SectionHarness.boot();
+    // light the active thread (and calm the rest) in step with the POI being walked
+    function lightThread(id) {
+      Object.keys(threadEls).forEach(function (k) {
+        var t = threadEls[k]; if (!t) return;
+        var on = k === id;
+        t.path.classList.toggle('is-on', on);
+        t.path.classList.toggle('is-dim', !on);
+        t.end.classList.toggle('is-on', on);
+        t.label.classList.toggle('is-on', on);
+      });
+    }
 
-  /* ---- ATOM 1 · district-radiates : the MEDIUM. Draws the cream-paper map, blooms
-  the door, then RADIATES a thin leader-thread from the door to each real POI as
-  its real walk-minute label rises. Self-triggers on scroll-in (NON-pin trigger),
-  hover-focuses a legend row / pin. This is the section's unique mark. ---- */
-  var dr = null;
-  SectionHarness.ranOK('district-radiates', function () {
-  dr = window.DistrictRadiates.create('.dr', {
-  draw: true, stagger: 0.14, duration: 0.9, ease: 'power2.out',
-  start: 'top 78%', once: true
-  });
-  window.__dr = dr;
-  });
+    // ---- build the stepping story blocks + the step ticks from the REAL POIs ----
+    var storyEl = document.querySelector('[data-cr-story]');
+    var stepsEl = document.querySelector('[data-cr-steps]');
+    var blocks = POIS.map(function (p, i) {
+      var b = document.createElement('div');
+      b.className = 'cr__block'; b.dataset.idx = i;
+      b.innerHTML =
+        '<div class="cr__no">' + String(i + 1).padStart(2, '0') + ' / ' + String(POIS.length).padStart(2, '0') + '</div>' +
+        '<h3 class="cr__place">' + p.label + '</h3>' +
+        '<p class="cr__time"><b>' + p.walk + ' хв</b> пішки · <b>' + p.drive + ' хв</b> авто · ' + p.m + ' м</p>';
+      storyEl.appendChild(b);
+      var t = document.createElement('span'); t.className = 'cr__tick'; stepsEl.appendChild(t);
+      return b;
+    });
+    if (gsap) gsap.set(blocks[0], { opacity: 1, y: 0 });
+    lightThread(POIS[0].id);
 
-  /* ---- ATOM 3 · numeral-frame-expand-hero : its set(p) NUMERAL treatment only, on a
-  cream plate with NO photo frame. We KILL its own pinned trigger (pin_killed) and
-  drive set(p) off the ONE pin below, so the big editorial total "6" + caption rise
-  then exit in concert with the pinned map. Null-guards on frame/img/bg make the
-  numeral-only markup safe. ---- */
-  var nfe = null;
-  SectionHarness.ranOK('numeral-frame-expand-hero', function () {
-  nfe = window.NumeralFrameExpandHero.create('#loc-numeral', {
-  frameInset: 0, frameScale: 1, panY: 0, exitY: 90,
-  ease: 'expo.out', manageLenis: false
-  });
-  // PIN_KILLED: take its set(p) but NOT its pin. (static branch has no trigger.)
-  if (nfe && nfe.trigger) { try { nfe.trigger.kill(); } catch (e) {} }
-  window.__nfe = nfe;
-  });
+    // ---- the stepping mechanic: ONE block legible at a time, never overlapping ----
+    var shown = -1;
+    function showStep(i) {
+      if (i === shown) return;
+      var prev = shown; shown = i;
+      stepsEl.querySelectorAll('.cr__tick').forEach(function (t, k) { t.classList.toggle('on', k <= i); });
+      if (map && map.select) map.select(POIS[i].id);
+      lightThread(POIS[i].id);
+      if (!gsap || REDUCED) {
+        blocks.forEach(function (b, k) {
+          b.style.opacity = k === i ? '1' : '0';
+          b.style.visibility = k === i ? 'visible' : 'hidden';
+        });
+        return;
+      }
+      // SEQUENTIAL handoff: the outgoing block fully fades + hides FIRST, then a short hold, then
+      // the incoming rises. Their legible windows can never overlap -> never two readable at once.
+      var nb = blocks[i];
+      if (prev >= 0 && blocks[prev]) {
+        gsap.killTweensOf(blocks[prev]);
+        gsap.to(blocks[prev], { opacity: 0, y: -14, duration: 0.26, ease: 'power2.in',
+          onComplete: function () { blocks[prev].style.willChange = ''; blocks[prev].style.visibility = 'hidden'; } });
+      }
+      gsap.killTweensOf(nb);
+      gsap.set(nb, { opacity: 0, y: 16, visibility: 'visible' });
+      gsap.to(nb, { opacity: 1, y: 0, duration: 0.42, ease: 'air',
+        delay: prev >= 0 ? 0.34 : 0, onComplete: function () { nb.style.willChange = ''; } });
+    }
 
-  /* ---- ATOM 2 · pin-story-text : OWNS THE ONE PIN. Scroll-locks #loc while the map
-  plays, and sequences a sparse line PER CLUSTER, one clean lower-left block at a
-  time. We use the atom's pin + stage + blocks, but we TAKE OVER the per-frame text
-  writer with a HARD SEQUENTIAL HANDOFF: the outgoing block reaches opacity 0 and a
-  dead-beat passes BEFORE the incoming block begins to rise. No in-place cross-
-  dissolve -> provably never two readable blocks in one frame (textOverlap killed).
-  On each tick we also drive the numeral plate's set(p) so the whole composition
-  breathes on ONE scroll driver. ---- */
-  var pst = null;
-  SectionHarness.ranOK('pin-story-text', function () {
-  pst = window.PinStoryText.create('#loc', {
-  end: '+=240%', scrub: 0.35, hold: 0.42, ease: 'air', manageLenis: false,
-  blocks: [
-  { align: 'lower-left', at: 0.16, eyebrow: 'Щодня',
-  title: 'Хліб і ліки <em>за десять хвилин.</em>',
-  body: 'Супермаркет, Нова Пошта і аптека тримаються одного кутка. Девʼять, десять, десять хвилин пішки.' },
-  { align: 'lower-left', at: 0.50, eyebrow: 'Зранку',
-  title: 'Школа і садок <em>через дорогу.</em>',
-  body: 'Девʼять хвилин від порога. Дитину можна провести і встигнути на каву.' },
-  { align: 'lower-left', at: 0.84, eyebrow: 'Коли треба більше',
-  title: 'Великий маркет <em>у тій самій прогулянці.</em>',
-  body: '«Грош Експрес» за пʼятнадцять, «Аврора» за вісімнадцять. Усе ще пішки.' }
-  ]
-  });
-  window.__pst = pst;
+    // ---- the ONE section pin (harness owns it). Scroll -> step index -> select + story + thread ----
+    var st = SectionHarness.pin('#combo', { start: 'top top', end: '+=' + (POIS.length * 90) + '%', scrub: 0.6 });
+    if (st) {
+      st.onUpdate = function (p) {
+        var idx = Math.min(POIS.length - 1, Math.max(0, Math.floor(p * (POIS.length - 0.001))));
+        showStep(idx);
+      };
+    } else {
+      showStep(0);
+    }
 
-  // ---- HARD SEQUENTIAL HANDOFF (no cross-dissolve) ----
-  // Take over the text choreography: build per-block windows that NEVER overlap above
-  // a readable opacity. Each block i owns a slot [hold-start, hold-end]; the exit ramp
-  // of block i fully completes (opacity 0) and a DEAD-BEAT elapses before block i+1's
-  // enter ramp begins. Only transform(Y) + opacity are written, and only when changed.
-  var stage = document.querySelector('#loc .pst__stage');
-  var TBLOCKS = stage ? [].slice.call(stage.querySelectorAll('.pst__block')) : [];
-  var N = TBLOCKS.length;
-  var air = (window.gsap && window.gsap.parseEase && window.gsap.parseEase('air'))
-  || function (t) { return 1 - Math.pow(1 - t, 3); };
-  // window plan for N=3 across progress 0..1 (settle plateaus + non-overlapping ramps
-  // separated by a dead-beat). Numbers chosen so no two ramps are ever live together.
-  var RAMP = 0.10;  // fade duration (in progress units)
-  var DEAD = 0.045;  // blank beat between an exit finishing and the next enter
-  var ENTERY = 26, EXITY = -30;
-  // settle centre per block (the engine stamps el.__at from the block spec's `at`)
-  function atOf(el, i) { return (el.__at != null) ? el.__at : ((i + 0.5) / N); }
-  var win = TBLOCKS.map(function (el, i) {
-  var c = atOf(el, i);
-  return {
-  enterFrom: c - 0.16, enterTo: c - 0.16 + RAMP,  // rise in
-  holdFrom: c - 0.16 + RAMP, holdTo: c + 0.16 - RAMP - DEAD, // fully settled
-  exitFrom: c + 0.16 - RAMP - DEAD, exitTo: c + 0.16 - DEAD  // rise out + gone
-  };
-  });
-  // PURE writer (no hidden cache): set(p) is a deterministic function of progress,
-  // idempotent + reverse-safe. Writes only opacity + transform (GPU). The cost is 3
-  // blocks x 2 props = 6 trivial writes per frame, negligible for the jank gate.
-  function sub(p, a, b) { var t = (p - a) / (b - a); return t < 0 ? 0 : (t > 1 ? 1 : t); }
-  function setText(p) {
-  for (var i = 0; i < N; i++) {
-  var el = TBLOCKS[i], w = win[i], o, y;
-  if (p < w.enterFrom || p > w.exitTo) { o = 0; y = (p < w.enterFrom ? ENTERY : EXITY); }
-  else if (p < w.enterTo) { var te = air(sub(p, w.enterFrom, w.enterTo)); o = te; y = (1 - te) * ENTERY; }
-  else if (p <= w.exitFrom) { o = 1; y = 0; }
-  else { var tx = air(sub(p, w.exitFrom, w.exitTo)); o = 1 - tx; y = tx * EXITY; }
-  el.style.opacity = o.toFixed(3);
-  el.style.visibility = o < 0.01 ? 'hidden' : 'visible';
-  el.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
-  }
-  }
-  setText(0);
+    // ---- asset-truth island: every thread was built FROM the REAL OSM POI coord ----
+    // Each thread stamps data-tx/data-ty = Math.round(real poi coord) at build time; assert those
+    // equal the bake (rounded). This catches any hand-typed drift away from osm.js, without a lossy
+    // geometric reconstruction (the thread terminus is intentionally inset from the pin).
+    (function assertTruth() {
+      var ok = true, why = [];
+      OSM.pois.forEach(function (poi) {
+        var t = threadEls[poi.id];
+        if (!t) { ok = false; why.push(poi.id + ':missing'); return; }
+        if (+t.path.getAttribute('data-tx') !== Math.round(poi.x)) { ok = false; why.push(poi.id + '.x'); }
+        if (+t.path.getAttribute('data-ty') !== Math.round(poi.y)) { ok = false; why.push(poi.id + '.y'); }
+      });
+      window.__ASSET_TRUTH__ = { ok: ok, why: why };
+      if (!ok) console.warn('asset-truth drift:', why.join(', '));
+    })();
 
-  // OWN the per-frame writer via the gsap.ticker (NOT by reassigning trigger.vars.onUpdate:
-  // under `scrub`, ScrollTrigger drives its update through an internal scrub tween and does
-  // NOT re-read vars.onUpdate, so that reassignment never fired and the engine's native
-  // cross-dissolve set() kept painting two same-anchor blocks at ~0.4 each across the seam,
-  // exactly the ghost the owner saw). A ticker callback runs every frame AFTER the engine's
-  // scrub update, so our deterministic sequential setText overwrites the engine's opacities
-  // and wins the frame -> a true dead-beat between blocks, never two legible at once.
-  // We drive text + numeral on the SAME single pin progress; per-frame cost stays minimal:
-  //   - setText is a lean pure write (3 blocks x opacity/transform)
-  //   - nfe.set (clip/transform string writes) runs ONLY in the windows where it has a
-  //     VISIBLE effect: the numeral fade [0..0.34] and the exit-rise [0.82..1]. In the
-  //     long settled middle it is skipped entirely (its last-written state already holds).
-  if (pst && pst.trigger && window.gsap) {
-  var nfeActive = -1;
-  window.gsap.ticker.add(function () {
-  var p = pst.trigger.progress || 0;
-  if (p < 0) p = 0; else if (p > 1) p = 1;
-  setText(p);
-  if (nfe && nfe.set) {
-  var active = (p <= 0.34 || p >= 0.82) ? 1 : 0;     // regions where nfe.set moves pixels
-  // run while inside an active window AND once on the frame we leave it (settles the
-  // boundary/held state). In the long settled middle nfe.set is skipped (state holds).
-  if (active || nfeActive === 1) nfe.set(p);
-  nfeActive = active;
-  }
-  });
-  }
-  window.__setText = setText;  // expose for the verify probe (maxSimultaneousText)
-  });
-
-  /* ENGINE/PIN CONTRACT for the probe:
-  - pin-story-text owns the single pinned ScrollTrigger (expectPins:1)
-  - district-radiates self-triggers a NON-pin ScrollTrigger (does not count)
-  - numeral-frame-expand-hero's pin was KILLED at wire-time (pin_killed) */
-  SectionHarness.declare({
-  pinOwner: 'pin-story-text', expectPins: 1,
-  atomsCited: ['district-radiates', 'pin-story-text', 'numeral-frame-expand-hero']
-  });
-  })();
-</script>
+    SectionHarness.declare({
+      pinOwner: 'harness', expectPins: 1,
+      atomsCited: ['locmap-engine']
+    });
+  </script>
 </body>
 </html>

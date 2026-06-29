@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--heritage-sepia · Спадок на теплому папері</title>
+<!--
+  SECTION VARIANT, location--heritage-sepia (role: location).
+  MAP-STYLE = SEPIA HERITAGE. The SAME dense real OSM district of с. Агрономічне as the
+  surveyed-route-map ideal (real road hierarchy by class, 823 building footprints, the site
+  parcel inside a true-scale 10-minute walking ring), re-rendered as an AGED WARM-PAPER heritage
+  survey: cream aged-paper field with a soft vignette, sepia-brown road hierarchy, warm umber
+  building footprints (NO lit windows in the daylight heritage register), the route draws in a deep
+  rust/oxblood with a live minute counter, brown dashed walking ring, ink-brown chrome. The realism
+  is identical to the ideal (same baked OSM, same Dijkstra routes); only the cartographic TREATMENT
+  differs (palette + line/fill). The warm member of the lane.
+
+  Shape = ENGINE-ATOM-DRIVEN-BY-HARNESS-PIN, identical mechanic to the ideal: locmap-engine
+  (owns_pin=FALSE) builds the SVG + draws routes; the harness owns the ONE section pin. As you
+  scroll the pinned range, the section STEPS through the 6 REAL POIs one at a time: each step
+  calls map.select(id) -> the rust Dijkstra route DRAWS along the actual streets, a walking dot
+  travels it, and the live minute counter grows to the REAL walk-time. ONE clean pin-story block
+  per step (number + POI name + real minutes), cross-faded so two are never legible at once.
+
+  asset-truth: streets/footprints from osm-agronomichne.js; POI names + minutes are the 6 real
+  ones (Траш! 9хв, Аврора 18хв, Грош Експрес 15хв, Нова Пошта 10хв, Подорожник 10хв, Школа·садок 9хв).
+  __LAB_OK__ passes only if: 1 pin, the cited real atoms ran, [data-render-surface] painted
+  (the aged paper), 0 real console errors. NO WebGL/canvas/tiles/mix-blend/backdrop-filter.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the rails). transform / opacity / clip-path / filter /
+     stroke-dashoffset only. NO mix-blend, NO backdrop-filter, NO animating width/height/top/left. */
+
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* SEPIA HERITAGE PALETTE: re-point every engine token to an aged warm-paper register, a deep
+     rust route accent. This is the whole "different map style", same engine, different paint. */
+  #combo.combo-stage,
+  .shp__field {
+    --lm-ink: #4a3a26;            /* warm ink-brown foreground */
+    --lm-bg-1: #e8dcc0;           /* aged paper */
+    --lm-bg-2: #efe6d1;           /* road casing = lighter paper halo so brown strokes separate */
+    --lm-accent: #8c3a26;         /* deep rust/oxblood, reserved for the active route + parcel */
+    --lm-accent-soft: #a85a3e;    /* warm terracotta soft */
+  }
+  #combo.combo-stage { background: #e3d6b8; color: #4a3a26; }
+
+  /* the render surface = aged warm paper with a soft vignette. A real CSS background of stacked
+     paper washes + a corner vignette gradient, so the honest paint-probe sees a painted surface
+     AND the sheet reads like an old surveyed heritage chart. The SVG mounts inside it. */
+  .shp__field {
+    background-color: #e8dcc0;
+    background-image:
+      /* corner vignette: the paper darkens warm toward the edges */
+      radial-gradient(135% 110% at 50% 42%, rgba(74,58,38,0) 56%, rgba(74,58,38,.16) 84%, rgba(58,42,24,.28)),
+      /* a warm patch low-right, like aged toning on old stock */
+      radial-gradient(60% 52% at 74% 78%, rgba(140,58,38,.07), rgba(140,58,38,0) 62%),
+      /* hairline paper grain so the sheet reads like printed cartographic stock */
+      radial-gradient(rgba(74,58,38,.05) 0.5px, transparent 0.6px),
+      radial-gradient(rgba(74,58,38,.035) 0.5px, transparent 0.6px),
+      /* the base aged-paper field gradient */
+      radial-gradient(120% 100% at 42% 30%, #ece2c8, #ddd0af);
+    background-size: 100% 100%, 100% 100%, 4px 4px, 7px 7px, 100% 100%;
+    background-position: 0 0, 0 0, 0 0, 2px 3px, 0 0;
+  }
+  .shp__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the engine's stage gradient would re-tint the field; force the flat aged paper under the SVG */
+  .shp__field.lm__stage, .shp__field.lm { background-color: #e8dcc0; }
+
+  /* ---- SEPIA MAP TREATMENT: redraw the engine's SVG classes warm-on-paper ---- */
+  /* green demoted to a soft sage wash, water a faint dusty blue, both muted into the paper */
+  .shp__field .lm-gw--green { fill: rgba(108,118,74,.16); }
+  .shp__field .lm-gw--water { fill: rgba(96,118,128,.14); }
+
+  /* buildings: warm umber footprints, hairline sepia stroke, an old printed cadastral plate.
+     NO lit windows in heritage daylight: the --lit class renders like every other footprint. */
+  .shp__field .lm-bld      { fill: rgba(120,86,52,.16); stroke: rgba(96,68,42,.3); stroke-width: 0.5; }
+  .shp__field .lm-bld--lit { fill: rgba(120,86,52,.16); stroke: rgba(96,68,42,.3); animation: none; }
+
+  /* road hierarchy: SEPIA-BROWN strokes over a LIGHTER-PAPER halo casing, so the grid reads warm
+     and crisp on the dense umber footprint field. Widths kept from the engine ranking. */
+  .shp__field .lm-rdc { stroke: #efe6d1; }
+  .shp__field .lm-rd--hwy   { stroke: rgba(74,52,30,.86); }
+  .shp__field .lm-rd--main  { stroke: rgba(140,74,46,.72); }
+  .shp__field .lm-rd--mid   { stroke: rgba(90,66,42,.5); }
+  .shp__field .lm-rd--minor { stroke: rgba(90,66,42,.32); }
+  .shp__field .lm-rd--faint { stroke: rgba(90,66,42,.16); }
+  .shp__field .lm-rdname { fill: rgba(74,58,38,.52); }
+
+  /* parcel: oxblood hatch + oxblood stroke; tag in ink-brown. (engine hatch uses brick rgba) */
+  .shp__field #lmHatch rect { fill: rgba(140,58,38,.1); }
+  .shp__field #lmHatch line { stroke: rgba(140,58,38,.7); }
+  .shp__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.6; }
+  .shp__field .lm-pulse  { stroke: var(--lm-accent-soft); }
+  .shp__field .lm-sitetag { fill: #4a3a26; }
+
+  /* walking ring: warm brown dashed */
+  .shp__field .lm-ring  { stroke: rgba(90,66,42,.34); }
+  .shp__field .lm-ringt { fill: rgba(74,58,38,.5); }
+
+  /* numbered POIs: paper disc, sepia ring, ink numeral; active flips to the rust accent */
+  .shp__field .lm-pt circle { fill: #efe6d1; stroke: rgba(96,68,42,.78); stroke-width: 1.4; }
+  .shp__field .lm-pt text   { fill: #4a3a26; }
+  .shp__field .lm-pt:hover circle, .shp__field .lm-pt.is-on circle { fill: var(--lm-accent); stroke: #efe6d1; }
+
+  /* the rust moment: the active Dijkstra route + walker + live badge */
+  .shp__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.2; }
+  .shp__field .lm-walker { fill: var(--lm-accent); stroke: #efe6d1; }
+  .shp__field .lm-livet  { fill: #f4efe6; }
+  .shp__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* ---- the reading rail (ink-brown on paper): eyebrow + ONE stepping story block ---- */
+  .shp__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(26px, 7vh, 72px);
+    width: min(34ch, 46vw); pointer-events: none;
+  }
+  @media (min-width: 900px) {
+    .shp__rail { left: auto; right: clamp(24px, 4vw, 72px); width: min(30ch, 34vw); }
+  }
+  .shp__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans);
+    letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(74,58,38,.62); margin: 0 0 clamp(.9rem, 2.4vh, 1.6rem);
+  }
+  .shp__coords {
+    display: block; margin-top: .5rem;
+    font: 500 .64rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(74,58,38,.44); text-transform: none;
+  }
+  .shp__story { position: relative; min-height: clamp(124px, 20vh, 184px); }
+  .shp__block {
+    position: absolute; inset: 0; opacity: 0; visibility: hidden; will-change: opacity, transform;
+    transform: translateY(14px);
+  }
+  .shp__no {
+    font: 600 .7rem/1 var(--combo-sans); letter-spacing: .2em;
+    color: var(--lm-accent); font-variant-numeric: tabular-nums;
+  }
+  .shp__place {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(2rem, 4vw, 3.4rem); line-height: .98; letter-spacing: -.03em;
+    color: #3c2e1c; margin: clamp(.5rem,1.4vh,.9rem) 0 0;
+  }
+  .shp__time {
+    margin-top: clamp(.7rem, 1.8vh, 1.2rem);
+    font: 500 .92rem/1.5 var(--combo-sans); letter-spacing: .02em;
+    color: rgba(74,58,38,.8);
+  }
+  .shp__time b { font-weight: 600; color: #3c2e1c; font-variant-numeric: tabular-nums; }
+
+  /* a slim step progress, one tick per real POI, the active one filled rust */
+  .shp__steps {
+    position: absolute; z-index: 8; left: clamp(20px, 4vw, 64px); bottom: clamp(20px, 5vh, 44px);
+    display: flex; gap: 8px; pointer-events: none;
+  }
+  @media (max-width: 899px) { .shp__steps { bottom: auto; top: clamp(18px, 4vh, 40px); } }
+  .shp__tick { width: 26px; height: 2px; background: rgba(90,66,42,.24); transform-origin: left center; }
+  .shp__tick.on { background: var(--lm-accent); }
+
+  /* the standing section label top-left */
+  .shp__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
+    font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(74,58,38,.58);
+  }
+  .combo-pre, .combo-post { background: #ddd0af; color: rgba(74,58,38,.5); }
+
+  @media (prefers-reduced-motion: reduce) { .shp__block { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--heritage-sepia">
+
+    <!-- the aged-paper field + the side list host. locmap-engine injects the SVG here. -->
+    <div class="shp__field lm" data-lm-stage data-render-surface></div>
+
+    <p class="shp__label">с. Агрономічне · за даними OpenStreetMap</p>
+
+    <div class="shp__rail">
+      <p class="shp__eyebrow">Спадок на теплому папері
+        <span class="shp__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+      <div class="shp__story" data-shp-story></div>
+    </div>
+
+    <!-- side list the engine fills (hidden off-screen; powers click-to-select + a11y) -->
+    <div data-lm-list hidden></div>
+
+    <div class="shp__steps" data-shp-steps></div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (canon engine) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // the 6 REAL POIs, in a walking order that reads as a tour (verbatim names + minutes)
+    var ORDER = ['school', 'np', 'trash', 'apteka', 'grosh', 'avrora'];
+    var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
+    var POIS = ORDER.map(function (id) { return byId[id]; }).filter(Boolean);
+
+    // ---- ENGINE job: the dense real map, re-themed sepia heritage via CSS (owns_pin=FALSE) ----
+    var map;
+    SectionHarness.ranOK('locmap-engine', function () {
+      map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6,
+        walkMin: 10,
+        modes: ['loc'],
+        flicker: { rate: 1e9 },    // heritage daylight: NO lit windows (rate huge -> none light)
+        route: true,
+        reveal: { start: 'top 75%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award'
+      });
+      window.__shpMap = map;
+    });
+
+    // ---- build the stepping story blocks + the step ticks from the REAL POIs ----
+    var storyEl = document.querySelector('[data-shp-story]');
+    var stepsEl = document.querySelector('[data-shp-steps]');
+    var blocks = POIS.map(function (p, i) {
+      var b = document.createElement('div');
+      b.className = 'shp__block'; b.dataset.idx = i;
+      b.innerHTML =
+        '<div class="shp__no">' + String(i + 1).padStart(2, '0') + ' / ' + String(POIS.length).padStart(2, '0') + '</div>' +
+        '<h3 class="shp__place">' + p.label + '</h3>' +
+        '<p class="shp__time"><b>' + p.walk + ' хв</b> пішки · <b>' + p.drive + ' хв</b> авто · ' + p.m + ' м</p>';
+      storyEl.appendChild(b);
+      var t = document.createElement('span'); t.className = 'shp__tick'; stepsEl.appendChild(t);
+      return b;
+    });
+    if (gsap) gsap.set(blocks[0], { opacity: 1, visibility: 'visible', y: 0 });
+
+    // ---- the stepping mechanic: ONE block legible at a time, never overlapping ----
+    var shown = -1;
+    function showStep(i) {
+      if (i === shown) return;
+      var prev = shown; shown = i;
+      stepsEl.querySelectorAll('.shp__tick').forEach(function (t, k) { t.classList.toggle('on', k <= i); });
+      if (map && map.select) map.select(POIS[i].id);
+      if (!gsap || REDUCED) {
+        blocks.forEach(function (b, k) {
+          b.style.opacity = k === i ? '1' : '0';
+          b.style.visibility = k === i ? 'visible' : 'hidden';
+        });
+        return;
+      }
+      if (prev >= 0 && blocks[prev]) {
+        gsap.to(blocks[prev], { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in',
+          onComplete: function () { blocks[prev].style.visibility = 'hidden'; blocks[prev].style.willChange = ''; } });
+      }
+      var nb = blocks[i];
+      nb.style.visibility = 'visible';
+      gsap.fromTo(nb, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'air',
+        delay: prev >= 0 ? 0.18 : 0, onComplete: function () { nb.style.willChange = ''; } });
+    }
+
+    // ---- the ONE section pin (harness owns it). Scroll -> step index -> select + story ----
+    var st = SectionHarness.pin('#combo', { start: 'top top', end: '+=' + (POIS.length * 90) + '%', scrub: 0.6 });
+    if (st) {
+      st.onUpdate = function (p) {
+        var idx = Math.min(POIS.length - 1, Math.max(0, Math.floor(p * (POIS.length - 0.001))));
+        showStep(idx);
+      };
+    } else {
+      showStep(0);
+    }
+
+    SectionHarness.declare({
+      pinOwner: 'harness', expectPins: 1,
+      atomsCited: ['locmap-engine']
+    });
+  </script>
+</body>
+</html>

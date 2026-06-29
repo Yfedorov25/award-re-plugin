@@ -1,17 +1,68 @@
-# Location Patterns — composed sections + the MEDIUM-ROOT taxonomy
+# Location Patterns — the MAP-STYLE taxonomy (current) + the MEDIUM-ROOT taxonomy (legacy)
 
-> Derived from the 10 GREEN location variants in `combos/location--*`. A **pattern**
-> is a named atom-composition that either RECURS across variants or GENERALIZES into a
-> reusable shape other sections can adopt. Each pattern fixes the one thing juniors get
-> wrong: the **atom order**, the **pin-owner rule**, and the **POI-owner rule** (which
-> layer reads the real dataset and projects the points — never an invented coord).
+> A **pattern** is a named atom-composition that either RECURS across variants or
+> GENERALIZES into a reusable shape other sections can adopt. Each pattern fixes the one
+> thing juniors get wrong: the **atom order**, the **pin-owner rule**, and the
+> **POI-owner rule** (which layer reads the real dataset and projects the points, never an
+> invented coord).
 >
-> The location lane has ONE governing law on top of the hero pin-owner law: **every new
-> location variant must pick a DISTINCT MEDIUM-ROOT, not a reskin of the map engine.**
-> The smarts etalon (`surveyed-route-map`) is the realism baseline; the other nine each
-> answer "can I live my life from here?" through a *different sense* (typography, scale,
-> area, raster photo, video, pen-sketch, photo-rail, arched-photo, illustrated-line).
-> Picking a root that is already taken = a re-theme, which the acceptance gates reject.
+> ⚠️ **GOVERNING PRINCIPLE CHANGE (2026-06-30, owner-directed).** The lane is now built as
+> **ONE realistic medium (a dense, real surveyed map of с. Агрономічне) in MANY cartographic
+> STYLES** — not as ten different media. The owner rejected the "ten different media" pass:
+> several variants (video, photo-rail, arched-photo, isochrone, raster, typographic) read as
+> "ways to present location" rather than the MAP shown differently, and were deleted. The new
+> mandate: every variant is a real dense map at the `surveyed-route-map` level of realism,
+> each in a **different palette / line / fill treatment**. The §A MEDIUM-ROOT taxonomy below
+> is kept as a LEGACY reference for the surviving non-map variants, but its rule
+> "every new variant must pick a distinct medium-root, NOT a reskin of the map engine" is
+> **SUPERSEDED** for new work: re-theming `locmap-engine` is now the whole point. Build new
+> location variants against the **§A0 MAP-STYLE taxonomy** instead.
+>
+> ## A0. The MAP-STYLE taxonomy (the CURRENT lane)
+>
+> All members render the SAME dense real OSM (via `locmap-engine`, `owns_pin=FALSE`, the
+> HARNESS owns the one pin), with the SAME real Dijkstra routes + live minute counter and the
+> SAME 6 real POIs. They differ ONLY in cartographic TREATMENT, achieved **entirely in the
+> variant `<style>`** by re-pointing the engine CSS tokens (`--lm-ink`, `--lm-bg-1/2`,
+> `--lm-accent`, `--lm-accent-soft`, `--lm-lit`) and overriding the road / building / parcel /
+> ring / POI / route classes. **The engine code is NEVER forked or edited.** The proven
+> re-theme reference is `combos/location--hi-contrast-mono/combo-lab.html`.
+>
+> Live + planned map styles (each a different-looking REAL map):
+> - **Dark dusk** (the ideal) — `surveyed-route-map`. Warm-dark field, lit windows, terracotta route.
+> - **Hi-contrast mono** — `hi-contrast-mono`. Pure black linework on white, ONE red route accent, no lit windows.
+> - **Heritage sepia** — `heritage-sepia`. Aged warm paper + vignette, sepia roads, rust route. Premium/villa.
+> - **Light editorial + radiating threads** — `concierge-radiate` (reworked). Cream-day real map + leader-threads splaying to the real POIs.
+> - **Scale-zoom through real maps** — `dive-to-the-gate` (reworked). One real map dived region → district → parcel.
+> - **Pen-sketch** — `architects-sketch`. Ink hand-drawing that is GEOGRAPHICALLY ACCURATE (real OSM roads via dashoffset). The one "drawn" style that still reads as a real survey.
+> - (open palette directions for future work: blueprint/cyanotype, night-neon, topographic-contour, satellite-tinted.)
+>
+> **The re-theme recipe (how to add a map style):**
+> 1. Copy `hi-contrast-mono/combo-lab.html`; rename its class prefix + ids/vars to your own.
+> 2. In the variant `<style>`, re-point `--lm-*` on `#combo` + your field class to the new palette.
+> 3. Override the road hierarchy strokes (`.lm-rd--hwy/main/mid/minor/faint`) + casing (`.lm-rdc`),
+>    the building fill/stroke (`.lm-bld`, `.lm-bld--lit`), the parcel/hatch, the ring, the POI discs,
+>    and the route/walker/live badge to the new treatment. Force a flat field bg under the SVG.
+> 4. Set `flicker.rate` huge to kill lit windows (daylight styles), or keep a low rate for dusk/night.
+> 5. Keep the harness pin + the 6-POI stepping story (one block legible at a time) unchanged.
+> 6. The DISTINCTNESS test is now: "is the MAP-STYLE unmistakable in one screenshot AND is the
+>    realism identical to the surveyed-route-map ideal?" — distinct by TREATMENT, not by medium.
+>
+> ---
+>
+> ## Legacy: the MEDIUM-ROOT taxonomy (historical — superseded for new work)
+>
+> Source variants (id → medium → atoms, pin-owner):
+> - `location--surveyed-route-map` — SURVEYED-VECTOR — locmap-engine(medium, owns_pin=FALSE) + theme-tween; pin: **harness**
+> - `location--minutes-as-hero` — TYPOGRAPHIC-MINUTE — minutes-bloom(engine+pin) + numeral-odometer-roll(medium, pinless) + scroll-indicator; pin: **minutes-bloom**
+> - `location--dive-to-the-gate` — SCALE-ZOOM — zoom-to-the-door(owns pin) + district-radiates(Act-2 grammar, pinless); pin: **zoom-to-the-door**
+> - `location--ten-minute-reach` — ISOCHRONE-AREA — reach-ribbon(medium) + numeral-frame-expand-hero(grammar only); pin: **harness**
+> - `location--concierge-radiate` — ILLUSTRATED-MAP — district-radiates(medium) + pin-story-text(owns pin) + numeral-frame-expand-hero(numeral treatment only); pin: **pin-story-text**
+> - `location--raster-tile-bloom` — RASTER-PHOTOGRAPHIC — raster-tile-reveal(medium) + pin-story-text(owns pin) + coords-corner-frame; pin: **pin-story-text**
+> - `location--day-in-the-area` — VIDEO-NO-MAP — scroll-scrub-video(medium+pin) + pin-story-text(pinless); pin: **scroll-scrub-video**
+> - `location--architects-sketch` — PEN-SKETCH — line-art-location-map(medium, pinless) + coords-corner-frame; pin: **harness**
+> - `location--nearby-in-photographs` — PHOTO-RAIL — map-dim-carousel-announce(owns pin) + poi-caption-carousel(pinless); pin: **map-dim-carousel-announce**
+> - `location--arched-window-place` — ARCHED-PHOTO — oval-mask-reveal(medium) + numeral-odometer-roll(stat band); pin: **harness**
 >
 > Source variants (id → medium → atoms, pin-owner):
 > - `location--surveyed-route-map` — SURVEYED-VECTOR — locmap-engine(medium, owns_pin=FALSE) + theme-tween; pin: **harness**

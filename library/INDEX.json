@@ -6319,56 +6319,169 @@
     "name": "Все поруч",
     "level": 2,
     "kind": "section-variant",
-    "status": "base",
     "section": "location",
-    "medium": "ILLUSTRATED MAP (radiating leader-threads)",
+    "status": "base",
+    "map_style": "LIGHT EDITORIAL + RADIATING THREADS over a real dense map (cream paper, dark-ink roads, warm-grey footprints, terracotta accent + leader-threads)",
+    "webgl": false,
+    "ease": "air",
     "meaning": {
-      "what": "A hand-illustrated warm cream-paper map of the district whose language is LINES: thin leader-threads radiate from YOUR DOOR to the 6 real named daily places, each thread carrying its real walk-minute figure. On scroll the section locks, the roads draw, the door blooms, the threads splay one by one as the minutes rise; a sparse line per cluster arrives over the map.",
-      "when": "The LOCATION section of a house/ЖК site where the proof is proximity (can I live my life from here) and you have a real OSM bake with real POIs + real walk-minutes; you want a DRAWN, editorial, premium register rather than a literal tiles/survey map.",
-      "lands": "The visitor feels the daily life is already stitched to the door: not kilometres on a schematic but a few minutes on foot, drawn from the porch. The radiating thread is the section's unmistakable mark."
+      "what": "The LOCATION beat at the surveyed-route-map level of cartographic REALISM (the SAME dense baked OSM district of с. Агрономічне: real road hierarchy by class, 823 building footprints, the site parcel inside a true-scale 10-minute walking ring, real Dijkstra routes drawn along the actual streets with a walking dot and a live minute counter), re-rendered in a DIFFERENT cartographic TREATMENT: a light cream-day editorial plan (cream paper, dark-ink roads, warm-grey footprints, one terracotta accent), NO warm-lit windows. On TOP of that real dense map the section's SIGNATURE: thin terracotta leader-threads splay from the REAL site (OSM.site 746,325) to each of the 6 REAL POIs, each carrying its real walk-minute, drawn in the engine's own SVG coordinate space so they land exactly on the real POI coords. Same locmap-engine, same real data, same mechanic as the ideal; only the palette/line/fill treatment differs and the threads are added as an authored mark. The section pins; scroll radiates the threads in, then STEPS through the 6 real POIs one at a time, each drawing its real terracotta route + live minutes and lighting its thread; one clean story block per step, cross-faded so two are never legible at once.",
+      "when": "When the LOCATION section wants a warm, light, editorial register that still reads as a real survey: a printed cream plan where a concierge mark stitches the door to every daily place with the minutes on it. The proximity-as-signature member of the map-style lane, distinct from the dark-dusk ideal and the hi-contrast mono by being a light cream-day sheet with radiating leader-threads.",
+      "lands": "A real printed cream plan fills the frame: the whole street grid and hundreds of warm-grey building footprints, the thick artery cutting the diagonal, the property parcel hatched in terracotta inside its dashed walking ring. Thin terracotta threads fan out from the door to the school, the post office, the markets, each with its honest minute figure, so the daily life reads as already stitched to the porch. As you scroll the camera holds; one thread lights at a time as a terracotta route draws itself along the real streets to that place, a dot walking it while the minutes count up to the honest number. It reads bespoke, warm and editorial, not decorative and not a sketch."
     },
     "source": {
-      "grammar": "district-radiates: editorial illustrated proximity map, leader-threads radiate door->POI on a cream paper field",
+      "grammar": "locmap-engine (the map CANON: dual casing+stroke road hierarchy, Dijkstra draw + getPointAtLength walker + growing live timer, 9-gate reveal, asymmetric layer parallax, true-scale walking ring) re-themed via CSS variables + class overrides into a light cream-day editorial treatment (dark-ink strokes over cream halo casing, warm-grey footprints with NO lit windows, one terracotta accent). The authored layer = the radiating leader-threads (one bowed quadratic per real POI from the real site, the smarts thread math, drawn in viewBox units so each lands on the real POI coord) PLUS the scroll-stepped POI tour: harness pin -> step index -> map.select() + thread-light + one cross-faded story block per step. Same composition as surveyed-route-map; the variant's own contribution is the cream-day RE-THEME and the radiating-thread mark, which the lane's map-style taxonomy treats as a first-class variant (not a forbidden reskin).",
       "recording": null,
-      "registry_ref": []
+      "registry_ref": [
+        "locmap-canon",
+        "SMARTS-location-etalon"
+      ]
     },
     "uses": [
       {
-        "atom": "pin-story-text",
-        "job": "owns the ONE pin (scroll-lock); sequences a sparse line PER CLUSTER, one clean lower-left block at a time, never overlapping"
-      },
-      {
-        "atom": "district-radiates",
-        "job": "the MEDIUM: draws the cream-paper map (real OSM roads/parks), blooms the door, RADIATES a thin leader-thread door->each real POI as its real walk-minute label rises; hover-focuses a row/pin. Self-triggers, NON-pin"
-      },
-      {
-        "atom": "numeral-frame-expand-hero",
-        "job": "its set(p) NUMERAL treatment only (big editorial total '6' + caption, NO photo frame), driven off the ONE pin; its own pinned trigger is killed at wire-time"
+        "atom": "locmap-engine",
+        "job": "owns_pin FALSE; reads the REAL baked OSM (osm.js -> osm-agronomichne.js) and bakes the dense district SVG into [data-lm-stage]; on map.select(id) draws the dataset's real Dijkstra route via stroke-dashoffset while a walker rides getPointAtLength and a live badge counts minutes up to the real walk-time. flicker.rate huge so NO windows light (cream-day has no warm glow). Re-themed to ink-on-cream + one terracotta accent purely by the variant CSS (engine code untouched). After it bakes the SVG the variant queries map.svg and APPENDS a thin authored threads <g>: one bowed leader-thread per real POI from the real site, radiated in via stroke-dashoffset. Its reveal/parallax triggers do NOT pin."
       }
     ],
     "pin": {
-      "owner": "pin-story-text",
+      "owner": "harness",
       "count": 1
     },
-    "pin_killed": [
-      "numeral-frame-expand-hero"
-    ],
-    "webgl": false,
-    "ease": "air",
+    "pin_killed": [],
     "gated_by": [
       "R_pin_budget",
       "R_perf_limits",
       "R_no_webgl"
     ],
     "acceptance": [
-      "asset-truth: door = OSM.site and every POI coord/name/walk-minute = OSM.pois VERBATIM (a module-island assertion proves Math.round(coord) match; window.__ASSET_TRUTH__.ok === true); zero invented streets/POIs/times",
-      "exactly ONE pinned ScrollTrigger (pin-story-text); the section scroll-LOCKS while the map plays (pin:true + pinSpacing); numeral-frame-expand-hero's pin is KILLED, district-radiates is NON-pin",
-      "pin-story-text blocks sequence one at a time: NEVER two text blocks at opacity>=0.85 at the same scroll position (verified maxConcurrent===1 across 25 scroll samples); never a full-screen wall",
-      "medium is unmistakable in a screenshot: hand-drawn cream paper + leader-threads radiating from one ringed door; NOTHING else draws connecting lines (not tiles, not survey-vector, not video)",
-      "6 leader-threads + 6 dots painted, each dot anchored on its thread end via the SVG CTM; threads have non-zero drawn length",
-      "motion only transform/opacity/clip-path/stroke-dashoffset; NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO video.currentTime; reduced-motion -> final drawn state + static text deck"
+      "MAP-STYLE is unmistakably LIGHT EDITORIAL + RADIATING THREADS in one screenshot: a light cream-paper plan with dark-ink roads and warm-grey footprints, NO lit windows, ONE terracotta accent, and thin terracotta leader-threads fanning from the one site marker to the real POIs with their minute figures. Realism is identical to the surveyed-route-map ideal (same dense real OSM: full street grid + 823 footprints + named streets + parcel + walking ring), distinct from the other map styles by TREATMENT (cream-day palette + the radiating-thread mark) not by medium. Verified by screenshot.",
+      "asset-truth: streets, footprints, green, walking routes, POI names and minutes are the REAL baked OSM of с. Агрономічне (osm.js -> osm-agronomichne.js): 136 roads, 823 footprints, site = OSM.site (746,325), 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв), real Dijkstra route per POI. The 6 leader-threads target the REAL POI coords (a module island re-derives each pin from its thread end and asserts Math.round match -> window.__ASSET_TRUTH__.ok). NO invented streets/POIs/times. Coords 49.18N 28.33E (Вінниця), never another city.",
+      "ONE pin only (harness owns it; locmap-engine is owns_pin FALSE; the threads radiate on a NON-pin once-trigger). Scroll-LOCK with pinSpacing while the mechanic plays. pins === 1 in the probe.",
+      "story text SEQUENCED: exactly one story block legible (opacity >= 0.85) at any scroll position, cross-faded + visibility-gated; never two at once, never a full-screen wall. Verified across 5 scroll samples (zero overlapping text-bearing pairs).",
+      "decode-guard: the [data-render-surface] field is a painted CSS background (cream paper grain) at non-zero size from load; no undecoded <img>/tile flicker (the medium uses zero raster imagery).",
+      "motion ONLY stroke-dashoffset / transform / opacity / filter; NO WebGL, NO mix-blend, NO backdrop-filter, NO video.currentTime, NO animating width/height/top/left/margin. will-change cleared after one-shots.",
+      "reduced-motion -> the full map + threads + first route shown statically, text steppable, __LAB_OK__ true; mobile 390px -> no horizontal overflow, __LAB_OK__ true. Zero real console errors.",
+      "copy Ukrainian, Fedoriv voice, sparse, proof-not-promises; ZERO em-dash/en-dash anywhere in the file."
     ],
+    "gate": {
+      "probe": "Serve library/ and open combos/location--concierge-radiate/combo-lab.html. __LAB_OK__ true, ScrollTrigger pin count === 1. Scroll the pinned range: the dense cream-on-ink district reads as a real survey (full grid, 823 footprints, named streets, parcel, walking ring); thin terracotta leader-threads radiate from the one site marker to the 6 real POIs with their minute figures; then the section STEPS through the 6 real POIs, each drawing its REAL terracotta Dijkstra route along the streets with a walker + live minute badge, lighting its thread, and ONE serif story block (name + real minutes) legible at a time. Confirm the LIGHT EDITORIAL + RADIATING THREADS treatment by screenshot and that only real OSM data appears."
+    },
+    "note": "|",
     "_path": "library/combos/location--concierge-radiate/",
+    "_variantsResolved": []
+  },
+  "location--dive-to-the-gate": {
+    "id": "location--dive-to-the-gate",
+    "name": "Падіння до воріт",
+    "level": 2,
+    "kind": "section-variant",
+    "section": "location",
+    "status": "base",
+    "map_style": "SCALE-ZOOM through REAL maps (region -> district -> parcel)",
+    "webgl": false,
+    "ease": "air",
+    "meaning": {
+      "what": "The LOCATION beat at the surveyed-route-map level of cartographic REALISM (the SAME dense baked OSM district of с. Агрономічне: real road hierarchy by class, 823 building footprints, the site parcel at 746.3,324.9 inside a true-scale 10-minute walking ring, real Dijkstra routes drawn along the actual streets with a walking dot and a live minute counter), rendered ONCE by locmap-engine and DIVED through three scales as one continuous fall: beat 1 РАЙОН (the whole district visible), beat 2 (zoom toward the site, the ring + named streets dominant, the real route to the school drawing), beat 3 ДІЛЯНКА (tight on the parcel: 22,5 сотки on вул. Перемоги, the two nearest real places with real minutes). Same locmap-engine, same real data, same routes as the ideal; the DIFFERENT cartographic TREATMENT is a cool slate-blue DAY map that warms slightly per beat. The dive is a CSS transform (scale + origin on the site) on the engine's SVG group across the pinned scroll. The section pins; scroll steps the three beats; one clean caption block per beat, cross-faded so two are never legible at once.",
+      "when": "When the LOCATION section wants to answer not 'here is a map' but 'this place nests inside the district and the district is five minutes from Вінниця', delivered as a single camera fall from the whole district down to the buyer's own parcel. The SCALE member of the map-style lane: the same dense real survey as the ideal, dived through three scales instead of stepped across POIs, distinct from the dark-dusk ideal and the mono/sepia treatments by being a cool slate-blue day map that warms as it descends.",
+      "lands": "A cool daylight survey fills the frame: the whole street grid and hundreds of building footprints in slate on pale stock, the thick highway cutting the diagonal, the property parcel hatched in terracotta inside its dashed walking ring. As you scroll the camera FALLS toward the site: the district holds, then dives in until the ten-minute ring and the named streets dominate and a terracotta line draws itself to the school, then dives again until the plot fills the frame with its size and its frontage street and the two nearest places. Three scales, one focal point, one fall. It reads engineered and authored, a real surveyed map dived through, not a slider of three drawings."
+    },
+    "source": {
+      "grammar": "locmap-engine (the map CANON: dual casing+stroke road hierarchy, Dijkstra draw + getPointAtLength walker + growing live timer, the property parcel + true-scale walking ring, asymmetric layer parallax) re-themed via CSS variables + class overrides into a cool slate-blue DAY treatment (slate strokes over pale halo casing, light-slate footprints with NO lit windows, a terracotta accent for the active route + parcel) and DIVED through three scales by a CSS transform (scale + transform-origin on the site) on the engine's SVG group, driven by the single harness pin. The authored layer = the three labelled scale beats: harness pin -> beat index -> applyScale() + map.select() + one cross-faded caption per beat. Same medium and realism as surveyed-route-map; the variant's own contribution is the SCALE dive through ONE real map plus the slate day re-theme (the lane's map-style taxonomy treats this as a first-class variant, not a forbidden reskin). Reworked from an earlier hand-drawn three-act schematic into three views of one REAL map.",
+      "recording": null,
+      "registry_ref": [
+        "locmap-canon",
+        "SMARTS-location-etalon"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "locmap-engine",
+        "job": "owns_pin FALSE; reads the REAL baked OSM (osm.js -> osm-agronomichne.js) and bakes the dense district SVG into [data-lm-stage]; on map.select(id) draws the dataset's real Dijkstra route via stroke-dashoffset while a walker rides getPointAtLength and a live badge counts minutes up to the real walk-time. flicker.rate huge so NO windows light (a day map has no warm glow); parallax 0 because the scale DIVE owns the camera. Re-themed to cool slate-on-pale + a terracotta accent purely by the variant CSS, and its SVG group is scaled (transform-origin on the site) per beat by the variant script. Engine code untouched; its reveal trigger does NOT pin."
+      }
+    ],
+    "pin": {
+      "owner": "harness",
+      "count": 1
+    },
+    "pin_killed": [
+      "zoom-to-the-door"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "MAP-STYLE is unmistakably SCALE-ZOOM through REAL maps in one screenshot: a cool slate-blue DAY survey (NO lit windows, terracotta accent) DIVED toward the site so the same real map reads at a clearly different scale than at the start. Realism is identical to the surveyed-route-map ideal (same dense real OSM: full street grid + 823 footprints + named streets + parcel + walking ring), distinct from the other map styles by TREATMENT + the scale dive, not by medium. Verified by screenshot.",
+      "asset-truth: streets, footprints, green, walking routes, POI names and minutes are the REAL baked OSM of с. Агрономічне (osm.js -> osm-agronomichne.js): 136 roads, 823 footprints, site at 746.3,324.9, 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв), real Dijkstra route per POI. NO invented streets/POIs/times/geometry. Coords 49.18N 28.33E (Вінниця), never another city.",
+      "SCALE DIVE through ONE real map: beat 1 РАЙОН shows the whole district (scale 1.0), beat 2 zooms toward the site (the 10-min ring + named streets dominant, the real route to Школа drawing), beat 3 ДІЛЯНКА is tight on the parcel (22,5 сотки + вул. Перемоги + the two nearest real places). The dive is a CSS transform (scale + transform-origin on the site) on the engine SVG group: transform/opacity only, NEVER width/height/top/left.",
+      "ONE pin only (harness owns it; locmap-engine is owns_pin FALSE; the old zoom-to-the-door pin was killed). Scroll-LOCK with pinSpacing while the dive plays. pins === 1 in the probe.",
+      "caption text SEQUENCED: exactly one beat caption legible (opacity >= 0.85) at any scroll position, cross-faded + visibility-gated; never two at once, never a full-screen wall. Verified across 5 scroll samples (zero overlapping text-bearing pairs).",
+      "decode-guard: the [data-render-surface] field is a painted CSS background (slate daylight field) at non-zero size from load; no undecoded <img>/tile flicker (the medium uses zero raster imagery).",
+      "motion ONLY stroke-dashoffset / transform / opacity / filter; NO WebGL, NO mix-blend, NO backdrop-filter, NO video.currentTime, NO animating width/height/top/left/margin. will-change cleared after one-shots.",
+      "reduced-motion -> the full map + first route shown statically at beat 0, captions steppable, __LAB_OK__ true; mobile 390px -> no horizontal overflow, __LAB_OK__ true. Zero real console errors. Copy Ukrainian, Fedoriv voice, sparse, proof-not-promises; ZERO em-dash/en-dash anywhere in the file."
+    ],
+    "gate": {
+      "probe": "Serve library/ and open combos/location--dive-to-the-gate/combo-lab.html. __LAB_OK__ true, ScrollTrigger pin count === 1. Scroll the pinned range: the dense slate-on-pale district reads as a real survey (full grid, 823 footprints, named streets, parcel, walking ring) and DIVES toward the site through three labelled beats (РАЙОН whole -> approach with the real route to Школа -> ДІЛЯНКА tight on the 22,5-сотки parcel on вул. Перемоги), the same real map at three scales, ONE caption block (place + real minutes) legible at a time, the page tint warming a notch per beat. Confirm the cool slate-blue DAY treatment + the scale dive by screenshot and that only real OSM data appears."
+    },
+    "note": "|",
+    "_path": "library/combos/location--dive-to-the-gate/",
+    "_variantsResolved": []
+  },
+  "location--heritage-sepia": {
+    "id": "location--heritage-sepia",
+    "name": "Спадок на теплому папері",
+    "level": 2,
+    "kind": "section-variant",
+    "section": "location",
+    "status": "base",
+    "map_style": "SEPIA HERITAGE (aged warm-paper survey: cream field with a soft vignette, sepia-brown roads, umber footprints, a deep rust route accent)",
+    "webgl": false,
+    "ease": "air",
+    "meaning": {
+      "what": "The LOCATION beat at the surveyed-route-map level of cartographic REALISM (the SAME dense baked OSM district of с. Агрономічне: real road hierarchy by class, 823 building footprints, the site parcel inside a true-scale 10-minute walking ring, real Dijkstra routes drawn along the actual streets with a walking dot and a live minute counter), re-rendered in a DIFFERENT cartographic TREATMENT: an aged warm-paper heritage survey. A cream aged-paper field with a soft corner vignette, sepia-brown road hierarchy over a lighter-paper halo casing, warm umber building footprints with NO lit windows (heritage daylight register), a brown dashed walking ring, ink-brown chrome, and the active route drawn in a deep rust/oxblood with the live minute counter. Same locmap-engine, same real data, same mechanic as the ideal; only the palette and line/fill treatment differ. The section pins; scroll STEPS through the 6 real POIs one at a time, each drawing its real rust route + live minutes; one clean story block per step, cross-faded so two are never legible at once.",
+      "when": "When the LOCATION section wants a warm, established, premium-villa register: an old printed survey on aged stock where the district reads heritage and the rust line is the walk to each real place. The warm member of the map-style lane, distinct from the dark-dusk ideal and the stark black-on-white mono by being a cream sepia heritage treatment.",
+      "lands": "An aged surveyed chart on warm paper fills the frame: the whole street grid and hundreds of building footprints in sepia and umber on cream, the thick brown highway cutting the diagonal, the property parcel hatched in oxblood inside its dashed walking ring, the paper darkening warm toward the edges. As you scroll the camera holds; a single deep-rust line draws itself along the real streets to the school, the post office, the market, a rust dot walking it while the minutes count up to the honest number. It reads warm, established and expensive, an heirloom plan rather than an embedded widget."
+    },
+    "source": {
+      "grammar": "locmap-engine (the map CANON: dual casing+stroke road hierarchy, Dijkstra draw + getPointAtLength walker + growing live timer, 9-gate reveal, asymmetric layer parallax, true-scale walking ring) re-themed via CSS variables + class overrides into a sepia-heritage treatment (sepia-brown strokes over a lighter-paper halo casing, warm umber footprints with NO lit windows, oxblood parcel hatch, a deep rust route accent, a paper vignette layered onto the field background). The authored layer = the scroll-stepped POI tour: harness pin -> step index -> map.select() + one cross-faded story block per step. Same composition as surveyed-route-map; the variant's own contribution is the sepia RE-THEME, which the lane's new map-style taxonomy treats as a first-class variant (not a forbidden reskin).",
+      "recording": null,
+      "registry_ref": [
+        "locmap-canon",
+        "SMARTS-location-etalon"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "locmap-engine",
+        "job": "owns_pin FALSE; reads the REAL baked OSM (osm.js -> osm-agronomichne.js) and bakes the dense district SVG into [data-lm-stage]; on map.select(id) draws the dataset's real Dijkstra route via stroke-dashoffset while a walker rides getPointAtLength and a live badge counts minutes up to the real walk-time. flicker.rate huge so NO windows light (heritage daylight has no warm glow). Re-themed to aged-paper sepia + a deep rust route accent purely by the variant CSS (engine code untouched). Its reveal/parallax triggers do NOT pin."
+      }
+    ],
+    "pin": {
+      "owner": "harness",
+      "count": 1
+    },
+    "pin_killed": [],
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "MAP-STYLE is unmistakably SEPIA HERITAGE in one screenshot: a cream aged-paper field with a soft vignette, sepia-brown roads, warm umber footprints, NO lit windows, a deep rust accent reserved for the active route. Realism is identical to the surveyed-route-map ideal (same dense real OSM: full street grid + 823 footprints + named streets + parcel + walking ring), distinct from the other map styles by TREATMENT not by medium. Verified by screenshot.",
+      "asset-truth: streets, footprints, green, walking routes, POI names and minutes are the REAL baked OSM of с. Агрономічне (osm.js -> osm-agronomichne.js): 136 roads, 823 footprints, 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв), real Dijkstra route per POI. NO invented streets/POIs/times. Coords 49.18N 28.33E (Вінниця), never another city.",
+      "ONE pin only (harness owns it; locmap-engine is owns_pin FALSE). Scroll-LOCK with pinSpacing while the mechanic plays. pins === 1 in the probe.",
+      "story text SEQUENCED: exactly one story block legible (opacity >= 0.85) at any scroll position, cross-faded, non-active blocks hard-zero + visibility hidden; never two at once, never a full-screen wall. Verified across 5 scroll samples (zero overlapping text-bearing pairs).",
+      "decode-guard: the [data-render-surface] field is a painted CSS background (aged paper + vignette) at non-zero size from load; no undecoded <img>/tile flicker (the medium uses zero raster imagery).",
+      "motion ONLY stroke-dashoffset / transform / opacity / filter; NO WebGL, NO mix-blend, NO backdrop-filter, NO video.currentTime, NO animating width/height/top/left/margin. will-change cleared after one-shots.",
+      "reduced-motion -> the full map + first route shown statically, text steppable, __LAB_OK__ true; mobile 390px -> no horizontal overflow, __LAB_OK__ true. Zero real console errors.",
+      "copy Ukrainian, Fedoriv voice, sparse, proof-not-promises; ZERO em-dash/en-dash anywhere in the file."
+    ],
+    "gate": {
+      "probe": "Serve library/ and open combos/location--heritage-sepia/combo-lab.html. __LAB_OK__ true, ScrollTrigger pin count === 1. Scroll the pinned range: the dense aged-paper district reads as a real survey (full grid, 823 footprints, named streets, parcel, walking ring); the section STEPS through the 6 real POIs, each drawing its REAL rust Dijkstra route along the streets with a rust walker + live minute badge and ONE serif story block (name + real minutes) legible at a time. Confirm the SEPIA HERITAGE treatment by screenshot and that only real OSM data appears."
+    },
+    "note": "|",
+    "_path": "library/combos/location--heritage-sepia/",
     "_variantsResolved": []
   },
   "location--hi-contrast-mono": {

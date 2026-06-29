@@ -3,329 +3,338 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>combo: location--dive-to-the-gate — Місто, район, ділянка (SCALE three-act match-cut zoom)</title>
+<title>combo: location--dive-to-the-gate · Падіння до воріт (SCALE-ZOOM через реальні карти)</title>
 <!--
-  AWARD LOCATION SECTION · MEDIUM = SCALE (three-act match-cut zoom).
-  ONE shared focal point (the Агрономічне site) is dived through three scales as a single
-  continuous zoom, NOT three fades:  МІСТО -> РАЙОН -> ДІЛЯНКА. Palette warms cool -> warm.
-  The only location variant that changes SCALE. zoom-to-the-door owns the pin and the dive;
-  district-radiates' grammar lights ACT 2 (radiating minute-threads to the 6 REAL POIs); the
-  three captions are the pin-story (one clean block per act, cross-faded, never overlapping).
+  SECTION VARIANT, location--dive-to-the-gate (role: location).
+  MAP-STYLE = SCALE-ZOOM through REAL maps (region -> district -> parcel). The SAME dense real OSM
+  district of с. Агрономічне as the surveyed-route-map ideal (real road hierarchy by class, 823
+  building footprints, the site parcel inside a true-scale 10-minute walking ring, real Dijkstra
+  routes), rendered ONCE by locmap-engine and DIVED through three scales as one continuous fall:
+  beat 1 РАЙОН (the whole district), beat 2 (zoom toward the site, the ring + named streets dominant,
+  a real route draws), beat 3 ДІЛЯНКА (tight on the parcel: 22,5 сотки on вул. Перемоги, the two
+  nearest real places). The realism is identical to the ideal (same baked OSM, same real routes);
+  only the cartographic TREATMENT differs: a cool slate-blue DAY map that warms slightly per beat.
 
-  REAL DATA: every street, POI name + walk/drive minute is projected from the baked OSM of
-  с. Агрономічне (Вінницький р-н). NOTHING invented. Coords 49.18N 28.33E.
-    site (OSM): 746.3, 324.9  ->  focal point in every act.
-  6 REAL POIs: Супермаркет «Траш!» 9/1 · Маркет «Аврора» 18/3 · «Грош Експрес» 15/2 ·
-               Нова Пошта 10/2 · Аптека «Подорожник» 10/2 · Школа · садок 9/2.
-  PIN: zoom-to-the-door owns the single section pin (pin:true + pinSpacing). No second pin.
-  LAWS: SVG / transform / opacity / stroke-dashoffset / filter only. NO WebGL, NO tiles,
-        NO canvas, NO mix-blend, NO backdrop-filter, NO video.currentTime.
+  Shape = ENGINE-ATOM-DRIVEN-BY-HARNESS-PIN. locmap-engine (owns_pin=FALSE) builds the SVG + draws
+  routes; the HARNESS owns the ONE section pin. The dive is a CSS transform (scale + origin on the
+  site) on the engine's SVG group across the pinned range, in THREE labelled beats with ONE clean
+  caption block legible at a time, cross-faded so two are never readable at once.
+
+  asset-truth: streets/footprints/green/routes from osm-agronomichne.js; the site at 746.3,324.9;
+  POI names + minutes are the 6 real ones (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв,
+  Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв). Coords 49.18 Пн · 28.33 Сх. NOTHING invented.
+  __LAB_OK__ passes only if: 1 pin, the cited real atom ran, [data-render-surface] painted (the
+  slate field), 0 real console errors. NO WebGL/canvas/tiles/mix-blend/backdrop-filter.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../components/zoom-to-the-door/component.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
 <link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
 
 <style>
-  /* variant SKIN only — the atom owns its rails, dive + draw. */
-  /* The render surface carries a faint paper grain so the harness probe sees a paint on the
-     [data-render-surface] (SVG strokes alone are not an <img>/bg). transform/opacity safe. */
-  .dive { position: relative; }
-  [data-render-surface] {
-    background-image:
-      radial-gradient(rgba(120,108,90,0.05) 0.5px, transparent 0.6px),
-      radial-gradient(rgba(120,108,90,0.04) 0.5px, transparent 0.6px);
-    background-size: 4px 4px, 7px 7px;
-    background-position: 0 0, 2px 3px;
-  }
-  /* a hairline section frame + section label, editorial */
-  .dive__chrome { position: absolute; z-index: 5; top: clamp(1.1rem,3vh,2.2rem);
-    left: clamp(1.2rem,4vw,3rem); right: clamp(1.2rem,4vw,3rem);
-    display: flex; justify-content: space-between; align-items: baseline;
-    pointer-events: none; color: var(--ztd-soft, #5c5347); }
-  .dive__chrome .sec { font: 600 0.7rem/1 'Inter',sans-serif; letter-spacing: 0.26em; text-transform: uppercase; }
-  .dive__chrome .geo { font: 500 0.7rem/1 'Inter',sans-serif; letter-spacing: 0.14em; opacity: 0.7; }
+  /* variant SKIN only (scaffold owns the rails). transform / opacity / clip-path / filter /
+     stroke-dashoffset only. NO mix-blend, NO backdrop-filter, NO animating width/height/top/left. */
 
-  /* district minute-threads (district-radiates grammar) for ACT 2 — drawn by the inline script */
-  .dr2-thread { fill: none; stroke: var(--ztd-accent, #b56a4a); stroke-width: 1.3;
-    stroke-linecap: round; opacity: 0.0; vector-effect: non-scaling-stroke; }
-  .dr2-min { fill: var(--ztd-accent-ink,#8f4a30); font: 600 12.5px 'Inter',sans-serif;
-    letter-spacing: 0.02em; }
-  .dr2-min .u { fill: var(--ztd-soft,#5c5347); font-weight: 500; }
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* COOL SLATE-BLUE DAY PALETTE: re-point every engine token to a daylight slate register.
+     This is the whole "different map style": same engine, different paint. The page tint warms
+     one notch per beat (data-dive-beat) so the fall reads from cool region down to a warmer plot. */
+  #combo.combo-stage,
+  .dive__field {
+    --lm-ink: #1c2733;            /* deep slate ink foreground */
+    --lm-bg-1: #e9eef3;           /* daylight paper inner */
+    --lm-bg-2: #dbe3eb;           /* road casing = pale halo so slate strokes separate */
+    --lm-accent: #c2693f;         /* warm terracotta, reserved for the active route + parcel */
+    --lm-accent-soft: #cf855f;
+  }
+  #combo.combo-stage { background: #eef2f6; color: #1c2733; }
+
+  /* the render surface = slate-blue daylight field. A real CSS background so the honest paint-probe
+     sees a painted surface from load AND the sheet reads like a printed survey on cool stock. */
+  .dive__field {
+    position: absolute; inset: 0; overflow: clip;
+    background-color: #e9eef3;
+    background-image:
+      radial-gradient(120% 100% at 56% 44%, #eef3f8, #d9e2ea 78%),
+      radial-gradient(rgba(28,39,51,.03) 0.5px, transparent 0.6px);
+    background-size: 100% 100%, 5px 5px;
+    background-position: 0 0, 0 0;
+    transition: filter .8s var(--ease-air);
+  }
+  .dive__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%;
+    will-change: transform; }
+  /* the engine's stage gradient would re-tint the field; keep our slate field under the SVG */
+  .dive__field.lm__stage, .dive__field.lm { background-color: #e9eef3; }
+
+  /* warm the whole sheet a notch per beat (filter only, GPU, never re-tints geometry math) */
+  #combo[data-dive-beat="0"] .dive__field { filter: none; }
+  #combo[data-dive-beat="1"] .dive__field { filter: sepia(.06) saturate(1.04); }
+  #combo[data-dive-beat="2"] .dive__field { filter: sepia(.13) saturate(1.08); }
+
+  /* ---- COOL-SLATE MAP TREATMENT: redraw the engine's SVG classes for a daylight survey ---- */
+  /* green demoted to a faint cool wash; water a touch bluer */
+  .dive__field .lm-gw--green { fill: rgba(74,110,86,.08); }
+  .dive__field .lm-gw--water { fill: rgba(70,120,170,.10); }
+
+  /* buildings: pale slate footprints, hairline slate stroke, a printed cadastral plan in daylight.
+     NO lit windows (day map): the --lit class renders like every other footprint (kill warm glow). */
+  .dive__field .lm-bld      { fill: rgba(28,39,51,.07); stroke: rgba(28,39,51,.14); stroke-width: 0.5; }
+  .dive__field .lm-bld--lit { fill: rgba(28,39,51,.07); stroke: rgba(28,39,51,.14); animation: none; }
+
+  /* road hierarchy: SLATE strokes over a PALE halo casing, so the grid reads crisp on the dense
+     footprint field. Widths kept from the engine ranking; casing is the pale halo. */
+  .dive__field .lm-rdc { stroke: #f3f6f9; }
+  .dive__field .lm-rd--hwy   { stroke: rgba(28,39,51,.82); }
+  .dive__field .lm-rd--main  { stroke: rgba(40,72,104,.66); }
+  .dive__field .lm-rd--mid   { stroke: rgba(28,39,51,.42); }
+  .dive__field .lm-rd--minor { stroke: rgba(28,39,51,.26); }
+  .dive__field .lm-rd--faint { stroke: rgba(28,39,51,.12); }
+  .dive__field .lm-rdname { fill: rgba(28,39,51,.5); }
+
+  /* parcel: terracotta hatch + stroke; tag in ink. (engine hatch uses brick rgba, override it) */
+  .dive__field #lmHatch rect { fill: rgba(194,105,63,.10); }
+  .dive__field #lmHatch line { stroke: rgba(194,105,63,.6); }
+  .dive__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.8; }
+  .dive__field .lm-pulse  { stroke: var(--lm-accent); }
+  .dive__field .lm-sitetag { fill: #1c2733; }
+
+  /* walking ring: thin slate dashed */
+  .dive__field .lm-ring  { stroke: rgba(40,72,104,.34); }
+  .dive__field .lm-ringt { fill: rgba(28,39,51,.5); }
+
+  /* numbered POIs: white disc, slate ring, slate numeral; active flips to the terracotta accent */
+  .dive__field .lm-pt circle { fill: #ffffff; stroke: rgba(40,72,104,.7); stroke-width: 1.4; }
+  .dive__field .lm-pt text   { fill: #1c2733; }
+  .dive__field .lm-pt:hover circle, .dive__field .lm-pt.is-on circle { fill: var(--lm-accent); stroke: #ffffff; }
+
+  /* the warm moment: the active Dijkstra route + walker + live badge */
+  .dive__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.4; }
+  .dive__field .lm-walker { fill: var(--lm-accent); stroke: #ffffff; }
+  .dive__field .lm-livet  { fill: #ffffff; }
+  .dive__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* ---- the reading rail (ink on slate): eyebrow + ONE stepping beat block ---- */
+  .dive__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(26px, 7vh, 72px);
+    width: min(36ch, 48vw); pointer-events: none;
+  }
+  @media (min-width: 900px) {
+    .dive__rail { left: auto; right: clamp(24px, 4vw, 72px); width: min(31ch, 35vw); }
+  }
+  .dive__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans);
+    letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(28,39,51,.6); margin: 0 0 clamp(.9rem, 2.4vh, 1.6rem);
+  }
+  .dive__coords {
+    display: block; margin-top: .5rem;
+    font: 500 .64rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(28,39,51,.42); text-transform: none;
+  }
+  .dive__story { position: relative; min-height: clamp(150px, 24vh, 220px); }
+  .dive__block {
+    position: absolute; inset: 0; opacity: 0; visibility: hidden;
+    will-change: opacity, transform; transform: translateY(14px);
+  }
+  .dive__no {
+    font: 600 .7rem/1 var(--combo-sans); letter-spacing: .2em;
+    color: var(--lm-accent); font-variant-numeric: tabular-nums;
+  }
+  .dive__place {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(2rem, 4vw, 3.4rem); line-height: .98; letter-spacing: -.03em;
+    color: #1c2733; margin: clamp(.5rem,1.4vh,.9rem) 0 0;
+  }
+  .dive__place em { font-style: italic; color: var(--lm-accent); }
+  .dive__body {
+    margin-top: clamp(.7rem, 1.8vh, 1.2rem);
+    font: 500 .92rem/1.5 var(--combo-sans); letter-spacing: .02em;
+    color: rgba(28,39,51,.78);
+  }
+  .dive__body b { font-weight: 600; color: #1c2733; font-variant-numeric: tabular-nums; }
+
+  /* a slim beat progress, one tick per scale, the active one filled terracotta */
+  .dive__steps {
+    position: absolute; z-index: 8; left: clamp(20px, 4vw, 64px); bottom: clamp(20px, 5vh, 44px);
+    display: flex; gap: 8px; pointer-events: none;
+  }
+  @media (max-width: 899px) { .dive__steps { bottom: auto; top: clamp(18px, 4vh, 40px); } }
+  .dive__tick { width: 30px; height: 2px; background: rgba(28,39,51,.2); }
+  .dive__tick.on { background: var(--lm-accent); }
+
+  /* the standing section label top-left */
+  .dive__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
+    font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(28,39,51,.56);
+  }
+  .combo-pre, .combo-post { background: #dde4ec; color: rgba(28,39,51,.45); }
+
+  @media (prefers-reduced-motion: reduce) { .dive__block { transition: none; } }
 </style>
 </head>
 <body>
   <div class="combo-pre">скрол ↓</div>
 
-  <!-- ============ THE SECTION: zoom-to-the-door canonical shape ============ -->
-  <section id="combo" class="combo-stage ztd dive" data-combo="location--dive-to-the-gate" data-ztd-act="0" data-render-surface>
-    <div class="ztd-wrap">
+  <section id="combo" class="combo-stage" data-combo="location--dive-to-the-gate" data-dive-beat="0">
 
-      <div class="dive__chrome">
-        <span class="sec">/ Локація</span>
-        <span class="geo">49.18° Пн · 28.33° Сх · Агрономічне</span>
-      </div>
+    <!-- the slate daylight field + the side list host. locmap-engine injects the SVG here. -->
+    <div class="dive__field lm" data-lm-stage data-render-surface></div>
 
-      <div class="ztd-frame">
-        <nav class="ztd-rail" data-ztd-rail aria-label="Масштаб карти"></nav>
+    <p class="dive__label">с. Агрономічне · за даними OpenStreetMap</p>
 
-        <div class="ztd-acts">
-
-          <!-- ============ ACT 1 · МІСТО ============
-               Real highway chain from Вінниця into the site. Focal = the site dot at 500,300.
-               The cool regional schematic. -->
-          <div class="ztd-card" data-card="0">
-            <div class="ztd-act" data-act="0">
-              <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Регіон: Вінниця, шосе, село Агрономічне за дванадцять хвилин">
-                <!-- real highway chain (OSM hwy class) diving to the focal site -->
-                <path data-draw class="ztd-line ztd-line--strong" d="M250.6 884.8 L240.6 865.6 L233.3 851.7 L227.8 841 L224.2 834.1 L212.3 811.1 L209.6 805.9 L208 802.4 L206.5 798.4 L205.9 795 L205.8 793.2 L206 789.4 L206.8 786.1 L208.9 778.9 L239.7 680.3 L266.6 600.6 L287.1 541.8 L303.9 493.7 L308.3 482.7 L310.6 479.2 L332.5 449.7 L347.4 434.9 L391 398.8 L423.7 372.2 L441.2 358.3 L443.4 356.5"/>
-                <path data-draw class="ztd-line" d="M443.4 356.5 L454.4 347.7 L465.8 338.5 L476.3 328.3 L487.7 312.8 L497 300.8 L507.3 286.1 L516.2 267.5 L523.6 255.7 L536.2 241.5 L546.8 229.7 L557.4 218.6"/>
-                <path data-draw class="ztd-line" d="M557.4 218.6 L582.8 197.3 L627.6 161.8 L631.9 158.3"/>
-                <!-- Вінниця cluster = the city end of the real highway (geographically SW, bottom-left) -->
-                <circle class="ztd-dot" cx="232" cy="852" r="10"/>
-                <circle class="ztd-dot" cx="268" cy="876" r="6.4"/>
-                <circle class="ztd-dot" cx="206" cy="884" r="5.4"/>
-                <text class="ztd-label--lg" x="232" y="822" text-anchor="middle">Вінниця</text>
-                <!-- the village = one warm dot AT THE FOCAL POINT (the site) -->
-                <circle class="ztd-warm" cx="500" cy="300" r="7"/>
-                <circle data-draw class="ztd-home__ring" cx="500" cy="300" r="17" fill="none"/>
-                <text class="ztd-tag" x="500" y="272" text-anchor="middle">Агрономічне</text>
-                <text class="ztd-label" x="500" y="392" text-anchor="middle">12 хв шосе до Вінниці</text>
-              </svg>
-            </div>
-            <div class="ztd-cap" data-cap="0">
-              <p class="k">/ Масштаб 01 · Місто</p>
-              <h3>За дванадцять хвилин <em>до Вінниці.</em></h3>
-              <p>Село Агрономічне на шосе. Місто близько, а навколо тиша.</p>
-            </div>
-          </div>
-
-          <!-- ============ ACT 2 · РАЙОН ============
-               Real named streets + 6 REAL POIs (district-radiates grammar: threads radiate from
-               the home to each place, minute labels rise). Focal = home at 500,300 (the same site).
-               [data-home-anchor] + [data-poi] coords drive the inline thread builder. -->
-          <div class="ztd-card" data-card="1">
-            <div class="ztd-act" data-act="1">
-              <svg id="act2svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Район: дім і шість щоденних місць пішки">
-                <!-- real named streets near the site -->
-                <path data-draw class="ztd-line" d="M457.1 276 L494.7 267.2 L523.5 257.8 L563.6 247.9 L624.7 242 L673.5 239.8 L689 285.5 L703.9 317"/>
-                <path data-draw class="ztd-line" d="M521.4 88.2 L538.2 155.5 L557.3 225.1 L570.8 273.4 L579.2 309.8 L595.8 348.6 L618.7 401.6 L625.4 411.4 L629.6 415"/>
-                <path data-draw class="ztd-line ztd-line--strong" d="M689 285.5 L625.9 289.3"/>
-                <path data-draw class="ztd-line" d="M598 443.3 L593.4 433.1 L561.4 362.1 L595.8 348.6"/>
-                <path data-draw class="ztd-line" d="M561.4 362.1 L521.4 368 L526.9 382 L550.7 443.5 L564.1 470.4"/>
-                <!-- street label, real -->
-                <text class="ztd-label" x="700" y="334" text-anchor="end">вул. Перемоги</text>
-
-                <!-- threads layer (inline script appends thread paths home -> each POI) -->
-                <g data-dr2-threads></g>
-
-                <!-- home anchor (the site) -->
-                <circle data-home-anchor data-cx="500" data-cy="300" class="ztd-home__ring" cx="500" cy="300" r="15"/>
-                <circle class="ztd-home__core" cx="500" cy="300" r="3.4"/>
-                <text class="ztd-tag" x="500" y="266" text-anchor="middle">Ваш дім</text>
-
-                <!-- 6 REAL POIs (projected OSM coords); data-poi/data-tx/data-ty + minutes verbatim.
-                     coords below are the act-2 projection re-centered to focal 500,300:
-                     dx = projX - 735.4, dy = projY - 288.2, then +500/+300. -->
-                <g data-poi="school"  data-tx="282" data-ty="359" data-min="9">
-                  <circle class="ztd-dot" cx="282" cy="359" r="5.5"/>
-                  <text class="ztd-label" x="282" y="343" text-anchor="middle">Школа · садок</text>
-                </g>
-                <g data-poi="trash"   data-tx="307" data-ty="476" data-min="9">
-                  <circle class="ztd-dot" cx="307" cy="476" r="5.5"/>
-                  <text class="ztd-label" x="307" y="498" text-anchor="middle">Супермаркет «Траш!»</text>
-                </g>
-                <g data-poi="np"      data-tx="277" data-ty="484" data-min="10">
-                  <circle class="ztd-dot" cx="277" cy="484" r="5"/>
-                  <text class="ztd-label" x="216" y="500" text-anchor="middle">Нова Пошта</text>
-                </g>
-                <g data-poi="apteka"  data-tx="219" data-ty="240" data-min="10">
-                  <circle class="ztd-dot" cx="219" cy="240" r="5.5"/>
-                  <text class="ztd-label" x="219" y="224" text-anchor="middle">Аптека «Подорожник»</text>
-                </g>
-                <g data-poi="grosh"   data-tx="194" data-ty="90"  data-min="15">
-                  <circle class="ztd-dot" cx="194" cy="90" r="5"/>
-                  <text class="ztd-label" x="194" y="74" text-anchor="middle">«Грош Експрес»</text>
-                </g>
-                <g data-poi="avrora"  data-tx="73"  data-ty="234" data-min="18">
-                  <circle class="ztd-dot" cx="73" cy="234" r="5"/>
-                  <text class="ztd-label" x="73" y="218" text-anchor="middle">Маркет «Аврора»</text>
-                </g>
-              </svg>
-            </div>
-            <div class="ztd-cap" data-cap="1">
-              <p class="k">/ Масштаб 02 · Район</p>
-              <h3>Шість щоденних місць <em>пішки.</em></h3>
-              <p>Школа і супермаркет за девʼять хвилин. Пошта й аптека за десять. День складається сам.</p>
-            </div>
-          </div>
-
-          <!-- ============ ACT 3 · ДІЛЯНКА ============
-               The plot, warm + intimate. Focal = parcel center at 500,300 (the same site).
-               Frontage = real вулиця Перемоги. Two nearest places tied with leader ticks, real
-               walk-minutes (Школа · садок 9 хв, Супермаркет «Траш!» 9 хв). -->
-          <div class="ztd-card" data-card="2">
-            <div class="ztd-act" data-act="2">
-              <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Ділянка на вулиці Перемоги, ваша адреса">
-                <defs>
-                  <pattern id="diveHatch" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                    <rect width="9" height="9" fill="rgba(181,106,74,.08)"/>
-                    <line x1="0" y1="0" x2="0" y2="9" stroke="rgba(181,106,74,.5)" stroke-width="1.2"/>
-                  </pattern>
-                </defs>
-                <!-- frontage street along the bottom = real вул. Перемоги -->
-                <path data-draw class="ztd-line ztd-line--strong" d="M-20 512 C260 500 520 504 760 492 C880 486 960 490 1020 486"/>
-                <text class="ztd-label" x="940" y="540" text-anchor="end">вул. Перемоги</text>
-                <!-- the parcel, centered on the focal point 500,300 -->
-                <path data-draw class="ztd-parcel" d="M300 150 L700 138 L716 452 L316 468 Z"/>
-                <!-- dimension lines -->
-                <line class="ztd-dim" x1="300" y1="120" x2="700" y2="108"/>
-                <line class="ztd-dim" x1="300" y1="114" x2="300" y2="156"/><line class="ztd-dim" x1="700" y1="102" x2="700" y2="144"/>
-                <text class="ztd-dim__t" x="500" y="100" text-anchor="middle">45 м</text>
-                <line class="ztd-dim" x1="746" y1="138" x2="762" y2="452"/>
-                <line class="ztd-dim" x1="710" y1="138" x2="752" y2="138"/><line class="ztd-dim" x1="726" y1="452" x2="768" y2="452"/>
-                <text class="ztd-dim__t" x="788" y="300" text-anchor="middle" transform="rotate(90 788 300)">50 м</text>
-                <text class="ztd-dim__t" x="508" y="296" text-anchor="middle" style="font-size:26px">22,5 сотки</text>
-                <circle class="ztd-home__core" cx="508" cy="330" r="3.6"/>
-                <text class="ztd-tag" x="508" y="360" text-anchor="middle">Ваша адреса</text>
-                <!-- nearest places tied to the parcel, REAL minutes -->
-                <line class="ztd-tick" x1="300" y1="300" x2="150" y2="300"/>
-                <circle class="ztd-dot" cx="138" cy="300" r="5"/><text class="ztd-label" x="138" y="286" text-anchor="middle">Школа · 9 хв</text>
-                <line class="ztd-tick" x1="716" y1="300" x2="862" y2="300"/>
-                <circle class="ztd-dot" cx="874" cy="300" r="5"/><text class="ztd-label" x="874" y="286" text-anchor="middle">Супермаркет · 9 хв</text>
-              </svg>
-            </div>
-            <div class="ztd-cap" data-cap="2">
-              <p class="k">/ Масштаб 03 · Ділянка</p>
-              <h3>Двадцять дві з половиною сотки. <em>Ваша адреса.</em></h3>
-              <p>Власна ділянка на фасаді вулиці Перемоги. Сорок пʼять на пʼятдесят метрів простору.</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
+    <div class="dive__rail">
+      <p class="dive__eyebrow">Падіння до воріт
+        <span class="dive__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+      <div class="dive__story" data-dive-story></div>
     </div>
+
+    <!-- side list the engine fills (hidden off-screen; powers click-to-select + a11y) -->
+    <div data-lm-list hidden></div>
+
+    <div class="dive__steps" data-dive-steps></div>
   </section>
 
   <div class="combo-post">наступна секція</div>
 
-  <!-- scaffold + adapters, then the cited atoms (canon owner FIRST) -->
+  <!-- scaffold + adapters, then the cited atom (canon engine) -->
   <script src="../_scaffold/combo-scaffold.js"></script>
   <script src="../_scaffold/adapters.js"></script>
-  <script src="../../components/zoom-to-the-door/component.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
 
-  <!-- pull REAL OSM through the symlinked dataset to ASSERT asset-truth at runtime (no invented data) -->
   <script type="module">
     import { OSM } from './osm.js';
-    // expose for the assert below; the SVG coords were projected from THIS dataset at build time.
-    window.__OSM = OSM;
-  </script>
 
-  <script>
-    (function () {
-      SectionHarness.boot();
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // ---- district-radiates grammar for ACT 2: radiate a bowed minute-thread home -> each POI ----
-      // (pin-less: it does NOT create a ScrollTrigger; it only draws SVG into act-2, driven by the
-      //  SAME pin via zoom-to-the-door's draw-on-arrival. We arm threads + reveal them when ACT 2
-      //  becomes active, hide when it leaves — one clean block per act, no overlap.)
-      function buildAct2Threads() {
-        var svg = document.getElementById('act2svg');
-        if (!svg) return;
-        var threads = svg.querySelector('[data-dr2-threads]');
-        var HX = 500, HY = 300;
-        var NS = 'http://www.w3.org/2000/svg';
-        var pois = [].slice.call(svg.querySelectorAll('[data-poi]'));
-        var built = [];
-        pois.forEach(function (g) {
-          var tx = +g.getAttribute('data-tx'), ty = +g.getAttribute('data-ty');
-          var min = g.getAttribute('data-min');
-          var dx = tx - HX, dy = ty - HY, dist = Math.hypot(dx, dy) || 1;
-          var mx = (HX + tx) / 2, my = (HY + ty) / 2;
-          var px = -dy / dist, py = dx / dist, bow = Math.min(34, dist * 0.12);
-          var d = 'M' + HX + ' ' + HY + ' Q' + (mx + px * bow) + ' ' + (my + py * bow) + ' ' + tx + ' ' + ty;
-          var p = document.createElementNS(NS, 'path');
-          p.setAttribute('d', d); p.setAttribute('class', 'dr2-thread');
-          threads.appendChild(p);
-          // minute label near the thread midpoint
-          var t = document.createElementNS(NS, 'text');
-          t.setAttribute('class', 'dr2-min');
-          t.setAttribute('x', (mx + px * (bow + 11)).toFixed(1));
-          t.setAttribute('y', (my + py * (bow + 11) + 4).toFixed(1));
-          t.setAttribute('text-anchor', 'middle');
-          t.innerHTML = min + ' <tspan class="u">хв</tspan>';
-          threads.appendChild(t);
-          if (window.gsap) {
-            var len = p.getTotalLength();
-            window.gsap.set(p, { strokeDasharray: len, strokeDashoffset: len, opacity: 1 });
-            window.gsap.set(t, { opacity: 0 });
-          }
-          built.push({ p: p, t: t });
-        });
-        return built;
+    var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
+
+    // ---- ENGINE job: the dense real map, re-themed cool-slate via CSS (owns_pin=FALSE) ----
+    var map = null, mapSvg = null;
+    SectionHarness.ranOK('locmap-engine', function () {
+      map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6,
+        walkMin: 10,
+        modes: ['loc'],
+        flicker: { rate: 1e9 },    // day map: NO lit windows (rate huge -> none light)
+        route: true,
+        reveal: { start: 'top 75%', once: true },
+        parallax: { green: 0, buildings: 0, pins: 0 },  // the dive owns the camera; no extra parallax
+        ease: 'award'
+      });
+      mapSvg = map && map.svg;
+      window.__diveMap = map;
+    });
+
+    // ---- the THREE scale beats: each a labelled view of the SAME real map at a different scale.
+    //      The dive is a CSS transform (scale + origin on the site) on the engine SVG group.
+    //      Each beat optionally selects a real POI so its real Dijkstra route draws. ----
+    var SITE_ORIGIN = '59.1% 52.3%';   // site 746.3,324.9 inside viewBox "120 -20 1060 660"
+    var BEATS = [
+      { // 0 · РАЙОН · the whole district, no route, the survey in full
+        no: '01 / 03', kicker: '01 / 03 · Масштаб району',
+        place: 'Весь район <em>як на долоні.</em>',
+        body: 'Реальна карта села: вулиці, сотні будівель, ваша ділянка в десятихвилинному колі пішки.',
+        scale: 1.0, select: null
+      },
+      { // 1 · approach · zoom toward the site, the ring + named streets dominant, a real route draws
+        no: '02 / 03', kicker: '02 / 03 · Десять хвилин пішки',
+        place: 'Школа <em>за девʼять хвилин.</em>',
+        body: 'Ближче до ділянки. Маршрут до школи й садка реальними вулицями, <b>9 хв</b> пішки.',
+        scale: 1.95, select: 'school'
+      },
+      { // 2 · ДІЛЯНКА · tight on the parcel: size, frontage street, the two nearest places
+        no: '03 / 03', kicker: '03 / 03 · Ваша ділянка',
+        place: 'Двадцять дві з половиною <em>сотки.</em>',
+        body: 'Ділянка на вул. Перемоги. Супермаркет «Траш!» <b>9 хв</b>, школа <b>9 хв</b> пішки.',
+        scale: 3.3, select: 'trash'
+      }
+    ];
+
+    // build the caption blocks + the beat ticks
+    var storyEl = document.querySelector('[data-dive-story]');
+    var stepsEl = document.querySelector('[data-dive-steps]');
+    var blocks = BEATS.map(function (B, i) {
+      var b = document.createElement('div');
+      b.className = 'dive__block'; b.dataset.idx = i;
+      b.innerHTML =
+        '<div class="dive__no">' + B.kicker + '</div>' +
+        '<h3 class="dive__place">' + B.place + '</h3>' +
+        '<p class="dive__body">' + B.body + '</p>';
+      storyEl.appendChild(b);
+      var t = document.createElement('span'); t.className = 'dive__tick'; stepsEl.appendChild(t);
+      return b;
+    });
+    if (gsap) gsap.set(blocks[0], { opacity: 1, visibility: 'visible', y: 0 });
+    else { blocks[0].style.opacity = '1'; blocks[0].style.visibility = 'visible'; }
+
+    // apply a scale to the engine SVG group (transform/opacity only; origin on the site)
+    function applyScale(k, animate) {
+      if (!mapSvg) return;
+      mapSvg.style.transformOrigin = SITE_ORIGIN;
+      if (!gsap || REDUCED || animate === false) { mapSvg.style.transform = 'scale(' + k + ')'; return; }
+      gsap.to(mapSvg, { scale: k, duration: 1.0, ease: 'air', overwrite: true });
+    }
+
+    // ---- the stepping mechanic: ONE caption legible at a time, never overlapping ----
+    var shown = -1;
+    function showBeat(i) {
+      if (i === shown) return;
+      var prev = shown; shown = i;
+      document.getElementById('combo').setAttribute('data-dive-beat', String(i));
+      stepsEl.querySelectorAll('.dive__tick').forEach(function (t, k) { t.classList.toggle('on', k <= i); });
+
+      // dive the map to this beat's scale + draw this beat's real route
+      applyScale(BEATS[i].scale, true);
+      if (map && map.select) {
+        if (BEATS[i].select) map.select(BEATS[i].select);
+        else map.clearSel && map.clearSel();
       }
 
-      var ztd, threads = [];
-      // OWNER FIRST: zoom-to-the-door owns the pin + the three-act dive (its own pin:true ST).
-      SectionHarness.ranOK('zoom-to-the-door', function () {
-        threads = buildAct2Threads() || [];
-        ztd = window.ZoomToTheDoor.create('#combo', { scrub: 0.7, end: '+=345%' });
-        window.__ztd = ztd;
-      });
-
-      // CITED, pin-less: district-radiates grammar reveals/hides on the act the atom reports.
-      // We observe data-ztd-act (the atom sets it every frame) and play threads ONLY on ACT 2,
-      // so ACT-2's minute story arrives as its own clean block (no overlap with ACT 1 / ACT 3).
-      SectionHarness.ranOK('district-radiates', function () {
-        if (!window.gsap || !threads.length) return;
-        var stageEl = document.getElementById('combo');
-        var on = false;
-        function setThreads(active) {
-          if (active === on) return; on = active;
-          threads.forEach(function (o, i) {
-            if (active) {
-              window.gsap.to(o.p, { strokeDashoffset: 0, duration: 0.7, ease: 'air', delay: i * 0.08, overwrite: true });
-              window.gsap.to(o.t, { opacity: 1, duration: 0.5, ease: 'power2.out', delay: 0.3 + i * 0.08, overwrite: true });
-            } else {
-              var len = o.p.getTotalLength ? o.p.getTotalLength() : 300;
-              window.gsap.set(o.p, { strokeDashoffset: len });
-              window.gsap.set(o.t, { opacity: 0 });
-            }
-          });
-        }
-        var mo = new MutationObserver(function () {
-          setThreads(stageEl.getAttribute('data-ztd-act') === '1');
+      if (!gsap || REDUCED) {
+        blocks.forEach(function (b, k) {
+          b.style.opacity = k === i ? '1' : '0';
+          b.style.visibility = k === i ? 'visible' : 'hidden';
         });
-        mo.observe(stageEl, { attributes: true, attributeFilter: ['data-ztd-act'] });
-        setThreads(stageEl.getAttribute('data-ztd-act') === '1');
-      });
+        return;
+      }
+      if (prev >= 0 && blocks[prev]) {
+        gsap.to(blocks[prev], { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in',
+          onComplete: function () { blocks[prev].style.visibility = 'hidden'; blocks[prev].style.willChange = ''; } });
+      }
+      var nb = blocks[i];
+      nb.style.visibility = 'visible';
+      gsap.fromTo(nb, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'air',
+        delay: prev >= 0 ? 0.18 : 0, onComplete: function () { nb.style.willChange = ''; } });
+    }
 
-      // Declare the contract for the honest probe: ONE pin, owned by zoom-to-the-door.
-      SectionHarness.declare({
-        pinOwner: 'zoom-to-the-door', expectPins: 1,
-        atomsCited: ['zoom-to-the-door', 'district-radiates']
-      });
+    // ---- the ONE section pin (harness owns it). Scroll -> beat index -> dive + route + caption ----
+    var st = SectionHarness.pin('#combo', { start: 'top top', end: '+=' + (BEATS.length * 100) + '%', scrub: 0.6 });
+    if (st) {
+      st.onUpdate = function (p) {
+        var idx = Math.min(BEATS.length - 1, Math.max(0, Math.floor(p * (BEATS.length - 0.001))));
+        showBeat(idx);
+      };
+    } else {
+      // no-pin fallback (reduced-motion / no GSAP): show the full map at beat 0 statically
+      applyScale(BEATS[0].scale, false);
+      showBeat(0);
+    }
 
-      // ---- runtime asset-truth assert: the on-screen POI minutes MUST equal the dataset's ----
-      (function assertTruth() {
-        var tries = 0;
-        (function tick() {
-          var OSM = window.__OSM;
-          if (!OSM) { if (++tries < 40) return setTimeout(tick, 100); return; }
-          var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
-          var ok = [].slice.call(document.querySelectorAll('#act2svg [data-poi]')).every(function (g) {
-            var id = g.getAttribute('data-poi'), min = +g.getAttribute('data-min');
-            return byId[id] && byId[id].walk === min;
-          });
-          if (!ok) console.error('ASSET-TRUTH FAIL: an on-screen POI minute does not match the OSM dataset');
-        })();
-      })();
-    })();
+    SectionHarness.declare({
+      pinOwner: 'harness', expectPins: 1,
+      atomsCited: ['locmap-engine']
+    });
   </script>
 </body>
 </html>
