@@ -214,7 +214,16 @@
         gsap && gsap.set(route, { strokeDasharray: len, strokeDashoffset: 0 });
         return;
       }
+      // ASSET-TRUTH: the badge always reads the HONEST destination minutes (+ metres), from the
+      // first frame and at every frame. The walker DOT still travels the route for kinetic interest,
+      // but the NUMBER never counts through fake intermediates. (Under a scrubbed pin the playhead
+      // can park mid-walk; a count-up like Math.round(o.t*walk) would freeze on a minute that no POI
+      // has — e.g. "6 хв" when the real value is 18 хв — and contradict the headline. Caught by the
+      // award jury across the whole map-style lane + the ideal; fixed once here in the canon.)
+      var honest = (p.walk != null ? p.walk + ' хв' : '') + (p.m != null ? ' · ' + p.m + ' м' : '');
       var o = { t: 0 }, D = Math.min(2.2, 0.8 + len / 600);
+      live.textContent = honest;
+      liveBg.setAttribute('width', 110);
       gsap.set(route, { strokeDasharray: len, strokeDashoffset: len });
       gsap.to(route, { strokeDashoffset: 0, duration: D, ease: 'power1.inOut' });
       gsap.to(o, { t: 1, duration: D, ease: 'power1.inOut',
@@ -223,9 +232,7 @@
           walker.setAttribute('cx', pt.x); walker.setAttribute('cy', pt.y);
           liveBg.setAttribute('x', pt.x + 10); liveBg.setAttribute('y', pt.y - 12);
           live.setAttribute('x', pt.x + 18); live.setAttribute('y', pt.y + 4);
-          live.textContent = Math.max(1, Math.round(o.t * (p.walk || 1))) + ' хв';
-        },
-        onComplete: function () { live.textContent = (p.walk != null ? p.walk + ' хв · ' : '') + (p.m != null ? p.m + ' м' : ''); liveBg.setAttribute('width', 110); }
+        }
       });
     }
 
