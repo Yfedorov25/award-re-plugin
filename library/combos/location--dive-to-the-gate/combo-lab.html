@@ -76,6 +76,21 @@
   #combo[data-dive-beat="1"] .dive__field { filter: sepia(.06) saturate(1.04); }
   #combo[data-dive-beat="2"] .dive__field { filter: sepia(.13) saturate(1.08); }
 
+  /* DEEP PARCEL BEAT: at the final (~9.5x) zoom the parcel + its neighbours fill the frame, so
+     the hairline outlines must read bolder relative to the now-large footprints. Bump ONLY the
+     parcel + building strokes under beat 2 so the plot stays crisp (stroke-width only, no layout). */
+  #combo[data-dive-beat="2"] .dive__field .lm-parcel { stroke-width: 3.2; }
+  #combo[data-dive-beat="2"] .dive__field .lm-bld    { stroke-width: 0.9; }
+  #combo[data-dive-beat="2"] .dive__field .lm-bld--lit { stroke-width: 0.9; }
+  /* The SVG text labels (site tag, street names, ring caption) scale WITH the 9.5x group, so at the
+     deep parcel beat they blow up oversized and crowd the chrome. They have already done their job by
+     the district beat (where "named streets dominant" lives), so fade them out as the dive lands on the
+     parcel; the orange plot + the caption carry the meaning there. opacity only (GPU), smooth. */
+  .dive__field .lm-sitetag, .dive__field .lm-rdname, .dive__field .lm-ringt { transition: opacity .5s cubic-bezier(.22,1,.36,1); }
+  #combo[data-dive-beat="2"] .dive__field .lm-sitetag,
+  #combo[data-dive-beat="2"] .dive__field .lm-rdname,
+  #combo[data-dive-beat="2"] .dive__field .lm-ringt { opacity: 0; }
+
   /* ---- COOL-SLATE MAP TREATMENT: redraw the engine's SVG classes for a daylight survey ---- */
   /* green demoted to a faint cool wash; water a touch bluer */
   .dive__field .lm-gw--green { fill: rgba(74,110,86,.08); }
@@ -94,7 +109,9 @@
   .dive__field .lm-rd--mid   { stroke: rgba(28,39,51,.42); }
   .dive__field .lm-rd--minor { stroke: rgba(28,39,51,.26); }
   .dive__field .lm-rd--faint { stroke: rgba(28,39,51,.12); }
-  .dive__field .lm-rdname { fill: rgba(28,39,51,.5); }
+  /* street labels: centred on their (x,y) anchor so the вул. Перемоги frontage label sits on the
+     road; a touch heavier so it survives the slate field at parcel zoom (fill/anchor only). */
+  .dive__field .lm-rdname { fill: rgba(28,39,51,.62); text-anchor: middle; font-weight: 600; }
 
   /* parcel: terracotta hatch + stroke; tag in ink. (engine hatch uses brick rgba, override it) */
   .dive__field #lmHatch rect { fill: rgba(194,105,63,.10); }
@@ -222,7 +239,18 @@
     var map = null, mapSvg = null;
     SectionHarness.ranOK('locmap-engine', function () {
       map = window.LocMap.create('#combo', {
-        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        // REAL street labels (engine renders data.names as .lm-rdname). The dataset carries per-road
+        // `name` strings but no top-level `names` array, so at parcel zoom the frontage read as an
+        // unlabelled footprint grid. These are REAL OSM names with REAL geometry: вул. Перемоги is
+        // the parcel frontage (main road just W of the site, segment 702,322 -> 643,326, ~flat),
+        // вул. Грушевського a real cross street (diagonal, ~67deg). NOTHING invented.
+        data: Object.assign({}, OSM, {
+          names: [
+            { n: 'вул. Перемоги',     x: 688, y: 317, a: -3.5 },
+            { n: 'вул. Грушевського', x: 600, y: 340, a: 67 }
+          ],
+          site: Object.assign({}, OSM.site, { tag: 'Тут будується' })
+        }),
         mScale: 2.6,
         walkMin: 10,
         modes: ['loc'],
@@ -257,7 +285,7 @@
         no: '03 / 03', kicker: '03 / 03 · Ваша ділянка',
         place: 'Двадцять дві з половиною <em>сотки.</em>',
         body: 'Ділянка на вул. Перемоги. Супермаркет «Траш!» <b>9 хв</b>, школа <b>9 хв</b> пішки.',
-        scale: 3.3, select: 'trash'
+        scale: 9.5, select: 'trash'
       }
     ];
 
@@ -275,8 +303,10 @@
       var t = document.createElement('span'); t.className = 'dive__tick'; stepsEl.appendChild(t);
       return b;
     });
-    if (gsap) gsap.set(blocks[0], { opacity: 1, visibility: 'visible', y: 0 });
-    else { blocks[0].style.opacity = '1'; blocks[0].style.visibility = 'visible'; }
+    // init: ALL blocks hidden. The deterministic state machine (showBeat) owns visibility from
+    // frame 1, so block 0 can never be left stuck at opacity:1 on a jumped/flicked scroll.
+    if (gsap) gsap.set(blocks, { opacity: 0, visibility: 'hidden', y: 14 });
+    else blocks.forEach(function (b) { b.style.opacity = '0'; b.style.visibility = 'hidden'; });
 
     // apply a scale to the engine SVG group (transform/opacity only; origin on the site)
     function applyScale(k, animate) {
@@ -287,10 +317,25 @@
     }
 
     // ---- the stepping mechanic: ONE caption legible at a time, never overlapping ----
+    // The active caption is a DETERMINISTIC function of the committed beat index: on EVERY
+    // beat change we HARD-SET every non-active block to opacity:0 + visibility:hidden (gsap.set,
+    // no delay, no running tween) BEFORE revealing the incoming one, and the incoming reveal has
+    // NO delay. So on a JUMPED/flicked/anchored scroll (where prev may be -1 and block 0 would
+    // otherwise stay stuck at opacity:1) only ONE block is ever visible. No two ramps overlap.
     var shown = -1;
+    function commitBlocks(i) {
+      // belt-and-braces: drive EVERY block's visibility from the committed index, not from "prev".
+      // Kill any in-flight reveal tween on a block we are hiding so a fast flick cannot leave a
+      // stray opacity ramp running on a hidden block (the only race that could re-show it).
+      blocks.forEach(function (b, k) {
+        if (k === i) return;
+        if (gsap) { gsap.killTweensOf(b); gsap.set(b, { opacity: 0, visibility: 'hidden', willChange: '' }); }
+        else { b.style.opacity = '0'; b.style.visibility = 'hidden'; }
+      });
+    }
     function showBeat(i) {
       if (i === shown) return;
-      var prev = shown; shown = i;
+      shown = i;
       document.getElementById('combo').setAttribute('data-dive-beat', String(i));
       stepsEl.querySelectorAll('.dive__tick').forEach(function (t, k) { t.classList.toggle('on', k <= i); });
 
@@ -301,21 +346,18 @@
         else map.clearSel && map.clearSel();
       }
 
+      // FIRST hard-hide all non-active blocks (kills any "prev"/init block left at opacity:1)
+      commitBlocks(i);
+
+      var nb = blocks[i];
       if (!gsap || REDUCED) {
-        blocks.forEach(function (b, k) {
-          b.style.opacity = k === i ? '1' : '0';
-          b.style.visibility = k === i ? 'visible' : 'hidden';
-        });
+        nb.style.opacity = '1'; nb.style.visibility = 'visible'; nb.style.transform = 'translateY(0)';
         return;
       }
-      if (prev >= 0 && blocks[prev]) {
-        gsap.to(blocks[prev], { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in',
-          onComplete: function () { blocks[prev].style.visibility = 'hidden'; blocks[prev].style.willChange = ''; } });
-      }
-      var nb = blocks[i];
+      // reveal the incoming with NO delay, so it can never run concurrently with an outgoing fade
       nb.style.visibility = 'visible';
       gsap.fromTo(nb, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'air',
-        delay: prev >= 0 ? 0.18 : 0, onComplete: function () { nb.style.willChange = ''; } });
+        overwrite: true, onComplete: function () { nb.style.willChange = ''; } });
     }
 
     // ---- the ONE section pin (harness owns it). Scroll -> beat index -> dive + route + caption ----
@@ -325,6 +367,7 @@
         var idx = Math.min(BEATS.length - 1, Math.max(0, Math.floor(p * (BEATS.length - 0.001))));
         showBeat(idx);
       };
+      showBeat(0);   // commit the first caption immediately (before the first scroll tick)
     } else {
       // no-pin fallback (reduced-motion / no GSAP): show the full map at beat 0 statically
       applyScale(BEATS[0].scale, false);
