@@ -218,7 +218,7 @@
       // first frame and at every frame. The walker DOT still travels the route for kinetic interest,
       // but the NUMBER never counts through fake intermediates. (Under a scrubbed pin the playhead
       // can park mid-walk; a count-up like Math.round(o.t*walk) would freeze on a minute that no POI
-      // has — e.g. "6 хв" when the real value is 18 хв — and contradict the headline. Caught by the
+      // has (e.g. "6 хв" when the real value is 18 хв) and contradict the headline. Caught by the
       // award jury across the whole map-style lane + the ideal; fixed once here in the canon.)
       var honest = (p.walk != null ? p.walk + ' хв' : '') + (p.m != null ? ' · ' + p.m + ' м' : '');
       var o = { t: 0 }, D = Math.min(2.2, 0.8 + len / 600);
