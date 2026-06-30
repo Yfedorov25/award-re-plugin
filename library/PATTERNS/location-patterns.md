@@ -54,9 +54,36 @@
 >    the building fill/stroke (`.lm-bld`, `.lm-bld--lit`), the parcel/hatch, the ring, the POI discs,
 >    and the route/walker/live badge to the new treatment. Force a flat field bg under the SVG.
 > 4. Set `flicker.rate` huge to kill lit windows (daylight styles), or keep a low rate for dusk/night.
-> 5. Keep the harness pin + the 6-POI stepping story (one block legible at a time) unchanged.
+> 5. Keep the CONTROLLED-CLICK model (pin-less, reveal on scroll-in, visible `data-lm-list`, click a
+>    row/pin to draw the route) unchanged. NO pin, NO scroll-stepping, NO scale-dive.
 > 6. The DISTINCTNESS test is now: "is the MAP-STYLE unmistakable in one screenshot AND is the
 >    realism identical to the surveyed-route-map ideal?" — distinct by TREATMENT, not by medium.
+>
+> ## A1. The COMPOSITION layer (how the smarts content is LAID OUT)
+>
+> On top of the map STYLE sits the COMPOSITION = how the smarts Агрономічне content is arranged.
+> The reference (the original smarts location) pairs a dense map with a reading panel; its content
+> is FIXED and must stay VISIBLE: the dense real map (hero) + a VISIBLE list of the 6 POIs WITH their
+> walk-times shown immediately + the property parcel with a «22,5 сотки» dimension line + a «≈10 хв»
+> ring + a highway sign-guide + a staggered birth + controlled-click. A composition RE-PLANS that
+> arrangement; it must NEVER hide the POI list/times and NEVER cover the map with big typography.
+>
+> **Composition LAW (F-20, owner-mandated):** the map is the HERO and the orientation list + times are
+> always VISIBLE. Present the smarts content (frame it, place it, make the place the interface); never
+> COVER it with a large headline, never HIDE the list behind a hover/click. Big display text belongs
+> beside/below the map or not at all; chrome over a map = tiny corner labels only. The test: in a
+> screenshot, is the map the first/biggest thing read AND is the POI list with times visible at once?
+>
+> Live compositions (each keeps the full smarts content, a different layout + style):
+> - **Panel-left** — `panel-left-survey` (dusk). Reading panel LEFT (title + visible POI list + sign), map RIGHT + «22,5 сотки» dim line. The faithful/complete one.
+> - **Corner-card** — `corner-card-night` (night-neon). Full-bleed map hero + a compact glass CARD in a corner holding the visible list + sign.
+> - **Spread-metric** — `spread-metric` (mono). 60/40, map LEFT, panel RIGHT leading with a big «22,5 сотки» metric, the visible list below.
+> - REJECTED: `portrait-flank` (a centered narrow portrait map with POI columns flanking it) — the narrow map went small/cramped and the flanks left too much side emptiness, so the map lost dominance. Lesson: keep the map LARGE + dense; do not shrink it to a centered portrait.
+>
+> Adding a composition: copy `panel-left-survey/combo-lab.html` (the template carries the engine call,
+> the authored «22,5 сотки» dimension-line builder, the staggered birth, and the pin-less click model);
+> change ONLY the LAYOUT (CSS grid/positions) + the map-style palette + the copy. Keep every smarts
+> content block VISIBLE.
 >
 > ---
 >
