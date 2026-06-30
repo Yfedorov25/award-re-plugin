@@ -6368,24 +6368,24 @@
     "_path": "library/combos/location--blueprint-survey/",
     "_variantsResolved": []
   },
-  "location--framed-plate": {
-    "id": "location--framed-plate",
-    "name": "Карта-експонат",
+  "location--corner-card-night": {
+    "id": "location--corner-card-night",
+    "name": "Локація (нічна карта, кутова картка)",
     "level": 2,
     "kind": "section-variant",
     "section": "location",
     "status": "candidate",
-    "map_style": "HERITAGE-SEPIA",
-    "composition": "FRAMED EXHIBIT (the map as a framed plate on a warm mat + a surveyed corner frame; a caption strip below)",
+    "map_style": "NIGHT-NEON",
+    "composition": "SMARTS proportion re-planned: a FULL-BLEED night map is the hero, and ALL the smarts content lives in one compact translucent GLASS card pinned in the bottom-left corner (eyebrow + short title + the VISIBLE 6-POI list with times + a highway sign-guide + legal); the map carries the parcel + a «22,5 сотки» dimension line + a «≈10 хв» walking ring",
     "webgl": false,
     "ease": "air",
     "meaning": {
-      "what": "A NEW award COMPOSITION on the heritage-sepia map style: the real dense sepia map of с. Агрономічне is presented as a framed PLATE (a thin inset border + soft shadow + a surveyed corner frame: coords, scale bar, north arrow, sheet labels) on a darker warm MAT with air around it, like an expensive map in a frame on a wall. NO big text over the map; the map is the hero and the frame makes it read costly. A thin caption strip of the 6 real POIs sits BELOW the plate. CONTROLLED-CLICK: reveals on scroll-in, then the USER clicks/hovers a POI (in the strip or on the map) and the real Dijkstra route draws + honest minute badge. Everything is a layout frame around the map (no transform on the map), so nothing floats.",
-      "when": "When the location beat should read as a curated, gallery-grade artifact: a surveyed map presented like a framed exhibit, heritage/villa register. The map stays the subject; distinct from the plain variants by the framed-plate presentation, and from the inspector composition by keeping a visible caption strip and a surveyed corner frame.",
-      "lands": "A warm dark wall with a single framed map on it: the sepia town under a thin border with corner survey ticks, coordinates and a scale bar, and below it a quiet line of the nearby places. Click one and the rust route draws along the real streets to the lit parcel. It reads like an expensive printed plate someone hung, not a web map."
+      "what": "A NEW composition that keeps the SMARTS Агрономічне reference's content + proportion (the reference this whole section was built from) but RE-PLANS the layout: the real dense NIGHT map is FULL-BLEED (it fills the stage, it is the hero), and ALL the smarts content sits in one compact translucent GLASS card pinned in the bottom-left CORNER, VISIBLE immediately, not hidden behind a click: the card holds the eyebrow + a short serif title that rises line by line + a hint + the VISIBLE list of the 6 real POIs with their walk-times + a highway sign-guide + a legal line. The map carries the property parcel with a «22,5 сотки» dimension line and a «≈10 хв» walking ring (how much space it takes, the metres written on the plate), exactly the smarts geometry. The card is a translucent dark panel with a hairline border (an rgba background, NO backdrop-filter). NIGHT-NEON treatment: a near-black field, the road grid GLOWING by rank (cyan highway, amber artery via filter drop-shadow) over a very dark casing, a low rate of warm-lit windows so the town reads as alive after dark, a hot-amber active route + parcel + walker. Elements appear ONE BY ONE on scroll-in (the staggered birth). CONTROLLED-CLICK: the visitor clicks a list row or a map pin and the real Dijkstra route draws + an honest minute badge. Same content as the smarts reference, a fresh layout; orientation points + times are visible immediately, not hidden.",
+      "when": "When the location beat wants the MAP to dominate as the hero (full-bleed, the town lit at night) while still carrying the FULL smarts content (the readable list of where-and-how-many-minutes + the dimensioned plot + the highway guide) in a single self-contained glass card over one corner, instead of a full-height reading rail. The map-forward, card-condensed member of the new composition set; distinct from panel-left and portrait-flank by being a corner card over a full-bleed night map.",
+      "lands": "A near-black aerial of the town fills the whole frame: streets glowing in a believable hierarchy, a scatter of warm-lit windows, the property marked with a luminous hatched parcel and its 22,5 сотки dimension inside a glowing ten-minute walking ring. Over the bottom-left corner a compact translucent card names the place, lists every nearby point with its minutes, and shows the highway times. Click a place (in the card or on the map) and a hot-amber route draws itself along the real streets with a glowing dot and an honest minute badge. The map is the hero; the card keeps the smarts plate complete and legible in one corner."
     },
     "source": {
-      "grammar": "locmap-engine (the heritage-sepia re-theme, identical realism to location--heritage-sepia) presented as a framed plate: a CSS mat + inset border + shadow around the map, the coords-corner-frame atom injecting the surveyed corners (coords, scale bar, north, sheet labels), and a caption strip below carrying the eyebrow + title + the engine's clickable [data-lm-list] rows rendered as a thin horizontal strip. CONTROLLED-CLICK (the smarts model): pin-less, the map reveals on scroll-in, the visitor clicks/hovers the 6 real POIs to draw routes. The framed-exhibit composition is the variant's own contribution.",
+      "grammar": "locmap-engine (the map CANON, identical realism + routes to the surveyed-route-map ideal) re-themed entirely via CSS into a NIGHT-NEON treatment (near-black field, roads glowing by rank via filter drop-shadow over a very dark casing, warm-lit windows ON at flicker.rate 9, a hot-amber accent for the active route + parcel + walker), in a FULL-BLEED layout (the map fills the stage) with the smarts content condensed into one translucent GLASS card pinned bottom-left: eyebrow, a line-rising serif title, a hint, the engine's clickable [data-lm-list], a loc__sign highway guide, legal. The map carries the parcel + an authored «22,5 сотки» dimension line (the smarts loc-dim) + a corner stamp. Staggered birth on scroll-in. CONTROLLED-CLICK (the smarts model): pin-less, click a row/pin to draw routes. Engine code untouched; the card is rgba, NO backdrop-filter.",
       "recording": null,
       "registry_ref": [
         "locmap-canon",
@@ -6395,11 +6395,7 @@
     "uses": [
       {
         "atom": "locmap-engine",
-        "job": "owns_pin FALSE; bakes the dense real OSM sepia map into [data-lm-stage] inside the framed plate, fills the caption strip [data-lm-list] with clickable .lm-row rows; on click/hover draws the real Dijkstra route + honest live minute badge. Re-themed sepia in the variant skin; reveal on scroll-in; no pin."
-      },
-      {
-        "atom": "coords-corner-frame",
-        "job": "owns_pin FALSE; injects the surveyed corner frame onto the plate (four tick corners that draw, a 49.18N 28.33E coord readout, a 0...500 м scale bar, a north arrow, sheet labels), tinted ink-on-paper. Pure overlay; reveals with the map."
+        "job": "owns_pin FALSE; bakes the dense real OSM night map into [data-lm-stage] (full-bleed), fills the glass card's [data-lm-list] with clickable .lm-row rows (name + walk-minutes) synced two-way with the numbered map pins, draws the real Dijkstra route + honest 'N хв · M м' badge on click/hover. flicker.rate 9 so a low rate of windows glow warm (the town lit at night); reveal once on scroll-in. The variant adds the authored «22,5 сотки» dimension line over the real parcel + the staggered card birth; re-themed to near-black neon purely by the variant CSS. No pin."
       }
     ],
     "pin": {
@@ -6413,20 +6409,21 @@
       "R_no_webgl"
     ],
     "acceptance": [
-      "COMPOSITION is unmistakably a FRAMED EXHIBIT in one screenshot: the sepia map sits as a bordered plate on a darker warm mat with air around it + a surveyed corner frame; NO big text over the map; a thin caption strip of POIs sits below. Realism identical to location--heritage-sepia. Verified by screenshot.",
-      "asset-truth: streets/footprints/green + 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв) from osm.js. Coords 49.18N 28.33E. NOTHING invented.",
-      "CONTROLLED-INTERACTIVE, PIN-LESS: 0 pins, NO scroll-stepping, NO scale-dive. Map reveals once, then the USER clicks/hovers a POI (caption strip row or map pin) to draw its route + honest badge. pins === 0.",
-      "the caption strip below the plate shows the engine's >=6 clickable .lm-row rows (number + name + minutes), two-way synced with the map pins; clicking one draws that POI's route.",
-      "the framed plate carries the coords-corner-frame surveyed corners (coords + scale bar + north + sheet labels); the map is NOT transformed (the frame is layout/CSS only), so it never floats.",
-      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO scale-from-origin on the map.",
-      "decode-guard: [data-render-surface] painted (the aged paper) at non-zero size from load; zero raster imagery. reduced-motion -> static framed map + strip, __LAB_OK__ true; mobile 390px -> the caption strip stacks, no overflow, __LAB_OK__ true. Zero real console errors.",
+      "COMPOSITION keeps the smarts content + proportion, re-planned: a FULL-BLEED night map (the hero) with the parcel + a «22,5 сотки» dimension line + a «≈10 хв» ring, and ALL the smarts content in one compact translucent GLASS card pinned bottom-left: the visible 6-POI list (each with its real walk-minutes) + a highway sign-guide. Orientation points + times are visible immediately IN THE CARD, NOT hidden behind a click. Verified by screenshot.",
+      "asset-truth: streets/footprints/green + 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв) from osm.js; real facts вул. Перемоги, 22,5 сотки, Гніванське шосе, 5 хвилин від Вінниці. Coords 49.18N 28.33E. NOTHING invented.",
+      "CONTROLLED-INTERACTIVE, PIN-LESS: 0 pins, NO scroll-stepping, NO scale-dive. Map reveals once with a staggered card birth, then the USER clicks/hovers a POI (list row or map pin) to draw its route + honest badge. pins === 0.",
+      "the [data-lm-list] in the GLASS card is filled with >=6 clickable .lm-row rows, two-way synced with the map pins; the sign-guide shows the real highway times.",
+      "the «22,5 сотки» dimension line is authored over the REAL parcel (the smarts loc-dim geometry); the map is not transformed, so it never floats.",
+      "the card is a translucent dark panel with a hairline border (rgba background), NO backdrop-filter; MAP-STYLE is unmistakably NIGHT-NEON (near-black field, roads glowing by rank, warm-lit windows, luminous parcel + ring).",
+      "elements appear ONE BY ONE on scroll-in (title lines rise, card blocks fade in staggered) like the smarts birth.",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO scale-from-origin. decode-guard: [data-render-surface] painted from load. reduced-motion -> static, __LAB_OK__ true; mobile 390px -> the card spans the bottom edge, no overflow, __LAB_OK__ true. Zero real console errors.",
       "copy Ukrainian, Fedoriv voice; ZERO em-dash/en-dash anywhere."
     ],
     "gate": {
-      "probe": "Serve library/ and open combos/location--framed-plate/combo-lab.html. __LAB_OK__ true, pin count === 0. Scroll in: the sepia map reveals inside a framed plate on a warm mat with a surveyed corner frame; below it a thin POI caption strip. Click a strip row/pin: the rust route draws with an honest badge. Confirm the framed-exhibit composition (map as hero, no big text over it) by screenshot + only real OSM data."
+      "probe": "Serve library/ and open combos/location--corner-card-night/combo-lab.html. __LAB_OK__ true, pin count === 0. Scroll in: the full-bleed night map reveals gate by gate (glowing roads, lit windows, the luminous parcel with «22,5 сотки» + the ring) and the bottom-left glass card births (title lines rise, blocks fade) showing the visible POI list with times + the highway guide. Click a row/pin: a hot-amber route draws with an honest badge. Confirm the smarts content is all visible in the card over a full-bleed night map + only real OSM data."
     },
     "note": "|",
-    "_path": "library/combos/location--framed-plate/",
+    "_path": "library/combos/location--corner-card-night/",
     "_variantsResolved": []
   },
   "location--heritage-sepia": {
@@ -6544,63 +6541,6 @@
     "_path": "library/combos/location--hi-contrast-mono/",
     "_variantsResolved": []
   },
-  "location--inspector-card": {
-    "id": "location--inspector-card",
-    "name": "Карта-інспектор",
-    "level": 2,
-    "kind": "section-variant",
-    "section": "location",
-    "status": "candidate",
-    "map_style": "NIGHT-NEON",
-    "composition": "INSPECTOR (full-bleed map hero, no big text, no list; hover/click a pin -> a floating detail card + route)",
-    "webgl": false,
-    "ease": "air",
-    "meaning": {
-      "what": "A NEW award COMPOSITION on the night-neon map style where the MAP IS THE HERO: the real dense night map of с. Агрономічне fills the whole frame with NO big text over it and NO side list. CONTROLLED-CLICK: the map reveals on scroll-in, then the USER hovers/clicks any of the 6 real POI pins and a small elegant DETAIL CARD floats up beside that pin (name, walk/drive minutes, metres from the plot) while the real Dijkstra route draws + an honest minute badge. Click empty map clears. Pure explore-the-map; the only chrome is a tiny corner label + a one-line hint. Nothing covers the map; the card is a DOM node projected at the pin via the SVG CTM (transform/opacity only), so nothing floats/swims.",
-      "when": "When the location beat should keep the MAP fully visible as the subject and invite exploration, rather than framing it with typography. The cleanest map-first format, distinct from the plain variants by its hover-to-inspect card interaction; distinct from the other new compositions (framed plate, split) by being uncovered full-bleed.",
-      "lands": "A night map fills the screen and holds still; the visitor moves across it and a quiet card lifts beside each place with its real minutes and metres, the amber route drawing along the real streets to the lit parcel. It reads like inspecting a real surveyed map, not reading a poster: the place itself is the interface."
-    },
-    "source": {
-      "grammar": "locmap-engine (the night-neon re-theme, identical realism to location--night-neon) with a DOM detail card driven by the engine's onSelect hook + a hover handler on .lm-pt: the active POI's viewBox coord is projected to screen px via svg.getScreenCTM() and the card is positioned beside the pin (transform only). CONTROLLED-CLICK (the smarts model): pin-less, the map reveals on scroll-in, the visitor hovers/clicks the 6 real POIs to preview/draw routes; the offscreen [data-lm-list] sink satisfies the engine's row creation while the composition shows NO visible list (the pins are the interface). The composition is the variant's own contribution.",
-      "recording": null,
-      "registry_ref": [
-        "locmap-canon",
-        "SMARTS-location-etalon"
-      ]
-    },
-    "uses": [
-      {
-        "atom": "locmap-engine",
-        "job": "owns_pin FALSE; bakes the dense real OSM night map into [data-lm-stage]; on click/hover of a POI pin fires onSelect + draws the real Dijkstra route + honest live minute badge. Re-themed night-neon in the variant skin; the variant adds the floating detail card positioned at the pin via the SVG CTM. reveal on scroll-in; no pin, no list shown."
-      }
-    ],
-    "pin": {
-      "owner": "none",
-      "count": 0
-    },
-    "pin_killed": [],
-    "gated_by": [
-      "R_pin_budget",
-      "R_perf_limits",
-      "R_no_webgl"
-    ],
-    "acceptance": [
-      "COMPOSITION is unmistakably INSPECTOR in one screenshot: the night map fills the frame with NO big text over it and NO visible side list; the only chrome is a tiny corner label + hint. Realism identical to location--night-neon. Verified by screenshot.",
-      "asset-truth: streets/footprints/green + 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв) from osm.js. Coords 49.18N 28.33E. NOTHING invented; the card shows the real walk/drive minutes + metres.",
-      "CONTROLLED-INTERACTIVE, PIN-LESS: 0 pins, NO scroll-stepping, NO scale-dive. Map reveals once, then hover/click a POI pin -> a detail card floats beside it + the route draws + honest badge; click empty map clears. pins === 0.",
-      "the floating card is positioned by the SVG CTM at the active pin (transform/opacity only) and shows the real label + walk хв + drive хв + metres; it flips to the left near the right edge and clamps vertically so it never leaves the frame.",
-      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO scale-from-origin on the map. The map never moves after the reveal (no float).",
-      "decode-guard: [data-render-surface] painted (the night field) at non-zero size from load; zero raster imagery.",
-      "reduced-motion -> static map, card appears without transition, __LAB_OK__ true; mobile 390px -> no overflow, __LAB_OK__ true. Zero real console errors.",
-      "copy Ukrainian, Fedoriv voice; ZERO em-dash/en-dash anywhere."
-    ],
-    "gate": {
-      "probe": "Serve library/ and open combos/location--inspector-card/combo-lab.html. __LAB_OK__ true, pin count === 0, 6 .lm-pt pins, NO visible list, no big text over the map. Hover/click a pin: a detail card floats beside it with the real label + minutes + metres, and the amber route draws with an honest badge. Click empty map clears. Confirm the INSPECTOR composition (map fully visible, the place is the interface) by screenshot + only real OSM data."
-    },
-    "note": "|",
-    "_path": "library/combos/location--inspector-card/",
-    "_variantsResolved": []
-  },
   "location--night-neon": {
     "id": "location--night-neon",
     "name": "Район уночі",
@@ -6658,6 +6598,177 @@
     },
     "note": "|",
     "_path": "library/combos/location--night-neon/",
+    "_variantsResolved": []
+  },
+  "location--panel-left-survey": {
+    "id": "location--panel-left-survey",
+    "name": "Локація (панель зліва)",
+    "level": 2,
+    "kind": "section-variant",
+    "section": "location",
+    "status": "candidate",
+    "map_style": "DARK DUSK",
+    "composition": "SMARTS proportion re-planned: reading panel LEFT (title + visible POI list with times + highway sign + legal), dense dusk map RIGHT with the parcel + «22,5 сотки» dimension line",
+    "webgl": false,
+    "ease": "air",
+    "meaning": {
+      "what": "A NEW composition that keeps the SMARTS Агрономічне reference's content + proportion (the reference this whole section was built from) but RE-PLANS the layout: a reading PANEL on the LEFT (eyebrow + a serif title that rises line by line + intro + the VISIBLE list of the 6 real POIs with their walk-times + a highway sign-guide + a legal line) and the real dense DUSK map on the RIGHT. The map carries the property parcel with a «22,5 сотки» dimension line and a «≈10 хв» walking ring (how much space it takes, the metres written on the plate), exactly the smarts geometry. Elements appear ONE BY ONE on scroll-in (the staggered birth). CONTROLLED-CLICK: the visitor clicks a list row or a map pin and the real Dijkstra route draws + an honest minute badge. Same content as the smarts reference, a fresh layout; orientation points + times are visible immediately, not hidden.",
+      "when": "When the location beat should carry the FULL smarts content (map + a readable list of where-and-how-many-minutes + the dimensioned plot + the highway guide) but in a fresh layout. The faithful, information-complete member of the new composition set; distinct from the others by putting the reading panel on the left.",
+      "lands": "A reading panel on the left names the place, lists every nearby point with its minutes and the highway times, and beside it the dusk town fills the right with the lit parcel and its 22,5 сотки dimension. Click a place and the route draws along the real streets. It reads like the smarts plate re-hung, complete and legible."
+    },
+    "source": {
+      "grammar": "locmap-engine (the dark-dusk re-theme, identical realism to the surveyed-route-map ideal) in the SMARTS location proportion inverted (panel left / map right): the panel carries the smarts content blocks (eyebrow, line-rising title, intro, the engine's clickable [data-lm-list], a loc__sign highway guide, legal), the map carries the parcel + an authored «22,5 сотки» dimension line (the smarts loc-dim) + a corner stamp. Staggered birth on scroll-in. CONTROLLED-CLICK (the smarts model): pin-less, click a row/pin to draw routes.",
+      "recording": null,
+      "registry_ref": [
+        "locmap-canon",
+        "SMARTS-location-etalon"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "locmap-engine",
+        "job": "owns_pin FALSE; bakes the dense real OSM dusk map into [data-lm-stage], fills the panel's [data-lm-list] with clickable .lm-row rows (name + walk-minutes), draws the real Dijkstra route + honest badge on click/hover. The variant adds the authored «22,5 сотки» dimension line over the real parcel + the staggered panel birth. reveal on scroll-in; no pin."
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "COMPOSITION keeps the smarts content + proportion, re-planned: a LEFT panel with the visible 6-POI list (each with its real walk-minutes) + a highway sign-guide, and the dense dusk map on the RIGHT with the parcel + a «22,5 сотки» dimension line + a «≈10 хв» ring. Orientation points + times are visible immediately, NOT hidden. Verified by screenshot.",
+      "asset-truth: streets/footprints/green + 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв) from osm.js; real facts вул. Перемоги, 22,5 сотки, Гніванське шосе, 5 хвилин від Вінниці. Coords 49.18N 28.33E. NOTHING invented.",
+      "CONTROLLED-INTERACTIVE, PIN-LESS: 0 pins, NO scroll-stepping, NO scale-dive. Map reveals once with a staggered panel birth, then the USER clicks/hovers a POI (list row or map pin) to draw its route + honest badge. pins === 0.",
+      "the [data-lm-list] in the LEFT panel is filled with >=6 clickable .lm-row rows, two-way synced with the map pins; the sign-guide shows the real highway times.",
+      "the «22,5 сотки» dimension line is authored over the REAL parcel (the smarts loc-dim geometry); the map is not transformed, so it never floats.",
+      "elements appear ONE BY ONE on scroll-in (title lines rise, panel blocks fade in staggered) like the smarts birth.",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO scale-from-origin. decode-guard: [data-render-surface] painted from load. reduced-motion -> static, __LAB_OK__ true; mobile 390px -> panel stacks above the map, no overflow, __LAB_OK__ true. Zero real console errors.",
+      "copy Ukrainian, Fedoriv voice; ZERO em-dash/en-dash anywhere."
+    ],
+    "gate": {
+      "probe": "Serve library/ and open combos/location--panel-left-survey/combo-lab.html. __LAB_OK__ true, pin count === 0. Scroll in: the left panel births (title lines rise, blocks fade) showing the visible POI list with times + the highway guide; the right dusk map shows the parcel with «22,5 сотки» + the ring. Click a row/pin: the route draws with an honest badge. Confirm the smarts content is all visible in a fresh layout + only real OSM data."
+    },
+    "note": "|",
+    "_path": "library/combos/location--panel-left-survey/",
+    "_variantsResolved": []
+  },
+  "location--portrait-flank": {
+    "id": "location--portrait-flank",
+    "name": "Локація (портрет з двома флангами)",
+    "level": 2,
+    "kind": "section-variant",
+    "section": "location",
+    "status": "candidate",
+    "map_style": "BLUEPRINT",
+    "composition": "SMARTS proportion re-planned: a CENTERED taller PORTRAIT map plate (framed, on a darker blue mat) with the title above it and the highway sign-guide below it, and the 6 real POIs split into TWO COLUMNS that FLANK the plate (3 left, 3 right), each row showing name + walk-time, visible immediately. The plate carries the parcel + a «22,5 сотки» dimension line + a «≈10 хв» ring.",
+    "webgl": false,
+    "ease": "air",
+    "meaning": {
+      "what": "A NEW composition that keeps the SMARTS Агрономічне reference's content + proportion (the reference this whole section was built from) but RE-PLANS the layout: the dense REAL blueprint map is a CENTERED, taller PORTRAIT plate (framed, not full-bleed) standing in the middle of the stage on a darker blue mat; the eyebrow + a serif title that rises line by line sit ABOVE it; the highway sign-guide sits BELOW it; and the six real POI orientation items are split into TWO COLUMNS that FLANK the plate, three on the LEFT and three on the RIGHT, each row showing the name + its walk-time, VISIBLE immediately (not hidden behind a click or a hover). The plate carries the property parcel with a «22,5 сотки» dimension line and a «≈10 хв» walking ring (how much space it takes, the metres written on the plate), exactly the smarts geometry. Elements appear ONE BY ONE on scroll-in (the staggered birth). CONTROLLED-CLICK: the visitor clicks a flank row or a map POI and the real Dijkstra route draws along the actual streets + an honest minute badge reads the true walk-time. Same content as the smarts reference, a fresh layout; orientation points + times are visible immediately, not hidden.",
+      "when": "When the location beat should carry the FULL smarts content (map + a readable list of where-and-how-many-minutes + the dimensioned plot + the highway guide) but framed like a museum plate: the map centred as a portrait subject with the orientation list balanced on either side. The symmetric, plate-and-flanks member of the new composition set; distinct from the others by centring the map as a portrait and splitting the POI list into two flanking columns.",
+      "lands": "A centred portrait plate of the dusk-cyan town stands on a deep blue mat, the lit parcel and its 22,5 сотки dimension at its heart; the title rises above it, the highway times read below it, and three orientation points with their minutes flank it on the left and three on the right. Click a place on either side and the route draws along the real streets in warm white. It reads like the smarts plate re-hung as a centred drawing, complete and legible."
+    },
+    "source": {
+      "grammar": "locmap-engine (the blueprint / cyanotype re-theme, identical realism to the surveyed-route-map ideal, palette lifted 1:1 from location--blueprint-survey) framed as a CENTERED PORTRAIT plate inside the SMARTS location proportion: the masthead carries the eyebrow + a line-rising title; the plate carries the dense real OSM map + the parcel + an authored «22,5 сотки» dimension line (the smarts loc-dim) + a corner stamp; the engine fills ONE [data-lm-list] which JS then distributes into two flank columns (first 3 rows left, last 3 right); a loc__sign highway guide + legal sit below. Staggered birth on scroll-in. CONTROLLED-CLICK (the smarts model): pin-less, click a row/POI to draw routes.",
+      "recording": null,
+      "registry_ref": [
+        "locmap-canon",
+        "SMARTS-location-etalon"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "locmap-engine",
+        "job": "owns_pin FALSE; bakes the dense real OSM blueprint map into [data-lm-stage], fills the hidden [data-lm-list] with 6 clickable .lm-row rows (name + walk-minutes) that the variant JS then distributes into the left flank (first 3) and right flank (last 3), draws the real Dijkstra route + honest badge on click/hover. The variant adds the authored «22,5 сотки» dimension line over the real parcel + the staggered masthead birth. reveal on scroll-in; no pin."
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "COMPOSITION keeps the smarts content + proportion, re-planned: a CENTERED taller portrait map plate with the title above + the highway sign-guide below, and the 6-POI list split into two FLANK columns (3 left, 3 right), each row with its real walk-minutes, VISIBLE immediately (NOT hidden behind a click/hover). The plate carries the parcel + a «22,5 сотки» dimension line + a «≈10 хв» ring. Verified by screenshot.",
+      "asset-truth: streets/footprints/green + 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв) from osm.js; real facts вул. Перемоги, 22,5 сотки, Гніванське шосе, 5 хвилин від Вінниці. Coords 49.18N 28.33E. NOTHING invented.",
+      "CONTROLLED-INTERACTIVE, PIN-LESS: 0 pins, NO scroll-stepping, NO scale-dive. Map reveals once with a staggered birth, then the USER clicks/hovers a POI (flank row or map disc) to draw its route + honest badge. pins === 0.",
+      "the engine fills the [data-lm-list] with 6 clickable .lm-row rows; JS distributes them into the two flanks (>=6 visible rows total, two-way synced with the map POIs); the sign-guide shows the real highway times.",
+      "the «22,5 сотки» dimension line is authored over the REAL parcel (the smarts loc-dim geometry); the map is not transformed, so it never floats.",
+      "elements appear ONE BY ONE on scroll-in (masthead title lines rise, blocks fade in staggered, the engine 9-gate births the map + flank rows) like the smarts birth.",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO scale-from-origin. decode-guard: [data-render-surface] painted from load. reduced-motion -> static, __LAB_OK__ true; mobile 390px -> the flanks stack above and below the plate, no overflow, __LAB_OK__ true. Zero real console errors.",
+      "copy Ukrainian, Fedoriv voice; ZERO em-dash/en-dash anywhere."
+    ],
+    "gate": {
+      "probe": "Serve library/ and open combos/location--portrait-flank/combo-lab.html. __LAB_OK__ true, pin count === 0. Scroll in: the masthead births (title lines rise), the centred portrait plate shows the parcel with «22,5 сотки» + the ring, and the 6 POI rows with times are visible split 3 left / 3 right. Click a row/POI: the route draws with an honest badge. Confirm the smarts content is all visible in a fresh layout + only real OSM data."
+    },
+    "note": "|",
+    "_path": "library/combos/location--portrait-flank/",
+    "_variantsResolved": []
+  },
+  "location--spread-metric": {
+    "id": "location--spread-metric",
+    "name": "Локація (метрика веде)",
+    "level": 2,
+    "kind": "section-variant",
+    "section": "location",
+    "status": "candidate",
+    "map_style": "HI-CONTRAST MONO",
+    "composition": "SMARTS proportion re-planned as a 60/40 spread: dense mono map LEFT (~60%), reading panel RIGHT (~40%) that LEADS WITH THE METRIC (big «22,5» сотки + «вул. Перемоги · фасад шосе» + «45 x 50 м» frontage), THEN the visible 6-POI list with times, THEN the highway sign-guide. The «22,5 сотки» dimension line also on the map.",
+    "webgl": false,
+    "ease": "air",
+    "meaning": {
+      "what": "A NEW composition that keeps the SMARTS Агрономічне reference's content + proportion (the reference this whole section was built from) but RE-PLANS the layout as a 60/40 spread that LEADS WITH THE METRIC. The dense real OSM map fills the LEFT ~60% as the hero (pure black linework on pure white paper, ONE red route accent). The RIGHT ~40% is a reading panel whose TOP is a big editorial metric block: a large «22,5» with «сотки» beside it, «вул. Перемоги · фасад шосе», and the «45 x 50 м» frontage. BELOW the metric the panel shows the VISIBLE list of the 6 real POIs with their walk-times, THEN a highway sign-guide, THEN a legal line. The map carries the property parcel with an authored «22,5 сотки» dimension line and a «≈10 хв» walking ring (how much space it takes, the metres written on the plate), exactly the smarts geometry. Elements appear ONE BY ONE on scroll-in (the staggered birth). CONTROLLED-CLICK: the visitor clicks a list row or a map POI and the real Dijkstra route draws + an honest minute badge. Same content as the smarts reference; the metric leads, but the orientation points + times are visible immediately below it, not hidden.",
+      "when": "When the location beat should OPEN ON THE NUMBER, foregrounding the plot size as the hook while still carrying the FULL smarts content (map + a readable list of where-and-how-many-minutes + the dimensioned plot + the highway guide). The metric-forward member of the new composition set; distinct from the others by leading the panel with a large editorial plot figure in a stark mono register.",
+      "lands": "The big town map fills the left in black on white; the right opens on a large 22,5 сотки with the frontage 45 x 50 м, then lists every nearby point with its minutes and the highway times. The plot parcel sits on the map with its own 22,5 сотки dimension line. Click a place and the red route draws along the real streets. It reads like the smarts plate re-hung around the number, complete and legible."
+    },
+    "source": {
+      "grammar": "locmap-engine (the hi-contrast mono re-theme, identical realism to the surveyed-route-map ideal) in the SMARTS location proportion re-planned as a 60/40 spread (map left ~60% / panel right ~40%): the panel LEADS WITH THE METRIC (a large «22,5» сотки editorial block + frontage facts) then carries the smarts content blocks below (eyebrow above, hint, the engine's clickable [data-lm-list], a loc__sign highway guide, legal); the map carries the parcel + an authored «22,5 сотки» dimension line (the smarts loc-dim) + a standing section label. Staggered birth on scroll-in. CONTROLLED-CLICK (the smarts model): pin-less, click a row/POI to draw routes.",
+      "recording": null,
+      "registry_ref": [
+        "locmap-canon",
+        "SMARTS-location-etalon"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "locmap-engine",
+        "job": "owns_pin FALSE; bakes the dense real OSM mono map into [data-lm-stage] (black-on-white, no lit windows, one red route accent), fills the panel's [data-lm-list] with clickable .lm-row rows (name + walk-minutes), draws the real Dijkstra route + honest badge on click/hover. The variant adds the leading «22,5» сотки metric block, the authored «22,5 сотки» dimension line over the real parcel, and the staggered panel birth. reveal on scroll-in; no pin."
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "COMPOSITION keeps the smarts content + proportion, re-planned as a 60/40 spread: the dense mono map fills the LEFT ~60%, and the RIGHT ~40% panel LEADS WITH THE METRIC (big «22,5» сотки + «вул. Перемоги · фасад шосе» + «45 x 50 м» frontage) and BELOW it the visible 6-POI list (each with its real walk-minutes) + a highway sign-guide. The map shows the parcel + a «22,5 сотки» dimension line + a «≈10 хв» ring. The metric leads but the orientation points + times are visible immediately below it, NOT hidden. Verified by screenshot.",
+      "asset-truth: streets/footprints/green + 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв) from osm.js; real facts вул. Перемоги, 22,5 сотки, 45 x 50 м фасад, Гніванське шосе, 5 хвилин від Вінниці. Coords 49.18N 28.33E. NOTHING invented.",
+      "CONTROLLED-INTERACTIVE, PIN-LESS: 0 pins, NO scroll-stepping, NO scale-dive. Map reveals once with a staggered panel birth, then the USER clicks/hovers a POI (list row or map disc) to draw its route + honest badge. pins === 0.",
+      "the [data-lm-list] in the RIGHT panel is filled with >=6 clickable .lm-row rows, two-way synced with the map POIs; the sign-guide shows the real highway times.",
+      "the «22,5 сотки» dimension line is authored over the REAL parcel (the smarts loc-dim geometry); the map is not transformed, so it never floats.",
+      "elements appear ONE BY ONE on scroll-in (panel blocks fade in staggered) like the smarts birth.",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL, NO mix-blend, NO backdrop-filter, NO canvas, NO scale-from-origin. decode-guard: [data-render-surface] painted (the white paper) from load. reduced-motion -> static, __LAB_OK__ true; mobile 390px -> map stacks above the panel, no overflow, __LAB_OK__ true. Zero real console errors.",
+      "copy Ukrainian, Fedoriv voice; ZERO em-dash/en-dash anywhere."
+    ],
+    "gate": {
+      "probe": "Serve library/ and open combos/location--spread-metric/combo-lab.html. __LAB_OK__ true, pin count === 0. Scroll in: the panel births (the metric block, then the blocks fade) showing the leading «22,5» сотки + frontage, the visible POI list with times + the highway guide; the left mono map shows the parcel with «22,5 сотки» + the ring. Click a row/POI: the red route draws with an honest badge. Confirm the smarts content is all visible in a fresh metric-led layout + only real OSM data."
+    },
+    "note": "|",
+    "_path": "library/combos/location--spread-metric/",
     "_variantsResolved": []
   },
   "manifesto-flip-draw": {

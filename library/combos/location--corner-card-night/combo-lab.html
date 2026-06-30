@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--corner-card-night · Локація (нічна карта, кутова картка)</title>
+<!--
+  SECTION VARIANT, location--corner-card-night (role: location). MAP-STYLE = NIGHT-NEON.
+  COMPOSITION = the SMARTS proportion, RE-PLANNED: the real dense NIGHT map is FULL-BLEED (it fills
+  the whole stage, it is the hero), and ALL the smarts content lives in one compact translucent GLASS
+  CARD pinned in the bottom-left CORNER, VISIBLE immediately (not hidden behind a click): the card
+  holds the eyebrow + a short title + the VISIBLE list of the 6 real POIs with their walk-times + a
+  highway sign-guide + a legal line. The map carries the property parcel with a dimension line
+  «22,5 сотки» and a «≈10 хв» walking ring, exactly the smarts geometry (how much space it takes, the
+  metres written on the plate). Elements appear ONE BY ONE on scroll-in (the staggered birth).
+  CONTROLLED-CLICK (the smarts model): the visitor clicks a list row or a map pin and the real Dijkstra
+  route draws + an honest minute badge. Same content as the smarts reference, a fresh layout: a
+  self-contained card over one corner of the full map, but the list + times are ALL shown in it, not
+  hidden. Pin-less; nothing floats; lit windows on (the town lit after dark).
+
+  The card is a translucent dark panel with a hairline border (an rgba background, NO backdrop-filter).
+
+  asset-truth: streets/footprints/green + 6 real POIs verbatim from osm.js (Школа·садок 9хв, Нова
+  Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв). Real facts: вул. Перемоги,
+  22,5 сотки, Гніванське шосе, 5 хвилин від Вінниці. Coords 49.18N 28.33E.
+  __LAB_OK__: 0 pins, the cited atom ran, [data-render-surface] painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin. */
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* the stage is a FULL-BLEED night map (the hero); the card sits over its corner. normal-flow, no pin */
+  #combo.combo-stage { background: #05060a; min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
+
+  /* NIGHT-NEON PALETTE (lifted 1:1 from location--night-neon): re-point every engine token to a
+     nocturnal register. Near-black field, luminous accent, warm lit windows. */
+  #combo.combo-stage,
+  .ccn__field {
+    --lm-ink: #cfe4ff;           /* cool moonlit ink for foreground text */
+    --lm-bg-1: #0a0d16;          /* night field gradient inner */
+    --lm-bg-2: #04050a;          /* night field gradient outer + road casing (very dark) */
+    --lm-accent: #ffb24d;        /* hot amber, reserved for the active route + parcel */
+    --lm-accent-soft: #ffc878;
+    --lm-lit: 255,196,120;       /* warm lit-window rgb (lamps in the windows) */
+  }
+
+  /* ---- the FULL-BLEED night field = the render surface, the hero ---- */
+  .ccn__field {
+    position: absolute; inset: 0; overflow: clip;
+    background-color: #07080c;
+    background-image:
+      radial-gradient(70% 56% at 60% 42%, rgba(70,120,190,.16), rgba(70,120,190,0) 60%),
+      radial-gradient(95% 80% at 38% 72%, rgba(255,178,77,.06), rgba(255,178,77,0) 58%),
+      radial-gradient(125% 110% at 56% 44%, #0a0d16, #05060a 82%);
+  }
+  .ccn__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the engine's stage gradient would re-tint the field; keep our night field under the SVG */
+  .ccn__field.lm__stage, .ccn__field.lm { background-color: #07080c; }
+
+  /* ---- NIGHT-NEON MAP TREATMENT (lifted 1:1): redraw the engine SVG classes for a town lit after dark ---- */
+  .ccn__field .lm-gw--green { fill: rgba(60,96,120,.06); }
+  .ccn__field .lm-gw--water { fill: rgba(70,120,190,.12); }
+
+  .ccn__field .lm-bld      { fill: rgba(120,160,210,.05); stroke: rgba(120,160,210,.07); stroke-width: 0.6; }
+  .ccn__field .lm-bld--lit { fill: rgba(var(--lm-lit),.30); stroke: rgba(var(--lm-lit),.34);
+    filter: drop-shadow(0 0 2.2px rgba(255,196,120,.55)); }
+
+  /* road hierarchy: the grid GLOWS by rank over a very dark casing. Highway cyan, main artery amber. */
+  .ccn__field .lm-rdc { stroke: #04050a; }
+  .ccn__field .lm-rd--hwy   { stroke: rgba(120,224,255,.92); filter: drop-shadow(0 0 4px rgba(90,210,255,.85)); }
+  .ccn__field .lm-rd--main  { stroke: rgba(255,196,120,.88); filter: drop-shadow(0 0 3.4px rgba(255,178,77,.7)); }
+  .ccn__field .lm-rd--mid   { stroke: rgba(150,196,240,.42); filter: drop-shadow(0 0 1.6px rgba(120,180,240,.4)); }
+  .ccn__field .lm-rd--minor { stroke: rgba(150,196,240,.24); }
+  .ccn__field .lm-rd--faint { stroke: rgba(150,196,240,.11); }
+  .ccn__field .lm-rdname { fill: rgba(180,212,255,.6); text-anchor: middle; font-weight: 600;
+    text-shadow: 0 0 6px rgba(60,120,190,.6); }
+
+  /* parcel: luminous amber hatch + glowing stroke; the tag in cool ink */
+  .ccn__field #lmHatch rect { fill: rgba(255,178,77,.12); }
+  .ccn__field #lmHatch line { stroke: rgba(255,196,120,.55); }
+  .ccn__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.8;
+    filter: drop-shadow(0 0 5px rgba(255,178,77,.85)); }
+  .ccn__field .lm-pulse  { stroke: var(--lm-accent-soft); }
+  .ccn__field .lm-sitetag { fill: #fff3df; text-shadow: 0 0 8px rgba(255,178,77,.7); }
+
+  /* walking ring: luminous cool dashed circle */
+  .ccn__field .lm-ring  { stroke: rgba(120,200,255,.4); filter: drop-shadow(0 0 2px rgba(90,180,255,.5)); }
+  .ccn__field .lm-ringt { fill: rgba(180,212,255,.55); }
+
+  /* numbered POIs: dark disc, glowing cool ring, lit numeral; active flips to the hot amber accent */
+  .ccn__field .lm-pt circle { fill: #0a0e18; stroke: rgba(140,210,255,.85); stroke-width: 1.4;
+    filter: drop-shadow(0 0 3px rgba(100,190,255,.55)); }
+  .ccn__field .lm-pt text   { fill: #dbecff; }
+  .ccn__field .lm-pt:hover circle, .ccn__field .lm-pt.is-on circle {
+    fill: var(--lm-accent); stroke: #fff3df; filter: drop-shadow(0 0 6px rgba(255,178,77,.95)); }
+
+  /* the warm moment: the active Dijkstra route + walker + live badge, all glowing amber */
+  .ccn__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.4;
+    filter: drop-shadow(0 0 4px rgba(255,178,77,.9)); }
+  .ccn__field .lm-walker { fill: #fff3df; stroke: var(--lm-accent);
+    filter: drop-shadow(0 0 5px rgba(255,178,77,.95)); }
+  .ccn__field .lm-livet  { fill: #0a0e18; font-weight: 600; }
+  .ccn__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent-soft); }
+
+  /* the dimension line + «22,5 сотки» metric over the parcel (authored, the smarts loc-dim). Luminous. */
+  .ccn__field .ccn-dim   { stroke: rgba(255,196,120,.78); stroke-width: 1;
+    filter: drop-shadow(0 0 2px rgba(255,178,77,.55)); }
+  .ccn__field .ccn-dimt  { fill: var(--lm-accent-soft); font: 600 11px var(--combo-sans); letter-spacing: .1em;
+    text-transform: uppercase; text-anchor: middle; text-shadow: 0 0 6px rgba(255,178,77,.6); }
+
+  /* a thin standing label of the place, top-left, over the map */
+  .ccn__place {
+    position: absolute; z-index: 7; top: clamp(18px, 4.5vh, 46px); left: clamp(20px, 4vw, 60px);
+    font: 600 .64rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(180,212,255,.5); text-shadow: 0 1px 14px rgba(0,0,0,.6); pointer-events: none;
+  }
+
+  /* a corner stamp on the map, opposite the card (the smarts loc__stamp) */
+  .ccn__stamp { position: absolute; right: clamp(.9rem,2.4vw,1.6rem); top: clamp(.9rem,4.5vh,3.6rem); z-index: 6;
+    text-align: right; pointer-events: none; }
+  .ccn__stamp b { display: block; font: 500 .7rem/1.3 var(--combo-sans); color: rgba(255,224,168,.8);
+    letter-spacing: .04em; text-shadow: 0 0 8px rgba(255,178,77,.4); }
+  .ccn__stamp span { font: 500 .6rem/1.4 var(--combo-sans); color: rgba(180,212,255,.42); letter-spacing: .04em; }
+
+  /* ======================================================================
+     THE GLASS CARD pinned in the BOTTOM-LEFT corner. A translucent dark
+     panel with a hairline border (rgba background, NO backdrop-filter).
+     Holds ALL the smarts content, VISIBLE immediately: eyebrow + short title
+     + the visible 6-POI list with times + the highway sign-guide + legal.
+     ====================================================================== */
+  .ccn__card {
+    position: absolute; z-index: 8;
+    left: clamp(16px, 3vw, 42px); bottom: clamp(16px, 4vh, 42px);
+    width: min(34ch, calc(100vw - 32px));
+    background: rgba(8, 12, 22, .82);
+    border: 1px solid rgba(140, 200, 255, .18);
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(180, 212, 255, .07);
+    padding: clamp(1rem, 2vh, 1.4rem) clamp(1rem, 1.6vw, 1.35rem);
+    display: flex; flex-direction: column; gap: clamp(.55rem, 1.2vh, .85rem);
+    max-height: min(78vh, 640px); overflow: auto;
+  }
+  @media (max-width: 560px) {
+    .ccn__card { left: 12px; right: 12px; width: auto; bottom: 12px; max-height: 72vh; }
+  }
+
+  .ccn__eyebrow { margin: 0; font: 600 .64rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(255,196,120,.78); }
+  .ccn__h { margin: .06rem 0 0; font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.45rem, 2.1vw, 1.95rem); line-height: 1.03; letter-spacing: -.025em; color: #eaf3ff; }
+  .ccn__h .ln { display: block; overflow: hidden; }
+  .ccn__h .ln > span { display: block; }
+  .ccn__h em { font-style: italic; color: var(--lm-accent-soft); }
+  .ccn__hint { margin: .1rem 0 .15rem; font: 500 .75rem/1.45 var(--combo-sans); color: rgba(207,228,255,.6); }
+  .ccn__coords { display: block; margin-top: .3rem; font: 500 .6rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(180,212,255,.36); }
+
+  /* the VISIBLE POI list (engine fills [data-lm-list] with .lm-row rows). Re-skinned for night. */
+  .ccn__list { display: block; margin-top: .1rem; }
+  .ccn__card .lm-row { padding: .5rem 0; border-bottom: 1px solid rgba(180,212,255,.12);
+    color: #dbecff; transition: background .25s, padding-left .25s; }
+  .ccn__card .lm-row .n  { color: rgba(255,196,120,.78); }
+  .ccn__card .lm-row .nm { font-weight: 500; }
+  .ccn__card .lm-row .tm { color: rgba(207,228,255,.62); }
+  .ccn__card .lm-row:hover, .ccn__card .lm-row.is-on { background: rgba(120,200,255,.07); padding-left: .4rem; }
+  .ccn__card .lm-row.is-on .n { color: var(--lm-accent); }
+
+  /* the highway sign-guide (smarts loc__sign), night-tinted */
+  .ccn__sign { margin-top: .25rem; border: 1px solid rgba(140,200,255,.16); background: rgba(10,16,28,.5);
+    border-radius: 9px; padding: .65rem .75rem; }
+  .ccn__sign .tt { margin: 0; font: 600 .58rem/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase;
+    color: rgba(207,228,255,.7); }
+  .ccn__sign .tt::after { content: " \2192"; color: var(--lm-accent-soft); }
+  .ccn__sign ul { margin: .5rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+  .ccn__sign li { list-style: none; display: flex; justify-content: space-between; gap: 1rem;
+    font: 500 .77rem/1 var(--combo-sans); color: rgba(207,228,255,.78); }
+  .ccn__sign li b { font-weight: 600; color: #eaf3ff; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ccn__legal { margin-top: .1rem; font: 500 .58rem/1.4 var(--combo-sans); letter-spacing: .04em; color: rgba(180,212,255,.4); }
+
+  .combo-pre, .combo-post { background: #04050a; color: rgba(180,212,255,.4); }
+  @media (prefers-reduced-motion: reduce) { .ccn__card .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">скрол ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--corner-card-night">
+
+    <!-- the FULL-BLEED night field + the list host. locmap-engine injects the SVG here. -->
+    <div class="ccn__field lm" data-lm-stage data-render-surface></div>
+
+    <p class="ccn__place">с. Агрономічне · за даними OpenStreetMap</p>
+
+    <p class="ccn__stamp" data-ccn-fade><b>22,5 сотки</b><span>вул. Перемоги · фасад шосе</span></p>
+
+    <!-- the GLASS CARD over the bottom-left corner: ALL the smarts content, visible immediately -->
+    <aside class="ccn__card">
+      <p class="ccn__eyebrow" data-ccn-fade>Локація · район уночі</p>
+      <h2 class="ccn__h">
+        <span class="ln"><span>Пʼять хвилин</span></span>
+        <span class="ln"><span>від Вінниці,</span></span>
+        <span class="ln"><span><em>усе інше пішки.</em></span></span>
+      </h2>
+      <p class="ccn__hint" data-ccn-fade>Натисніть місце, щоб побачити шлях по справжніх вулицях і час пішки.
+        <span class="ccn__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+
+      <div class="ccn__list" data-lm-list></div>
+
+      <div class="ccn__sign" data-ccn-fade>
+        <p class="tt">По Гніванському шосе</p>
+        <ul>
+          <li><span>До Вінниці</span><b>12 хв</b></li>
+          <li><span>До обʼїзної</span><b>4 хв</b></li>
+        </ul>
+      </div>
+
+      <p class="ccn__legal" data-ccn-fade>Карта за даними OpenStreetMap. Хвилини орієнтовні.</p>
+    </aside>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+    var gsap = window.gsap;
+
+    // ---- ENGINE: the dense real NIGHT map, re-themed neon via CSS. owns_pin FALSE; reveal once on
+    //      scroll-in; CLICK/HOVER on a POI or a list row draws its real Dijkstra route ----
+    var map;
+    SectionHarness.ranOK('locmap-engine', function () {
+      map = window.LocMap.create('#combo', {
+        // REAL street labels (engine renders data.names as .lm-rdname). вул. Перемоги is the parcel
+        // frontage (the main road just W of the site), вул. Грушевського a real cross street.
+        data: Object.assign({}, OSM, {
+          names: [
+            { n: 'вул. Перемоги',     x: 688, y: 317, a: -3.5 },
+            { n: 'вул. Грушевського', x: 600, y: 340, a: 67 }
+          ],
+          site: Object.assign({}, OSM.site, { tag: 'Тут будується' })
+        }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true,
+        flicker: { rate: 9 },     // night map: a low rate of warm-lit windows (the town lit after dark)
+        reveal: { start: 'top 72%', once: true },
+        parallax: { green: 1.0, buildings: 1.6, pins: 2.4 },
+        ease: 'award'
+      });
+      window.__ccnMap = map;
+
+      // authored dimension line + «22,5 сотки» over the real parcel (the smarts loc-dim geometry)
+      var S = OSM.site, svg = map.svg, NS = 'http://www.w3.org/2000/svg';
+      var g = document.createElementNS(NS, 'g'); g.setAttribute('data-ccn-dim', '');
+      function ln(x1, y1, x2, y2) { var e = document.createElementNS(NS, 'line');
+        e.setAttribute('x1', x1); e.setAttribute('y1', y1); e.setAttribute('x2', x2); e.setAttribute('y2', y2);
+        e.setAttribute('class', 'ccn-dim'); g.appendChild(e); }
+      ln(S.x - 15, S.y + 22, S.x + 14, S.y + 22);
+      ln(S.x - 15, S.y + 18, S.x - 15, S.y + 26);
+      ln(S.x + 14, S.y + 18, S.x + 14, S.y + 26);
+      var t = document.createElementNS(NS, 'text'); t.setAttribute('x', S.x); t.setAttribute('y', S.y + 38);
+      t.setAttribute('class', 'ccn-dimt'); t.textContent = '22,5 сотки'; g.appendChild(t);
+      svg.appendChild(g);
+    });
+
+    // ---- staggered birth of the CARD: title lines rise, fades fade (the smarts reveal) ----
+    if (gsap) {
+      var hLines = gsap.utils.toArray('.ccn__h .ln > span');
+      var fades = gsap.utils.toArray('[data-ccn-fade]');
+      gsap.set(hLines, { yPercent: 115 });
+      gsap.set(fades, { opacity: 0, y: 8 });
+      ScrollTrigger.create({ trigger: '#combo', start: 'top 70%', once: true, onEnter: function () {
+        var tl = gsap.timeline();
+        tl.to(hLines, { yPercent: 0, duration: .9, ease: 'air', stagger: .1 }, 0)
+          .to(fades, { opacity: 1, y: 0, duration: .7, ease: 'power2.out', stagger: .12 }, .3);
+      } });
+    }
+
+    // pin-less, controlled-interactive section: the visitor clicks to draw routes. 0 pins.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>
