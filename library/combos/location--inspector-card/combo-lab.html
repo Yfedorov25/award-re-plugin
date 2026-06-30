@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--inspector-card · Карта-інспектор (night)</title>
+<!--
+  SECTION VARIANT, location--inspector-card (role: location). MAP-STYLE = NIGHT-NEON.
+  COMPOSITION = INSPECTOR: the real dense night map of с. Агрономічне fills the whole frame with NO
+  big text over it and NO side list. The map is the hero. CONTROLLED-CLICK: reveals on scroll-in,
+  then the USER hovers/clicks any of the 6 real POI pins on the map and a small elegant DETAIL CARD
+  floats up beside that pin (name, walk/drive minutes, metres) while the real Dijkstra route draws +
+  honest badge. Click empty map -> clear. Pure explore-the-map; the only chrome is a tiny corner label.
+  No big words on the field (the map is never covered). Pin-less; the card is a DOM node positioned
+  via the SVG CTM (transform/opacity only), so nothing floats/swims.
+
+  asset-truth: streets/footprints/green + 6 real POIs verbatim (Школа·садок 9хв, Нова Пошта 10хв,
+  Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв) from osm.js. Coords 49.18N 28.33E.
+  __LAB_OK__: 0 pins, the cited atom ran, [data-render-surface] painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin. */
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+  #combo.combo-stage { background: #05060a; min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
+
+  /* NIGHT-NEON palette + treatment (lifted 1:1 from location--night-neon, identical realism) */
+  #combo.combo-stage, .insp__field {
+    --lm-ink: #cfe4ff; --lm-bg-1: #0a0d16; --lm-bg-2: #04050a;
+    --lm-accent: #ffb24d; --lm-accent-soft: #ffc878; --lm-lit: 255,196,120;
+  }
+  .insp__field {
+    position: absolute; inset: 0; overflow: clip; background-color: #07080c;
+    background-image:
+      radial-gradient(70% 56% at 60% 42%, rgba(70,120,190,.16), rgba(70,120,190,0) 60%),
+      radial-gradient(95% 80% at 38% 72%, rgba(255,178,77,.06), rgba(255,178,77,0) 58%),
+      radial-gradient(125% 110% at 56% 44%, #0a0d16, #05060a 82%);
+  }
+  .insp__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .insp__field.lm__stage, .insp__field.lm { background-color: #07080c; }
+  .insp__field .lm-gw--green { fill: rgba(60,96,120,.06); }
+  .insp__field .lm-gw--water { fill: rgba(70,120,190,.12); }
+  .insp__field .lm-bld      { fill: rgba(120,160,210,.05); stroke: rgba(120,160,210,.07); stroke-width: 0.6; }
+  .insp__field .lm-bld--lit { fill: rgba(var(--lm-lit),.30); stroke: rgba(var(--lm-lit),.34);
+    filter: drop-shadow(0 0 2.2px rgba(255,196,120,.55)); }
+  .insp__field .lm-rdc { stroke: #04050a; }
+  .insp__field .lm-rd--hwy   { stroke: rgba(120,224,255,.92); filter: drop-shadow(0 0 4px rgba(90,210,255,.85)); }
+  .insp__field .lm-rd--main  { stroke: rgba(255,196,120,.88); filter: drop-shadow(0 0 3.4px rgba(255,178,77,.7)); }
+  .insp__field .lm-rd--mid   { stroke: rgba(150,196,240,.42); filter: drop-shadow(0 0 1.6px rgba(120,180,240,.4)); }
+  .insp__field .lm-rd--minor { stroke: rgba(150,196,240,.24); }
+  .insp__field .lm-rd--faint { stroke: rgba(150,196,240,.11); }
+  .insp__field .lm-rdname { fill: rgba(180,212,255,.6); text-anchor: middle; font-weight: 600;
+    text-shadow: 0 0 6px rgba(60,120,190,.6); }
+  .insp__field #lmHatch rect { fill: rgba(255,178,77,.12); }
+  .insp__field #lmHatch line { stroke: rgba(255,196,120,.55); }
+  .insp__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.8; filter: drop-shadow(0 0 5px rgba(255,178,77,.85)); }
+  .insp__field .lm-pulse  { stroke: var(--lm-accent-soft); }
+  .insp__field .lm-sitetag { fill: #fff3df; text-shadow: 0 0 8px rgba(255,178,77,.7); }
+  .insp__field .lm-ring  { stroke: rgba(120,200,255,.4); filter: drop-shadow(0 0 2px rgba(90,180,255,.5)); }
+  .insp__field .lm-ringt { fill: rgba(180,212,255,.55); }
+  .insp__field .lm-pt circle { fill: #0a0e18; stroke: rgba(140,210,255,.85); stroke-width: 1.4;
+    filter: drop-shadow(0 0 3px rgba(100,190,255,.55)); }
+  .insp__field .lm-pt text   { fill: #dbecff; }
+  .insp__field .lm-pt:hover circle, .insp__field .lm-pt.is-on circle {
+    fill: var(--lm-accent); stroke: #fff3df; filter: drop-shadow(0 0 6px rgba(255,178,77,.95)); }
+  .insp__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.4; filter: drop-shadow(0 0 4px rgba(255,178,77,.8)); }
+  .insp__field .lm-walker { fill: #fff3df; stroke: var(--lm-accent); filter: drop-shadow(0 0 4px rgba(255,178,77,.95)); }
+  .insp__field .lm-livet  { fill: #0a0e18; font-weight: 700; }
+  .insp__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* ---- the ONLY chrome over the map: a tiny corner label + a one-line hint. No big text. ---- */
+  .insp__label {
+    position: absolute; z-index: 8; top: clamp(18px, 4.5vh, 44px); left: clamp(18px, 4vw, 56px);
+    font: 600 .62rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(180,212,255,.58); pointer-events: none; text-shadow: 0 0 8px rgba(60,120,190,.5); }
+  .insp__coords {
+    position: absolute; z-index: 8; top: clamp(18px, 4.5vh, 44px); right: clamp(18px, 4vw, 56px);
+    font: 500 .62rem/1 var(--combo-sans); letter-spacing: .14em;
+    color: rgba(180,212,255,.42); pointer-events: none; text-shadow: 0 0 8px rgba(60,120,190,.5); }
+  .insp__hint {
+    position: absolute; z-index: 8; bottom: clamp(18px, 4.5vh, 40px); left: clamp(18px, 4vw, 56px);
+    font: 500 .72rem/1 var(--combo-sans); letter-spacing: .02em;
+    color: rgba(180,212,255,.5); pointer-events: none; text-shadow: 0 0 8px rgba(60,120,190,.5);
+    transition: opacity .4s; }
+  .insp__hint.is-hidden { opacity: 0; }
+
+  /* ---- THE FLOATING DETAIL CARD: positioned by JS (transform only) at the active pin ---- */
+  .insp__card {
+    position: absolute; z-index: 9; left: 0; top: 0; width: max-content; max-width: 240px;
+    pointer-events: none; opacity: 0; transform: translate3d(0,0,0) scale(.96);
+    transform-origin: left center; will-change: transform, opacity;
+    background: rgba(8,12,20,.82); border: 1px solid rgba(140,200,255,.28);
+    border-radius: 12px; padding: .7rem .85rem .8rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(120,180,255,.06) inset; }
+  .insp__card.is-on { opacity: 1; transform: translate3d(var(--cx,0), var(--cy,0), 0) scale(1); }
+  .insp__card .nm { font-family: var(--combo-serif); font-weight: 400; font-size: 1.06rem;
+    line-height: 1.05; color: #eaf3ff; letter-spacing: -.01em; display: block; margin-bottom: .42rem; }
+  .insp__card .mins { display: flex; gap: .9rem; align-items: baseline; }
+  .insp__card .mins b { font: 600 1.1rem/1 var(--combo-sans); color: var(--lm-accent-soft);
+    font-variant-numeric: tabular-nums; }
+  .insp__card .mins .u { font: 500 .62rem/1 var(--combo-sans); letter-spacing: .08em; text-transform: uppercase;
+    color: rgba(180,212,255,.55); margin-left: .2rem; }
+  .insp__card .meta { margin-top: .5rem; font: 500 .66rem/1.3 var(--combo-sans); letter-spacing: .04em;
+    color: rgba(180,212,255,.5); }
+
+  /* hidden host the engine still fills (it needs [data-lm-list] for row creation; we keep it offscreen
+     because the inspector composition has no visible list (the pins ARE the interface)) */
+  .insp__sink { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  .combo-pre, .combo-post { background: #05060a; color: rgba(180,212,255,.4); }
+  @media (prefers-reduced-motion: reduce) { .insp__card { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--inspector-card">
+
+    <!-- the live night map fills the frame -->
+    <div class="insp__field lm" data-lm-stage data-render-surface></div>
+
+    <p class="insp__label">с. Агрономічне · район уночі</p>
+    <p class="insp__coords">49.18° Пн · 28.33° Сх</p>
+    <p class="insp__hint" data-insp-hint>Наведіть точку на карті, щоб побачити шлях і час пішки.</p>
+
+    <!-- the floating detail card (positioned at the active pin by JS) -->
+    <div class="insp__card" data-insp-card aria-live="polite">
+      <span class="nm" data-c-nm></span>
+      <span class="mins"><span><b data-c-walk></b><span class="u">хв пішки</span></span>
+        <span><b data-c-drive></b><span class="u">хв авто</span></span></span>
+      <span class="meta" data-c-meta></span>
+    </div>
+
+    <!-- offscreen list sink the engine fills (no visible list in this composition) -->
+    <div class="insp__sink" data-lm-list></div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+    var gsap = window.gsap;
+
+    var byId = {}; OSM.pois.forEach(function (p) { byId[p.id] = p; });
+    var card = document.querySelector('[data-insp-card]');
+    var hint = document.querySelector('[data-insp-hint]');
+    var cNm = card.querySelector('[data-c-nm]'), cWalk = card.querySelector('[data-c-walk]'),
+        cDrive = card.querySelector('[data-c-drive]'), cMeta = card.querySelector('[data-c-meta]');
+    var svgEl = null, stageEl = document.getElementById('combo');
+
+    // place the card beside the pin (projected viewBox -> screen px via the SVG CTM); transform only
+    function placeCard(p) {
+      if (!svgEl || !svgEl.getScreenCTM) return;
+      var ctm = svgEl.getScreenCTM(); if (!ctm) return;
+      var pt = svgEl.createSVGPoint(); pt.x = p.x; pt.y = p.y;
+      var sp = pt.matrixTransform(ctm);
+      var sr = stageEl.getBoundingClientRect();
+      var x = sp.x - sr.left, y = sp.y - sr.top;
+      // prefer to the right of the pin; flip left if near the right edge; clamp vertically
+      var cw = card.offsetWidth || 220, ch = card.offsetHeight || 110;
+      var ox = (x + 18 + cw > sr.width - 12) ? -(cw + 18) : 18;
+      var ty = Math.max(12, Math.min(sr.height - ch - 12, y - ch / 2));
+      card.style.setProperty('--cx', (x + ox) + 'px');
+      card.style.setProperty('--cy', ty + 'px');
+    }
+    function showCard(id) {
+      var p = byId[id]; if (!p) return;
+      cNm.textContent = p.label; cWalk.textContent = p.walk; cDrive.textContent = p.drive;
+      cMeta.textContent = p.m + ' м від ділянки';
+      placeCard(p);
+      card.classList.add('is-on');
+      if (hint) hint.classList.add('is-hidden');
+    }
+    function hideCard() { card.classList.remove('is-on'); if (hint) hint.classList.remove('is-hidden'); }
+
+    // ---- ENGINE: the night map. owns_pin FALSE; reveal on scroll-in; CLICK/HOVER drives route+card ----
+    SectionHarness.ranOK('locmap-engine', function () {
+      var map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true, flicker: { rate: 9 },
+        reveal: { start: 'top 70%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award',
+        onSelect: function (id) { showCard(id); }   // engine tells us which pin was chosen
+      });
+      window.__inspMap = map;
+      svgEl = map.svg;
+      // hovering a pin previews the card too (no route until click); leaving clears the preview
+      stageEl.addEventListener('mouseover', function (e) {
+        var g = e.target.closest && e.target.closest('.lm-pt'); if (g && g.dataset.id) showCard(g.dataset.id);
+      });
+      // a click on the empty map (engine clears the route) also clears the card
+      stageEl.addEventListener('click', function (e) {
+        if (!(e.target.closest && e.target.closest('.lm-pt'))) hideCard();
+      });
+    });
+
+    // keep the card glued to its pin on resize/scroll-parallax
+    window.addEventListener('resize', function () { if (card.classList.contains('is-on')) {
+      var id = cNm.textContent; var p = OSM.pois.find(function (q) { return q.label === id; }); if (p) placeCard(p);
+    } });
+
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>
