@@ -1,1 +1,0 @@
-/Users/yehorfedorov/Downloads/award-re-plugin/library/_assets/location/osm-agronomichne.js
