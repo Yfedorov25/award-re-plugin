@@ -5,71 +5,75 @@ level: 2
 kind: section-variant
 section: location
 status: base
-medium: "PEN-SKETCH (1px strokes, dashoffset draw)"
+medium: "PEN/INK DRAFTING (click-driven, real dense OSM)"
+map_style: "PEN/INK DRAFTING (click-driven, real dense OSM)"
 webgl: false
-ease: air
+ease: award
 meaning:
-  what: "The LOCATION beat rendered as an architect's hand-sketch: a MONOCHROME pen drawing of с. Агрономічне, thin (~1px) cream strokes on a brown drafting field, NO fills, NO colour photography, NO Google / NO Mapbox / NO tiles. The REAL OSM streets DRAW in via stroke-dashoffset, a ringed survey crosshair marks the real site point, the 6 real POIs ladder up on hairline leader-lines with their real minutes, and as the section pins each POI's REAL Dijkstra walking route draws along the actual streets. A coords-corner-frame plate (49.18N 28.33E, scale bar, north arrow, sheet labels) frames it as a drafting table."
-  when: "When the LOCATION section should feel SURVEYED and authored, not consumer-mapped: a quiet, austere, premium register that answers 'can I live my life from here' by literally drawing the walk to each real place. The medium reads as a studio's site plan, distinct from any raster / illustrated / isochrone / photo map."
-  lands: "The plate draws itself in front of you like a hand on a drafting board: streets ink in, the survey crosshair finds the site, then one real walking route after another draws to the school, the post office, the market, while a single serif line names each place and its real minutes. It reads engineered and expensive, a sketch made by someone who knows the village, not a screenshot of a map."
+  what: "The realistic CONTROLLED-INTERACTIVE LOCATION section (the smarts Агрономічне model) drawn as an architect's hand site plan. The SAME dense, real baked OSM district of с. Агрономічне (true road hierarchy by class, the building footprints, the site anchored inside a true-scale 10-minute walking ring) is rendered as a PEN DRAWING: thin dark-ink strokes on warm drafting paper, the hierarchy by stroke-width only, building footprints as near-empty ink outlines (drawn, not blocked), the parcel as an ink hatch, the ring thin dashed ink, the POIs as small ink-ringed dots. NO filled blocks, NO colour photography, NO lit windows, NO Google / NO Mapbox / NO tiles. The plan REVEALS on scroll-in once (the 9-gate birth), then there is NO pin and NO forced stepping: the USER clicks (or hovers) any of the 6 real POIs, on the map or in the visible side list, and THAT draws the real Dijkstra route along the actual streets in slightly heavier ink while a walking dot rides it and a live minute badge reads the honest walk-time. Two-way hover (pin <-> list row). The visitor drives; the sheet never floats because nothing animates it after the reveal."
+  when: "The LOCATION beat where the register should feel SURVEYED and authored, an austere monochrome drafting sheet, yet the buyer must still be able to answer 'can I live my life from here' by clicking a place and watching the real walk draw along real streets to the honest minute. The same dense real geography as the dark etalon, only the rendering is a pen on a drafting table, distinct from the raster / illustrated / isochrone / photo dialects."
+  lands: "A drafting sheet fills the frame: the real streets ink in by stroke-width hierarchy, the building footprints drawn as thin empty outlines, the home hatched inside its ten-minute walking ring. Then you click the school, or the post office, or the market, in the list or on the plan, and its real route draws itself along the actual roads in heavier ink, a dot walks it, and a small badge reads the honest minutes (9 хв to the school, 18 хв to Аврора). It reads engineered and expensive, a site plan made by someone who knows the village, not a screenshot of a map."
 source:
-  grammar: "11tanjung's monochrome line-art WHERE beat (line-art-location-map, D_11tanjung D2) framed by a surveyor's drafting plate (coords-corner-frame). The pen-sketch medium + real-Dijkstra-route-per-step is the variant's own composition, not a re-theme of a tile/vector map engine."
+  grammar: "locmap-engine (the map CANON: SMARTS motion + QUADRO IA, harvested from apps/smarts/src/js/sections/location.js: dual casing+stroke road hierarchy, Dijkstra draw + getPointAtLength walker + growing live timer, 9-gate reveal, asymmetric layer parallax, true-scale walking ring, two-way pin<->row sync). The variant's authored layer = the PEN/INK rendering (a full CSS re-theme of the engine tokens and layer classes to dark ink on warm paper, lit windows off via flicker.rate 1e9) plus the controlled-click model: the map reveals once, then click/hover draws the route. No second engine, no forced stepping, no scale-dive."
   recording: null
-  registry_ref: []
+  registry_ref: ["locmap-canon", "SMARTS-location-etalon"]
 uses:
-  - { atom: line-art-location-map, job: "owns_pin FALSE; reads our static [data-draw] REAL OSM road paths + [data-target] site crosshair + .lam-poi REAL POI markers and returns a PURE set(p) scrub of the whole pen-sketch reveal (roads draw via stroke-dashoffset 0..0.55, crosshair 0.30..0.62, POIs ladder bottom-to-top 0.45..1). Its own onEnter trigger is KILLED at wire-time so ONLY the harness pin drives set(p); no auto-play, no second trigger." }
-  - { atom: coords-corner-frame, job: "owns_pin FALSE; injects the drafting plate overlay (four survey tick-corners that DRAW via stroke-dashoffset + a 49.18N 28.33E coordinate readout + a 0 ... 500 м scale bar + a north arrow + corner labels План локації / Масштаб / Аркуш 01 / OSM 2026). set(p) is a PURE scrub ridden on the same harness pin so the plate draws in with the sketch." }
-pin: { owner: harness, count: 1 }
+  - { atom: locmap-engine, job: "owns_pin FALSE. Bakes the SAME real с. Агрономічне OSM (osm.js) into [data-lm-stage] and fills the visible [data-lm-list] with clickable rows synced two-way with the map pins; the whole map is re-themed to PEN/INK on drafting paper purely by CSS (re-pointed --lm-* tokens + road/building/parcel/ring/POI/route class overrides), lit windows killed via flicker.rate 1e9. reveal {start:'top 70%', once:true} plays the 9-gate birth on scroll-in; after that select(id) draws the real Dijkstra route + walker + the honest live 'N хв · M м' badge on click/hover. NO showStep, NO SectionHarness.pin(), NO scale transform on the SVG." }
+pin: { owner: none, count: 0 }
 pin_killed: []
 gated_by: [R_pin_budget, R_perf_limits, R_no_webgl]
 acceptance:
-  - "MEDIUM is unmistakably PEN-SKETCH: thin ~1px cream strokes on a brown drafting field, NO fills, NO colour photo, NO Google/Mapbox/tiles, NO canvas drawImage. Verified by screenshot."
-  - "asset-truth: streets, walking routes, POI names and minutes are the REAL baked OSM of с. Агрономічне (osm.js -> osm-agronomichne.js): 80 real streets in-window, 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв), real Dijkstra route per POI. NO invented streets/POIs/times. Coords 49.18N 28.33E (Вінниця), never another city."
-  - "ONE pin only (harness owns it; line-art-location-map + coords-corner-frame are owns_pin FALSE, the map atom's own trigger is killed). Scroll-LOCK with pinSpacing while the mechanic plays. pins === 1 in the probe."
-  - "pin-story text SEQUENCED: exactly one story block legible (opacity >= 0.85) at any scroll position, cross-faded; never two at once, never a full-screen wall. Verified across 7 scroll samples (blocksLegible === 1 each)."
-  - "decode-guard: the [data-render-surface] field is a painted CSS background-image (drafting paper) at non-zero size from load; no undecoded <img>/tile flicker (the medium uses zero raster imagery)."
-  - "motion ONLY stroke-dashoffset / transform / opacity / filter; NO WebGL, NO mix-blend, NO backdrop-filter, NO video.currentTime, NO animating width/height/top/left/margin. will-change cleared after one-shots."
-  - "reduced-motion -> the full sketch + plate shown statically (80/80 roads drawn), text steppable, __LAB_OK__ true; mobile 390px -> no horizontal overflow, __LAB_OK__ true. Zero real console errors in all three modes."
-  - "copy Ukrainian, Fedoriv voice, sparse, proof-not-promises; ZERO em-dash/en-dash anywhere in the file."
+  - "MAP-STYLE is unmistakably PEN/INK DRAFTING in one screenshot: thin dark-ink strokes on warm drafting paper, road hierarchy by stroke-width only, building footprints as near-empty ink outlines (not filled blocks), parcel an ink hatch, ring thin dashed ink, POIs small ink-ringed dots, NO colour photo, NO Google/Mapbox/tiles, NO canvas, NO lit windows. Realism is identical to the dark etalon: the SAME dense real OSM, only the rendering differs."
+  - "CONTROLLED-INTERACTIVE model: the map REVEALS on scroll-in once (9-gate birth), then the USER clicks (or hovers) any of the 6 real POIs on the plan OR in the visible side list and THAT draws the real Dijkstra route along the actual streets with a walking dot and a live honest minute badge. NO forced scroll-stepping, NO scale-dive, NO pin. Two-way hover (pin <-> list row)."
+  - "asset-truth: streets, footprints, walking routes, POI names and minutes are the REAL baked OSM of с. Агрономічне (osm.js): the real road graph in-window, 6 real POIs (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв), real Dijkstra route per POI. NO invented streets/POIs/times. Coords 49.18° Пн · 28.33° Сх (Вінниця), plot 22,5 сотки on вул. Перемоги, never another city."
+  - "ZERO pins (pin-less click section): SectionHarness.declare expectPins 0, pinOwner none; no SectionHarness.pin(), no engine pin. The live badge reads the HONEST 'N хв · M м' from the first frame (engine fix), never a count-up. pins === 0 in the probe, >= 6 .lm-row rows; click a row -> a .lm-route appears and the badge reads a real 'N хв · M м'."
+  - "decode-guard: the [data-render-surface] field is a painted CSS background-image (drafting paper) at non-zero size from load; zero raster imagery (SVG map), no undecoded <img>/tile flicker."
+  - "motion ONLY stroke-dashoffset / transform / opacity / filter; NO WebGL, NO canvas, NO mix-blend, NO backdrop-filter, NO video.currentTime, NO animating width/height/top/left/right/bottom/margin. will-change cleared after one-shots."
+  - "reduced-motion -> the full plan + the selected route shown statically, __LAB_OK__ true; mobile 390px -> no pin, no horizontal overflow, __LAB_OK__ true. Zero real console errors in all modes. Copy Ukrainian, Fedoriv voice, sparse, proof-not-promises; ZERO em-dash/en-dash anywhere."
 gate:
-  probe: "Serve library/ and open combos/location--architects-sketch/combo-lab.html. __LAB_OK__ true, ScrollTrigger pin count === 1. Scroll the pinned range: the REAL streets ink in by stroke-dashoffset, the survey crosshair finds the real site, the drafting plate (coords/scale/north/labels) draws in, then the section STEPS through the 6 real POIs, each drawing its REAL Dijkstra route along the streets with ONE serif story block (name + real minutes) legible at a time. Confirm the PEN-SKETCH medium by screenshot and that only real OSM data appears."
+  probe: "Serve library/ and open combos/location--architects-sketch/combo-lab.html. __LAB_OK__ true, ScrollTrigger pin count === 0. Scroll the section in: the drafting plan births gate by gate (footprints, then the ink road hierarchy draws in, ring, parcel, ink-ringed POI dots) with >= 6 synced clickable .lm-row rows. Click a POI or a row -> a real Dijkstra route draws along the actual streets in heavier ink, a walker rides it, and the live badge reads the honest 'N хв · M м' from the first frame; click it again clears. Confirm the PEN/INK DRAFTING map-style by screenshot (unmistakable in one shot) and that only real OSM data appears, and that there is no forced stepping and no scale-dive."
 note: |
-  Variant #8 of the location family (medium = PEN-SKETCH), distinct by MEDIUM from the
-  other nine (illustrated map / typographic-minute / scale-zoom / isochrone-area /
-  surveyed-vector-route / raster-tiles / video-no-map / photo-rail / arched-photo).
-  Built from the REAL Агрономічне OSM dataset via a deterministic geometry pass (focus
-  viewBox 255 35 600 560; 80 in-window streets sorted faint->prominent; one real Dijkstra
-  route path per POI), so the geometry is asset-true, never hand-invented. The map atom is
-  pinless and its onEnter trigger is killed so the single harness pin is the only scroll
-  owner; coords-corner-frame rides the same pin. No pin-story-text atom is cited (its pin
-  would be a second owner); the sequenced one-block-at-a-time read is hand-wired as a
-  cross-fade, the surveyed-route-map pattern.
+  Variant of the location family REBUILT onto the map CANON (locmap-engine) for the
+  CONTROLLED-INTERACTIVE click model (the smarts Агрономічне model). It is the SAME dense
+  real OSM district as the dark etalon (location--surveyed-route-map) wearing a PEN/INK
+  DRAFTING skin: a full CSS re-theme of the engine tokens + layer classes to thin dark ink
+  on warm drafting paper, lit windows off (flicker.rate 1e9), building footprints as
+  near-empty outlines, roads ranked by stroke-width only. The map reveals once on scroll-in,
+  then the visitor clicks any of the 6 real POIs (on the plan or in the visible side list) to
+  draw the real route + the honest minute badge; the side list is two-way synced with the
+  pins. PIN-LESS: pinOwner none, expectPins 0 (correct and passes the gate). No second
+  engine, no forced scroll-stepping, no scale transform. This replaces the earlier scroll-only
+  pen-sketch (line-art-location-map + coords-corner-frame, no click) so the variant also
+  supports click-to-route while keeping the austere drafting-sheet look. DATA is baked OSM
+  (osm.js) shared with the etalon, never hand-invented (the F-24 authenticity lesson). LAWS:
+  SVG only, GPU props, no tiles/Mapbox/canvas/WebGL, reduced-motion -> static.
 ---
 
-# location--architects-sketch · "Схема від руки" (pen-sketch location plate)
+# location--architects-sketch · "Схема від руки" (PEN/INK drafting plan, click-driven)
 
-The LOCATION beat as a monochrome architect's hand-sketch of с. Агрономічне: thin cream
-strokes on a brown drafting field (NO fills, NO colour, NO Google/Mapbox/tiles). The REAL
-OSM streets draw in, a survey crosshair marks the real site, the drafting plate frames it
-(49.18N 28.33E, scale bar, north), and as the section pins each of the 6 real POIs draws its
-REAL Dijkstra walking route along the actual streets, one serif story line at a time.
+The LOCATION beat as an architect's hand site plan of с. Агрономічне drawn on the map CANON:
+the SAME dense real OSM as the dark etalon, rendered as thin dark-ink strokes on warm drafting
+paper (NO fills, NO colour, NO Google/Mapbox/tiles, NO lit windows). The plan reveals once on
+scroll-in; then the visitor drives.
 
-## The single scroll (harness pin)
-- 0 .. ~0.38: `line-art-location-map.set(p)` + `coords-corner-frame.set(p)` draw the pen-sketch
-  and the plate in (stroke-dashoffset / opacity / transform only).
-- ~0.38 .. 1: STEP through the 6 real POIs. The active POI's real Dijkstra route draws
-  (stroke-dashoffset), the prior fades, and ONE story block (name + real minutes) cross-fades
-  in. Never two blocks legible at once.
+## The interaction (controlled-interactive, the smarts model)
+- The plan REVEALS on scroll-in once (locmap-engine's 9-gate birth). After that nothing animates
+  the map: no pin, no forced stepping, no scale-dive.
+- The USER clicks (or hovers) any of the 6 real POIs, on the plan OR in the visible side list, and
+  THAT draws the real Dijkstra route along the actual streets in heavier ink, a dot walks it, and a
+  live badge reads the honest minutes. Two-way hover (pin <-> list row). Click again clears.
 
-## Atoms (cite, never inline)
-- `line-art-location-map` (owns_pin FALSE) is the monochrome strokes-draw + crosshair + POI ladder.
-  Its own trigger is killed; the harness pin scrubs `set(p)`.
-- `coords-corner-frame` (owns_pin FALSE) is the surveyor's drafting plate, scrubbed on the same pin.
+## Atom (cite, never inline)
+- `locmap-engine` (owns_pin FALSE) bakes the real OSM and wires the route + the synced side list.
+  The PEN/INK look is a pure CSS re-theme of its tokens and layer classes; lit windows are killed
+  with `flicker.rate: 1e9`. The harness owns NO pin.
 
 ## Data (asset-truth)
-`osm.js -> osm-agronomichne.js`. 80 real in-window streets, 6 real POIs with verbatim names +
-real minutes + real Dijkstra route paths. Coords 49.18N 28.33E. Nothing invented.
+`osm.js` (shared with the etalon). The real in-window streets, 6 real POIs with verbatim names +
+real minutes + real Dijkstra route paths. Coords 49.18° Пн · 28.33° Сх. Plot 22,5 сотки on вул.
+Перемоги. Nothing invented.
 
 ## Gate
-`__LAB_OK__` true, pins === 1, blocksLegible === 1 across the scroll, full sketch under
+`__LAB_OK__` true, pins === 0, >= 6 clickable `.lm-row` rows, click draws a `.lm-route` with the
+honest `N хв · M м` badge, PEN/INK map-style unmistakable in one screenshot, full plan under
 reduced-motion, no overflow at 390px, zero console errors, zero em/en-dash.

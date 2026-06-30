@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--dive-to-the-gate · Район уночі</title>
+<!--
+  SECTION VARIANT, location--dive-to-the-gate (role: location). MAP-STYLE = NIGHT-NEON (click-driven).
+  CONTROLLED-INTERACTIVE model (the smarts Агрономічне model): a dense, real baked OSM district of
+  с. Агрономічне (real road hierarchy by class, real building footprints with warm-lit windows so the
+  town reads as alive after dark, the site parcel inside a true-scale 10-minute walking ring) REVEALS
+  on scroll-in once. After that there is NO pin and NO forced stepping and NO scale dive: the USER
+  clicks (or hovers) any of the 6 real POIs, on the map or in the visible side list, and THAT draws
+  the real Dijkstra route along the actual streets while a walking dot travels it and the live minute
+  badge shows the honest walk-time. Two-way hover (pin to list row and back). This is locmap-engine's
+  native interaction; no scroll-lock, the visitor drives. Nothing animates the map after the reveal,
+  so the grid never floats.
+
+  NIGHT-NEON treatment: a near-black field with a faint cool glow. The road hierarchy GLOWS by rank
+  via filter drop-shadow (cyan on the highway, amber on the main artery), the casing very dark. A low
+  rate of warm-lit windows is ON (flicker.rate 9, the town lit at night). The active route is hot amber
+  with a glowing walker; parcel + ring luminous; POI discs lit. It reads instantly as the town grid lit
+  up at night.
+
+  asset-truth: streets/footprints/green from osm.js; the site at 746.3,324.9; POI names + minutes are
+  the 6 real ones (Школа·садок 9хв, Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв,
+  Аврора 18хв). Two REAL street labels (вул. Перемоги, вул. Грушевського) ride the night map. Coords
+  49.18 Пн · 28.33 Сх, 5 хвилин від Вінниці. NOTHING invented.
+  __LAB_OK__ passes only if: 0 pins (pin-less click section), the cited real atom ran,
+  [data-render-surface] painted (the night field), 0 real console errors. NO WebGL/canvas/tiles/
+  mix-blend/backdrop-filter.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin. */
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* the stage is a full-viewport night map + a reading rail; a normal-flow block (no pin) */
+  #combo.combo-stage { background: #05060a; min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
+
+  /* NIGHT-NEON PALETTE: re-point every engine token to a nocturnal register. This is the whole
+     "different map style": same engine, different paint. Near-black field, luminous accent. */
+  #combo.combo-stage,
+  .night__field {
+    --lm-ink: #cfe4ff;           /* cool moonlit ink for foreground text */
+    --lm-bg-1: #0a0d16;          /* night field gradient inner */
+    --lm-bg-2: #04050a;          /* night field gradient outer + road casing (very dark) */
+    --lm-accent: #ffb24d;        /* hot amber, reserved for the active route + parcel */
+    --lm-accent-soft: #ffc878;
+    --lm-lit: 255,196,120;       /* warm lit-window rgb (lamps in the windows) */
+  }
+
+  /* the render surface = the near-black night field with a faint cool glow gradient. A real CSS
+     background so the honest paint-probe sees a painted surface from load, and so it reads as a town
+     seen from above at night before the SVG even paints. */
+  .night__field {
+    position: absolute; inset: 0; overflow: clip;
+    background-color: #07080c;
+    background-image:
+      radial-gradient(70% 56% at 60% 42%, rgba(70,120,190,.16), rgba(70,120,190,0) 60%),
+      radial-gradient(95% 80% at 38% 72%, rgba(255,178,77,.06), rgba(255,178,77,0) 58%),
+      radial-gradient(125% 110% at 56% 44%, #0a0d16, #05060a 82%);
+  }
+  .night__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the engine's stage gradient would re-tint the field; keep our night field under the SVG */
+  .night__field.lm__stage, .night__field.lm { background-color: #07080c; }
+
+  /* ---- NIGHT-NEON MAP TREATMENT: redraw the engine SVG classes for a town lit after dark ---- */
+  /* green sunk to a near-invisible cool wash; water a faint moonlit blue */
+  .night__field .lm-gw--green { fill: rgba(60,96,120,.06); }
+  .night__field .lm-gw--water { fill: rgba(70,120,190,.12); }
+
+  /* buildings: dark slabs with a faint cool edge; the --lit slabs glow warm (lamps on) */
+  .night__field .lm-bld      { fill: rgba(120,160,210,.05); stroke: rgba(120,160,210,.07); stroke-width: 0.6; }
+  .night__field .lm-bld--lit { fill: rgba(var(--lm-lit),.30); stroke: rgba(var(--lm-lit),.34);
+    filter: drop-shadow(0 0 2.2px rgba(255,196,120,.55)); }
+
+  /* road hierarchy: the grid GLOWS by rank. The casing is very dark (the unlit asphalt halo) and the
+     stroke over it is neon, with a drop-shadow bloom that grows with the road class. Widths kept from
+     the engine ranking; only colour + glow change. Highway cyan, main artery amber, the rest cool. */
+  .night__field .lm-rdc { stroke: #04050a; }
+  .night__field .lm-rd--hwy   { stroke: rgba(120,224,255,.92); filter: drop-shadow(0 0 4px rgba(90,210,255,.85)); }
+  .night__field .lm-rd--main  { stroke: rgba(255,196,120,.88); filter: drop-shadow(0 0 3.4px rgba(255,178,77,.7)); }
+  .night__field .lm-rd--mid   { stroke: rgba(150,196,240,.42); filter: drop-shadow(0 0 1.6px rgba(120,180,240,.4)); }
+  .night__field .lm-rd--minor { stroke: rgba(150,196,240,.24); }
+  .night__field .lm-rd--faint { stroke: rgba(150,196,240,.11); }
+  /* street labels: cool moonlit ink, a faint glow so the names read over the dark field */
+  .night__field .lm-rdname { fill: rgba(180,212,255,.6); text-anchor: middle; font-weight: 600;
+    text-shadow: 0 0 6px rgba(60,120,190,.6); }
+
+  /* parcel: luminous amber hatch + glowing stroke; the tag in cool ink */
+  .night__field #lmHatch rect { fill: rgba(255,178,77,.12); }
+  .night__field #lmHatch line { stroke: rgba(255,196,120,.55); }
+  .night__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.8;
+    filter: drop-shadow(0 0 5px rgba(255,178,77,.85)); }
+  .night__field .lm-pulse  { stroke: var(--lm-accent-soft); }
+  .night__field .lm-sitetag { fill: #fff3df; text-shadow: 0 0 8px rgba(255,178,77,.7); }
+
+  /* walking ring: luminous cool dashed circle */
+  .night__field .lm-ring  { stroke: rgba(120,200,255,.4); filter: drop-shadow(0 0 2px rgba(90,180,255,.5)); }
+  .night__field .lm-ringt { fill: rgba(180,212,255,.55); }
+
+  /* numbered POIs: dark disc, glowing cool ring, lit numeral; active flips to the hot amber accent */
+  .night__field .lm-pt circle { fill: #0a0e18; stroke: rgba(140,210,255,.85); stroke-width: 1.4;
+    filter: drop-shadow(0 0 3px rgba(100,190,255,.55)); }
+  .night__field .lm-pt text   { fill: #dbecff; }
+  .night__field .lm-pt:hover circle, .night__field .lm-pt.is-on circle {
+    fill: var(--lm-accent); stroke: #fff3df; filter: drop-shadow(0 0 6px rgba(255,178,77,.95)); }
+
+  /* the warm moment: the active Dijkstra route + walker + live badge, all glowing amber */
+  .night__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.4;
+    filter: drop-shadow(0 0 4px rgba(255,178,77,.9)); }
+  .night__field .lm-walker { fill: #fff3df; stroke: var(--lm-accent);
+    filter: drop-shadow(0 0 5px rgba(255,178,77,.95)); }
+  .night__field .lm-livet  { fill: #0a0e18; font-weight: 600; }
+  .night__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent-soft); }
+
+  /* the standing section label top-left */
+  .night__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
+    font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(180,212,255,.5); text-shadow: 0 1px 14px rgba(0,0,0,.6); pointer-events: none;
+  }
+
+  /* ---- the reading rail: eyebrow + a serif title + hint + a CLICKABLE list of the 6 real POIs ---- */
+  .night__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(22px, 6vh, 56px);
+    width: min(40ch, 88vw);
+  }
+  @media (min-width: 900px) {
+    .night__rail { left: auto; right: clamp(24px, 4vw, 60px); top: 50%; bottom: auto;
+      transform: translateY(-50%); width: min(32ch, 34vw); }
+  }
+  .night__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(255,196,120,.7); margin: 0 0 .5rem; text-shadow: 0 1px 16px rgba(0,0,0,.6);
+  }
+  .night__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.7rem, 3vw, 2.7rem); line-height: 1.0; letter-spacing: -.03em;
+    color: #eaf3ff; margin: 0 0 .4rem; text-shadow: 0 2px 26px rgba(0,0,0,.6);
+  }
+  .night__hint {
+    font: 500 .76rem/1.45 var(--combo-sans); letter-spacing: .01em;
+    color: rgba(207,228,255,.55); margin: 0 0 clamp(.9rem, 2vh, 1.4rem);
+    text-shadow: 0 1px 14px rgba(0,0,0,.55);
+  }
+  .night__coords {
+    display: block; margin-top: .4rem;
+    font: 500 .62rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(180,212,255,.34); text-transform: none;
+  }
+  /* the list the engine fills with .lm-row rows (click + hover drives the route) */
+  .night__list { display: block; }
+
+  /* re-skin the engine's .lm-row rows for the night palette (engine ships brighter cream defaults) */
+  .night__rail .lm-row { padding: .62rem 0; border-bottom: 1px solid rgba(180,212,255,.12);
+    color: #dbecff; text-shadow: 0 1px 12px rgba(0,0,0,.5); transition: background .25s, padding-left .25s; }
+  .night__rail .lm-row .n  { color: rgba(255,196,120,.75); }
+  .night__rail .lm-row .tm { color: rgba(207,228,255,.6); }
+  .night__rail .lm-row:hover, .night__rail .lm-row.is-on { background: rgba(120,200,255,.06); padding-left: .5rem; }
+  .night__rail .lm-row.is-on .n { color: var(--lm-accent); }
+
+  .combo-pre, .combo-post { background: #04050a; color: rgba(180,212,255,.4); }
+
+  @media (prefers-reduced-motion: reduce) { .night__rail .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">скрол ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--night-neon">
+
+    <!-- the night field + the side list host. locmap-engine injects the SVG here. -->
+    <div class="night__field lm" data-lm-stage data-render-surface></div>
+
+    <p class="night__label">с. Агрономічне · за даними OpenStreetMap</p>
+
+    <div class="night__rail">
+      <p class="night__eyebrow">Район уночі</p>
+      <h2 class="night__title">Що поруч</h2>
+      <p class="night__hint">Натисніть місце, щоб побачити шлях і час пішки.
+        <span class="night__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+      <!-- the engine fills this with clickable rows (two-way synced with the map pins) -->
+      <div class="night__list" data-lm-list></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (canon engine) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+
+    // ---- ENGINE: the dense real night map, re-themed neon via CSS. owns_pin FALSE; reveal once on
+    //      scroll-in; CLICK/HOVER on a POI or a list row draws its real Dijkstra route ----
+    SectionHarness.ranOK('locmap-engine', function () {
+      window.LocMap.create('#combo', {
+        // REAL street labels (engine renders data.names as .lm-rdname). The dataset carries per-road
+        // name strings but no top-level names array, so the frontage read as an unlabelled footprint
+        // grid. These are REAL OSM names with REAL geometry: вул. Перемоги is the parcel frontage
+        // (main road just W of the site), вул. Грушевського a real cross street. NOTHING invented.
+        data: Object.assign({}, OSM, {
+          names: [
+            { n: 'вул. Перемоги',     x: 688, y: 317, a: -3.5 },
+            { n: 'вул. Грушевського', x: 600, y: 340, a: 67 }
+          ],
+          site: Object.assign({}, OSM.site, { tag: 'Тут будується' })
+        }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true,
+        flicker: { rate: 9 },     // night map: a low rate of warm-lit windows (the town lit after dark)
+        reveal: { start: 'top 70%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award'
+      });
+    });
+
+    // pin-less, controlled-interactive section: the visitor clicks to draw routes. 0 pins.
+    // NO SectionHarness.pin(), NO scale dive, NO scroll-stepping.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>
