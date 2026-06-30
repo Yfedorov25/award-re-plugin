@@ -7,7 +7,7 @@ status: base
 family: floorplan-smarts
 palette: ever-light
 entry:
-  call: "combo-lab.html — composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js."
+  call: "combo-lab.html - composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js."
   module: section-variant
 uses:
   - { atom: numbered-floorplate-select, job: "L2 clean redrawn floorplate of the real floor-std-clean.svg (viewBox 100x44.08, 18 room rects); per-unit footprints from units.json pos + centroid number pills; status-coded hover wash + top card" }
@@ -49,7 +49,7 @@ note: |
   dark) + compare-two. Reference: D_ever_visualsearch_video.md + D_era_springs_visualsearch_video.md.
 ---
 
-# floorplan-smarts--museum-daylight — EVER light full drill on the real 54-apartment building
+# floorplan-smarts--museum-daylight - EVER light full drill on the real 54-apartment building
 
 The conversion-core floorplan in the EVER museum-daylight skin: facade floor-bands (off-facade hover
 card) -> clean redrawn numbered floorplate + a persistent unit list with live counts -> calm veil

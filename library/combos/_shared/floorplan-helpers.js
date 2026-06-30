@@ -1,10 +1,10 @@
 /* ============================================================================
-   floorplan-helpers.js — SHARED data + helpers for the 9 floorplan section variants.
+   floorplan-helpers.js - SHARED data + helpers for the 9 floorplan section variants.
    Written ONCE, imported by every floorplan-* combo-lab (ES module).
    ----------------------------------------------------------------------------
    Carries the REAL asset-truth data (smarts units.json + towns content.js, copied
    verbatim this session) + the converters/formatters/SVG builders the combos share.
-   No engine internals here — this only PREPARES data the three atoms consume.
+   No engine internals here - this only PREPARES data the three atoms consume.
    LAWS: $ never the ruble default; zero invented data; zero em/en-dash anywhere.
    ============================================================================ */
 
@@ -15,7 +15,7 @@ export const STATUS_WORD_F = { available: 'Вільна', reserved: 'Бронь'
 export const STATUS_WORD_M = { available: 'Вільний', reserved: 'У броні', sold: 'Проданий' }; // masculine (таун, блок)
 
 /* ============================================================================
-   SMARTS — REAL, from apps/smarts/data/units.json (verified this session)
+   SMARTS - REAL, from apps/smarts/data/units.json (verified this session)
    54 units, 18 per floor on "2","3","m"; 2 types; $950/m2.
    pos {x,y,w,h} are PERCENT of the floorplate -> convert to numbered-floorplate
    points in the floor-std-clean.svg viewBox (100 x 44.08).
@@ -58,7 +58,7 @@ export function smartsUnitsForFloor(rawUnits, floorId) {
   });
 }
 
-// a mini floor-locator svg (this unit filled dark) reusing the real pos rects — for veil L3 floorChipSVG.
+// a mini floor-locator svg (this unit filled dark) reusing the real pos rects - for veil L3 floorChipSVG.
 // NOT a Flip target (static svg); built per unit, active cell solid.
 export function smartsFloorChip(rawUnits, floorId, activeCode) {
   const cells = rawUnits.filter((u) => u.floor === floorId).map((u) => {
@@ -74,13 +74,44 @@ export function smartsFloorChip(rawUnits, floorId, activeCode) {
     '" fill="none" stroke="var(--fp-loc-off,#aeb6bc)" stroke-width="0.3"/>' + cells + '</svg>';
 }
 
+// a mini SITE/STACK locator for the smarts veil L3: the 4 levels over the commerce plinth, THIS floor solid.
+// Real data (SMARTS_FLOORS + the commerce plinth), reusing data-block so the atom's active-fill could also drive it.
+// Static svg; the active level uses var(--fp-loc-on). NOT a Flip target.
+export function smartsSiteChip(activeFloorId) {
+  // levels top->bottom: мансарда (m), 3, 2, then the commerce plinth (not selectable)
+  const levels = [
+    { id: 'm', label: 'М' },
+    { id: '3', label: '3' },
+    { id: '2', label: '2' },
+  ];
+  const bandH = 9, gap = 1.4, plinthH = 7, w = 40;
+  let y = 1.2, rows = '';
+  levels.forEach((lv) => {
+    const on = lv.id === activeFloorId;
+    rows += '<rect data-block="' + lv.id + '" x="1.2" y="' + y.toFixed(1) + '" width="' + (w - 2.4) +
+      '" height="' + bandH + '" rx="1" fill="' + (on ? 'var(--fp-loc-on,#1e2227)' : 'none') + '" ' +
+      'stroke="' + (on ? 'var(--fp-loc-on,#1e2227)' : 'var(--fp-loc-off,#aeb6bc)') + '" stroke-width="0.5"/>';
+    rows += '<text x="' + (w / 2) + '" y="' + (y + bandH / 2 + 1.5).toFixed(1) + '" text-anchor="middle" ' +
+      'font-size="4.4" font-family="Inter, sans-serif" fill="' + (on ? '#fff' : 'var(--fp-loc-off,#8a949b)') + '">' + lv.label + '</text>';
+    y += bandH + gap;
+  });
+  // the commerce plinth (always neutral, never the active unit)
+  const ph = y;
+  rows += '<rect x="1.2" y="' + ph.toFixed(1) + '" width="' + (w - 2.4) + '" height="' + plinthH +
+    '" rx="1" fill="#e4e7ea" stroke="var(--fp-loc-off,#aeb6bc)" stroke-width="0.5"/>';
+  rows += '<text x="' + (w / 2) + '" y="' + (ph + plinthH / 2 + 1.5).toFixed(1) +
+    '" text-anchor="middle" font-size="3.4" font-family="Inter, sans-serif" fill="#8a949b" letter-spacing="0.5">КОМЕРЦІЯ</text>';
+  const totalH = ph + plinthH + 1.2;
+  return '<svg viewBox="0 0 ' + w + ' ' + totalH.toFixed(1) + '" preserveAspectRatio="xMidYMid meet">' + rows + '</svg>';
+}
+
 /* ============================================================================
-   TOWNS — REAL, from apps/towns/data/content.js (verified this session)
+   TOWNS - REAL, from apps/towns/data/content.js (verified this session)
    6 identical townhouses, the ONLY real differentiator is position (edge vs middle).
    ALL available (no invented sold/reserved). Plot 121..139 m2 stated ONCE as a range.
    Calibrated hit-zones copied verbatim from apps/towns/src/js/sections/units.js.
    selector render = selector-row-6-day.png, intrinsic 1920 x 814 (near-orthographic,
-   FLAT front quads — no perspective side faces).
+   FLAT front quads - no perspective side faces).
    ============================================================================ */
 export const TOWNS_IMG = { w: 1920, h: 814 };
 // calibrated zones from towns units.js (x/w in viewBox-100 over the render; px = pin center-of-mass)
@@ -134,7 +165,7 @@ export const TOWNS_HONESTY = 'Повне планування покажемо �
 export const TOWNS_PRICE_NOTE = '67 тисяч доларів це ціна на старті будівництва. Далі вона зростатиме.';
 
 /* ============================================================================
-   TOWER-1to1 — SYNTHETIC but self-consistent (openly a demo: "Демонстраційний проєкт").
+   TOWER-1to1 - SYNTHETIC but self-consistent (openly a demo: "Демонстраційний проєкт").
    area x flat rate so price never contradicts area. 8 units per floor (matches the
    authored tower-floor-clean.svg 8 footprints). Two korpus. Status by floor band.
    ============================================================================ */

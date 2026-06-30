@@ -12,7 +12,7 @@ composition: "TOWNS shortened drill: real 6-house front render RIGHT + an OFF-fa
 webgl: false
 ease: award
 entry:
-  call: "combo-lab.html — clean-floor-hover-select over the real selector-row-6-day.png (flat front quads) with its tooltip suppressed; an off-facade rail card drives the spec; click -> veil-flat-detail-reveal town page. Data from _shared/floorplan-helpers.js (TOWNS_*)."
+  call: "combo-lab.html - clean-floor-hover-select over the real selector-row-6-day.png (flat front quads) with its tooltip suppressed; an off-facade rail card drives the spec; click -> veil-flat-detail-reveal town page. Data from _shared/floorplan-helpers.js (TOWNS_*)."
   module: section-variant
 meaning:
   what: "The conversion-core floorplan for the TOWNS-type object (6 identical townhouses in a row) in the ERA dark skin, taking the live towns-zamkova site as the base and FIXING its two faults. SHORTENED drill (the unit IS the whole house): the real front render of the 6-house row sits RIGHT with flat per-house hover zones + number pins; the spec card lives in an OFF-facade LEFT rail and a hairline tether points to the hovered house, so the row of 6 is never covered (THE F-20 FIX, owner complaint #1). Click a house -> a deep two-tone veil town-detail: a giant 'Таунхаус №N' spec rail beside a plan canvas of PROPORTIONAL labelled room tiles built from the REAL room areas (owner complaint #2: the under-developed town page), with an honest 'візуалізація' caption + a row-locator showing THIS house. Controlled-click; 0 pins; NO-WebGL."
@@ -54,7 +54,7 @@ note: |
   apps/towns/pages/town.html rebuild (vite) follows after owner approves this direction.
 ---
 
-# floorplan-towns--row-elevation-rail — pick 1 of 6 with the spec OFF the facade (the F-20 fix) + a deep town page
+# floorplan-towns--row-elevation-rail - pick 1 of 6 with the spec OFF the facade (the F-20 fix) + a deep town page
 
 ERA dark. The real 6-house front render with flat hover zones + number pins; the spec card lives in an
 OFF-facade left rail with a hairline tether so the row is never covered (fixes the live site's

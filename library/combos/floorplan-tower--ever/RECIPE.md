@@ -12,7 +12,7 @@ composition: "TOWER full drill (EVER replica): korpus toggle + facade floor-hove
 webgl: false
 ease: award
 entry:
-  call: "combo-lab.html — clean-floor-hover-select over the Higgsfield tower render (traced bands) + numbered-floorplate-select over the authored tower-floor-clean.svg + veil-flat-detail-reveal. Synthetic demo data from _shared/floorplan-helpers.js (TOWER_*) + _assets/floorplan tower vectors."
+  call: "combo-lab.html - clean-floor-hover-select over the Higgsfield tower render (traced bands) + numbered-floorplate-select over the authored tower-floor-clean.svg + veil-flat-detail-reveal. Synthetic demo data from _shared/floorplan-helpers.js (TOWER_*) + _assets/floorplan tower vectors."
   module: section-variant
 meaning:
   what: "An almost 1:1 EVER replica of the full visual-search drill on a LARGE multi-korpus tower, to prove the system reproduces award sites faithfully. L1: a Higgsfield-generated tower render with a korpus A/B toggle and traced floor bands; hovering a floor tints it terracotta + a left beige tooltip card y-tracks the hovered floor (the EVER move). Click -> L2: a clean numbered floorplate of 8 units round a central core (the authored tower-floor-clean.svg) + a persistent unit list with self-consistent demo data. Click -> L3: the calm veil two-tone flat-detail with an authored clean type-plan. Controlled-click; 0 pins; NO-WebGL."
@@ -52,7 +52,7 @@ note: |
   variants: era (dark copper + cinematic photo-bleed L3) + springs (cream sepia + left preview-pane).
 ---
 
-# floorplan-tower--ever — an almost 1:1 EVER replica on our own multi-korpus tower
+# floorplan-tower--ever - an almost 1:1 EVER replica on our own multi-korpus tower
 
 EVER light. Full drill on a Higgsfield tower: facade floor-hover with the EVER y-tracking tooltip +
 korpus A/B toggle -> clean numbered floorplate of 8 units round a core -> calm veil two-tone

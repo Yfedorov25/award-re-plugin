@@ -94,6 +94,20 @@
   .vfd-overlay .vfd-rail { color:#e9edf0; }
   .vfd-overlay .vfd-type { color:#fff; }
   .vfd-overlay .vfd-price { color:var(--tw-accent-soft); }
+  /* FIX-A (F-21): a PROMINENT back control on the ERA dark rail with the terracotta accent. A clearly
+     bordered pill + the arrow + a strong hover (fills terracotta), large click target, top-left, so
+     getting OUT of the chosen town is the most obvious affordance after the CTA. */
+  #tw-detail .vfd-back { display:inline-flex; align-items:center; gap:.6rem; padding:.5rem .95rem .5rem .55rem;
+    border:1px solid rgba(192,132,87,.55); border-radius:999px; background:rgba(26,34,43,.85);
+    color:var(--tw-ink); font:600 .66rem/1 var(--combo-sans); letter-spacing:.13em; text-transform:uppercase;
+    cursor:pointer; transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+    box-shadow:0 2px 12px rgba(0,0,0,.3); }
+  #tw-detail .vfd-back:hover { background:var(--tw-accent); border-color:var(--tw-accent); color:#11161c; transform:translateX(-2px); }
+  #tw-detail .vfd-back__o { width:32px; height:32px; border-radius:50%; border:1px solid rgba(192,132,87,.6);
+    display:inline-flex; align-items:center; justify-content:center; font-size:1rem; line-height:1;
+    background:rgba(192,132,87,.16); color:var(--tw-accent-soft);
+    transition:background .18s ease, color .18s ease, border-color .18s ease; }
+  #tw-detail .vfd-back:hover .vfd-back__o { background:#11161c; border-color:#11161c; color:var(--tw-accent-soft); }
   /* the placeholder plan = proportional labelled room tiles (real areas, NO invented footprint) */
   .tw-plan-tiles { width:100%; max-width:520px; }
   .tw-plan-tiles__fl { margin-bottom:1.1rem; }
@@ -266,7 +280,7 @@
       var h=TOWNS_HOUSES[n-1];
       twVfd.open({
         type:'Таунхаус №'+n, sub:h.pos+' · вул. Замкова', areaM2:82, areaUnit:'м²', price:67000,
-        status:'sale', crumbs:'Ряд таунхаусів — №'+n+' — '+h.pos,
+        status:'sale', crumbs:'Ряд таунхаусів · №'+n+' · '+h.pos,
         floorChipSVG:rowLocatorSVG(n), floorNr:n
       });
       // the plan canvas = proportional room tiles (HTML, not an <svg> string -> inject directly,
