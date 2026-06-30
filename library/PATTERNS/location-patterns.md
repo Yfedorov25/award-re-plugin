@@ -20,22 +20,32 @@
 >
 > ## A0. The MAP-STYLE taxonomy (the CURRENT lane)
 >
-> All members render the SAME dense real OSM (via `locmap-engine`, `owns_pin=FALSE`, the
-> HARNESS owns the one pin), with the SAME real Dijkstra routes + live minute counter and the
-> SAME 6 real POIs. They differ ONLY in cartographic TREATMENT, achieved **entirely in the
-> variant `<style>`** by re-pointing the engine CSS tokens (`--lm-ink`, `--lm-bg-1/2`,
-> `--lm-accent`, `--lm-accent-soft`, `--lm-lit`) and overriding the road / building / parcel /
-> ring / POI / route classes. **The engine code is NEVER forked or edited.** The proven
-> re-theme reference is `combos/location--hi-contrast-mono/combo-lab.html`.
+> All members render the SAME dense real OSM (via `locmap-engine`, `owns_pin=FALSE`), with the
+> SAME real Dijkstra routes + honest live minute badge and the SAME 6 real POIs. They differ ONLY
+> in cartographic TREATMENT, achieved **entirely in the variant `<style>`** by re-pointing the
+> engine CSS tokens (`--lm-ink`, `--lm-bg-1/2`, `--lm-accent`, `--lm-accent-soft`, `--lm-lit`) and
+> overriding the road / building / parcel / ring / POI / route / `.lm-row` classes. **The engine
+> code is NEVER forked or edited.** The proven re-theme + interaction reference is
+> `combos/location--surveyed-route-map/combo-lab.html`.
 >
-> Live + planned map styles (each a different-looking REAL map):
+> **INTERACTION MODEL = CONTROLLED CLICK (the smarts Агрономічне model), owner-mandated 2026-06-30.**
+> The map REVEALS on scroll-in once, then there is NO pin, NO forced scroll-stepping, NO scale-dive.
+> The visitor clicks/hovers any of the 6 real POIs (on the map OR in a VISIBLE side list,
+> `data-lm-list`) and THAT draws its route + honest badge; two-way pin<->row hover. Every variant is
+> **pin-LESS** (`SectionHarness.declare({ pinOwner:'none', expectPins:0 })`). The earlier
+> scroll-FORCED stepping (`SectionHarness.pin` + scrub auto-steps) and the scale-dive were REJECTED:
+> the dive scaled the SVG from origin so the map "floated/swam" and labels blew up oversized (see
+> FAILURES-LOG F-19). "Більше керованого інтерактиву, а не вимушеного." Do NOT add a pin or a
+> scroll-driven step/scale to a location map variant; let the visitor drive.
+>
+> The 6 live map styles (each a different-looking REAL map, all controlled-click):
 > - **Dark dusk** (the ideal) — `surveyed-route-map`. Warm-dark field, lit windows, terracotta route.
 > - **Hi-contrast mono** — `hi-contrast-mono`. Pure black linework on white, ONE red route accent, no lit windows.
 > - **Heritage sepia** — `heritage-sepia`. Aged warm paper + vignette, sepia roads, rust route. Premium/villa.
-> - **Light editorial + radiating threads** — `concierge-radiate` (reworked). Cream-day real map + leader-threads splaying to the real POIs.
-> - **Scale-zoom through real maps** — `dive-to-the-gate` (reworked). One real map dived region → district → parcel.
-> - **Pen-sketch** — `architects-sketch`. Ink hand-drawing that is GEOGRAPHICALLY ACCURATE (real OSM roads via dashoffset). The one "drawn" style that still reads as a real survey.
-> - (open palette directions for future work: blueprint/cyanotype, night-neon, topographic-contour, satellite-tinted.)
+> - **Blueprint / cyanotype** — `blueprint-survey` (was `concierge-radiate`). Deep cyan + faint blueprint grid, white linework, warm-white route. Architect register.
+> - **Night-neon** — `night-neon` (was `dive-to-the-gate`). Near-black, road hierarchy GLOWS by rank (cyan/amber drop-shadow), lit windows, amber route. Premium night.
+> - **Pen / ink drafting** — `architects-sketch`. Thin dark-ink strokes on drafting paper, the REAL dense OSM (rebuilt on `locmap-engine` so it also clicks). Austere studio register.
+> - (open palette directions for future work: topographic-contour, satellite-tinted.)
 >
 > **The re-theme recipe (how to add a map style):**
 > 1. Copy `hi-contrast-mono/combo-lab.html`; rename its class prefix + ids/vars to your own.
