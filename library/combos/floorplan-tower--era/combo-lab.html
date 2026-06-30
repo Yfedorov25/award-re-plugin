@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: floorplan-tower--era · Вежа (репліка ERA, темна мідь)</title>
+<!--
+  SECTION VARIANT, floorplan-tower--era (role: floorplan). PALETTE = ERA DARK (navy stage + copper).
+  TOWER family ERA sister of floorplan-tower--ever. SAME full drill + SAME synthetic tower data + SAME
+  authored tower vectors, only RE-SKINNED to ERA dark copper + ONE signature move.
+  FULL drill: korpus+floor (facade floor-hover, y-tracking tooltip) -> unit (numbered floorplate, top card)
+  -> flat (veil, cinematic photo-bleed). Controlled-click; 0 pins; NO-WebGL.
+
+  SIGNATURE MOVE (ERA cinematic): L3 photo-bleed. A warm evening interior image bleeds BEHIND a GIANT
+  serif AREA numeral on the LEFT of the flat-detail, with the dark copper plan panel beside it. The image
+  is decode-guarded: if 'fp-assets/interior-evening.webp' is missing it never throws and the rail still
+  renders (the numeral + plan + spec carry the canvas alone).
+
+  asset-truth posture: tower render is Higgsfield-generated and data is OPENLY SYNTHETIC (a demo project),
+  carrying the "Демонстраційний проєкт" legal line. Self-consistent (area x rate, 8 units/floor matching
+  the authored tower-floor-clean.svg footprints). Floor bands traced off a coordinate grid (not guessed).
+  __LAB_OK__: 0 pins, atoms ran, surface painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/clean-floor-hover-select/component.css">
+<link rel="stylesheet" href="../../components/numbered-floorplate-select/component.css">
+<link rel="stylesheet" href="../../components/veil-flat-detail-reveal/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ===== ERA DARK skin (navy stage + copper). transform/opacity/clip-path/stroke-dashoffset only. ===== */
+  :root { --tv-plate:#1c2530; --tv-accent:#c08457; --tv-accent-2:#d6a079; --tv-ink:#eef2f5; --tv-navy:#0f1620; --tv-slate:#16202b; }
+  #combo.combo-stage { background:#0b1119; height:100vh; min-height:100vh; display:grid; grid-template-rows:auto 1fr; padding:0; }
+
+  .tv-head { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; padding:clamp(1rem,3vh,2rem) clamp(1.4rem,3vw,3rem) .3rem; }
+  .tv-eyebrow { margin:0; font:600 .64rem/1 var(--combo-sans); letter-spacing:.26em; text-transform:uppercase; color:var(--tv-accent); }
+  .tv-h { margin:.2rem 0 0; font-family:var(--combo-serif); font-weight:300; font-size:clamp(1.5rem,2.5vw,2.3rem); line-height:1.02; letter-spacing:-.02em; color:#e9eef2; }
+  .tv-h em { font-style:italic; color:var(--tv-accent-2); }
+  .tv-korpus { display:flex; gap:.5rem; }
+  .tv-kbtn { padding:.5rem 1rem; border-radius:999px; border:1px solid rgba(192,132,87,.4); background:none; color:#c9d2da; font:600 .72rem/1 var(--combo-sans); letter-spacing:.06em; cursor:pointer; transition:background .16s,color .16s; }
+  .tv-kbtn.is-on { background:var(--tv-accent); color:#1a120b; border-color:var(--tv-accent); }
+
+  .tv-stage { position:relative; margin:0 clamp(1rem,2.4vw,2.4rem) clamp(1rem,2.4vh,2rem); border-radius:8px; overflow:hidden; }
+
+  /* L1: tower facade + traced floor bands + a left tooltip card (ERA y-tracking, copper) */
+  .tv-l1 { position:absolute; inset:0; display:grid; grid-template-columns:minmax(210px,23%) 1fr; background:var(--tv-navy); }
+  .tv-l1.is-hidden { visibility:hidden; }
+  .tv-l1__rail { padding:clamp(1.2rem,3vh,2rem) clamp(1rem,1.6vw,1.6rem); color:#dbe2e8; border-right:1px solid rgba(192,132,87,.18); display:flex; flex-direction:column; gap:.6rem; }
+  .tv-l1__k { font:600 .58rem/1 var(--combo-sans); letter-spacing:.22em; text-transform:uppercase; color:rgba(214,160,121,.7); }
+  .tv-l1__legal { margin-top:auto; font:500 .58rem/1.4 var(--combo-sans); color:rgba(219,226,232,.4); }
+  .cfh-stage { position:relative; display:grid; place-items:center; padding:clamp(.6rem,2vh,1.4rem); }
+  .cfh-render { position:relative; height:100%; aspect-ratio:3712 / 4608; max-height:78vh; }
+  .cfh-render .cfh-img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+  .cfh-floors { position:absolute; inset:0; width:100%; height:100%; }
+  .cfh-band { fill:var(--tv-accent); fill-opacity:0; stroke:var(--tv-accent-2); stroke-opacity:0; stroke-width:2; cursor:pointer;
+    transition:fill-opacity .15s, stroke-opacity .15s; }
+  .cfh-band.is-hover { fill-opacity:.42; stroke-opacity:.9; }
+  /* the ERA left tooltip card (y-tracks the hovered floor over the render), dark copper */
+  .cfh-card { position:absolute; left:clamp(.6rem,2vw,1.4rem); top:0; z-index:5; pointer-events:none;
+    background:#241812; color:#f0e2d6; border:1px solid rgba(192,132,87,.5); border-radius:8px; padding:.7rem .9rem; min-width:150px; box-shadow:0 6px 22px rgba(0,0,0,.5); }
+  .cfh-card::after { content:""; position:absolute; right:-7px; top:50%; transform:translateY(-50%); border:7px solid transparent; border-left-color:#241812; }
+  .cfh-card__num { font-family:var(--combo-serif); font-weight:300; font-size:2rem; line-height:1; color:var(--tv-accent-2); }
+  .cfh-card__lab { font:600 .56rem/1 var(--combo-sans); letter-spacing:.2em; text-transform:uppercase; opacity:.65; }
+  .cfh-card__sub { display:block; margin-top:.35rem; font:500 .76rem/1.3 var(--combo-sans); }
+
+  /* L2: numbered floorplate + persistent unit list (copper-themed plate) */
+  .tv-l2 { position:absolute; inset:0; display:grid; grid-template-columns:1fr minmax(230px,23%); background:var(--tv-navy); visibility:hidden; }
+  .tv-l2.is-on { visibility:visible; }
+  .tv-l2 .nfp-stage { background:var(--tv-navy); padding:clamp(1rem,3vh,2rem) clamp(1rem,2vw,2rem); min-height:0; height:100%; grid-template-columns:180px 1fr; }
+  .tv-l2 .nfp-stagecard { background:var(--tv-plate); }
+  /* re-skin the plate copper: zones + pills + plan strokes read copper on the dark plate */
+  .tv-l2 .nfp-zone { stroke:rgba(192,132,87,.55); }
+  .tv-l2 .nfp-plan [stroke] { stroke:rgba(214,160,121,.65); }
+  .tv-l2 .nfp-plan [fill]:not([fill="none"]) { fill:rgba(192,132,87,.08); }
+  .tv-l2 .nfp-pill circle { fill:var(--tv-accent); }
+  .tv-l2 .nfp-pill text { fill:#1a120b; }
+  .tv-l2 .nfp-back,.tv-l2 .nfp-floornum,.tv-l2 .nfp-floorsel { color:#e7ecef; }
+  .tv-list { border-left:1px solid rgba(192,132,87,.18); padding:clamp(1.1rem,3vh,2rem) clamp(.9rem,1.4vw,1.3rem); overflow:auto; color:#e7ecef; }
+  .tv-list__t { font-family:var(--combo-serif); font-weight:300; font-size:1.3rem; color:#eef2f5; }
+  .tv-list ul { list-style:none; margin:.6rem 0 0; padding:0; display:flex; flex-direction:column; gap:.25rem; }
+  .tv-row { display:grid; grid-template-columns:2.4ch 1fr auto; gap:.6rem; align-items:baseline; cursor:pointer; padding:.45rem .5rem; border-radius:5px; border:1px solid transparent; transition:background .16s; }
+  .tv-row:hover { background:rgba(192,132,87,.1); }
+  .tv-row.is-dead { opacity:.5; }
+  .tv-row__n { font-family:var(--combo-serif); font-size:.95rem; color:var(--tv-accent-2); }
+  .tv-row__m { font:400 .7rem/1.3 var(--combo-sans); color:rgba(231,236,239,.72); }
+  .tv-row__p { font:500 .74rem/1 var(--combo-sans); color:#fff; font-variant-numeric:tabular-nums; text-align:right; }
+  .tv-row__d { display:inline-block; width:6px; height:6px; border-radius:50%; margin-left:.3rem; }
+  .tv-d-sale{background:#7fae6f} .tv-d-reserved{background:var(--tv-accent-2)} .tv-d-sold{background:#6c7884}
+
+  /* L3 veil: ERA DARK two-tone. copper locator accents. */
+  .vfd-overlay { --vfd-veil:#0c1118; --vfd-rail-bg:#161f29; --vfd-canvas-bg:#10171f; --vfd-ink:#eef2f5; --vfd-serif:var(--combo-serif); --vfd-sans:var(--combo-sans);
+    --fp-loc-on:var(--tv-accent); --fp-loc-off:#5a6776; }
+  #tv-flat .vfd-rail { color:#e6ecf1; }
+  #tv-flat .vfd-type { color:#f1f5f8; }
+  #tv-flat .vfd-price { color:var(--tv-accent-2); }
+  #tv-flat .vfd-reserve { background:var(--tv-accent); color:#1a120b; border-color:var(--tv-accent); }
+  /* F-21 prominent back pill (dark copper) */
+  #tv-flat .vfd-back { display:inline-flex; align-items:center; gap:.6rem; padding:.5rem .95rem .5rem .55rem; border-radius:999px;
+    background:rgba(36,24,18,.85); border:1px solid rgba(192,132,87,.5); color:var(--tv-accent-2); font:600 .68rem/1 var(--combo-sans);
+    letter-spacing:.1em; text-transform:uppercase; cursor:pointer; box-shadow:0 2px 12px rgba(0,0,0,.4); transition:background .16s,color .16s,transform .16s; }
+  #tv-flat .vfd-back:hover { background:var(--tv-accent); border-color:var(--tv-accent); color:#1a120b; transform:translateX(-2px); }
+  #tv-flat .vfd-back__o { width:32px; height:32px; border-radius:50%; border:1px solid rgba(192,132,87,.55); display:grid; place-items:center; }
+  #tv-flat .vfd-back:hover .vfd-back__o { background:#1a120b; border-color:#1a120b; color:var(--tv-accent-2); }
+
+  /* F-22 fill the canvas: SIGNATURE photo-bleed. warm interior bleeds BEHIND a GIANT serif numeral on
+     the LEFT, the dark copper plan panel beside it. */
+  #tv-flat .vfd-canvas { position:relative; overflow:hidden; }
+  .era-bleed { position:absolute; left:0; top:0; bottom:0; width:46%; z-index:0; overflow:hidden; }
+  .era-bleed__img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    filter:brightness(.62) saturate(1.05) sepia(.12); opacity:0; transition:opacity .6s ease; }
+  .era-bleed__img.is-shown { opacity:1; }
+  /* warm-to-dark wash so the numeral reads even if the image 404s */
+  .era-bleed::after { content:""; position:absolute; inset:0; background:
+    linear-gradient(180deg, rgba(12,17,24,.25), rgba(12,17,24,.7)),
+    radial-gradient(120% 90% at 18% 78%, rgba(192,132,87,.32), rgba(12,17,24,0) 60%); }
+  .era-bleed__num { position:absolute; left:clamp(.6rem,2.2vw,2.2rem); bottom:clamp(1rem,4vh,3rem); z-index:1;
+    font-family:var(--combo-serif); font-weight:300; font-style:italic; line-height:.82;
+    font-size:clamp(4.5rem,13vw,11rem); color:#f3e7da; letter-spacing:-.02em;
+    text-shadow:0 6px 40px rgba(0,0,0,.55); pointer-events:none; }
+  .era-bleed__unit { display:block; margin-top:.3rem; font-family:var(--combo-sans); font-style:normal;
+    font-weight:600; font-size:.8rem; letter-spacing:.28em; text-transform:uppercase; color:rgba(214,160,121,.85); }
+  .era-bleed__cap { position:absolute; left:clamp(.6rem,2.2vw,2.2rem); top:clamp(.8rem,3vh,1.4rem); z-index:1;
+    font:500 .56rem/1.3 var(--combo-sans); letter-spacing:.16em; text-transform:uppercase; color:rgba(214,160,121,.6); }
+  /* plan panel sits to the RIGHT of the bleed (F-22 big plan owns the rest of the canvas) */
+  #tv-flat .vfd-plan { position:relative; z-index:1; margin-left:46%; width:auto; height:80%; max-height:80vh; max-width:50%; }
+  #tv-flat .vfd-plan svg { width:auto; height:100%; max-width:100%; margin:0 auto; }
+  #tv-flat .vfd-locators { z-index:2; }
+  #tv-flat .vfd-floorchip { width:150px; }
+  #tv-flat .vfd-floorchip svg { width:100%; height:auto; }
+  #tv-flat .vfd-floorchip [data-nr].is-active { fill:var(--fp-loc-on); stroke:var(--fp-loc-on); }
+
+  .combo-pre,.combo-post { background:#0b1119; color:#5d6b78; }
+  @media (max-width:900px){ .tv-l1,.tv-l2{ grid-template-columns:1fr; } .tv-list,.tv-l1__rail,.cfh-card{ display:none; }
+    .era-bleed{ display:none; } #tv-flat .vfd-plan{ margin-left:0; max-width:90%; } }
+  @media (prefers-reduced-motion:reduce){ .cfh-band,.tv-kbtn,.tv-row,.era-bleed__img{ transition:none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="floorplan-tower--era">
+    <div class="tv-head">
+      <div>
+        <p class="tv-eyebrow">Корпус і поверх</p>
+        <h2 class="tv-h">Оберіть свою квартиру <em>у вечірній вежі.</em></h2>
+      </div>
+      <div class="tv-korpus" data-korpus>
+        <button class="tv-kbtn is-on" data-k="A" type="button">Корпус A</button>
+        <button class="tv-kbtn" data-k="B" type="button">Корпус B</button>
+      </div>
+    </div>
+
+    <div class="tv-stage" data-render-surface>
+      <!-- L1 tower facade -->
+      <div class="tv-l1" data-l1>
+        <aside class="tv-l1__rail">
+          <span class="tv-l1__k" data-l1k>Корпус A · до 20 поверхів</span>
+          <span class="tv-l1__legal">Демонстраційний проєкт. Дані наведено для прикладу.</span>
+        </aside>
+        <div class="cfh-stage" id="tv-tower">
+          <div class="cfh-render">
+            <img class="cfh-img" src="fp-assets/tower-front.png" alt="Житлова вежа, два корпуси" loading="eager" decoding="async"/>
+            <svg class="cfh-floors"></svg>
+          </div>
+          <div class="cfh-card"><div class="cfh-card__num">9</div><div class="cfh-card__lab">поверх</div><div class="cfh-card__sub"></div></div>
+        </div>
+      </div>
+
+      <!-- L2 numbered floorplate -->
+      <div class="tv-l2" data-l2>
+        <section class="nfp-stage" id="tv-plate">
+          <div class="nfp-rail">
+            <div class="nfp-back" data-l2-back><span class="nfp-back__o">&larr;</span> До вежі</div>
+            <div class="nfp-floornum" data-l2-num>9</div>
+            <div class="nfp-floorsel" data-l2-k>Корпус A</div>
+            <div class="nfp-rail__div"></div>
+          </div>
+          <div class="nfp-stagecard">
+            <svg class="nfp-plan" viewBox="0 0 100 72" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" data-plan></svg>
+            <svg class="nfp-zones" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="nfp-card"><span class="nfp-card__type"></span><span><span class="nfp-card__nr"></span><br><span class="nfp-card__area"></span></span><span class="nfp-card__price"></span></div>
+          </div>
+        </section>
+        <aside class="tv-list" data-list>
+          <div class="tv-list__t" data-list-t>9 поверх</div>
+          <ul data-list-ul></ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <div class="vfd-overlay" id="tv-flat">
+    <div class="vfd-veil"></div>
+    <div class="vfd-page">
+      <div class="vfd-head">
+        <button class="vfd-back"><span class="vfd-back__o">&larr;</span> До поверху</button>
+        <span class="vfd-word" style="font-family:var(--combo-serif);letter-spacing:.06em;opacity:.7;color:#d6a079">tower</span>
+        <span style="width:120px"></span>
+      </div>
+      <div class="vfd-crumbs"></div>
+      <div class="vfd-rail">
+        <div class="vfd-type"></div><div class="vfd-sub"></div><div class="vfd-area"></div><div class="vfd-price"></div>
+        <button class="vfd-reserve">Забронювати перегляд</button>
+        <div class="vfd-rail__icons"><button aria-label="обране">&#9825;</button><button aria-label="порівняти">&#8646;</button></div>
+        <button class="vfd-similar">Схожі квартири &#8595;</button>
+      </div>
+      <div class="vfd-canvas">
+        <!-- SIGNATURE: cinematic photo-bleed behind a giant serif AREA numeral -->
+        <div class="era-bleed">
+          <img class="era-bleed__img" alt="" decoding="async"/>
+          <span class="era-bleed__cap">Вечірня вітальня</span>
+          <span class="era-bleed__num" data-bleed-num>96,5<span class="era-bleed__unit">м² · загальна площа</span></span>
+        </div>
+        <div class="vfd-plan"></div>
+        <div class="vfd-locators">
+          <div class="vfd-floorchip"></div>
+          <div class="vfd-compass"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="none" stroke="#5a6776"/><path d="M20 5 L24 20 L20 35 L16 20 Z" fill="#c08457"/><text x="20" y="14" text-anchor="middle" font-size="7" fill="#d6a079">N</text></svg></div>
+          <div class="vfd-sitechip"></div>
+        </div>
+        <div class="vfd-seed"><svg viewBox="0 0 92 150"><ellipse cx="46" cy="80" rx="34" ry="64" fill="#1a2430"/><path d="M46 18 C 30 60, 30 110, 46 145 C 62 110, 62 60, 46 18 Z" fill="#202c39" opacity=".8"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/clean-floor-hover-select/component.js"></script>
+  <script src="../../components/numbered-floorplate-select/component.js"></script>
+  <script src="../../components/veil-flat-detail-reveal/component.js"></script>
+
+  <script type="module">
+    import { TOWER_META } from '../../_assets/floorplan/tower-meta.js';
+    import { TOWER_FOOTPRINTS } from '../../_assets/floorplan/tower-footprints.js';
+    import { TOWER_TYPE_PLANS } from '../../_assets/floorplan/tower-type-plans.js';
+    import { towerUnitsForFloor, fmtPrice, TOWER_TYPE } from '../_shared/floorplan-helpers.js';
+
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    var IW = 3712, IH = 4608;
+
+    // inline the authored tower floor plan into .nfp-plan (shared viewBox 100x72)
+    fetch('../../_assets/floorplan/tower-floor-clean.svg').then(function(r){return r.text();}).then(function(svg){
+      var inner = svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+      document.querySelector('[data-plan]').innerHTML = inner;
+    });
+
+    // SIGNATURE decode-guard: force-decode the evening interior; if it 404s the rail still renders.
+    (function preloadBleed(){
+      var im = new Image();
+      im.onload = function(){ /* ready; per-open we set src on the shown img + reveal */ };
+      im.onerror = function(){ /* missing image never throws; wash + numeral carry the bleed */ };
+      im.src = 'fp-assets/interior-evening.webp';
+    })();
+
+    // ---- traced floor bands over the real render (read off a coordinate grid, NOT guessed) ----
+    // tower fills X ~11..91, Y ~21..82 in the contain box; korpus A (left) X 11..47, korpus B (right) 53..91.
+    function pct(x,y){ return (x/100*IW).toFixed(0)+','+(y/100*IH).toFixed(0); }
+    function bandsFor(korpus){
+      var x0base = korpus==='A' ? 11 : 53, x1base = korpus==='A' ? 47 : 91;
+      var floors = TOWER_META.korpus.filter(function(k){return k.id===korpus;})[0].floors; // high..low
+      var topY=21, botY=82, n=floors.length;
+      var rowH=(botY-topY)/n;
+      return floors.map(function(fl,i){
+        var yT=topY+i*rowH, yB=topY+(i+1)*rowH;
+        var insT=(1-i/n)*1.5, insB=(1-(i+1)/n)*1.5;
+        var x0t=x0base+insT, x1t=x1base-insT, x0b=x0base+insB, x1b=x1base-insB;
+        return { floor:fl, label:'поверх', sub:'', status:'live',
+          points: pct(x0t,yT)+' '+pct(x1t,yT)+' '+pct(x1b,yB)+' '+pct(x0b,yB),
+          anchor:{ x:(x0base/100*IW), y:((yT+yB)/2/100*IH) } };
+      });
+    }
+
+    var cfh=null, nfp=null, vfd=null, korpus='A', currentFloor=TOWER_META.sampleFloor, currentUnits=[];
+
+    function freeCount(units){ return units.filter(function(u){return u.status==='sale';}).length; }
+
+    function buildList(units){
+      var ul=document.querySelector('[data-list-ul]');
+      ul.innerHTML = units.map(function(u){ var dead=u.status!=='sale';
+        var pr=u.status==='sale'?fmtPrice(u.price):(u.status==='sold'?'Продано':'Бронь');
+        return '<li class="tv-row'+(dead?' is-dead':'')+'" data-row="'+u.nr+'"><span class="tv-row__n">'+u.nr+'</span>'+
+          '<span class="tv-row__m">'+u.type+' · '+u.area+' м²</span>'+
+          '<span class="tv-row__p">'+pr+'<i class="tv-row__d tv-d-'+u.status+'"></i></span></li>'; }).join('');
+      ul.querySelectorAll('.tv-row').forEach(function(li){ var nr=li.dataset.row;
+        li.addEventListener('mouseenter',function(){ if(nfp&&nfp.setHover) nfp.setHover(nr); });
+        li.addEventListener('mouseleave',function(){ if(nfp&&nfp.clear) nfp.clear(); });
+        li.addEventListener('click',function(){ var u=currentUnits.filter(function(x){return String(x.nr)===String(nr);})[0]; if(u) openFlat(u); });
+      });
+    }
+
+    // ---- L1: facade floor-hover ----
+    SectionHarness.ranOK('clean-floor-hover-select', function(){
+      cfh = window.CleanFloorHoverSelect.create('#tv-tower', {
+        imgW:IW, imgH:IH, bands:bandsFor('A'), fit:'contain', fillOn:.42, hoverDur:.15,
+        onSelect:function(floor){ openFloor(+floor); }
+      });
+      var sub=document.querySelector('.cfh-card__sub');
+      document.querySelectorAll('.cfh-band').forEach(function(b){
+        b.addEventListener('mouseenter',function(){ var u=towerUnitsForFloor('A',+b.dataset.floor,TOWER_FOOTPRINTS); if(sub) sub.textContent=freeCount(u)+' вільних · 8 квартир'; });
+      });
+    });
+
+    function rebuildBands(){
+      cfh = window.CleanFloorHoverSelect.create('#tv-tower', {
+        imgW:IW, imgH:IH, bands:bandsFor(korpus), fit:'contain', fillOn:.42, hoverDur:.15,
+        onSelect:function(floor){ openFloor(+floor); }
+      });
+    }
+
+    // ---- L2: numbered floorplate (standard top card, NOT a cursor card) ----
+    SectionHarness.ranOK('numbered-floorplate-select', function(){
+      currentUnits = towerUnitsForFloor('A', currentFloor, TOWER_FOOTPRINTS);
+      nfp = window.NumberedFloorplateSelect.create('#tv-plate', {
+        vbW:100, vbH:72, units:currentUnits, pillR:2.6, pillFont:2.4, hoverFill:.12, ease:'power2.out',
+        fmtPrice:fmtPrice, onSelect:function(nr,u){ openFlat(u); }
+      });
+      buildList(currentUnits);
+    });
+
+    function openFloor(fl){
+      currentFloor=fl; currentUnits=towerUnitsForFloor(korpus,fl,TOWER_FOOTPRINTS);
+      document.querySelector('[data-l2-num]').textContent=fl;
+      document.querySelector('[data-l2-k]').textContent='Корпус '+korpus;
+      document.querySelector('[data-list-t]').textContent=fl+' поверх · корпус '+korpus;
+      if(nfp&&nfp.render) nfp.render(currentUnits);
+      buildList(currentUnits);
+      var L1=document.querySelector('[data-l1]'), L2=document.querySelector('[data-l2]');
+      L2.classList.add('is-on');
+      if(gsap){ gsap.fromTo(L2,{autoAlpha:0},{autoAlpha:1,duration:.5,ease:'award'});
+        gsap.to(L1,{autoAlpha:0,duration:.35,ease:'power2.in',onComplete:function(){ L1.classList.add('is-hidden'); }}); }
+      else L1.classList.add('is-hidden');
+    }
+    function backToTower(){
+      var L1=document.querySelector('[data-l1]'), L2=document.querySelector('[data-l2]');
+      L1.classList.remove('is-hidden');
+      if(gsap){ gsap.fromTo(L1,{autoAlpha:0},{autoAlpha:1,duration:.5,ease:'award'});
+        gsap.to(L2,{autoAlpha:0,duration:.3,ease:'power2.in',onComplete:function(){ L2.classList.remove('is-on'); gsap.set(L2,{clearProps:'opacity,visibility'}); }}); }
+      else L2.classList.remove('is-on');
+    }
+    document.querySelector('[data-l2-back]').addEventListener('click', backToTower);
+
+    // korpus toggle (re-themes L1 bands; on L2 swaps the floor's units)
+    document.querySelectorAll('[data-korpus] .tv-kbtn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        korpus=btn.dataset.k;
+        document.querySelectorAll('[data-korpus] .tv-kbtn').forEach(function(b){ b.classList.toggle('is-on',b===btn); });
+        document.querySelector('[data-l1k]').textContent='Корпус '+korpus+' · до '+(korpus==='A'?'20':'16')+' поверхів';
+        rebuildBands();
+      });
+    });
+
+    // ---- L3: veil flat ----
+    SectionHarness.ranOK('veil-flat-detail-reveal', function(){
+      vfd = window.VeilFlatDetailReveal.create('#tv-flat', {
+        veilColor:'#0c1118', coverDur:.4, holdDur:.3, uncoverDur:.45, ease:'expo.out', drawPlan:true,
+        fmtPrice:fmtPrice, onReserve:function(u){ console.log('reserve', u&&u.code); }
+      });
+    });
+    function typeKeyOf(label){ for(var k in TOWER_TYPE){ if(TOWER_TYPE[k].label===label) return k; } return 't-2'; }
+    function towerFloorChip(activeNr){
+      var cells=TOWER_FOOTPRINTS.map(function(pts,i){
+        var nr=String(i+1).padStart(2,'0'); var on=nr===activeNr;
+        return '<polygon data-nr="'+nr+'" points="'+pts+'" fill="'+(on?'var(--fp-loc-on)':'none')+'" stroke="'+(on?'var(--fp-loc-on)':'var(--fp-loc-off)')+'" stroke-width="0.6"/>';
+      }).join('');
+      return '<svg viewBox="0 0 100 72" preserveAspectRatio="xMidYMid meet"><rect x="2" y="2" width="96" height="68" fill="none" stroke="var(--fp-loc-off)" stroke-width="0.4"/>'+cells+'</svg>';
+    }
+    // SIGNATURE: set the giant area numeral + reveal the decode-guarded bleed image per unit
+    function setBleed(u){
+      var numEl=document.querySelector('[data-bleed-num]');
+      var areaStr=String(u.area).replace('.', ',');
+      if(numEl) numEl.firstChild.textContent=areaStr; // keeps the .era-bleed__unit span intact
+      var img=document.querySelector('.era-bleed__img');
+      if(!img) return;
+      img.classList.remove('is-shown');
+      var probe=new Image();
+      probe.onload=function(){ img.src=probe.src; if(img.decode){ img.decode().then(function(){ img.classList.add('is-shown'); }).catch(function(){ img.classList.add('is-shown'); }); } else { img.classList.add('is-shown'); } };
+      probe.onerror=function(){ /* missing image: leave wash + numeral only, never throw */ };
+      probe.src='fp-assets/interior-evening.webp';
+    }
+    function openFlat(u){
+      if(!vfd) return;
+      var tk=typeKeyOf(u.type);
+      setBleed(u);
+      vfd.open({
+        type:u.type, sub:'Корпус '+u.korpus+' · '+u.floor+' поверх', areaM2:u.area, areaUnit:'м²', price:u.price,
+        status:u.status, crumbs:'Вежа · корпус '+u.korpus+' · '+u.floor+' поверх · № '+u.nr,
+        planSVG:TOWER_TYPE_PLANS[tk], floorChipSVG:towerFloorChip(u.nr), floorNr:u.nr
+      });
+    }
+
+    // ---- birth (controlled, scroll-in once) ----
+    if(gsap){
+      var headEls=gsap.utils.toArray('.tv-eyebrow,.tv-h,.tv-kbtn');
+      gsap.set(headEls,{autoAlpha:0,y:12});
+      gsap.set('.tv-stage',{clipPath:'inset(8% 0 0 0)'});
+      ScrollTrigger.create({ trigger:'#combo', start:'top 68%', once:true, onEnter:function(){
+        gsap.to(headEls,{autoAlpha:1,y:0,duration:.6,ease:'award',stagger:.07});
+        gsap.to('.tv-stage',{clipPath:'inset(0% 0 0 0)',duration:.9,ease:'award',delay:.1});
+      }});
+    }
+
+    SectionHarness.declare({ pinOwner:'none', expectPins:0, atomsCited:['clean-floor-hover-select','numbered-floorplate-select','veil-flat-detail-reveal'] });
+  </script>
+</body>
+</html>

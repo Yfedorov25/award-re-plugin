@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: floorplan-towns--street-ribbon · Вибір тауну (гігантські цифри)</title>
+<!--
+  SECTION VARIANT, floorplan-towns--street-ribbon (role: floorplan). PALETTE = EVER LIGHT.
+  TOWNS-TYPE shortened drill: pick 1 of 6 identical row-houses -> the town page (the unit IS the house).
+  SISTER of row-elevation-rail. SAME real 6-house data + SAME deep town-detail (veil L3 with proportional
+  real-area room tiles + prominent back pill + row-locator), COPIED wholesale. ONLY the HERO answer differs.
+
+  SIGNATURE MOVE (a genuinely different hero from row-rail, which highlights on the photo):
+  the GIANT TERRACOTTA GHOSTED NUMERALS 1-6 ARE the UI. The 6 houses recede to a low-contrast
+  substrate (the real selector-row-6-day.png, dimmed + desaturated via CSS filter). The numerals sit in
+  a RESERVED top sky-band - a real layout pad that is PART of the composition, NOT borrowed from the
+  image - so a numeral or its chip NEVER lands on the facade at any width. Hovering a numeral LIFTS it +
+  a SLIM chip glides ABOVE the roofline (never inside the facade band) naming the house; the full spec
+  stays in an OFF-facade reading column. Controlled-click: click a numeral -> the deep town-detail.
+  The row is the hero VIA the numerals; nothing ever covers a house (the F-20 law, satisfied by design).
+
+  asset-truth: REAL towns data (content.js): 6 houses, 82 м², дві спальні, свій двір, від $67 тис, status
+  Вільний, position edge/middle (the ONLY real differentiator). All available (nothing invented sold/reserved).
+  Calibrated zones copied verbatim from apps/towns/src/js/sections/units.js. __LAB_OK__: 0 pins, atoms ran,
+  [data-render-surface] painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/clean-floor-hover-select/component.css">
+<link rel="stylesheet" href="../../components/veil-flat-detail-reveal/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ===== EVER LIGHT skin. transform / opacity / clip-path / filter / stroke-dashoffset only. ===== */
+  :root { --tw-accent:#c2724e; --tw-accent-soft:#d68a64; --tw-ink:#2a2622; --tw-paper:#efe9e0; --tw-paper-2:#e6ddd0; }
+
+  #combo.combo-stage { background:var(--tw-paper); color:var(--tw-ink);
+    height:100vh; min-height:100vh; display:grid;
+    grid-template-columns:1fr minmax(300px,28%); }
+  @media (max-width:900px){ #combo.combo-stage{ grid-template-columns:1fr; grid-template-rows:1fr auto; } }
+
+  /* ---- LEFT (hero): the numeral street-ribbon. A reserved sky-band on top of a dimmed row render. ---- */
+  /* center the [skyband + render] stack vertically so BOTH always fit inside the 100vh stage
+     (justify-end pushed the sky-band off the top; F-fix: start-align, the render bleeds below). */
+  /* start the stack at the TOP so the numerals are always fully visible; the dimmed render below is a
+     decorative substrate that may bleed past the bottom edge (overflow:hidden), which is fine. */
+  .tw-field { position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:flex-start; gap:clamp(.6rem,2vh,1.4rem);
+    padding:clamp(1.4rem,4vh,2.8rem) clamp(.9rem,2.4vw,2.4rem) 0; }
+
+  /* the numeral lane = a real layout pad ABOVE the render. The numerals live here, never on the facade. */
+  .tw-skyband { position:relative; z-index:4; flex:0 0 auto; display:grid; grid-template-columns:repeat(6,1fr);
+    align-items:end; height:clamp(96px,17vh,170px); padding-bottom:.2rem; }
+  .tw-numeral { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    background:none; border:0; padding:0; cursor:pointer; color:inherit; }
+  /* the GIANT ghosted numeral - the UI itself */
+  .tw-numeral__big { font-family:var(--combo-serif); font-weight:600; font-size:clamp(3rem,7vw,6.4rem);
+    line-height:.86; letter-spacing:-.04em; color:var(--tw-accent); opacity:.26;
+    font-variant-numeric:lining-nums; transition:opacity .22s ease, transform .26s ease, color .22s ease;
+    transform:translateY(6px); will-change:transform,opacity; }
+  .tw-numeral.is-hot .tw-numeral__big { opacity:1; transform:translateY(-8px); }
+  .tw-numeral.is-chosen .tw-numeral__big { opacity:1; color:var(--tw-accent); }
+  /* the SLIM chip that glides ABOVE the roofline on hover (named house); never inside the facade band */
+  .tw-chip { position:absolute; bottom:calc(100% + 6px); left:50%; transform:translate(-50%,8px);
+    white-space:nowrap; padding:.34rem .7rem; border-radius:999px; background:var(--tw-ink); color:var(--tw-paper);
+    font:600 .62rem/1 var(--combo-sans); letter-spacing:.1em; text-transform:uppercase;
+    opacity:0; pointer-events:none; transition:opacity .2s ease, transform .2s ease; box-shadow:0 4px 16px rgba(42,38,34,.22); }
+  .tw-numeral.is-hot .tw-chip { opacity:1; transform:translate(-50%,0); }
+  /* a hairline tick from the numeral down toward its house (drawn, never covers the facade) */
+  .tw-numeral__tick { width:1px; height:clamp(14px,3vh,26px); margin-top:.4rem; background:var(--tw-accent);
+    opacity:0; transform:scaleY(.4); transform-origin:top; transition:opacity .2s ease, transform .24s ease; }
+  .tw-numeral.is-hot .tw-numeral__tick, .tw-numeral.is-chosen .tw-numeral__tick { opacity:.8; transform:scaleY(1); }
+
+  /* the dimmed/desaturated 6-house render = the LOW-CONTRAST SUBSTRATE (CSS filter, allowed) */
+  .cfh-stage { position:relative; width:100%; max-width:calc(44vh * 2.359); margin:0 auto; z-index:2; flex:0 0 auto; }
+  .cfh-render { position:relative; width:100%; aspect-ratio:1920 / 814; margin:0 auto; }
+  .cfh-render .cfh-img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:block;
+    filter:grayscale(.55) brightness(1.04) contrast(.92) saturate(.7); opacity:.78;
+    transition:filter .3s ease, opacity .3s ease; }
+  .cfh-stage.has-hot .cfh-img { filter:grayscale(.32) brightness(1.02) contrast(.96) saturate(.85); opacity:.86; }
+  .cfh-floors { position:absolute; inset:0; width:100%; height:100%; }
+  /* flat front zones: invisible, only a soft warm wash on the hovered house (the numeral is the real UI) */
+  .cfh-band { fill:var(--tw-accent); fill-opacity:0; stroke:var(--tw-accent-soft); stroke-opacity:0; stroke-width:2;
+    cursor:pointer; transition:fill-opacity .18s ease, stroke-opacity .18s ease; }
+  .cfh-band.is-hover { fill-opacity:.14; stroke-opacity:.7; }
+  .cfh-band.is-chosen { fill-opacity:.2; stroke-opacity:.95; }
+
+  /* ---- RIGHT: the OFF-facade reading column (head + the spec, never over a house) ---- */
+  .tw-read { position:relative; z-index:5; padding:clamp(1.3rem,4vh,2.6rem) clamp(1.3rem,2.2vw,2.2rem);
+    display:flex; flex-direction:column; gap:.9rem; border-left:1px solid rgba(42,38,34,.12); background:var(--tw-paper-2); }
+  .tw-eyebrow { margin:0; font:600 .64rem/1 var(--combo-sans); letter-spacing:.26em; text-transform:uppercase; color:var(--tw-accent); }
+  .tw-h { margin:.15rem 0 0; font-family:var(--combo-serif); font-weight:300; font-size:clamp(1.6rem,2.4vw,2.4rem); line-height:1.04; letter-spacing:-.02em; color:var(--tw-ink); }
+  .tw-h em { font-style:italic; color:var(--tw-accent); }
+  .tw-intro { margin:.2rem 0; font:400 .84rem/1.5 var(--combo-sans); color:rgba(42,38,34,.66); max-width:34ch; }
+
+  /* the OFF-facade spec card: lives in the right column, updates per hovered numeral, NEVER over a house */
+  .tw-card { margin-top:.4rem; border:1px solid rgba(42,38,34,.16); border-radius:10px; background:rgba(255,255,255,.6);
+    padding:1rem 1.1rem; min-height:160px; opacity:.6; transition:opacity .2s, border-color .2s; }
+  .tw-card.is-on { opacity:1; border-color:rgba(194,114,78,.5); }
+  .tw-card__no { font-family:var(--combo-serif); font-weight:300; font-size:2.4rem; line-height:1; color:var(--tw-ink); }
+  .tw-card__pos { display:inline-block; margin-left:.5rem; font:500 .72rem/1 var(--combo-sans); letter-spacing:.06em; color:var(--tw-accent); vertical-align:super; }
+  .tw-card__rows { margin-top:.7rem; display:flex; flex-direction:column; gap:.42rem; }
+  .tw-card__row { display:flex; justify-content:space-between; gap:1rem; font:500 .82rem/1.2 var(--combo-sans); color:rgba(42,38,34,.78); }
+  .tw-card__row b { color:var(--tw-ink); font-weight:600; font-variant-numeric:tabular-nums; }
+  .tw-card__st { display:inline-flex; align-items:center; gap:.4rem; font:600 .7rem/1 var(--combo-sans); letter-spacing:.08em; color:#3f8a52; margin-top:.1rem; }
+  .tw-card__st i { width:7px; height:7px; border-radius:50%; background:#3f8a52; }
+  .tw-card__actions { margin-top:.9rem; display:flex; flex-direction:column; gap:.5rem; }
+  .tw-choose { padding:.7rem 1rem; border-radius:999px; border:0; background:var(--tw-accent); color:#fff; font:600 .78rem/1 var(--combo-sans); letter-spacing:.06em; cursor:pointer; }
+  .tw-plan { background:none; border:0; color:rgba(42,38,34,.7); font:500 .72rem/1 var(--combo-sans); letter-spacing:.04em; cursor:pointer; text-align:left; padding:0; }
+  .tw-plan::after { content:" \2192"; color:var(--tw-accent); }
+  .tw-hint { margin-top:auto; font:400 .68rem/1.4 var(--combo-sans); color:rgba(42,38,34,.5); }
+  .tw-legal { font:500 .6rem/1.4 var(--combo-sans); letter-spacing:.04em; color:rgba(42,38,34,.46); }
+
+  /* ---- the DEEP town-detail (veil L3): COPIED wholesale from row-elevation-rail, re-skinned EVER LIGHT ---- */
+  .vfd-overlay { --vfd-veil:#efe9e0; --vfd-rail-bg:#e6ddd0; --vfd-canvas-bg:#f5f1e9; --vfd-ink:#2a2622;
+    --vfd-serif:var(--combo-serif); --vfd-sans:var(--combo-sans); --fp-loc-on:#c2724e; --fp-loc-off:#a89b8b; }
+  .vfd-overlay .vfd-rail { color:var(--tw-ink); }
+  .vfd-overlay .vfd-type { color:var(--tw-ink); }
+  .vfd-overlay .vfd-price { color:var(--tw-accent); }
+  /* F-21: a PROMINENT back control - a clearly bordered terracotta pill + circular arrow + strong hover
+     (fills terracotta), large click target, top-left, so getting OUT of the chosen town is the most
+     obvious affordance after the CTA. */
+  #tw-detail .vfd-back { display:inline-flex; align-items:center; gap:.6rem; padding:.5rem .95rem .5rem .55rem;
+    border:1px solid rgba(194,114,78,.55); border-radius:999px; background:rgba(255,255,255,.7);
+    color:var(--tw-ink); font:600 .66rem/1 var(--combo-sans); letter-spacing:.13em; text-transform:uppercase;
+    cursor:pointer; transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+    box-shadow:0 2px 12px rgba(42,38,34,.12); }
+  #tw-detail .vfd-back:hover { background:var(--tw-accent); border-color:var(--tw-accent); color:#fff; transform:translateX(-2px); }
+  #tw-detail .vfd-back__o { width:32px; height:32px; border-radius:50%; border:1px solid rgba(194,114,78,.6);
+    display:inline-flex; align-items:center; justify-content:center; font-size:1rem; line-height:1;
+    background:rgba(194,114,78,.14); color:var(--tw-accent);
+    transition:background .18s ease, color .18s ease, border-color .18s ease; }
+  #tw-detail .vfd-back:hover .vfd-back__o { background:#fff; border-color:#fff; color:var(--tw-accent); }
+  /* the placeholder plan = proportional labelled room tiles (real areas, NO invented footprint) */
+  .tw-plan-tiles { width:100%; max-width:520px; }
+  .tw-plan-tiles__fl { margin-bottom:1.1rem; }
+  .tw-plan-tiles__flh { font:600 .64rem/1 var(--combo-sans); letter-spacing:.16em; text-transform:uppercase; color:#9a8c78; margin-bottom:.5rem; }
+  .tw-plan-tiles__grid { display:flex; flex-wrap:wrap; gap:6px; align-items:stretch; }
+  .tw-tile { background:#fff; border:1px solid #ddd2c0; border-radius:4px; padding:.5rem .6rem; display:flex; flex-direction:column; justify-content:space-between; min-height:54px; }
+  .tw-tile__n { font:500 .72rem/1.2 var(--combo-sans); color:#3a352e; }
+  .tw-tile__m { font:600 .82rem/1 var(--combo-sans); color:#a85f38; font-variant-numeric:tabular-nums; margin-top:.3rem; }
+  .tw-plan-cap { margin-top:.6rem; font:500 .64rem/1.4 var(--combo-sans); color:#9a8c78; }
+
+  .combo-pre,.combo-post { background:var(--tw-paper-2); color:rgba(42,38,34,.42); }
+  /* reduced-motion / narrow: drop the lift/chip motion; the numerals stay a tappable button row */
+  @media (max-width:900px){ .tw-read{ border-left:0; border-top:1px solid rgba(42,38,34,.12); } .tw-numeral__big{ font-size:clamp(2.8rem,16vw,5rem); } }
+  @media (prefers-reduced-motion:reduce){ .tw-card,.cfh-band,.tw-numeral__big,.tw-chip,.tw-numeral__tick,.cfh-render .cfh-img{ transition:none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="floorplan-towns--street-ribbon">
+    <!-- LEFT (hero): the numeral street-ribbon. Numerals live in a RESERVED sky-band ABOVE a dimmed render. -->
+    <div class="tw-field" data-render-surface>
+      <!-- the reserved sky-band: the GIANT numerals ARE the UI (a layout pad, NOT borrowed from the image) -->
+      <div class="tw-skyband" data-tw-sky></div>
+
+      <!-- the dimmed/desaturated 6-house render = the low-contrast substrate; flat hover zones over it -->
+      <div class="cfh-stage" id="tw-row">
+        <div class="cfh-render">
+          <img class="cfh-img" src="towns-assets/renders/selector-row-6-day.png" alt="Ряд із шести таунхаусів" loading="eager" decoding="async"/>
+          <svg class="cfh-floors"></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: the OFF-facade reading column. The spec lives HERE, never over a house. -->
+    <aside class="tw-read">
+      <p class="tw-eyebrow" data-tw-fade>Вибір таунхауса</p>
+      <h2 class="tw-h">Шість будинків. <em>Оберіть свій номер.</em></h2>
+      <p class="tw-intro" data-tw-fade>Наведіть на цифру над рядом. Деталі зʼявляться тут, поруч, не закриваючи сам таун.</p>
+
+      <div class="tw-card" data-tw-card>
+        <span class="tw-card__no" data-c-no>Таун 3</span><span class="tw-card__pos" data-c-pos>у середині ряду</span>
+        <div class="tw-card__rows">
+          <span class="tw-card__row"><span>Площа</span><b data-c-area>82 м²</b></span>
+          <span class="tw-card__row"><span>Кімнати</span><b data-c-rooms>дві спальні</b></span>
+          <span class="tw-card__row"><span>Двір</span><b data-c-yard>свій двір</b></span>
+          <span class="tw-card__row"><span>Ціна</span><b data-c-price>від $67 тис.</b></span>
+        </div>
+        <span class="tw-card__st"><i></i><span data-c-st>Вільний</span></span>
+        <div class="tw-card__actions">
+          <button class="tw-choose" data-c-choose type="button">Обрати цей</button>
+          <button class="tw-plan" data-c-plan type="button">Дивитися планування</button>
+        </div>
+      </div>
+      <span class="tw-hint" data-tw-fade>Натисніть цифру над будинком, щоб обрати</span>
+      <span class="tw-legal" data-tw-fade>Точну доступність блоків підтвердимо у відповідь на заявку.</span>
+    </aside>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- DEEP town-detail (the click target; the deep two-tone town page, copied wholesale from row-rail) -->
+  <div class="vfd-overlay" id="tw-detail">
+    <div class="vfd-veil"></div>
+    <div class="vfd-page">
+      <div class="vfd-head">
+        <button class="vfd-back"><span class="vfd-back__o">&larr;</span> До ряду таунхаусів</button>
+        <span class="vfd-word" style="font-family:var(--combo-serif);letter-spacing:.06em;opacity:.7">Замкова</span>
+        <span style="width:120px"></span>
+      </div>
+      <div class="vfd-crumbs"></div>
+      <div class="vfd-rail">
+        <div class="vfd-type"></div>
+        <div class="vfd-sub"></div>
+        <div class="vfd-area"></div>
+        <div class="vfd-price"></div>
+        <button class="vfd-reserve">Залишити заявку</button>
+        <div class="vfd-rail__icons"><button aria-label="обране">&#9825;</button></div>
+        <button class="vfd-similar">Свій двір і вхід</button>
+      </div>
+      <div class="vfd-canvas">
+        <div class="vfd-plan"></div>
+        <div class="vfd-locators">
+          <div class="vfd-floorchip"></div>
+          <div class="vfd-compass"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="none" stroke="#a89b8b"/><path d="M20 5 L24 20 L20 35 L16 20 Z" fill="#c2724e"/><text x="20" y="14" text-anchor="middle" font-size="7" fill="#a89b8b">N</text></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/clean-floor-hover-select/component.js"></script>
+  <script src="../../components/veil-flat-detail-reveal/component.js"></script>
+
+  <script type="module">
+    import { TOWNS_HOUSES, TOWNS_ZONES, TOWNS_BAND, TOWNS_IMG, TOWNS_ROOMS } from '../_shared/floorplan-helpers.js';
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    // the house 'award' ease (the family curve; scaffold only registers 'air'). Register once.
+    if (gsap && window.CustomEase && !gsap.parseEase('award')) {
+      try { window.CustomEase.create('award', '0.25,0.46,0.45,0.94'); } catch (e) {}
+    }
+
+    // build FLAT front quads per house from the calibrated zones (viewBox-100 x/w) -> image px.
+    // near-orthographic render -> rectangles, NOT perspective chevrons (M2 gate). Zones drive the soft wash;
+    // the GIANT numerals are the real UI.
+    var IW = TOWNS_IMG.w, IH = TOWNS_IMG.h;
+    function bandPoints(z){
+      var x0 = z.x/100*IW, x1 = (z.x+z.w)/100*IW, y0 = TOWNS_BAND.top/100*IH, y1 = TOWNS_BAND.bot/100*IH;
+      return [[x0,y0],[x1,y0],[x1,y1],[x0,y1]].map(function(p){return p[0].toFixed(0)+','+p[1].toFixed(0);}).join(' ');
+    }
+    var bands = TOWNS_ZONES.map(function(z){ var h = TOWNS_HOUSES[z.n-1];
+      return { floor: z.n, label:'Таун', sub:h.pos, status:'live', points: bandPoints(z) }; });
+
+    var cfh=null, chosen=0;
+    var stage=document.getElementById('tw-row');
+    var card=document.querySelector('[data-tw-card]');
+    var cNo=document.querySelector('[data-c-no]'), cPos=document.querySelector('[data-c-pos]'),
+        cArea=document.querySelector('[data-c-area]'), cRooms=document.querySelector('[data-c-rooms]'),
+        cYard=document.querySelector('[data-c-yard]'), cPrice=document.querySelector('[data-c-price]'),
+        cSt=document.querySelector('[data-c-st]'), cChoose=document.querySelector('[data-c-choose]'), cPlan=document.querySelector('[data-c-plan]');
+    var sky=document.querySelector('[data-tw-sky]');
+    var activeN=0;
+
+    function fillCard(n){
+      var h=TOWNS_HOUSES[n-1]; if(!h) return;
+      cNo.textContent='Таун '+h.nr; cPos.textContent=h.pos;
+      cArea.textContent=h.area; cRooms.textContent=h.rooms; cYard.textContent=h.yard; cPrice.textContent=h.priceFrom;
+      cSt.textContent='Вільний';
+      card.classList.add('is-on'); activeN=n;
+    }
+    function hotHouse(n,on){
+      var num=sky.querySelector('.tw-numeral[data-n="'+n+'"]'); if(num) num.classList.toggle('is-hot',on);
+      var band=document.querySelector('.cfh-band[data-floor="'+n+'"]'); if(band) band.classList.toggle('is-hover',on);
+      stage.classList.toggle('has-hot',on); // un-dim the render a touch while reading a house
+    }
+    function enter(n){ hotHouse(n,true); fillCard(n); }
+    function leave(n){ hotHouse(n,false); }
+    function choose(n){
+      chosen=n;
+      sky.querySelectorAll('.tw-numeral').forEach(function(el){ el.classList.toggle('is-chosen',+el.dataset.n===n); });
+      document.querySelectorAll('.cfh-band').forEach(function(b){ b.classList.toggle('is-chosen',+b.dataset.floor===n); });
+      fillCard(n);
+      openTownDetail(n); // controlled-click -> the deep town page (the F-20-safe detail)
+    }
+
+    // the DEEP town-detail = proportional labelled room tiles (real areas, NO invented footprint) + a row-locator
+    function roomTilesSVG(){
+      function floorTiles(rooms,label){
+        var max=Math.max.apply(null,rooms.map(function(r){return r.m2;}));
+        var tiles=rooms.map(function(r){ var basis=(30+r.m2/max*120); // flex-basis px proportional to area
+          return '<div class="tw-tile" style="flex:'+r.m2.toFixed(2)+' 1 '+basis.toFixed(0)+'px">'+
+            '<span class="tw-tile__n">'+r.name+'</span><span class="tw-tile__m">'+r.m2.toFixed(2).replace('.',',')+' м²</span></div>'; }).join('');
+        return '<div class="tw-plan-tiles__fl"><div class="tw-plan-tiles__flh">'+label+'</div><div class="tw-plan-tiles__grid">'+tiles+'</div></div>';
+      }
+      return '<div class="tw-plan-tiles">'+floorTiles(TOWNS_ROOMS.floor1,'Перший поверх')+floorTiles(TOWNS_ROOMS.floor2,'Другий поверх')+
+        '<p class="tw-plan-cap">Візуалізація. Точні розміри уточнюються. Повне планування покажемо у відповідь на заявку.</p></div>';
+    }
+    function rowLocatorSVG(activeN){
+      var cells=TOWNS_ZONES.map(function(z){ var on=z.n===activeN;
+        return '<rect data-nr="'+z.n+'" x="'+(z.x).toFixed(1)+'" y="20" width="'+(z.w-1).toFixed(1)+'" height="60" '+
+          'fill="'+(on?'var(--fp-loc-on)':'none')+'" stroke="'+(on?'var(--fp-loc-on)':'var(--fp-loc-off)')+'" stroke-width="1"/>'; }).join('');
+      return '<svg viewBox="0 0 100 100" width="120" height="120" preserveAspectRatio="xMidYMid meet">'+cells+'</svg>';
+    }
+    var twVfd=null;
+    function openTownDetail(n){
+      if(!twVfd) return;
+      var h=TOWNS_HOUSES[n-1];
+      twVfd.open({
+        type:'Таунхаус №'+n, sub:h.pos+' · вул. Замкова', areaM2:82, areaUnit:'м²', price:67000,
+        status:'sale', crumbs:'Ряд таунхаусів · №'+n+' · '+h.pos,
+        floorChipSVG:rowLocatorSVG(n), floorNr:n
+      });
+      // the plan canvas = proportional room tiles (HTML, not an <svg> string -> inject directly,
+      // the atom only innerHTMLs planSVG when it starts with '<svg')
+      var planWrap=document.querySelector('#tw-detail .vfd-plan');
+      if(planWrap) planWrap.innerHTML=roomTilesSVG();
+    }
+
+    SectionHarness.ranOK('clean-floor-hover-select', function(){
+      cfh = window.CleanFloorHoverSelect.create('#tw-row', {
+        imgW:IW, imgH:IH, bands:bands, fit:'contain', fillOn:.14, hoverDur:.18,
+        onSelect:function(floor){ choose(+floor); }
+      });
+      // the atom has NO .cfh-card in our markup -> its tooltip is a no-op (the spec lives off-facade).
+      // wire the soft-wash bands so hovering the FACADE also lights the matching numeral.
+      bands.forEach(function(b){
+        var el=document.querySelector('.cfh-band[data-floor="'+b.floor+'"]');
+        if(el){ el.addEventListener('mouseenter',function(){ enter(+b.floor); }); el.addEventListener('mouseleave',function(){ leave(+b.floor); }); }
+      });
+      // build the GIANT numerals 1..6 in the reserved sky-band (the UI itself; columns align to the zones)
+      TOWNS_ZONES.forEach(function(z){
+        var h=TOWNS_HOUSES[z.n-1];
+        var b=document.createElement('button'); b.className='tw-numeral'; b.type='button'; b.dataset.n=z.n;
+        b.setAttribute('aria-label','Таунхаус №'+z.n+', '+h.pos);
+        b.innerHTML='<span class="tw-chip">Таун '+z.n+' · '+h.pos+'</span>'+
+          '<span class="tw-numeral__big">'+z.n+'</span><span class="tw-numeral__tick"></span>';
+        b.addEventListener('mouseenter',function(){ enter(z.n); }); b.addEventListener('mouseleave',function(){ leave(z.n); });
+        b.addEventListener('focus',function(){ enter(z.n); }); b.addEventListener('blur',function(){ leave(z.n); });
+        b.addEventListener('click',function(){ choose(z.n); });
+        sky.appendChild(b);
+      });
+      fillCard(3); // seed the middle house so the card paints from load
+    });
+
+    // the deep town-detail (veil L3 reused for the town page); towns price reads "від $67 тис."
+    SectionHarness.ranOK('veil-flat-detail-reveal', function(){
+      twVfd = window.VeilFlatDetailReveal.create('#tw-detail', {
+        veilColor:'#efe9e0', coverDur:.4, holdDur:.3, uncoverDur:.45, ease:'expo.out', drawPlan:false,
+        fmtPrice:function(){ return 'від $67 тис.'; }, onClose:function(){}, onReserve:function(){ console.log('lead town', chosen); }
+      });
+    });
+
+    cChoose.addEventListener('click', function(){ if(activeN) choose(activeN); });
+    cPlan.addEventListener('click', function(){ if(activeN) console.log('open plan -> /pages/town.html?n='+activeN); });
+
+    // staggered birth (controlled, scroll-in once): the render rises, then the giant numerals settle in
+    if (gsap){
+      var fades=gsap.utils.toArray('.tw-eyebrow, .tw-h, .tw-intro, [data-tw-fade]');
+      gsap.set(fades,{autoAlpha:0,y:10});
+      gsap.set('.cfh-render',{clipPath:'inset(0 0 8% 0)'});
+      ScrollTrigger.create({ trigger:'#combo', start:'top 70%', once:true, onEnter:function(){
+        gsap.to(fades,{autoAlpha:1,y:0,duration:.6,ease:'award',stagger:.08});
+        gsap.to('.cfh-render',{clipPath:'inset(0 0 0% 0)',duration:.9,ease:'award'});
+        gsap.fromTo('.tw-numeral__big',{autoAlpha:0,yPercent:14},{autoAlpha:1,yPercent:0,duration:.7,ease:'back.out(1.5)',stagger:.08,delay:.35});
+      }});
+    }
+
+    SectionHarness.declare({ pinOwner:'none', expectPins:0, atomsCited:['clean-floor-hover-select','veil-flat-detail-reveal'] });
+  </script>
+</body>
+</html>

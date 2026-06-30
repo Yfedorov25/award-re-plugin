@@ -11541,5 +11541,603 @@
     "note": "|",
     "_path": "library/combos/architecture--element-strip/",
     "_variantsResolved": []
+  },
+  "floorplan-smarts--compare-two": {
+    "id": "floorplan-smarts--compare-two",
+    "name": "Floorplan SMARTS compare-two (EVER light skin + a cool drafting-blue 4th accent; the SMARTS family pin-to-compare composition: the real numbered floorplate + unit list as the entry, click two units into a 2-slot compare tray, then see BOTH clean plans side by side with a synced diff-highlighting spec table; max 2 plans by construction so it is catalog-legal; optional single-unit veil deep view)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-smarts",
+    "palette": "ever-light",
+    "entry": {
+      "call": "combo-lab.html - composes numbered-floorplate-select (the picker) + veil-flat-detail-reveal (optional single-unit deep view) over the real smarts floor plate; a bespoke 2-slot compare tray + two-column compare panel are the signature. Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js.",
+      "module": "section-variant"
+    },
+    "uses": [
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "the picker: clean redrawn floorplate of the real floor-std-clean.svg (viewBox 100x44.08, interior walls); per-unit footprints from units.json pos + centroid number pills; clicking a pill ADDS the unit to the 2-slot compare tray (not a flat open); status-coded hover wash"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "optional single-unit deep view: a Деталі button on a compare column opens the dark cover-hold-open veil with the real type-NN-clean.webp plan + spec rail + drafting-blue floor-locator (THIS unit)"
+      }
+    ],
+    "meaning": {
+      "what": "The SMARTS-family compare-two floorplan: the ONLY catalog-legal two-plans composition. ENTRY is the smarts L2 (numbered-floorplate-select on the real clean plate, default floor 3) beside a persistent unit list carrying nr/type/area/price/status (the spec stays visible). SIGNATURE = pin-to-compare: the user CLICKS a unit pill or list row to add it to a 2-SLOT compare tray; when 2 slots are full, both clean plans appear SIDE BY SIDE in a two-column panel with a synced spec table (тип / площа / ціна / поверх / статус) where the rows that DIFFER glow drafting-blue and carry a delta (різниця X м², різниця $Y). A 3rd pick shifts out the oldest, so it can NEVER show 3 plans (catalog-legal by construction). Each slot has a clear remove control + a Деталі button to the single-unit veil. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A multi-apartment residential building where buyers decide BETWEEN two similar apartments (same type, different floor or footprint; or two types head to head). The catalog-legal compare member of the floorplan family: it is the variant that lets you show two plans together without violating the max-2-full-plans rule, because two is the hard ceiling of the composition.",
+      "signature": "Pin-to-compare. The live pick-counter pip (вибрано N з 2) + the 2-slot compare tray + the two-column compare panel with a SYNCED spec table whose differing rows glow drafting-blue (the comparison IS the spec, fully visible). Max 2 plans by design; a 3rd pick swaps the oldest slot.",
+      "lands": "A cool pale floor plate, every apartment marked by its number, a list beside it naming each one with its size, price and whether it is free, sold or held. Click a number and it drops into a slot in a little tray at the bottom; click a second and the tray lights up. Press the button and the screen lifts to two clean plans standing side by side, a slim table down the middle reading off площа, ціна, поверх, тип, статус line by line, the lines that differ glowing a quiet drafting-blue with the exact gap named. It reads as a precise side by side of exactly two homes, the difference doing the talking."
+    },
+    "source": {
+      "grammar": "EVER visual-search L2-L3 (the light museum skin) on the real smarts building, recomposed for comparison: the numbered floorplate is the picker, the bespoke 2-slot tray + two-column compare panel are the signature, the veil-flat-detail-reveal is the optional single-unit deep view. Drafting-blue is the 4th accent; the composition (not the skin) is the differentiator.",
+      "recording": "apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (L2-L3) + D_era_springs_visualsearch_video.md (palette family). Quality bar: apps/smarts/src/js/sections/units.js (FIX-2). Sibling: floorplan-smarts--museum-daylight (the full-drill EVER baseline).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "SMARTS-floorplan-etalon"
+      ]
+    },
+    "asset_truth": "REAL. apps/smarts/data/units.json (54 units, 18/floor on 2/3/m, types Смарт 27 / Смарт 24, $950/m2, statuses available / sold / reserved). REAL floor-std-clean.svg (interior walls) + type-27-clean.webp + type-24-clean.webp. Prices = area x 950; $ (no ruble). Only available units are pickable. Nothing invented.",
+    "webgl": false,
+    "owns_pin": false,
+    "motion": "transform / opacity / clip-path / stroke-dashoffset only. Reveal = clip-path inset + fade (scroll-in once). Hover = footprint wash 0.12. Pick = tray slot + pip fill (opacity/background). Picker -> compare = opacity swap + staggered column rise (no scale-from-origin, F-19). Compare column -> veil = the cover-hold-open. award/power2/expo eases.",
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "ENTRY = the smarts numbered floorplate (default floor 3) + a persistent unit list with nr/type/area/price/status; the floor index IS the entry (no L1 facade). Verified by screenshot.",
+      "SIGNATURE pin-to-compare: clicking a pill or row adds an AVAILABLE unit to a 2-slot tray (the pip shows вибрано N з 2); a 3rd pick shifts out the oldest so picks length is always <= 2; clear + per-slot remove work. With 2 picks the compare panel shows BOTH clean plans side by side + a synced spec table whose differing rows glow drafting-blue with a named delta. MAX 2 plans by construction (catalog-legal). Verified by screenshot.",
+      "asset-truth: real units.json (18/floor on 2/3/m), types Смарт 27/24, $950/m2; real floor-std-clean.svg + type-27/24-clean.webp. Prices = area x 950. Only available units pickable. NOTHING invented.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER picks/compares. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit list (nr/type/area/price/status) is always visible while picking; the compare panel shows the two plans large with the spec table beside them, never hidden behind a click-only card. F-21 prominent back pill; F-22 columns fill the canvas, no dead space; F-23 interior-detail plate.",
+      "motion only transform/opacity/clip-path/stroke-dashoffset; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. <=980px -> stacked compare. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere incl comments; $ prices (no ruble)."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, [data-render-surface] painted. The plate shows numbered units on floor 3 + a right list with real nr/type/area/price + status dots + a 2-slot tray. Click two available units (pill or row) -> the pip reads вибрано 2 з 2, both slots fill, the CTA enables. Press Показати поруч -> the compare panel shows both clean plans side by side + a synced spec table with differing rows in drafting-blue + named deltas. A 3rd click never yields a 3rd plan. Деталі on a column opens the veil deep view. Drive via real mouse clicks; eyeball every state.",
+      "expectPins": 0,
+      "pinOwner": "none",
+      "atomsCited": [
+        "numbered-floorplate-select",
+        "veil-flat-detail-reveal"
+      ]
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-smarts--compare-two/",
+    "_variantsResolved": []
+  },
+  "floorplan-smarts--copper-dusk": {
+    "id": "floorplan-smarts--copper-dusk",
+    "name": "Floorplan SMARTS copper-dusk (ERA DARK copper skin, the evening sister of museum-daylight; SAME full building->floor->unit drill on the real 54-apartment smarts object, only re-skinned navy+copper + ONE signature: copper wall-stroke draw-on at L2 + a photo-bleed L3; controlled-click, plan is hero AND the unit spec stays visible)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-smarts",
+    "palette": "era-dark",
+    "entry": {
+      "call": "combo-lab.html - composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js. ERA-dark re-skin of floorplan-smarts--museum-daylight.",
+      "module": "section-variant"
+    },
+    "uses": [
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean redrawn floorplate of the real floor-std-clean.svg (viewBox 100x44.08, interior-rich walls); per-unit footprints from units.json pos + centroid number pills; status-coded hover wash + top card. SIGNATURE: the room-wall strokes ink in via stroke-dashoffset before the pills fade up"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 calm two-tone flat-detail reached via the dark cover-hold-open veil; navy spec rail with a warm real interior photo bleeding behind the giant unit type + lighter plan canvas + copper floor-locator with THIS unit lit"
+      }
+    ],
+    "meaning": {
+      "what": "The conversion-core floorplan for the SMARTS-type object (one entrance, 54 apartments) in the ERA DARK copper-dusk skin (premium evening). FULL drill: L1 the real facade-commerce-clean.webp (dusk-graded) with hover floor-bands (the hover card docks in an OFF-FACADE rail, never covering the building) -> click a floor -> L2 the clean redrawn numbered floorplate where the room-wall strokes INK IN (stroke-dashoffset) before the number pills settle, beside a persistent right unit-list carrying nr/type/area/price/status with live free-counts (the spec stays visible, never hidden) -> click a unit -> L3 the calm veil flat-detail where a warm real interior photo bleeds softly behind the giant unit type on the left rail (behind the type only, never over the spec numbers), the real type-NN-clean.webp plan owning the right canvas + a copper floor-locator. Controlled-click throughout; 0 pins; NO-WebGL.",
+      "when": "The same multi-apartment residential building as museum-daylight, presented as a premium EVENING showroom. Use when the brand reads dark/luxury (ERA, Springs night skin) rather than pale museum daylight. Same proven shipped structure (smarts FIX-2), only re-themed + one signature move.",
+      "signature": "Copper wall-stroke draw-on: on each floor open the plate's room-wall strokes animate in via stroke-dashoffset 100->0 (the architect inking the plan) BEFORE the number pills fade up. PLUS the photo-bleed L3: a warm real interior bleeds behind the unit type on the left rail (decode-guarded, behind the type, never over the spec). The persistent availability spine + the copper floor-locator breadcrumb remain. Plan is hero, spec never hidden.",
+      "lands": "A navy evening building with copper-lit number circles on its floors; move up it and a floor warms copper while a card OFF to the side names the floor, its free count and a from-price. Click and a clean plate of that floor draws itself in front of you, wall by wall in copper line, then every apartment lights up by its number, a list beside it naming each one with its size, price and whether it is free, sold or held. Click a number and the screen goes dark for a beat and lifts to the calm apartment page: its name and price in air on the left over a softly lit real room, its clean plan on the right, a tiny floor map in copper showing exactly which one it is. It reads as a warm, confident evening index of the whole building, the line and the number doing the work."
+    },
+    "source": {
+      "grammar": "EVER visual-search L1-L3 re-themed to the ERA DARK skin on the real smarts building. L1 facade floor-bands (the shipped FBANDS approach, not the L1 atom) with an OFF-facade hover card; L2 numbered-floorplate-select on the real clean vector with a copper stroke-dashoffset wall-ink intro + a persistent unit-list spine; L3 veil-flat-detail-reveal two-tone dark detail with a photo-bleed rail. Re-skinned to ERA dark/copper tokens.",
+      "recording": "apps/quadro/.award-re/teardowns/D_era_springs_visualsearch_video.md (the ERA dark palette + L3 compositions) + D_ever_visualsearch_video.md (the L1-L3 drill grammar). Quality bar: apps/smarts/src/js/sections/units.js (FIX-2). Decode-guard: frame-scrub-img-decode-guard law.",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "era-springs-dark-skin",
+        "SMARTS-floorplan-etalon"
+      ]
+    },
+    "asset_truth": "REAL. apps/smarts/data/units.json (54 units, 18/floor on 2/3/m, types Смарт 27 / Смарт 24, $950/m2, statuses 35 available / 12 sold / 7 reserved). REAL floor-std-clean.svg (interior-rich) + facade-commerce-clean.webp + type-27/24-clean.webp + real interior photo ev-rest.webp for the L3 bleed. Nothing invented; prices = area x 950.",
+    "webgl": false,
+    "owns_pin": false,
+    "motion": "transform / opacity / clip-path / filter / stroke-dashoffset only. Reveal = clip-path inset + fade (scroll-in once). SIGNATURE = room-wall stroke-dashoffset 100->0 (power1.inOut, ~0.55s, small stagger) then pills fade up. Hover = footprint wash 0.12 + top card. Drill L1->L2 = opacity swap (no scale-from-origin). L2->L3 = the veil cover-hold-open. Photo-bleed = opacity+scale fade-in (decode-guarded). award/power1/power2/expo eases.",
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill building->floor->unit: L1 real dusk-graded facade with copper-lit floor pills + OFF-facade hover card (never covers the building, the F-20 fix); L2 the clean numbered floorplate with the copper wall-ink intro + a persistent unit-list with nr/type/area/price/status; L3 the veil two-tone dark flat-detail with a photo-bleed rail. Verified by screenshot at every level.",
+      "asset-truth: 54 real units from units.json (18/floor on 2/3/m), types Смарт 27/24, $950/m2, statuses 35 available / 12 sold / 7 reserved; real floor-std-clean.svg + facade + type-NN-clean.webp + ev-rest.webp interior. Prices = area x 950. NOTHING invented.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER hovers/clicks to drill. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit list (nr/type/area/price/status) is always visible beside the plate, never hidden behind a click-only card. The L3 photo bleeds BEHIND the type only, never over the spec numbers. Max 1 full plan at a time (catalog-safe).",
+      "SIGNATURE (F-19 safe): the wall-ink uses stroke-dashoffset on the plan strokes only, NEVER a scale-from-origin on the content svg; the geometry/footprints/pills are untouched. The photo-bleed is decode-guarded (img.decode() before reveal).",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. decode-guard the flat plan + facade + bleed. reduced-motion/<=820px -> unit list. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere incl comments; $ prices (no ruble)."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, [data-render-surface] painted. Facade is navy/dusk with copper floor pills (М/3/2); hovering a band tints it copper + fills an OFF-facade rail card (never covers the building). Click a floor -> the room walls ink in (copper stroke draw-on) then the numbered pills appear + a right unit-list with real nr/type/area/price + status dots. Click a unit -> the dark veil opens the two-tone flat-detail: a warm interior bleeds behind the type on the rail, the real plan + spec + copper floor-locator. Drive via real mouseenter/click; eyeball every level.",
+      "expectPins": 0,
+      "pinOwner": "none",
+      "atomsCited": [
+        "numbered-floorplate-select",
+        "veil-flat-detail-reveal"
+      ]
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-smarts--copper-dusk/",
+    "_variantsResolved": []
+  },
+  "floorplan-smarts--museum-daylight": {
+    "id": "floorplan-smarts--museum-daylight",
+    "name": "Floorplan SMARTS museum-daylight (EVER light skin; full building->floor->unit drill on the real 54-apartment smarts object: facade floor-bands -> clean redrawn numbered floorplate + a persistent unit list with live counts -> calm veil flat-detail; controlled-click, plan is hero AND the unit spec stays visible)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-smarts",
+    "palette": "ever-light",
+    "entry": {
+      "call": "combo-lab.html - composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js.",
+      "module": "section-variant"
+    },
+    "uses": [
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean redrawn floorplate of the real floor-std-clean.svg (viewBox 100x44.08, 18 room rects); per-unit footprints from units.json pos + centroid number pills; status-coded hover wash + top card"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 calm two-tone flat-detail reached via the dark cover-hold-open veil; neutral grey-blue spec rail + lighter plan canvas + floor-locator with THIS unit dark"
+      }
+    ],
+    "meaning": {
+      "what": "The conversion-core floorplan for the SMARTS-type object (one entrance, 54 apartments) in the EVER LIGHT museum-daylight skin. FULL drill: L1 the real facade-commerce-clean.webp with hover floor-bands (the hover card docks in an OFF-FACADE rail, never covering the building) -> click a floor -> L2 the clean redrawn numbered floorplate (the number is the UI) beside a persistent right unit-list carrying nr/type/area/price/status with live free-counts (the spec stays visible, never hidden) -> click a unit -> L3 the calm veil flat-detail (real type-NN-clean.webp plan + spec rail + floor-locator). Controlled-click throughout; 0 pins; NO-WebGL.",
+      "when": "A multi-apartment residential building (one entrance, tens of units across floors) where the user must find a specific apartment. The reference-faithful EVER baseline of the floorplan family; the proven shipped quality bar (smarts FIX-2).",
+      "signature": "The persistent availability spine (real free-counts 11/12/12 per floor in the head + the always-visible unit list at L2) + the floor-locator breadcrumb in the L3 rail (THIS unit filled). Plan is hero, spec never hidden.",
+      "lands": "A cool pale building with white number circles on its floors; move up it and a floor lights softly while a card OFF to the side names the floor, its free count and a from-price. Click and a clean redrawn plate of that floor arrives, every apartment marked by its number, a list beside it naming each one with its size, price and whether it is free, sold or held. Click a number and the screen goes dark for a beat and lifts to the calm apartment page: its name and price in air on the left, its clean plan on the right, a tiny floor map showing exactly which one it is. It reads as a precise, daylight index of the whole building, the number doing the work."
+    },
+    "source": {
+      "grammar": "EVER visual-search L1-L3 (the light museum skin) on the real smarts building. L1 facade floor-bands (the shipped FBANDS approach, not the L1 atom) with an OFF-facade hover card; L2 numbered-floorplate-select on the real clean vector + a persistent unit-list spine; L3 veil-flat-detail-reveal two-tone calm detail. Re-themed to EVER light tokens.",
+      "recording": "apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (L1-L3) + D_era_springs_visualsearch_video.md (palette family). Quality bar: apps/smarts/src/js/sections/units.js (FIX-2).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "SMARTS-floorplan-etalon"
+      ]
+    },
+    "asset_truth": "REAL. apps/smarts/data/units.json (54 units, 18/floor on 2/3/m, types Смарт 27 / Смарт 24, $950/m2, statuses 35 available / 12 sold / 7 reserved). REAL floor-std-clean.svg + facade-commerce-clean.webp + type-27/24-clean.webp. Nothing invented; prices = area x 950.",
+    "webgl": false,
+    "owns_pin": false,
+    "motion": "transform / opacity / clip-path / stroke-dashoffset only. Reveal = clip-path inset + fade (scroll-in once). Hover = footprint wash 0.12 + top card. Drill L1->L2 = opacity swap (no scale-from-origin). L2->L3 = the veil cover-hold-open. award/power2/expo eases.",
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill building->floor->unit: L1 real facade with white floor pills + OFF-facade hover card (never covers the building, the F-20 fix); L2 the clean numbered floorplate + a persistent unit-list with nr/type/area/price/status; L3 the veil two-tone flat-detail. Verified by screenshot at every level.",
+      "asset-truth: 54 real units from units.json (18/floor on 2/3/m), types Смарт 27/24, $950/m2, statuses 35 available / 12 sold / 7 reserved; real floor-std-clean.svg + facade + type-NN-clean.webp. Prices = area x 950. NOTHING invented.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER hovers/clicks to drill. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit list (nr/type/area/price/status) is always visible beside the plate, never hidden behind a click-only card. Max 1 full plan at a time (catalog-safe).",
+      "motion only transform/opacity/clip-path/stroke-dashoffset; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. decode-guard the flat plan + facade. reduced-motion/<=820px -> unit list. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere incl comments; $ prices (no ruble)."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, [data-render-surface] painted. Facade shows white floor pills (М/3/2); hovering a band tints it + fills an OFF-facade rail card (never covers the building). Click a floor -> the clean numbered plate + a right unit-list with real nr/type/area/price + status dots. Click a unit -> the dark veil opens the two-tone flat-detail with the real plan + spec + floor-locator. Drive via real mouseenter/click; eyeball every level.",
+      "expectPins": 0,
+      "pinOwner": "none",
+      "atomsCited": [
+        "numbered-floorplate-select",
+        "veil-flat-detail-reveal"
+      ]
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-smarts--museum-daylight/",
+    "_variantsResolved": []
+  },
+  "floorplan-tower--era": {
+    "id": "floorplan-tower--era",
+    "name": "Floorplan TOWER era (ERA dark sister of tower--ever: the same full EVER-grade drill on the same large 2-korpus tower, re-skinned ERA dark copper, with a cinematic photo-bleed flat-detail: facade floor-hover with a y-tracking copper tooltip -> clean copper numbered floorplate of 8 units round a core -> dark veil flat-detail where a warm evening interior bleeds behind a giant serif area numeral; controlled-click, openly a demo project)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-tower",
+    "palette": "era-dark",
+    "section": "floorplan",
+    "map_style": "",
+    "composition": "TOWER full drill (ERA dark re-skin): korpus toggle + facade floor-hover (y-tracking copper tooltip) -> copper numbered floorplate (8 units round a central core, standard top card) -> dark veil flat-detail with a cinematic photo-bleed (warm interior behind a giant serif area numeral)",
+    "webgl": false,
+    "ease": "award",
+    "entry": {
+      "call": "combo-lab.html - clean-floor-hover-select over the Higgsfield tower render (traced bands) + numbered-floorplate-select over the authored tower-floor-clean.svg + veil-flat-detail-reveal. Synthetic demo data from _shared/floorplan-helpers.js (TOWER_*) + _assets/floorplan tower vectors. The L3 signature reveals fp-assets/interior-evening.webp (decode-guarded).",
+      "module": "section-variant"
+    },
+    "meaning": {
+      "what": "The ERA dark sister of floorplan-tower--ever: the SAME full visual-search drill on the SAME large multi-korpus tower, re-skinned to ERA cinematic dark copper, plus ONE signature move. L1: the Higgsfield tower render on a navy stage with a korpus A/B toggle and traced floor bands; hovering a floor tints it copper + a dark copper tooltip card y-tracks the hovered floor naming the floor and its free count. Click -> L2: a copper-themed numbered floorplate of 8 units round a central core (the authored tower-floor-clean.svg) with a standard top card + a persistent unit list. Click -> L3: a dark veil flat-detail whose SIGNATURE is a cinematic photo-bleed: a warm evening interior image bleeds behind a giant italic serif AREA numeral on the left, with the dark copper plan panel beside it. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A large multi-korpus / many-floor tower wanting the full EVER-grade building->floor->unit->flat drill in an evening, cinematic register (dark copper) rather than the light EVER replica. The mood-led member of the family; uses the same openly synthetic demo dataset as tower--ever.",
+      "signature": "The L3 cinematic photo-bleed: a warm evening interior bleeds (cover, dimmed) behind a GIANT italic serif area numeral on the left of the flat-detail, the dark copper plan panel beside it; paired with the ERA dark copper re-skin and the y-tracking copper facade tooltip. The bleed image is decode-guarded so a missing file never throws.",
+      "lands": "A lit tower of two wings stands on near-black; move up it and a copper band warms a floor's window row while a small dark card glides alongside naming the floor and its free count. Click and a copper plate of that floor arrives, eight apartments round the core each marked by its number, a list beside them. Click a number and the screen darkens and lifts to an evening apartment page: a warm room glows behind a tall serif number that is the area itself, the clean plan drawn in copper beside it, the price below. It reads like ERA after dark, on our own tower."
+    },
+    "source": {
+      "grammar": "ERA dark register over the EVER visual-search L1-L3 grammar: clean-floor-hover-select (traced perspective bands + a y-tracking tooltip, re-skinned copper) -> numbered-floorplate-select (centroid number pills round a core, copper plate) -> veil-flat-detail-reveal (dark two-tone detail) plus a cinematic photo-bleed numeral. ERA dark tokens (navy stage, copper #c08457 accents).",
+      "recording": "apps/quadro/.award-re/teardowns/D_era_springs_visualsearch_video.md (ERA dark palette + L3 compositions) + D_ever_visualsearch_video.md (L1-L3 measurements).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "TOWER-1to1-replica",
+        "ERA-dark-cinematic-bleed"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "clean-floor-hover-select",
+        "job": "L1 pick a floor on the Higgsfield tower render; perspective band quads traced off a coordinate grid (viewBox 3712x4608, fit contain); the copper left tooltip y-tracks the hovered floor; korpus A/B re-themes the bands"
+      },
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 copper-themed numbered floorplate of the authored tower-floor-clean.svg (viewBox 100x72, 8 unit footprints round a central core); centroid number pills + status hover wash + standard top card"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 dark cinematic flat-detail via the dark veil; authored clean tower type-plan + spec rail, with a photo-bleed of a warm evening interior behind a giant serif area numeral"
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "asset_truth": "OPENLY SYNTHETIC (the same demo tower as tower--ever, no real data), carrying the legal line 'Демонстраційний проєкт. Дані наведено для прикладу.' The data is SELF-CONSISTENT (4 types area x flat rate $1450/m2 so price never contradicts area; 8 units/floor matching the authored 8 footprints; statuses spread by floor band). The tower render is Higgsfield-generated; floor bands are TRACED over the real render off a coordinate grid (not guessed). The L3 evening interior (fp-assets/interior-evening.webp) is a Higgsfield mood image, decode-guarded so a missing file never throws. Floor count capped at the readable bands (B3 gate). NEVER claimed as real.",
+    "owns_pin": false,
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill korpus+floor->unit->flat, ERA dark re-skin: L1 traced facade bands + y-tracking copper tooltip + korpus A/B toggle; L2 copper numbered floorplate of 8 units round a core + a unit list + a standard top card; L3 dark veil flat-detail with the cinematic photo-bleed numeral. Verified by screenshot at every level.",
+      "SIGNATURE photo-bleed: a warm evening interior bleeds (cover, dimmed) behind a giant italic serif AREA numeral on the left; the dark copper plan panel sits beside it; the image is decode-guarded so a 404 never throws and the rail still renders.",
+      "OPENLY SYNTHETIC + self-consistent: carries 'Демонстраційний проєкт. Дані наведено для прикладу.'; prices = area x 1450 (never contradict area); 8 units match the 8 authored footprints; all 3 statuses render. NO claim of being real.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit list (nr/type/area/price/status) is visible beside the plate; the flat-detail rail (type/sub/area/price/reserve) is visible; max 1 full plan at a time.",
+      "F-22 canvas full: a big copper plan + a visible floor-locator (THIS unit highlighted) + the photo-bleed numeral fill the canvas; no large empty region.",
+      "F-21 prominent back: .vfd-back is a clear copper pill with a circular arrow + hover, not a faint text link.",
+      "floor bands TRACED over the real render (read off a coordinate grid, not guessed); floor count capped at the readable bands (B3).",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. decode-guard the render + plans + the bleed image. reduced-motion/<=900px -> floor + unit lists, bleed hidden. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere; $ prices."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, render painted. Hover up the tower: a copper band lights a floor + a dark copper tooltip y-tracks it; korpus A/B toggles re-theme the bands. Click a floor -> 8 numbered copper units round the core + a unit list (self-consistent demo data, all 3 statuses, $ prices). Click a unit -> the dark veil opens the cinematic flat-detail: a warm evening interior bleeds behind a giant serif area numeral, the copper plan + spec beside it. Confirm the 'Демонстраційний проєкт' legal line. Eyeball every level."
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-tower--era/",
+    "_variantsResolved": []
+  },
+  "floorplan-tower--ever": {
+    "id": "floorplan-tower--ever",
+    "name": "Floorplan TOWER ever (almost 1:1 EVER replica on a large 2-korpus tower: facade floor-hover with the EVER y-tracking tooltip -> clean numbered floorplate of 8 units round a core -> calm veil flat-detail; controlled-click, openly a demo project)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-tower",
+    "palette": "ever-light",
+    "section": "floorplan",
+    "map_style": "",
+    "composition": "TOWER full drill (EVER replica): korpus toggle + facade floor-hover (y-tracking tooltip) -> numbered floorplate (8 units round a central core) -> veil two-tone flat-detail",
+    "webgl": false,
+    "ease": "award",
+    "entry": {
+      "call": "combo-lab.html - clean-floor-hover-select over the Higgsfield tower render (traced bands) + numbered-floorplate-select over the authored tower-floor-clean.svg + veil-flat-detail-reveal. Synthetic demo data from _shared/floorplan-helpers.js (TOWER_*) + _assets/floorplan tower vectors.",
+      "module": "section-variant"
+    },
+    "meaning": {
+      "what": "An almost 1:1 EVER replica of the full visual-search drill on a LARGE multi-korpus tower, to prove the system reproduces award sites faithfully. L1: a Higgsfield-generated tower render with a korpus A/B toggle and traced floor bands; hovering a floor tints it terracotta + a left beige tooltip card y-tracks the hovered floor (the EVER move). Click -> L2: a clean numbered floorplate of 8 units round a central core (the authored tower-floor-clean.svg) + a persistent unit list with self-consistent demo data. Click -> L3: the calm veil two-tone flat-detail with an authored clean type-plan. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A large multi-korpus / many-floor tower where the full EVER-grade building->floor->unit->flat drill is wanted, and a faithful reference replica is the goal. The showcase member of the family; uses an openly synthetic demo dataset (a tower we do not have real data for).",
+      "signature": "The EVER y-tracking left tooltip card on the traced tower facade + the korpus A/B toggle that re-themes the floor bands on the same render, faithful to the reference.",
+      "lands": "A lit tower of two wings fills the stage; move up it and a clean terracotta band lights on a floor's window row while a small beige card glides alongside naming the floor and its free count. Click and a clean plate of that floor arrives, eight apartments round the core each marked by its number, a list beside them. Click a number and the screen darkens for a beat and lifts to the calm apartment page, its plan drawn clean beside its name and price. It reads exactly like the reference, on our own tower."
+    },
+    "source": {
+      "grammar": "EVER visual-search L1-L3 reproduced faithfully: clean-floor-hover-select (traced perspective bands + the y-tracking tooltip) -> numbered-floorplate-select (centroid number pills round a core) -> veil-flat-detail-reveal (two-tone calm detail). EVER light tokens + measurements (band fill ~0.4, hover wash 0.12).",
+      "recording": "apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (L1-L3 measurements) + D_era_springs_visualsearch_video.md.",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "TOWER-1to1-replica"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "clean-floor-hover-select",
+        "job": "L1 pick a floor on the Higgsfield tower render; perspective band quads traced off a coordinate grid (viewBox 3712x4608, fit contain); the EVER left tooltip y-tracks the hovered floor; korpus A/B re-themes the bands"
+      },
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean numbered floorplate of the authored tower-floor-clean.svg (viewBox 100x72, 8 unit footprints round a central core); centroid number pills + status hover wash + top card"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 calm two-tone flat-detail via the dark veil; authored clean tower type-plan + spec rail"
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "asset_truth": "OPENLY SYNTHETIC (a demo tower we have no real data for), carrying the legal line 'Демонстраційний проєкт. Дані наведено для прикладу.' The data is SELF-CONSISTENT (4 types area x flat rate $1450/m2 so price never contradicts area; 8 units/floor matching the authored 8 footprints; statuses spread by floor band). The tower render is Higgsfield-generated; floor bands are TRACED over the real render off a coordinate grid (not guessed). Floor count capped at the readable bands (B3 gate).",
+    "owns_pin": false,
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill korpus+floor->unit->flat, faithful EVER replica: L1 traced facade bands + y-tracking left tooltip + korpus A/B toggle; L2 numbered floorplate of 8 units round a core + a unit list; L3 veil two-tone flat-detail. Verified by screenshot at every level.",
+      "OPENLY SYNTHETIC + self-consistent: carries 'Демонстраційний проєкт. Дані наведено для прикладу.'; prices = area x 1450 (never contradict area); 8 units match the 8 authored footprints; all 3 statuses render. NO claim of being real.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit list (nr/type/area/price/status) is visible beside the plate; max 1 full plan at a time.",
+      "floor bands TRACED over the real render (read off a coordinate grid, not guessed); floor count capped at the readable bands (B3).",
+      "motion only transform/opacity/clip-path/stroke-dashoffset; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. decode-guard the render + plans. reduced-motion/<=820px -> floor + unit lists. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere; $ prices."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, render painted. Hover up the tower: a terracotta band lights a floor + a left beige tooltip y-tracks it; korpus A/B toggles re-theme the bands. Click a floor -> 8 numbered units round the core + a unit list (self-consistent demo data, all 3 statuses, $ prices). Click a unit -> the veil opens the two-tone flat-detail (authored clean type-plan + spec). Confirm the 'Демонстраційний проєкт' legal line. Eyeball every level."
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-tower--ever/",
+    "_variantsResolved": []
+  },
+  "floorplan-tower--springs": {
+    "id": "floorplan-tower--springs",
+    "name": "Floorplan TOWER springs (Springs cream sister of the EVER tower replica: warm sand plate + fine sepia plan strokes + oval cream number pills, with a fixed LEFT preview-pane mini-plan that slides in on pill hover; facade floor-hover -> numbered floorplate -> green-and-cream two-tone veil flat-detail; controlled-click, openly a demo project)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-tower",
+    "palette": "springs-cream",
+    "section": "floorplan",
+    "map_style": "",
+    "composition": "TOWER full drill (Springs re-skin): korpus toggle + facade floor-hover (y-tracking cream tooltip) -> numbered floorplate (8 cream-pill units round a core) WITH a fixed left preview-pane mini-plan -> green-gradient + cream two-tone veil flat-detail",
+    "webgl": false,
+    "ease": "award",
+    "entry": {
+      "call": "combo-lab.html - clean-floor-hover-select over the Higgsfield tower render (traced bands) + numbered-floorplate-select over the authored tower-floor-clean.svg (re-skinned cream/sepia) + veil-flat-detail-reveal (green-and-cream). The novel L2 left preview-pane mini-plan is wired combo-level on the built .nfp-pill[data-nr] (mouseenter -> slide TOWER_TYPE_PLANS[type] into the fixed left pane). Synthetic demo data from _shared/floorplan-helpers.js (TOWER_*) + _assets/floorplan tower vectors.",
+      "module": "section-variant"
+    },
+    "meaning": {
+      "what": "The Springs cream sister of the EVER tower replica: the same full visual-search drill on a LARGE multi-korpus tower, re-skinned to Springs resort-soft (warm sand plate ~#e9e2cf, fine sepia plan strokes ~#8a7d63, oval-ish cream number pills, a green accent ~#3a5a2f). L1: a Higgsfield-generated tower render with a korpus A/B toggle and traced floor bands; hovering a floor tints it soft green + a left cream tooltip card y-tracks the hovered floor naming it and its free count. Click -> L2: a clean numbered floorplate of 8 cream-pill units round a central core (the authored tower-floor-clean.svg, plan strokes recoloured sepia) + a persistent unit list. THE SIGNATURE: a FIXED LEFT preview-pane that, on pill (or list-row) hover, slides that unit's mini type-plan into view (autoAlpha + x:-8->0, ~0.2s) WHILE the floorplate stays on the right. Click -> L3: a green-gradient left rail + cream plan canvas (the Springs two-tone) flat-detail with an authored clean type-plan. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A large multi-korpus / many-floor tower wanting the full building->floor->unit->flat drill in a warm, resort-soft Springs register, where a left mini-plan preview adds calm previewing without leaving the floorplate. The cream member of the tower family; uses an openly synthetic demo dataset.",
+      "signature": "The fixed LEFT preview-pane mini-plan slide: hover a number pill and that unit's mini type-plan slides into the fixed left pane while the plate stays put on the right (the one genuinely novel L2 move), inside the Springs cream-and-sepia skin with a green accent.",
+      "lands": "A lit tower of two wings fills a sandy stage; move up it and a soft green band lights a floor's window row while a small cream card glides alongside naming the floor and its free count. Click and a cream plate of that floor arrives, eight apartments round the core each marked by an oval number; hover a number and its little plan slides into a pane on the left while the plate holds steady on the right, a list of all eight beside them. Click a number and the screen darkens for a beat and lifts to a calm apartment page, a green rail of name and price beside a cream canvas where the plan is drawn clean in fine sepia."
+    },
+    "source": {
+      "grammar": "Springs cream visual-search reproduced over the EVER tower-replica drill: clean-floor-hover-select (traced perspective bands + a y-tracking cream tooltip) -> numbered-floorplate-select (cream oval pills round a core, sepia plan) -> veil-flat-detail-reveal (green-gradient rail + cream canvas two-tone). Springs cream tokens (sand ~#e9e2cf, sepia ~#8a7d63, green ~#3a5a2f); the left preview-pane is the Springs L2 preview move.",
+      "recording": "apps/quadro/.award-re/teardowns/D_era_springs_visualsearch_video.md (Springs cream palette + the left preview measurements) + D_ever_visualsearch_video.md (the L1-L3 drill it re-skins).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "TOWER-1to1-replica",
+        "springs-cream-preview-pane"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "clean-floor-hover-select",
+        "job": "L1 pick a floor on the Higgsfield tower render; perspective band quads traced off a coordinate grid (viewBox 3712x4608, fit contain); a left CREAM tooltip y-tracks the hovered floor; korpus A/B re-themes the bands; band wash recoloured soft green"
+      },
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean numbered floorplate of the authored tower-floor-clean.svg (viewBox 100x72, 8 unit footprints round a central core); cream oval number pills + sepia plan strokes + status hover wash; its built .nfp-pill[data-nr] drive the left preview-pane mini-plan"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 Springs two-tone flat-detail via the dark-green veil: a green-gradient left rail (cream ink) + a cream plan canvas with fine sepia strokes; authored clean tower type-plan + spec rail + prominent back pill + floor-locator"
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "asset_truth": "OPENLY SYNTHETIC (a demo tower we have no real data for), carrying the legal line 'Демонстраційний проєкт. Дані наведено для прикладу.' The data is SELF-CONSISTENT (4 types area x flat rate $1450/m2 so price never contradicts area; 8 units/floor matching the authored 8 footprints; statuses spread by floor band). The tower render is Higgsfield-generated; floor bands are TRACED over the real render off a coordinate grid (not guessed). Floor count capped at the readable bands (B3 gate). The left preview mini-plans are the same authored clean type-plans (TOWER_TYPE_PLANS), recoloured sepia in CSS only.",
+    "owns_pin": false,
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill korpus+floor->unit->flat in the Springs cream skin: L1 traced facade bands (soft green wash) + a y-tracking left CREAM tooltip + korpus A/B toggle; L2 cream oval-pill floorplate of 8 units round a core + a unit list + the LEFT preview-pane mini-plan; L3 green-gradient rail + cream canvas flat-detail. Verified by screenshot at every level.",
+      "SIGNATURE move present: hovering a number pill (or a list row) slides that unit's mini type-plan into the fixed LEFT pane (autoAlpha + x:-8->0, ~0.2s) while the floorplate stays on the right; the pane seeds the first unit's mini-plan at load so the render surface paints non-zero. Decode-safe (inline vector SVG, no async image).",
+      "OPENLY SYNTHETIC + self-consistent: carries 'Демонстраційний проєкт. Дані наведено для прикладу.'; prices = area x 1450 (never contradict area); 8 units match the 8 authored footprints; all 3 statuses render. NO claim of being real.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit list (nr/type/area/price/status) is visible beside the plate; the left preview adds a second always-visible plan view; max 1 full flat-plan at a time at L3.",
+      "F-21 prominent back (cream pill + circular arrow on green, hover swap); F-22 full canvas (big plan + a visible floor-locator with THIS unit highlighted via --fp-loc-on/off + a site/compass cluster); F-23 interior detail (authored tower-floor-clean.svg + type-plans keep walls, no empty boxes).",
+      "floor bands TRACED over the real render (read off a coordinate grid, not guessed); floor count capped at the readable bands (B3).",
+      "motion only transform/opacity/clip-path/stroke-dashoffset; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. decode-guard the render + plans. reduced-motion/<=900px -> floor + unit lists (preview pane hidden). __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere; $ prices."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, render painted (the left preview seeds the first unit's mini-plan). Hover up the tower: a soft-green band lights a floor + a left cream tooltip y-tracks it; korpus A/B toggles re-theme the bands. Click a floor -> 8 cream oval-pill units round the core + a unit list (self-consistent demo data, all 3 statuses, $ prices) + a left preview-pane. Hover a pill -> its mini type-plan slides into the LEFT pane while the plate holds. Click a unit -> the dark-green veil opens the green-and-cream two-tone flat-detail (authored clean type-plan in fine sepia + spec + prominent back). Confirm the 'Демонстраційний проєкт' legal line. Eyeball every level."
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-tower--springs/",
+    "_variantsResolved": []
+  },
+  "floorplan-towns--row-elevation-rail": {
+    "id": "floorplan-towns--row-elevation-rail",
+    "name": "Floorplan TOWNS row-elevation-rail (ERA dark; pick 1 of 6 identical row-houses on the real front render; THE F-20 FIX: the hover spec card docks in an OFF-facade rail with a hairline tether so the row is never covered; click opens a deep two-tone town-detail with proportional real-area room tiles)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-towns",
+    "palette": "era-dark",
+    "section": "floorplan",
+    "map_style": "",
+    "composition": "TOWNS shortened drill: real 6-house front render RIGHT + an OFF-facade reading rail LEFT (the spec lives here, never over a house) + a deep veil town-detail on click",
+    "webgl": false,
+    "ease": "award",
+    "entry": {
+      "call": "combo-lab.html - clean-floor-hover-select over the real selector-row-6-day.png (flat front quads) with its tooltip suppressed; an off-facade rail card drives the spec; click -> veil-flat-detail-reveal town page. Data from _shared/floorplan-helpers.js (TOWNS_*).",
+      "module": "section-variant"
+    },
+    "meaning": {
+      "what": "The conversion-core floorplan for the TOWNS-type object (6 identical townhouses in a row) in the ERA dark skin, taking the live towns-zamkova site as the base and FIXING its two faults. SHORTENED drill (the unit IS the whole house): the real front render of the 6-house row sits RIGHT with flat per-house hover zones + number pins; the spec card lives in an OFF-facade LEFT rail and a hairline tether points to the hovered house, so the row of 6 is never covered (THE F-20 FIX, owner complaint #1). Click a house -> a deep two-tone veil town-detail: a giant 'Таунхаус №N' spec rail beside a plan canvas of PROPORTIONAL labelled room tiles built from the REAL room areas (owner complaint #2: the under-developed town page), with an honest 'візуалізація' caption + a row-locator showing THIS house. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A small-inventory boutique development of a few identical units in a row (townhouses, a terrace) where position is the differentiator and there is no per-floor unit nesting. The faithful evolution of the shipped towns selector; the SAMPLE-FIRST for the towns family.",
+      "signature": "The OFF-facade rail + hairline tether (the house is never covered, the F-20 fix) and the deep town-detail with proportional real-area room tiles (premium even with a placeholder plan).",
+      "lands": "A dark row of six identical townhouses fills the right; move across it and a house warms under a number while a card on the LEFT, off the building, names it: which position in the row, its size, rooms, yard and from-price, with a thin line pointing to the house so nothing is covered. Click and the screen lifts to a calm two-tone page: the townhouse name and price in air on the left, and on the right its rooms laid out as tiles sized to their real area across both floors, honestly marked a visualization. A small row map shows which of the six it is. It reads as choosing a specific home, not reading a list."
+    },
+    "source": {
+      "grammar": "EVER/ERA visual-search L1 (pick on a render) + L3 (veil two-tone detail), adapted to a 6-house row: clean-floor-hover-select with FLAT front quads (the render is near-orthographic, M2 gate) + an OFF-facade rail (the F-20 fix) + veil-flat-detail-reveal as the town page with proportional room tiles.",
+      "recording": "apps/quadro/.award-re/teardowns/D_era_springs_visualsearch_video.md + D_ever_visualsearch_video.md. Base: the live towns-zamkova.vercel.app selector (apps/towns/src/js/sections/units.js calibrated ZONES).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "TOWNS-row-selector"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "clean-floor-hover-select",
+        "job": "L1 pick a house on the REAL row render; FLAT front quads from the calibrated zones (viewBox 1920x814, fit contain); its built-in tooltip is suppressed (no .cfh-card) so the OFF-facade rail drives the spec (F-20 fix)"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "the deep town page reached on click; two-tone giant-type spec rail + a plan canvas of proportional real-area room tiles (drawPlan false, no invented footprint) + a row-locator with THIS house filled"
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "asset_truth": "REAL towns data (content.js): 6 houses, 82 м², дві спальні, свій двір, від $67 тис, status Вільний, position edge/middle (the ONLY real differentiator). ALL available (no invented sold/reserved). Room areas verbatim from CONTENT.plan.scenes. Calibrated zones verbatim from units.js. Real render selector-row-6-day.png. The plan is honest proportional tiles (no invented footprint) since towns has no real plan PDF yet.",
+    "owns_pin": false,
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "F-20 FIX: hovering ANY house (incl the middle ones) shows the spec in an OFF-facade LEFT rail card + a hairline tether; the spec node never overlaps the house band. Verified by screenshot on a middle house.",
+      "SHORTENED drill: pick 1 of 6 -> a deep veil town-detail (the unit IS the house; no floor->unit nesting). The town page = a two-tone spec rail + proportional real-area room tiles + an honest visualization caption + a row-locator.",
+      "asset-truth: 6 real houses, 82 м², від $67 тис, дві спальні, свій двір, status Вільний, real positions; room areas verbatim from content.js. ALL available (nothing invented). Real render + calibrated zones. NO invented footprint/plan.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER hovers/clicks. pins === 0.",
+      "FLAT front quads (the render is near-orthographic, M2 gate) NOT perspective chevrons; 6 number pins always visible; the row is the hero and stays uncovered.",
+      "motion only transform/opacity/clip-path/stroke-dashoffset; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. decode-guard the render. reduced-motion/<=820px -> a house button list. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere; $ prices."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, render painted. Hover a MIDDLE house (3,4): the spec appears in the LEFT rail (off the facade) with a tether, the house is NOT covered. 6 number pins visible. Click a house: the veil opens a two-tone town-detail (giant 'Таунхаус №N' + 82 м² + від $67 тис + proportional room tiles across two floors + an honest caption + a row-locator with THIS house filled). Eyeball the F-20 fix + the deep page."
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-towns--row-elevation-rail/",
+    "_variantsResolved": []
+  },
+  "floorplan-towns--street-ribbon": {
+    "id": "floorplan-towns--street-ribbon",
+    "name": "Floorplan TOWNS street-ribbon (EVER light; pick 1 of 6 identical row-houses where GIANT terracotta ghosted numerals 1-6 ARE the UI, set in a reserved sky-band above a dimmed row render so a numeral or chip never lands on the facade; the spec stays in an OFF-facade reading column; click opens the SAME deep two-tone town-detail with proportional real-area room tiles + a prominent back pill + a row-locator)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-towns",
+    "palette": "ever-light",
+    "section": "floorplan",
+    "map_style": "",
+    "composition": "TOWNS shortened drill: a reserved top sky-band of GIANT numerals (the UI) over a dimmed low-contrast 6-house render LEFT + an OFF-facade reading column RIGHT (the spec lives here, never over a house) + the same deep veil town-detail on click",
+    "webgl": false,
+    "ease": "award",
+    "entry": {
+      "call": "combo-lab.html - clean-floor-hover-select over the real selector-row-6-day.png (flat front quads, dimmed/desaturated substrate) with its tooltip suppressed; GIANT numerals 1-6 in a reserved sky-band ARE the controlled-click UI; an off-facade reading column drives the spec; click -> veil-flat-detail-reveal town page. Data from _shared/floorplan-helpers.js (TOWNS_*).",
+      "module": "section-variant"
+    },
+    "meaning": {
+      "what": "The conversion-core floorplan for the TOWNS-type object (6 identical townhouses in a row) in the EVER light skin - the NUMERAL-DOMINANT sister of row-elevation-rail. A genuinely different HERO answer: instead of highlighting on the photo, the 6 houses RECEDE to a low-contrast substrate (the real front render, dimmed + desaturated via CSS filter) and GIANT terracotta ghosted numerals 1-6 BECOME the UI, sitting in a RESERVED top sky-band - a real layout pad that is part of the composition, NOT borrowed from the image - so a numeral or its chip never lands on the facade at any width. Hovering a numeral LIFTS it + a SLIM chip glides ABOVE the roofline naming the house; the full spec lives in an OFF-facade reading column (the F-20 law, satisfied by design - nothing ever covers a house). Click a numeral -> the SAME deep two-tone veil town-detail as row-rail: a giant 'Таунхаус №N' spec rail beside a plan canvas of PROPORTIONAL labelled room tiles built from the REAL room areas, an honest 'візуалізація' caption, a prominent terracotta back pill (F-21) and a row-locator showing THIS house. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A small-inventory boutique development of a few identical units in a row (townhouses, a terrace) where position is the differentiator and there is no per-floor unit nesting - and the brand wants an editorial, numeral-led hero rather than a photo-highlight selector. The numeral-dominant sister of the towns SAMPLE-FIRST.",
+      "signature": "GIANT terracotta ghosted numerals 1-6 ARE the UI, set in a RESERVED sky-band above a dimmed row render (a different hero from row-rail's photo-highlight); the chip glides above the roofline, the spec stays off-facade, nothing covers a house. Same deep town-detail with proportional real-area room tiles.",
+      "lands": "Six oversized ghosted numbers stand in a band of air across the top; below them the row of six townhouses sits quiet and desaturated, a backdrop. Move across a number and it lifts and warms, a thin slip of a label glides above the rooftops to name the house, and a card in the column to the right names it fully: which position in the row, its size, rooms, yard and from-price, with the building never touched. Click and the screen lifts to a calm two-tone page: the townhouse name and price in air on the left, its rooms laid out as tiles sized to their real area across both floors, honestly marked a visualization, a clear way back, and a small row map of which of the six it is. The number is the door."
+    },
+    "source": {
+      "grammar": "EVER/ERA visual-search L1 (pick on a render) + L3 (veil two-tone detail), adapted to a 6-house row with a numeral-led hero: clean-floor-hover-select with FLAT front quads over a DIMMED render substrate (the render is near-orthographic, M2 gate) + GIANT numerals in a reserved sky-band as the UI + an OFF-facade reading column (the F-20 fix, by design) + veil-flat-detail-reveal as the town page with proportional room tiles.",
+      "recording": "apps/quadro/.award-re/teardowns/D_era_springs_visualsearch_video.md + D_ever_visualsearch_video.md. Base: the live towns-zamkova.vercel.app selector (apps/towns/src/js/sections/units.js calibrated ZONES).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "TOWNS-row-selector"
+      ]
+    },
+    "uses": [
+      {
+        "atom": "clean-floor-hover-select",
+        "job": "L1 pick a house on the REAL row render used as a DIMMED low-contrast substrate; FLAT front quads from the calibrated zones (viewBox 1920x814, fit contain) drive only a soft hover-wash; its built-in tooltip is suppressed (no .cfh-card) so the GIANT numerals are the UI and the OFF-facade column drives the spec"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "the deep town page reached on click (same as row-rail); two-tone giant-type spec rail + a plan canvas of proportional real-area room tiles (drawPlan false, no invented footprint) + a prominent terracotta back pill (F-21) + a row-locator with THIS house filled"
+      }
+    ],
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "pin_killed": [],
+    "asset_truth": "REAL towns data (content.js): 6 houses, 82 м², дві спальні, свій двір, від $67 тис, status Вільний, position edge/middle (the ONLY real differentiator). ALL available (no invented sold/reserved). Room areas verbatim from CONTENT.plan.scenes. Calibrated zones verbatim from units.js. Real render selector-row-6-day.png (dimmed via CSS filter only, not altered data). The reserved sky-band is a layout pad, NOT borrowed sky from the image. The plan is honest proportional tiles (no invented footprint) since towns has no real plan PDF yet.",
+    "owns_pin": false,
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "DIFFERENT HERO from row-rail: the 6 houses recede to a dimmed/desaturated substrate; GIANT terracotta numerals 1-6 in a RESERVED sky-band ARE the UI. The numeral/chip NEVER lands on the facade band at any width (the sky-band is a layout pad, not the image). Verified by screenshot at desktop + narrow.",
+      "F-20 (nothing covers a house): the spec lives in an OFF-facade reading column; on hover a slim chip glides ABOVE the roofline only; hovering ANY house (incl middle 3,4) never overlaps the facade band. Verified on a middle numeral.",
+      "SHORTENED drill: pick 1 of 6 -> the SAME deep veil town-detail as row-rail (the unit IS the house; no floor->unit nesting). The town page = a two-tone spec rail + proportional real-area room tiles + an honest visualization caption + a PROMINENT terracotta back pill (F-21) + a row-locator.",
+      "asset-truth: 6 real houses, 82 м², від $67 тис, дві спальні, свій двір, status Вільний, real positions; room areas verbatim from content.js. ALL available (nothing invented). Real render (dimmed via filter only) + calibrated zones. NO invented footprint/plan; the sky-band is a composition pad, not borrowed image sky.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin (F-19). Reveal once on scroll-in; the USER hovers/clicks a numeral. pins === 0.",
+      "FLAT front quads (the render is near-orthographic, M2 gate) NOT perspective chevrons; the row stays uncovered; the numerals are the hero.",
+      "motion only transform/opacity/clip-path/filter; NO WebGL/mix-blend/backdrop/canvas/scale-from-origin. The render dim is a CSS filter (allowed). reduced-motion/<=900px -> the numerals stay a tappable button row. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere; $ prices."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, render painted. Six GIANT ghosted terracotta numerals sit in a reserved band ABOVE a dimmed 6-house render. Hover a MIDDLE numeral (3,4): it lifts, a slim chip glides above the roofline, the spec appears in the OFF-facade RIGHT column - the house is NOT covered. Click a numeral: the veil opens the deep two-tone town-detail (giant 'Таунхаус №N' + 82 м² + від $67 тис + proportional room tiles across two floors + an honest caption + a prominent back pill + a row-locator with THIS house filled). Eyeball the numeral-as-UI hero + the deep page."
+    },
+    "files": [
+      "combo-lab.html",
+      "RECIPE.md"
+    ],
+    "note": "|",
+    "_path": "library/combos/floorplan-towns--street-ribbon/",
+    "_variantsResolved": []
   }
 }
