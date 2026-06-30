@@ -4,7 +4,7 @@ name: "Локація (панель зліва)"
 level: 2
 kind: section-variant
 section: location
-status: candidate
+status: base
 map_style: "DARK DUSK"
 composition: "SMARTS proportion re-planned: reading panel LEFT (title + visible POI list with times + highway sign + legal), dense dusk map RIGHT with the parcel + «22,5 сотки» dimension line"
 webgl: false

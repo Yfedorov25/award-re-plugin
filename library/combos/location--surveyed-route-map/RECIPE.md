@@ -5,7 +5,7 @@ name: "Маршрут по справжніх вулицях"
 level: 2
 kind: section-variant
 section: location
-status: candidate
+status: base
 meaning:
   what: "The realistic etalon of the LOCATION section (the smarts variant). A dark, baked OSM VECTOR district of с. Агрономічне rendered as real geography: road hierarchy by class (hwy / main / mid / minor / faint with dual casing+stroke), 823 building footprints with deterministic warm-lit windows so the town reads as alive at dusk, and the site anchored inside a true-scale 10-minute walking ring. The section pins; as you scroll, it STEPS through the 6 real POIs one at a time, and at each step a Dijkstra route DRAWS along the actual streets (route[] from the dataset) while a walking dot travels it and a LIVE minute counter grows to the real walk-time. theme-tween lerps the chrome toward a dusk tone across the same scroll. One clean pin-story block per step (number, place, real minutes), cross-faded so two are never legible at once."
   when: "The location beat where the buyer's real question is 'can I actually live my life from here'. This is the most authentic-geography answer: not a stylised illustration or a number, but the true street graph, with the walk to the school / pharmacy / Nova Poshta drawn along the streets you would really walk and timed to the real minute. The 'we surveyed it, here is the proof' register."

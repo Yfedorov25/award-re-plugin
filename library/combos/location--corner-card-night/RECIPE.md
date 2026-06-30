@@ -4,7 +4,7 @@ name: "Локація (нічна карта, кутова картка)"
 level: 2
 kind: section-variant
 section: location
-status: candidate
+status: base
 map_style: "NIGHT-NEON"
 composition: "SMARTS proportion re-planned: a FULL-BLEED night map is the hero, and ALL the smarts content lives in one compact translucent GLASS card pinned in the bottom-left corner (eyebrow + short title + the VISIBLE 6-POI list with times + a highway sign-guide + legal); the map carries the parcel + a «22,5 сотки» dimension line + a «≈10 хв» walking ring"
 webgl: false

@@ -4,7 +4,7 @@ name: "Локація (метрика веде)"
 level: 2
 kind: section-variant
 section: location
-status: candidate
+status: base
 map_style: "HI-CONTRAST MONO"
 composition: "SMARTS proportion re-planned as a 60/40 spread: dense mono map LEFT (~60%), reading panel RIGHT (~40%) that LEADS WITH THE METRIC (big «22,5» сотки + «вул. Перемоги · фасад шосе» + «45 x 50 м» frontage), THEN the visible 6-POI list with times, THEN the highway sign-guide. The «22,5 сотки» dimension line also on the map."
 webgl: false
