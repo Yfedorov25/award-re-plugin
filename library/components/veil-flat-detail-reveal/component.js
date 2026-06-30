@@ -71,7 +71,8 @@
       function set(sel, val) { var el = ov.querySelector(sel); if (el != null && val != null) el.textContent = val; }
       set('.vfd-type', unit.type);
       set('.vfd-sub', unit.sub);
-      set('.vfd-area', unit.areaM2 != null ? unit.areaM2 + ' M²' : '');
+      // areaUnit defaults to the Ukrainian 'м²' (UA/RU market); pass areaUnit:'M²' for latin if needed
+      set('.vfd-area', unit.areaM2 != null ? unit.areaM2 + ' ' + (unit.areaUnit || 'м²') : '');
       var priceEl = ov.querySelector('.vfd-price');
       if (priceEl) priceEl.textContent = unit.status === 'sold' ? 'Продано' : opt.fmtPrice(unit.price);
       set('.vfd-crumbs', unit.crumbs);

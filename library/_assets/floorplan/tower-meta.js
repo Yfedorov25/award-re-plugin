@@ -1,0 +1,2 @@
+// Tower demo meta (synthetic, openly a demo). Floor list = bands we trace on the render (B3 cap).
+export const TOWER_META = {"legal":"Демонстраційний проєкт. Дані наведено для прикладу.","korpus":[{"id":"A","label":"Корпус A","floors":[12,11,10,9,8,7,6,5,4,3,2],"higherNote":"поверхи 13 і вище за запитом"},{"id":"B","label":"Корпус B","floors":[10,9,8,7,6,5,4,3,2],"higherNote":"поверхи 11 і вище за запитом"}],"sampleKorpus":"A","sampleFloor":9};
