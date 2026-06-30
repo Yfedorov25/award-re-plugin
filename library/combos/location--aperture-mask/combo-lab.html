@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--aperture-mask · ПОРУЧ (карта крізь слово)</title>
+<!--
+  SECTION VARIANT, location--aperture-mask (role: location). MAP-STYLE = NIGHT-NEON.
+  COMPOSITION = TYPOGRAPHIC APERTURE: the real dense night map of с. Агрономічне is seen brightest
+  THROUGH a giant serif word «ПОРУЧ» cut into a dark scrim; outside the word the same live map is
+  dimmed to atmosphere. The word is the window. CONTROLLED-CLICK: the map reveals on scroll-in, then
+  the USER clicks/hovers the 6 real POIs (map or the visible side list) and THAT draws the real
+  Dijkstra route + honest minute badge. The aperture is pure SVG <mask> + clip on a scrim (no WebGL,
+  no mix-blend, no scale-from-origin) so it never floats; a light parallax gives the word depth.
+
+  asset-truth: streets/footprints/green from osm.js; the 6 real POIs verbatim (Школа·садок 9хв,
+  Нова Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв). Coords 49.18N 28.33E.
+  __LAB_OK__: 0 pins (pin-less click section), the cited atom ran, [data-render-surface] painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin. */
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  #combo.combo-stage { background: #05060a; min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
+
+  /* NIGHT-NEON palette (lifted 1:1 from location--night-neon so the realism is identical) */
+  #combo.combo-stage, .apm__field {
+    --lm-ink: #cfe4ff; --lm-bg-1: #0a0d16; --lm-bg-2: #04050a;
+    --lm-accent: #ffb24d; --lm-accent-soft: #ffc878; --lm-lit: 255,196,120;
+  }
+  .apm__field {
+    position: absolute; inset: 0; overflow: clip; background-color: #07080c;
+    background-image:
+      radial-gradient(70% 56% at 60% 42%, rgba(70,120,190,.16), rgba(70,120,190,0) 60%),
+      radial-gradient(95% 80% at 38% 72%, rgba(255,178,77,.06), rgba(255,178,77,0) 58%),
+      radial-gradient(125% 110% at 56% 44%, #0a0d16, #05060a 82%);
+  }
+  .apm__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .apm__field.lm__stage, .apm__field.lm { background-color: #07080c; }
+
+  /* night map treatment (same as night-neon) */
+  .apm__field .lm-gw--green { fill: rgba(60,96,120,.06); }
+  .apm__field .lm-gw--water { fill: rgba(70,120,190,.12); }
+  .apm__field .lm-bld      { fill: rgba(120,160,210,.05); stroke: rgba(120,160,210,.07); stroke-width: 0.6; }
+  .apm__field .lm-bld--lit { fill: rgba(var(--lm-lit),.30); stroke: rgba(var(--lm-lit),.34);
+    filter: drop-shadow(0 0 2.2px rgba(255,196,120,.55)); }
+  .apm__field .lm-rdc { stroke: #04050a; }
+  .apm__field .lm-rd--hwy   { stroke: rgba(120,224,255,.92); filter: drop-shadow(0 0 4px rgba(90,210,255,.85)); }
+  .apm__field .lm-rd--main  { stroke: rgba(255,196,120,.88); filter: drop-shadow(0 0 3.4px rgba(255,178,77,.7)); }
+  .apm__field .lm-rd--mid   { stroke: rgba(150,196,240,.42); filter: drop-shadow(0 0 1.6px rgba(120,180,240,.4)); }
+  .apm__field .lm-rd--minor { stroke: rgba(150,196,240,.24); }
+  .apm__field .lm-rd--faint { stroke: rgba(150,196,240,.11); }
+  .apm__field .lm-rdname { fill: rgba(180,212,255,.6); text-anchor: middle; font-weight: 600;
+    text-shadow: 0 0 6px rgba(60,120,190,.6); }
+  .apm__field #lmHatch rect { fill: rgba(255,178,77,.12); }
+  .apm__field #lmHatch line { stroke: rgba(255,196,120,.55); }
+  .apm__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.8; filter: drop-shadow(0 0 5px rgba(255,178,77,.85)); }
+  .apm__field .lm-pulse  { stroke: var(--lm-accent-soft); }
+  .apm__field .lm-sitetag { fill: #fff3df; text-shadow: 0 0 8px rgba(255,178,77,.7); }
+  .apm__field .lm-ring  { stroke: rgba(120,200,255,.4); filter: drop-shadow(0 0 2px rgba(90,180,255,.5)); }
+  .apm__field .lm-ringt { fill: rgba(180,212,255,.55); }
+  .apm__field .lm-pt circle { fill: #0a0e18; stroke: rgba(140,210,255,.85); stroke-width: 1.4;
+    filter: drop-shadow(0 0 3px rgba(100,190,255,.55)); }
+  .apm__field .lm-pt text   { fill: #dbecff; }
+  .apm__field .lm-pt:hover circle, .apm__field .lm-pt.is-on circle {
+    fill: var(--lm-accent); stroke: #fff3df; filter: drop-shadow(0 0 6px rgba(255,178,77,.95)); }
+  .apm__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.4; filter: drop-shadow(0 0 4px rgba(255,178,77,.8)); }
+  .apm__field .lm-walker { fill: #fff3df; stroke: var(--lm-accent); filter: drop-shadow(0 0 4px rgba(255,178,77,.95)); }
+  .apm__field .lm-livet  { fill: #0a0e18; font-weight: 700; }
+  .apm__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* ---- THE APERTURE SCRIM: a dark veil over the map with the word «ПОРУЧ» punched OUT, so the
+     live map glows bright only inside the letterforms; outside the word the map is dimmed to mood.
+     Pure SVG <mask> (luminance): white scrim everywhere, black inside the glyph text -> the scrim's
+     opacity is 0 inside the word. pointer-events:none so clicks pass to the map underneath. ---- */
+  .apm__aperture { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+  .apm__aperture svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .apm__word { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
+
+  /* a hairline outline of the same word, drawn over everything, so the aperture reads as an
+     intentional cut even where the map behind is dark. stroke-only, glows faintly. */
+  .apm__outline { fill: none; stroke: rgba(207,228,255,.5); stroke-width: 1.1;
+    filter: drop-shadow(0 0 6px rgba(120,180,255,.4)); }
+
+  /* ---- chrome: eyebrow top-left + a small clickable POI list bottom-left ---- */
+  .apm__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 48px); left: clamp(20px, 4vw, 60px);
+    font: 600 .64rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(180,212,255,.6); pointer-events: none; text-shadow: 0 0 8px rgba(60,120,190,.5); }
+  .apm__sub {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 48px); right: clamp(20px, 4vw, 60px);
+    font: 500 .64rem/1 var(--combo-sans); letter-spacing: .14em;
+    color: rgba(180,212,255,.45); pointer-events: none; text-shadow: 0 0 8px rgba(60,120,190,.5); }
+
+  .apm__rail { position: absolute; z-index: 8; left: clamp(20px, 4vw, 60px); bottom: clamp(22px, 6vh, 52px);
+    width: min(34ch, 86vw); }
+  .apm__hint { font: 500 .74rem/1.45 var(--combo-sans); color: rgba(180,212,255,.6);
+    margin: 0 0 .7rem; text-shadow: 0 0 8px rgba(60,120,190,.5); }
+  .apm__list { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.4rem; max-width: 52ch; }
+  @media (max-width: 720px) { .apm__list { grid-template-columns: 1fr; } }
+  /* re-skin the engine rows for the night field, compact */
+  .apm__rail .lm-row { padding: .42rem 0; border-bottom: 1px solid rgba(180,212,255,.14);
+    color: #cfe4ff; text-shadow: 0 0 8px rgba(20,40,70,.7); transition: padding-left .25s, background .25s; }
+  .apm__rail .lm-row .n { color: var(--lm-accent-soft); }
+  .apm__rail .lm-row:hover, .apm__rail .lm-row.is-on { background: rgba(120,180,255,.08); padding-left: .4rem; }
+  .apm__rail .lm-row.is-on .n { color: var(--lm-accent); }
+
+  .combo-pre, .combo-post { background: #05060a; color: rgba(180,212,255,.4); }
+  @media (prefers-reduced-motion: reduce) { .apm__rail .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--aperture-mask">
+
+    <!-- the live night map -->
+    <div class="apm__field lm" data-lm-stage data-render-surface></div>
+
+    <!-- THE APERTURE: a dark scrim with «ПОРУЧ» punched out via an SVG luminance mask -->
+    <div class="apm__aperture" data-apm-aperture>
+      <svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <mask id="apmCut" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="600">
+            <!-- white = scrim visible; the word in black = scrim cut away (map shows through) -->
+            <rect x="0" y="0" width="1000" height="600" fill="#fff"/>
+            <text class="apm__word" x="500" y="312" text-anchor="middle" dominant-baseline="middle"
+                  font-size="208" letter-spacing="6" fill="#000">ПОРУЧ</text>
+          </mask>
+        </defs>
+        <!-- the dark veil, with the word cut out; the night map glows through the letters -->
+        <rect class="apm__veil" x="0" y="0" width="1000" height="600" fill="#05060a"
+              opacity="0.84" mask="url(#apmCut)"/>
+        <!-- a hairline outline of the same word (matched size) so the cut reads as intentional -->
+        <text class="apm__word apm__outline" x="500" y="312" text-anchor="middle" dominant-baseline="middle"
+              font-size="208" letter-spacing="6">ПОРУЧ</text>
+      </svg>
+    </div>
+
+    <p class="apm__label">с. Агрономічне · район уночі</p>
+    <p class="apm__sub">49.18° Пн · 28.33° Сх</p>
+
+    <div class="apm__rail">
+      <p class="apm__hint">Натисніть місце, щоб побачити шлях і час пішки.</p>
+      <div class="apm__list" data-lm-list></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+    var gsap = window.gsap;
+
+    // ---- ENGINE: the night map. owns_pin FALSE; reveal on scroll-in; CLICK/HOVER drives route ----
+    SectionHarness.ranOK('locmap-engine', function () {
+      var map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true,
+        flicker: { rate: 9 },
+        reveal: { start: 'top 70%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award'
+      });
+      window.__apmMap = map;
+    });
+
+    // ---- aperture entrance + light parallax on the word for depth (transform/opacity only) ----
+    var ap = document.querySelector('[data-apm-aperture]');
+    if (gsap && ap) {
+      gsap.set(ap, { opacity: 0, scale: 1.04, transformOrigin: '50% 50%' });
+      gsap.to(ap, { opacity: 1, scale: 1, duration: 1.2, ease: 'air',
+        scrollTrigger: { trigger: '#combo', start: 'top 72%', once: true } });
+      // a gentle parallax drift of the word as the section scrolls (depth, never a layout move)
+      gsap.fromTo(ap, { yPercent: -2.5 }, { yPercent: 2.5, ease: 'none',
+        scrollTrigger: { trigger: '#combo', start: 'top bottom', end: 'bottom top', scrub: true } });
+    }
+
+    // pin-less controlled-interactive section. 0 pins.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>
