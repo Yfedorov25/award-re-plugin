@@ -127,3 +127,21 @@ Always FILL the canvas (F-22): big plan + floor-locator (THIS unit `--fp-loc-on`
   failure; show all-available + honest proportional tiles when there is no real plan.
 - Raw HTML entities (`&middot;`, `&mdash;`) in a JS string that becomes textContent -> they render
   literally; use the real character (`·`) and never an em/en-dash.
+
+## 5. MOBILE FACADE-HERO (the phone pattern for a facade floor-picker, learned F-41/F-42)
+A landscape building render in a portrait phone can't be both big and fully shown at once, and the
+desktop drill (hover bands, side panels, veil locators) breaks on touch. The pattern that works:
+- **L1** — the WHOLE building shows (`object-fit:contain`, never cropped), as a STATIC image: no band
+  contours, no tapping on the building (`.en-facade__svg { display:none }`). Floors are picked ONLY by
+  big buttons docked at the bottom (`.en-ledger` as a bottom bar). Variants whose desktop picker isn't a
+  ledger (a tracking tooltip, a green preview panel) hide that on mobile and show the ledger instead.
+- **L2** — the spec + unit list must be OPAQUE with real contrast (light card `#fff` + dark text on light
+  skins; a solid dark card `#12191f` + light text on a dark skin). `rgba(...,.4)` translucent = unreadable.
+- **L3** — a REAL top-to-bottom scroll: `#fp-flat.vfd-overlay{overflow-y:auto}` +
+  `.vfd-page{position:relative;inset:auto;display:flex;flex-direction:column;height:auto;min-height:100%;overflow:visible}`
+  so children take natural height and the page overflows/scrolls. The rail (with the CTA) comes FIRST, the
+  plan canvas BELOW it. Drop `.vfd-locators` + `.vfd-seed` (desktop-only chrome, noise on a phone).
+- Drive it off CSS vars (`--en-ink/-accent/-muted`) so ONE mobile block auto-adapts to every skin; only a
+  dark skin needs explicit bar/list overrides.
+- The building geometry stays the live-smarts container (aspect-ratio 2.357 + cover) on desktop — see F-41;
+  mobile switches that ONE combo to contain because the picker moves off the building to the bottom bar.
