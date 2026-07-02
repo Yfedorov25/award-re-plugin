@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PASSPORT · t-1-mobile «Шлях до ключів: шов-естафета» · клас A · PHONE TWIN
+Десктоп-база: t-1-keys-road.html (не чіпати). Той самий DATA-контракт.
+SIGNATURE MORPH збережено: CLIP-WIPE знизу вгору, ті самі вікна 12% p.
+Мобільна форма: медіа-бенд ~56dvh зверху (портретний кроп, той самий
+object-position на всіх трьох стадіях = frame-match кропу), інструменти
+стеком під ним у тому ж 100dvh sticky; одометр clamp 64-88px; віхи display-only.
+Пін-ранвей 280dvh (великий палець, не десктопні 520vh).
+
+STAGE MAP (p = прогрес піна, чиста функція скролу):
+  p 0.00-0.18  dwell   stage-0 «ділянка»
+  p 0.18-0.30  WIPE-1  stage-1 знизу вгору
+  p 0.30-0.74  dwell   stage-1 «каркас»
+  p 0.74-0.86  WIPE-2  stage-2 знизу вгору
+  p 0.86       BEAT    кромка + «9» + віха 4 + лінія 100% в одному кадрі
+  p 0.86-1.00  dwell   фінал, підпис «2 квартал 2027 · ключі»
+
+F-48: тапів у спокої = 1 (міст). Один хінт (у ліді). Низ 90px чистий.
+Анімовані властивості: clip-path, transform, opacity, stroke-dashoffset.
+Reduced-motion: render(1) статично, пін відпущено.
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-1 mobile · Шлях до ключів</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,400&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --bg-2:#211D18; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.16); --gutter:20px;
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:clip}
+  body{background:#0b0a09;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--bg)}
+  img{display:block}
+  a{color:var(--ink)}
+
+  .meta-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:20px var(--gutter) 0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .head{padding:40px var(--gutter) 32px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:300;font-size:40px;line-height:1.05;text-wrap:balance}
+  .lede{color:var(--muted);margin-top:16px;font-size:15px}
+
+  .pin{height:280dvh;position:relative}
+  html.static .pin{height:auto}
+  .stick{position:sticky;top:0;height:100dvh;display:grid;grid-template-rows:56dvh 1fr;overflow:clip;background:var(--bg)}
+  html.static .stick{position:relative;height:auto;min-height:100dvh}
+  .stage-media{position:relative;overflow:clip;background:var(--bg-2)}
+  .stage-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 68%}
+  .stage-media img.s1,.stage-media img.s2{clip-path:inset(100% 0 0 0)}
+  .h-cap{position:absolute;left:16px;bottom:14px;z-index:5;font:500 11px/1 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(237,230,216,.82);
+    text-shadow:0 1px 8px rgba(10,8,6,.65)}
+
+  .instruments{display:flex;flex-direction:column;justify-content:space-evenly;gap:6px;
+    padding:14px var(--gutter) calc(24px + env(safe-area-inset-bottom))}
+  .stage-cap{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.1;min-height:1.2em}
+  .stage-cap .in{display:inline-block;animation:capIn .45s cubic-bezier(.2,.7,.2,1) both}
+  html.static .stage-cap .in{animation:none}
+  @keyframes capIn{from{opacity:0;transform:translateY(.35em)}to{opacity:1;transform:none}}
+
+  .road svg{display:block;width:100%;height:64px;overflow:visible;pointer-events:none} /* віхи display-only */
+  .road .base{stroke:var(--hair);stroke-width:1}
+  .road .fill{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1}
+  .tick circle{fill:var(--bg);stroke:rgba(237,230,216,.4);stroke-width:1;transition:fill .3s,stroke .3s}
+  .tick text{font-family:var(--sans);font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    fill:var(--muted);opacity:.45;transition:opacity .3s}
+  .tick.lit circle{fill:var(--accent);stroke:var(--accent)}
+  .tick.lit text{opacity:1;fill:var(--ink)}
+
+  .odo{display:flex;align-items:baseline;gap:16px}
+  .reel{height:1em;overflow:clip;font-family:var(--serif);font-weight:300;font-size:clamp(64px,22vw,88px);line-height:1}
+  .reel .strip{transition:transform .5s cubic-bezier(.3,0,.2,1);will-change:transform}
+  html.static .reel .strip{transition:none}
+  .reel .strip span{display:block;height:1em}
+  .odo-word{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);max-width:14ch;line-height:1.6}
+
+  .terms{padding:64px var(--gutter) 96px}
+  .terms h2{font-family:var(--serif);font-weight:300;font-size:30px;line-height:1.1;margin-bottom:24px}
+  .row{display:grid;gap:6px;padding:18px 0;border-top:1px solid var(--hair);
+    opacity:0;transform:translateY(14px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+  .row:last-of-type{border-bottom:1px solid var(--hair)}
+  .row.on{opacity:1;transform:none}
+  html.static .row{opacity:1;transform:none;transition:none}
+  .row .k{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .row .v{font-size:17px}
+  .bridge{margin-top:32px;display:inline-flex;align-items:center;gap:14px;min-height:44px;font-size:15px;
+    text-decoration:none;border-bottom:1px solid var(--accent);color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="phone">
+<section data-screen-label="t-1 mobile keys road">
+  <div class="meta-row"><span data-slot="project"></span><span>Клас A · t-1 · моб</span></div>
+  <header class="head">
+    <p class="eyebrow" data-slot="eyebrow"></p>
+    <h1 data-slot="title"></h1>
+    <p class="lede" data-slot="body"></p>
+  </header>
+
+  <div class="pin" id="pin">
+    <div class="stick">
+      <figure class="stage-media" id="media">
+        <figcaption class="h-cap" id="hcap"></figcaption>
+      </figure>
+      <div class="instruments">
+        <div class="stage-cap"><span class="in" id="scap"></span></div>
+        <div class="road" id="road"></div>
+        <div class="odo">
+          <div class="reel"><div class="strip" id="strip"></div></div>
+          <div class="odo-word" id="odoword"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <h2 data-slot="termsTitle"></h2>
+    <div id="rows"></div>
+    <a class="bridge" data-slot-href="bridge" href="#">
+      <span data-slot="bridgeLabel"></span>
+      <svg width="22" height="10" viewBox="0 0 22 10" fill="none" aria-hidden="true">
+        <path d="M0 5h20M16 1l4 4-4 4" stroke="#AC7E65" stroke-width="1.2"/></svg>
+    </a>
+  </div>
+</section>
+</div>
+
+<script>
+/* ═ TEMPLATE CONTRACT ═ (ідентичний десктопному t-1-keys-road.html)
+   ОБОВʼЯЗКОВІ: project.name · section.{eyebrow,title,body} · stages[3]
+   (frame-matched кадри ОДНІЄЇ камери: src, caption «дата · стан», honesty) ·
+   finale.caption · odometer.{finalValue,unitForms[3],sub} · milestones[4]
+   {at,date,word} · terms.{title,rows[{k,v}]} · bridge.{label,href}
+   ОПЦІЙНІ: terms.rows порожній = блок ховається; alt збирається з honesty. */
+const DATA = {
+  project: { name: 'ЖК Агрономічне' },
+  section: {
+    eyebrow: 'Будівництво',
+    title: 'Від старту до ключів менше року',
+    body: 'Малий будинок на 3 поверхи будується швидко. Гортайте: ділянка виросте в готовий будинок.'
+  },
+  stages: [
+    { src: 'assets/build-smarts/build-stage-0.webp', caption: 'Червень 2026 · ділянка',
+      honesty: 'Візуалізація · ділянка, червень 2026' },
+    { src: 'assets/build-smarts/build-stage-1.webp', caption: 'Осінь 2026 · каркас',
+      honesty: 'Візуалізація · каркас, осінь 2026' },
+    { src: 'assets/build-smarts/build-stage-2.webp', caption: 'Кінець 2026 · фасади',
+      honesty: 'Візуалізація · фасади, кінець 2026' }
+  ],
+  finale: { caption: '2 квартал 2027 · ключі' },
+  odometer: { finalValue: 9, unitForms: ['місяць','місяці','місяців'], sub: 'від старту до ключів' },
+  milestones: [
+    { at: 0.0,  date: 'Червень 2026', word: 'ділянка' },
+    { at: 0.34, date: 'Осінь 2026',   word: 'каркас'  },
+    { at: 0.67, date: 'Кінець 2026',  word: 'фасади'  },
+    { at: 1.0,  date: '2 кв 2027',    word: 'ключі'   }
+  ],
+  terms: {
+    title: 'Умови без дрібного шрифту',
+    rows: [
+      { k: 'Оплата',          v: 'Платите всю суму одразу та отримуєте знижку.' },
+      { k: 'Розтермінування', v: 'Графік платежів складаємо під ваш бюджет.' },
+      { k: 'Супровід',        v: 'Наш менеджер веде вашу угоду до ключів.' }
+    ]
+  },
+  bridge: { label: 'Запитати про розтермінування', href: '#cta' }
+};
+
+const $ = s => document.querySelector(s);
+const put = (slot, v) => { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = v; };
+put('project', DATA.project.name);
+put('eyebrow', DATA.section.eyebrow);
+put('title', DATA.section.title);
+put('body', DATA.section.body);
+put('termsTitle', DATA.terms.title);
+put('bridgeLabel', DATA.bridge.label);
+$('[data-slot-href="bridge"]').href = DATA.bridge.href;
+
+const media = $('#media');
+const stageEls = DATA.stages.map((st, i) => {
+  const img = new Image();
+  img.src = st.src; img.alt = st.honesty.replace(' · ', ': ');
+  img.className = 's' + i; img.loading = 'eager';
+  media.insertBefore(img, media.querySelector('.h-cap'));
+  return img;
+});
+
+const strip = $('#strip');
+for (let d = 0; d <= 9; d++) { const s = document.createElement('span'); s.textContent = d; strip.appendChild(s); }
+const plural = n => DATA.odometer.unitForms[n === 1 ? 0 : (n >= 2 && n <= 4 ? 1 : 2)];
+const odoword = $('#odoword');
+
+(function buildRoad(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 1000 64'); svg.setAttribute('preserveAspectRatio', 'none');
+  const mk = cls => { const l = document.createElementNS(NS, 'line');
+    l.setAttribute('x1', 12); l.setAttribute('x2', 988); l.setAttribute('y1', 22); l.setAttribute('y2', 22);
+    l.setAttribute('pathLength', '1'); l.setAttribute('class', cls);
+    l.setAttribute('vector-effect', 'non-scaling-stroke'); return l; };
+  svg.appendChild(mk('base'));
+  const fill = mk('fill'); svg.appendChild(fill);
+  DATA.milestones.forEach(m => {
+    const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'tick');
+    const x = 12 + m.at * 976;
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', x); c.setAttribute('cy', 22); c.setAttribute('r', 4.5);
+    c.setAttribute('vector-effect', 'non-scaling-stroke');
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', 50);
+    t.setAttribute('text-anchor', m.at === 0 ? 'start' : (m.at === 1 ? 'end' : 'middle'));
+    t.textContent = m.word;   /* на фоні лише буденне слово: дати живуть у підписі стадії */
+    g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+  });
+  $('#road').appendChild(svg);
+  window.__roadFill = fill;
+})();
+const ticks = [...document.querySelectorAll('.tick')];
+
+const rowsEl = $('#rows');
+DATA.terms.rows.forEach(r => {
+  const d = document.createElement('div'); d.className = 'row';
+  const k = document.createElement('div'); k.className = 'k'; k.textContent = r.k;
+  const v = document.createElement('div'); v.className = 'v'; v.textContent = r.v;
+  d.appendChild(k); d.appendChild(v); rowsEl.appendChild(d);
+});
+
+const seg = (p, a, b) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+const W1 = [0.18, 0.30], W2 = [0.74, 0.86], BEAT = 0.86;
+let lastM = -1, lastCap = -1, lastH = -1, lastLit = -1;
+const scap = $('#scap'), hcap = $('#hcap');
+const captions = [DATA.stages[0].caption, DATA.stages[1].caption, DATA.stages[2].caption, DATA.finale.caption];
+
+function render(p){
+  stageEls[1].style.clipPath = `inset(${(1 - seg(p, W1[0], W1[1])) * 100}% 0 0 0)`;
+  stageEls[2].style.clipPath = `inset(${(1 - seg(p, W2[0], W2[1])) * 100}% 0 0 0)`;
+  const lp = Math.min(1, p / BEAT);
+  window.__roadFill.style.strokeDashoffset = 1 - lp;
+  const lit = DATA.milestones.reduce((n, m, i) => lp >= m.at - 0.001 ? i : n, -1);
+  if (lit !== lastLit) { ticks.forEach((t, i) => t.classList.toggle('lit', i <= lit)); lastLit = lit; }
+  const F = DATA.odometer.finalValue;
+  const mQ = lp >= 1 ? F : Math.floor(lp * F);
+  if (mQ !== lastM) { strip.style.transform = `translateY(${-mQ}em)`; odoword.textContent = plural(mQ) + ' ' + DATA.odometer.sub; lastM = mQ; }
+  const cap = p >= BEAT ? 3 : p >= W2[0] ? 2 : p >= W1[1] ? 1 : 0;
+  if (cap !== lastCap) { scap.classList.remove('in'); void scap.offsetWidth; scap.textContent = captions[cap]; scap.classList.add('in'); lastCap = cap; }
+  const h = p >= W2[0] ? 2 : p >= W1[0] ? 1 : 0;
+  if (h !== lastH) { hcap.textContent = DATA.stages[h].honesty; lastH = h; }
+}
+
+window.__zeroBlankProbe = function(){
+  for (let p = 0; p <= 1.001; p += 0.02) { render(p);
+    if (getComputedStyle(stageEls[0]).opacity !== '1') return { ok: false, p }; }
+  return { ok: true };
+};
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const decoded = img => Promise.race([
+  img.decode().catch(() => {}),
+  new Promise(r => { if (img.complete) r(); else img.addEventListener('load', r, { once: true }); }),
+  new Promise(r => setTimeout(r, 800))
+]);
+
+async function init(){
+  /* DECODE-GUARD: стадії декодуються ДО створення тригера */
+  await Promise.all(stageEls.map(decoded));
+
+  if (reduced.matches) {
+    document.documentElement.classList.add('static');
+    requestAnimationFrame(() => requestAnimationFrame(() => render(1)));
+    [...rowsEl.children].forEach(r => r.classList.add('on'));
+    return;
+  }
+
+  const pin = $('#pin');
+  let start = 0, len = 1;
+  const measure = () => { const r = pin.getBoundingClientRect(); start = r.top + scrollY; len = pin.offsetHeight - innerHeight; };
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    measure(); render(0);
+    let raf = null;
+    const loop = () => { raf = null; render(Math.min(1, Math.max(0, (scrollY - start) / len))); };
+    addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(loop); }, { passive: true });
+    addEventListener('resize', () => { measure(); loop(); });
+    loop();
+  }));
+
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { [...rowsEl.children].forEach((r, i) => setTimeout(() => r.classList.add('on'), i * 110)); io.disconnect(); }
+  }), { threshold: 0.3 });
+  io.observe(rowsEl);
+}
+init();
+reduced.addEventListener('change', () => init());
+</script>
+</body>
+</html>

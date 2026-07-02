@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<!--
+Мобільний індекс TRUST Round 1: тапабельний список на ширину телефона,
+групи «Клас A · повний фактаж» / «Клас B · обмежений фактаж».
+Тап пункту відкриває мобільний твін у цій же вкладці.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRUST · Round 1 · мобільні прототипи</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;1,400&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.14); --gutter:20px;
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:clip}
+  body{background:#0b0a09;font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--bg)}
+  a{color:var(--ink);text-decoration:none}
+
+  .head{padding:44px var(--gutter) 30px;border-bottom:1px solid var(--hair)}
+  .sup{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+  h1{font-family:var(--serif);font-weight:300;font-size:34px;line-height:1.1;margin-top:12px}
+  .group-label{padding:26px var(--gutter) 12px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .item{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:baseline;
+    padding:18px var(--gutter);min-height:56px;border-top:1px solid var(--hair)}
+  .item:active{background:#211D18}
+  .item .id{font-size:11px;letter-spacing:.14em;color:var(--muted)}
+  .item .name{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.15}
+  .item .arr{color:var(--accent)}
+  .foot{padding:28px var(--gutter) calc(36px + env(safe-area-inset-bottom));font-size:11.5px;line-height:1.7;color:var(--muted);border-top:1px solid var(--hair);margin-top:26px}
+</style>
+</head>
+<body>
+<div class="phone" data-screen-label="mobile index">
+  <header class="head">
+    <p class="sup">Trust · Round 1 · мобільні твіни</p>
+    <h1>Секція доказу на телефоні</h1>
+  </header>
+  <div id="groups"></div>
+  <p class="foot">Кожен файл самодостатній: const DATA нагорі, той самий контракт,
+    що в десктопній базі. Десктопні файли не змінені.</p>
+</div>
+
+<script>
+const GROUPS = [
+  { label: 'Клас A · повний фактаж', items: [
+    { id: 't-1', name: 'Шлях до ключів: шов-естафета', file: 't-1-mobile.html' },
+    { id: 't-2', name: 'Матеріал у руці',              file: 't-2-mobile.html' },
+    { id: 't-3', name: 'Менше року: одометр',          file: 't-3-mobile.html' },
+    { id: 't-4', name: 'Технічний аркуш',              file: 't-4-mobile.html' }
+  ]},
+  { label: 'Клас B · обмежений фактаж', items: [
+    { id: 't-5', name: 'Чесна інвентаризація',         file: 't-5-mobile.html' },
+    { id: 't-6', name: 'Шість із шести',               file: 't-6-mobile.html' }
+  ]}
+];
+const groupsEl = document.getElementById('groups');
+GROUPS.forEach(g => {
+  const lb = document.createElement('p'); lb.className = 'group-label'; lb.textContent = g.label;
+  groupsEl.appendChild(lb);
+  g.items.forEach(it => {
+    const a = document.createElement('a'); a.className = 'item'; a.href = it.file;
+    const id = document.createElement('span'); id.className = 'id'; id.textContent = it.id;
+    const nm = document.createElement('span'); nm.className = 'name'; nm.textContent = it.name;
+    const ar = document.createElement('span'); ar.className = 'arr'; ar.textContent = '→';
+    a.appendChild(id); a.appendChild(nm); a.appendChild(ar);
+    groupsEl.appendChild(a);
+  });
+});
+</script>
+</body>
+</html>
