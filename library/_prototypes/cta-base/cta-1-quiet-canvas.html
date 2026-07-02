@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>CTA 1 · Ключі на столі · Smarts</title>
+<style>
+/* palette: warm near black + cream, Springs l-callback class */
+:root{
+  --cream:#efe8da;
+  --mut:rgba(239,232,218,.72);
+  --line:rgba(239,232,218,.38);
+  --warm:#d3a077;
+  --deep:#171310;
+  --ease:cubic-bezier(.25,.74,.22,.99); /* house ease, one per move */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  min-width:1440px;
+  font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+  background:#12100d;color:var(--cream);
+  -webkit-font-smoothing:antialiased;
+}
+.caps{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:500}
+.serif{font-family:Georgia,'Times New Roman',serif;font-weight:400}
+
+/* ============ section shell ============ */
+.cta{position:relative;min-height:100vh;overflow:clip}
+.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 62%}
+/* local scrims, one per text zone, static, no live paint */
+.scrim{position:absolute;inset:0;pointer-events:none}
+.scrim-l{background:linear-gradient(97deg,rgba(14,12,10,.66) 0%,rgba(14,12,10,.34) 42%,rgba(14,12,10,0) 66%)}
+.scrim-r{background:linear-gradient(263deg,rgba(14,12,10,.7) 0%,rgba(14,12,10,.38) 34%,rgba(14,12,10,0) 60%)}
+.scrim-b{background:linear-gradient(0deg,rgba(14,12,10,.5) 0%,rgba(14,12,10,0) 24%)}
+
+.wrap{position:relative;max-width:1440px;margin:0 auto;padding:56px 72px 90px;min-height:100vh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;min-height:44px}
+.top .caps{color:var(--mut)}
+
+/* mode anchors: two quiet text buttons */
+.modes{display:flex;align-items:center;gap:18px}
+.mode{background:none;border:0;cursor:pointer;color:var(--mut);font:inherit;
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;min-height:44px;min-width:44px;padding:0 2px}
+.mode .u{display:block;height:1px;background:var(--warm);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.mode.is-on{color:var(--cream)}
+.mode.is-on .u,.mode:hover .u{transform:scaleX(1)}
+.sep{color:var(--line)}
+
+.cols{display:grid;grid-template-columns:1fr 460px;gap:120px;align-items:start;margin-top:64px;flex:1}
+
+/* ============ left voice block: push swap in a clipped window ============ */
+.voicewin{overflow:clip;height:460px}
+.voicestrip{height:100%;display:grid;grid-template-rows:100% 100%;transition:transform .7s var(--ease)}
+.m-inv .voicestrip{transform:translateY(-100%)}
+.voice{display:flex;flex-direction:column;gap:26px;padding-top:6px}
+.title{font-size:58px;line-height:1.04;letter-spacing:-.01em;max-width:9.5em}
+.sub{font-size:18px;line-height:1.55;color:var(--mut);max-width:30em}
+.proof{color:var(--mut);border-top:1px solid var(--line);padding-top:16px;max-width:26em}
+
+/* entrance: clipped rise */
+.rise{overflow:clip}
+.rise>*{transform:translateY(112%);transition:transform .95s var(--ease)}
+.is-in .rise>*{transform:translateY(0)}
+
+/* verb row */
+.verb{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;
+  min-height:60px;margin-top:auto;border:0;border-top:1px solid var(--line);
+  background:none;color:var(--cream);cursor:pointer;text-align:left;text-decoration:none}
+.vw{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:26px}
+.vw i{display:block;height:1px;background:var(--warm);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.verb:hover .vw i{transform:scaleX(1)}
+.ring{width:48px;height:48px;flex:none;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center}
+.ring svg{width:18px;height:18px;stroke:var(--cream);fill:none;stroke-width:1.5}
+
+/* ============ form atom ============ */
+.stage{position:relative}
+.atom{display:flex;flex-direction:column}
+.fade{opacity:0;transition:opacity .8s var(--ease) .55s}
+.is-in .fade{opacity:1}
+
+/* chip slot: fixed height window, push swap by mode */
+.chipwin{overflow:clip;height:88px}
+.chipstrip{display:grid;grid-template-rows:88px 88px;transition:transform .7s var(--ease)}
+.m-inv .chipstrip{transform:translateY(-88px)}
+.chipslot{display:flex;align-items:center;height:88px}
+.chip{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:8px 4px 8px 10px}
+.chip img{width:44px;height:44px;object-fit:contain;background:#f2ede3;border-radius:6px;opacity:0;transition:opacity .3s var(--ease)}
+.chip img.is-ready{opacity:1}
+.chip-t{font-size:15px;line-height:1.3}
+.chip-t small{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:2px}
+.chip-x{width:44px;height:44px;flex:none;background:none;border:0;cursor:pointer;color:var(--mut);display:grid;place-items:center}
+.chip-x:hover{color:var(--warm)}
+.chip-x svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5}
+.chip-empty a{color:var(--cream);font-size:15px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--warm);display:inline-flex;align-items:center;min-height:44px}
+.chip-empty a:hover{color:var(--warm)}
+
+/* underline fields, self drawing lines */
+.fld{position:relative;padding-top:22px}
+.fld input{width:100%;background:transparent;border:0;outline:0;color:var(--cream);
+  font-size:17px;font-family:inherit;line-height:1.3;padding:10px 0 12px;border-radius:0}
+.fld input::placeholder{color:transparent}
+.fld:focus-within input::placeholder{color:rgba(239,232,218,.4)}
+.fld label{position:absolute;left:0;bottom:15px;font-size:16px;color:var(--mut);pointer-events:none;
+  transform-origin:left bottom;transition:transform .35s var(--ease)}
+.fld:focus-within label,.fld.has-val label{transform:translateY(-31px) scale(.7)}
+.uline{position:absolute;left:0;bottom:0;width:100%;height:2px;display:block}
+.uline line{fill:none;stroke-width:2}
+.l-base{stroke:var(--line);stroke-dasharray:100;stroke-dashoffset:100}
+.is-in .l-base{stroke-dashoffset:0;transition:stroke-dashoffset .9s var(--ease);transition-delay:var(--d,0s)}
+.l-warm{stroke:var(--warm);stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .45s var(--ease)}
+.fld:focus-within .l-warm{stroke-dashoffset:0}
+
+/* honeypot */
+.hp{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+
+/* consent */
+.consent{display:flex;align-items:flex-start;gap:14px;min-height:44px;padding:14px 0 4px;cursor:pointer}
+.consent input{position:absolute;opacity:0;width:1px;height:1px}
+.box{width:22px;height:22px;flex:none;margin-top:1px;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center}
+.box svg{width:12px;height:12px;fill:none;stroke:var(--warm);stroke-width:2.2;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .35s var(--ease)}
+.consent input:checked~.box svg{stroke-dashoffset:0}
+.consent input:focus-visible~.box{border-color:var(--warm)}
+.consent span.txt{font-size:13px;line-height:1.5;color:var(--mut)}
+
+/* message zone: reserved, zero CLS */
+.msgzone{min-height:52px;padding:8px 0 2px}
+.msg{font-size:14px;line-height:1.45;color:#e8b483}
+.msg a{color:inherit}
+
+/* button with mode swapped label window */
+.btn{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;
+  border:1px solid var(--cream);border-radius:29px;background:transparent;color:var(--cream);cursor:pointer;font-family:inherit}
+.btn:hover{border-color:var(--warm);color:var(--warm)}
+.btn[disabled]{cursor:default}
+.blwin{overflow:clip;height:20px}
+.blstrip{display:grid;grid-template-rows:20px 20px 20px;transition:transform .5s var(--ease)}
+.blstrip span{font-size:13px;letter-spacing:.14em;text-transform:uppercase;line-height:20px}
+.btn-run{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);pointer-events:none;opacity:0;transition:opacity .3s var(--ease)}
+.btn-run rect{fill:none;stroke:var(--warm);stroke-width:2;stroke-dasharray:20 80;stroke-dashoffset:0}
+.is-busy .btn-run{opacity:1}
+.is-busy .btn-run rect{animation:run 1.2s linear infinite}
+@keyframes run{to{stroke-dashoffset:-100}}
+
+/* undecided slot: fixed height window, swapped by mode */
+.underwin{overflow:clip;height:52px;margin-top:14px}
+.understrip{display:grid;grid-template-rows:52px 52px;transition:transform .7s var(--ease)}
+.m-inv .understrip{transform:translateY(-52px)}
+.under a{color:var(--mut);font-size:14px;text-decoration:underline;text-underline-offset:4px;display:inline-flex;align-items:center;min-height:44px}
+.under a:hover{color:var(--warm)}
+
+/* ============ success ritual: clip curtain over the form column ============ */
+.curtain{position:absolute;inset:-2px;background:var(--deep);border:1px solid rgba(239,232,218,.14);border-radius:14px;
+  padding:44px 40px;display:flex;flex-direction:column;justify-content:center;gap:16px;
+  clip-path:inset(100% 0 0 0);transition:clip-path .85s cubic-bezier(.33,0,.16,1); /* close is softer: single soft in out */
+  pointer-events:none}
+.is-done .curtain{clip-path:inset(0 0 0 0);pointer-events:auto}
+.ok{width:64px;height:64px}
+.ok path,.ok circle{fill:none;stroke:var(--warm);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.succ-h{font-size:30px;line-height:1.15}
+.succ-p{font-size:15px;line-height:1.55;color:var(--mut);max-width:26em;
+  opacity:0;transform:translateY(12px);transition:opacity .6s var(--ease) .95s,transform .6s var(--ease) .95s}
+.is-done .succ-p{opacity:1;transform:none}
+
+/* demo harness, far from the form zone, in flow of the section */
+.demo{position:absolute;left:72px;bottom:24px;display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;color:rgba(239,232,218,.5)}
+.demo input{width:16px;height:16px;accent-color:#8a6a4d}
+.demo span{font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+
+@media (prefers-reduced-motion: reduce){
+  .rise>*,.is-in .rise>*{transform:none;transition:none}
+  .l-base,.is-in .l-base{stroke-dashoffset:0;transition:none}
+  .fade,.is-in .fade{opacity:1;transition:none}
+  .curtain{transition:none}
+  .succ-p,.is-done .succ-p{opacity:1;transform:none;transition:none}
+  .voicestrip,.chipstrip,.blstrip,.understrip{transition:none}
+  .is-busy .btn-run rect{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!--
+  cta-1 "Ключі на столі" · smarts · Springs l-callback class.
+  One entrance move (title rise + field lines draw), then stillness until submit.
+  GA4 contract: cta_view, form_start, form_error, generate_lead. No tel on smarts.
+  BASE NOTE: recorded with the owner's voice pass (ти -> ви), text nodes only.
+-->
+<section class="cta" id="cta" data-cta-variant="cta-1" data-cta-mode="residential" data-screen-label="CTA 1 Ключі на столі">
+  <img class="bg" src="assets/renders-smarts/ext-02-1920.webp" alt="" loading="eager" decoding="sync">
+  <div class="scrim scrim-l" aria-hidden="true"></div>
+  <div class="scrim scrim-r" aria-hidden="true"></div>
+  <div class="scrim scrim-b" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header class="top">
+      <p class="caps">ЖК Агрономічне</p>
+      <nav class="modes" aria-label="Голос секції">
+        <button type="button" class="mode is-on" data-mode="residential">квартира<i class="u"></i></button>
+        <span class="sep" aria-hidden="true">|</span>
+        <button type="button" class="mode" data-mode="invest">комерція<i class="u"></i></button>
+      </nav>
+    </header>
+
+    <div class="cols">
+      <!-- left: serif title, whole copy block swaps by push swap in a clipped window -->
+      <div class="left" style="display:flex;flex-direction:column;min-height:560px">
+        <div class="voicewin">
+          <div class="voicestrip" id="voicestrip">
+            <div class="voice" data-voice="residential">
+              <div class="rise"><h1 class="serif title">Лишіть номер, ми передзвонимо.</h1></div>
+              <p class="sub fade">Підкажемо формат, <span data-j="n24"></span> чи <span data-j="n27"></span> метрів. Обрану квартиру забронюємо за вами.</p>
+              <p class="caps proof fade"><span data-j="total"></span> квартир · формати <span data-j="m24"></span> і <span data-j="m27"></span> м²</p>
+            </div>
+            <div class="voice" data-voice="invest">
+              <h2 class="serif title">Комерція: <span data-j="blocks"></span> блоків, $<span data-j="ppm"></span> за метр.</h2>
+              <p class="sub">Залиште номер. Надішлемо площі, ціни і вільні блоки з <span data-j="comm"></span> м².</p>
+              <p class="caps proof">Капіталізація до <span data-j="cap"></span>% · блоки від <span data-j="minb"></span> м²</p>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="verb fade" id="verb-leave">
+          <span class="vw">Залишити номер<i></i></span>
+          <span class="ring" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2 9h13M10 4l5 5-5 5"/></svg></span>
+        </button>
+      </div>
+
+      <!-- right: the form atom, no box, straight on the media -->
+      <div class="stage">
+        <form class="atom" id="form" novalidate autocomplete="on">
+          <!-- unit context: chip only. demo chip pre set (arrival from the picker simulated) -->
+          <div class="chipwin fade">
+            <div class="chipstrip">
+              <div class="chipslot" id="chipslot-res"></div>
+              <div class="chipslot" id="chipslot-inv"></div>
+            </div>
+          </div>
+
+          <div class="fld" style="--d:0s">
+            <input id="f-name" name="name" type="text" autocomplete="name" aria-required="true">
+            <label for="f-name">Імʼя</label>
+            <svg class="uline" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+              <line class="l-base" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+              <line class="l-warm" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+            </svg>
+          </div>
+          <div class="fld" style="--d:.16s">
+            <input id="f-phone" name="phone" type="tel" inputmode="tel" placeholder="+380 __ ___ __ __" autocomplete="tel" aria-required="true">
+            <label for="f-phone">Телефон</label>
+            <svg class="uline" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+              <line class="l-base" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+              <line class="l-warm" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+            </svg>
+          </div>
+
+          <!-- honeypot -->
+          <p class="hp" aria-hidden="true"><label>Компанія<input type="text" name="company" tabindex="-1" autocomplete="off"></label></p>
+          <input type="hidden" name="unit" id="f-unit" value="A2-12">
+          <input type="hidden" name="mode" id="f-mode" value="residential">
+
+          <label class="consent fade">
+            <input type="checkbox" id="f-consent">
+            <span class="box" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2 7.5l3.4 3.4L12 3.6"/></svg></span>
+            <!-- alt line for invest mode (proposal, not wired per brief scope): Погоджуюсь на обробку даних для звʼязку щодо комерції. Без розсилок. -->
+            <span class="txt">Погоджуюсь на обробку даних для звʼязку щодо квартири. Без розсилок.</span>
+          </label>
+
+          <div class="msgzone"><p class="msg" id="msg" aria-live="polite" role="status"></p></div>
+
+          <button class="btn fade" id="btn" type="submit" data-conv="lead">
+            <span class="blwin"><span class="blstrip" id="blstrip">
+              <span>Передзвоніть мені</span>
+              <span>Отримати пропозицію</span>
+              <span>Надсилаємо…</span>
+            </span></span>
+            <svg class="btn-run" viewBox="0 0 460 58" preserveAspectRatio="none" aria-hidden="true">
+              <rect x="1" y="1" width="458" height="56" rx="28" pathLength="100"/>
+            </svg>
+          </button>
+
+          <div class="underwin fade">
+            <div class="understrip">
+              <p class="under"><a href="#floorplan-picker" data-conv="pick">Можна і без вибору. Підберемо разом по телефону.</a></p>
+              <p class="under" aria-hidden="true"></p>
+            </div>
+          </div>
+        </form>
+
+        <!-- success ritual: clip curtain closes over the form column -->
+        <div class="curtain" id="curtain" role="status" aria-live="polite">
+          <svg class="ok" viewBox="0 0 64 64" aria-hidden="true">
+            <circle class="ok-path" cx="32" cy="32" r="29"/>
+            <path class="ok-path" d="M20 33.5l8.4 8.4L44.5 25"/>
+          </svg>
+          <h2 class="serif succ-h">Заявка у нас.</h2>
+          <p class="succ-p" id="succ-p"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <label class="demo"><input type="checkbox" id="demo-fail"><span>демо: провал відправки</span></label>
+</section>
+
+<script>
+/* Dataset: single source of smarts numbers, runtime join, nothing typed in copy */
+const SMARTS = {
+  priceUsdPerM2Commercial: 1100,
+  commercial: { totalM2: 712, minBlockM2: 100, capitalizationPct: 30,
+    blocks: ["C-01","C-02","C-03","C-04","C-05"] },
+  types: {
+    "smart-24": { label: "Смарт 24 м²", totalM2: 23.76, plan: "assets/plans-smarts/type-24-clean.webp" },
+    "smart-27": { label: "Смарт 27 м²", totalM2: 27.06, plan: "assets/plans-smarts/type-27-clean.webp" }
+  },
+  units: [
+    ["A2-01","smart-27"],["A2-02","smart-27"],["A2-03","smart-27"],["A2-04","smart-27"],["A2-05","smart-24"],["A2-06","smart-24"],
+    ["A2-07","smart-27"],["A2-08","smart-27"],["A2-09","smart-24"],["A2-10","smart-24"],["A2-11","smart-27"],["A2-12","smart-27"],
+    ["A2-13","smart-24"],["A2-14","smart-24"],["A2-15","smart-27"],["A2-16","smart-27"],["A2-17","smart-27"],["A2-18","smart-27"],
+    ["A3-01","smart-27"],["A3-02","smart-27"],["A3-03","smart-27"],["A3-04","smart-27"],["A3-05","smart-24"],["A3-06","smart-24"],
+    ["A3-07","smart-27"],["A3-08","smart-27"],["A3-09","smart-24"],["A3-10","smart-24"],["A3-11","smart-27"],["A3-12","smart-27"],
+    ["A3-13","smart-24"],["A3-14","smart-24"],["A3-15","smart-27"],["A3-16","smart-27"],["A3-17","smart-27"],["A3-18","smart-27"],
+    ["Am-01","smart-27"],["Am-02","smart-27"],["Am-03","smart-27"],["Am-04","smart-27"],["Am-05","smart-24"],["Am-06","smart-24"],
+    ["Am-07","smart-27"],["Am-08","smart-27"],["Am-09","smart-24"],["Am-10","smart-24"],["Am-11","smart-27"],["Am-12","smart-27"],
+    ["Am-13","smart-24"],["Am-14","smart-24"],["Am-15","smart-27"],["Am-16","smart-27"],["Am-17","smart-27"],["Am-18","smart-27"]
+  ],
+  demoUnit: "A2-12"
+};
+const fmtM2 = v => String(v).replace(".", ",");
+const fmtInt = v => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+/* runtime join of every visible smarts numeral */
+const J = {
+  n24: Math.round(SMARTS.types["smart-24"].totalM2),
+  n27: Math.round(SMARTS.types["smart-27"].totalM2),
+  m24: Math.round(SMARTS.types["smart-24"].totalM2),
+  m27: Math.round(SMARTS.types["smart-27"].totalM2),
+  total: SMARTS.units.length,
+  blocks: SMARTS.commercial.blocks.length,
+  ppm: fmtInt(SMARTS.priceUsdPerM2Commercial),
+  comm: SMARTS.commercial.totalM2,
+  cap: SMARTS.commercial.capitalizationPct,
+  minb: SMARTS.commercial.minBlockM2
+};
+document.querySelectorAll("[data-j]").forEach(el => { el.textContent = J[el.dataset.j]; });
+
+const sec = document.getElementById("cta");
+const form = document.getElementById("form");
+const nameI = document.getElementById("f-name");
+const phoneI = document.getElementById("f-phone");
+const consentI = document.getElementById("f-consent");
+const unitI = document.getElementById("f-unit");
+const modeI = document.getElementById("f-mode");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("btn");
+const blstrip = document.getElementById("blstrip");
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- chip contract ---------- */
+function chipSmarts(code){
+  const t = SMARTS.types[Object.fromEntries(SMARTS.units)[code]];
+  const div = document.createElement("div");
+  div.className = "chip";
+  div.innerHTML =
+    '<img alt="" width="44" height="44" loading="eager" src="' + t.plan + '">' +
+    '<span class="chip-t">Квартира ' + code + ' · ' + fmtM2(t.totalM2) + ' м²<small>обрано в пікері</small></span>' +
+    '<button type="button" class="chip-x" aria-label="Прибрати вибір"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button>';
+  const img = div.querySelector("img");
+  img.decode().then(()=>img.classList.add("is-ready")).catch(()=>img.classList.add("is-ready"));
+  div.querySelector(".chip-x").addEventListener("click", ()=>{ unitI.value=""; renderChipRes(null); });
+  return div;
+}
+function chipEmptyRes(){
+  const p = document.createElement("p");
+  p.className = "chip-empty";
+  p.innerHTML = '<a href="#floorplan-picker" data-conv="pick">Обрати квартиру в пікері</a>';
+  return p;
+}
+function renderChipRes(code){
+  const slot = document.getElementById("chipslot-res");
+  slot.replaceChildren(code ? chipSmarts(code) : chipEmptyRes());
+}
+renderChipRes(SMARTS.demoUnit); /* demo: arrival from the picker */
+(function(){
+  const slot = document.getElementById("chipslot-inv");
+  const div = document.createElement("div");
+  div.className = "chip";
+  div.innerHTML =
+    '<img alt="" width="44" height="44" loading="eager" src="assets/plans-smarts/facade-commerce-clean.webp">' +
+    '<span class="chip-t">Комерція · ' + J.comm + ' м²<small>' + J.blocks + ' блоків, фасадна лінія</small></span>';
+  const img = div.querySelector("img");
+  img.decode().then(()=>img.classList.add("is-ready")).catch(()=>img.classList.add("is-ready"));
+  slot.replaceChildren(div);
+})();
+
+/* ---------- mode switch: applyMode contract, whole copy block push swap ---------- */
+let mode = "residential";
+function applyMode(m){
+  mode = m;
+  sec.dataset.ctaMode = m;
+  modeI.value = m;
+  sec.classList.toggle("m-inv", m === "invest");
+  if (!btn.classList.contains("is-busy"))
+    blstrip.style.transform = m === "invest" ? "translateY(-20px)" : "translateY(0)";
+  document.querySelectorAll(".mode").forEach(b => b.classList.toggle("is-on", b.dataset.mode === m));
+  msg.textContent = "";
+}
+document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", ()=>applyMode(b.dataset.mode)));
+
+/* ---------- phone mask: synchronous, paste safe ---------- */
+function maskPhone(v){
+  let d = v.replace(/\D/g, "");
+  if (d.startsWith("380")) d = d.slice(3);
+  else if (d.startsWith("80")) d = d.slice(2);
+  else if (d.startsWith("0")) d = d.slice(1);
+  d = d.slice(0, 9);
+  let out = "+380";
+  for (const n of [2,3,2,2]) {
+    if (!d.length) break;
+    out += " " + d.slice(0, n); d = d.slice(n);
+  }
+  return out;
+}
+phoneI.addEventListener("input", ()=>{ phoneI.value = maskPhone(phoneI.value); syncVal(phoneI); });
+phoneI.addEventListener("focus", ()=>{ if (!phoneI.value) { phoneI.value = "+380 "; syncVal(phoneI); } });
+phoneI.addEventListener("blur", ()=>{ if (phoneI.value.replace(/\D/g,"") === "380") { phoneI.value = ""; syncVal(phoneI); } });
+
+/* floating labels */
+function syncVal(i){ i.closest(".fld").classList.toggle("has-val", !!i.value); }
+[nameI, phoneI].forEach(i => { i.addEventListener("input", ()=>syncVal(i)); i.addEventListener("blur", ()=>syncVal(i)); });
+
+/* GA4: form_start on first field focus {variant:"cta-1", mode} */
+let started = false;
+[nameI, phoneI].forEach(i => i.addEventListener("focus", ()=>{ if (!started) { started = true; /* gtag("event","form_start",...) */ } }));
+
+document.getElementById("verb-leave").addEventListener("click", ()=>nameI.focus());
+
+/* ---------- honest submit through a Promise ---------- */
+function sendDemo(){
+  const fail = document.getElementById("demo-fail").checked;
+  return new Promise((res, rej)=>setTimeout(()=>fail ? rej(new Error("network")) : res({ok:true}), 1500));
+}
+function setBusy(on){
+  btn.classList.toggle("is-busy", on);
+  btn.disabled = on;
+  blstrip.style.transform = on ? "translateY(-40px)" : (mode === "invest" ? "translateY(-20px)" : "translateY(0)");
+}
+const ERR = {
+  fill: "Вкажіть імʼя і телефон.",
+  phone: "Перевірте номер: +380 і ще 9 цифр.",
+  consent: "Потрібна згода на обробку даних.",
+  network: "Не надіслалось. Спробуйте ще раз." /* smarts: no phone published yet, honest retry only */
+};
+function showErr(kind){ msg.textContent = ERR[kind]; /* GA4: form_error {variant:"cta-1", kind, mode} */ }
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  if (form.company.value) return; /* honeypot: drop silently */
+  const digits = phoneI.value.replace(/\D/g, "");
+  if (!nameI.value.trim() || digits.length <= 3) return showErr("fill");
+  if (digits.length !== 12) return showErr("phone");
+  if (!consentI.checked) return showErr("consent");
+  msg.textContent = "";
+  setBusy(true);
+  sendDemo().then(()=>{ /* GA4: generate_lead {variant:"cta-1", mode, unit:unitI.value} */ ritual(); })
+    .catch(()=>{ setBusy(false); showErr("network"); });
+});
+
+/* ---------- success ritual: curtain, self drawing check, next step copy ---------- */
+function ritual(){
+  document.getElementById("succ-p").textContent = mode === "invest"
+    ? "Надішлемо пропозицію по комерції і передзвонимо у робочий час." /* proposed invest success line, plain */
+    : "Передзвонимо у робочий час і забронюємо квартиру, якщо обрали.";
+  sec.classList.add("is-done");
+  const finish = ()=>{
+    document.querySelectorAll(".ok-path").forEach((p, i) => {
+      const L = p.getTotalLength();
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
+      p.getBoundingClientRect();
+      if (RM) { p.style.strokeDashoffset = "0"; return; }
+      p.style.transition = "stroke-dashoffset .7s cubic-bezier(.33,0,.16,1) " + (i * .3) + "s";
+      p.style.strokeDashoffset = "0";
+    });
+    form.setAttribute("inert", "");
+  };
+  RM ? finish() : setTimeout(finish, 700);
+}
+
+/* entrance: reveals fire on arrival, nothing pre revealed */
+/* GA4: cta_view {variant:"cta-1", mode} */
+function arrive(){ setTimeout(()=>sec.classList.add("is-in"), 60); }
+document.readyState === "complete" ? arrive() : addEventListener("load", arrive);
+</script>
+</body>
+</html>
