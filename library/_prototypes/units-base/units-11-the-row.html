@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!--
+  units-11 «Ряд» - THE ROW AS THE HERO (towns)
+  PASSPORT:
+   (a) archetype: the row itself (one wide render, position ticks, a migrating wash)
+   (b) media count: 1 render (the row, ALWAYS full-width, never cropped)
+   (c) copy position: beat copy under the photo, alignment mirrors per beat (right / left)
+   (d) instrument cell: none (a pure film; scroll only; ticks are marks, never controls)
+   (e) interaction model: scroll-triggered snapped states
+  STAGE MAP: 5 stages; stages 2-5 share one pinned pane (4 snaps, pin = 3 viewports).
+   1 statement over the row dimmed [seam: row-continuity, relay = the same row photo arriving undimmed]
+   2 THE ROW full-width, six hairline ticks drop onto the facade [held]
+   3 КРАЙНІЙ: ONE wash layer warms positions 1 and 6, copy right [seam: wash-migration]
+   4 СЕРЕДИНА: the SAME wash migrates to positions 2-5, copy left [seam: wash-migration]
+   5 THE BRIDGE of its own matter [seam: ticks-rise, relay = the six ticks]: the ticks rise off the photo
+     and become six serif numerals 1-6 in a line over the verbs
+  MORPH: ONE wash layer (two bands inside one node) migrating by transform only, never two washes crossfading;
+  the ticks are the relay element photo -> bridge (transform travel of the same nodes).
+  BOUNDARY: ticks and washes are marks on the photo, pointer-events none, nothing per-house is clickable.
+  SMOOTHNESS: animated = transform, opacity, color/background-color; one easing per move; no hover instruments.
+  Zero em/en-dash. No WebGL. Towns facts from the brief.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Таунхауси - Ряд</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--ink:#2A231D;--sub:#87796a;--oak:#9c7b52;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{font-family:"Jost",sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .eyebrow{font-size:13px;letter-spacing:.34em;text-transform:uppercase;color:var(--oak)}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* stage 1 - statement over the dimmed row */
+  .s1{height:100vh;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .s1 .rowimg{position:absolute;left:0;width:100vw;top:50%;transform:translateY(-50%);opacity:.22;pointer-events:none}
+  .s1 .inner{position:relative;z-index:2;max-width:70ch;padding:0 24px}
+  .s1 .t{font-size:clamp(38px,4.8vw,84px);line-height:1.08;max-width:22ch;margin:16px auto 0}
+  .s1 .line{margin-top:18px;font-size:clamp(15px,1.1vw,17px);line-height:1.7;color:var(--sub);font-weight:300}
+  .scrollcue{position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);z-index:2}
+
+  /* the pinned row: stages 2-5 */
+  .pinwrap{position:relative;height:300vh}
+  .pin{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--paper);display:flex;flex-direction:column;justify-content:center}
+  .rowbox{position:relative;width:100vw;transition:opacity .9s var(--hs)}
+  .pin.v3 .rowbox{opacity:.18}
+  .rowbox img{display:block;width:100%;height:auto}
+  .rowbox .rplate{position:absolute;right:16px;bottom:12px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.45)}
+  /* ONE wash layer, two bands inside it, migrating by transform only */
+  .wash{position:absolute;left:0;right:0;top:30%;height:56%;pointer-events:none;opacity:0;transition:opacity .7s var(--hs)}
+  .pin.v1 .wash,.pin.v2 .wash{opacity:1}
+  .pin.v3 .wash{opacity:0}
+  .band{position:absolute;top:0;bottom:0;left:2%;width:16%;background:linear-gradient(to top,rgba(195,154,102,.38),rgba(195,154,102,.16));
+    transform-origin:left center;transition:transform .9s var(--hs)}
+  .band.b2{left:82%}
+  .pin.v2 .band.b1{transform:translateX(100%) scaleX(2)}
+  .pin.v2 .band.b2{transform:translateX(-200%) scaleX(2)}
+  /* the six ticks (marks, not controls) */
+  .ticks{position:absolute;inset:0;pointer-events:none}
+  .tick{position:absolute;top:4%;width:1px;margin-left:-.5px;display:flex;flex-direction:column;align-items:center;
+    transition:transform 1s var(--hs)}
+  .tick .tnum{font-family:"Cormorant Garamond",serif;font-size:clamp(20px,2vw,34px);line-height:1;color:var(--ink);
+    opacity:0;transform:translateY(8px);transition:opacity .6s var(--hs),transform .6s var(--hs)}
+  .tick .tline{width:1px;height:0;background:rgba(42,35,29,.65);margin-top:6px;transition:transform .8s var(--hs);transform-origin:top;transform:scaleY(0)}
+  .pin.ticked .tick .tline{transform:scaleY(1)}
+  .pin.v3 .tick .tline{transform:scaleY(0)}
+  .pin.v3 .tick .tnum{opacity:1;transform:none;font-size:clamp(30px,3vw,52px)}
+  /* beat copy under the photo */
+  .beats{position:relative;width:100vw;padding:26px clamp(40px,6vw,110px) 0;min-height:110px}
+  .beat{position:absolute;top:26px;left:clamp(40px,6vw,110px);right:clamp(40px,6vw,110px);opacity:0;transform:translateY(14px);transition:opacity .7s var(--hs),transform .7s var(--hs);pointer-events:none}
+  .beat.on{opacity:1;transform:none}
+  .beat .bt{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(24px,2.4vw,40px)}
+  .beat .bl{margin-top:8px;font-size:14px;color:var(--sub);font-weight:300;max-width:44ch}
+  .beat.right{text-align:right}
+  .beat.right .bl{margin-left:auto}
+  .beat .ek{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--oak);margin-bottom:8px}
+  /* the bridge block (stage 5) */
+  .bridge{position:absolute;left:50%;bottom:clamp(50px,10vh,110px);transform:translate(-50%,18px);width:min(760px,86vw);text-align:center;z-index:5;
+    opacity:0;transition:opacity .8s var(--hs) .35s,transform .8s var(--hs) .35s;pointer-events:none}
+  .pin.v3 .bridge{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  .bridge .bh{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,3.4vw,58px);line-height:1.1}
+  .bverbs{display:flex;justify-content:center;gap:clamp(30px,5vw,80px);margin-top:26px}
+  .bverb{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);padding:12px 0;min-height:44px}
+  .bverb .vt{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:clamp(21px,2vw,32px);transition:color .4s}
+  .bverb:hover .vt{color:var(--oak)}
+  .ring{width:46px;height:46px;min-width:46px;border:1px solid rgba(42,35,29,.4);border-radius:50%;display:grid;place-items:center;transition:background .4s,color .4s}
+  .ring svg{width:16px;height:16px;stroke:currentColor}
+  .bverb:hover .ring{background:var(--ink);color:var(--paper)}
+
+  .rise{opacity:0;transform:translateY(34px)}
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important;transition-delay:0s !important}
+    .rise{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<section class="s1" data-stage="1" data-screen-label="u11 stage 1 statement">
+  <img class="rowimg" src="assets/towns/selector-row-6-day.png" alt="">
+  <div class="inner">
+    <div class="eyebrow rise">Формат · Таунхауси</div>
+    <h1 class="serif t rise d1">Шість однакових таунхаусів. Тут обирають не метри, а місце в ряду.</h1>
+    <p class="line rise d2 num">По 82 м² кожен, на власній землі. Різниця лише в тому, з чим ти сусідиш.</p>
+  </div>
+  <div class="scrollcue rise d3">Ряд нижче</div>
+</section>
+
+<div class="pinwrap" id="pinwrap">
+  <div class="pin" id="pin" data-stage="2 3 4 5" data-screen-label="u11 the row / edge / middle / bridge">
+    <div class="rowbox" id="rowbox">
+      <img id="rowphoto" src="assets/towns/selector-row-6-day.png" alt="Ряд із шести таунхаусів">
+      <span class="rplate">Ряд · візуалізація</span>
+      <div class="wash" id="wash"><div class="band b1"></div><div class="band b2"></div></div>
+      <div class="ticks" id="ticks"></div>
+    </div>
+    <div class="beats">
+      <div class="beat right" id="beatA">
+        <div class="ek">Позиція · крайній</div>
+        <div class="bt">Сусіди лише з одного боку.</div>
+        <div class="bl">Місця 1 і 6. Один сусід через стіну, і більше тиші з краю.</div>
+      </div>
+      <div class="beat" id="beatB">
+        <div class="ek">Позиція · середина</div>
+        <div class="bt">Середина тримає тепло.</div>
+        <div class="bl num">Місця 2 до 5. Спільні стіни гріють з обох боків, і взимку це відчутно.</div>
+      </div>
+    </div>
+    <div class="bridge">
+      <div class="bh">Ряд один, місць шість.<br>Обери своє.</div>
+      <div class="bverbs">
+        <a class="bverb" href="#pick-place"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="vt">Обрати місце</span></a>
+        <a class="bverb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var img = new Image();
+  img.src = 'assets/towns/selector-row-6-day.png';
+  if (img.decode) img.decode().catch(function(){});
+
+  function dOf(el){ return el.classList.contains('d3') ? 480 : el.classList.contains('d2') ? 300 : el.classList.contains('d1') ? 140 : 0; }
+  [].slice.call(document.querySelectorAll('.rise')).forEach(function(el){
+    setTimeout(function(){
+      el.style.transition = 'opacity .9s var(--hs), transform .9s var(--hs)';
+      el.style.opacity = 1; el.style.transform = 'none';
+    }, 80 + dOf(el));
+  });
+
+  /* the six ticks: position marks calibrated to the six houses (by eye, honest and even) */
+  var XS = [8, 24, 40, 56, 72, 88]; /* % of the photo width, house centers */
+  var ticks = document.getElementById('ticks');
+  var tickEls = XS.map(function(x, i){
+    var t = document.createElement('div');
+    t.className = 'tick';
+    t.style.left = x + '%';
+    t.innerHTML = '<span class="tnum serif num">' + (i + 1) + '</span><span class="tline" style="transition-delay:' + (i * 70) + 'ms"></span>';
+    t.querySelector('.tline').style.height = '26%';
+    return t;
+  });
+  tickEls.forEach(function(t){ ticks.appendChild(t); });
+  /* line height needs photo-box units: set after layout */
+  function sizeTicks(){
+    var h = document.getElementById('rowbox').getBoundingClientRect().height;
+    tickEls.forEach(function(t){ t.querySelector('.tline').style.height = (h * 0.26) + 'px'; });
+  }
+
+  /* stages */
+  var pin = document.getElementById('pin');
+  var wrap = document.getElementById('pinwrap');
+  var beatA = document.getElementById('beatA'), beatB = document.getElementById('beatB');
+  var view = -1;
+
+  function riseTicksTo(on){
+    /* bridge: the same tick nodes travel up off the photo (transform only, measured) */
+    tickEls.forEach(function(t, i){
+      if (on){
+        var r = t.getBoundingClientRect();
+        var targetY = innerHeight * 0.34;
+        t.style.transitionDelay = (i * 50) + 'ms';
+        t.style.transform = 'translateY(' + (targetY - r.top) .toFixed(1) + 'px)';
+      } else {
+        t.style.transitionDelay = (i * 40) + 'ms';
+        t.style.transform = 'none';
+      }
+    });
+  }
+
+  function goView(v){
+    if (v === view) return;
+    var was = view;
+    view = v;
+    pin.classList.toggle('ticked', v >= 0);
+    pin.classList.toggle('v1', v === 1);
+    pin.classList.toggle('v2', v === 2);
+    pin.classList.toggle('v3', v === 3);
+    beatA.classList.toggle('on', v === 1);
+    beatB.classList.toggle('on', v === 2);
+    if (v === 3) riseTicksTo(true);
+    else if (was === 3) riseTicksTo(false);
+  }
+
+  function onScroll(){
+    var r = wrap.getBoundingClientRect(), vh = innerHeight;
+    var total = wrap.offsetHeight - vh;
+    var p = Math.min(1, Math.max(0, -r.top / total));
+    if (r.top > vh * 0.7){ return; }
+    goView(p < 0.22 ? 0 : p < 0.5 ? 1 : p < 0.76 ? 2 : 3);
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', sizeTicks);
+  if (img.complete) sizeTicks(); else img.onload = sizeTicks;
+  setTimeout(function(){ sizeTicks(); onScroll(); }, 350);
+})();
+</script>
+</body>
+</html>

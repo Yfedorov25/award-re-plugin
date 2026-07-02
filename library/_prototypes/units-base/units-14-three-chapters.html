@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<!--
+  units-14 «Дім у трьох главах» - THE DECK FIXED (towns; media-first, no empty cover)
+  PASSPORT:
+   (a) archetype: Saisei deck, corrected: chapter 1 IS the statement (no cover slide), the bridge is a
+       fourth frame delivered through the deck's own push
+   (b) media count: deck-frame (1 persistent frame; 3 chapter renders + the bridge render as states)
+   (c) copy position: card-caption (chapter chrome on the media scrim; counter + ticks + arrows below)
+   (d) instrument cell: deck arrows (P21 rings, latch + queue <= 1, counter digit-roll; wheel NEVER advances)
+   (e) interaction model: click / keyboard / swipe-release (>= 60px, no layer drag); scrolling the pin's tail
+       delivers the bridge frame once through the same push
+  STAGE MAP: 3 stages + 2 states inside stage 2 (chapters 2-3). Pin = 3 viewports of travel.
+   1 statement AND chapter 1 in one: the kitchen render already full in the frame [seam: chapter-push]
+   2 THE DECK: chapters push INSIDE the one frame (ONE tween, ONE easing, no stacked settle)
+   3 THE BRIDGE as the fourth frame [seam: next-handoff, relay = the same push mechanism]
+  MORPH: one [data-deck-frame]; every advance = exactly one transform tween per layer (translateX),
+  incoming and outgoing paired, no second easing anywhere on the move; counter = stacked digit strip.
+  SMOOTHNESS: animated = transform, opacity, color/background-color; one easing per move; swipe never
+  drags the layer (release-commit only); hover only warms the arrows. Zero em/en-dash. No WebGL.
+  Towns facts from the brief (19,44 / 14,05 / 12,49 / 1,5 / 6).
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Таунхауси - Дім у трьох главах</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--ink:#2A231D;--sub:#87796a;--oak:#9c7b52;--hs:cubic-bezier(.25,.74,.22,.99);--push:cubic-bezier(.22,1,.36,1)}
+  body{font-family:"Jost",sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .eyebrow{font-size:13px;letter-spacing:.34em;text-transform:uppercase;color:var(--oak)}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .num{font-variant-numeric:tabular-nums}
+
+  .pinwrap{position:relative;height:400vh}
+  .pin{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:clamp(30px,5vh,60px) clamp(40px,6vw,110px)}
+  .headrow{width:min(1240px,100%);display:flex;align-items:baseline;gap:18px}
+  .headrow .eyebrow{margin-right:auto}
+
+  .frame{position:relative;width:min(1240px,100%);flex:1;min-height:0;overflow:hidden;background:#1c1712}
+  .layer{position:absolute;inset:0;will-change:transform}
+  .layer img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .layer .scrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(16,12,8,.62),rgba(16,12,8,.04) 50%)}
+  .layer .chov{position:absolute;left:clamp(22px,2.6vw,44px);bottom:clamp(22px,3.6vh,40px);right:clamp(22px,2.6vw,44px);color:#fff}
+  .layer .chn{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#E8C89A}
+  .layer .cht{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(40px,4.6vw,84px);line-height:1;letter-spacing:-.015em;margin-top:10px}
+  .layer .chv{margin-top:10px;font-family:"Cormorant Garamond",serif;font-size:clamp(22px,2vw,34px)}
+  .layer .chv small{font-family:"Jost",sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-left:10px}
+  .layer .chl{margin-top:8px;font-size:13.5px;font-weight:300;color:rgba(255,255,255,.88);max-width:52ch}
+  .layer .mplate{position:absolute;right:14px;top:12px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+  .deckhint{position:absolute;right:18px;bottom:16px;z-index:6;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.9);opacity:0;transition:opacity .6s}
+  .pin.armed .deckhint{opacity:.9}
+  .pin.touched .deckhint{opacity:0}
+
+  /* the bridge frame content */
+  .layer.bframe .chov{left:0;right:0;bottom:auto;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px}
+  .layer.bframe .bh{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(38px,4.2vw,72px);line-height:1.1;color:#fff}
+  .layer.bframe .bsub{font-size:14px;font-weight:300;color:rgba(255,255,255,.88)}
+  .bverbs{display:flex;gap:clamp(26px,4vw,64px);margin-top:22px}
+  .bverb{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;padding:12px 0;min-height:44px}
+  .bverb .vt{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:clamp(20px,1.9vw,30px);transition:color .4s}
+  .bverb:hover .vt{color:#E8C89A}
+  .ring{width:46px;height:46px;min-width:46px;border:1px solid rgba(255,255,255,.55);border-radius:50%;display:grid;place-items:center;transition:background .4s,color .4s}
+  .ring svg{width:16px;height:16px;stroke:currentColor}
+  .bverb:hover .ring{background:#fff;color:#1c1712}
+
+  /* deck chrome */
+  .chrome{width:min(1240px,100%);display:flex;align-items:center;gap:26px;transition:opacity .6s var(--hs)}
+  .pin.onbridge .chrome{opacity:.3}
+  .counter{display:flex;align-items:baseline;font-family:"Cormorant Garamond",serif;font-size:clamp(26px,2.4vw,40px);line-height:1}
+  .cwin{overflow:hidden;height:1em;display:inline-flex}
+  .cstrip{display:flex;flex-direction:column;transition:transform .7s var(--push)}
+  .cstrip span{height:1em;display:block}
+  .counter .of{color:var(--sub);font-size:.6em;margin-left:.3em}
+  .ticks{display:flex;gap:10px;align-items:center}
+  .tick{width:26px;height:1px;background:rgba(42,35,29,.3);transition:background .5s,transform .5s var(--hs);transform-origin:left}
+  .tick.on{background:var(--oak);transform:scaleX(2)}
+  .arrows{display:flex;gap:12px;margin-left:auto}
+  .arrow{width:52px;height:52px;border:1px solid rgba(42,35,29,.4);border-radius:50%;background:none;display:grid;place-items:center;cursor:pointer;color:var(--ink);transition:background .4s,color .4s,border-color .4s,opacity .4s}
+  .arrow svg{width:18px;height:18px;stroke:currentColor}
+  .arrow:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .arrow[disabled]{opacity:.25;pointer-events:none}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="pinwrap" id="pinwrap">
+  <div class="pin" id="pin" data-stage="1 2 3" data-screen-label="u14 deck: chapter 1 / deck / bridge frame">
+    <div class="headrow">
+      <div class="eyebrow">Формат · Таунхауси · дім у трьох главах</div>
+    </div>
+    <div class="frame" id="frame" data-deck-frame>
+      <span class="deckhint">далі</span>
+    </div>
+    <div class="chrome" id="chrome">
+      <div class="counter num"><span class="cwin"><span class="cstrip" id="cstrip"><span>1</span><span>2</span><span>3</span><span>3</span></span></span><span class="of num">/ 3</span></div>
+      <div class="ticks" id="ticks"><span class="tick on"></span><span class="tick"></span><span class="tick"></span></div>
+      <div class="arrows">
+        <button class="arrow" id="prev" type="button" aria-label="Попередня глава" disabled><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+        <button class="arrow" id="next" type="button" aria-label="Наступна глава"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var CH = [
+    { n: 'Глава 1 · внизу', t: 'Кухня-вітальня', v: '19,44 м²', vk: 'на все гучне',
+      cp: 'Стіл на всіх, вихід у двір, і день починається тут.',
+      img: 'assets/towns/int-kitchen-day.jpg', plate: 'Кухня-вітальня · візуалізація' },
+    { n: 'Глава 2 · нагорі', t: 'Спальні', v: '14,05 і 12,49', vk: 'метрів тиші',
+      cp: 'Нагорі все, що тихе. День лишається внизу.',
+      img: 'assets/towns/int-bedmain-day.jpg', plate: 'Спальня · візуалізація' },
+    { n: 'Глава 3 · за кухнею', t: 'Двір', v: '1,5 сотки', vk: 'своєї землі',
+      cp: 'Свій вихід з кухні у свій двір. Земля, яка додається до метрів.',
+      img: 'assets/towns/back-yard.webp', plate: 'Двір · візуалізація' },
+    { bridge: true, img: 'assets/towns/arch-entry-dusk.webp', plate: 'Вулиця · візуалізація' }
+  ];
+  CH.forEach(function(c){ var i = new Image(); i.src = c.img; if (i.decode) i.decode().catch(function(){}); });
+
+  var frame = document.getElementById('frame');
+  var pin = document.getElementById('pin');
+  var hint = frame.querySelector('.deckhint');
+
+  function makeLayer(i){
+    var c = CH[i];
+    var d = document.createElement('div');
+    d.className = 'layer' + (c.bridge ? ' bframe' : '');
+    if (c.bridge){
+      d.innerHTML = '<img src="' + c.img + '" alt=""><div class="scrim" style="background:rgba(16,12,8,.55)"></div>' +
+        '<span class="mplate">' + c.plate + '</span>' +
+        '<div class="chov"><div class="bh">Ряд один, місць шість.<br>Обери своє.</div>' +
+        '<div class="bsub num">82 м² на власній землі, від $67 тис.</div>' +
+        '<div class="bverbs">' +
+        '<a class="bverb" href="#pick-place"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="vt">Обрати місце</span></a>' +
+        '<a class="bverb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>' +
+        '</div></div>';
+    } else {
+      d.innerHTML = '<img src="' + c.img + '" alt=""><div class="scrim"></div>' +
+        '<span class="mplate">' + c.plate + '</span>' +
+        '<div class="chov"><div class="chn num">' + c.n + '</div><div class="cht">' + c.t + '</div>' +
+        '<div class="chv num">' + c.v + '<small>' + c.vk + '</small></div>' +
+        '<p class="chl num">' + c.cp + '</p></div>';
+    }
+    return d;
+  }
+  /* chapter 1 = the statement: already full in the frame at load */
+  var first = makeLayer(0);
+  frame.insertBefore(first, hint);
+
+  var cur = 0, busy = false, queued = 0;
+  var cstrip = document.getElementById('cstrip');
+  var ticks = [].slice.call(document.getElementById('ticks').children);
+  var prevB = document.getElementById('prev'), nextB = document.getElementById('next');
+
+  function push(to, dir){
+    busy = true;
+    pin.classList.add('touched');
+    var inc = makeLayer(to);
+    /* ONE tween per layer, ONE easing, no second settle */
+    inc.style.transform = 'translateX(' + (dir > 0 ? 102 : -102) + '%)';
+    inc.style.transition = 'none';
+    frame.insertBefore(inc, hint);
+    var out = inc.previousElementSibling;
+    void inc.offsetWidth;
+    inc.style.transition = 'transform .8s var(--push)';
+    inc.style.transform = 'none';
+    if (out && out.classList.contains('layer')){
+      out.style.transition = 'transform .8s var(--push)';
+      out.style.transform = 'translateX(' + (dir > 0 ? -102 : 102) + '%)';
+    }
+    cur = to;
+    var onBridge = !!CH[cur].bridge;
+    pin.classList.toggle('onbridge', onBridge);
+    cstrip.style.transform = 'translateY(' + (-Math.min(cur, 2)) + 'em)';
+    ticks.forEach(function(t, k){ t.classList.toggle('on', k === Math.min(cur, 2)); });
+    prevB.disabled = cur === 0;
+    nextB.disabled = onBridge;
+    setTimeout(function(){
+      [].slice.call(frame.querySelectorAll('.layer')).forEach(function(l){ if (l !== inc) frame.removeChild(l); });
+      busy = false;
+      if (queued){ var q = queued; queued = 0; advance(q); }
+    }, 850);
+  }
+
+  function advance(dir){
+    var to = cur + dir;
+    if (to < 0 || to >= CH.length) return;
+    if (busy){ if (queued === 0) queued = dir; return; } /* latch + queue <= 1 */
+    push(to, dir);
+  }
+
+  /* the failsafe handoff: ONE push straight to the bridge frame, through the same mechanism */
+  function jumpToBridge(){
+    if (CH[cur].bridge) return;
+    if (busy){ setTimeout(jumpToBridge, 300); return; }
+    push(CH.length - 1, 1);
+  }
+
+  nextB.addEventListener('click', function(){ advance(1); });
+  prevB.addEventListener('click', function(){ advance(-1); });
+  addEventListener('keydown', function(e){
+    var r = pin.getBoundingClientRect();
+    if (r.top > innerHeight * 0.5 || r.bottom < innerHeight * 0.5) return;
+    if (e.key === 'ArrowRight') advance(1);
+    else if (e.key === 'ArrowLeft') advance(-1);
+  });
+
+  /* swipe: release-commit only (>= 60px); the layer NEVER drags; wheel untouched, scroll passes */
+  var sx = null;
+  frame.addEventListener('pointerdown', function(e){ if (e.pointerType !== 'mouse') sx = e.clientX; });
+  frame.addEventListener('pointerup', function(e){
+    if (sx === null) return;
+    var dx = e.clientX - sx;
+    sx = null;
+    if (Math.abs(dx) >= 60) advance(dx < 0 ? 1 : -1);
+  });
+  frame.addEventListener('pointercancel', function(){ sx = null; });
+
+  /* scroll: arms the hint; the pin's tail delivers the bridge ONCE through the same push (failsafe) */
+  var wrap = document.getElementById('pinwrap');
+  var armed = false, handedOff = false;
+  function onScroll(){
+    var r = wrap.getBoundingClientRect(), vh = innerHeight;
+    var total = wrap.offsetHeight - vh;
+    var p = Math.min(1, Math.max(0, -r.top / total));
+    if (!armed && r.top <= 0){
+      armed = true;
+      setTimeout(function(){ pin.classList.add('armed'); }, 300);
+    }
+    if (p > 0.8 && !handedOff && !CH[cur].bridge){
+      handedOff = true;
+      jumpToBridge();
+    }
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(onScroll, 300);
+})();
+</script>
+</body>
+</html>
