@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PASSPORT · t-5-honest-inventory «Чесна інвентаризація» · клас B (primary)
+Граматика: Silver Pinewood факт-CAPS. Один тихий full-bleed рендер з локальним
+скрімом; рядки ТІЛЬКИ підтверджених фактів; більше нічого. Чесність = доказ.
+SIGNATURE MORPH (F-45): SELF-DRAW hairline. Кожен факт-рядок проявляється
+per-line (opacity + translateY, один ease), його волосяна лінія прокреслює себе
+scaleX 0 -> 1 слідом за рядком. Підпис «Візуалізація» = частина композиції.
+
+STAGE MAP (в'їзд по входу у вьюпорт; без піна, без скраба):
+  enter title   заголовок і лід рядок за рядком
+  rows          факт-рядки по одному, hairline самопрокреслюється під кожним
+  rest          статика; жодного руху далі (тиша = жест)
+
+КЛАС B: нуль дат, нуль років, нуль девелопера у всьому файлі (включно з alt).
+Анімовані властивості: transform, opacity. Reduced-motion / <=820px: усе одразу.
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-5 · Чесна інвентаризація</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,400&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.28); --gutter:56px;
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{overflow-x:clip;background:var(--bg);color:var(--ink)}
+  body{font-family:var(--sans);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  img{display:block}
+
+  .scene{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;overflow:clip}
+  .scene > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+  .scrim{position:absolute;inset:0;z-index:-1;
+    background:linear-gradient(to top,rgba(16,13,10,.82),rgba(16,13,10,.24) 46%,rgba(16,13,10,.42));}
+
+  .meta-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:28px var(--gutter) 0;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(237,230,216,.8)}
+
+  .block{padding:9vh var(--gutter) 0;max-width:880px}
+  .eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+  h1{font-family:var(--serif);font-weight:300;font-size:clamp(46px,5vw,76px);line-height:1.03;text-wrap:balance}
+  .lede{margin-top:22px;max-width:44ch;color:rgba(237,230,216,.85)}
+  .r{opacity:0;transform:translateY(16px)}
+  .r.on{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  html.static .r{opacity:1;transform:none;transition:none}
+
+  .rows{padding:0 var(--gutter) 88px}
+  .row{position:relative;display:grid;grid-template-columns:200px 1fr;gap:40px;padding:22px 0 20px;
+    opacity:0;transform:translateY(14px)}
+  .row.on{opacity:1;transform:none;transition:opacity .65s cubic-bezier(.2,.7,.2,1),transform .65s cubic-bezier(.2,.7,.2,1)}
+  html.static .row{opacity:1;transform:none;transition:none}
+  .row .k{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,230,216,.62);padding-top:4px}
+  .row .v{font-size:15px;letter-spacing:.14em;text-transform:uppercase;line-height:1.9}
+  .row .hairline{position:absolute;left:0;right:0;top:0;height:1px;background:var(--hair);
+    transform:scaleX(0);transform-origin:left}
+  .row.on .hairline{transform:scaleX(1);transition:transform .8s cubic-bezier(.2,.7,.2,1) .12s}
+  html.static .row .hairline{transform:scaleX(1);transition:none}
+
+  .h-cap{position:absolute;left:16px;bottom:14px;z-index:5;font:500 11px/1 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(237,230,216,.82);
+    text-shadow:0 1px 8px rgba(10,8,6,.65)}
+
+  @media (max-width:820px){
+    :root{--gutter:20px}
+    .row{grid-template-columns:1fr;gap:8px}
+  }
+</style>
+</head>
+<body>
+<section class="scene" data-screen-label="t-5 honest inventory">
+  <img id="bg" alt="">
+  <div class="scrim"></div>
+
+  <div>
+    <div class="meta-row"><span data-slot="project"></span><span>Клас B · t-5</span></div>
+    <div class="block">
+      <p class="eyebrow r" data-slot="eyebrow"></p>
+      <h1 class="r" data-slot="title"></h1>
+      <p class="lede r" data-slot="body"></p>
+    </div>
+  </div>
+
+  <div class="rows" id="rows"></div>
+  <span class="h-cap" data-slot="honesty"></span>
+</section>
+
+<script>
+/* ═ TEMPLATE CONTRACT ═
+   ОБОВʼЯЗКОВІ поля для нового проєкту (клас B, обмежений фактаж):
+   project.name · media.{src (тихий full-bleed рендер), honesty («Візуалізація»
+   для чистого рендера), altSubject (що на кадрі, БЕЗ дат)} ·
+   section.{eyebrow,title,body} · rows[] {k,v} (тільки підтверджені факти)
+   ОПЦІЙНІ: немає. ЗАБОРОНЕНО у класі B: дати, роки, імʼя девелопера,
+   таймлайни, «рік здачі» будь-де, включно з alt і ghost-типографікою. */
+const DATA = {
+  project: { name: 'Таунхауси · вул. Замкова' },
+  media: {
+    src: 'assets/towns/hero-day.webp',
+    honesty: 'Візуалізація',
+    altSubject: 'фасади ряду таунхаусів'
+  },
+  section: {
+    eyebrow: 'Формат',
+    title: '6 однакових таунів по 82 м²',
+    body: 'Планування одне на всіх. Ви обираєте лише місце в ряду.'
+  },
+  rows: [
+    { k: 'Статус',  v: 'Всі 6 таунів зараз вільні.' },
+    { k: 'Двір',    v: 'У кожного тауна 1,5 сотки власного двору.' },
+    { k: 'Рендери', v: 'Показуємо візуалізації та підписуємо їх чесно.' },
+    { k: 'Дати',    v: 'Назвемо, коли зафіксуємо їх у документах.' }
+  ]
+};
+
+const $ = s => document.querySelector(s);
+const put = (slot, v) => { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = v; };
+put('project', DATA.project.name);
+put('eyebrow', DATA.section.eyebrow);
+put('title', DATA.section.title);
+put('body', DATA.section.body);
+put('honesty', DATA.media.honesty);
+
+const bg = $('#bg');
+bg.src = DATA.media.src;
+bg.alt = DATA.media.honesty + ': ' + DATA.media.altSubject;
+
+const rowsEl = $('#rows');
+DATA.rows.forEach(r => {
+  const d = document.createElement('div'); d.className = 'row';
+  const h = document.createElement('span'); h.className = 'hairline';
+  const k = document.createElement('div'); k.className = 'k'; k.textContent = r.k;
+  const v = document.createElement('div'); v.className = 'v'; v.textContent = r.v;
+  d.appendChild(h); d.appendChild(k); d.appendChild(v); rowsEl.appendChild(d);
+});
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const narrow = matchMedia('(max-width: 820px)');
+
+const decoded = img => Promise.race([
+  img.decode().catch(() => {}),
+  new Promise(r => { if (img.complete) r(); else img.addEventListener('load', r, { once: true }); }),
+  new Promise(r => setTimeout(r, 800))
+]);
+async function init(){
+  /* DECODE-GUARD: рендер декодується ДО створення тригерів появи */
+  await decoded(bg);
+
+  if (reduced.matches || narrow.matches) {
+    document.documentElement.classList.add('static');
+    [...document.querySelectorAll('.r,.row')].forEach(el => el.classList.add('on'));
+    return;
+  }
+  document.documentElement.classList.remove('static');
+
+  [...document.querySelectorAll('.block .r')].forEach((el, i) => setTimeout(() => el.classList.add('on'), 150 + i * 140));
+
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    [...rowsEl.children].forEach((r, i) => setTimeout(() => r.classList.add('on'), i * 150));
+    io.disconnect();
+  }), { threshold: 0.35 });
+  io.observe(rowsEl);
+}
+init();
+narrow.addEventListener('change', () => init());
+reduced.addEventListener('change', () => init());
+</script>
+</body>
+</html>
