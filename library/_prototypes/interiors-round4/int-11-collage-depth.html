@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<!--
+  int-11 «Колаж на глибині» - SMARTS-LIVE GRAMMAR EVOLVED (ANCHOR)
+  PASSPORT:
+   (a) archetype: sticky-left editorial column + right collage of full 4:3 frames on depth planes (live smarts base, staged deeper)
+   (b) media count: 2-3 collage (stage 2), 1 full-bleed (stages 3-4)
+   (c) copy position: sticky-left
+   (d) day/night cell: cursor x seam (THE CARESS on the main kitchen card, rest 55%, full chrome, drag twin)
+   (e) interaction: cursor + scroll-triggered; playground lightbox after arrival
+  STAGE MAP (4 stages + 4 states inside the lightbox playground):
+   1 statement beside empty ruled column [type owns frame] -> curtain seam (relay: the hairline rule extends into the collage edge)
+   2 the collage ASSEMBLES [collage at depth] (word «Всередині» behind through gutters; kitchen main card = caress instrument) -> de-bleed seam (relay: the main card expanding, P2)
+   3 full-bleed bedroom, inverted copy [quiet full room] -> dusk seam (relay: the panel darkening)
+   4 evening arrival kitchen night [home lit within] + «+» lightbox playground
+  Deeper than live: stage spine + de-bleed seam + theme warm->dusk. Night eager + decoded (fixes live lazy bug).
+  Set B. Zero em/en-dash. No WebGL.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Всередині - Колаж на глибині</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--clay:#b3826a;--clay2:#9e6f59;--ink:#3c2419;--plaster:#f2e8dd;--eve:#171009;--eveink:#efe1d0;--hs:cubic-bezier(.25,.74,.22,.99)}
+  html{scroll-behavior:smooth}
+  body{font-family:"Jost",sans-serif;background:var(--clay);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .st{min-height:100vh;position:relative;overflow:hidden;padding:0 clamp(40px,6vw,110px);display:flex;align-items:center}
+  .eyebrow{font-size:13px;letter-spacing:.34em;text-transform:uppercase;color:rgba(60,36,25,.78);display:flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink)}
+  .title{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.015em;line-height:1.05;color:var(--ink)}
+  .line{font-size:clamp(15px,1.15vw,18px);line-height:1.7;color:rgba(60,36,25,.88);font-weight:300}
+  .hair{height:1px;background:rgba(60,36,25,.3)}
+
+  /* stage 1 - statement beside the empty ruled column */
+  .s1{background:linear-gradient(168deg,var(--clay),var(--clay2))}
+  .s1 .wrap{display:grid;grid-template-columns:minmax(280px,32%) 1fr;gap:clamp(32px,4vw,64px);width:100%;align-items:center}
+  .s1 .colL .eyebrow{margin-bottom:26px}
+  .s1 .title{font-size:clamp(38px,4.6vw,74px)}
+  .s1 .rule{margin-top:30px;width:100%}
+  .s1 .ghostcol{height:52vh;border-left:1px solid rgba(60,36,25,.22);opacity:.7}
+  .scrollcue{position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(60,36,25,.6)}
+
+  /* stage 2 - the collage assembles */
+  .s2{background:linear-gradient(168deg,var(--clay),var(--clay2));padding-top:9vh;padding-bottom:9vh}
+  .s2 .grid{display:grid;grid-template-columns:minmax(280px,30%) 1fr;gap:clamp(32px,4vw,64px);width:100%;align-items:start}
+  .s2 .left{position:sticky;top:14vh}
+  .s2 .left .eyebrow{margin-bottom:22px}
+  .s2 .left .title{font-size:clamp(30px,2.9vw,48px)}
+  .s2 .left .rule{margin:26px 0;transform-origin:left}
+  .s2 .left .line{max-width:34ch}
+  .word{position:absolute;left:clamp(40px,6vw,110px);bottom:3vh;z-index:0;font-family:"Cormorant Garamond",serif;font-weight:500;font-style:italic;
+    font-size:clamp(80px,11vw,170px);line-height:.8;letter-spacing:-.02em;color:rgba(60,36,25,.15);pointer-events:none;user-select:none}
+  .coll{position:relative;min-height:74vh;z-index:2}
+  .card{position:absolute;overflow:hidden;background:#8a604c;box-shadow:0 24px 60px rgba(40,20,10,.3)}
+  .card img{display:block;width:100%;height:100%;object-fit:cover}
+  .main{left:0;top:5%;width:62%;aspect-ratio:4/3;z-index:2;cursor:ew-resize}
+  .main img{position:absolute;inset:0}
+  .main .night{clip-path:inset(0 0 0 var(--split,55%))}
+  .splitline{position:absolute;top:0;bottom:0;left:var(--split,55%);width:2px;background:var(--plaster);z-index:4;box-shadow:0 0 18px rgba(0,0,0,.35);pointer-events:none;opacity:0;transition:opacity .6s}
+  .splitline::after{content:"\21C6";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;
+    background:var(--plaster);color:var(--ink);display:grid;place-items:center;font-size:16px}
+  .armed .splitline{opacity:1}
+  .tag{position:absolute;z-index:5;bottom:14px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--plaster);text-shadow:0 1px 10px rgba(0,0,0,.5);pointer-events:none;transition:opacity .4s}
+  .tag.day{left:16px}.tag.night{right:16px}
+  .hint{position:absolute;z-index:5;top:14px;left:16px;font-size:12px;letter-spacing:.1em;color:var(--plaster);text-shadow:0 1px 10px rgba(0,0,0,.5);pointer-events:none;opacity:0;transition:opacity .6s}
+  .armed .hint{opacity:1}
+  .hint.gone{opacity:0!important}
+  .cardb{right:0;top:0;width:44%;aspect-ratio:4/3;z-index:3}
+  .cardc{right:7%;bottom:0;width:40%;aspect-ratio:4/3;z-index:1}
+  .plus{margin-top:30px;display:inline-flex;align-items:center;gap:14px;background:none;border:0;cursor:pointer;color:var(--ink);font-family:"Jost";font-size:11.5px;letter-spacing:.2em;text-transform:uppercase}
+  .plus .ring{width:56px;height:56px;border-radius:50%;background:var(--ink);color:var(--clay);display:grid;place-items:center;font-size:22px;font-weight:300;transition:transform .4s var(--hs)}
+  .plus:hover .ring{transform:scale(1.08)}
+
+  /* stage 3 - full-bleed bedroom inverted */
+  .s3{padding:0;background:#20242c;color:#eef1f6}
+  .s3 .frame{position:absolute;inset:0;overflow:hidden}
+  .s3 .frame img{width:100%;height:100%;object-fit:cover}
+  .s3 .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,12,18,.6),rgba(10,12,18,0) 52%)}
+  .s3 .ov{position:absolute;z-index:4;right:clamp(40px,6vw,110px);bottom:13vh;text-align:right;max-width:560px}
+  .s3 .eyebrow{justify-content:flex-end;color:#a9c0d8}.s3 .eyebrow::before{background:#a9c0d8}
+  .s3 .title{font-size:clamp(34px,4vw,60px);color:#fff;margin:18px 0}
+  .s3 .line{color:#dfe5ee;margin-left:auto;max-width:38ch}
+
+  /* stage 4 - evening arrival */
+  .s4{padding:0;background:var(--eve);color:var(--eveink)}
+  .s4 .frame{position:absolute;inset:0;overflow:hidden}
+  .s4 .frame img{width:100%;height:100%;object-fit:cover}
+  .s4 .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(9,6,3,.68),rgba(9,6,3,0) 50%,rgba(9,6,3,.28))}
+  .s4 .ov{position:absolute;z-index:4;left:clamp(40px,6vw,110px);bottom:12vh;max-width:620px}
+  .s4 .eyebrow{color:#e6b878}.s4 .eyebrow::before{background:#e6b878}
+  .s4 .title{font-size:clamp(36px,4.4vw,66px);color:#fff;margin:18px 0}
+  .s4 .line{color:#d7c6b2;max-width:44ch}
+  .pill{display:inline-block;margin-top:26px;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#c9bcab;border:1px solid rgba(233,225,214,.28);padding:9px 16px;border-radius:40px}
+
+  /* lightbox playground */
+  .lb{position:fixed;inset:0;z-index:300;background:linear-gradient(168deg,#a4765f,#8f654f);color:var(--ink);
+    display:grid;grid-template-columns:minmax(300px,34%) 1fr;gap:clamp(24px,3vw,48px);padding:clamp(48px,8vh,80px) clamp(40px,6vw,110px);
+    opacity:0;pointer-events:none;transition:opacity .5s var(--hs)}
+  .lb.on{opacity:1;pointer-events:auto}
+  .lb .x{position:absolute;top:28px;left:clamp(40px,6vw,110px);width:48px;height:48px;border-radius:50%;background:var(--ink);color:var(--clay);border:0;cursor:pointer;font-size:16px;z-index:2}
+  .lb .colL{display:flex;flex-direction:column;justify-content:center;gap:22px}
+  .lb .text{font-size:clamp(15px,1.15vw,18px);line-height:1.65;color:rgba(60,36,25,.92);max-width:36ch;font-weight:300}
+  .lb .n{font-family:"Cormorant Garamond",serif;font-size:clamp(110px,16vh,190px);line-height:.8;font-weight:500;color:rgba(60,36,25,.9)}
+  .lb .nav{display:flex;gap:12px}
+  .lb .nav button{width:48px;height:48px;border-radius:50%;border:1px solid rgba(60,36,25,.5);background:transparent;color:var(--ink);cursor:pointer;font-size:16px;transition:.3s}
+  .lb .nav button:hover{background:var(--ink);color:var(--clay)}
+  .lb .stage{position:relative;align-self:center;justify-self:center;aspect-ratio:4/3;height:min(78vh,54vw);max-width:100%;overflow:hidden;background:#7d5743}
+  .lb .stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .lb .stage .n2{opacity:0;transition:opacity 1s var(--hs)}
+  .lb.nite .stage .n2{opacity:1}
+  .lb .mode{position:absolute;right:16px;top:16px;z-index:5;border:0;border-radius:999px;padding:8px 18px;background:rgba(16,19,26,.55);color:var(--plaster);
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="film">
+
+  <section class="st s1">
+    <div class="wrap">
+      <div class="colL">
+        <div class="eyebrow rise">Всередині</div>
+        <h1 class="title rise d1">Тут світло знає,<br>куди тебе вести.</h1>
+        <div class="hair rule d2"></div>
+      </div>
+      <div class="ghostcol fade d2"></div>
+    </div>
+    <div class="scrollcue rise d3">Проходьте далі</div>
+  </section>
+
+  <section class="st s2" id="s2">
+    <div class="word">Всередині</div>
+    <div class="grid">
+      <div class="left">
+        <div class="eyebrow rise">Кухня-вітальня</div>
+        <h2 class="title rise d1">Тут пахне кавою<br>і зібралися всі.</h2>
+        <div class="hair rule d2"></div>
+        <p class="line rise d2">Одна велика кімната на цілий день. Готуєш, розмовляєш, живеш поруч. Тепла теракота на стінах, дубова підлога під ногами.</p>
+        <button class="plus rise d3" id="openLb"><span class="ring">+</span> Подивитись дім</button>
+      </div>
+      <div class="coll">
+        <div class="card main cU" id="main">
+          <img class="dayimg" src="assets/interiors-townhouse/int-kitchen-day.jpg" alt="Кухня-вітальня вдень">
+          <img class="night" src="assets/interiors-townhouse/int-kitchen-night.jpg" alt="Кухня-вітальня ввечері">
+          <i class="splitline"></i>
+          <span class="hint" id="hint">потягни</span>
+          <span class="tag day" id="tagD">День</span>
+          <span class="tag night" id="tagN">Вечір</span>
+        </div>
+        <div class="card cardb rise d2"><img src="assets/interiors-townhouse/int-stairs1-day.jpg" alt="Сходи"></div>
+        <div class="card cardc rise d3"><img src="assets/interiors-townhouse/int-hall-day.jpg" alt="Передпокій"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="st s3">
+    <div class="frame portal"><img src="assets/interiors-townhouse/int-bedmain-day.jpg" alt="Спальня вдень"></div>
+    <div class="ov">
+      <div class="eyebrow rise d1">Спальня</div>
+      <h2 class="title rise d2">Кімната, де день<br>нарешті стихає.</h2>
+      <p class="line rise d3">Білі стіни, м'яке світло, нічого зайвого. Вранці тебе будить сонце, а не будильник.</p>
+    </div>
+  </section>
+
+  <section class="st s4">
+    <div class="frame cV"><img src="assets/interiors-townhouse/int-kitchen-night.jpg" alt="Кухня-вітальня ввечері"></div>
+    <div class="ov">
+      <div class="eyebrow rise d1">Коли темніє</div>
+      <h2 class="title rise d2">А ввечері дім<br>світиться зсередини.</h2>
+      <p class="line rise d3">Світло тепле і низьке, під стелею. Ти вдома, і нікуди не поспішаєш.</p>
+      <div class="pill rise d4">Ремонт під ключ. Меблі на візуалізації для прикладу.</div>
+    </div>
+  </section>
+
+</div>
+
+<div class="lb" id="lb">
+  <button class="x" id="lbX">&#10005;</button>
+  <div class="colL">
+    <p class="text" id="lbT"></p>
+    <div class="hair"></div>
+    <div class="n" id="lbN">1</div>
+    <div class="nav"><button id="lbP">&#8592;</button><button id="lbNx">&#8594;</button></div>
+  </div>
+  <div class="stage">
+    <img class="d2img" id="lbD" src="" alt="">
+    <img class="n2" id="lbNi" src="" alt="">
+    <button class="mode" id="lbM">Вечір</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  /* ---------- film reveal engine (fire-and-hold, setTimeout-safe) ---------- */
+  var sts=[].slice.call(document.querySelectorAll('.st'));
+  var SEL='.rise,.fade,.cL,.cR,.cU,.cD,.cC,.cV,.portal,.cover,.scale,.rule';
+  function ease(t){return 1-Math.pow(1-t,3);}
+  function dOf(el){return el.classList.contains('d4')?0.64:el.classList.contains('d3')?0.48:el.classList.contains('d2')?0.3:el.classList.contains('d1')?0.14:0;}
+  function kOf(el){var c=el.classList;return c.contains('cover')?'cover':c.contains('cL')?'cL':c.contains('cR')?'cR':c.contains('cU')?'cU':c.contains('cD')?'cD':c.contains('cC')?'cC':c.contains('cV')?'cV':c.contains('portal')?'portal':c.contains('scale')?'scale':c.contains('rule')?'rule':c.contains('fade')?'fade':'rise';}
+  function set(el,k,e){var i=1-e;
+    if(k==='rise'){el.style.opacity=e;el.style.transform='translateY('+(38*i).toFixed(1)+'px)';}
+    else if(k==='fade'){el.style.opacity=e;}
+    else if(k==='cL'){el.style.clipPath='inset(0 '+(i*100).toFixed(2)+'% 0 0)';}
+    else if(k==='cR'){el.style.clipPath='inset(0 0 0 '+(i*100).toFixed(2)+'%)';}
+    else if(k==='cU'){el.style.clipPath='inset('+(i*100).toFixed(2)+'% 0 0 0)';}
+    else if(k==='cD'){el.style.clipPath='inset(0 0 '+(i*100).toFixed(2)+'% 0)';}
+    else if(k==='cC'){el.style.clipPath='inset(0 '+(i*50).toFixed(2)+'% 0 '+(i*50).toFixed(2)+'%)';}
+    else if(k==='cV'){el.style.clipPath='inset('+(i*50).toFixed(2)+'% 0 '+(i*50).toFixed(2)+'% 0)';}
+    else if(k==='portal'){var p=(i*40).toFixed(2);el.style.clipPath='inset('+p+'% '+p+'% '+p+'% '+p+'%)';}
+    else if(k==='cover'){el.style.transform='translateY('+(-e*101).toFixed(2)+'%)';}
+    else if(k==='scale'){el.style.opacity=Math.min(1,e*1.5);el.style.transform='scale('+(1.14-e*0.14).toFixed(3)+')';}
+    else if(k==='rule'){el.style.transformOrigin='left';el.style.transform='scaleX('+e.toFixed(3)+')';}
+  }
+  function anim(el){var k=kOf(el),delay=dOf(el)*1000,dur=(k==='rise'||k==='rule'||k==='fade')?900:1350,t0=null;
+    function step(ts){if(t0===null)t0=ts;var m=ts-t0-delay;if(m<0){requestAnimationFrame(step);return;}var p=Math.min(1,m/dur);set(el,k,ease(p));if(p<1)requestAnimationFrame(step);}
+    requestAnimationFrame(step);setTimeout(function(){set(el,k,1);},delay+dur+150);}
+  var played=[];
+  function play(st){if(played.indexOf(st)>-1)return;played.push(st);
+    [].slice.call(st.querySelectorAll(SEL)).forEach(anim);
+    if(st.id==='s2'){setTimeout(arm,1650);} }
+  sts.forEach(function(st){[].slice.call(st.querySelectorAll(SEL)).forEach(function(el){set(el,kOf(el),0);});});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){play(e.target);}});},{threshold:0.25});
+  sts.forEach(function(s,i){if(i===0){setTimeout(function(){play(s);},40);}else io.observe(s);});
+  function checkStages(){var vh=innerHeight;sts.forEach(function(s){var r=s.getBoundingClientRect();if(r.top<vh*0.72&&r.bottom>vh*0.2)play(s);});}
+  window.addEventListener('scroll',checkStages,{passive:true});
+  setTimeout(checkStages,600);
+  setTimeout(function(){[].slice.call(sts[0].querySelectorAll(SEL)).forEach(function(el){set(el,kOf(el),1);});},1300);
+
+  /* ---------- THE CARESS: cursor-seam on the main kitchen card ---------- */
+  var main=document.getElementById('main');
+  var hint=document.getElementById('hint');
+  var tagD=document.getElementById('tagD'), tagN=document.getElementById('tagN');
+  // eager decode of the night layer (fixes the live lazy-decode bug)
+  var nimg=main.querySelector('.night'); if(nimg.decode) nimg.decode().catch(function(){});
+  var sp={v:55}, target=55, tick=null, armed=false, touched=false;
+  function applySplit(){
+    main.style.setProperty('--split',sp.v+'%');
+    var t=(94-sp.v)/88; // 0 day .. 1 night shown
+    tagD.style.opacity=(1-t*0.65).toFixed(2);
+    tagN.style.opacity=(0.45+t*0.55).toFixed(2);
+  }
+  applySplit();
+  function loop(){sp.v+=(target-sp.v)*0.14;applySplit();
+    if(Math.abs(target-sp.v)>0.05){tick=requestAnimationFrame(loop);}else{sp.v=target;applySplit();tick=null;}}
+  function drive(){if(!tick)tick=requestAnimationFrame(loop);}
+  function arm(){
+    if(armed)return; armed=true;
+    main.parentElement.parentElement.parentElement.classList.add('armed');
+    document.querySelector('.s2 .coll').parentElement.parentElement.classList.add('armed');
+    document.getElementById('s2').classList.add('armed');
+    // one autonomous demonstration: 55 -> 48 -> 55
+    var t0=null, D=2500;
+    (function demo(ts){if(touched)return;if(t0===null)t0=performance.now();
+      var p=Math.min(1,(performance.now()-t0)/D);
+      target=55-7*Math.sin(p*Math.PI); drive();
+      if(p<1)setTimeout(function(){demo();},40);else{target=55;drive();}})();
+  }
+  function move(x){if(!armed)return;
+    var r=main.getBoundingClientRect();
+    target=Math.max(6,Math.min(94,((x-r.left)/r.width)*100));drive();
+    if(!touched){touched=true;setTimeout(function(){hint.classList.add('gone');},1500);}}
+  main.addEventListener('mousemove',function(e){move(e.clientX);});
+  main.addEventListener('touchmove',function(e){move(e.touches[0].clientX);},{passive:true});
+  main.addEventListener('mouseleave',function(){target=55;drive();});
+  main.addEventListener('touchend',function(){target=55;drive();});
+  // idle relax
+  var idleT;function pokeIdle(){clearTimeout(idleT);idleT=setTimeout(function(){target=55;drive();},6000);}
+  main.addEventListener('mousemove',pokeIdle);
+
+  /* ---------- playground lightbox ---------- */
+  var SLIDES=[
+    {d:'assets/interiors-townhouse/int-kitchen-day.jpg',n:'assets/interiors-townhouse/int-kitchen-night.jpg',t:'Кухня-вітальня. Одна велика кімната на цілий день, тепла теракота і дуб.'},
+    {d:'assets/interiors-townhouse/int-bedmain-day.jpg',n:'assets/interiors-townhouse/int-bedmain-night.jpg',t:'Спальня. Білі стіни, м\'яке світло, нічого зайвого.'},
+    {d:'assets/interiors-townhouse/int-bed2-day.jpg',n:'assets/interiors-townhouse/int-bed2-night.jpg',t:'Друга кімната. Дитяча, кабінет, гостьова. Ти сам вирішиш, ким вона стане.'},
+    {d:'assets/interiors-townhouse/int-stairs1-day.jpg',n:'assets/interiors-townhouse/int-stairs1-night.jpg',t:'Коридор і сходи. Дорога нагору, де день стихає.'}
+  ];
+  SLIDES.forEach(function(s){var a=new Image();a.src=s.d;var b=new Image();b.src=s.n;});
+  var lb=document.getElementById('lb'),cur=0;
+  function show(i){cur=(i+SLIDES.length)%SLIDES.length;var s=SLIDES[cur];
+    document.getElementById('lbD').src=s.d;document.getElementById('lbNi').src=s.n;
+    document.getElementById('lbT').textContent=s.t;document.getElementById('lbN').textContent=(cur+1);
+    lb.classList.remove('nite');document.getElementById('lbM').textContent='Вечір';}
+  document.getElementById('openLb').addEventListener('click',function(){lb.classList.add('on');show(0);});
+  document.getElementById('lbX').addEventListener('click',function(){lb.classList.remove('on');});
+  document.getElementById('lbP').addEventListener('click',function(){show(cur-1);});
+  document.getElementById('lbNx').addEventListener('click',function(){show(cur+1);});
+  document.getElementById('lbM').addEventListener('click',function(){
+    var n=lb.classList.toggle('nite');document.getElementById('lbM').textContent=n?'День':'Вечір';});
+  document.addEventListener('keydown',function(e){
+    if(!lb.classList.contains('on'))return;
+    if(e.key==='Escape')lb.classList.remove('on');
+    if(e.key==='ArrowRight')show(cur+1);
+    if(e.key==='ArrowLeft')show(cur-1);});
+})();
+</script>
+</body>
+</html>
