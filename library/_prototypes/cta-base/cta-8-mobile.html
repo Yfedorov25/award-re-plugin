@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CTA 8 · Число-вхід · mobile</title>
+<style>
+/* phone-first 390x844. backgrounds: #0b0a09 backdrop, #14110e canvas, curtain #1b1611. no media band, no light surface. */
+:root{
+  --bgc:#14110e;
+  --cream:#efe8da;
+  --mut:rgba(239,232,218,.7);
+  --line:rgba(239,232,218,.32);
+  --warm:#d3a077;
+  --deep:#1b1611;
+  --ease:cubic-bezier(.25,.74,.22,.99); /* house ease, one per move */
+  --roll:cubic-bezier(.16,.84,.28,.99); /* odometer settle */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0b0a09;font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;color:var(--cream);-webkit-font-smoothing:antialiased}
+.phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--bgc);padding:18px 20px 32px}
+.caps{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:500}
+.serif{font-family:Georgia,'Times New Roman',serif;font-weight:400}
+
+.top{display:flex;justify-content:space-between;align-items:center;min-height:44px;color:var(--mut)}
+
+/* the odometer: one value, one reel per digit, plays once */
+.num{font-family:'Times New Roman',Georgia,serif;font-variant-numeric:lining-nums tabular-nums;
+  font-size:clamp(64px,19vw,88px);line-height:1;letter-spacing:-.02em;display:flex;margin-top:22px}
+.reel{display:block;overflow:clip;height:1em;width:.5em}
+.rstrip{display:block;transition:transform 1.2s var(--roll);transition-delay:var(--rd,0s)}
+.rstrip b{display:block;height:1em;font-weight:400;text-align:center}
+.num .st{display:block}
+.num .gap{width:.22em}
+.numlabel{margin-top:10px;color:var(--mut)}
+
+.factrow{display:flex;gap:14px;align-items:baseline;margin-top:20px;border-top:1px solid var(--line);padding-top:14px}
+.factrow .k{color:var(--mut);flex:none}
+.factrow .v{font-family:Georgia,serif;font-size:19px}
+
+/* row photo: contained full-width, never cropped */
+.proofimg{margin-top:18px}
+.proofimg img{display:block;width:100%;height:auto;border-radius:10px}
+.proofimg figcaption{margin-top:8px;color:var(--mut)}
+
+.fade{opacity:0;transition:opacity .6s var(--ease) .4s}
+.is-in .fade{opacity:1}
+
+/* call verb first, above the form */
+.verbs{margin-top:20px;border-bottom:1px solid var(--line)}
+.verb{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:60px;
+  border:0;border-top:1px solid var(--line);background:none;color:var(--cream);cursor:pointer;text-align:left;text-decoration:none;padding:4px 0}
+.vw{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:22px}
+.vw small{display:block;font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;font-style:normal;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin-top:4px}
+.ring{width:48px;height:48px;flex:none;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center}
+.ring svg{width:18px;height:18px;stroke:var(--cream);fill:none;stroke-width:1.5}
+
+/* form atom */
+.stage{position:relative;margin-top:14px}
+.chipslot{display:flex;align-items:center;height:48px}
+.chip-line{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;width:100%}
+.chip-t{font-size:14px;line-height:1.3;flex:1}
+.chip-x{width:44px;height:44px;flex:none;background:none;border:0;cursor:pointer;color:var(--mut);display:grid;place-items:center}
+.chip-x svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5}
+.chip-empty a{color:var(--cream);font-size:14px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--warm);display:inline-flex;align-items:center;min-height:44px}
+
+.fld{position:relative;padding-top:18px}
+.fld input{width:100%;background:transparent;border:0;outline:0;color:var(--cream);font-size:17px;font-family:inherit;line-height:1.3;padding:10px 0 12px;border-radius:0}
+.fld input::placeholder{color:transparent}
+.fld:focus-within input::placeholder{color:rgba(239,232,218,.4)}
+.fld label{position:absolute;left:0;bottom:15px;font-size:16px;color:var(--mut);pointer-events:none;transform-origin:left bottom;transition:transform .35s var(--ease)}
+.fld:focus-within label,.fld.has-val label{transform:translateY(-28px) scale(.7)}
+.uline{position:absolute;left:0;bottom:0;width:100%;height:2px;display:block}
+.uline line{fill:none;stroke-width:2}
+.l-base{stroke:var(--line);stroke-dasharray:100;stroke-dashoffset:100}
+.is-in .l-base{stroke-dashoffset:0;transition:stroke-dashoffset .7s var(--ease);transition-delay:var(--d,0s)}
+.l-warm{stroke:var(--warm);stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .45s var(--ease)}
+.fld:focus-within .l-warm{stroke-dashoffset:0}
+
+.hp{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+
+.consent{display:flex;align-items:flex-start;gap:14px;min-height:44px;padding:14px 0 2px;cursor:pointer}
+.consent input{position:absolute;opacity:0;width:1px;height:1px}
+.box{width:20px;height:20px;flex:none;margin-top:1px;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center}
+.box svg{width:12px;height:12px;fill:none;stroke:var(--warm);stroke-width:2.2;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .35s var(--ease)}
+.consent input:checked~.box svg{stroke-dashoffset:0}
+.consent input:focus-visible~.box{border-color:var(--warm)}
+.consent .txt{font-size:12px;line-height:1.5;color:rgba(239,232,218,.78)}
+
+.msgzone{min-height:46px;padding:6px 0 2px}
+.msg{font-size:14px;line-height:1.4;color:#e8b483}
+.msg a{color:inherit}
+
+.btn{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;
+  border:1px solid var(--cream);border-radius:28px;background:transparent;color:var(--cream);cursor:pointer;font-family:inherit}
+.btn[disabled]{cursor:default}
+.blwin{overflow:clip;height:20px}
+.blstrip{display:grid;grid-template-rows:20px 20px;transition:transform .5s var(--ease)}
+.blstrip span{font-size:13px;letter-spacing:.14em;text-transform:uppercase;line-height:20px}
+.is-busy .blstrip{transform:translateY(-20px)}
+.btn-run{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);pointer-events:none;opacity:0;transition:opacity .3s var(--ease)}
+.btn-run rect{fill:none;stroke:var(--warm);stroke-width:2;stroke-dasharray:20 80;stroke-dashoffset:0}
+.is-busy .btn-run{opacity:1}
+.is-busy .btn-run rect{animation:run 1.2s linear infinite}
+@keyframes run{to{stroke-dashoffset:-100}}
+
+
+.curtain{position:absolute;inset:-2px;background:var(--deep);border:1px solid rgba(239,232,218,.14);border-radius:14px;
+  padding:32px 24px;display:flex;flex-direction:column;justify-content:center;gap:14px;
+  clip-path:inset(100% 0 0 0);transition:clip-path .85s cubic-bezier(.33,0,.16,1);pointer-events:none}
+.is-done .curtain{clip-path:inset(0 0 0 0);pointer-events:auto}
+.ok{width:56px;height:56px}
+.ok path,.ok circle{fill:none;stroke:var(--warm);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.succ-h{font-size:26px;line-height:1.15}
+.succ-p{font-size:15px;line-height:1.55;color:var(--mut);
+  opacity:0;transform:translateY(12px);transition:opacity .6s var(--ease) .95s,transform .6s var(--ease) .95s}
+.is-done .succ-p{opacity:1;transform:none}
+.succ-p a{color:inherit}
+
+
+@media (prefers-reduced-motion: reduce){
+  .rstrip{transition:none!important;transform:none!important}
+  .fade,.is-in .fade{opacity:1;transition:none}
+  .l-base,.is-in .l-base{stroke-dashoffset:0;transition:none}
+  .curtain{transition:none}
+  .succ-p,.is-done .succ-p{opacity:1;transform:none;transition:none}
+  .blstrip{transition:none}
+  .is-busy .btn-run rect{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!--
+  PASSPORT · cta-8-mobile "Число-вхід" · towns · phone twin of cta-8.
+  Shape: the odometer $67 000 at the top on the dark (clamp 64..88px), label + honest fact,
+  the row photo contained full-width under it (never cropped), then call verb FIRST + the form.
+  Signature morph: the odometer, plays once. Nothing else moves after the cascade.
+  Without JS the number reads correctly: the target digit is the first row of every strip.
+  GA4 contract: cta_view, form_start, form_error, generate_lead, tel_click.
+-->
+<div class="phone">
+<section id="cta" data-cta-variant="cta-8-mobile" data-cta-mode="towns" data-screen-label="CTA 8 mobile Число-вхід">
+  <header class="top">
+    <p class="caps">Таунхауси · вул. Замкова</p>
+    <p class="caps">82 м² · 1,5 сотки</p>
+  </header>
+
+  <p class="num" aria-label="67 тисяч доларів">
+    <span class="st">$</span><span class="reel"><span class="rstrip" data-extra="9"><b>6</b><b>7</b><b>8</b><b>9</b><b>0</b><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b></span></span><span class="reel"><span class="rstrip" data-extra="7"><b>7</b><b>8</b><b>9</b><b>0</b><b>1</b><b>2</b><b>3</b><b>4</b></span></span><span class="gap"></span><span class="reel"><span class="rstrip" data-extra="8"><b>0</b><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b></span></span><span class="reel"><span class="rstrip" data-extra="6"><b>0</b><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b></span></span><span class="reel"><span class="rstrip" data-extra="10"><b>0</b><b>1</b><b>2</b><b>3</b><b>4</b><b>5</b><b>6</b><b>7</b><b>8</b><b>9</b><b>0</b></span></span>
+  </p>
+  <p class="caps numlabel">від, за свій дім з двором</p>
+
+  <div class="factrow fade">
+    <span class="caps k">Наявність</span>
+    <span class="v serif">Всі шість зараз вільні.</span>
+  </div>
+
+  <div class="verbs">
+    <a class="verb" href="tel:+380935626483" data-conv="tel">
+      <span class="vw">Подзвонити зараз<i></i><small>+380 93 562 64 83</small></span>
+      <span class="ring" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2 9h13M10 4l5 5-5 5"/></svg></span>
+    </a>
+  </div>
+
+  <div class="stage">
+    <form id="form" novalidate autocomplete="on" style="display:flex;flex-direction:column">
+      <p class="caps" style="color:var(--mut);padding:2px 0 6px">Або залиште номер, передзвонимо ми</p>
+      <div class="chipslot" id="chipslot"></div>
+
+      <div class="fld" style="--d:.2s">
+        <input id="f-name" name="name" type="text" autocomplete="name" aria-required="true">
+        <label for="f-name">Імʼя</label>
+        <svg class="uline" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+          <line class="l-base" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+          <line class="l-warm" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+        </svg>
+      </div>
+      <div class="fld" style="--d:.36s">
+        <input id="f-phone" name="phone" type="tel" inputmode="tel" placeholder="+380 __ ___ __ __" autocomplete="tel" aria-required="true">
+        <label for="f-phone">Телефон</label>
+        <svg class="uline" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+          <line class="l-base" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+          <line class="l-warm" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+        </svg>
+      </div>
+
+      <p class="hp" aria-hidden="true"><label>Компанія<input type="text" name="company" tabindex="-1" autocomplete="off"></label></p>
+      <input type="hidden" name="unit" id="f-unit" value="">
+
+      <label class="consent">
+        <input type="checkbox" id="f-consent">
+        <span class="box" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2 7.5l3.4 3.4L12 3.6"/></svg></span>
+        <span class="txt">Погоджуюсь на обробку даних для звʼязку. Без розсилок.</span>
+      </label>
+
+      <div class="msgzone"><p class="msg" id="msg" aria-live="polite" role="status"></p></div>
+
+      <button class="btn" id="btn" type="submit" data-conv="lead">
+        <span class="blwin"><span class="blstrip">
+          <span id="btn-label">Передзвоніть мені</span>
+          <span>Надсилаємо…</span>
+        </span></span>
+        <svg class="btn-run" viewBox="0 0 390 56" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="1" y="1" width="388" height="54" rx="27" pathLength="100"/>
+        </svg>
+      </button>
+
+    </form>
+
+    <div class="curtain" id="curtain" role="status" aria-live="polite">
+      <svg class="ok" viewBox="0 0 64 64" aria-hidden="true">
+        <circle class="ok-path" cx="32" cy="32" r="29"/>
+        <path class="ok-path" d="M20 33.5l8.4 8.4L44.5 25"/>
+      </svg>
+      <h2 class="serif succ-h">Заявка у нас.</h2>
+      <p class="succ-p">Передзвонимо з номера <a href="tel:+380935626483" data-conv="tel">+380 93 562 64 83</a>, збережіть його.</p>
+    </div>
+  </div>
+
+  <figure class="proofimg fade">
+    <img src="assets/towns/selector-row-6-day.png" alt="Ряд із шести таунхаусів, вул. Замкова" loading="eager" decoding="sync">
+    <figcaption class="caps">Ряд із шести · вул. Замкова</figcaption>
+  </figure>
+</section>
+</div>
+
+<script>
+const sec = document.getElementById("cta");
+const form = document.getElementById("form");
+const nameI = document.getElementById("f-name");
+const phoneI = document.getElementById("f-phone");
+const consentI = document.getElementById("f-consent");
+const unitI = document.getElementById("f-unit");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("btn");
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- odometer: pre-offset before first paint, roll to zero once on arrival ---------- */
+const strips = document.querySelectorAll(".rstrip");
+if (!RM) strips.forEach(s => { s.style.transform = "translateY(calc(-1em * " + s.dataset.extra + "))"; });
+
+/* ---------- chip contract: empty state in this variant, leads to the row picker ---------- */
+function chipTown(n){
+  const p = document.createElement("p");
+  p.className = "chip-line";
+  p.innerHTML =
+    '<span class="chip-t">Таунхаус №' + n + ' у ряду · з пікера</span>' +
+    '<button type="button" class="chip-x" aria-label="Прибрати вибір"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button>';
+  p.querySelector(".chip-x").addEventListener("click", ()=>{ unitI.value=""; renderChip(null); });
+  return p;
+}
+function chipEmpty(){
+  const p = document.createElement("p");
+  p.className = "chip-empty";
+  p.innerHTML = '<a href="#row-picker" data-conv="pick">Обрати місце в ряду</a>';
+  return p;
+}
+function renderChip(n){
+  document.getElementById("chipslot").replaceChildren(n ? chipTown(n) : chipEmpty());
+  document.getElementById("btn-label").textContent = n ? "Забронювати №" + n : "Передзвоніть мені";
+}
+renderChip(null); /* empty state demo in this variant */
+
+/* ---------- phone mask: synchronous, paste safe ---------- */
+function maskPhone(v){
+  let d = v.replace(/\D/g, "");
+  if (d.startsWith("380")) d = d.slice(3);
+  else if (d.startsWith("80")) d = d.slice(2);
+  else if (d.startsWith("0")) d = d.slice(1);
+  d = d.slice(0, 9);
+  let out = "+380";
+  for (const n of [2,3,2,2]) { if (!d.length) break; out += " " + d.slice(0, n); d = d.slice(n); }
+  return out;
+}
+phoneI.addEventListener("input", ()=>{ phoneI.value = maskPhone(phoneI.value); syncVal(phoneI); });
+phoneI.addEventListener("focus", ()=>{ if (!phoneI.value) { phoneI.value = "+380 "; syncVal(phoneI); } });
+phoneI.addEventListener("blur", ()=>{ if (phoneI.value.replace(/\D/g,"") === "380") { phoneI.value = ""; syncVal(phoneI); } });
+function syncVal(i){ i.closest(".fld").classList.toggle("has-val", !!i.value); }
+[nameI, phoneI].forEach(i => { i.addEventListener("input", ()=>syncVal(i)); i.addEventListener("blur", ()=>syncVal(i)); });
+
+/* GA4: form_start on first field focus {variant:"cta-8-mobile"} */
+let started = false;
+[nameI, phoneI].forEach(i => i.addEventListener("focus", ()=>{ if (!started) { started = true; } }));
+/* GA4: tel_click on every [data-conv="tel"] {variant:"cta-8-mobile"} */
+
+/* ---------- honest submit through a Promise ---------- */
+function sendDemo(){
+  /* demo: append ?fail=1 to the file URL to test the honest error path */
+  const fail = new URLSearchParams(location.search).get("fail") === "1";
+  return new Promise((res, rej)=>setTimeout(()=>fail ? rej(new Error("network")) : res({ok:true}), 1500));
+}
+function setBusy(on){ btn.classList.toggle("is-busy", on); btn.disabled = on; }
+const ERR = {
+  fill: "Вкажіть імʼя і телефон.",
+  phone: "Перевірте номер: +380 і ще 9 цифр.",
+  consent: "Потрібна згода на обробку даних.",
+  network: 'Не надіслалось. Спробуйте ще раз або подзвоніть: <a href="tel:+380935626483" data-conv="tel">+380 93 562 64 83</a>.'
+};
+function showErr(kind){
+  if (kind === "network") msg.innerHTML = ERR.network; else msg.textContent = ERR[kind];
+  /* GA4: form_error {variant:"cta-8-mobile", kind} */
+}
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  if (form.company.value) return; /* honeypot: drop silently */
+  const digits = phoneI.value.replace(/\D/g, "");
+  if (!nameI.value.trim() || digits.length <= 3) return showErr("fill");
+  if (digits.length !== 12) return showErr("phone");
+  if (!consentI.checked) return showErr("consent");
+  msg.textContent = "";
+  setBusy(true);
+  sendDemo().then(()=>{ /* GA4: generate_lead {variant:"cta-8-mobile", unit:unitI.value} */ ritual(); })
+    .catch(()=>{ setBusy(false); showErr("network"); });
+});
+
+function ritual(){
+  sec.classList.add("is-done");
+  const finish = ()=>{
+    document.querySelectorAll(".ok-path").forEach((p, i) => {
+      const L = p.getTotalLength();
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
+      p.getBoundingClientRect();
+      if (RM) { p.style.strokeDashoffset = "0"; return; }
+      p.style.transition = "stroke-dashoffset .7s cubic-bezier(.33,0,.16,1) " + (i * .3) + "s";
+      p.style.strokeDashoffset = "0";
+    });
+    form.setAttribute("inert", "");
+  };
+  RM ? finish() : setTimeout(finish, 700);
+}
+
+/* entrance: one cascade on arrival (odometer + lines + fades), then stillness */
+/* GA4: cta_view {variant:"cta-8-mobile"} */
+function arrive(){ setTimeout(()=>{
+  sec.classList.add("is-in");
+  if (!RM) strips.forEach((s, i) => { s.style.setProperty("--rd", (i * .1) + "s"); s.style.transform = "translateY(0)"; });
+}, 60); }
+document.readyState === "complete" ? arrive() : addEventListener("load", arrive);
+</script>
+</body>
+</html>
