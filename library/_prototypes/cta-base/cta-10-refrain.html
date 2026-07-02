@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1440, initial-scale=1">
+<title>CTA 10 · Рефрен · Smarts</title>
+<style>
+/* one dark screen: the word slot above the plain title, form right, ghost plan plate at 8%.
+   backgrounds used: #14110e body only. no light surface anywhere. */
+:root{
+  --bgc:#14110e;
+  --cream:#efe8da;
+  --mut:rgba(239,232,218,.7);
+  --line:rgba(239,232,218,.32);
+  --warm:#d3a077;
+  --deep:#1b1611;
+  --ease:cubic-bezier(.25,.74,.22,.99); /* house ease, one per move */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{min-width:1440px;font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bgc);color:var(--cream);-webkit-font-smoothing:antialiased;overflow:clip}
+.caps{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:500}
+.serif{font-family:Georgia,'Times New Roman',serif;font-weight:400}
+
+.cta{position:relative;height:100vh;min-height:720px;overflow:clip}
+/* ghost plate: a drawing, static, dark-tinted by invert (static element, not on the motion path) */
+.ghost{position:absolute;right:-120px;top:80px;width:920px;opacity:.08;pointer-events:none;user-select:none;filter:invert(.92)}
+.ghost img{width:100%;height:auto;display:block}
+
+.wrap{position:relative;max-width:1440px;margin:0 auto;padding:48px 72px 56px;height:100%;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center;min-height:44px;color:var(--mut)}
+
+/* word slot: ONE node, translateY strip in a clip window, plays once, rests on the pick verb */
+.slot{margin-top:40px;overflow:clip;height:1.28em;font-size:76px;line-height:1.28;letter-spacing:-.015em}
+.slotstrip{display:block;transition:transform .45s var(--ease)}
+.slotstrip span{display:block;height:1.28em}
+.slotstrip .pick{color:var(--warm)}
+
+.cols{display:grid;grid-template-columns:1fr 440px;gap:120px;align-items:start;margin-top:44px;flex:1}
+
+.rise{overflow:clip}
+.rise>*{transform:translateY(112%);transition:transform .8s var(--ease)}
+.is-in .rise>*{transform:translateY(0)}
+.fade{opacity:0;transition:opacity .6s var(--ease) .4s}
+.is-in .fade{opacity:1}
+
+.title{font-size:42px;line-height:1.1;letter-spacing:-.01em;max-width:12em}
+.sub{font-size:18px;line-height:1.55;color:var(--mut);max-width:26em;margin-top:20px}
+.proof{margin-top:28px;padding-top:16px;border-top:1px solid var(--line);color:var(--mut);max-width:24em}
+
+.verb{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;max-width:460px;min-height:60px;margin-top:36px;
+  border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:none;color:var(--cream);cursor:pointer;text-align:left;padding:4px 0}
+.vw{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:25px}
+.vw i{display:block;height:1px;background:var(--warm);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.verb:hover .vw i{transform:scaleX(1)}
+.ring{width:48px;height:48px;flex:none;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center}
+.ring svg{width:18px;height:18px;stroke:var(--cream);fill:none;stroke-width:1.5}
+
+/* ============ form atom ============ */
+.stage{position:relative}
+.atom{display:flex;flex-direction:column}
+.chipslot{display:flex;align-items:center;height:76px}
+.chip{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:6px 4px 6px 10px}
+.chip img{width:44px;height:44px;object-fit:contain;background:#f2ede3;border-radius:6px;opacity:0;transition:opacity .3s var(--ease)}
+.chip img.is-ready{opacity:1}
+.chip-t{font-size:14px;line-height:1.3}
+.chip-t small{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:2px}
+.chip-x{width:44px;height:44px;flex:none;background:none;border:0;cursor:pointer;color:var(--mut);display:grid;place-items:center}
+.chip-x:hover{color:var(--warm)}
+.chip-x svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.5}
+.chip-empty a{color:var(--cream);font-size:14px;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--warm);display:inline-flex;align-items:center;min-height:44px}
+.chip-empty a:hover{color:var(--warm)}
+
+.fld{position:relative;padding-top:18px}
+.fld input{width:100%;background:transparent;border:0;outline:0;color:var(--cream);font-size:17px;font-family:inherit;line-height:1.3;padding:9px 0 11px;border-radius:0}
+.fld input::placeholder{color:transparent}
+.fld:focus-within input::placeholder{color:rgba(239,232,218,.4)}
+.fld label{position:absolute;left:0;bottom:14px;font-size:16px;color:var(--mut);pointer-events:none;transform-origin:left bottom;transition:transform .35s var(--ease)}
+.fld:focus-within label,.fld.has-val label{transform:translateY(-27px) scale(.7)}
+.uline{position:absolute;left:0;bottom:0;width:100%;height:2px;display:block}
+.uline line{fill:none;stroke-width:2}
+.l-base{stroke:var(--line);stroke-dasharray:100;stroke-dashoffset:100}
+.is-in .l-base{stroke-dashoffset:0;transition:stroke-dashoffset .7s var(--ease);transition-delay:var(--d,0s)}
+.l-warm{stroke:var(--warm);stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .45s var(--ease)}
+.fld:focus-within .l-warm{stroke-dashoffset:0}
+
+.hp{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+
+.consent{display:flex;align-items:flex-start;gap:14px;min-height:44px;padding:12px 0 2px;cursor:pointer}
+.consent input{position:absolute;opacity:0;width:1px;height:1px}
+.box{width:22px;height:22px;flex:none;margin-top:1px;border:1px solid var(--line);border-radius:5px;display:grid;place-items:center}
+.box svg{width:12px;height:12px;fill:none;stroke:var(--warm);stroke-width:2.2;stroke-dasharray:20;stroke-dashoffset:20;transition:stroke-dashoffset .35s var(--ease)}
+.consent input:checked~.box svg{stroke-dashoffset:0}
+.consent input:focus-visible~.box{border-color:var(--warm)}
+.consent .txt{font-size:13px;line-height:1.5;color:var(--mut)}
+
+.msgzone{min-height:46px;padding:6px 0 2px}
+.msg{font-size:14px;line-height:1.4;color:#e8b483}
+
+.btn{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;
+  border:1px solid var(--cream);border-radius:28px;background:transparent;color:var(--cream);cursor:pointer;font-family:inherit}
+.btn:hover{border-color:var(--warm);color:var(--warm)}
+.btn[disabled]{cursor:default}
+.blwin{overflow:clip;height:20px}
+.blstrip{display:grid;grid-template-rows:20px 20px;transition:transform .5s var(--ease)}
+.blstrip span{font-size:13px;letter-spacing:.14em;text-transform:uppercase;line-height:20px}
+.is-busy .blstrip{transform:translateY(-20px)}
+.btn-run{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);pointer-events:none;opacity:0;transition:opacity .3s var(--ease)}
+.btn-run rect{fill:none;stroke:var(--warm);stroke-width:2;stroke-dasharray:20 80;stroke-dashoffset:0}
+.is-busy .btn-run{opacity:1}
+.is-busy .btn-run rect{animation:run 1.2s linear infinite}
+@keyframes run{to{stroke-dashoffset:-100}}
+
+.under{margin-top:10px;min-height:44px;display:flex;align-items:center}
+.under a{color:var(--mut);font-size:14px;text-decoration:underline;text-underline-offset:4px}
+.under a:hover{color:var(--warm)}
+
+.curtain{position:absolute;inset:-2px;background:var(--deep);border:1px solid rgba(239,232,218,.14);border-radius:14px;
+  padding:40px 36px;display:flex;flex-direction:column;justify-content:center;gap:14px;
+  clip-path:inset(100% 0 0 0);transition:clip-path .85s cubic-bezier(.33,0,.16,1);pointer-events:none}
+.is-done .curtain{clip-path:inset(0 0 0 0);pointer-events:auto}
+.ok{width:60px;height:60px}
+.ok path,.ok circle{fill:none;stroke:var(--warm);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.succ-h{font-size:28px;line-height:1.15}
+.succ-p{font-size:15px;line-height:1.55;color:var(--mut);max-width:26em;
+  opacity:0;transform:translateY(12px);transition:opacity .6s var(--ease) .95s,transform .6s var(--ease) .95s}
+.is-done .succ-p{opacity:1;transform:none}
+
+.demo{position:absolute;left:72px;bottom:14px;display:flex;align-items:center;gap:10px;min-height:44px;cursor:pointer;color:rgba(239,232,218,.5)}
+.demo input{width:16px;height:16px;accent-color:#8a6a4d}
+.demo span{font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+
+@media (prefers-reduced-motion: reduce){
+  .slotstrip{transition:none!important}
+  .rise>*,.is-in .rise>*{transform:none;transition:none}
+  .fade,.is-in .fade{opacity:1;transition:none}
+  .l-base,.is-in .l-base{stroke-dashoffset:0;transition:none}
+  .curtain{transition:none}
+  .succ-p,.is-done .succ-p{opacity:1;transform:none;transition:none}
+  .blstrip{transition:none}
+  .is-busy .btn-run rect{animation:none}
+}
+</style>
+</head>
+<body>
+
+<!--
+  PASSPORT · cta-10 "Рефрен" · smarts · one screen, dark, residential voice only (no mode switch).
+  Signature morph: the word slot (one node, translateY strip in a clip window) plays ONCE:
+  "Смарт 24" -> "Смарт 27" -> "Оберіть свою." and rests. Lines joined from the dataset labels, strictly factual.
+  Cascade: title rise .8s + lines .7s + fades .6s done by ~1.1s; slot steps at .5s/1.0s (.45s each), rests by ~1.45s.
+  GA4 contract: cta_view, form_start, form_error, generate_lead. No tel on smarts.
+-->
+<section class="cta" id="cta" data-cta-variant="cta-10" data-cta-mode="residential" data-screen-label="CTA 10 Рефрен">
+  <div class="ghost" aria-hidden="true"><img src="assets/plans-smarts/floor-std-clean.svg" alt="" loading="eager"></div>
+
+  <div class="wrap">
+    <header class="top">
+      <p class="caps">ЖК Агрономічне</p>
+      <p class="caps"><span data-j="total"></span> квартир · 3 поверхи</p>
+    </header>
+
+    <h1 class="serif slot" aria-label="Оберіть свою.">
+      <span class="slotstrip" id="slotstrip">
+        <span id="slot-24"></span>
+        <span id="slot-27"></span>
+        <span class="pick">Оберіть свою.</span>
+      </span>
+    </h1>
+
+    <div class="cols">
+      <div class="left">
+        <div class="rise"><h2 class="serif title">Лишіть номер, ми передзвонимо.</h2></div>
+        <p class="sub fade">Підкажемо, що вам підходить: <span data-j="n24"></span> чи <span data-j="n27"></span> метрів. Обрану квартиру забронюємо за вами.</p>
+        <p class="caps proof fade"><span data-j="c24"></span> x Смарт <span data-j="n24"></span> · <span data-j="c27"></span> x Смарт <span data-j="n27"></span></p>
+        <button type="button" class="verb fade" id="verb-leave">
+          <span class="vw">Залишити номер<i></i></span>
+          <span class="ring" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="M2 9h13M10 4l5 5-5 5"/></svg></span>
+        </button>
+      </div>
+
+      <div class="stage">
+        <form class="atom" id="form" novalidate autocomplete="on">
+          <div class="chipslot fade" id="chipslot"></div>
+
+          <div class="fld" style="--d:.2s">
+            <input id="f-name" name="name" type="text" autocomplete="name" aria-required="true">
+            <label for="f-name">Імʼя</label>
+            <svg class="uline" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+              <line class="l-base" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+              <line class="l-warm" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+            </svg>
+          </div>
+          <div class="fld" style="--d:.36s">
+            <input id="f-phone" name="phone" type="tel" inputmode="tel" placeholder="+380 __ ___ __ __" autocomplete="tel" aria-required="true">
+            <label for="f-phone">Телефон</label>
+            <svg class="uline" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+              <line class="l-base" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+              <line class="l-warm" x1="0" y1="1" x2="100" y2="1" pathLength="100"/>
+            </svg>
+          </div>
+
+          <p class="hp" aria-hidden="true"><label>Компанія<input type="text" name="company" tabindex="-1" autocomplete="off"></label></p>
+          <input type="hidden" name="unit" id="f-unit" value="A2-12">
+
+          <label class="consent fade">
+            <input type="checkbox" id="f-consent">
+            <span class="box" aria-hidden="true"><svg viewBox="0 0 14 14"><path d="M2 7.5l3.4 3.4L12 3.6"/></svg></span>
+            <span class="txt">Погоджуюсь на обробку даних для звʼязку щодо квартири. Без розсилок.</span>
+          </label>
+
+          <div class="msgzone"><p class="msg" id="msg" aria-live="polite" role="status"></p></div>
+
+          <button class="btn fade" id="btn" type="submit" data-conv="lead">
+            <span class="blwin"><span class="blstrip">
+              <span id="btn-label">Передзвоніть мені</span>
+              <span>Надсилаємо…</span>
+            </span></span>
+            <svg class="btn-run" viewBox="0 0 440 56" preserveAspectRatio="none" aria-hidden="true">
+              <rect x="1" y="1" width="438" height="54" rx="27" pathLength="100"/>
+            </svg>
+          </button>
+
+          <p class="under fade"><a href="#floorplan-picker" data-conv="pick">Можна і без вибору. Підберемо разом по телефону.</a></p>
+        </form>
+
+        <div class="curtain" id="curtain" role="status" aria-live="polite">
+          <svg class="ok" viewBox="0 0 64 64" aria-hidden="true">
+            <circle class="ok-path" cx="32" cy="32" r="29"/>
+            <path class="ok-path" d="M20 33.5l8.4 8.4L44.5 25"/>
+          </svg>
+          <h2 class="serif succ-h">Заявка у нас.</h2>
+          <p class="succ-p">Передзвонимо у робочий час і забронюємо квартиру, якщо обрали.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <label class="demo"><input type="checkbox" id="demo-fail"><span>демо: провал відправки</span></label>
+</section>
+
+<script>
+/* Dataset: single source of smarts numbers, runtime join, nothing typed in copy */
+const SMARTS = {
+  types: {
+    "smart-24": { label: "Смарт 24 м²", totalM2: 23.76, plan: "assets/plans-smarts/type-24-clean.webp" },
+    "smart-27": { label: "Смарт 27 м²", totalM2: 27.06, plan: "assets/plans-smarts/type-27-clean.webp" }
+  },
+  units: [
+    ["A2-01","smart-27"],["A2-02","smart-27"],["A2-03","smart-27"],["A2-04","smart-27"],["A2-05","smart-24"],["A2-06","smart-24"],
+    ["A2-07","smart-27"],["A2-08","smart-27"],["A2-09","smart-24"],["A2-10","smart-24"],["A2-11","smart-27"],["A2-12","smart-27"],
+    ["A2-13","smart-24"],["A2-14","smart-24"],["A2-15","smart-27"],["A2-16","smart-27"],["A2-17","smart-27"],["A2-18","smart-27"],
+    ["A3-01","smart-27"],["A3-02","smart-27"],["A3-03","smart-27"],["A3-04","smart-27"],["A3-05","smart-24"],["A3-06","smart-24"],
+    ["A3-07","smart-27"],["A3-08","smart-27"],["A3-09","smart-24"],["A3-10","smart-24"],["A3-11","smart-27"],["A3-12","smart-27"],
+    ["A3-13","smart-24"],["A3-14","smart-24"],["A3-15","smart-27"],["A3-16","smart-27"],["A3-17","smart-27"],["A3-18","smart-27"],
+    ["Am-01","smart-27"],["Am-02","smart-27"],["Am-03","smart-27"],["Am-04","smart-27"],["Am-05","smart-24"],["Am-06","smart-24"],
+    ["Am-07","smart-27"],["Am-08","smart-27"],["Am-09","smart-24"],["Am-10","smart-24"],["Am-11","smart-27"],["Am-12","smart-27"],
+    ["Am-13","smart-24"],["Am-14","smart-24"],["Am-15","smart-27"],["Am-16","smart-27"],["Am-17","smart-27"],["Am-18","smart-27"]
+  ],
+  demoUnit: "A2-12"
+};
+const fmtM2 = v => String(v).replace(".", ",");
+const J = {
+  n24: Math.round(SMARTS.types["smart-24"].totalM2),
+  n27: Math.round(SMARTS.types["smart-27"].totalM2),
+  total: SMARTS.units.length,
+  c24: SMARTS.units.filter(u => u[1] === "smart-24").length,
+  c27: SMARTS.units.filter(u => u[1] === "smart-27").length
+};
+document.querySelectorAll("[data-j]").forEach(el => { el.textContent = J[el.dataset.j]; });
+/* word slot lines from the dataset labels: strictly factual */
+document.getElementById("slot-24").textContent = SMARTS.types["smart-24"].label.replace(" м²", "");
+document.getElementById("slot-27").textContent = SMARTS.types["smart-27"].label.replace(" м²", "");
+
+const sec = document.getElementById("cta");
+const form = document.getElementById("form");
+const nameI = document.getElementById("f-name");
+const phoneI = document.getElementById("f-phone");
+const consentI = document.getElementById("f-consent");
+const unitI = document.getElementById("f-unit");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("btn");
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- word slot: plays once on arrival, rests on the last line ---------- */
+const strip = document.getElementById("slotstrip");
+function playSlot(){
+  if (RM) { strip.style.transform = "translateY(-2.56em)"; return; }
+  setTimeout(()=>{ strip.style.transform = "translateY(-1.28em)"; }, 500);
+  setTimeout(()=>{ strip.style.transform = "translateY(-2.56em)"; }, 1000);
+}
+
+/* ---------- chip contract: pre-set demo, X removes, empty state links to the picker ---------- */
+function chipSmarts(code){
+  const t = SMARTS.types[Object.fromEntries(SMARTS.units)[code]];
+  const div = document.createElement("div");
+  div.className = "chip";
+  div.innerHTML =
+    '<img alt="" width="44" height="44" loading="eager" src="' + t.plan + '">' +
+    '<span class="chip-t">Квартира ' + code + ' · ' + fmtM2(t.totalM2) + ' м²<small>обрано в пікері</small></span>' +
+    '<button type="button" class="chip-x" aria-label="Прибрати вибір"><svg viewBox="0 0 14 14"><path d="M2 2l10 10M12 2L2 12"/></svg></button>';
+  const img = div.querySelector("img");
+  img.decode().then(()=>img.classList.add("is-ready")).catch(()=>img.classList.add("is-ready"));
+  div.querySelector(".chip-x").addEventListener("click", ()=>{ unitI.value=""; renderChip(null); });
+  return div;
+}
+function chipEmpty(){
+  const p = document.createElement("p");
+  p.className = "chip-empty";
+  p.innerHTML = '<a href="#floorplan-picker" data-conv="pick">Обрати квартиру в пікері</a>';
+  return p;
+}
+function renderChip(code){
+  document.getElementById("chipslot").replaceChildren(code ? chipSmarts(code) : chipEmpty());
+}
+renderChip(SMARTS.demoUnit); /* demo: arrival from the picker */
+
+/* ---------- phone mask: synchronous, paste safe ---------- */
+function maskPhone(v){
+  let d = v.replace(/\D/g, "");
+  if (d.startsWith("380")) d = d.slice(3);
+  else if (d.startsWith("80")) d = d.slice(2);
+  else if (d.startsWith("0")) d = d.slice(1);
+  d = d.slice(0, 9);
+  let out = "+380";
+  for (const n of [2,3,2,2]) { if (!d.length) break; out += " " + d.slice(0, n); d = d.slice(n); }
+  return out;
+}
+phoneI.addEventListener("input", ()=>{ phoneI.value = maskPhone(phoneI.value); syncVal(phoneI); });
+phoneI.addEventListener("focus", ()=>{ if (!phoneI.value) { phoneI.value = "+380 "; syncVal(phoneI); } });
+phoneI.addEventListener("blur", ()=>{ if (phoneI.value.replace(/\D/g,"") === "380") { phoneI.value = ""; syncVal(phoneI); } });
+function syncVal(i){ i.closest(".fld").classList.toggle("has-val", !!i.value); }
+[nameI, phoneI].forEach(i => { i.addEventListener("input", ()=>syncVal(i)); i.addEventListener("blur", ()=>syncVal(i)); });
+
+/* GA4: form_start on first field focus {variant:"cta-10"} */
+let started = false;
+[nameI, phoneI].forEach(i => i.addEventListener("focus", ()=>{ if (!started) { started = true; } }));
+document.getElementById("verb-leave").addEventListener("click", ()=>nameI.focus());
+
+/* ---------- honest submit through a Promise ---------- */
+function sendDemo(){
+  const fail = document.getElementById("demo-fail").checked;
+  return new Promise((res, rej)=>setTimeout(()=>fail ? rej(new Error("network")) : res({ok:true}), 1500));
+}
+function setBusy(on){ btn.classList.toggle("is-busy", on); btn.disabled = on; }
+const ERR = {
+  fill: "Вкажіть імʼя і телефон.",
+  phone: "Перевірте номер: +380 і ще 9 цифр.",
+  consent: "Потрібна згода на обробку даних.",
+  network: "Не надіслалось. Спробуйте ще раз." /* smarts: no phone published yet, honest retry only */
+};
+function showErr(kind){ msg.textContent = ERR[kind]; /* GA4: form_error {variant:"cta-10", kind} */ }
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  if (form.company.value) return; /* honeypot: drop silently */
+  const digits = phoneI.value.replace(/\D/g, "");
+  if (!nameI.value.trim() || digits.length <= 3) return showErr("fill");
+  if (digits.length !== 12) return showErr("phone");
+  if (!consentI.checked) return showErr("consent");
+  msg.textContent = "";
+  setBusy(true);
+  sendDemo().then(()=>{ /* GA4: generate_lead {variant:"cta-10", unit:unitI.value} */ ritual(); })
+    .catch(()=>{ setBusy(false); showErr("network"); });
+});
+
+function ritual(){
+  sec.classList.add("is-done");
+  const finish = ()=>{
+    document.querySelectorAll(".ok-path").forEach((p, i) => {
+      const L = p.getTotalLength();
+      p.style.strokeDasharray = L;
+      p.style.strokeDashoffset = L;
+      p.getBoundingClientRect();
+      if (RM) { p.style.strokeDashoffset = "0"; return; }
+      p.style.transition = "stroke-dashoffset .7s cubic-bezier(.33,0,.16,1) " + (i * .3) + "s";
+      p.style.strokeDashoffset = "0";
+    });
+    form.setAttribute("inert", "");
+  };
+  RM ? finish() : setTimeout(finish, 700);
+}
+
+/* entrance: one cascade on arrival (slot + title + lines + fades), then stillness */
+/* GA4: cta_view {variant:"cta-10"} */
+function arrive(){ setTimeout(()=>{ sec.classList.add("is-in"); playSlot(); }, 60); }
+document.readyState === "complete" ? arrive() : addEventListener("load", arrive);
+</script>
+</body>
+</html>
