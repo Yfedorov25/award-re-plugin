@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!--
+  units-1-mobile «Список і план» (smarts) - phone twin of units-1-list-plan.html
+  MOBILE STAGE MAP (same spine, same seams):
+   1 statement over the ghost plan (contained full-width, faint) [seam: plate-continuity]
+   2 the LIST: two format rows stacked full-width, each with its wash slot [held; chips arm on plate arrival]
+   3 THE TURN: the plate as a contained full-width card on its own screen; the two wash nodes FLY from
+     their list-slot rects into the plate bands (measured FLIP, transform only, origin 0 0), one step,
+     fired as the plate screen arrives, never scrubbed [seam: the-turn]
+   4 the bridge: «Обери свою квартиру.» + two verbs as full-width rows [seam: plan-to-plate]
+  INSTRUMENT: two tap pills >= 50px docked ABOVE the plate; dimming logic unchanged (both views);
+  demonstration: none needed (pills are visible buttons). Phone canvas 430px, overflow-x:clip, 100dvh.
+  Copy identical to desktop. Zero em/en-dash. No WebGL. Dataset embedded as const SMARTS.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Формати - Список і план · мобільна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--ink:#2A231D;--sub:#87796a;--oak:#9c7b52;--pale:#c9beac;--t24:#A67B4F;--t27:#4F6570;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{background:#0b0a09;font-family:"Jost",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--paper)}
+  .eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--oak)}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* s1 statement */
+  .s1{min-height:100dvh;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 22px}
+  .s1 .ghostplan{position:absolute;left:0;width:100%;top:50%;transform:translateY(-50%);opacity:.09;pointer-events:none;filter:grayscale(1)}
+  .s1 .eyebrow{margin-bottom:20px}
+  .s1 .title{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,9vw,44px);line-height:1.08;letter-spacing:-.012em}
+  .s1 .title em{font-style:italic;color:var(--oak)}
+  .s1 .line{margin-top:18px;font-size:15px;line-height:1.65;color:var(--sub);font-weight:300;max-width:34ch}
+  .scrollcue{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+
+  /* s2 the list */
+  .s2{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:60px 22px}
+  .row{border-top:1px solid rgba(42,35,29,.16);padding:22px 0 26px;transition:opacity .5s var(--hs)}
+  .row:last-of-type{border-bottom:1px solid rgba(42,35,29,.16)}
+  .rowhead{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .rowname{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(34px,10vw,48px);line-height:1;letter-spacing:-.015em;transition:color .5s}
+  .rowplanchip{height:56px;width:auto;background:#fff;border:1px solid rgba(42,35,29,.14);padding:4px}
+  .rowfacts{display:flex;align-items:baseline;gap:14px;margin-top:12px}
+  .rowarea{font-family:"Cormorant Garamond",serif;font-size:24px;line-height:1;transition:color .5s}
+  .rowarea small{font-family:"Jost",sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--sub);margin-left:6px}
+  .rowcount{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--sub);margin-left:auto}
+  .slot{position:relative;height:44px;margin-top:14px}
+  .row.dim{opacity:.35}
+  .row.dim .rowname,.row.dim .rowarea{color:var(--pale)}
+
+  /* s3 THE TURN: the plate screen */
+  .s3{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:60px 22px 110px}
+  .chipbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .chip{font-family:"Jost",sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:none;border:1px solid rgba(42,35,29,.35);border-radius:40px;padding:14px 18px;min-height:50px;cursor:pointer;transition:color .45s,border-color .45s}
+  .chip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:1px}
+  .chip[data-t="smart-24"] .dot{background:var(--t24)}
+  .chip[data-t="smart-27"] .dot{background:var(--t27)}
+  .chip.off{color:var(--pale);border-color:rgba(42,35,29,.14)}
+  .chip.off .dot{opacity:.35}
+  .chipline{font-size:12px;color:var(--sub);letter-spacing:.04em;width:100%}
+  .platebox{position:relative;width:100%;aspect-ratio:2.2685/1;background:#fff;border:1px solid rgba(42,35,29,.12)}
+  .platebox svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .platebox svg .u24,.platebox svg .u27{transition:fill .6s var(--hs)}
+  .platebox.lit svg .u24{fill:rgba(166,123,79,.32)}
+  .platebox.lit svg .u27{fill:rgba(79,101,112,.30)}
+  .platebox.lit.only27 svg .u24{fill:rgba(166,123,79,.08)}
+  .platebox.lit.only24 svg .u27{fill:rgba(79,101,112,.07)}
+  .band{position:absolute;pointer-events:none}
+  .plate-cap{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--sub);text-align:center}
+  .caps{display:flex;justify-content:space-between;gap:10px}
+  .cap{display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(8px);transition:opacity .5s var(--hs),transform .5s var(--hs)}
+  .cap.on{opacity:1;transform:none}
+  .cap.dim{opacity:.3}
+  .cap .capname{font-family:"Cormorant Garamond",serif;font-size:19px}
+  .cap .capn{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--sub)}
+  .planspecs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .spec{border-top:1px solid rgba(42,35,29,.16);padding-top:10px}
+  .spec .sv{font-family:"Cormorant Garamond",serif;font-size:26px;line-height:1}
+  .spec .sk{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);margin-top:5px}
+
+  /* the two morph wash nodes (absolute in the phone canvas) */
+  .morph{position:absolute;z-index:12;transform-origin:0 0;will-change:transform;overflow:hidden;pointer-events:none;transition:transform .8s var(--hs),opacity .45s var(--hs)}
+  .morph .cells{position:absolute;inset:0;opacity:.5;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1px,transparent 1px 16.66%)}
+  .morph.m24{background:rgba(166,123,79,.42)}
+  .morph.m27{background:rgba(79,101,112,.40)}
+  .morph .mtag{position:absolute;left:10px;bottom:6px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(42,35,29,.75)}
+  .morph.landed{opacity:0}
+  .morph.dim{opacity:.35}
+  .morph.dim.landed{opacity:0}
+
+  /* s4 bridge */
+  .s4{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:60px 22px 110px;text-align:center}
+  .s4 .bh{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,9vw,44px);letter-spacing:-.012em}
+  .s4 .bsub{margin-top:12px;font-size:15px;line-height:1.65;color:var(--sub);font-weight:300}
+  .verbs{margin-top:36px;display:flex;flex-direction:column}
+  .verb{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 4px;border-top:1px solid rgba(42,35,29,.2);text-decoration:none;color:var(--ink);min-height:64px}
+  .verb:last-child{border-bottom:1px solid rgba(42,35,29,.2)}
+  .verb .vt{font-family:"Cormorant Garamond",serif;font-size:24px;font-style:italic}
+  .ring{width:50px;height:50px;min-width:50px;border:1px solid rgba(42,35,29,.4);border-radius:50%;display:grid;place-items:center}
+  .ring svg{width:17px;height:17px;stroke:currentColor}
+
+  .rise{opacity:0;transform:translateY(30px)}
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important}
+    .rise{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+<section class="s1" data-stage="1" data-screen-label="u1m stage 1 statement">
+  <img class="ghostplan" src="assets/plans-smarts/floor-std-clean.svg" alt="">
+  <div class="eyebrow rise">Формати</div>
+  <h1 class="title rise d1"><span class="num" data-total>54</span> квартири. Два формати:<br><em>24 і 27 метрів.</em></h1>
+  <p class="line rise d2">Подивись обидва формати на плані поверху й обери свій.</p>
+  <div class="scrollcue rise d3">Два формати нижче</div>
+</section>
+
+<section class="s2" data-stage="2" data-screen-label="u1m stage 2 list">
+  <div class="eyebrow" style="margin-bottom:10px">Два формати</div>
+  <div class="row" data-t="smart-24">
+    <div class="rowhead"><div class="rowname num">Смарт 24</div><img class="rowplanchip" src="assets/plans-smarts/type-24-clean.webp" alt="Міні-план Смарт 24"></div>
+    <div class="rowfacts"><div class="rowarea num"><span id="area24"></span> м²<small>загалом</small></div><div class="rowcount num" id="count24"></div></div>
+    <div class="slot" data-slot="smart-24"></div>
+  </div>
+  <div class="row" data-t="smart-27">
+    <div class="rowhead"><div class="rowname num">Смарт 27</div><img class="rowplanchip" src="assets/plans-smarts/type-27-clean.webp" alt="Міні-план Смарт 27"></div>
+    <div class="rowfacts"><div class="rowarea num"><span id="area27"></span> м²<small>загалом</small></div><div class="rowcount num" id="count27"></div></div>
+    <div class="slot" data-slot="smart-27"></div>
+  </div>
+</section>
+
+<section class="s3" id="s3" data-stage="3" data-screen-label="u1m stage 3 the plate">
+  <div class="eyebrow">На плиті поверху</div>
+  <div class="chipbar">
+    <button class="chip" data-t="smart-24" type="button"><span class="dot"></span>Смарт 24</button>
+    <button class="chip" data-t="smart-27" type="button"><span class="dot"></span>Смарт 27</button>
+    <span class="chipline num" id="chipline"></span>
+  </div>
+  <div class="platebox" id="platebox">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 44.08" preserveAspectRatio="none"><rect x="0" y="0" width="100" height="44.08" fill="#e9ecee"></rect><rect x="0.3" y="0.3" width="99.4" height="43.48" fill="#fff" stroke="#1e2227" stroke-width="0.4"></rect><rect x="0.11" y="23.67" width="10.65" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="0.11" y="0.76" width="10.65" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="10.76" y="0.76" width="10.64" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="10.76" y="23.67" width="10.64" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="21.40" y="0.76" width="9.49" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="30.89" y="0.76" width="9.49" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="30.89" y="23.67" width="9.49" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="40.38" y="23.67" width="9.62" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="40.38" y="0.76" width="9.62" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="50.00" y="0.76" width="9.62" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="50.00" y="23.67" width="9.62" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="59.62" y="23.67" width="9.49" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="59.62" y="0.76" width="9.49" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="69.11" y="0.76" width="9.49" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="78.60" y="0.76" width="10.64" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="78.60" y="23.67" width="10.64" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="89.24" y="23.67" width="10.64" height="19.87" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="89.24" y="0.76" width="10.64" height="19.65" fill="#fff" stroke="#9aa1a8" stroke-width="0.16"></rect><rect x="0.3" y="20.41" width="99.4" height="3.26" fill="#f1f3f4" stroke="#cfd4d8" stroke-width="0.1"></rect><rect x="23.40" y="20.61" width="4.20" height="22.87" fill="#eef0f1" stroke="#7e878d" stroke-width="0.16"></rect><line x1="23.70" y1="21.81" x2="27.30" y2="21.81" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="23.70" y1="24.42" x2="27.30" y2="24.42" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="23.70" y1="27.03" x2="27.30" y2="27.03" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="23.70" y1="29.64" x2="27.30" y2="29.64" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="23.70" y1="32.24" x2="27.30" y2="32.24" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="23.70" y1="34.85" x2="27.30" y2="34.85" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="23.70" y1="37.46" x2="27.30" y2="37.46" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="23.70" y1="40.07" x2="27.30" y2="40.07" stroke="#b9bfc4" stroke-width="0.09"></line><rect x="75.00" y="20.61" width="4.20" height="22.87" fill="#eef0f1" stroke="#7e878d" stroke-width="0.16"></rect><line x1="75.30" y1="21.81" x2="78.90" y2="21.81" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="75.30" y1="24.42" x2="78.90" y2="24.42" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="75.30" y1="27.03" x2="78.90" y2="27.03" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="75.30" y1="29.64" x2="78.90" y2="29.64" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="75.30" y1="32.24" x2="78.90" y2="32.24" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="75.30" y1="34.85" x2="78.90" y2="34.85" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="75.30" y1="37.46" x2="78.90" y2="37.46" stroke="#b9bfc4" stroke-width="0.09"></line><line x1="75.30" y1="40.07" x2="78.90" y2="40.07" stroke="#b9bfc4" stroke-width="0.09"></line></svg>
+    <div class="band" id="band24"></div>
+    <div class="band" id="band27"></div>
+  </div>
+  <div class="plate-cap">План типового поверху · схема</div>
+  <div class="caps">
+    <div class="cap" id="cap24"><span class="capname num">Смарт 24</span><span class="capn num" id="capn24"></span></div>
+    <div class="cap" id="cap27"><span class="capname num">Смарт 27</span><span class="capn num" id="capn27"></span></div>
+  </div>
+  <div class="planspecs">
+    <div class="spec"><div class="sv num" id="spec-perfloor"></div><div class="sk">квартир на поверсі</div></div>
+    <div class="spec"><div class="sv num" id="spec-floors"></div><div class="sk">типові поверхи</div></div>
+    <div class="spec"><div class="sv num" id="spec-a24"></div><div class="sk">метрів у Смарт 24</div></div>
+    <div class="spec"><div class="sv num" id="spec-a27"></div><div class="sk">метрів у Смарт 27</div></div>
+  </div>
+</section>
+
+<section class="s4" data-stage="4" data-screen-label="u1m stage 4 bridge">
+  <div class="bh">Обери свою квартиру.</div>
+  <p class="bsub"><span class="num" data-total>54</span> квартири на трьох поверхах. Далі на плані кожна окремо.</p>
+  <nav class="verbs">
+    <a class="verb" href="#pick-params"><span class="vt">За параметрами</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="verb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </nav>
+</section>
+
+<div class="morph m24" id="m24" data-t="smart-24"><div class="cells"></div><span class="mtag num" id="mtag24"></span></div>
+<div class="morph m27" id="m27" data-t="smart-27"><div class="cells"></div><span class="mtag num" id="mtag27"></span></div>
+
+</div>
+<script>
+const SMARTS = {"priceUsdPerM2":950,"commercial":{"totalM2":712,"openSpaceM2":668.72,"minBlockM2":100,"priceUsdPerM2":1100,"capitalizationPct":30,"blocks":[{"code":"C-01","m2":100},{"code":"C-02","m2":120},{"code":"C-03","m2":150},{"code":"C-04","m2":100},{"code":"C-05","m2":198.72}]},"floors":[{"id":"2","label":"2-й поверх"},{"id":"3","label":"3-й поверх"},{"id":"m","label":"Мансардний поверх"}],"types":{"smart-27":{"label":"Смарт 27 м²","m2":17.34,"livingM2":17.34,"bathM2":5.03,"hallM2":4.69,"totalM2":27.06},"smart-24":{"label":"Смарт 24 м²","m2":15.27,"livingM2":15.27,"bathM2":4.68,"hallM2":3.81,"totalM2":23.76}},"units":[{"code":"A2-01","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"A2-02","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"A2-03","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"A2-04","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-05","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-06","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-07","floor":"2","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"A2-08","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"A2-09","floor":"2","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"A2-10","floor":"2","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"A2-11","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"A2-12","floor":"2","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"A2-13","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-14","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-15","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"A2-16","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-17","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-18","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-01","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"A3-02","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"A3-03","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-04","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-05","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-06","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-07","floor":"3","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"A3-08","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"A3-09","floor":"3","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"A3-10","floor":"3","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"A3-11","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"A3-12","floor":"3","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"A3-13","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-14","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-15","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-16","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-17","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-18","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-01","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"Am-02","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"Am-03","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-04","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-05","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-06","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-07","floor":"m","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"Am-08","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"Am-09","floor":"m","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"Am-10","floor":"m","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"Am-11","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"Am-12","floor":"m","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"Am-13","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-14","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-15","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-16","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-17","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-18","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}}]}; /* embedded 1:1 from data/smarts-units.json; statuses and entry sums omitted: never used in UNITS */
+(function(){
+  'use strict';
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fmt = function(n){ return String(n).replace('.', ','); };
+  var gram = function(n){
+    var m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return n + ' квартира';
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return n + ' квартири';
+    return n + ' квартир';
+  };
+  var units = SMARTS.units;
+  var n24 = units.filter(function(u){ return u.type === 'smart-24'; }).length;
+  var n27 = units.filter(function(u){ return u.type === 'smart-27'; }).length;
+  var perFloor = units.filter(function(u){ return u.floor === '2'; }).length;
+  [].slice.call(document.querySelectorAll('[data-total]')).forEach(function(e){ e.textContent = units.length; });
+  document.getElementById('area24').textContent = fmt(SMARTS.types['smart-24'].totalM2);
+  document.getElementById('area27').textContent = fmt(SMARTS.types['smart-27'].totalM2);
+  document.getElementById('count24').textContent = gram(n24) + ' у домі';
+  document.getElementById('count27').textContent = gram(n27) + ' у домі';
+  document.getElementById('capn24').textContent = gram(n24);
+  document.getElementById('capn27').textContent = gram(n27);
+  document.getElementById('mtag24').textContent = 'x ' + n24;
+  document.getElementById('mtag27').textContent = 'x ' + n27;
+  document.getElementById('spec-perfloor').textContent = perFloor;
+  document.getElementById('spec-floors').textContent = SMARTS.floors.length;
+  document.getElementById('spec-a24').textContent = fmt(SMARTS.types['smart-24'].totalM2);
+  document.getElementById('spec-a27').textContent = fmt(SMARTS.types['smart-27'].totalM2);
+
+  /* footprint bands from the dataset (floor 2 as the plate) */
+  var f2 = units.filter(function(u){ return u.floor === '2'; });
+  function bbox(list){
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    list.forEach(function(u){
+      x0 = Math.min(x0, u.pos.x); y0 = Math.min(y0, u.pos.y);
+      x1 = Math.max(x1, u.pos.x + u.pos.w); y1 = Math.max(y1, u.pos.y + u.pos.h);
+    });
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+  var band24 = bbox(f2.filter(function(u){ return u.type === 'smart-24'; }));
+  var band27 = bbox(f2.filter(function(u){ return u.type === 'smart-27' && u.pos.y > 50; }));
+  function setBand(el, b){
+    el.style.left = b.x + '%'; el.style.top = b.y + '%';
+    el.style.width = b.w + '%'; el.style.height = b.h + '%';
+  }
+  var eBand24 = document.getElementById('band24'), eBand27 = document.getElementById('band27');
+  setBand(eBand24, band24); setBand(eBand27, band27);
+
+  /* classify SVG unit rects by geometry match (position + size) */
+  var platebox = document.getElementById('platebox');
+  var svg = platebox.querySelector('svg');
+  [].slice.call(svg.querySelectorAll('rect')).forEach(function(r){
+    var x = parseFloat(r.getAttribute('x')), y = parseFloat(r.getAttribute('y'));
+    var w = parseFloat(r.getAttribute('width')), h = parseFloat(r.getAttribute('height'));
+    if (isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h)) return;
+    for (var i = 0; i < f2.length; i++){
+      var p = f2[i].pos;
+      if (Math.abs(p.x - x) < 0.6 && Math.abs(p.y * 0.4408 - y) < 0.6 &&
+          Math.abs(p.w - w) < 0.6 && Math.abs(p.h * 0.4408 - h) < 0.6){
+        r.classList.add(f2[i].type === 'smart-24' ? 'u24' : 'u27');
+        return;
+      }
+    }
+  });
+
+  /* stage 1 reveal */
+  function dOf(el){ return el.classList.contains('d3') ? 480 : el.classList.contains('d2') ? 300 : el.classList.contains('d1') ? 140 : 0; }
+  [].slice.call(document.querySelectorAll('.rise')).forEach(function(el){
+    setTimeout(function(){
+      el.style.transition = 'opacity .9s var(--hs), transform .9s var(--hs)';
+      el.style.opacity = 1; el.style.transform = 'none';
+    }, 80 + dOf(el));
+  });
+
+  /* THE FLIGHT: seat each wash node at its list-slot rect (phone coords), fly to the band rect */
+  var phone = document.getElementById('phone');
+  var morphs = { 'smart-24': document.getElementById('m24'), 'smart-27': document.getElementById('m27') };
+  var bands = { 'smart-24': eBand24, 'smart-27': eBand27 };
+  var flown = false;
+
+  function seatMorphs(){
+    var pr = phone.getBoundingClientRect();
+    Object.keys(morphs).forEach(function(t){
+      var m = morphs[t];
+      var r = document.querySelector('[data-slot="' + t + '"]').getBoundingClientRect();
+      var keep = m.style.transition;
+      m.style.transition = 'none';
+      m.style.left = (r.left - pr.left) + 'px';
+      m.style.top = (r.top - pr.top) + 'px';
+      m.style.width = r.width + 'px';
+      m.style.height = r.height + 'px';
+      m.style.transform = flown ? flightTransform(m, t) : 'none';
+      void m.offsetWidth;
+      m.style.transition = keep;
+    });
+  }
+  function flightTransform(m, t){
+    var keep = m.style.transform;
+    m.style.transform = 'none';
+    var a = m.getBoundingClientRect();
+    var b = bands[t].getBoundingClientRect();
+    m.style.transform = keep;
+    return 'translate(' + (b.left - a.left) + 'px,' + (b.top - a.top) + 'px) ' +
+           'scale(' + (b.width / a.width) + ',' + (b.height / a.height) + ')';
+  }
+  function fly(){
+    if (flown) return;
+    flown = true;
+    Object.keys(morphs).forEach(function(t){
+      var m = morphs[t];
+      m.style.transform = flightTransform(m, t);
+    });
+    setTimeout(function(){
+      platebox.classList.add('lit');
+      Object.keys(morphs).forEach(function(t){ morphs[t].classList.add('landed'); });
+      [].slice.call(document.querySelectorAll('.cap')).forEach(function(c){ c.classList.add('on'); });
+    }, reduced ? 0 : 820);
+  }
+
+  /* the instrument: two tap pills, dimming both views, never hiding, never reflowing */
+  var chips = [].slice.call(document.querySelectorAll('.chip'));
+  var active = { 'smart-24': true, 'smart-27': true };
+  var chipline = document.getElementById('chipline');
+  var cap24 = document.getElementById('cap24'), cap27 = document.getElementById('cap27');
+  function applyFilter(){
+    var both = active['smart-24'] === active['smart-27'];
+    ['smart-24', 'smart-27'].forEach(function(t){
+      var dim = !both && !active[t];
+      [].slice.call(document.querySelectorAll('.row[data-t="' + t + '"], .morph[data-t="' + t + '"]')).forEach(function(el){
+        el.classList.toggle('dim', dim);
+      });
+      (t === 'smart-24' ? cap24 : cap27).classList.toggle('dim', dim);
+    });
+    platebox.classList.toggle('only24', !both && active['smart-24']);
+    platebox.classList.toggle('only27', !both && active['smart-27']);
+    var n = (both ? units.length : units.filter(function(u){ return active[u.type]; }).length);
+    var tail = both ? ' · два формати' : (active['smart-24'] ? ' · Смарт 24' : ' · Смарт 27');
+    chipline.textContent = 'У фокусі: ' + gram(n) + tail;
+    chips.forEach(function(c){ c.classList.toggle('off', !both && !active[c.dataset.t]); });
+  }
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      var t = c.dataset.t;
+      var both = active['smart-24'] === active['smart-27'];
+      if (both){ active[t] = true; active[t === 'smart-24' ? 'smart-27' : 'smart-24'] = false; }
+      else if (active[t]){ active['smart-24'] = true; active['smart-27'] = true; }
+      else { active[t] = true; active[t === 'smart-24' ? 'smart-27' : 'smart-24'] = false; }
+      applyFilter();
+    });
+  });
+  applyFilter();
+
+  /* the turn fires as the plate screen arrives: one step, never scrubbed */
+  var s3 = document.getElementById('s3');
+  function onScroll(){
+    if (s3.getBoundingClientRect().top < innerHeight * 0.55) fly();
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', seatMorphs);
+  addEventListener('load', seatMorphs);
+  setTimeout(function(){ seatMorphs(); onScroll(); }, 400);
+
+  window.__unitsCount = function(){ return units.filter(function(u){ return active[u.type]; }).length; };
+})();
+</script>
+</body>
+</html>

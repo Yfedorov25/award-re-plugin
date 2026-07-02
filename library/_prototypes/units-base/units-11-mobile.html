@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+  units-11-mobile «Ряд» (towns) - phone twin of units-11-the-row.html
+  MOBILE STAGE MAP (same spine, same seams):
+   1 statement over the row dimmed (contained full-width, never cropped) [seam: row-continuity]
+   2 THE ROW contained full-width on a light band; six ticks drop [held]
+   3 КРАЙНІЙ: the ONE wash warms positions 1 and 6, beat copy under the photo [seam: wash-migration]
+   4 СЕРЕДИНА: the SAME wash migrates to 2-5 [seam: wash-migration]
+   5 THE BRIDGE: the ticks rise off the photo into six serif numerals over the verbs [seam: ticks-rise]
+  No instruments (pure film, scroll steps only; desktop had none either). Pin = 3 viewports (100dvh).
+  Verbs = two full-width rows. Copy identical to desktop. Zero em/en-dash. No WebGL.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Таунхауси - Ряд · мобільна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--ink:#2A231D;--sub:#87796a;--oak:#9c7b52;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{background:#0b0a09;font-family:"Jost",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--paper)}
+  .eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--oak)}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* s1 statement */
+  .s1{min-height:100dvh;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22px}
+  .s1 .rowimg{position:absolute;left:0;width:100%;top:50%;transform:translateY(-50%);opacity:.22;pointer-events:none}
+  .s1 .inner{position:relative;z-index:2}
+  .s1 .t{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,9vw,44px);line-height:1.12;margin:14px auto 0;max-width:15ch;letter-spacing:-.012em}
+  .s1 .line{margin-top:16px;font-size:15px;line-height:1.65;color:var(--sub);font-weight:300;max-width:32ch}
+  .scrollcue{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub);z-index:2}
+
+  /* the pinned row */
+  .pinwrap{position:relative;height:300dvh}
+  .pin{position:sticky;top:0;height:100dvh;overflow:hidden;background:var(--paper);display:flex;flex-direction:column;justify-content:center;gap:20px}
+  .rowbox{position:relative;width:100%;transition:opacity .9s var(--hs)}
+  .pin.v3 .rowbox{opacity:.18}
+  .rowbox img{display:block;width:100%;height:auto}
+  .rowbox .rplate{position:absolute;right:10px;bottom:8px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.45)}
+  .wash{position:absolute;left:0;right:0;top:30%;height:56%;pointer-events:none;opacity:0;transition:opacity .7s var(--hs)}
+  .pin.v1 .wash,.pin.v2 .wash{opacity:1}
+  .pin.v3 .wash{opacity:0}
+  .band{position:absolute;top:0;bottom:0;left:2%;width:16%;background:linear-gradient(to top,rgba(195,154,102,.38),rgba(195,154,102,.16));
+    transform-origin:left center;transition:transform .9s var(--hs)}
+  .band.b2{left:82%}
+  .pin.v2 .band.b1{transform:translateX(100%) scaleX(2)}
+  .pin.v2 .band.b2{transform:translateX(-200%) scaleX(2)}
+  .ticks{position:absolute;inset:0;pointer-events:none}
+  .tick{position:absolute;top:4%;width:1px;margin-left:-.5px;display:flex;flex-direction:column;align-items:center;transition:transform 1s var(--hs)}
+  .tick .tnum{font-family:"Cormorant Garamond",serif;font-size:15px;line-height:1;color:var(--ink);opacity:0;transform:translateY(8px);transition:opacity .6s var(--hs),transform .6s var(--hs)}
+  .tick .tline{width:1px;height:0;background:rgba(42,35,29,.65);margin-top:4px;transition:transform .8s var(--hs);transform-origin:top;transform:scaleY(0)}
+  .pin.ticked .tick .tline{transform:scaleY(1)}
+  .pin.v3 .tick .tline{transform:scaleY(0)}
+  .pin.v3 .tick .tnum{opacity:1;transform:none;font-size:26px}
+  /* beat copy under the photo */
+  .beats{position:relative;padding:0 22px;min-height:130px}
+  .beat{position:absolute;top:0;left:22px;right:22px;opacity:0;transform:translateY(14px);transition:opacity .7s var(--hs),transform .7s var(--hs);pointer-events:none}
+  .beat.on{opacity:1;transform:none}
+  .beat .bt{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:24px;line-height:1.2}
+  .beat .bl{margin-top:8px;font-size:15px;line-height:1.65;color:var(--sub);font-weight:300}
+  .beat.right{text-align:right}
+  .beat .ek{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--oak);margin-bottom:8px}
+  /* the bridge */
+  .bridge{position:absolute;left:22px;right:22px;bottom:max(100px,12dvh);z-index:5;
+    opacity:0;transform:translateY(18px);transition:opacity .8s var(--hs) .35s,transform .8s var(--hs) .35s;pointer-events:none}
+  .pin.v3 .bridge{opacity:1;transform:none;pointer-events:auto}
+  .bridge .bh{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,9vw,42px);line-height:1.12;text-align:center}
+  .verbs{margin-top:22px;display:flex;flex-direction:column}
+  .verb{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 4px;border-top:1px solid rgba(42,35,29,.2);text-decoration:none;color:var(--ink);min-height:60px}
+  .verb:last-child{border-bottom:1px solid rgba(42,35,29,.2)}
+  .verb .vt{font-family:"Cormorant Garamond",serif;font-size:23px;font-style:italic}
+  .ring{width:48px;height:48px;min-width:48px;border:1px solid rgba(42,35,29,.4);border-radius:50%;display:grid;place-items:center}
+  .ring svg{width:16px;height:16px;stroke:currentColor}
+
+  .rise{opacity:0;transform:translateY(30px)}
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important;transition-delay:0s !important}
+    .rise{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+<section class="s1" data-stage="1" data-screen-label="u11m stage 1 statement">
+  <img class="rowimg" src="assets/towns/selector-row-6-day.png" alt="">
+  <div class="inner">
+    <div class="eyebrow rise">Формат · Таунхауси</div>
+    <h1 class="t rise d1">Шість однакових таунхаусів. Тут обирають не метри, а місце в ряду.</h1>
+    <p class="line rise d2 num">По 82 м² кожен, на власній землі. Різниця лише в тому, з чим ти сусідиш.</p>
+  </div>
+  <div class="scrollcue rise d3">Ряд нижче</div>
+</section>
+
+<div class="pinwrap" id="pinwrap">
+  <div class="pin" id="pin" data-stage="2 3 4 5" data-screen-label="u11m the row / edge / middle / bridge">
+    <div class="rowbox" id="rowbox">
+      <img id="rowphoto" src="assets/towns/selector-row-6-day.png" alt="Ряд із шести таунхаусів">
+      <span class="rplate">Ряд · візуалізація</span>
+      <div class="wash"><div class="band b1"></div><div class="band b2"></div></div>
+      <div class="ticks" id="ticks"></div>
+    </div>
+    <div class="beats">
+      <div class="beat right" id="beatA">
+        <div class="ek">Позиція · крайній</div>
+        <div class="bt">Сусіди лише з одного боку.</div>
+        <div class="bl">Місця 1 і 6. Один сусід через стіну, і більше тиші з краю.</div>
+      </div>
+      <div class="beat" id="beatB">
+        <div class="ek">Позиція · середина</div>
+        <div class="bt">Середина тримає тепло.</div>
+        <div class="bl num">Місця 2 до 5. Спільні стіни гріють з обох боків, і взимку це відчутно.</div>
+      </div>
+    </div>
+    <div class="bridge">
+      <div class="bh">Ряд один, місць шість.<br>Обери своє.</div>
+      <nav class="verbs">
+        <a class="verb" href="#pick-place"><span class="vt">Обрати місце</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        <a class="verb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+      </nav>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+(function(){
+  'use strict';
+  var img = new Image();
+  img.src = 'assets/towns/selector-row-6-day.png';
+  if (img.decode) img.decode().catch(function(){});
+
+  function dOf(el){ return el.classList.contains('d3') ? 480 : el.classList.contains('d2') ? 300 : el.classList.contains('d1') ? 140 : 0; }
+  [].slice.call(document.querySelectorAll('.rise')).forEach(function(el){
+    setTimeout(function(){
+      el.style.transition = 'opacity .9s var(--hs), transform .9s var(--hs)';
+      el.style.opacity = 1; el.style.transform = 'none';
+    }, 80 + dOf(el));
+  });
+
+  var XS = [8, 24, 40, 56, 72, 88];
+  var ticks = document.getElementById('ticks');
+  var tickEls = XS.map(function(x, i){
+    var t = document.createElement('div');
+    t.className = 'tick';
+    t.style.left = x + '%';
+    t.innerHTML = '<span class="tnum serif num">' + (i + 1) + '</span><span class="tline" style="transition-delay:' + (i * 70) + 'ms"></span>';
+    return t;
+  });
+  tickEls.forEach(function(t){ ticks.appendChild(t); });
+  function sizeTicks(){
+    var h = document.getElementById('rowbox').getBoundingClientRect().height;
+    tickEls.forEach(function(t){ t.querySelector('.tline').style.height = (h * 0.26) + 'px'; });
+  }
+
+  var pin = document.getElementById('pin');
+  var wrap = document.getElementById('pinwrap');
+  var beatA = document.getElementById('beatA'), beatB = document.getElementById('beatB');
+  var view = -1;
+
+  function riseTicksTo(on){
+    tickEls.forEach(function(t, i){
+      if (on){
+        var r = t.getBoundingClientRect();
+        var targetY = innerHeight * 0.26;
+        t.style.transitionDelay = (i * 50) + 'ms';
+        t.style.transform = 'translateY(' + (targetY - r.top).toFixed(1) + 'px)';
+      } else {
+        t.style.transitionDelay = (i * 40) + 'ms';
+        t.style.transform = 'none';
+      }
+    });
+  }
+
+  function goView(v){
+    if (v === view) return;
+    var was = view;
+    view = v;
+    pin.classList.toggle('ticked', v >= 0);
+    pin.classList.toggle('v1', v === 1);
+    pin.classList.toggle('v2', v === 2);
+    pin.classList.toggle('v3', v === 3);
+    beatA.classList.toggle('on', v === 1);
+    beatB.classList.toggle('on', v === 2);
+    if (v === 3) riseTicksTo(true);
+    else if (was === 3) riseTicksTo(false);
+  }
+
+  function onScroll(){
+    var r = wrap.getBoundingClientRect(), vh = innerHeight;
+    var total = wrap.offsetHeight - vh;
+    var p = Math.min(1, Math.max(0, -r.top / total));
+    if (r.top > vh * 0.7) return;
+    goView(p < 0.22 ? 0 : p < 0.5 ? 1 : p < 0.76 ? 2 : 3);
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', sizeTicks);
+  if (img.complete) sizeTicks(); else img.onload = sizeTicks;
+  setTimeout(function(){ sizeTicks(); onScroll(); }, 350);
+})();
+</script>
+</body>
+</html>

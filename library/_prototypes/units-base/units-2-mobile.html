@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<!--
+  units-2-mobile «Колекції» (smarts) - phone twin of units-2-collections.html
+  MOBILE STAGE MAP (same spine, same seams):
+   1 museum wall label statement [seam: curtain-i]
+   2-4 TIERS as the sticky curtain stack (панелі наїжджають одна на одну), one column inside:
+     roman + tier name, render card full-width 4:3 (commerce facade contained), plan chip white mount,
+     copy + wrapping statrow [seams: curtain-ii + theme shift, curtain-iii + graphite shift]
+   5 the bridge: the 54 odometer rolls on arrival; verbs stacked as two full-width rows [variant B]
+  INSTRUMENT: the I/II/III rail = bottom-docked horizontal row of 3 tap targets >= 44px (active
+  opacity 1, others .35), hidden on the bridge; tap scrolls to the tier.
+  Phone canvas 430px, overflow-x:clip (sticky survives), 100dvh tiers.
+  Copy identical to desktop. Zero em/en-dash. No WebGL. Dataset embedded as const SMARTS.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Формати - Колекції · мобільна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--paper2:#E7DED0;--graphite:#1E2227;--ink:#2A231D;--cream:#EDE6DA;--sub:#87796a;--oak:#9c7b52;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{background:#0b0a09;font-family:"Jost",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--paper)}
+  .eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--oak)}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .line{font-size:15px;line-height:1.65;color:var(--sub);font-weight:300}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* s1 museum label */
+  .s1{min-height:100dvh;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:0 22px}
+  .placard{max-width:340px;padding:26px 24px;border:1px solid rgba(42,35,29,.22)}
+  .placard .pt{font-size:11px;letter-spacing:.36em;text-transform:uppercase;margin:0 0 14px}
+  .placard .pl{font-size:13px;line-height:1.75;color:var(--sub);font-weight:300;letter-spacing:.03em}
+  .roman{position:absolute;font-family:"Cormorant Garamond",serif;font-size:60px;color:rgba(42,35,29,.07);line-height:1}
+  .roman.rl{left:14px;top:18%}
+  .roman.rr{right:14px;bottom:18%}
+  .scrollcue{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+
+  /* tiers - sticky curtain stack; the whole tier MUST fit 100dvh at 390x844
+     (sticky top:0 + taller-than-viewport content = the bottom is unreachable) */
+  .tier{position:sticky;top:0;min-height:100dvh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:12px;padding:52px 22px 72px}
+  .tier.t1{background:var(--paper);z-index:2}
+  .tier.t2{background:var(--paper2);z-index:3}
+  .tier.t3{background:var(--graphite);z-index:4;color:var(--cream)}
+  .tier.t3 .line{color:#9aa4ac}
+  .tier.t3 .eyebrow{color:#c8a06a}
+  .tn-roman{position:absolute;top:20px;right:22px;font-family:"Cormorant Garamond",serif;font-size:22px;letter-spacing:.1em;opacity:.45}
+  .tiername{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(34px,11vw,48px);line-height:.98;letter-spacing:-.02em;text-transform:uppercase}
+  .rendermount{width:100%;aspect-ratio:16/10;overflow:hidden;position:relative}
+  .rendermount img{width:100%;height:100%;object-fit:cover;display:block}
+  .rendermount.contained{aspect-ratio:auto}
+  .rendermount.contained img{height:auto;object-fit:contain}
+  .rendermount .plate{position:absolute;left:10px;bottom:8px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.4)}
+  .planmount{background:#fff;border:1px solid rgba(42,35,29,.18);padding:8px;width:32%;align-self:flex-start}
+  .planmount img{display:block;width:100%;height:auto}
+  .planmount .plate{margin-top:6px;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);text-align:center}
+  .beat-t{font-size:clamp(19px,5.6vw,24px);line-height:1.22}
+  .statrow{display:flex;gap:16px;border-top:1px solid rgba(128,118,102,.35);padding-top:10px;flex-wrap:wrap}
+  .tier.t3 .statrow{border-top-color:rgba(237,230,218,.22)}
+  .stat .sv{font-family:"Cormorant Garamond",serif;font-size:22px;line-height:1}
+  .stat .sk{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub);margin-top:5px}
+  .tier.t3 .stat .sk{color:#8d979f}
+  .settle{opacity:0;transform:translateY(26px);transition:opacity .9s var(--hs),transform .9s var(--hs)}
+  .tier.live .settle{opacity:1;transform:none}
+  .tier.live .settle.lag1{transition-delay:.12s}
+  .tier.live .settle.lag2{transition-delay:.24s}
+
+  /* the rail: bottom-docked 3 tap targets */
+  .rail{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:50;
+    background:rgba(242,237,228,.92);border:1px solid rgba(42,35,29,.16);border-radius:40px;padding:4px 10px;
+    opacity:0;pointer-events:none;transition:opacity .5s var(--hs)}
+  body.railon .rail{opacity:1;pointer-events:auto}
+  .rail button{font-family:"Cormorant Garamond",serif;font-size:20px;line-height:1;background:none;border:0;color:var(--ink);opacity:.35;cursor:pointer;padding:10px 14px;min-width:44px;min-height:44px;transition:opacity .4s}
+  .rail button.on{opacity:1}
+
+  /* s5 bridge */
+  .bridge{position:sticky;top:0;min-height:100dvh;z-index:5;background:var(--paper);display:flex;flex-direction:column;justify-content:center;text-align:center;overflow:hidden;padding:60px 22px 100px}
+  .bl{display:flex;align-items:baseline;justify-content:center;gap:.2em;font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,9vw,42px);letter-spacing:-.012em;line-height:1.1;flex-wrap:wrap}
+  .odo{display:inline-flex;overflow:hidden;height:1em;line-height:1;color:var(--oak)}
+  .odo .col{display:flex;flex-direction:column;transition:transform 1s var(--hs)}
+  .odo .col span{height:1em;display:block}
+  .bsub{margin-top:14px;font-size:15px;color:var(--sub);font-weight:300;line-height:1.65}
+  .forkline{width:1px;height:44px;background:rgba(42,35,29,.35);margin:26px auto 0}
+  .verbs{margin-top:0;display:flex;flex-direction:column;text-align:left}
+  .verb{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 4px;border-top:1px solid rgba(42,35,29,.2);text-decoration:none;color:var(--ink);min-height:64px}
+  .verb:last-child{border-bottom:1px solid rgba(42,35,29,.2)}
+  .verb .vt{font-family:"Cormorant Garamond",serif;font-size:24px;font-style:italic}
+  .ring{width:50px;height:50px;min-width:50px;border:1px solid rgba(42,35,29,.4);border-radius:50%;display:grid;place-items:center}
+  .ring svg{width:17px;height:17px;stroke:currentColor}
+
+  .rise{opacity:0;transform:translateY(30px)}
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important;transition-delay:0s !important}
+    .rise,.settle{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+<section class="s1" data-stage="1" data-screen-label="u2m stage 1 museum label">
+  <span class="roman rl">I</span><span class="roman rr">III</span>
+  <div class="placard rise">
+    <p class="pt">Формати</p>
+    <p class="pl">Три зібрання: <span class="num" data-n24>18</span> квартир Смарт 24,
+      <span class="num" data-n27>36</span> квартир Смарт 27
+      і комерційний перший поверх.</p>
+  </div>
+  <div class="scrollcue rise d1">Зібрання I нижче</div>
+</section>
+
+<section class="tier t1" data-stage="2" data-screen-label="u2m tier I Смарт 24">
+  <span class="tn-roman">I</span>
+  <h2 class="tiername num">Смарт 24</h2>
+  <div class="rendermount settle"><img src="assets/renders-smarts/day-01-vitalnia.webp" alt="Кімната Смарт 24"><span class="plate">Кімната · візуалізація</span></div>
+  <figure class="planmount settle lag1"><img src="assets/plans-smarts/type-24-clean.webp" alt="План Смарт 24"><figcaption class="plate num">Смарт 24 · план</figcaption></figure>
+  <div class="eyebrow settle lag1">Смарт 24 · <span class="num" data-n24>18</span> квартир</div>
+  <h3 class="serif beat-t settle lag2"><span class="num" data-a24>23,76</span> м²: кімната, санвузол і передпокій.</h3>
+  <p class="line settle lag2">Кімната <span class="num" data-r24>15,27</span> м². Формат для одного або для пари.</p>
+  <div class="statrow settle lag2">
+    <div class="stat"><div class="sv num" data-a24>23,76</div><div class="sk">метрів загалом</div></div>
+    <div class="stat"><div class="sv num" data-r24>15,27</div><div class="sk">метрів кімнати</div></div>
+    <div class="stat"><div class="sv num" data-n24>18</div><div class="sk">квартир у домі</div></div>
+  </div>
+</section>
+
+<section class="tier t2" data-stage="3" data-screen-label="u2m tier II Смарт 27">
+  <span class="tn-roman">II</span>
+  <h2 class="tiername num">Смарт 27</h2>
+  <div class="rendermount settle"><img src="assets/renders-smarts/day-04-vikno.webp" alt="Вікно Смарт 27"><span class="plate">Кімната · візуалізація</span></div>
+  <figure class="planmount settle lag1"><img src="assets/plans-smarts/type-27-clean.webp" alt="План Смарт 27"><figcaption class="plate num">Смарт 27 · план</figcaption></figure>
+  <div class="eyebrow settle lag1">Смарт 27 · <span class="num" data-n27>36</span> квартир</div>
+  <h3 class="serif beat-t settle lag2">Кімната більша: <span class="num" data-r27>17,34</span> замість <span class="num" data-r24>15,27</span>.</h3>
+  <p class="line settle lag2">Місця вистачає і для ліжка, і для робочого столу. Найпоширеніший формат дому: <span class="num" data-n27>36</span> квартир із <span class="num" data-nall>54</span>.</p>
+  <div class="statrow settle lag2">
+    <div class="stat"><div class="sv num" data-a27>27,06</div><div class="sk">метрів загалом</div></div>
+    <div class="stat"><div class="sv num" data-r27>17,34</div><div class="sk">метрів кімнати</div></div>
+    <div class="stat"><div class="sv num" data-n27>36</div><div class="sk">квартир у домі</div></div>
+  </div>
+</section>
+
+<section class="tier t3" data-stage="4" data-screen-label="u2m tier III Комерція">
+  <span class="tn-roman">III</span>
+  <h2 class="tiername">Комерція</h2>
+  <div class="rendermount contained settle"><img src="assets/plans-smarts/facade-commerce-clean.webp" alt="Фасад комерційного поверху"><span class="plate">Фасад · схема</span></div>
+  <div class="eyebrow settle lag1">Комерція · перший поверх</div>
+  <h3 class="serif beat-t settle lag2">Перший поверх: <span class="num" data-c-m2>712</span> м² під бізнес.</h3>
+  <p class="line settle lag2"><span class="num" data-c-m2>712</span> м² під бізнес, пʼять блоків від <span class="num" data-c-min>100</span> м², усі з фасадними вітринами. $<span class="num" data-c-price>1 100</span> за м² на старті, капіталізація до <span class="num" data-c-cap>30</span>% до здачі.</p>
+  <div class="statrow settle lag2">
+    <div class="stat"><div class="sv num" data-c-m2>712</div><div class="sk">м² під бізнес</div></div>
+    <div class="stat"><div class="sv num" data-c-blocks>5</div><div class="sk">блоків з вітринами</div></div>
+    <div class="stat"><div class="sv num">$<span data-c-price>1 100</span></div><div class="sk">за м² на старті</div></div>
+  </div>
+</section>
+
+<section class="bridge" data-stage="5" data-screen-label="u2m stage 5 bridge">
+  <div class="bl"><span class="odo num" id="odo"></span><span>&nbsp;квартири на трьох поверхах.</span></div>
+  <p class="bsub">Обери свою квартиру. Далі на плані кожна окремо.</p>
+  <div class="forkline"></div>
+  <nav class="verbs">
+    <a class="verb" href="#pick-params"><span class="vt">За параметрами</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="verb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </nav>
+</section>
+
+</div>
+<nav class="rail" aria-label="Зібрання">
+  <button data-i="0" class="on">I</button>
+  <button data-i="1">II</button>
+  <button data-i="2">III</button>
+</nav>
+
+<script>
+const SMARTS = {"priceUsdPerM2":950,"commercial":{"totalM2":712,"openSpaceM2":668.72,"minBlockM2":100,"priceUsdPerM2":1100,"capitalizationPct":30,"blocks":[{"code":"C-01","m2":100},{"code":"C-02","m2":120},{"code":"C-03","m2":150},{"code":"C-04","m2":100},{"code":"C-05","m2":198.72}]},"floors":[{"id":"2","label":"2-й поверх"},{"id":"3","label":"3-й поверх"},{"id":"m","label":"Мансардний поверх"}],"types":{"smart-27":{"label":"Смарт 27 м²","m2":17.34,"livingM2":17.34,"bathM2":5.03,"hallM2":4.69,"totalM2":27.06},"smart-24":{"label":"Смарт 24 м²","m2":15.27,"livingM2":15.27,"bathM2":4.68,"hallM2":3.81,"totalM2":23.76}},"units":[{"code":"A2-01","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"A2-02","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"A2-03","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"A2-04","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-05","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-06","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-07","floor":"2","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"A2-08","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"A2-09","floor":"2","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"A2-10","floor":"2","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"A2-11","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"A2-12","floor":"2","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"A2-13","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-14","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-15","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"A2-16","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-17","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-18","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-01","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"A3-02","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"A3-03","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-04","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-05","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-06","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-07","floor":"3","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"A3-08","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"A3-09","floor":"3","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"A3-10","floor":"3","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"A3-11","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"A3-12","floor":"3","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"A3-13","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-14","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-15","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-16","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-17","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-18","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-01","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"Am-02","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"Am-03","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-04","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-05","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-06","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-07","floor":"m","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"Am-08","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"Am-09","floor":"m","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"Am-10","floor":"m","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"Am-11","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"Am-12","floor":"m","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"Am-13","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-14","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-15","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-16","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-17","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-18","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}}]}; /* embedded 1:1 from data/smarts-units.json; statuses and entry sums omitted: never used in UNITS */
+(function(){
+  'use strict';
+  var fmt = function(n){ return String(n).replace('.', ','); };
+  var units = SMARTS.units;
+  var n24 = units.filter(function(u){ return u.type === 'smart-24'; }).length;
+  var n27 = units.filter(function(u){ return u.type === 'smart-27'; }).length;
+  var fill = function(sel, v){ [].slice.call(document.querySelectorAll(sel)).forEach(function(e){ e.textContent = v; }); };
+  fill('[data-n24]', n24); fill('[data-n27]', n27); fill('[data-nall]', units.length);
+  fill('[data-a24]', fmt(SMARTS.types['smart-24'].totalM2)); fill('[data-a27]', fmt(SMARTS.types['smart-27'].totalM2));
+  fill('[data-r24]', fmt(SMARTS.types['smart-24'].m2)); fill('[data-r27]', fmt(SMARTS.types['smart-27'].m2));
+  fill('[data-c-m2]', SMARTS.commercial.totalM2); fill('[data-c-min]', SMARTS.commercial.minBlockM2);
+  fill('[data-c-price]', String(SMARTS.commercial.priceUsdPerM2).replace(/(\d)(\d{3})$/, '$1 $2'));
+  fill('[data-c-cap]', SMARTS.commercial.capitalizationPct); fill('[data-c-blocks]', SMARTS.commercial.blocks.length);
+
+  ['assets/plans-smarts/type-24-clean.webp','assets/plans-smarts/type-27-clean.webp',
+   'assets/renders-smarts/day-01-vitalnia.webp','assets/renders-smarts/day-04-vikno.webp',
+   'assets/plans-smarts/facade-commerce-clean.webp'].forEach(function(s){
+    var i = new Image(); i.src = s; if (i.decode) i.decode().catch(function(){});
+  });
+
+  [].slice.call(document.querySelectorAll('.s1 .rise')).forEach(function(el, i){
+    setTimeout(function(){
+      el.style.transition = 'opacity .9s var(--hs), transform .9s var(--hs)';
+      el.style.opacity = 1; el.style.transform = 'none';
+    }, 80 + i * 160);
+  });
+
+  var tiers = [].slice.call(document.querySelectorAll('.tier'));
+  var bridge = document.querySelector('.bridge');
+  var rail = [].slice.call(document.querySelectorAll('.rail button'));
+  var odoPlayed = false;
+
+  function onScroll(){
+    var vh = innerHeight;
+    var railOn = false, activeTier = -1;
+    tiers.forEach(function(t, i){
+      var r = t.getBoundingClientRect();
+      var owns = r.top <= vh * 0.4 && r.bottom > vh * 0.6;
+      if (r.top <= vh * 0.55) t.classList.add('live');
+      if (owns){ activeTier = i; railOn = true; }
+    });
+    var br = bridge.getBoundingClientRect();
+    if (br.top <= vh * 0.4){ railOn = false; playOdo(); }
+    document.body.classList.toggle('railon', railOn);
+    rail.forEach(function(b, i){ b.classList.toggle('on', i === activeTier); });
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(onScroll, 300);
+
+  rail.forEach(function(b){
+    b.addEventListener('click', function(){
+      var t = tiers[+b.dataset.i];
+      window.scrollTo({ top: t.offsetTop + 2, behavior: 'smooth' });
+    });
+  });
+
+  /* bridge odometer (stacked digit strips) */
+  var odo = document.getElementById('odo');
+  String(units.length).split('').forEach(function(d){
+    var col = document.createElement('span'); col.className = 'col';
+    for (var k = 0; k <= 9; k++){ var s = document.createElement('span'); s.textContent = k; col.appendChild(s); }
+    col.dataset.d = d;
+    odo.appendChild(col);
+  });
+  function playOdo(){
+    if (odoPlayed) return; odoPlayed = true;
+    [].slice.call(odo.children).forEach(function(col, i){
+      setTimeout(function(){ col.style.transform = 'translateY(' + (-col.dataset.d) + 'em)'; }, 120 + i * 140);
+    });
+  }
+
+  window.__unitsCount = function(){ return units.length; };
+})();
+</script>
+</body>
+</html>
