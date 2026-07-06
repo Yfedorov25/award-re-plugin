@@ -1,0 +1,83 @@
+/* ============================================================
+   PINNED-COUNTER-SLIDESHOW · component.css
+   ------------------------------------------------------------
+   Структурні хуки атома. Рух (blur/бар/ticks/follower) веде JS.
+   Живі величини AIR: бар лічильника 2px (counter__progress-bar),
+   line-ticks 2px (progress-bar__item-inner), tint за текстом = проєкт.
+   Застереження К1.7: горизонтальне обрізання у предків — ТІЛЬКИ
+   через clip (hidden-варіант ламає position:sticky).
+   ============================================================ */
+
+[data-pcs-layer] {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: clip;
+}
+
+[data-pcs-bg] {
+  position: absolute;
+  inset: 0;
+}
+[data-pcs-bg] img,
+[data-pcs-bg] .pcs-fill {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* тексти: стек в одній грід-клітинці (живий content-animation —
+   старий і новий співіснують під час свапу БЕЗ стрибка лейауту) */
+[data-pcs-card] { position: relative; z-index: 2; }
+[data-pcs-text] { grid-area: 1 / 1; }
+[data-pcs-text].is-off { visibility: hidden; }
+
+/* ---- лічильник-віджет (живий .counter): бар 2px + «N / M» ---- */
+[data-pcs-widget] { z-index: 3; }
+[data-pcs-bar-track] {
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(127, 127, 127, .25);
+}
+[data-pcs-bar] {
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform: translateX(-100%);
+  /* скраб: transform ставить JS у rAF — БЕЗ transition (закон перфи) */
+}
+
+/* follower-режим (живий cursor--counter): віджет липне до курсора */
+[data-pcs-widget].pcs-widget-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  margin: 14px 0 0 18px;      /* зсув від вістря курсора */
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform;
+}
+[data-pcs-widget].pcs-widget-cursor.pcs-widget-on { opacity: 1; }
+
+/* ---- моб line-ticks (живий progress-bar is-hidden--md-up) ---- */
+[data-pcs-ticks] {
+  display: none;
+  gap: 10px;
+}
+.pcs-touch [data-pcs-ticks] { display: flex; }
+.pcs-touch [data-pcs-widget] { display: none; }  /* лічильник схований на моб */
+.pcs-tick {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(127, 127, 127, .25);
+}
+.pcs-tick-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform: translateX(-100%);
+}
