@@ -1,0 +1,142 @@
+/* ============================================================
+   AIR-MENU-OVERLAY · component.css
+   ------------------------------------------------------------
+   Увесь рух живе ТУТ (JS тільки класи). Живі величини AIR:
+   фази 0.8s cubic-bezier(.7,0,.3,1); хедер 1.2s
+   cubic-bezier(.25,.74,.22,.99); бургер .6s cubic-bezier(.29,.73,.45,1);
+   панель md-up: frosted 68.57/31.43; моб: column-reverse stack.
+   Кольори/шрифти панелі = проєкт (лаба показує AIR-скін).
+   ============================================================ */
+
+:root.amo-lock { overflow: hidden; }
+
+/* ---- хедер (A-18): fixed + перефарбовування 1.2s air-bezier ---- */
+[data-amo-header] {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 30;
+  transition: background-color 1.2s cubic-bezier(.25,.74,.22,.99),
+              color 1.2s cubic-bezier(.25,.74,.22,.99);
+}
+
+/* ---- бургер: 2 спани → хрест (живий .icon-menu span) ---- */
+[data-amo-burger-lines] {
+  position: relative;
+  display: inline-block;
+  width: 16px; height: 10px;
+}
+[data-amo-burger-lines] i {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: currentColor;
+  transition: transform .6s cubic-bezier(.29,.73,.45,1);
+}
+[data-amo-burger-lines] i:first-child { top: 0; }
+[data-amo-burger-lines] i:last-child { bottom: 0; }
+.amo-burger-x [data-amo-burger-lines] i:first-child {
+  transform: translateY(4px) rotate(45deg);
+}
+.amo-burger-x [data-amo-burger-lines] i:last-child {
+  transform: translateY(-4px) rotate(-45deg);
+}
+
+/* ---- модал: двофазний ритуал (живі animation--modal-in/out) ---- */
+[data-amo-modal] {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+[data-amo-modal].amo-closed { visibility: hidden; }
+
+/* ЗАКРИТИЙ стан (= правила close-переходу):
+   панель/лого/спіраль гаснуть ОДРАЗУ, фон чекає .8s */
+[data-amo-bg] {
+  position: absolute; inset: 0;
+  opacity: 0;
+  transition: opacity .8s cubic-bezier(.7,0,.3,1) .8s;
+}
+[data-amo-bg-image],
+[data-amo-giant] {
+  position: fixed;
+  opacity: 0;
+  transition: opacity .8s cubic-bezier(.7,0,.3,1) 0s;
+}
+[data-amo-panel] {
+  position: relative;
+  opacity: 0;
+  transform: translateY(-30px); /* close: панель іде ВГОРУ (живий out--active) */
+  transition: opacity .8s cubic-bezier(.7,0,.3,1) 0s,
+              transform .8s cubic-bezier(.7,0,.3,1) 0s;
+}
+/* штрих: у повністю закритому стані панель чекає ЗНИЗУ (in--inactive) */
+[data-amo-modal].amo-closed [data-amo-panel] {
+  transform: translateY(30px);
+  transition: none;
+}
+
+/* ВІДКРИТИЙ стан (= правила open-переходу):
+   фон ОДРАЗУ, панель/лого/спіраль з delay .8s */
+.amo-open [data-amo-bg] {
+  opacity: 1;
+  transition-delay: 0s;
+}
+.amo-open [data-amo-bg-image],
+.amo-open [data-amo-giant] {
+  opacity: 1;
+  transition-delay: .8s;
+}
+.amo-open [data-amo-panel] {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: .8s, .8s;
+}
+
+/* ---- панель: живий .menu ---- */
+[data-amo-panel] {
+  display: flex;
+  border-radius: 5px;
+  overflow: clip;
+}
+@media (min-width: 769px) {
+  [data-amo-panel] {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  [data-amo-left] { flex: 0 0 68.571%; }
+  [data-amo-right] {
+    flex: 0 0 31.429%;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(127, 127, 127, .2);
+  }
+  [data-amo-card] + [data-amo-card] {
+    border-top: 1px solid rgba(127, 127, 127, .2);
+  }
+}
+
+/* ---- моб (T-M11): full-screen stack, CTA-плитки НАД списками ---- */
+@media (max-width: 768px) {
+  [data-amo-panel] {
+    flex-direction: column-reverse;   /* живий .menu n-md */
+    min-height: calc(100svh - 130px);
+    border-radius: 0;
+  }
+  [data-amo-right] {
+    display: flex;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 5px;
+  }
+  [data-amo-card] { flex: 1; aspect-ratio: 1.458; }
+  [data-amo-card] + [data-amo-card] {
+    border-left: 1px solid rgba(127, 127, 127, .2);
+  }
+  [data-amo-bg-image] { inset: 0; height: 100svh; }
+}
+
+/* активний пункт посірілий (T-M11: «ти вже тут») */
+[data-amo-item] a[aria-current] {
+  opacity: .35;
+  pointer-events: none;
+}
