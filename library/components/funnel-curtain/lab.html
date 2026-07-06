@@ -125,8 +125,9 @@
       spread = first.left < window.innerWidth * 0.12 && last.right > window.innerWidth * 0.88;
     }
     report.rise = { midTop: Math.round(midTop), inViewport: midTop > 0 && midTop < window.innerHeight,
-                    letters: spans.length, spread: spread };
-    ok = report.rise.inViewport && spans.length === 3 * 2 && spread && ok;
+                    letters: spans.length, spread: spread,
+                    giant: spans.length ? spans[0].getBoundingClientRect().height > window.innerWidth * 0.12 : false };
+    ok = report.rise.inViewport && spans.length === 3 && spread && report.rise.giant && ok;
 
     await p;
     var dur = performance.now() - t0;

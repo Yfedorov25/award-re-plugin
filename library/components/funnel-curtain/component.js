@@ -3,10 +3,13 @@
    ------------------------------------------------------------
    T-M29 чорна wordmark-штора фунела + T-530 flash-перехід дрілу.
    Контракт: D_AIR_mobile_video (dense tr-05..32, виміряно по кадрах):
-   тап [CHOOSE AN OFFICE ✛] → ЧОРНА панель їде знизу→вгору, на її
-   ВЕРХНІЙ КРОМЦІ їде розведений рядок «A I R A I R» (~1.2s підйом) →
-   повне покриття (тут свапається сторінка) → панель продовжує ВГОРУ,
-   знизу відкривається нова сторінка; повний ритуал ~2.2–2.5s.
+   тап [CHOOSE AN OFFICE ✛] → ЧОРНА панель їде знизу→вгору, у її
+   ВЕРХНІЙ частині їде ГІГАНТСЬКИЙ розведений рядок wordmark (~1.7s
+   підйом; плаваюча CTA-пілюля лишається видимою над кромкою) →
+   покриття → свап → швидкий вихід (~0.3s, нова сторінка вже стоїть);
+   повний ритуал ~2.2s. УТОЧНЕНО живим відео 2026-07-06 (2fps-розкладка
+   t22.6–25.0 MOBILE-air-4): «A I R A I R» ×2 і довгий вихід з тірдауна
+   НЕ підтвердились — один гігант-прохід, вихід швидкий.
    Це ДОВГИЙ брендовий ритуал входу у фунел — контраст зі швидкою
    білою міжсторінковою шторою T-M22 (~0.5s, окремий атом).
 
@@ -47,12 +50,12 @@
     options = options || {};
     var opt = {
       wordmark: options.wordmark || 'AIR',
-      repeat: options.repeat != null ? options.repeat : 2,
+      repeat: options.repeat != null ? options.repeat : 1, /* живе відео: ОДИН гігант-прохід (A I R ×2 з тірдауна не підтвердився) */
       bg: options.bg || '#111110',
       ink: options.ink || '#f4f2ee',
-      riseMs: options.riseMs != null ? options.riseMs : 1200,
-      holdMs: options.holdMs != null ? options.holdMs : 180,
-      exitMs: options.exitMs != null ? options.exitMs : 1050,
+      riseMs: options.riseMs != null ? options.riseMs : 1700, /* живе відео: підйом ~1.7s */
+      holdMs: options.holdMs != null ? options.holdMs : 140,
+      exitMs: options.exitMs != null ? options.exitMs : 320, /* живе відео: свап+вихід швидкий, список стоїть за ~0.3s */
       flashMs: options.flashMs != null ? options.flashMs : 450,
       zIndex: options.zIndex != null ? options.zIndex : 15
     };
@@ -74,14 +77,14 @@
         edge.className = 'fcr__edge';
         edge.style.cssText = 'position:absolute;top:0;left:0;right:0;' +
           'display:flex;justify-content:space-between;align-items:flex-start;' +
-          'padding:2.4vh 4vw 0;pointer-events:none';
+          'padding:5vh 4vw 0;pointer-events:none';
         var letters = String(opt.wordmark).replace(/\s+/g, '').split('');
         for (var r = 0; r < opt.repeat; r++) {
           letters.forEach(function (ch) {
             var s = doc.createElement('span');
             s.textContent = ch;
-            s.style.cssText = 'font-weight:300;line-height:1;letter-spacing:.04em;' +
-              'font-size:clamp(14px,2.2vw,24px);color:' + opt.ink;
+            s.style.cssText = 'font-weight:300;line-height:1;letter-spacing:.02em;' +
+              'font-size:clamp(64px,21vw,220px);color:' + opt.ink; /* ГІГАНТ як на живих кадрах */
             edge.appendChild(s);
           });
         }
