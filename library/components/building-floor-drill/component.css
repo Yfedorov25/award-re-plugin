@@ -1,0 +1,59 @@
+/* ============================================================
+   BUILDING-FLOOR-DRILL · component.css
+   Живі величини /visual-search (2026-07-06): плити/маркери/tooltip —
+   transition 0.6s cubic-bezier(.25,.74,.22,.99); clickable hover =
+   hsla(0,0%,100%,.4); не-clickable hovered = rgba(primary,.15);
+   маркер active = інверсія.
+   ============================================================ */
+
+[data-bfd] { position: relative; }
+[data-bfd] svg { display: block; width: 100%; height: auto; }
+
+/* плити: невидимі до hover (живий plan-hoverable) */
+.bfd-plate {
+  transition: fill .6s cubic-bezier(.25,.74,.22,.99),
+              opacity .6s cubic-bezier(.25,.74,.22,.99);
+  pointer-events: all;
+}
+.bfd-plate path, .bfd-plate polygon, .bfd-plate rect { fill: inherit; pointer-events: all; }
+.bfd-clickable { fill: hsla(0, 0%, 100%, 0); cursor: pointer; }
+.bfd-clickable.bfd-hovered { fill: hsla(0, 0%, 100%, .4); }   /* живий */
+.bfd-disabled { fill: rgba(17, 17, 16, 0); cursor: default; }
+.bfd-disabled.bfd-hovered { fill: rgba(17, 17, 16, .15); }    /* живий primary .15 */
+
+/* маркери веж (живий plan-marker--building) */
+[data-bfd-markers] { position: absolute; inset: 0; pointer-events: none; }
+.bfd-marker { position: absolute; transform: translate(-50%, -130%); }
+.bfd-marker-content {
+  display: inline-grid; place-content: center; min-width: 44px; padding: 10px 12px;
+  border: 1px solid rgba(17, 17, 16, .35); border-radius: 4px;
+  background: rgba(244, 242, 238, .9); color: #111110;
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  transition: color .6s cubic-bezier(.25,.74,.22,.99),
+              background-color .6s cubic-bezier(.25,.74,.22,.99),
+              border-color .6s cubic-bezier(.25,.74,.22,.99);
+}
+.bfd-marker-active .bfd-marker-content {   /* живий: інверсія */
+  background: #111110; border-color: #111110; color: #f4f2ee;
+}
+
+/* tooltip--floor (живий шаблон): картка праворуч від плити */
+[data-bfd-tooltip] {
+  position: absolute; transform: translate(14px, -50%);
+  min-width: 150px; padding: 14px 16px; border-radius: 4px;
+  background: rgba(244, 242, 238, .95); color: #111110;
+  box-shadow: 0 6px 30px rgba(17, 17, 16, .12);
+  opacity: 0; pointer-events: none;
+  transition: opacity .6s cubic-bezier(.25,.74,.22,.99);
+}
+[data-bfd-tooltip].bfd-tt-on { opacity: 1; }
+.bfd-tt-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1.6em; }
+.bfd-tt-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #6b6b68; }
+.bfd-tt-num { font-size: 30px; font-weight: 300; line-height: 1; }
+.bfd-tt-meta { margin-top: 8px; font-size: 12px; color: #55544f; }
+
+/* T-M32: моб — дрил не існує */
+.bfd-touch [data-bfd-svg],
+.bfd-touch [data-bfd-markers],
+.bfd-touch [data-bfd-tooltip] { display: none; }
+[data-bfd-mobile][hidden] { display: none; }
