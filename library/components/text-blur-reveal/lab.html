@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · text-blur-reveal · AIR reveal-канон (T-322 + T-M23)</title>
+<!--
+================================================================================
+  LAB: text-blur-reveal — ОСНОВНИЙ reveal-канон AIR (T-322)
+  Контракт: D_AIR_invest_1to1 §3.1/§6.1 — blur(10px)->0 + opacity, БЕЗ
+  y-зсуву, каскад за ордером 0.18s, 0.3s/елемент, once. Движок = бойовий
+  v3 з invest-комбо (вердикт «топ» 2026-07-05), систематизований атомом.
+
+  КОПІ = ДОСЛІВНІ еталони _COPY_CANON з invest--quiet-depth (нуль вигаданого).
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability: CLS < 0.1 + дрейф якоря <= 4px (2 виміри 300/900ms);
+  2. початковий каскад групи s0 ЧЕСНИЙ: лог ордерів монотонний, лаг
+     ордерів ~0.18s (+-90ms), нуль y-зсуву (top елемента стабільний +-1px
+     до/після reveal);
+  3. стрибок у середину -> через 350ms НУЛЬ [data-brv] у проміжних станах
+     (opacity 0.05..0.95 або blur 0.5..9.5px), стрибкова група у
+     gate.instant;
+  4. повний прохід: всі групи settled (runs=1), решта каскадом;
+  5. console errors == 0.
+  Живий перегляд (без ?probe) = НУЛЬ автоскролів (закон PROBE_MODE).
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --panel: #ececea; --dark: #161616;
+          --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  section { min-height: 92vh; padding: 12vh 6vw; display: flex;
+            flex-direction: column; justify-content: center; }
+  .lab-tag { position: fixed; top: 10px; left: 12px; z-index: 9;
+             font-size: 10px; letter-spacing: .14em; color: #999;
+             text-transform: uppercase; pointer-events: none; }
+
+  /* s0 — kicker + інтро (світло) */
+  #s0 .kicker { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+                color: #6b6b68; margin-bottom: 3vh; }
+  #s0 h1 { font-size: clamp(28px, 4.6vw, 64px); font-weight: 300;
+           line-height: 1.12; max-width: 30ch; }
+
+  /* s1 — темний акт: картки-титули + параграфи */
+  #s1 { background: var(--dark); color: #f2f1ee; }
+  #s1 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+              gap: 5vh 4vw; max-width: 1100px; }
+  #s1 h3 { font-size: 19px; font-weight: 400; margin-bottom: 1.6vh; }
+  #s1 p { font-size: 14px; font-weight: 300; line-height: 1.55; color: #c9c7c2; }
+
+  /* s2 — бенд-рядки (світло) */
+  #s2 .line { display: block; font-size: clamp(22px, 3.2vw, 44px);
+              font-weight: 300; line-height: 1.25; max-width: 34ch; }
+
+  /* s3 — службове число на панелі */
+  #s3 { background: var(--panel); align-items: flex-start; }
+  #s3 .kicker { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+                color: #6b6b68; margin-bottom: 3vh; }
+  #s3 .num { font-size: clamp(56px, 5.9vw, 96px); font-weight: 300; line-height: 1; }
+  #s3 .cap { font-size: 13px; color: #6b6b68; margin-top: 1.2vh; }
+  @media (max-width: 768px) { #s1 .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · text-blur-reveal · air t-322 + t-m23 · кінець проби внизу</div>
+
+<section id="s0">
+  <p class="kicker" data-brv data-brv-order="0">На цьому сайті лише перевірені цифри</p>
+  <h1 data-brv data-brv-order="1">Умови без дрібного шрифту</h1>
+</section>
+
+<section id="s1">
+  <div class="grid">
+    <div>
+      <h3 data-brv data-brv-order="0">Оплата</h3>
+      <p data-brv data-brv-order="1">Платите всю суму одразу та отримуєте знижку. З ремонтом під ключ, вхід від 22 800 доларів.</p>
+    </div>
+    <div>
+      <h3 data-brv data-brv-order="0">Розтермінування</h3>
+      <p data-brv data-brv-order="1">Графік платежів складаємо під ваш бюджет. Узгодимо розтермінування або знижку за повну оплату і забронюємо її за вами.</p>
+    </div>
+    <div>
+      <h3 data-brv data-brv-order="0">Супровід</h3>
+      <p data-brv data-brv-order="1">Наш менеджер веде вашу угоду до ключів. Підкажемо, яка квартира вам підійде. Особисто або відеозв'язком · як зручно Вам.</p>
+    </div>
+    <div>
+      <h3 data-brv data-brv-order="0">Строки</h3>
+      <p data-brv data-brv-order="1">Від старту до ключів менше року. Малий будинок на 3 поверхи будується швидко. Назвемо, коли зафіксуємо їх у документах.</p>
+    </div>
+  </div>
+</section>
+
+<section id="s2">
+  <span class="line" data-brv data-brv-order="0">Житла тут будують більше, ніж магазинів.</span>
+  <span class="line" data-brv data-brv-order="1">Цей розрив і є ваш прибуток.</span>
+</section>
+
+<section id="s3">
+  <p class="kicker" data-brv data-brv-order="0">Умови без дрібного шрифту</p>
+  <div class="num" data-brv data-brv-order="1">22 800</div>
+  <p class="cap" data-brv data-brv-order="2">доларів · вхід з ремонтом під ключ</p>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* ---- error counter (мережеві шуми file:// не рахуємо) ---- */
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  /* якір нуль-зсуву: top заголовка s0 ДО reveal */
+  var h1 = document.querySelector('#s0 h1');
+  var topBefore = h1.getBoundingClientRect().top;
+
+  var brv = window.TextBlurReveal.create('#s0, #s1, #s2, #s3', {});
+  window.__BRV = brv;
+
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function midStates() {
+    return Array.prototype.filter.call(document.querySelectorAll('[data-brv]'), function (el) {
+      var o = parseFloat(getComputedStyle(el).opacity);
+      var m = (getComputedStyle(el).filter || '').match(/blur\((\d+(?:\.\d+)?)px\)/);
+      var b = m ? parseFloat(m[1]) : 0;
+      return (o > 0.05 && o < 0.95) || (b > 0.5 && b < 9.5);
+    }).length;
+  }
+
+  var report = { stability: null, cascade: null, jump: null, settle: null, errors: null };
+  window.__LAB_REPORT = report;
+
+  async function probeStability() {
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = h1.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = h1.getBoundingClientRect().top;
+    var out = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    report.stability = out;
+    return out.ok;
+  }
+
+  async function probeCascade() {
+    /* s0 у в'юпорті з завантаження -> чесний каскад */
+    await delay(1300); /* 0 + lag*1 + dur = ~0.5s; запас на decode/arm */
+    var l = brv.log.filter(function (e) { return e.g === 's0'; });
+    var mono = l.length >= 2 && l.every(function (e, i) {
+      return i === 0 || e.order >= l[i - 1].order;
+    });
+    var lagOk = true;
+    if (l.length >= 2) {
+      var dt = l[1].t - l[0].t;
+      lagOk = dt > 90 && dt < 270; /* 0.18s +-90ms */
+    }
+    var topAfter = h1.getBoundingClientRect().top;
+    var noShift = Math.abs(topAfter - topBefore) <= 1.5;
+    var out = { entries: l.length, mono: mono, lagOk: lagOk, noShift: noShift,
+                ok: l.length >= 2 && mono && lagOk && noShift && brv.gate.groupRuns.s0 === 1 };
+    report.cascade = out;
+    return out.ok;
+  }
+
+  async function probeJump() {
+    /* стрибок у s2 -> instant, нуль проміжних станів */
+    var s2 = document.getElementById('s2');
+    window.scrollTo(0, s2.offsetTop - window.innerHeight * 0.3);
+    await delay(350);
+    var out = { mid: midStates(), instant: brv.gate.instant.indexOf('s2') >= 0,
+                ok: false };
+    out.ok = out.mid === 0 && out.instant;
+    report.jump = out;
+    return out.ok;
+  }
+
+  async function probeSettle() {
+    /* доскрол до кінця кроками -> все settled */
+    var max = document.body.scrollHeight - window.innerHeight;
+    var y = window.scrollY;
+    while (y < max) {
+      y = Math.min(y + window.innerHeight * 0.35, max);
+      window.scrollTo(0, y);
+      await delay(90);
+    }
+    await delay(900);
+    var out = { settled: brv.settled(), mid: midStates(),
+                runs: JSON.parse(JSON.stringify(brv.gate.groupRuns)) };
+    out.ok = out.settled && out.mid === 0;
+    report.settle = out;
+    return out.ok;
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; } /* без автоскролів */
+    var ok = true;
+    ok = await probeStability() && ok;
+    ok = await probeCascade() && ok;
+    ok = await probeJump() && ok;
+    ok = await probeSettle() && ok;
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:text-blur-reveal]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>
