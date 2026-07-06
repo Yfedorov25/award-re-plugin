@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЗБОРКА · about-air — сторінка /about (екзамен DoD №4)</title>
+<!--
+================================================================================
+  ЗБОРКА /about (фінал спринту-6). Акти в живому порядку /about:
+  hero-заголовок → лобі-факти (8m/680m² гігант-числа) → revolves-
+  карусель (T-119-переклад) → headquarters-слайдер (image-slider-wipe
+  3 слайди, живий №2 інстанс!) → ✛-пари (plus-toggle-cards) →
+  площі (area-tabs-accordion) → футер. Живі фото/копі hotlink.
+  ГЕЙТ: движки init, слайдер headquarters 3 слайди свапає, docHeight
+  стабільна, errors 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/revolves-carousel/component.css">
+<link rel="stylesheet" href="../../components/image-slider-wipe/component.css">
+<link rel="stylesheet" href="../../components/plus-toggle-cards/component.css">
+<link rel="stylesheet" href="../../components/area-tabs-accordion/component.css">
+<link rel="stylesheet" href="../../components/giant-number-fact/component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; overflow-x: clip; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 40; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  header.vs { position: sticky; top: 0; z-index: 25; display: flex; justify-content: space-between;
+    padding: 13px 3vw; background: rgba(244,242,238,.85); backdrop-filter: blur(10px); }
+  header.vs .logo { letter-spacing: .32em; font-weight: 500; }
+  .crumb { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8b8a86; }
+  .h1 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 300; text-transform: uppercase; line-height: 1.06; }
+  .spread { display: flex; justify-content: space-between; }
+  .act { padding: 10vh 3vw; max-width: 1200px; margin: 0 auto; }
+  .lead { font-size: 14px; line-height: 1.55; color: #6b6b68; max-width: 44ch; }
+  .facts { display: flex; gap: 6vw; margin-top: 5vh; }
+  .facts .gnf-num { font-size: clamp(40px, 5vw, 84px); font-weight: 300; line-height: 1; }
+  .facts .cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
+  /* headquarters слайдер */
+  #hq { background: #101112; color: #f2f1ee; }
+  #hq .act { max-width: none; padding: 10vh 0 0; }
+  #hq .head { padding: 0 3vw 5vh; max-width: 1200px; margin: 0 auto; }
+  .isw-row { display: flex; gap: 10px; height: 84svh; align-items: stretch; padding: 0 3vw; }
+  [data-isw-stage] { flex: 0 0 65%; border-radius: 6px; overflow: clip; }
+  .isw-card { flex: 1; display: flex; flex-direction: column; border-radius: 6px;
+    padding: 4vh 1.8vw; background: rgba(236, 235, 230, .12);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); color: #f2f1ee; }
+  .isw-counter { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4vh; }
+  .isw-counter [data-isw-count] { font-size: clamp(40px, 4.2vw, 78px); font-weight: 300; line-height: 1; }
+  .isw-counter [data-isw-total] { font-size: 13px; color: rgba(242,241,238,.5); }
+  .isw-texts { flex: 1; display: grid; align-content: center; }
+  .isw-texts p { font-size: 13.5px; font-weight: 300; line-height: 1.55; color: #c9c7c2; }
+  .isw-nav { display: none; }
+  @media (max-width: 768px) {
+    .isw-row { display: block; height: auto; padding: 0; }
+    [data-isw-stage] { border-radius: 0; overflow-x: scroll; overflow-y: hidden; }
+    .isw-strip [data-isw-slide] { height: 56svh; border-radius: 6px; overflow: clip; }
+    .isw-card { margin: 12px 4vw 0; padding: 3.2vh 5vw; }
+    .isw-counter { display: none; }
+    .isw-nav { display: flex; align-items: center; justify-content: center; gap: 18px;
+      margin-top: 2.4vh; padding-bottom: 3vh; }
+    .isw-nav button { width: 44px; height: 44px; border-radius: 4px;
+      border: 1px solid rgba(242,241,238,.3); background: none; color: #f2f1ee; font-size: 16px; }
+    .isw-nav .nn { font-size: 13px; color: #f2f1ee; min-width: 3.4em; text-align: center; }
+  }
+  /* ✛-пари */
+  [data-ptc] { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  [data-ptc-card] { min-height: 240px; border-radius: 6px; background: rgba(236,235,230,.9); }
+  [data-ptc-face] { height: 100%; padding: 20px; display: flex; flex-direction: column; }
+  [data-ptc-face] .ic { flex: 1; display: grid; place-items: center; font-size: 40px; font-weight: 200; color: #8b8a86; }
+  [data-ptc-face] [data-ptc-plus] { align-self: flex-end; }
+  [data-ptc-popup] { padding: 20px; background: rgba(236,235,230,.98); font-size: 12.5px; line-height: 1.5; color: #3c3b39; }
+  /* revolves */
+  [data-rvc-stage] { aspect-ratio: 1176 / 672; }
+  .rvc-bar { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .rvc-bar button.nav { width: 48px; height: 48px; border-radius: 4px; font-size: 18px;
+    border: 1px solid rgba(17,17,16,.3); background: none; cursor: pointer; }
+  [data-ata-panel] .inner { display: grid; grid-template-columns: 1fr auto; gap: 3vw; align-items: center; padding: 3vh 0; }
+  [data-ata-panel] img { width: min(420px, 100%); aspect-ratio: 540 / 420; object-fit: contain; background: #fff; border-radius: 4px; }
+  .giant { font-size: clamp(40px, 5.4vw, 88px); font-weight: 300; line-height: 1; }
+  footer { background: #0d0d0c; color: #8b8a86; padding: 6vh 3vw; display: flex;
+    justify-content: space-between; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="lab-tag">зборка · about-air · гортай поруч з живою /about</div>
+<header class="vs"><span class="logo">AIR</span><span class="crumb">Home / About the project</span></header>
+
+<div class="act">
+  <h2 class="h1 spread"><span>Headquarters</span><span>for</span><span>visionaries</span></h2>
+  <p class="lead" style="margin-top:4vh">The bespoke design by HAAST Architectural Bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
+  <div class="facts">
+    <div data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="8">0</div><p class="cap">m ceiling height above</p></div>
+    <div data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="680">0</div><p class="cap">m² maximum lobby area</p></div>
+  </div>
+</div>
+
+<div class="act">
+  <h2 class="h1" style="margin-bottom:4vh">Architecture that revolves</h2>
+  <div data-rvc id="rvc">
+    <div data-rvc-stage>
+      <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xxl/assets/images/media/about/5.revolves/image-1%40xxxl.webp" alt=""></figure>
+      <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xxl/assets/images/media/about/5.revolves/image-2%40xxxl.webp" alt=""></figure>
+      <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xxl/assets/images/media/about/5.revolves/image-3%40xxxl.webp" alt=""></figure>
+    </div>
+    <div class="rvc-bar">
+      <button class="nav" data-rvc-prev aria-label="previous">‹</button>
+      <span style="font-size:13px;color:#6b6b68"><b data-rvc-count style="font-weight:300;font-size:26px;color:#111110">1</b> <span data-rvc-total>/ 3</span></span>
+      <button class="nav" data-rvc-next aria-label="next">›</button>
+      <div data-rvc-thumbs></div>
+    </div>
+  </div>
+</div>
+
+<section id="hq" data-amo-theme="dark">
+  <div class="act">
+    <div class="head"><h2 class="h1 spread"><span>Headquarters</span><span>slider</span></h2></div>
+    <div id="isw">
+      <div data-isw-layer>
+        <div class="isw-row">
+          <div data-isw-stage id="iswStage">
+            <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-1%40xxxl.webp" alt=""></figure>
+            <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-2%40xxxl.webp" alt=""></figure>
+            <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xxl/assets/images/media/about/5.revolves/image-1%40xxxl.webp" alt=""></figure>
+          </div>
+          <div class="isw-card" data-isw-card>
+            <div data-isw-ticks style="color:#f2f1ee"></div>
+            <p class="isw-counter"><span data-isw-count>1</span><span data-isw-total>/ 3</span></p>
+            <div class="isw-texts">
+              <p data-isw-text>The 14-story tower is designed specifically as the headquarters of a large company and is fully autonomous.</p>
+              <p data-isw-text class="is-off">Its engineering systems are either independent, supplied via separate networks, or designed to be isolated when necessary.</p>
+              <p data-isw-text class="is-off">A company that establishes its headquarters in AIR's third tower can shape its own service infrastructure and management model.</p>
+            </div>
+            <div class="isw-nav">
+              <button data-isw-prev aria-label="previous">←</button>
+              <span class="nn"><span id="navCount">1</span> / 3</span>
+              <button data-isw-next aria-label="next">→</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="act">
+  <h2 class="h1" style="margin-bottom:4vh">Premium tech &amp; engineering</h2>
+  <div data-ptc id="ptc">
+    <article data-ptc-card>
+      <div data-ptc-face><p>Premium technologies</p><div class="ic">◍</div><span data-ptc-plus>✛</span></div>
+      <div data-ptc-popup>High-speed elevators with waiting under 40 seconds; spacious underground parking with 490 spaces; VIP elevators for top management; increased number of turnstiles.</div>
+    </article>
+    <article data-ptc-card>
+      <div data-ptc-face><p>Innovative engineering</p><div class="ic">⌘</div><span data-ptc-plus>✛</span></div>
+      <div data-ptc-popup>Dedicated service elevators; central air conditioning and ventilation systems; separate elevators for building operations and office servicing.</div>
+    </article>
+  </div>
+</div>
+
+<div class="act">
+  <h2 class="h1" style="margin-bottom:1vh">Optimal office solutions</h2>
+  <p class="lead" style="margin-bottom:4vh">Well-designed, functional layouts for maximum comfort and efficient use of space.</p>
+  <div data-ata id="ata">
+    <nav data-ata-tabs role="tablist"></nav>
+    <section data-ata-panel data-ata-label="79 м²"><div class="inner">
+      <img loading="lazy" alt="" src="https://aircenter.space/assets/images/offices/plans/k1/floor_9/1_9_18.svg">
+      <div class="giant">79<span style="font-size:14px"> м²</span></div>
+    </div></section>
+    <section data-ata-panel data-ata-label="136.1 м²"><div class="inner">
+      <img loading="lazy" alt="" src="https://aircenter.space/assets/images/offices/plans/k1/floor_9/1_9_20.svg">
+      <div class="giant">136.1<span style="font-size:14px"> м²</span></div>
+    </div></section>
+    <section data-ata-panel data-ata-label="220.4 м²"><div class="inner">
+      <img loading="lazy" alt="" src="https://aircenter.space/assets/images/offices/plans/k1/floor_11/1_11_46.svg">
+      <div class="giant">220.4<span style="font-size:14px"> м²</span></div>
+    </div></section>
+    <section data-ata-panel data-ata-label="340 м²"><div class="inner">
+      <img loading="lazy" alt="" src="https://aircenter.space/assets/images/offices/plans/k1/floor_7/1_7_3.svg">
+      <div class="giant">340<span style="font-size:14px"> м²</span></div>
+    </div></section>
+  </div>
+</div>
+
+<footer><span>Home / About</span><span>© 2026 Tekta Group</span></footer>
+
+<script src="../../components/revolves-carousel/component.js"></script>
+<script src="../../components/image-slider-wipe/component.js"></script>
+<script src="../../components/plus-toggle-cards/component.js"></script>
+<script src="../../components/area-tabs-accordion/component.js"></script>
+<script src="../../components/giant-number-fact/component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var api = {};
+  if (!touch && !reduced && window.Lenis) {
+    api.lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    (function raf(t) { api.lenis.raf(t); requestAnimationFrame(raf); })(0);
+  }
+  api.rvc = window.RevolvesCarousel.create('#rvc', {});
+  api.isw = window.ImageSliderWipe.create('#isw', { mobile: 'tap' });
+  api.ptc = window.PlusToggleCards.create('#ptc', {});
+  api.ata = window.AreaTabsAccordion.create('#ata', {});
+  api.gnf = Array.prototype.map.call(document.querySelectorAll('[data-gnf]'), function (el) {
+    return window.GiantNumberFact.create(el, {});
+  });
+  var navCount = document.getElementById('navCount');
+  var iswCount = document.querySelector('[data-isw-count]');
+  if (navCount && iswCount) new MutationObserver(function () {
+    navCount.textContent = iswCount.textContent;
+  }).observe(iswCount, { childList: true, characterData: true, subtree: true });
+  window.__ABOUT = api;
+
+  var report = { stability: null, engines: null, hq: null, docHeight: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function jump(y) { api.lenis ? api.lenis.scrollTo(y, { immediate: true }) : window.scrollTo(0, y); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(150);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('.h1');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    var doc1 = document.body.scrollHeight;
+    report.engines = {
+      rvc: !!(api.rvc && !api.rvc.error), isw: !!(api.isw && !api.isw.error),
+      ptc: !!(api.ptc && !api.ptc.error), ata: !!(api.ata && !api.ata.error),
+      gnf: api.gnf.length === 2, lenis: touch || !!api.lenis
+    };
+    ok = Object.keys(report.engines).every(function (k) { return report.engines[k]; }) && ok;
+
+    /* headquarters-слайдер: 3 слайди, свап на порозі */
+    if (!touch) {
+      var iswRoot = document.getElementById('isw');
+      var top = iswRoot.getBoundingClientRect().top + scrollY;
+      jump(top + (iswRoot.offsetHeight - innerHeight) * 0.5);
+      await delay(200);
+      var count = document.querySelector('[data-isw-count]').textContent;
+      jump(0);
+      await delay(300);
+      report.hq = { count: count, ok: count === '2' };
+      ok = report.hq.ok && ok;
+    } else { report.hq = { ok: true, skipped: 'touch' }; }
+
+    report.docHeight = { stable: Math.abs(document.body.scrollHeight - doc1) <= 2 };
+    ok = report.docHeight.stable && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[зборка:about-air]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>
