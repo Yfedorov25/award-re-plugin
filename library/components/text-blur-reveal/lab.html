@@ -124,7 +124,13 @@
   var h1 = document.querySelector('#s0 h1');
   var topBefore = h1.getBoundingClientRect().top;
 
-  var brv = window.TextBlurReveal.create('#s0, #s1, #s2, #s3', {});
+  /* вердикт-тюнінг: ?dur=&lag=&blur= (дефолти = бойові 0.3/0.18/10;
+     контракт AIR §3.1 виміряний = 0.5-0.8s/елемент, лаг 0.15-0.25s) */
+  var q = new URLSearchParams(location.search);
+  function num(k) { var v = parseFloat(q.get(k)); return isNaN(v) ? undefined : v; }
+  var brv = window.TextBlurReveal.create('#s0, #s1, #s2, #s3', {
+    duration: num('dur'), lag: num('lag'), blurFrom: num('blur')
+  });
   window.__BRV = brv;
 
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
