@@ -1,0 +1,12 @@
+{
+  "extends": "locmap-engine",
+  "variant": "air-dark",
+  "registry_ref": ["T-427", "T-104", "T-M20"],
+  "contract": "жива /location aircenter.space (live-archive 2026-07-06): темна векторна карта на plan-движку, AIR-плашка в центрі, фільтр категорій = radio-група popover (park/sport/bank/supermarket/consumer/restaurant) — вибір свапає маркер-сет; T-M20: стрічка [← PARKS ∨ →] + dropdown-up шит",
+  "params": {
+    "theme": { "value": "чорне поле #0d0d0c; вулиці сірі (#2a2b2d/#3a3c40), будівлі #1a1b1d, вода/зелень глухі; маркери білі, активний = інверсія; AIR-плашка біла рамка", "law": "жива темна векторна /location (кадри dref s-02) — карта ЧОРНА, не паперова" },
+    "categories": { "value": "Parks/Sport/Banks/Supermarkets/Consumer services/Restaurants — radio, вибір свапає набір маркерів", "law": "живий js-plan-filters (radio name=group, value=park/sport/bank/supermarket/...)" },
+    "poiList": { "value": "колонка INFRASTRUCTURE праворуч, вибрана категорія active", "law": "жива права колонка /location#map (кадри: PARKS/SPORT/BANKS/SUPERMARKETS/CONSUMER SERVICES/RESTAURANTS AND COFFEE)" },
+    "route": { "value": "клік POI → маршрут малюється + live-лічильник хвилин (движок базовий)", "law": "T-427 (закритий locmap-engine); на моб число СТАТИЧНЕ (T-M26)" }
+  }
+}
