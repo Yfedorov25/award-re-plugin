@@ -1,4 +1,74 @@
 {
+  "budget-pills-bridge": {
+    "id": "budget-pills-bridge",
+    "name": "Budget pills bridge (AIR B4-міст: 2-3 бюджет-пілюлі з deep-link пре-фільтром ціни ?price[from]&price[to] у каталог; конверсійний шов після кожної моделі стратегії)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "BudgetPillsBridge.create(target, opts)  // target = <nav data-bpb data-bpb-base> з <a data-bpb-pill data-from data-to>; opts: { base ('#каталог' - заглушка до появи каталога) }. Компонент лише збирає href-и та плюс-іконки; стани = CSS.",
+      "module": "iife",
+      "returns": "{ root, pills, links(), destroy, ready }"
+    },
+    "meaning": {
+      "what": "Ряд із 2-3 бюджет-пілюль після моделі стратегії (контракт D_AIR_invest_1to1 §1 B4): кожна = deep-link у каталог із пре-фільтром ціни `?price[from]=F&price[to]=T` - дослівний query-контракт, знятий зі статус-бара AIR (живе підтвердження A-12/T-409). Висота ~4.4vh, плюс-іконка праворуч, на мобайлі тап-таргет ≥44px. Секція не розповідає - вона продає конкретний зріз інвентаря.",
+      "when": "Конверсійний місток одразу після доказового біта (модель стратегії, кейс-таблиця): читач щойно побачив числа - дай йому один тап у каталог уже відфільтрований під його бюджет. Контракт повторює міст після КОЖНОЇ моделі.",
+      "lands": "Під таблицею три тихі пілюлі з бюджетами. Тап - і каталог відкривається вже з твоїм ціновим зрізом: нуль форм, нуль питань, шлях від доказу до інвентаря за один жест.",
+      "not_when": "Без каталога-приймача у проді (заглушка тільки для бази/лаб - контракт лінка задокументований, приймач = visual-search наступних хвиль). Як заміна повної фільтр-панелі T-409 (це швидкий вхід, не фільтри). Діапазони, не прив'язані до реального інвентаря (F1: межі = інтерфейс, але якорі - з канону)."
+    },
+    "source": {
+      "grammar": "AIR /investment B4 «CHOOSE AN OFFICE»: UP TO 50 MILLION / 50-150 MILLION / 150+ MILLION, плюс-іконки, deep-link offices?price[from]&price[to] у статус-барі; повторюється після Rental Income і після Asset Resale",
+      "recording": "skills/teardowns/references/D_AIR_invest_1to1.md (§1 B4, §6.8: deep-link підтверджено живцем) + D_AIR_mobile_video.md (§5 f208-210: 3 pill-діплінки за бюджетом)",
+      "registry_ref": [
+        "T-409"
+      ]
+    },
+    "stack": "vanilla (нуль GSAP - стани CSS, механіки руху нема)",
+    "webgl": false,
+    "motion_props": [],
+    "trigger": "клік/тап пілюлі = навігація по deep-link (подієвий атом)",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "conversion",
+      "bridge"
+    ],
+    "combines_with": [
+      "case-tabs-table",
+      "invest-card-reveal",
+      "conversion-quiet-gate"
+    ],
+    "anti_combos": [],
+    "gated_by": [
+      "R_perf_limits"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "PROBE_MODE (закон кола): проби лише при navigator.webdriver/?probe; живий перегляд без автоскролів",
+      "loadStability (D14): head-inline перший кадр; CLS < 0.1 + дрейф якорів ≤ 4px за 1s",
+      "DEEP-LINK КОНТРАКТ: рівно 3 пілюлі; кожен href = base + `price[from]=F&price[to]=T` з числами розмітки, ДОСЛІВНИЙ синтаксис дужок як в AIR (проба перевіряє формат параметрів на stub-base '#каталог')",
+      "ФОРМА: пілюля (border-radius ≥ висота/2 − 1, C12); висота ≈4.4vh на десктопі (±1.2vh) і ≥44px на мобайлі; 3 плюс-іконки; один ряд на десктопі (top-и ±2px)",
+      "КОНТРАСТ тексту пілюлі проти зблендованого філу ≥ 4.5:1",
+      "гігієна: сторінка без x-переповнення; текст-ректи ≥ 16px; console errors == 0; __LAB_OK__ лише від lab (B15)"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "gate": {
+      "probe": "Відкрий lab.html?probe (або headless). __LAB_OK__ true після stability/links/shape/contrast пакетів (__PROBE = href-и і габарити). Живий перегляд: під CTA-рядком «Обрати місце в ряду» три пілюлі з бюджетами; ховер трохи темнішає; статус-бар показує ?price[from]=…&price[to]=…"
+    },
+    "note": "|",
+    "_path": "library/components/budget-pills-bridge/",
+    "_variantsResolved": []
+  },
   "cards-swipe": {
     "id": "cards-swipe",
     "name": "Pinned cinematic deck-swipe",
@@ -89,6 +159,87 @@
         "extends": "cards-swipe"
       }
     ]
+  },
+  "case-tabs-table": {
+    "id": "case-tabs-table",
+    "name": "Case tabs table (AIR B3 MODEL-механіка: CASE-таби tap-свапають цілий датасет кросфейдом 0.3s із накладеними значеннями, таблиця 5 рядків + результат-пари; T-M19 = read-only пресети без слайдерів)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "CaseTabsTable.create(target, opts)  // target = порожній [data-ctt]; opts: { cases:[{tab, head, rows:[{label,value}], result:[{label,value}]}], active (0), duration (0.3s, контрактне вікно 0.25-0.35), ease ('out-quad') }. Лейбли рядків МУСЯТЬ збігатися між кейсами.",
+      "module": "iife",
+      "returns": "{ root, index, cases, els, setCase(i), destroy, ready }"
+    },
+    "meaning": {
+      "what": "Біла CASE-картка стратегічної моделі (контракт D_AIR_invest_1to1 §1 B3): таби-клітинки з label 11px CAPS верх-ліво (актив = ЧОРНИЙ border-bottom 2px на всю клітинку, неактив = сіра hairline), head 1.9vw зліва + таблиця 5 рядків праворуч (10px сірий лейбл / 12px чорне значення right-aligned, hairline, крок ~5.6vh) + результат-пари 1.9vw. Клік таба свапає ЦІЛИЙ датасет кросфейдом 0.3s: привид старого значення накладений на нове мід-флайт (§3.3, виміряно покадрово), нуль layout-зсуву. Тільки opacity (D4), textContent лише при зміні (D6). T-M19: слайдерів НЕ існує - read-only пресети, full-width таблиця, числа справа.",
+      "when": "Модель стратегії/пропозиції з 2-3 фіксованими кейсами, кожен зі своїм датасетом (площа, вхід, умови): смарт 24 проти 27 метрів, квартира проти таунхауса. Ядро стратегічної машини B3-B5. Бери, коли дані читаються таблицею і порівняння = один тап.",
+      "lands": "Тап по другому кейсу, і вся картка перескладається без жодного смикання: старі числа ще мить просвічують крізь нові, як подвійна експозиція, ряди стоять мертво на місці. Читається як інженерний документ, що вміє дихати.",
+      "not_when": "Живий розрахунок зі слайдерами (T-416 range-калькулятор - інший атом, і на мобайлі він усе одно гине в таб-пресети). Дохідність/окупність БЕЗ даних замовника - F7 забороняє; атом нічого не рахує, він показує дане. Більше ~6 рядків або різна структура між кейсами (це вже дві різні картки). Один кейс (просто таблиця)."
+    },
+    "source": {
+      "grammar": "AIR /investment B3: CASE 1|CASE 2 картка (OFFICE 110.6 ⇄ 84.7 м², кросфейд чисел накладенням, чорний border-bottom 2px) + мобільний закон T-M19 (таб-пресети замість слайдерів, sticky-spy пара - справа комбо)",
+      "recording": "skills/teardowns/references/D_AIR_invest_1to1.md (§1 B3, §3.3, §6.2 tab-crossfade чисел - кандидат T-ID) + D_AIR_mobile_video.md (§5 f181-207: read-only пресети, числа right-aligned)",
+      "registry_ref": [
+        "T-433",
+        "T-416",
+        "T-M19"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 (лише opacity-твіни свопу; без ScrollTrigger, без Lenis)",
+    "webgl": false,
+    "motion_props": [
+      "opacity"
+    ],
+    "trigger": "клік/тап таба (подієвий атом; нуль скролу, нуль піна)",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "proof",
+      "conversion"
+    ],
+    "combines_with": [
+      "budget-pills-bridge",
+      "giant-number-fact",
+      "spread-row-headline"
+    ],
+    "anti_combos": [
+      "range-sliders-on-touch",
+      "second-count-engine-in-beat"
+    ],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "PROBE_MODE (закон кола 2026-07-05): сценарні проби ТІЛЬКИ при navigator.webdriver або ?probe; живий перегляд без автоскролів",
+      "loadStability (D14): head-inline scrollRestoration manual + top + overflow-anchor none; CLS < 0.1 (буферизований layout-shift спостерігач з <head>) + дрейф якорів ≤ 4px за 1s",
+      "ГЕОМЕТРІЯ контракту: 2 таби рівної ширини (±2px); актив = border-bottom 2px темний, неактив = 1px hairline; head ≈1.9vw (±0.3); РІВНО 5 рядків із кроком ≈5.6vh (±1.5); праві кромки значень вирівняні (±2px); результат ≈1.9vw",
+      "КОНТРАСТ: лейбли І значення проти картки ≥ 4.5:1 (WCAG relative luminance, машинно)",
+      "СВОП-ДРАЙВ (B14): клік таба → на 120ms привиди НАКЛАДЕНІ на живий текст (opacity живого < 0.95) → на 450ms датасет доїхав (head + значення), привидів 0, ряди не зсунулись (±1px), aria-selected переїхав; зворотний своп працює",
+      "D6-дисципліна свопу: привидяться ЛИШЕ змінені слоти (у lab-датасеті head + Площа = рівно 2 привиди; незмінні значення не перемальовуються)",
+      "мобільний гейт (≤768px) = T-M19: НУЛЬ input[type=range]; таби на всю ширину картки; тап-таргети ≥ 44px; своп із тапа працює; сторінка без x-переповнення; текст-ректи ≥ 16px",
+      "чесність даних (F1/F7): атом не рахує нічого; lab живиться лише канон-числами (ЕТ-06/09/03/25) - нуль оренди, нуль окупності",
+      "console errors == 0; __LAB_OK__ виставляє лише lab (B15)"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "gate": {
+      "probe": "Відкрий lab.html?probe (або headless). __LAB_OK__ true після stability/geometry/contrast/swap пакетів (window.__PROBE = числа). Живий перегляд без ?probe: гортай до білої картки на сірій панелі, тапни «27 метрів» - весь датасет перескладається накладеним кросфейдом, ряди не смикаються; на 390x844 таби на всю ширину, слайдерів нема."
+    },
+    "note": "|",
+    "_path": "library/components/case-tabs-table/",
+    "_variantsResolved": []
   },
   "circular-ui-language": {
     "id": "circular-ui-language",
@@ -560,6 +711,173 @@
     "_path": "library/components/frame-scrub-img/",
     "_variantsResolved": []
   },
+  "giant-number-fact": {
+    "id": "giant-number-fact",
+    "name": "Giant number-fact (AIR T-422: гігантське число ~20-28vw з людським підписом; T-304: докрутка лічильником ОДИН раз на в'їзді; D6: DOM пишеться лише при зміні)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "GiantNumberFact.create(target, opts)  // target = [data-gnf] з [data-gnf-num data-gnf-value data-gnf-decimals] + [data-gnf-unit] + [data-gnf-label]. opts: { value (дефолт з data-gnf-value), decimals (0), duration (1.6s), ease ('air'), slidePx (80), start ('top 78%'), trigger:'scroll'|'manual' }.",
+      "module": "iife",
+      "returns": "{ el, num, value, stats, played, play(), refresh(), destroy(), ready }"
+    },
+    "meaning": {
+      "what": "ОДНЕ гігантське число-факт (clamp ~20-28vw, дефолт clamp(72px, 21vw, 360px)) з малою версальною одиницею на базовій лінії і людським підписом під ним. Коли секція в'їжджає у в'юпорт (once:true, 'top 78%'), блок в'їжджає (translateY + opacity) і число докручується лічильником 0 → значення house ease-ом. ОДИН раз - скрол геть і назад НЕ передокручує. D6-закон лічильника: textContent пишеться ЛИШЕ коли відформатований рядок змінився; stats {ticks, writes} відкриті для машинної проби. Формат = копі-канон: тисячі нерозривним пробілом (22 800), десяткові комою (1,5); tabular-nums проти тремтіння, негативний трекінг великого кегля (C27). У markup стоїть ФІНАЛЬНЕ число - no-JS/reduced-motion правда без скриптів.",
+      "when": "Один факт, який мусить ударити масштабом: ціна входу, хвилини до міста, метри, сотки. AIR ставить такі числа в lifestyle-слайди (400 STORES, 3 MIN WALK); EVR докручує їх лічильником на розділювачах (T-321). Бери, коли в біті РІВНО ОДНА величина (закон копі-канону: одна величина на одометр-рил) і їй потрібен весь кадр.",
+      "lands": "Секція відкривається, і замість абзацу в очі їде число на пів-екрана, яке докручується до значення і стає: 22 800. Маленький підпис під ним каже, ЩО це. Число прочитане тілом раніше, ніж головою - і воно більше не смикається, скільки не гортай.",
+      "not_when": "3-6 точок даних, кожній свій кадр (stat-odometer - пінований степер). Службові лічильники N/6 (C22 - заборонені). Фонова ghost-цифра як декор (C22: гігант-фон = шум). Датасет без чисел (C26: не вигадуй числовий хребет). Кілька величин в одному рилі (канон: одна величина). Число, що мусить жити в matching/таблиці - там звичайна типографіка."
+    },
+    "source": {
+      "grammar": "AIR — гігантські числа в lifestyle-слайдах (T-422); EVR — count-up гігант-факт на розділювачах (T-321 = T-304 + T-422)",
+      "recording": "skills/teardowns/references/D_AIR_video.md (§Драматургія п.4: гігантські числа «400 STORES», «3 MIN WALK») + _REGISTRY_TID T-422/T-304/T-321",
+      "registry_ref": [
+        "T-422",
+        "T-304"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger (once-тригер; без Lenis - атом не володіє скролом)",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "ScrollTrigger once:true 'top 78%' (число в'їжджає ОДИН раз); або trigger:'manual' - інтегратор кличе play() у своїй партитурі",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "proof",
+      "divider"
+    ],
+    "combines_with": [
+      "invest-card-reveal",
+      "spread-row-headline",
+      "theme-tween",
+      "section-rise-into-view"
+    ],
+    "anti_combos": [
+      "numeral-odometer-roll",
+      "second-count-engine-in-beat"
+    ],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "C27-масштаб машинно: computed font-size числа ≥ 18% ширини в'юпорта; letter-spacing НЕГАТИВНИЙ; tabular-nums увімкнений",
+      "ДРАЙВ реальним скролом (B14): секцію довезено у в'юпорт → семпли textContent на 120/300/800ms: значення ростуть монотонно, на 120ms докрутка ще НЕ доїхала; settled ДОСЛІВНО == «22 800» (тисячі нерозривним пробілом - формат канону)",
+      "блок доїхав: opacity 1, transform identity; bbox числа ПОВНІСТЮ у в'юпорті (гігант, що ріжеться краєм = провалений гігант)",
+      "десяткова кома канону: інстанс 1,5 settled ДОСЛІВНО == «1,5»",
+      "D6 машинно: інстанс value=5 - stats.writes ≤ 7 ПРИ stats.ticks > writes (лічильник пише DOM лише при зміні відформатованого рядка)",
+      "ONCE: скрол геть і назад - stats.ticks НЕ виросли, текст стоїть фінальним (число не смикається)",
+      "рух ТІЛЬКИ transform/opacity на блоці + textContent лічильника (D4/D6); нуль CSS transition на керованих властивостях (D3); NO mix-blend / NO backdrop / NO WebGL",
+      "мобільний гейт (≤768px, проба 390x844): число вміщається (bbox.left ≥ 16px, right ≤ vw - одиниця переноситься під число flex-wrap-ом, не ріже екран); докрутка і settled «22 800»; та сама D6-проба; сторінка ≤8 екранів, проміжки ≤1.5 екрана, текст-ректи left ≥ 16px",
+      "no-JS / reduced-motion / no-GSAP / NaN-value = СТАТИЧНА ПРАВДА: фінальне число з markup стоїть без руху, нуль трігерів",
+      "__LAB_OK__ виставляє ЛИШЕ lab після всіх проб + console errors == 0; на десктопі - десктопний пакет, на ≤768px - мобільний (B15: гейт не бреше)"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "gate": {
+      "probe": "Відкрий lab.html (desktop). __LAB_OK__ true лише після проб (window.__PROBE = семпли докрутки в часі + scale/D6/once числа). Гортай: рендер → «Ціна входу»: 22 800 доларів в'їжджає і докручується один раз → рендер → темний акт «Свій двір»: 1,5 сотки (кома канону) → «Дорога»: 5 хвилин до Вінниці → рендер → хвіст. Прокрути назад і знову вниз: числа НЕ смикаються (once). На 390x844: число тримається в екрані, одиниця переноситься під нього."
+    },
+    "note": "|",
+    "_path": "library/components/giant-number-fact/",
+    "_variantsResolved": []
+  },
+  "invest-card-reveal": {
+    "id": "invest-card-reveal",
+    "name": "Invest card reveal (AIR T-430: темна картка переваги мовчить, ховер/фокус піднімає титул і розкриває повний текст під ним; mobile T-M18 = морозна scroll-snap стрічка поверх темного макро, текст відкритий одразу)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "InvestCardReveal.create(target, opts)  // target = контейнер із [data-icr-card] (кожна картка: [data-icr-index] + [data-icr-title] + [data-icr-body]) або одна картка. opts: { mode:'auto'|'desktop'|'mobile', mobileBreakpoint (768), duration (0.55s), ease ('air'), gapPx (18 - повітря між піднятим титулом і тілом) }.",
+      "module": "iife",
+      "returns": "{ cards, mode, track, open(i), close(i), toggle(i), isOpen(i), measure(), refresh(), destroy(), ready }"
+    },
+    "meaning": {
+      "what": "Desktop: темна картка переваги, яка МОВЧИТЬ - у спокої видно лише малий індекс угорі та короткий версальний титул, притиснутий до низу. Ховер (або клавіатурний фокус - a11y) піднімає титул на виміряний lift і під ним розкривається повний текст: clip-path inset зверху-вниз + opacity, з волоском-лінією scaleX. Картка НЕ міняє розмір - грід заморожений, bbox-перетин відкритої картки з сусідами = 0 (C28). Тільки transform / opacity / clip-path (D4), house ease інлайновано (D13). Mobile ≤768px (T-M18, з реального телефонного запису AIR): ховер-розкриття ВБИТЕ - картки стають горизонтальною scroll-snap стрічкою морозних (frosted glass) карток поверх темного архітектурного макро-фото host-розмітки; титул зверху, ПОВНИЙ текст видимий одразу знизу, сусідня картка виглядає з-за краю як свайп-кью. Нема ні ховера, ні тапа для розкриття - свайп замість ховера.",
+      "when": "Секція переваг/умов інвест-регістру: 3-5 коротких сильних тез, кожна з одним реченням-доказом, який НЕ мусить кричати з екрана. AIR тримає на цьому весь /investment: HIGH DEMAND / STRONG TENANT BASE / TENANTS CORE. Бери, коли секція має звучати стримано і глибина повинна відкриватись на дотик - титул продає, текст доводить.",
+      "lands": "Ряд темних мовчазних карток читається як стриманий факт-лист; наводиш курсор - титул м'яко відпливає вгору, під ним домальовується волосок і проступає одне точне речення. Прибрав курсор - картка знову мовчить. На телефоні глибина не ховається, а ЇДЕ: морозні картки свайпаються поверх макро-фактури, наступна вже визирає з-за краю. Секція шепоче, а не перелічує.",
+      "not_when": "Довгі тексти (3+ речення): картка перетворюється на акордеон - бери facilities-hover-accordion або звичайний текст-блок. Контент, який мусить бути видимим без взаємодії на десктопі (юридичні умови, ціни - F3). Список без коротких титулів-тез. Курсорні тултіпи для конверсійних даних (C13 - там постійні пілюлі-якорі). Світла секція: картка задумана темною (T-430 = 'темна картка переваги'); на світлому перевизнач --icr-bg/--icr-ink свідомо. Морозна стрічка без темного СТАТИЧНОГО фото за нею: backdrop-filter над скрабленою/canvas поверхнею заборонений (D2 - виняток T-M18 діє лише над статичним фото)."
+    },
+    "source": {
+      "grammar": "AIR /investment — темні картки переваг із ховер-розкриттям тексту (секція, яку власник назвав топ: лаконічно, стримано, глибоко); мобільна граматика = морозна свайп-стрічка з реального телефонного запису",
+      "recording": "skills/teardowns/references/D_AIR_video.md (§Інше /investment) + D_AIR_architecture §3 /investment + D_AIR_mobile_video.md (§5 /INVESTMENT f169-180: 5 карток = морозна свайп-стрічка, ховер вбитий; §1.6 district-числа f61-72: та сама механіка)",
+      "registry_ref": [
+        "T-430",
+        "T-M18"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 (без ScrollTrigger - подієвий атом, нуль скролу; мобільна стрічка = нативний snap-скрол без GSAP)",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity",
+      "clip-path"
+    ],
+    "trigger": "hover + keyboard focus (desktop) / горизонтальний scroll-snap свайп (mobile ≤768px, T-M18 - текст відкритий, розкриття не існує); нуль ScrollTrigger, нуль pin",
+    "timing_layer": [
+      "A-ambient"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "proof"
+    ],
+    "combines_with": [
+      "giant-number-fact",
+      "spread-row-headline",
+      "theme-tween",
+      "section-rise-into-view"
+    ],
+    "anti_combos": [
+      "interiors-cards-cursor",
+      "cursor-tooltip-on-conversion-data",
+      "backdrop-over-scrubbed-surface"
+    ],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "закрита правда на ВСІХ картках перед будь-яким драйвом (desktop): тіло невидиме (opacity ≤ 0.05 + clip-path повністю закритий), титул притиснутий до низу картки",
+      "ДРАЙВ-інтеракція (B14): lab САМ диспатчить mouseenter на СЕРЕДНІЙ картці ряду (C28 - ніколи на крайній) і семплить opacity тіла на 120/300/800ms - розкриття монотонне і на 120ms ще НЕ доїхало; settled: opacity ≥ 0.99, clip відкритий",
+      "титул піднявся рівно на виміряний lift (bodyH + gapPx, знятий у measure() після fonts.ready, ніколи в кадрі - D6): |shift − lift| ≤ 3px",
+      "C28: bbox відкритої картки перетинає bbox ОБОХ сусідів на 0 px² (картка не міняє розмір - грід заморожений); тіло повністю всередині картки",
+      "mouseleave повертає мовчання (тіло знову невидиме); card.focus() відкриває так само як ховер, blur() закриває (a11y-пакет)",
+      "GSAP керує ТІЛЬКИ transform / opacity / clip-path (D4); нуль CSS transition на цих властивостях (D3); NO mix-blend / NO WebGL; overflow clip, не hidden (К1.7)",
+      "мобільний гейт (viewport ≤768px, проба 390x844) = T-M18-пакет: mode==='mobile' і host зібраний у .icr-swipe; текст КОЖНОЇ картки відкритий ОДРАЗУ (нуль ховера/тапа для розкриття); трек переповнений і РЕАЛЬНО свайпається (драйв scrollLeft→200 = зміщення відбулось); снап існує (scroll-snap-type x, кожна картка snap-align); свайп-кью: ширина картки ≤ 90% трека; жодна картка не обрізана по тексту (Range-ректи титулу й тіла всередині bbox картки); горизонтальний скрол ТІЛЬКИ всередині трека (сторінка без x-переповнення); морозне скло (computed backdrop-filter blur) над реально завантаженим макро-фото",
+      "мобільна сторінка ≤7 екранів, проміжки ≤1.5 екрана, текст-ректи (Range) left ≥ 16px",
+      "no-JS / reduced-motion / no-GSAP = СТАТИЧНА ПРАВДА: повний текст видимий у природному потоці (CSS-дефолт без .icr-wired), нуль слухачів",
+      "__LAB_OK__ виставляє ЛИШЕ lab після всіх проб + console errors == 0; на десктоп-в'юпорті - десктопний пакет, на ≤768px - T-M18-пакет (B15: гейт не бреше)"
+    ],
+    "verify": "lab.html#__LAB_OK__",
+    "gate": {
+      "probe": "Відкрий lab.html (desktop). __LAB_OK__ true лише після драйв-проб (window.__PROBE = семпли opacity в часі + lift/shift числа + overlap площа). Гортай: рендер-секція → темна секція: kicker «На цьому сайті лише перевірені цифри» + 4 мовчазні картки (Статус / Двір / Рендери / Дати, ЕТ-29) → наведи на будь-яку: титул відпливає вгору, волосок домальовується, речення проступає → прибери курсор: картка знову мовчить → Tab по картках: фокус розкриває так само → рендер-секція → хвіст. На 390x844: картки = морозна стрічка поверх макро-фото, текст відкритий, свайп із снапом, сусідка визирає з-за краю; ховер/тап нічого не розкривають (нема чого)."
+    },
+    "note": "|",
+    "_path": "library/components/invest-card-reveal/",
+    "_variantsResolved": []
+  },
   "media-step-switch": {
     "id": "media-step-switch",
     "name": "Full-bleed media+text stepper (film/quote)",
@@ -581,7 +899,7 @@
       "grammar": "QUADRO slide-lab — msw4a film/quote: a pinned full-bleed media stepper whose text steps are four DIFFERENT typographic types woven with a looping lite-video beat (the cinematic in-place counterpart to the pin-less stacked-pairs rhythm)",
       "recording": "apps/quadro/public/slide-lab/msw4a-film-quote.html",
       "registry_ref": [
-        "T-310"
+        "x:pinned-media-stepper, точний T-ID уточнюється у спринті-0 (хибний T-310 знятий 2026-07-05)"
       ]
     },
     "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis 1.1.13",
@@ -1460,6 +1778,92 @@
     ],
     "verify": "lab.html#__LAB_OK__",
     "_path": "library/components/slide-out-img-text/",
+    "_variantsResolved": []
+  },
+  "spread-row-headline": {
+    "id": "spread-row-headline",
+    "name": "Spread-row headline (AIR act-divider: зібране слово-речення роз'їжджається до країв ряду ~96vw за РЕАЛЬНИЙ прохід секції крізь в'юпорт; mobile T-M01 = лівий 2-рядковий wrap по ЯВНІЙ смисловій парі)",
+    "level": 1,
+    "kind": "component",
+    "status": "official",
+    "entry": {
+      "call": "SpreadRowHeadline.create(target, opts)  // target = заголовок зі смисловими парами <span data-srh-group> (без груп = один блок). opts: { section (елемент/селектор секції-пасу C21; дефолт host.closest('[data-srh-section]')), spreadWidth, convergeAnchor, stagger, wordGapEm (дефолт 0.14 - майже впритул), ease, direction, start, end (override; без них - пас секції 'top top'→'bottom bottom'), trigger:'scroll'|'progress', mode:'auto'|'desktop'|'mobile', mobileBreakpoint, manageLenis }.",
+      "module": "iife",
+      "returns": "{ words, lines, groups, mode, trigger, set(p), measure(), refresh(), destroy(), ready }"
+    },
+    "meaning": {
+      "what": "Act-подія, не скромний заголовок. 2-4 слова акту при p=0 стоять ЗІБРАНИМ словом-реченням у центрі ряду (майже впритул, wordGapEm 0.14), при p=1 - розведені до країв ряду ≥90% ширини в'юпорта (flex space-between = CSS-правда). Прогрес = РЕАЛЬНИЙ прохід секції-пасу крізь в'юпорт (C21): атом бере [data-srh-section] (~200vh) і скрабить 'top top'→'bottom bottom', тобто p=(-rect.top)/(rect.height-vh). Ряд (з kicker) у CSS sticky-обгортці 100vh тримається по центру в'юпорта ПРОТЯГОМ УСЬОГО проходу - слова супроводжують весь акт, рух активний на всьому пассі, нуль мертвих зон і нуль порожніх кольорових смуг (C22). transform translateX ONLY, split по СЛОВАХ, персловний stagger із house ease всередині sub-window.",
+      "when": "Системний act-розділювач МІЖ великими медіа-блоками сторінки: коротка декларативна теза 2-4 КОРОТКИХ слова (E11). Фізика амплітуди: довгі слова з'їдають розмах - для act-події бери сумарно ~12-14 літер на 3 слова, тоді зібраний кластер ≤55% ряду і spread-дельта пробиває 40% vw. На AIR цей прийом несе ВСІ межі актів (8+ ужитків): THE MOMENTUM · TO RISE HIGHER, KEY ADVANTAGES, INVESTMENT STRATEGIES.",
+      "lands": "Межа акту читається як подія з примруженими очима (squint): компактне слово-речення прилипає по центру екрана і слова розлітаються на сотні пікселів до країв, поки акт проходить повз - рядок стає архітектурною лінією на всю ширину екрана і супроводжує глядача весь прохід. Скрол назад збирає фразу знову - рух реверсивний, як розворот книги.",
+      "not_when": "Довгі заголовки (5+ слів або 20+ літер): кластер стає ширшим за пів-ряду, амплітуда гине, подія деградує в ледь помітний зсув (провал v1 цього ж атома). Hero-слово з kinetic-літерами (T-301-клас). Секція, де той самий текст уже скрабить інший рушій (R_timing_layers). На мобайлі spread не живе (T-M01): атом сам колапсує у лівий стек по ЯВНІЙ смисловій парі, роль act-розділювача віддай інверсії фону (T-M07)."
+    },
+    "source": {
+      "grammar": "AIR — act-divider spread-row (8+ uses)",
+      "recording": "~/.claude/plugins/cache/award-re-plugin/award-re/1.7.0/skills/teardowns/references/D_AIR_video.md (§2 spread-row системний прийом; AIR MOBILE таблиця desktop→mobile: spread втрачено → лівий 2-рядковий wrap по смисловій парі)",
+      "registry_ref": [
+        "T-310",
+        "T-M01"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger (+ guarded Lenis 1.1.13)",
+    "webgl": false,
+    "motion_props": [
+      "transform"
+    ],
+    "trigger": "one scroll-scrub ScrollTrigger по секції-пасу (scrub:true, БЕЗ GSAP pin; вертикальне утримання ряду в кадрі = CSS sticky-обгортка host-розмітки 100vh, пін-бюджет цілий), reversible; або ручний set(p) (trigger:'progress')",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "owns_scroll": false,
+    "page_beat": [
+      "section-announce",
+      "divider"
+    ],
+    "combines_with": [
+      "theme-tween",
+      "editorial-act-crossfade",
+      "section-rise-into-view",
+      "scroll-hint-descending-tick"
+    ],
+    "anti_combos": [
+      "pin",
+      "letter-split",
+      "second-scrub-on-same-text"
+    ],
+    "gated_by": [
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "АМПЛІТУДА (C21, машинний анти-регрес): spread-дельта bbox слів (last.right − first.left) між p=0 і p=1 ПЕРЕВИЩУЄ 40% ширини в'юпорта на ОБОХ демо-актах; перше слово проїжджає ≥15% vw (виміряно 1440x900: дельта 683.6px = 47.5% vw і 654.6px = 45.5% vw, прохід 342/327px)",
+      "прогрес = РЕАЛЬНИЙ прохід секції-пасу крізь в'юпорт (C21): trigger = [data-srh-section] ~200vh, scrub 'top top'→'bottom bottom' ≡ p=(-rect.top)/(rect.height−vh); рух активний на ВСЬОМУ пассі, нуль мертвих зон 0-25% та 75-100%",
+      "STICKY-СУПРОВІД (v3, C22-порожнеча): ряд слів разом із kicker у CSS sticky-обгортці 100vh (top:0, grid-центр) тримається вертикально по центру в'юпорта ПРОТЯГОМ УСЬОГО проходу 1800px; БЕЗ GSAP pin (owns_pin false, пін-бюджет цілий), sticky-тір 100vh = innerHeight (B14), предки sticky без overflow-x:hidden (К1.7 - тільки clip)",
+      "DEAD-BAND СКАН (машинний анти-регрес, урок v2): прохід усієї сторінки кроком 300px - якщо акт-секція покриває >60% в'юпорта, ряд слів МУСИТЬ перетинати зону 60..(vh−60); нуль мертвих смуг (v2 мав 8, v3 = 0) + перевірка ланцюга предків на overflow-x:hidden",
+      "масштаб (C27): при p=1 розведений ряд ≥90% ширини в'юпорта, edge-lock ±3px (перше слово в лівому краї ряду, останнє в правому); негативний трекінг великого кегля на host",
+      "converge при p=0 = зібране слово-речення: кластер ≤55% ряду, КОЖЕН міжслівний зазор ≤max(22px, 0.22em) (майже впритул), центр кластера в центрі ряду (±10%)",
+      "bbox-проби на 5 позиціях [0/.25/.5/.75/1] треку: ПОВНИЙ bbox КОЖНОГО слова всередині в'юпорта на всіх 5 позиціях (sticky тримає ряд у кадрі весь трек); порядок слів збережений, перекриття сусідів = 0 (B14)",
+      "lab-контекст (C11): розділювач стоїть МІЖ full-bleed медіа-секціями (реальні рендери через symlink renders/, домашній патерн бібліотеки), не в океані порожнечі; хвіст = малий маркер одразу після останньої сусід-секції, не мертвий екран",
+      "мобільний гейт (viewport ≤768px, проба 390x844, клас К1): сторінка ≤7 екранів (секції короткі, без десктопного runway), жоден проміжок між контент-блоками >1.5 екрана, текст-ректи (Range) із safe-padding bbox.left ≥16px, акт центрований вертикально в секції (симетрія ±15%)",
+      "T-M01 семантичний wrap: мобільні рядки = ТОЧНО ЯВНІ пари [data-srh-group] з markup (ніколи механічний авто-перенос), кожен рядок без внутрішнього wrap - проба звіряє textContent рядків із парами; форсований 360px бокс: рівно 2 лівих статичних рядки, без transform, без переповнення, БЕЗ pin (C7)",
+      "split ПО СЛОВАХ, ніколи по літерах (D12); fonts.ready ПЕРЕД вимірюванням; геометрія знімається в measure()/onRefresh, ніколи в кадрі (D6)",
+      "transform translateX ONLY на .srh-word; НУЛЬ CSS transition на scroll-керованих властивостях (D3); NO mix-blend / NO backdrop / NO WebGL; owns_pin false - вертикальне утримання ряду в кадрі робить CSS sticky host-розмітки, не transform і не GSAP pin",
+      "reduced-motion / no-GSAP / <2 слів -> статичний spread (CSS-правда), нуль трігерів",
+      "__LAB_OK__ виставляє ЛИШЕ lab після всіх гео-проб + console errors == 0; на десктоп-в'юпорті - десктопний пакет, на ≤768px - мобільний пакет М1-М7 (B15: гейт не бреше)"
+    ],
+    "gate": {
+      "probe": "Відкрий lab.html (desktop). __LAB_OK__ true лише після гео-проб (window.__PROBE = повний звіт зі spread-числами на 5 позиціях + dead-band скан). Гортай: рендер-секція → акт I (light): зібране «ЧАС РОСТИ ВИЩЕ» прилипає по центру екрана і слова розлітаються до країв протягом усього проходу 200vh - жодної порожньої смуги → рендер → акт II (dark, theme-flip): «НОВИЙ ТИП ДОМУ» те саме на темній поверхні → рендер → 360px бокс тримає «У ЦЕНТРІ / ЖИТТЯ» без руху → малий маркер-хвіст. Скрол назад збирає фрази знову. Відкрий на 390x844: акти колапсують у лівий семантичний стек, сторінка ~4 екрани без мертвих зон, __PROBE.mobilePage показує цифри."
+    },
+    "note": "|",
+    "_path": "library/components/spread-row-headline/",
     "_variantsResolved": []
   },
   "stacked-pairs": {
@@ -5932,6 +6336,234 @@
     "_path": "library/combos/interiors-cards-cursor/",
     "_variantsResolved": []
   },
+  "invest--quiet-depth": {
+    "id": "invest--quiet-depth",
+    "name": "Інвест-акт AIR 1-в-1, хвиля 1 (B0 карусель переваг з cursor-arrow T-432 + B1 spread-row бенд + B2 інтро + число 5.9vw на світлій панелі без лічильника; reveal = blur-проявлення; mobile = морозна свайп-стрічка T-M18)",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "invest: карусель темних карток переваг + типографічний бенд-шов + службове число на світлій панелі + одна тиха дія",
+    "page_beat": "proof",
+    "meaning": {
+      "what": "Покадрова репліка AIR /investment за контрактом D_AIR_invest_1to1 (хвиля 1, біти B0-B2 + число-фрагмент B3). B0: темний акт #0c0d0c з інтро-рядком і КАРУСЕЛЛЮ ≥4 темних карток 43.5vw x 51vh (#191b19, gap 1.6vw, радіус 0): титул 1.5vw CAPS верх-ліво, параграф 0.86vw CAPS сірий у нижній правій колоні, ЗАВЖДИ видимий. T-432 cursor-arrow: вся картка = клік-зона; за курсором їде біла плитка 48px (gsap.quickTo), ліва половина картки = стрілка-вліво і prev, права = стрілка-вправо і next; у спокої плитка припаркована на стику карток напівпрозорою. B1: білий spread-row бенд 14vh (атом spread-row-headline, статичний розведений стан). B2: центрований підпис 2 рядки 1vw. B3-lite: світла панель #ececea зі СЛУЖБОВИМ числом 5.9vw БЕЗ лічильника + тиха pill-CTA. Весь текст входить blur(10px)-у-різкість + opacity БЕЗ y-руху, каскадом 0.18s. Шви: dim-scrim на виїзді медіа-сусіда + blur-у-різкість медіа-вхід. Нуль пінів.",
+      "when": "Інвест/умови-біт преміум RE-сторінки, який мусить звучати як AIR: стримані темні картки-докази в каруселі, типографічний бенд-шов і службова цифра на світлому. Це секція, яку власник назвав топ («максимально круто, лаконічно, стримано і глибоко») - тепер зібрана за виміряним контрактом, не за мотивами.",
+      "lands": "Світлий рендер притемнюється і йде під чорний акт; повз їдуть великі мовчазні картки, за курсором пливе біла стрілка, яка сама знає, куди ви хочете гортнути. Білий бенд розрізає темряву двома розведеними словами. Далі світла панель говорить одним службовим числом. Текст ніде не в'їжджає - він ПРОЯВЛЯЄТЬСЯ з розмиття, як фокус об'єктива.",
+      "not_when": "Біт із наративом на кожен пункт (там пінований степер benefit-wipe-band). Конверсійний гейт із формою (conversion-quiet-gate). Сторінка, де сусідні акти теж темні (C8: акт живе від світлих медіа-сусідів). Датасет без канонічного числа (C26). Тач-перший контекст без десктопа - T-432 живе лише з курсором (на тачі його нема: свайп-стрічка)."
+    },
+    "source": {
+      "grammar": "AIR /investment 1-в-1: покадровий контракт D_AIR_invest_1to1.md (4 відео 2026-07-05, базис 1280x712) + owner hover-тест (81 кадр): T-430 ховер-розкриття НЕ існує, текст карток видимий завжди, реальна ховер-механіка = T-432 cursor-arrow",
+      "recording": "skills/teardowns/references/D_AIR_invest_1to1.md (§1 B0-B3, §3 хореографія, §4 ховер-стани, §5 шви, §7 диф-таблиця, §8 правки) + D_AIR_mobile_video.md §5 (T-M18) + KAI/ingest/AIR-HARVEST-PLAN.md",
+      "registry_ref": [
+        "T-432",
+        "T-422",
+        "T-310",
+        "T-511",
+        "T-M18"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 + ScrollTrigger (+ quickTo для T-432) + guarded Lenis 1.1.13 (Lenis лише для живого перегляду, після проб). No build.",
+    "webgl": false,
+    "theme": {
+      "skin": "dark-to-light",
+      "book_end": false
+    },
+    "ease": "out-quad",
+    "motion_props": [
+      "transform",
+      "opacity",
+      "clip-path",
+      "filter"
+    ],
+    "owns_pin": false,
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "uses": [
+      {
+        "atom": "spread-row-headline",
+        "params": {
+          "trigger": "progress",
+          "set": 1
+        },
+        "job": "B1 бенд: статичний розведений стан (конвергенції на записі НЕ видно, §9 контракту); мобайл = T-M01 лівий семантичний стек"
+      },
+      {
+        "atom": "invest-card-reveal",
+        "params": {
+          "mode": "mobile-only"
+        },
+        "job": "ТІЛЬКИ мобільна гілка T-M18 (морозна снап-стрічка поверх macro-pergola). Desktop-ховер атома НЕ вмикається: owner hover-тест довів, що T-430 розкриття в AIR не існує; десктоп-карусель + T-432 = механіка комбо за контрактом"
+      },
+      {
+        "atom": "reveal",
+        "params": {
+          "character": "blur(10px) у різкість + opacity, БЕЗ y-руху, каскад 0.18s, once, гейт на decode медіа"
+        },
+        "job": "entrance-шар усіх текстів (§3.1 контракту)"
+      },
+      {
+        "atom": "theme-flip",
+        "params": {
+          "rhythm": "світле медіа + dim-scrim → чорний акт → білий бенд → світла панель → фото blur-у-різкість"
+        },
+        "job": "ритм тем і шви (§0/§5 контракту)"
+      }
+    ],
+    "combines_with": [
+      "spread-row-headline",
+      "conversion-quiet-gate"
+    ],
+    "anti_combos": [
+      "stat-odometer",
+      "media-step-switch",
+      "cards-swipe",
+      "scroll-scrubbed-blur"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html",
+      "renders"
+    ],
+    "acceptance": [
+      "МЕДІА-ГЕЙТ (дефект v1): вхідна хореографія стартує ЛИШЕ після img.decode() ключових зображень + входу біта у в'юпорт (IntersectionObserver, once); машинно: __GATE.decodeT ≤ __GATE.firstRevealT і всі ключові img complete на момент першого reveal",
+      "КАРУСЕЛЬ-ГЕОМЕТРІЯ за контрактом (§1 B0): картка 43.5vw x 51vh (±0.6vw/±1.5vh), gap 1.6vw (±0.3), ≥4 карток, стартова активна left ≈26.5vw (±1); плитка-стрілка 48x48px (±2) припаркована на стику карток (x ≈65.7vw ±1.5, ~63% висоти ±8%) напівпрозорою (alpha < 0.5); текст карток видимий (opacity ≥ 0.9, нуль clip)",
+      "T-432 ДРАЙВ (B14): у спокої НУЛЬ active/hover-станів; mousemove на правій половині картки → плитка активна (біла, luma > 0.85), гліф «вправо», СЛІДУЄ за курсором (quickTo, зміщення ≥60px за другим рухом); клік → трек У РУСІ на 140ms і рівно -45.1vw (±1) на 550ms (0.45s ease-out, §3.2), нуль layout-зсуву; ліва половина → гліф «вліво», клік → назад до 0; prev на idx 0 = clamp (нічого); mouseleave → плитка паркується на стик і гасне",
+      "BLUR-REVEAL (§3.1 + доктрина-виняток D4): до входу елемент blur(10px) + opacity 0; на семплі в польоті blur МІЖ 0 і 10; settled blur 0 + opacity 1; rect.top елемента незмінний ±1px (проявлення БЕЗ руху); каскад-лаги з __REVEAL_LOG у 0.1-0.35s; повторний в'їзд групу НЕ перезапускає (once); will-change знімається по завершенню (D5)",
+      "ЧИСЛО (§7 диф): 5.9vw (±0.6) на світлій панелі luma 0.8-0.95, БЕЗ count-up - textContent «22 800» ДОСЛІВНО незмінний на всіх семплах під час reveal; негативний трекінг; bbox у кадрі",
+      "БЕНД B1 (§1): слово-ліво від краю ≈1.6vw (±0.8), слово-право до ≈98.4vw (±0.8), кегль ≈4.5vw (±0.5), висота ≈14vh (±3); ІНТРО B2: 2 рядки, центр ±2vw, кегль ≈1vw",
+      "ШВИ (§5): dim-scrim - opacity скрабом 0 → ≈0.18 пропорційно виїзду медіа A (семпли 0 / 0.03-0.16 / 0.12-0.24); медіа B входить blur ≥5px → 0 (0.8s, once); center-band wipe = N/A чесно (носій-слайдер у комбо відсутній)",
+      "CTA: РІВНО ОДИН лінк-пілюля зі стрілкою (E13/C14/C12); DEAD-BAND скан (біт >60% екрана ⇒ контент у зоні 60..vh−60) = 0 смуг (C22)",
+      "Д1 (v3): після завершення reveal КОЖЕН текст картки computed opacity === '1' І WCAG-контраст title+body проти ЕФЕКТИВНОГО фону картки (rgba-поверхня, зблендована над фоном акту) ≥ 4.5:1 - машинний розрахунок relative luminance",
+      "Д2 (v3): сумарна площа bbox титул+body ≥ 15% площі картки НА КОЖНІЙ картці (контрактний орієнтир 17-28% при 5-7 рядках AIR-тексту; канон-копі коротша - поріг 15% зафіксовано чесно); поверхня картки напівпрозора (alpha 0.6-0.97) над реально завантаженим темним рендером (render-through)",
+      "Д3 (v3, C28): bbox-перетин плитки-стрілки з УСІМА текстами карток = 0 у парковці та в 5 settled-позиціях слідування (включно з наведенням прямо на body-зону - вертикальний кламп тримає плитку у вільній смузі між титулом і body); контрактна парковка 63% перевіряється проти РЕАЛЬНОЇ геометрії текстів і за перетину чесно піднімається в центр вільної смуги; damping quickTo 0.42s",
+      "Д4 (v3): reveal = ОДИН каскад на секцію (лаги за data-brv-order); секція, пройдена/досягнута стрибком (delta > 0.45vh на подію) чи мідскролом при старті - рендериться МИТТЄВО settled, без анімації (рейс-стійке рішення: старт групи відкладено на 1 кадр, щоб scroll-подія встигла позначити стрибок); ПРОБА: стрибок у середину → через 300ms НУЛЬ [data-brv] у проміжних станах (opacity 0.05..0.95 або blur 0.5..9.5px), видиме settled, майбутнє чесно сховане; повільний прохід (кроки 0.38vh) → b3 проходить ЧЕСНИЙ каскад і settled ≤ 2s після входу",
+      "мобільний гейт (≤768px, 390x844): плитка-стрілка display:none (T-432 курсор-only); T-M18-пакет стрічки: текст відкритий, свайп-драйв, снап x, кью ≤0.9, no-cut, frost blur над macro-PERGOLA (дефект v1: чистий темний кадр) з tint ≥0.5, сторінка без x-переповнення; бенд = T-M01 стек «Ваш»/«прибуток» без transform; число «22 800» незмінне, ≥30px, у кадрі; медіа-гейт; 1 лінк; ≤8.5 екрана; проміжки ≤1.5 екрана; текст-ректи ≥16px; нуль active-станів",
+      "рух: transform / opacity / clip-path + filter ЛИШЕ як one-shot text/media-entrance blur (доктрина-виняток D4: time-based ≤0.3s на текст-елемент, НІКОЛИ не scroll-scrubbed; медіа-вхід 0.8s за контрактом §3.6); нуль пінів (§3.8); NO mix-blend / NO WebGL; console errors == 0; __LAB_OK__ виставляє лише lab (B15)"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "gate": {
+      "probe": "Відкрий combo-lab.html (desktop, сервер бібліотеки 8820). __LAB_OK__ true лише після повного пакета (window.__PROBE = gate/theme/scrim/carousel/t431/band/intro/number/reveal/mediaB/cta/deadBands з числами). Гортай: світлий рендер притемнюється scrim-ом → чорний акт: інтро-рядок і карусель великих мовчазних карток; поводи курсором по картці - біла плитка їде за ним і показує «вліво/вправо» по половинах, клік гортає трек; → білий бенд «ВАШ / ПРИБУТОК» → центрований підпис → світла панель: kicker, число 22 800 (проявляється з розмиття, НЕ докручується), пілюля CTA → фото-тераса входить розмитою і різкішає → хвіст. На 390x844: стрічка T-M18 поверх тихого макро-pergola, бенд колапсує у стек, стрілки нема."
+    },
+    "note": "|",
+    "_path": "library/combos/invest--quiet-depth/",
+    "_variantsResolved": []
+  },
+  "invest--strategy-machine": {
+    "id": "invest--strategy-machine",
+    "name": "Стратегічна машина продажу (AIR B3-B5: sticky-рейка 23vw + МОДЕЛЬ 1 case-таби + budget-міст + МОДЕЛЬ 2 другий датасет + міст 2; mobile T-M19 = закріплена знизу spy-пара)",
+    "level": 2,
+    "kind": "combo",
+    "status": "official",
+    "section_job": "invest-стратегії: навігаційний хребет із 2 моделей, кейс-таблиці на табах і конверсійні мости в каталог після кожної моделі",
+    "page_beat": "proof",
+    "meaning": {
+      "what": "Машина продажу за контрактом D_AIR_invest_1to1 B3-B5, що йде ПІСЛЯ official-акту invest--quiet-depth (B0-B2). Ліва STICKY-РЕЙКА 23vw (пункт = «МОДЕЛЬ N» 10px + hairline + назва 20px; актив чорний, неактив #8a8a88; клік = плавний anchor-скрол; єдиний sticky сторінки, нуль пінів §3.8) + світла панель #ececea від 34.4vw: МОДЕЛЬ 1 (шапка титул+параграф → case-tabs-table, датасет smart 24/27) → BUDGET-МІСТ (повторюється після КОЖНОЇ моделі: CTA-титул + 3 пілюлі deep-link ?price[from]&price[to]) → МОДЕЛЬ 2 (ТОЙ САМИЙ атом, датасет tauny «квартира проти таунхауса») → міст 2. Reveal = анти-стрибковий blur-каскад на секцію (стрибок/мідскрол = settled миттєво). Mobile T-M19: рейка гине → ЗАКРІПЛЕНА ЗНИЗУ пара «1. | 2.» = scroll-spy (підкреслення само переїжджає) і tap-навігація; таби свапають read-only датасети, слайдерів не існує.",
+      "when": "Після інвест-акту B0-B2, коли треба ДОВЕСТИ пропозицію числами і дати готовий вхід у каталог: 2-3 моделі покупки, кожна зі своїм кейс-датасетом. Це конверсійне ядро сторінки /invest за AIR-драматургією.",
+      "lands": "Рейка тримається збоку всю дорогу і сама знає, де ви: назва моделі чорніє, щойно її таблиця в'їжджає в кадр. Тап по кейсу перескладає числа подвійною експозицією, а під кожною моделлю три тихі пілюлі вже тримають відфільтрований каталог. Читається як інструмент, не як сторінка.",
+      "not_when": "Без даних замовника на другу модель (одна модель = просто case-tabs-table без машини). Дохідність/окупність без даних (F7 - машина показує канон-факти, не рахує відсотки). Сторінка, де вже є інший sticky-хребет у тому ж прогоні (рейка = єдиний sticky, H11). Перед актом B0-B2 (машина = продовження, не вхід)."
+    },
+    "source": {
+      "grammar": "AIR /investment B3-B5: sticky-рейка MODEL 1/MODEL 2 з anchor #strategy-2 і перемиканням активу; CASE-картка; budget-міст після кожної моделі; мобільний T-M19 sticky-spy низ",
+      "recording": "skills/teardowns/references/D_AIR_invest_1to1.md (§1 B3-B5, §3 хореографія, §5 шви, §8 P0-P1) + D_AIR_mobile_video.md (§5 f181-210: T-M19 пара-spy + таб-пресети + pill-діплінки)",
+      "registry_ref": [
+        "T-416",
+        "T-409",
+        "T-434",
+        "T-M19"
+      ]
+    },
+    "stack": "vanilla + GSAP 3.12.5 (opacity-свопи атома + blur-reveal шар); без ScrollTrigger і Lenis - скрол нативний, spy = rAF-слухач з D6-записами",
+    "webgl": false,
+    "theme": {
+      "skin": "light",
+      "book_end": false
+    },
+    "ease": "out-quad",
+    "motion_props": [
+      "opacity",
+      "transform",
+      "filter"
+    ],
+    "owns_pin": false,
+    "pin": {
+      "owner": "none",
+      "count": 0
+    },
+    "uses": [
+      {
+        "atom": "case-tabs-table",
+        "params": {
+          "model1": "smart 24/27 (ЕТ-06/09/03/25)",
+          "model2": "tauny квартира-таунхаус (ЕТ-07/08/13/18/19/29)",
+          "duration": 0.3
+        },
+        "job": "обидві МОДЕЛІ: CASE-таби свапають цілий датасет накладеним кросфейдом; T-M19 read-only пресети"
+      },
+      {
+        "atom": "budget-pills-bridge",
+        "params": {
+          "base": "#каталог (stub)",
+          "ranges": "0-30000 / 30000-70000 / 70000-200000 навколо канон-якорів 22 800 і 67 000"
+        },
+        "job": "конверсійний міст після КОЖНОЇ моделі: deep-link ?price[from]&price[to] (A-12/T-409)"
+      },
+      {
+        "atom": "reveal",
+        "params": {
+          "character": "blur(10px) у різкість, ≤0.3s/елемент, лаг 0.18s, once; стрибок >0.45vh/подію або мідскрол = settled миттєво (рейс-стійкий settle)"
+        },
+        "job": "анти-стрибковий entrance-шар секцій машини"
+      }
+    ],
+    "combines_with": [
+      "invest--quiet-depth",
+      "conversion-quiet-gate",
+      "spread-row-headline"
+    ],
+    "anti_combos": [
+      "stat-odometer",
+      "media-step-switch",
+      "second-sticky-spine-in-run"
+    ],
+    "gated_by": [
+      "R_pin_budget",
+      "R_anti_combos",
+      "R_theme_flow",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "files": [
+      "RECIPE.md",
+      "combo-lab.html",
+      "renders"
+    ],
+    "acceptance": [
+      "PROBE_MODE (закон кола 2026-07-05): сценарні проби лише при navigator.webdriver/?probe; живий перегляд без автоскролів",
+      "loadStability (D14): head-inline перший кадр + overflow-anchor none; CLS < 0.1 + дрейф якорів (model-1/model-2/рейка) ≤ 4px за 1s",
+      "РЕЙКА за контрактом: left ≈1.6vw (±0.9), ширина ≈23vw (±1.6); контент-колона від ≈34.4vw (±2.2); панель luma 0.8-0.95; sticky тримає top 0±2px на обох моделях (висота рейки ≤ vh, B14); актив-пункт слідує за скролом (на моделі 1 чорніший пункт 1, на моделі 2 - пункт 2); клік пункту = плавний anchor-скрол до моделі (JS-smooth, НЕ глобальний CSS)",
+      "АТОМИ: модель 1 свапає 24→27 і назад; модель 2 = ІНШИЙ датасет (таби «Коробка з сусідами за стіною»/«Дім із двором і своїм входом», своп на «Таунхаус 82 м²»); нуль layout-зсуву (проба атома)",
+      "МОСТИ: РІВНО 2 екземпляри по 3 пілюлі; кожен href містить price[from]= і price[to]= (дослівний A-12/T-409 контракт на stub-базі); титули = CTA-формули канону («Обрати квартиру» / дослівний ЕТ-29 «Обрати місце в ряду»)",
+      "REVEAL: стрибок у модель 1 → 300ms → НУЛЬ [data-brv] у проміжних станах (opacity 0.05..0.95 або blur 0.5..9.5), модель 2 попереду чесно схована; ПЕРШИЙ візит моделі 2 = повільний прохід (кроки 0.38vh) → ЧЕСНИЙ каскад (midBlur > 0, лаги 0.1-0.35s, settled ≤ 2.6s з проходом), once; медіа-гейт decode ≤ firstReveal",
+      "КОНТРАСТ ≥ 4.5:1 (актив-пункт рейки, лід моделі, лейбли/значення картки, пілюлі проти зблендованих поверхонь); DEAD-BAND скан машини = 0 смуг (C22)",
+      "мобільний гейт (≤768px) = T-M19: spy-пара закріплена ЗНИЗУ (position fixed, bottom ≈ vh±2), 2 пункти; підкреслення на моделі 1 під пунктом 1, після проходу до моделі 2 САМО переїжджає під пункт 2 (transform, запис лише при зміні - D6); тап пункту = навігація до моделі; НУЛЬ input[type=range]; свопи табів працюють; стрибок → нуль проміжних станів; сторінка без x-переповнення; текст-ректи ≥ 16px",
+      "чесність (F1/F7): нуль оренди й окупності - датасети лише з канону; console errors == 0; __LAB_OK__ лише від lab (B15)"
+    ],
+    "verify": "combo-lab.html#__LAB_OK__",
+    "gate": {
+      "probe": "Відкрий combo-lab.html?probe (або headless). __LAB_OK__ true після повного пакета (__PROBE = stability/jump/rail/reveal/atoms/bridges/contrast/deadBands з числами). Живий перегляд без ?probe: інтро → рендер → машина: рейка липне зліва і чорнить активну модель, кейси свапаються табами, під кожною моделлю мости з пілюлями у каталог; на 390x844 знизу закріплена пара «1. | 2.» з підкресленням-spy."
+    },
+    "note": "|",
+    "_path": "library/combos/invest--strategy-machine/",
+    "_variantsResolved": []
+  },
   "isometric-building-unit-selector": {
     "id": "isometric-building-unit-selector",
     "name": "Isometric building unit-selector (the visual-search conversion core: a pre-rendered iso building + SVG hotspots + a filter bar + a live count + a hover info-card; filtering highlights matching units and dims the rest)",
@@ -9428,7 +10060,9 @@
       "grammar": "EVER per-section palette (slate/brown/green) with the header tinting to the incoming theme across each seam and modals inheriting the active theme; live-read.",
       "recording": "ever-live-here.com (live) + apps/quadro/.award-re/teardowns/EVER-MOTION-SPEC-live.md",
       "registry_ref": [
-        "T-themetween-ever"
+        "T-501",
+        "T-M07",
+        "x:T-themetween-ever legacy slug"
       ]
     },
     "stack": "vanilla JS only (IntersectionObserver + rAF lerp; no libs). Linear-RGB interpolation.",
@@ -11685,6 +12319,201 @@
     "_path": "library/combos/floorplan-smarts--copper-dusk/",
     "_variantsResolved": []
   },
+  "floorplan-smarts--era-cinematic": {
+    "id": "floorplan-smarts--era-cinematic",
+    "name": "Floorplan SMARTS era-cinematic (ERA dark cinematic skin; ported from Claude Design 01; full-bleed facade under a dusk grade + a copper scan-line that rides the active band; full building->floor->unit drill on the real 54-apartment object)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-smarts",
+    "palette": "era-dark",
+    "entry": {
+      "call": "combo-lab.html - composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js.",
+      "module": "section-variant"
+    },
+    "uses": [
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean redrawn numbered floorplate of the real floor-std-clean.svg (viewBox 100x44.08); per-unit footprints from units.json pos + centroid number pills; status-coded hover wash + top card"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 calm two-tone flat-detail via the dark cover-hold-open veil; spec rail + plan canvas + floor-locator with THIS unit filled"
+      }
+    ],
+    "meaning": {
+      "what": "The conversion-core floorplan for the real SMARTS object (one entrance, 54 apartments), ported from a Claude Design composition onto our real engine. PALETTE = ERA DARK cinematic (navy #0c1115, copper #c2724e, cream #f5efe8 ink). Playfair Display + Inter. FULL drill: L1 the real facade with hover floor-bands (the OFF-facade affordance never covers the building) -> click a floor -> L2 the clean redrawn numbered floorplate beside a persistent unit-list (nr/type/area/price/status, live free-counts, spec always visible) -> click a unit -> L3 the calm veil flat-detail. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A multi-apartment residential building (one entrance, tens of units across floors) where the user must find a specific apartment. One of the four smarts floorplan compositions (ever-numeral / era-cinematic / ever-band / springs-twopane), same engine, distinct look.",
+      "signature": "The real facade FULL-BLEED under a cinematic dusk grade; hovering a band ignites copper (band glow + a copper scan-line that rides the active row). The building is the hero, not a boxed image.",
+      "lands": "The real building on screen; move up its floors and the chosen level lights while an OFF-building affordance names its free count and from-price. Click and a clean redrawn plate of that floor arrives, each apartment marked by its number, a list beside it naming size, price and status. Click a number and the screen goes dark for a beat and lifts to the calm apartment page. A precise index of the whole building, the number doing the work."
+    },
+    "source": {
+      "grammar": "EVER visual-search L1-L3 on the real smarts building, re-skinned to this Claude Design composition. L1 facade floor-bands (shipped FBANDS, not the L1 atom); L2 numbered-floorplate-select + a persistent unit-list spine; L3 veil-flat-detail-reveal.",
+      "recording": "claudedesign/Smarts Floor Selector Redesign1 (the approved LOOK) + apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (the engine grammar).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "smarts-floorplan-claude-design"
+      ]
+    },
+    "asset_truth": "REAL. apps/smarts/data/units.json via _shared/floorplan-helpers.js (54 units, 18/floor on 2/3/m, types Смарт 27/24, $950/m2, statuses 35 available / 12 sold / 7 reserved). REAL floor-std-clean.svg + facade-commerce-clean.webp + type-27/24-clean.webp. Prices = area x 950. Nothing invented.",
+    "webgl": false,
+    "owns_pin": false,
+    "motion": "transform / opacity / clip-path / filter / stroke-dashoffset only. Reveal = clip-path inset + fade (scroll-in once). Drill L1->L2 = opacity swap (no scale-from-origin). L2->L3 = the veil cover-hold-open. award/power2/expo eases.",
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill building->floor->unit: L1 real facade + an OFF-building floor affordance (never covers the building, F-20); L2 the clean numbered floorplate + a persistent unit-list (nr/type/area/price/status); L3 the veil two-tone flat-detail. Verified by screenshot at every level.",
+      "asset-truth: 54 real units from units.json via the shared helpers; types Смарт 27/24; $950/m2; statuses 35/12/7; real plan + facade + type-NN-clean. NOTHING invented.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER hovers/clicks to drill. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit spec (nr/type/area/price/status) is always visible, never hidden behind a click-only card. Prominent back at L2 + L3 (F-21). Filled flat-detail canvas (F-22). Interior-rich clean plan (F-23).",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL/mix-blend-as-fill/canvas/scale-from-origin. reduced-motion/<=820px -> a static plan picture + list. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere incl comments; $ prices (no ruble)."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, [data-render-surface] painted. Hover a floor band -> the composition affordance lights (never covers the building). Click a floor -> the clean numbered plate + a right unit-list with real nr/type/area/price + status. Click a unit -> the dark veil opens the two-tone flat-detail. Drive via real mouseenter/click; eyeball every level.",
+      "expectPins": 0,
+      "pinOwner": "none",
+      "atomsCited": [
+        "numbered-floorplate-select",
+        "veil-flat-detail-reveal"
+      ]
+    },
+    "_path": "library/combos/floorplan-smarts--era-cinematic/",
+    "_variantsResolved": []
+  },
+  "floorplan-smarts--ever-band": {
+    "id": "floorplan-smarts--ever-band",
+    "name": "Floorplan SMARTS ever-band (EVER daylight sky skin; ported from Claude Design 03; a near-full daylight facade + ONE tracking tooltip and a hairline measure-band that glide between floors; full building->floor->unit drill on the real 54-apartment object)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-smarts",
+    "palette": "ever-daylight",
+    "entry": {
+      "call": "combo-lab.html - composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js.",
+      "module": "section-variant"
+    },
+    "uses": [
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean redrawn numbered floorplate of the real floor-std-clean.svg (viewBox 100x44.08); per-unit footprints from units.json pos + centroid number pills; status-coded hover wash + top card"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 calm two-tone flat-detail via the dark cover-hold-open veil; spec rail + plan canvas + floor-locator with THIS unit filled"
+      }
+    ],
+    "meaning": {
+      "what": "The conversion-core floorplan for the real SMARTS object (one entrance, 54 apartments), ported from a Claude Design composition onto our real engine. PALETTE = EVER daylight sky-to-ground gradient (ink #1c2227, terracotta #b9633c). Fraunces + Inter. FULL drill: L1 the real facade with hover floor-bands (the OFF-facade affordance never covers the building) -> click a floor -> L2 the clean redrawn numbered floorplate beside a persistent unit-list (nr/type/area/price/status, live free-counts, spec always visible) -> click a unit -> L3 the calm veil flat-detail. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A multi-apartment residential building (one entrance, tens of units across floors) where the user must find a specific apartment. One of the four smarts floorplan compositions (ever-numeral / era-cinematic / ever-band / springs-twopane), same engine, distinct look.",
+      "signature": "The facade fills the stage in daylight; ONE tracking tooltip + a hairline MEASURE BAND (two glowing lines at the active floor top+bottom) glide between floors (expo.out). Minimal, surgical.",
+      "lands": "The real building on screen; move up its floors and the chosen level lights while an OFF-building affordance names its free count and from-price. Click and a clean redrawn plate of that floor arrives, each apartment marked by its number, a list beside it naming size, price and status. Click a number and the screen goes dark for a beat and lifts to the calm apartment page. A precise index of the whole building, the number doing the work."
+    },
+    "source": {
+      "grammar": "EVER visual-search L1-L3 on the real smarts building, re-skinned to this Claude Design composition. L1 facade floor-bands (shipped FBANDS, not the L1 atom); L2 numbered-floorplate-select + a persistent unit-list spine; L3 veil-flat-detail-reveal.",
+      "recording": "claudedesign/Smarts Floor Selector Redesign1 (the approved LOOK) + apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (the engine grammar).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "smarts-floorplan-claude-design"
+      ]
+    },
+    "asset_truth": "REAL. apps/smarts/data/units.json via _shared/floorplan-helpers.js (54 units, 18/floor on 2/3/m, types Смарт 27/24, $950/m2, statuses 35 available / 12 sold / 7 reserved). REAL floor-std-clean.svg + facade-commerce-clean.webp + type-27/24-clean.webp. Prices = area x 950. Nothing invented.",
+    "webgl": false,
+    "owns_pin": false,
+    "motion": "transform / opacity / clip-path / filter / stroke-dashoffset only. Reveal = clip-path inset + fade (scroll-in once). Drill L1->L2 = opacity swap (no scale-from-origin). L2->L3 = the veil cover-hold-open. award/power2/expo eases.",
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill building->floor->unit: L1 real facade + an OFF-building floor affordance (never covers the building, F-20); L2 the clean numbered floorplate + a persistent unit-list (nr/type/area/price/status); L3 the veil two-tone flat-detail. Verified by screenshot at every level.",
+      "asset-truth: 54 real units from units.json via the shared helpers; types Смарт 27/24; $950/m2; statuses 35/12/7; real plan + facade + type-NN-clean. NOTHING invented.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER hovers/clicks to drill. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit spec (nr/type/area/price/status) is always visible, never hidden behind a click-only card. Prominent back at L2 + L3 (F-21). Filled flat-detail canvas (F-22). Interior-rich clean plan (F-23).",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL/mix-blend-as-fill/canvas/scale-from-origin. reduced-motion/<=820px -> a static plan picture + list. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere incl comments; $ prices (no ruble)."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, [data-render-surface] painted. Hover a floor band -> the composition affordance lights (never covers the building). Click a floor -> the clean numbered plate + a right unit-list with real nr/type/area/price + status. Click a unit -> the dark veil opens the two-tone flat-detail. Drive via real mouseenter/click; eyeball every level.",
+      "expectPins": 0,
+      "pinOwner": "none",
+      "atomsCited": [
+        "numbered-floorplate-select",
+        "veil-flat-detail-reveal"
+      ]
+    },
+    "_path": "library/combos/floorplan-smarts--ever-band/",
+    "_variantsResolved": []
+  },
+  "floorplan-smarts--ever-numeral": {
+    "id": "floorplan-smarts--ever-numeral",
+    "name": "Floorplan SMARTS ever-numeral (EVER light museum skin; ported from Claude Design 02; a giant thin ghost numeral swaps per floor hover + a bottom floor-ledger spine; full building->floor->unit drill on the real 54-apartment object)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-smarts",
+    "palette": "ever-light",
+    "entry": {
+      "call": "combo-lab.html - composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js.",
+      "module": "section-variant"
+    },
+    "uses": [
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean redrawn numbered floorplate of the real floor-std-clean.svg (viewBox 100x44.08); per-unit footprints from units.json pos + centroid number pills; status-coded hover wash + top card"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 calm two-tone flat-detail via the dark cover-hold-open veil; spec rail + plan canvas + floor-locator with THIS unit filled"
+      }
+    ],
+    "meaning": {
+      "what": "The conversion-core floorplan for the real SMARTS object (one entrance, 54 apartments), ported from a Claude Design composition onto our real engine. PALETTE = EVER LIGHT museum (slate gradient, terracotta #b9633c, ink #1f2429). Fraunces + Inter. FULL drill: L1 the real facade with hover floor-bands (the OFF-facade affordance never covers the building) -> click a floor -> L2 the clean redrawn numbered floorplate beside a persistent unit-list (nr/type/area/price/status, live free-counts, spec always visible) -> click a unit -> L3 the calm veil flat-detail. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A multi-apartment residential building (one entrance, tens of units across floors) where the user must find a specific apartment. One of the four smarts floorplan compositions (ever-numeral / era-cinematic / ever-band / springs-twopane), same engine, distinct look.",
+      "signature": "The giant thin Fraunces ghost numeral that swaps (fade+rise, expo.out) on every floor hover (L1), sits behind the plan (L2) and behind the apartment title (L3) - the museum-numeral thread. Bottom floor-ledger (реєстр поверхів) as the L1 spine.",
+      "lands": "The real building on screen; move up its floors and the chosen level lights while an OFF-building affordance names its free count and from-price. Click and a clean redrawn plate of that floor arrives, each apartment marked by its number, a list beside it naming size, price and status. Click a number and the screen goes dark for a beat and lifts to the calm apartment page. A precise index of the whole building, the number doing the work."
+    },
+    "source": {
+      "grammar": "EVER visual-search L1-L3 on the real smarts building, re-skinned to this Claude Design composition. L1 facade floor-bands (shipped FBANDS, not the L1 atom); L2 numbered-floorplate-select + a persistent unit-list spine; L3 veil-flat-detail-reveal.",
+      "recording": "claudedesign/Smarts Floor Selector Redesign1 (the approved LOOK) + apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (the engine grammar).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "smarts-floorplan-claude-design"
+      ]
+    },
+    "asset_truth": "REAL. apps/smarts/data/units.json via _shared/floorplan-helpers.js (54 units, 18/floor on 2/3/m, types Смарт 27/24, $950/m2, statuses 35 available / 12 sold / 7 reserved). REAL floor-std-clean.svg + facade-commerce-clean.webp + type-27/24-clean.webp. Prices = area x 950. Nothing invented.",
+    "webgl": false,
+    "owns_pin": false,
+    "motion": "transform / opacity / clip-path / filter / stroke-dashoffset only. Reveal = clip-path inset + fade (scroll-in once). Drill L1->L2 = opacity swap (no scale-from-origin). L2->L3 = the veil cover-hold-open. award/power2/expo eases.",
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill building->floor->unit: L1 real facade + an OFF-building floor affordance (never covers the building, F-20); L2 the clean numbered floorplate + a persistent unit-list (nr/type/area/price/status); L3 the veil two-tone flat-detail. Verified by screenshot at every level.",
+      "asset-truth: 54 real units from units.json via the shared helpers; types Смарт 27/24; $950/m2; statuses 35/12/7; real plan + facade + type-NN-clean. NOTHING invented.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER hovers/clicks to drill. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit spec (nr/type/area/price/status) is always visible, never hidden behind a click-only card. Prominent back at L2 + L3 (F-21). Filled flat-detail canvas (F-22). Interior-rich clean plan (F-23).",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL/mix-blend-as-fill/canvas/scale-from-origin. reduced-motion/<=820px -> a static plan picture + list. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere incl comments; $ prices (no ruble)."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, [data-render-surface] painted. Hover a floor band -> the composition affordance lights (never covers the building). Click a floor -> the clean numbered plate + a right unit-list with real nr/type/area/price + status. Click a unit -> the dark veil opens the two-tone flat-detail. Drive via real mouseenter/click; eyeball every level.",
+      "expectPins": 0,
+      "pinOwner": "none",
+      "atomsCited": [
+        "numbered-floorplate-select",
+        "veil-flat-detail-reveal"
+      ]
+    },
+    "_path": "library/combos/floorplan-smarts--ever-numeral/",
+    "_variantsResolved": []
+  },
   "floorplan-smarts--museum-daylight": {
     "id": "floorplan-smarts--museum-daylight",
     "name": "Floorplan SMARTS museum-daylight (EVER light skin; full building->floor->unit drill on the real 54-apartment smarts object: facade floor-bands -> clean redrawn numbered floorplate + a persistent unit list with live counts -> calm veil flat-detail; controlled-click, plan is hero AND the unit spec stays visible)",
@@ -11753,6 +12582,71 @@
     ],
     "note": "|",
     "_path": "library/combos/floorplan-smarts--museum-daylight/",
+    "_variantsResolved": []
+  },
+  "floorplan-smarts--springs-twopane": {
+    "id": "floorplan-smarts--springs-twopane",
+    "name": "Floorplan SMARTS springs-twopane (Springs cream resort skin; ported from Claude Design 05; a two-pane split - left cream facade exhibit, right deep-green preview panel that slides in with the level spec + plan thumb; full building->floor->unit drill on the real 54-apartment object)",
+    "role": "floorplan",
+    "kind": "combo",
+    "status": "base",
+    "family": "floorplan-smarts",
+    "palette": "springs-cream",
+    "entry": {
+      "call": "combo-lab.html - composes numbered-floorplate-select (L2) + veil-flat-detail-reveal (L3) over the real smarts facade (inline FBANDS L1, NOT the L1 atom). Data from _assets/floorplan/smarts-units.js via _shared/floorplan-helpers.js.",
+      "module": "section-variant"
+    },
+    "uses": [
+      {
+        "atom": "numbered-floorplate-select",
+        "job": "L2 clean redrawn numbered floorplate of the real floor-std-clean.svg (viewBox 100x44.08); per-unit footprints from units.json pos + centroid number pills; status-coded hover wash + top card"
+      },
+      {
+        "atom": "veil-flat-detail-reveal",
+        "job": "L3 calm two-tone flat-detail via the dark cover-hold-open veil; spec rail + plan canvas + floor-locator with THIS unit filled"
+      }
+    ],
+    "meaning": {
+      "what": "The conversion-core floorplan for the real SMARTS object (one entrance, 54 apartments), ported from a Claude Design composition onto our real engine. PALETTE = Springs cream resort (cream #e7e0d1, deep-green #19241d panel, brass #c2a35e). Cormorant Garamond + Inter. FULL drill: L1 the real facade with hover floor-bands (the OFF-facade affordance never covers the building) -> click a floor -> L2 the clean redrawn numbered floorplate beside a persistent unit-list (nr/type/area/price/status, live free-counts, spec always visible) -> click a unit -> L3 the calm veil flat-detail. Controlled-click; 0 pins; NO-WebGL.",
+      "when": "A multi-apartment residential building (one entrance, tens of units across floors) where the user must find a specific apartment. One of the four smarts floorplan compositions (ever-numeral / era-cinematic / ever-band / springs-twopane), same engine, distinct look.",
+      "signature": "A two-pane split: LEFT a cream-sky facade exhibit (bands + commerce POI), RIGHT a deep-green preview panel that slides/cross-fades in with the chosen level (giant brass numeral, free/from counts, a plan thumbnail, a brass CTA). Always-visible preview, never covers the building.",
+      "lands": "The real building on screen; move up its floors and the chosen level lights while an OFF-building affordance names its free count and from-price. Click and a clean redrawn plate of that floor arrives, each apartment marked by its number, a list beside it naming size, price and status. Click a number and the screen goes dark for a beat and lifts to the calm apartment page. A precise index of the whole building, the number doing the work."
+    },
+    "source": {
+      "grammar": "EVER visual-search L1-L3 on the real smarts building, re-skinned to this Claude Design composition. L1 facade floor-bands (shipped FBANDS, not the L1 atom); L2 numbered-floorplate-select + a persistent unit-list spine; L3 veil-flat-detail-reveal.",
+      "recording": "claudedesign/Smarts Floor Selector Redesign1 (the approved LOOK) + apps/quadro/.award-re/teardowns/D_ever_visualsearch_video.md (the engine grammar).",
+      "registry_ref": [
+        "ever-visual-search-drilldown",
+        "smarts-floorplan-claude-design"
+      ]
+    },
+    "asset_truth": "REAL. apps/smarts/data/units.json via _shared/floorplan-helpers.js (54 units, 18/floor on 2/3/m, types Смарт 27/24, $950/m2, statuses 35 available / 12 sold / 7 reserved). REAL floor-std-clean.svg + facade-commerce-clean.webp + type-27/24-clean.webp. Prices = area x 950. Nothing invented.",
+    "webgl": false,
+    "owns_pin": false,
+    "motion": "transform / opacity / clip-path / filter / stroke-dashoffset only. Reveal = clip-path inset + fade (scroll-in once). Drill L1->L2 = opacity swap (no scale-from-origin). L2->L3 = the veil cover-hold-open. award/power2/expo eases.",
+    "gated_by": [
+      "R_pin_budget",
+      "R_perf_limits",
+      "R_no_webgl"
+    ],
+    "acceptance": [
+      "FULL drill building->floor->unit: L1 real facade + an OFF-building floor affordance (never covers the building, F-20); L2 the clean numbered floorplate + a persistent unit-list (nr/type/area/price/status); L3 the veil two-tone flat-detail. Verified by screenshot at every level.",
+      "asset-truth: 54 real units from units.json via the shared helpers; types Смарт 27/24; $950/m2; statuses 35/12/7; real plan + facade + type-NN-clean. NOTHING invented.",
+      "CONTROLLED-CLICK, PIN-LESS: 0 pins, no scroll-stepping, no scale-from-origin. Reveal once on scroll-in; the USER hovers/clicks to drill. pins === 0.",
+      "PLAN IS HERO + SPEC VISIBLE: the unit spec (nr/type/area/price/status) is always visible, never hidden behind a click-only card. Prominent back at L2 + L3 (F-21). Filled flat-detail canvas (F-22). Interior-rich clean plan (F-23).",
+      "motion only transform/opacity/clip-path/filter/stroke-dashoffset; NO WebGL/mix-blend-as-fill/canvas/scale-from-origin. reduced-motion/<=820px -> a static plan picture + list. __LAB_OK__ true, 0 console errors.",
+      "copy Ukrainian; ZERO em-dash/en-dash anywhere incl comments; $ prices (no ruble)."
+    ],
+    "gate": {
+      "probe": "Open combo-lab. __LAB_OK__ true, 0 pins, 0 console errors, [data-render-surface] painted. Hover a floor band -> the composition affordance lights (never covers the building). Click a floor -> the clean numbered plate + a right unit-list with real nr/type/area/price + status. Click a unit -> the dark veil opens the two-tone flat-detail. Drive via real mouseenter/click; eyeball every level.",
+      "expectPins": 0,
+      "pinOwner": "none",
+      "atomsCited": [
+        "numbered-floorplate-select",
+        "veil-flat-detail-reveal"
+      ]
+    },
+    "_path": "library/combos/floorplan-smarts--springs-twopane/",
     "_variantsResolved": []
   },
   "floorplan-tower--era": {

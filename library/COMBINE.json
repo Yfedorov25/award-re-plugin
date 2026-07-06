@@ -1,6 +1,6 @@
 {
  "generated": "scripts/combine-graph.mjs — do not hand-edit",
- "brickCount": 103,
+ "brickCount": 108,
  "graph": {
   "apartment-day-grid": {
    "lane": "interiors",
@@ -80,6 +80,18 @@
    ],
    "variants": []
   },
+  "budget-pills-bridge": {
+   "lane": "cta",
+   "combinesReal": [
+    "case-tabs-table",
+    "invest-card-reveal"
+   ],
+   "toBuild": [
+    "conversion-quiet-gate"
+   ],
+   "anti": [],
+   "variants": []
+  },
   "cards-swipe": {
    "lane": "gallery",
    "combinesReal": [
@@ -99,6 +111,20 @@
     "cinematic",
     "editorial"
    ]
+  },
+  "case-tabs-table": {
+   "lane": "trust",
+   "combinesReal": [
+    "budget-pills-bridge",
+    "giant-number-fact",
+    "spread-row-headline"
+   ],
+   "toBuild": [],
+   "anti": [
+    "range-sliders-on-touch",
+    "second-count-engine-in-beat"
+   ],
+   "variants": []
   },
   "center-focus-carousel": {
    "lane": "amenities",
@@ -590,6 +616,21 @@
    ],
    "variants": []
   },
+  "giant-number-fact": {
+   "lane": "trust",
+   "combinesReal": [
+    "invest-card-reveal",
+    "spread-row-headline",
+    "theme-tween",
+    "section-rise-into-view"
+   ],
+   "toBuild": [],
+   "anti": [
+    "numeral-odometer-roll",
+    "second-count-engine-in-beat"
+   ],
+   "variants": []
+  },
   "grid-skeleton-draw": {
    "lane": "preloader",
    "combinesReal": [
@@ -643,6 +684,22 @@
    "anti": [
     "auto-rotate",
     "carousel-over-scrubbed-surface"
+   ],
+   "variants": []
+  },
+  "invest-card-reveal": {
+   "lane": "trust",
+   "combinesReal": [
+    "giant-number-fact",
+    "spread-row-headline",
+    "theme-tween",
+    "section-rise-into-view"
+   ],
+   "toBuild": [],
+   "anti": [
+    "interiors-cards-cursor",
+    "cursor-tooltip-on-conversion-data",
+    "backdrop-over-scrubbed-surface"
    ],
    "variants": []
   },
@@ -1415,6 +1472,22 @@
    ],
    "variants": []
   },
+  "spread-row-headline": {
+   "lane": "transition",
+   "combinesReal": [
+    "theme-tween",
+    "editorial-act-crossfade",
+    "section-rise-into-view",
+    "scroll-hint-descending-tick"
+   ],
+   "toBuild": [],
+   "anti": [
+    "pin",
+    "letter-split",
+    "second-scrub-on-same-text"
+   ],
+   "variants": []
+  },
   "stacked-pairs": {
    "lane": "gallery",
    "combinesReal": [],
@@ -1632,13 +1705,19 @@
    "theme-tween"
   ],
   "trust": [
+   "budget-pills-bridge",
    "coords-corner-frame",
    "drag-tab-reveal",
    "fluid-type-sizing",
    "focus-render-switch",
+   "giant-number-fact",
+   "invest-card-reveal",
    "menu-tracked-stagger",
    "puzzle-text",
    "script-overline-display-pair",
+   "section-rise-into-view",
+   "spread-row-headline",
+   "theme-tween",
    "watercolor-svg-map"
   ],
   "hero": [
@@ -1711,12 +1790,24 @@
    "river-tinted-poi-map",
    "rotated-mosaic-hero",
    "script-overline-display-pair",
+   "scroll-hint-descending-tick",
    "scroll-zoom-image-pair",
    "section-pager",
+   "section-rise-into-view",
    "stat-odometer",
    "theme-tween",
    "venn-ring-portal-reveal",
    "vertical-curtain-wipe"
+  ],
+  "cta": [
+   "case-tabs-table",
+   "compass-rose-section-divider",
+   "coords-corner-frame",
+   "invest-card-reveal",
+   "map-dim-carousel-announce",
+   "menu-tracked-stagger",
+   "river-tinted-poi-map",
+   "script-overline-display-pair"
   ],
   "gallery": [
    "bleeding-wordmark",
@@ -1821,14 +1912,6 @@
    "stat-odometer",
    "theme-tween",
    "zoom-to-the-door"
-  ],
-  "cta": [
-   "compass-rose-section-divider",
-   "coords-corner-frame",
-   "map-dim-carousel-announce",
-   "menu-tracked-stagger",
-   "river-tinted-poi-map",
-   "script-overline-display-pair"
   ],
   "menu": [
    "avatar-card-carousel",
@@ -1945,6 +2028,14 @@
    "count": 4
   },
   {
+   "name": "conversion-quiet-gate",
+   "wanters": [
+    "budget-pills-bridge",
+    "themed-contact-map"
+   ],
+   "count": 2
+  },
+  {
    "name": "counter",
    "wanters": [
     "media-step-switch",
@@ -2014,13 +2105,6 @@
     "render-scroll-scale"
    ],
    "count": 1
-  },
-  {
-   "name": "conversion-quiet-gate",
-   "wanters": [
-    "themed-contact-map"
-   ],
-   "count": 1
   }
  ],
  "antiVocabulary": [
@@ -2028,6 +2112,7 @@
   "auto-rotate",
   "backdrop-filter-over-scroll",
   "backdrop-filter-over-scrub",
+  "backdrop-over-scrubbed-surface",
   "before-after-drag",
   "blur-reveal-stagger-title",
   "cards-swipe",
@@ -2035,6 +2120,7 @@
   "center-plan-on-page",
   "center-seam-split",
   "corner-frame-meta",
+  "cursor-tooltip-on-conversion-data",
   "daynight-cursor-seam",
   "daynight-scroll-scrub",
   "daynight-scrub",
@@ -2049,8 +2135,10 @@
   "full-bleed-hero",
   "hero-video-render-rotator",
   "hover-over-scrubbed-surface",
+  "interiors-cards-cursor",
   "lenis-smooth-scroll",
   "letter-level-split",
+  "letter-split",
   "live-map-pan-zoom",
   "live-webgl-3d",
   "locmap-engine",
@@ -2062,6 +2150,7 @@
   "mix-blend-over-scrub",
   "multiple-same-edge-tabs",
   "nested-pin",
+  "numeral-odometer-roll",
   "object-over-scrubbed-surface",
   "overuse-per-page",
   "panel-rise-over",
@@ -2069,6 +2158,7 @@
   "pin-conflict",
   "preloader-band-collapse",
   "primary-nav",
+  "range-sliders-on-touch",
   "raw-developer-plan-image",
   "real-webgl-scene",
   "reveal-over-scrubbed-surface",
@@ -2082,11 +2172,13 @@
   "scrubbed-blur-surface",
   "scrubbed-theme-over-media",
   "scrubbed-video-bg",
+  "second-count-engine-in-beat",
   "second-cover",
   "second-hero",
   "second-overlay",
   "second-pin",
   "second-scroll-owner",
+  "second-scrub-on-same-text",
   "second-smoother",
   "section-pager",
   "selector-over-scroll-surface",

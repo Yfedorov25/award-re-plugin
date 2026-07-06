@@ -16,7 +16,7 @@ meaning:
 source:
   grammar: "QUADRO slide-lab — msw4a film/quote: a pinned full-bleed media stepper whose text steps are four DIFFERENT typographic types woven with a looping lite-video beat (the cinematic in-place counterpart to the pin-less stacked-pairs rhythm)"
   recording: "apps/quadro/public/slide-lab/msw4a-film-quote.html"
-  registry_ref: ["T-310"]
+  registry_ref: ["x:pinned-media-stepper, точний T-ID уточнюється у спринті-0 (хибний T-310 знятий 2026-07-05)"]
 stack: "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis 1.1.13"
 webgl: false
 motion_props: [transform, opacity]
