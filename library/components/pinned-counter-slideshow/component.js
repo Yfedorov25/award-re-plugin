@@ -65,7 +65,7 @@
     var html = '';
     for (var i = 0; i < words.length; i++) {
       html += /\S/.test(words[i])
-        ? '<span class="pcs-w" style="display:inline-block">' + words[i] + '</span>'
+        ? '<span class="pcs-w" style="display:inline">' + words[i] + '</span>'
         : words[i];
     }
     var saved = el.innerHTML;
@@ -213,7 +213,11 @@
       lastQ = q;
       gate.renders++;
       var want = Math.min(Math.floor(p * N), N - 1);
-      if (want !== idx) goTo(want, want > idx ? 1 : -1);
+      if (want !== idx) {
+        /* гістерезис 1.5% спану: lerp-коливання довкола порога не дриґає свап */
+        var boundary = (want > idx ? idx + 1 : idx) / N;
+        if (Math.abs(p - boundary) > 0.015) goTo(want, want > idx ? 1 : -1);
+      }
       /* desktop: ОДИН бар безперервно за весь пін (живий 0-0→200-100,
          тут без under-next: −100% → 0%); моб: покрокові line-ticks */
       if (bar) bar.style.transform = 'translateX(' + (-100 * (1 - p)) + '%)';

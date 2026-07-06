@@ -89,7 +89,7 @@
     var html = '';
     for (var i = 0; i < words.length; i++) {
       html += /\S/.test(words[i])
-        ? '<span class="isw-w" style="display:inline-block">' + words[i] + '</span>'
+        ? '<span class="isw-w" style="display:inline">' + words[i] + '</span>'
         : words[i];
     }
     var saved = el.innerHTML;
@@ -394,7 +394,11 @@
       gate.renders++;
       /* index = min(floor(p·N), N−1) — живий мапінг */
       var want = Math.min(Math.floor(p * N), N - 1);
-      if (want !== idx) goTo(want, want > idx ? 1 : -1);
+      if (want !== idx) {
+        /* гістерезис 1.5% спану: lerp-коливання довкола порога не дриґає свап */
+        var boundary = (want > idx ? idx + 1 : idx) / N;
+        if (Math.abs(p - boundary) > 0.015) goTo(want, want > idx ? 1 : -1);
+      }
       /* ticks: безперервний fill скролом (transform-only, без transition) */
       for (var i = 0; i < tickFills.length; i++)
         tickFills[i].style.transform =

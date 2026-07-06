@@ -33,7 +33,6 @@
 <link rel="stylesheet" href="../../components/preloader-logo-convoy/component.css">
 <link rel="stylesheet" href="../../components/kinetic-letters-hero/component.css">
 <link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
-<link rel="stylesheet" href="../../components/spread-row-headline/component.css">
 <link rel="stylesheet" href="../../components/text-blur-reveal/component.css">
 <link rel="stylesheet" href="../../components/pinned-counter-slideshow/component.css">
 <link rel="stylesheet" href="../../components/sticky-card-parallax/component.css">
@@ -101,8 +100,10 @@
   #impulse .intro-copy p { max-width: 44ch; font-size: clamp(15px, 1.4vw, 21px); line-height: 1.5; font-weight: 300; }
   #impulse .bleed { position: relative; height: 108svh; overflow: clip; }
   #impulse .bleed img { width: 100%; height: 100%; object-fit: cover; }
-  #impulse .bleed h2 { position: absolute; left: 0; right: 0; bottom: 6vh; color: #f2f1ee;
-    display: flex; justify-content: space-between; padding: 0 3vw; }
+  .spread { display: flex; justify-content: space-between; }
+  #impulse .act-head { padding: 9vh 3vw 0; }
+  #people .bleed h2 { position: absolute; left: 0; right: 0; bottom: 6vh; color: #f2f1ee;
+    padding: 0 3vw; }
   #impulse .after { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; padding: 12vh 3vw; align-items: start; }
   #impulse .after .txt { max-width: 46ch; margin-top: 6vh; }
   #impulse .after .small { display: block; margin-top: 5vh; }
@@ -111,12 +112,13 @@
 
   /* ---- 3 · FORMAT ---- */
   #format .head { padding: 12vh 3vw 5vh; }
-  #format .head h2 { display: flex; justify-content: space-between; }
+
   #format .head p { max-width: 40ch; margin: 4vh auto 0; text-align: center; }
-  #format .photo { padding: 2vh 3vw; }
-  #format .photo img { border-radius: 6px; width: 100%;
-    will-change: transform; transform-origin: 50% 100%; }
-    /* живий landingFormatImageWrapper: фото росте з грід-ширини у fullbleed */
+  /* живий l-format-image: fullbleed-бокс ФІКСОВАНОЇ висоти (нуль стрибків),
+     фото масштабується всередині 0.66→1 (grid→fullbleed, origin згори) */
+  #format .photo { padding: 2vh 0 0; }
+  #format .photo img { width: 100%; height: 92svh; object-fit: cover;
+    border-radius: 6px; will-change: transform; transform-origin: 50% 0%; }
   #fmtpin [data-pcs-bg] img { width: 100%; height: 100%; object-fit: cover; }
   /* живий фон піна = Vimeo-луп спіралі (background=1), постер під ним */
   #fmtpin [data-pcs-bg] iframe { position: absolute; left: 50%; top: 50%;
@@ -209,7 +211,7 @@
 
   /* ---- 7 · STATUS ---- */
   #status .head { padding: 12vh 3vw 5vh; text-align: center; }
-  #status .head h2 { display: flex; justify-content: space-between; text-align: left; }
+  #status .head h2 { text-align: left; }
   #status .head p { max-width: 42ch; margin: 4vh auto 0; }
   #isw [data-isw-layer] { padding-bottom: 3vh; }
   .isw-row { display: flex; gap: 10px; height: 84svh; align-items: stretch; padding: 0 3vw; }
@@ -295,9 +297,11 @@
   <div class="intro-copy" data-brv-group>
     <p data-brv data-brv-order="0">AIR is a new generation of offices that brings a new level of premium quality and style to class A business real estate.</p>
   </div>
-  <div class="bleed" data-srh-section data-brv-group>
+  <div class="bleed" data-brv-group>
     <img data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_impulse_bg_xxl/assets/images/media/landing/2.impulse/background%40xxxl.webp" alt="">
-    <h2 class="h1" id="impulseSpread"><span data-srh-group>The momentum</span><span data-srh-group>to rise higher</span></h2>
+  </div>
+  <div class="act-head" data-brv-group>
+    <h2 class="h1 spread"><span data-brv data-brv-order="0">The momentum</span><span data-brv data-brv-order="1">to rise higher</span></h2>
   </div>
   <div class="after" data-brv-group>
     <div class="txt">
@@ -312,8 +316,8 @@
 <!-- 3 · FORMAT — пін з лічильником-курсором -->
 <section id="format" data-amo-theme="light">
   <div class="head" data-brv-group data-ride="12">
-    <h2 class="h1" data-brv data-brv-order="0"><span>A new</span><span>premium</span><span>format</span></h2>
-    <p class="lead" data-brv data-brv-order="1">AIR is not only a new generation of offices but also a strong architectural statement by ADM architects.</p>
+    <h2 class="h1 spread"><span data-brv data-brv-order="0">A new</span><span data-brv data-brv-order="1">premium</span><span data-brv data-brv-order="2">format</span></h2>
+    <p class="lead" data-brv data-brv-order="3">AIR is not only a new generation of offices but also a strong architectural statement by ADM architects.</p>
   </div>
   <div class="photo" data-brv-group>
     <img width="2044" height="2088" data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_format_bg_xxl/assets/images/media/landing/3.format/background%40xxxl.webp" alt="">
@@ -359,8 +363,8 @@
 
 <!-- 5 · LIFE — числа району -->
 <section id="life" data-amo-theme="dark">
-  <div data-srh-section>
-    <h2 class="h1" id="lifeSpread"><span data-srh-group>At the center</span><span data-srh-group>of life</span></h2>
+  <div data-brv-group>
+    <h2 class="h1 spread"><span data-brv data-brv-order="0">At the center</span><span data-brv data-brv-order="1">of life</span></h2>
   </div>
   <div data-brv-group data-ride="12">
   <p class="lead" data-brv data-brv-order="0">The premium AIR business center is designed to become a symbol the city &mdash; a large-scale area spanning one of the city&rsquo;s primary business districts.</p>
@@ -379,9 +383,9 @@
 
 <!-- 6 · PEOPLE — двори -->
 <section id="people" data-amo-theme="dark">
-  <div class="bleed" data-srh-section data-brv-group>
+  <div class="bleed" data-brv-group>
     <img data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_people_bg_xxl/assets/images/media/landing/6.people/background%40xxxl.webp" alt="">
-    <h2 class="h1" id="peopleSpread"><span data-srh-group>Designed with</span><span data-srh-group>people in mind</span></h2>
+    <h2 class="h1 spread"><span data-brv data-brv-order="1">Designed with</span><span data-brv data-brv-order="2">people in mind</span></h2>
   </div>
   <div style="background:var(--paper); color:var(--ink)" data-amo-theme="light">
     <div class="copy" data-brv-group data-ride="10">
@@ -413,8 +417,8 @@
 <!-- 7 · STATUS — слайдер 1/2 з шов-кліпом -->
 <section id="status" data-amo-theme="light" style="background:var(--paper)">
   <div class="head" data-brv-group data-ride="12">
-    <h2 class="h1" data-brv data-brv-order="0"><span>A tangible sense</span><span>of status</span></h2>
-    <p class="lead" data-brv data-brv-order="1">The facades of AIR resemble frozen waves. HAAST Bureau continuing this elemental metaphor in the lobby design.</p>
+    <h2 class="h1 spread"><span data-brv data-brv-order="0">A tangible sense</span><span data-brv data-brv-order="1">of status</span></h2>
+    <p class="lead" data-brv data-brv-order="2">The facades of AIR resemble frozen waves. HAAST Bureau continuing this elemental metaphor in the lobby design.</p>
   </div>
   <div id="isw">
     <div data-isw-layer>
@@ -489,7 +493,6 @@
 <script src="../../components/preloader-logo-convoy/component.js"></script>
 <script src="../../components/kinetic-letters-hero/component.js"></script>
 <script src="../../components/air-menu-overlay/component.js"></script>
-<script src="../../components/spread-row-headline/component.js"></script>
 <script src="../../components/text-blur-reveal/component.js"></script>
 <script src="../../components/pinned-counter-slideshow/component.js"></script>
 <script src="../../components/giant-number-fact/component.js"></script>
@@ -532,10 +535,9 @@
   /* меню + themed-хедер */
   api.amo = window.AirMenuOverlay.create({});
 
-  /* spread-заголовки (T-310) */
-  api.srh1 = window.SpreadRowHeadline.create('#impulseSpread', {});
-  api.srh2 = window.SpreadRowHeadline.create('#lifeSpread', {});
-  api.srh3 = window.SpreadRowHeadline.create('#peopleSpread', {});
+  /* заголовки актів: ЖИВА правда (2026-07-06, фікс-кол 3) — group--between
+     СТАТИЧНИЙ + reveal-каскад слів (data-reveal="text"); конвергенції РУХОМ
+     на живій головній НЕМА (жоден h2 не має parallax-патернів) */
 
   /* reveal-канон (T-322) */
   api.brv = window.TextBlurReveal.create('[data-brv-group]', {});
@@ -643,7 +645,7 @@
       var q = Math.round(p * 1000);
       if (q === last) return;
       last = q;
-      var s = 0.70 + (1.064 - 0.70) * smooth(p); /* 8/12 колонок → fullbleed поверх падінгів */
+      var s = 0.66 + (1 - 0.66) * smooth(p); /* живий i≈0.66: грід-ширина → fullbleed */
       img.style.transform = 'scale(' + s.toFixed(4) + ')';
     }
     addEventListener('scroll', function () {
@@ -722,6 +724,12 @@
       .observe(iswCount, { childList: true, characterData: true, subtree: true });
   }
 
+  /* фікс-кол 3: перерахунок GSAP-тригерів ПІСЛЯ довантаження всіх фото —
+     пізній hotlink-декод більше не зсуває сторінку посеред скролу */
+  window.addEventListener('load', function () {
+    if (window.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 300);
+  });
+
   window.__HOME = api;
   /* старі атоми ставлять __LAB_OK__ на init — вердикт зборки авторитетний */
   if (PM) { try { delete window.__LAB_OK__; } catch (e) { window.__LAB_OK__ = undefined; } }
@@ -759,7 +767,7 @@
     report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1), top: clsTop.slice(0, 3) };
     report.engines = {
       plc: !!(api.plc && !api.plc.error), klh: !!(api.klh && !api.klh.error),
-      amo: !!(api.amo && !api.amo.error), srh: !!(api.srh1 && api.srh2 && api.srh3),
+      amo: !!(api.amo && !api.amo.error), spreads: document.querySelectorAll('.spread [data-brv]').length >= 9,
       brv: !!api.brv, pcs: !!(api.pcs && !api.pcs.error),
       hm: !!(api.hm && api.hm.ok), gnf: api.gnf.length === 4,
       cfc: !!api.cfc, isw: !!(api.isw && !api.isw.error),
@@ -773,6 +781,9 @@
       iswDrift: touch || document.getElementById('isw').classList.contains('isw-drift'),
       underNext: parseFloat(getComputedStyle(document.getElementById('harmony')).marginBottom) < -100
     };
+    /* фікс-кол 3 (зауваження «стрибає»): висота документа СТАЛА за прохід —
+       пізні декоди/сплітання більше не ростять сторінку посеред скролу */
+    var doc1 = document.body.scrollHeight;
     /* фікс-кол 1: harmony — зустрічні дрейфи живі (двi позиції скролу) */
     if (!touch) {
       var hb = document.getElementById('hmBg'), hcl = document.getElementById('hmCardLayer');
@@ -798,7 +809,12 @@
       report.hmDrift = { moved: true };
       report.tilt = { ok: true };
     }
+    jump(document.body.scrollHeight); await delay(400);
+    jump(0); await delay(300);
+    report.docHeight = { before: doc1, after: document.body.scrollHeight,
+                         stable: Math.abs(document.body.scrollHeight - doc1) <= 2 };
     var enginesOk = Object.keys(report.engines).every(function (k) { return report.engines[k]; });
+    enginesOk = enginesOk && report.docHeight.stable;
     report.errors = errs;
     /* CLS-виняток: прелоадер ховає перший рендер — рахуємо після нього */
     window.__LAB_OK__ = !!(enginesOk && errs === 0 && report.stability.drift <= 4 &&
