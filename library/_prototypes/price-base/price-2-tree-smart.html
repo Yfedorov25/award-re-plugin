@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Інвестиція у смарт · прототип-дерево</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  ПРОТОТИП-ДЕРЕВО «Інвестиція у смарт» · RE-SKIN town-еталона (F-55/F-56 виправлені там)
+  Відмінності від town:
+    · ДАНІ smarts (units.json + content.js): пресейл 950 $/м², вхід $22 800, крива 950->1150 (+30%)
+    · ЧІП ПЛОЩІ 24/27 м² керує ВСІМА числами (площа -> ціна, вхід, платіж, прибуток)
+    · оренди в $ у фактажі НЕМАЄ (invest-calc.js) -> гілки «Здавати» НЕМА (рішення А, asset-truth)
+      дерево асиметричне: «жити»=глибина1 · «інвестувати»->тільки «Перепродати»
+  Ті самі закони: один PriceModel + makeOdo (дедуп), пін на консолі НЕМА, крива self-play,
+  синхрон-інваріант одометр = висота кінчика = priceAt(p).
+-->
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#12100d;color:#f0eae0;font-family:"Jost","Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.serif{font-family:"Cormorant Garamond",Georgia,serif}
+.cap{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9d968a;font-weight:500}
+.section-tag{position:fixed;left:72px;top:26px;z-index:30;color:#c89f6a;letter-spacing:.22em;pointer-events:none}
+.console{position:relative;min-height:100vh;overflow:clip;display:grid;grid-template-columns:33% 67%}
+.media{position:absolute;inset:0;z-index:0}
+.media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;filter:saturate(.72) brightness(.6);transition:opacity .55s ease}
+.media img.on{opacity:.15}
+.veil{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,#12100d 0%,rgba(18,16,13,.86) 40%,rgba(18,16,13,.5) 100%)}
+.veil-b{position:absolute;left:0;right:0;bottom:0;height:28vh;z-index:1;background:linear-gradient(180deg,rgba(18,16,13,0),#12100d)}
+.index{position:relative;z-index:5;padding:9vh 40px 8vh 72px;display:flex;flex-direction:column;gap:14px;border-right:1px solid rgba(240,234,224,.1)}
+.index>*{flex:none}
+h1{font-size:38px;line-height:1.06;font-weight:600;margin:6px 0 2px}
+.lede{font-size:15px;color:#9d968a;margin:0 0 4px;line-height:1.55;max-width:22em}
+.tabs{display:flex;flex-direction:column;gap:7px;margin-top:8px}
+.tab{display:flex;align-items:baseline;gap:12px;text-align:left;background:none;border:0;border-left:2px solid transparent;padding:12px 0 12px 16px;cursor:pointer;color:#9d968a;transition:color .4s,border-color .4s;min-height:44px}
+.tab .n{font-family:"Cormorant Garamond",serif;font-size:15px;opacity:.55}
+.tab .t{font-family:"Cormorant Garamond",serif;font-size:23px;font-weight:600;line-height:1.05}
+.tab.on{color:#f0eae0;border-color:#c89f6a}
+.tab.on .t{color:#f0eae0}.tab.on .n{color:#c89f6a;opacity:1}
+.path{margin-top:14px;font-size:12.5px;color:#9d968a;min-height:1.2em}
+.path b{color:#c89f6a;font-weight:500}
+.bridge{margin-top:auto;font-family:"Cormorant Garamond",serif;font-size:20px;font-weight:500;color:#f0eae0;line-height:1.22;max-width:17em}
+.demo-cap{margin-top:12px;color:#c89f6a;opacity:.85}
+.window{position:relative;z-index:5;padding:6vh 60px 6vh 52px;display:flex;flex-direction:column;overflow:clip;min-height:100vh}
+/* ЧІП ПЛОЩІ (нова для smart) */
+.areachip{display:flex;gap:8px;margin-bottom:16px;align-items:center}
+.areachip .lbl{font-size:12px;color:#9d968a;letter-spacing:.04em;margin-right:2px}
+.chip{font-family:"Jost";font-size:13px;color:#c8c2b6;background:rgba(240,234,224,.05);border:1px solid rgba(240,234,224,.2);padding:8px 15px;cursor:pointer;min-height:40px;transition:color .3s,background .3s,box-shadow .3s,border-color .3s;font-variant-numeric:tabular-nums}
+.chip.on{color:#12100d;background:#c89f6a;border-color:#c89f6a;box-shadow:0 0 0 5px rgba(200,159,106,.12)}
+.subtabs{display:flex;gap:8px;margin-bottom:16px;opacity:0;max-height:0;overflow:hidden;transition:opacity .3s,max-height .3s}
+.subtabs.on{opacity:1;max-height:60px}
+.subtab{font-family:"Jost";font-size:13px;color:#c8c2b6;background:rgba(240,234,224,.05);border:1px solid rgba(240,234,224,.2);padding:8px 17px;cursor:pointer;min-height:40px;transition:color .3s,background .3s,box-shadow .3s,border-color .3s}
+.subtab.on{color:#12100d;background:#c89f6a;border-color:#c89f6a;box-shadow:0 0 0 6px rgba(200,159,106,.13)}
+.stage{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center}
+.comp{display:flex;flex-direction:column;gap:2px;position:relative}
+.comp-eyebrow{color:#9d968a;margin-bottom:6px}
+.hero-state{color:#9d968a}
+.hero-row{display:flex;align-items:baseline;gap:.05em;line-height:.95}
+.plus{font-family:"Cormorant Garamond",serif;font-size:52px;font-weight:500;color:#c89f6a;line-height:.9;margin-right:.04em}
+.odo{display:inline-flex;align-items:baseline;font-variant-numeric:tabular-nums;line-height:1;font-family:"Cormorant Garamond",serif}
+.odo{--ch:1.24em}
+.odo-col{display:inline-block;width:1ch;height:var(--ch);overflow:hidden;vertical-align:baseline}
+.odo-strip{display:block;transform:translateY(0);will-change:transform}
+.odo-cell{display:block;height:var(--ch);line-height:var(--ch);text-align:center;font-variant-numeric:tabular-nums}
+.odo-sep{display:inline-block;width:.30ch;height:var(--ch)}
+.odo.roll .odo-strip{transition:transform .2s cubic-bezier(.4,0,.2,1)}
+.odo.settle .odo-strip{transition:transform .44s cubic-bezier(.22,1,.36,1)}
+.hero-odo{font-size:84px;font-weight:600;letter-spacing:-.01em}
+.unit{font-family:"Cormorant Garamond",serif;font-size:32px;font-weight:500;color:#c89f6a;margin-left:.1em}
+.hero-role{color:#f0eae0;font-size:15px;margin-top:5px}
+.hero-sub{color:#9d968a;font-size:14px;margin-top:3px}
+.hero-sub b{color:#f0eae0;font-weight:500;font-variant-numeric:tabular-nums}
+.chart{width:min(100%,640px);margin-top:6px}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.axv{font-family:"Jost";font-size:12px;fill:#9d968a}
+.axc{font-family:"Jost";font-size:11.5px;fill:#9d968a;letter-spacing:.12em}
+.band-end{font-family:"Cormorant Garamond",serif;font-weight:600;font-variant-numeric:tabular-nums}
+.tip-dot{fill:#f6ecdc}
+.trail-dot{fill:#c89f6a}
+.gridline{transition:opacity .18s,stroke-width .18s}
+.gridtext{transition:opacity .18s}
+.grow{margin-top:10px;display:flex;align-items:baseline;gap:14px}
+.grow .from{color:#9d968a;font-size:15px}
+.grow .arr{color:#9d968a;font-size:15px}
+.grow .to{font-family:"Cormorant Garamond",serif;font-size:21px;font-weight:600;color:#f0eae0}
+.grow .to small{font-family:"Jost";font-size:12px;color:#9d968a;font-weight:400;margin-left:.3em}
+.ctrl{margin-top:18px;width:min(100%,440px);display:flex;flex-direction:column;gap:7px}
+.ctrl label{font-size:13px;color:#9d968a;display:flex;gap:12px;align-items:baseline}
+.ctrl label b{color:#f0eae0;font-weight:500;font-family:"Cormorant Garamond",serif;font-size:18px}
+input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:44px;background:transparent;cursor:pointer;--f:0;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,#c89f6a 0,#c89f6a calc(var(--f)*100%),rgba(240,234,224,.22) calc(var(--f)*100%),rgba(240,234,224,.22) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#f0eae0;margin-top:-13px;box-shadow:0 0 0 8px rgba(200,159,106,.14)}
+input[type=range]::-moz-range-track{height:2px;background:rgba(240,234,224,.22)}
+input[type=range]::-moz-range-progress{height:2px;background:#c89f6a}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#f0eae0;border:0;box-shadow:0 0 0 8px rgba(200,159,106,.14)}
+.tickrow{display:flex;justify-content:space-between;font-size:11px;color:#9d968a}
+.payoff{margin-top:18px;display:flex;flex-direction:column;gap:5px;max-width:26em;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
+.payoff.on{opacity:1;transform:none}
+.payoff .prow{display:flex;align-items:baseline;gap:.4em}
+.payoff .when{color:#f0eae0;font-size:15px}
+.payoff .big{font-family:"Cormorant Garamond",serif;font-size:30px;font-weight:600;color:#c89f6a;line-height:1;font-variant-numeric:tabular-nums}
+.payoff .note{color:#9d968a;font-size:13px;line-height:1.5}
+.acts{margin-top:18px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.how{background:none;border:0;padding:0;color:#c89f6a;font-size:14px;cursor:pointer;text-align:left;width:max-content;border-bottom:1px solid rgba(200,159,106,.5);min-height:26px}
+.panel{margin-top:14px;background:rgba(24,21,17,.98);border:1px solid rgba(240,234,224,.16);padding:20px 22px;max-width:560px}
+.panel[hidden]{display:none}
+.panel h3{font-family:"Jost";font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9d968a;font-weight:600;margin:0 0 12px}
+.panel p{margin:0 0 9px;font-size:14.5px;line-height:1.5;font-variant-numeric:tabular-nums}
+.panel p b{font-family:"Cormorant Garamond",serif;font-size:16px;font-weight:600}
+.panel p.dim{color:#9d968a;font-size:12.5px;margin-top:12px}
+.offer{position:absolute;left:72px;bottom:16px;z-index:6;color:#9d968a}
+.data-fail{background:#7c2320;color:#fff;padding:14px 72px;font-size:14px}
+button:focus-visible,input:focus-visible{outline:2px solid #c89f6a;outline-offset:3px}
+@media (max-width:900px){
+  .section-tag{left:24px}
+  .console{grid-template-columns:1fr;min-height:auto}
+  .index{padding:5vh 24px 18px;border-right:0;border-bottom:1px solid rgba(240,234,224,.1)}
+  h1{font-size:27px}
+  .tabs{flex-direction:row;gap:8px}
+  .tab{border-left:0;border-bottom:2px solid transparent;padding:10px 4px}
+  .tab .t{font-size:16px}.tab .n{display:none}
+  .bridge{display:none}
+  .window{padding:22px 24px 40px}
+  .hero-odo{font-size:52px}.plus{font-size:36px}.unit{font-size:22px}
+  .offer{position:static;padding:0 24px 20px}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} .odo-strip{transition:none!important} }
+</style>
+</head>
+<body>
+<p class="cap section-tag" data-slot="section"></p>
+<div class="console" id="console" data-screen-label="Інвестиція у смарт · прототип-дерево">
+  <div class="media" aria-hidden="true">
+    <img id="mediaLive" src="assets/renders-smarts/day-01-vitalnia.webp" alt="">
+    <img id="mediaResale" src="assets/renders-smarts/ext-01-1920.webp" alt="">
+  </div>
+  <img src="assets/renders-smarts/ext-01-1920.webp" alt="Візуалізація ЖК Агрономічне, приклад" style="display:none">
+  <div class="veil"></div><div class="veil-b"></div>
+  <aside class="index">
+    <p class="cap" data-slot="eyebrow"></p>
+    <h1 class="serif" data-slot="title"></h1>
+    <p class="lede" data-slot="lede"></p>
+    <div class="tabs" id="l1tabs" role="tablist"></div>
+    <p class="path" id="path"></p>
+    <p class="bridge serif" data-slot="bridge"></p>
+    <p class="cap demo-cap" data-slot="demoNote"></p>
+  </aside>
+  <main class="window">
+    <div class="areachip" id="areachip" role="radiogroup" aria-label="Площа квартири"></div>
+    <div class="subtabs" id="l2tabs" role="tablist"></div>
+    <div class="stage" id="stage"></div>
+    <div class="acts">
+      <button class="how" id="howBtn" aria-expanded="false"></button>
+    </div>
+    <div class="panel" id="howPanel" hidden></div>
+  </main>
+  <p class="cap offer" data-slot="offerNote"></p>
+</div>
+
+<script>
+/* ============ СПІЛЬНЕ (дедуп) ============ */
+const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
+const W = (e,a,b) => clamp((e-a)/(b-a),0,1);
+const smoothstep = (e,a,b) => { const t=clamp((e-a)/(b-a),0,1); return t*t*(3-2*t); };
+const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const fmt1 = x => (Math.round(x*10)/10).toString().replace('.', ',');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const PriceModel = {
+  entry(priceUsd, downPct){ return Math.round(priceUsd*downPct/100); },
+  installment(priceUsd, downPct, months){ const first=Math.round(priceUsd*downPct/100); return Math.round((priceUsd - first)/months); },
+  resaleGain(area, presalePerM2, handoverPerM2){ return Math.round(area*(handoverPerM2-presalePerM2)); },
+  entryTotal(area, presalePerM2){ return Math.round(area*presalePerM2); }
+};
+window.PriceModel = PriceModel;
+
+function makeOdo(el, maxVal){
+  const maxStr = fmt(maxVal); el.textContent=''; const cols=[];
+  for (const ch of maxStr){
+    if (ch>='0'&&ch<='9'){ const c=document.createElement('span');c.className='odo-col';
+      const s=document.createElement('span');s.className='odo-strip';
+      s.innerHTML='<span class="odo-cell"> </span>'+Array.from({length:10},(_,d)=>'<span class="odo-cell">'+d+'</span>').join('');
+      c.appendChild(s);el.appendChild(c);cols.push({s,last:null});
+    } else { const sp=document.createElement('span');sp.className='odo-sep';sp.textContent=' ';el.appendChild(sp);cols.push(null); } }
+  return { set(v){ const str=fmt(v); let si=str.length-1;
+    for (let i=cols.length-1;i>=0;i--){ if(!cols[i]){ if(si>=0&&!/[0-9]/.test(str[si]))si--; continue; }
+      const ch=si>=0?str[si--]:''; if(cols[i].last===ch)continue; cols[i].last=ch;
+      const n=(ch===''?0:1+(+ch)); cols[i].s.style.transform='translateY(calc(var(--ch) * '+(-n)+'))'; } } };
+}
+function rollCls(el, settle){ el.classList.remove('roll','settle'); el.classList.add(settle?'settle':'roll'); }
+
+/* монотонний кубічний сплайн (перенос t2-curve дослівно) */
+function monotonePath(pts){
+  const n = pts.length; if (n < 2) return 'M'+pts[0].x+' '+pts[0].y;
+  const P = [{x:2*pts[0].x-pts[1].x, y:2*pts[0].y-pts[1].y}, ...pts, {x:2*pts[n-1].x-pts[n-2].x, y:2*pts[n-1].y-pts[n-2].y}];
+  const m = P.length, dx=[], sl=[];
+  for (let i=0;i<m-1;i++){ dx[i]=P[i+1].x-P[i].x; sl[i]=(P[i+1].y-P[i].y)/dx[i]; }
+  const tan = new Array(m); tan[0]=sl[0]; tan[m-1]=sl[m-2];
+  for (let i=1;i<m-1;i++){ if (sl[i-1]*sl[i]<=0) tan[i]=0;
+    else { const w1=2*dx[i]+dx[i-1], w2=dx[i]+2*dx[i-1]; tan[i]=(w1+w2)/(w1/sl[i-1]+w2/sl[i]); } }
+  let d = 'M'+pts[0].x.toFixed(2)+' '+pts[0].y.toFixed(2);
+  for (let k=0;k<n-1;k++){ const i=k+1, h=P[i+1].x-P[i].x;
+    d += ' C'+(P[i].x+h/3).toFixed(2)+' '+(P[i].y+tan[i]*h/3).toFixed(2)+' '+(P[i+1].x-h/3).toFixed(2)+' '+(P[i+1].y-tan[i+1]*h/3).toFixed(2)+' '+P[i+1].x.toFixed(2)+' '+P[i+1].y.toFixed(2); }
+  return d;
+}
+
+/* стан площі (чіп керує математикою обох композицій) */
+const AreaState = { area: null };
+
+/* ============ КОМПОЗИЦІЯ 1 · РОЗТЕРМІНУВАННЯ (лист «жити») ============
+   smarts-модель (installment-calc.js): ціна = площа×950, перший внесок % ,
+   платіж = (ціна − внесок) / місяці. Слайдер = перший внесок; місяці фіксовані. */
+function mountInstallmentScene(host, D){
+  const S = D.smart, area = AreaState.area;
+  const price = PriceModel.entryTotal(area, S.presalePerM2);   // повна пресейл-ціна квартири
+  host.innerHTML =
+    '<div class="comp"><p class="cap comp-eyebrow">Купую, щоб жити · '+area+' м²</p>'
+    + '<p class="cap hero-state">платіж</p>'
+    + '<div class="hero-row"><span class="odo hero-odo" id="cOdo"></span><span class="unit">$</span></div>'
+    + '<p class="hero-role">ваш платіж на місяць · '+S.months+' міс</p><p class="hero-sub" id="cSub"></p>'
+    + '<div class="ctrl"><label for="cRng">Перший внесок <b id="cRngOut"></b></label>'
+    + '<input type="range" id="cRng"><div class="tickrow"><span>'+S.downLo+'%</span><span>'+S.downHi+'%</span></div></div>'
+    + '<div class="payoff" id="cPay"><div class="prow"><span class="when">ключі</span> <span class="big serif">'+S.keysWhen+'</span></div>'
+    + '<p class="note">і квартира ваша, без оренди комусь.</p></div></div>';
+  const odo = makeOdo(host.querySelector('#cOdo'), PriceModel.installment(price,S.downLo,S.months));
+  const rng = host.querySelector('#cRng'); let down = S.downDefault;
+  function paint(settle){
+    const first = PriceModel.entry(price, down);
+    const pay = PriceModel.installment(price, down, S.months);
+    rollCls(host.querySelector('#cOdo'), settle); odo.set(pay);
+    host.querySelector('#cRngOut').textContent = down+'%';
+    host.querySelector('#cSub').innerHTML = 'ціна '+area+' м² = <b>'+fmt(price)+' $</b>, внесок <b>'+fmt(first)+' $</b>, решта '+S.months+' платежами';
+    rng.style.setProperty('--f',(down-S.downLo)/(S.downHi-S.downLo));
+    D._how = { title:'смарт '+area+' м²', lines:[
+      'ціна поки будують: '+area+' × '+S.presalePerM2+' = <b>'+fmt(price)+' $</b>',
+      'перший внесок '+down+'%: <b>'+fmt(first)+' $</b> · решта '+fmt(price-first)+' $ на '+S.months+' міс = <b>'+fmt(pay)+' $ на місяць</b>',
+      S.keysNote ] };
+  }
+  rng.min=S.downLo; rng.max=S.downHi; rng.step=5; rng.value=down;
+  rng.addEventListener('input', ()=>{ down=+rng.value; paint(false); });
+  rng.addEventListener('change', ()=> paint(true));
+  paint(true);
+  requestAnimationFrame(()=>setTimeout(()=> host.querySelector('#cPay').classList.add('on'), 380));
+  return { path:'<b>Купую, щоб жити</b>' };
+}
+
+/* ============ КОМПОЗИЦІЯ 2 · КРИВА ЗРОСТАННЯ (перенос t2-curve, self-play драйвер) ============ */
+function mountCurveScene(host, D){
+  const S = D.smart, area = AreaState.area;
+  const SP = S.curveStages.map(s=>s.p);
+  const handover = Math.round((S.marketLo + S.marketHi)/2); SP[SP.length-1]=handover;
+  const START=SP[0], HANDOVER=SP[SP.length-1], N=SP.length;
+  const roundToUsd=10, q=v=>Math.round(v/roundToUsd)*roundToUsd;
+  const BR=[.25,.37,.55,.67,.80,.92];
+  function priceAt(e){ let p;
+    if(e<BR[0])p=SP[0]; else if(e<BR[1])p=SP[0]+(SP[1]-SP[0])*smoothstep(e,BR[0],BR[1]);
+    else if(e<BR[2])p=SP[1]; else if(e<BR[3])p=SP[1]+(SP[2]-SP[1])*smoothstep(e,BR[2],BR[3]);
+    else if(e<BR[4])p=SP[2]; else p=SP[2]+(SP[3]-SP[2])*smoothstep(e,BR[4],BR[5]);
+    return q(p); }
+  const X0=70,X1=580,YB=300,YT=48,PMIN=S.curveYMin,PMAX=S.curveYMax;
+  const YOF=p=>YB-(p-PMIN)/(PMAX-PMIN)*(YB-YT);
+  const XE=e=>X0+(X1-X0)*clamp(e,0,1);
+  const XS=S.curveStages.map((_,i)=>X0+(X1-X0)*i/(N-1));
+  const gridVals=S.curveGrid;
+  host.innerHTML =
+    '<div class="comp"><p class="cap comp-eyebrow">Купую, щоб перепродати · '+area+' м²</p>'
+    + '<p class="cap hero-state" id="cState">ціна метра росте до здачі</p>'
+    + '<div class="hero-row"><span class="odo hero-odo" id="cOdo"></span><span class="unit">$/м²</span></div>'
+    + '<p class="hero-sub" id="cSub"></p>'
+    + '<div class="chart"><svg id="cSvg" viewBox="0 0 660 340" preserveAspectRatio="xMidYMid meet">'
+    + '<defs><linearGradient id="cAreaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c89f6a" stop-opacity=".17"></stop><stop offset="1" stop-color="#c89f6a" stop-opacity="0"></stop></linearGradient>'
+    + '<clipPath id="cAreaClip"><rect id="cAreaRect" x="'+X0+'" y="0" width="0" height="340"></rect></clipPath></defs>'
+    + '<g id="cGrid"></g>'
+    + '<g clip-path="url(#cAreaClip)"><path id="cArea" fill="url(#cAreaG)"></path></g>'
+    + '<path id="cBandPath" fill="#9d968a" fill-opacity=".1" opacity="0"></path>'
+    + '<path id="cCurve" pathLength="1" fill="none" stroke="#c89f6a" stroke-width="2.8" stroke-linecap="round" style="stroke-dasharray:1;stroke-dashoffset:1"></path>'
+    + '<g id="cBandLab" opacity="0"></g><g id="cTrail"></g>'
+    + '<circle id="cTip" class="tip-dot" r="4" opacity="0"></circle></svg></div>'
+    + '<div class="grow"><span class="from">зараз '+fmt(START)+' $/м²</span><span class="arr">→</span><span class="to">на здачі ~'+fmt(HANDOVER)+' <small>$/м²</small></span></div>'
+    + '<div class="payoff" id="cPay"><div class="prow"><span class="when">ваш прибуток</span> <span class="big serif" id="cGain"></span></div>'
+    + '<p class="note">Різницю між входом і ціною на здачі забираєте ви.</p></div></div>';
+  const odo = makeOdo(host.querySelector('#cOdo'), PMAX);
+  let gh=''; gridVals.forEach(v=>{ gh+='<line class="gridline" data-v="'+v+'" x1="'+X0+'" x2="'+X1+'" y1="'+YOF(v)+'" y2="'+YOF(v)+'" stroke="#f0eae0" style="opacity:.08"></line>'
+    +'<text class="axv gridtext" data-v="'+v+'" x="'+(X1+10)+'" y="'+(YOF(v)+4)+'" style="opacity:.08">'+fmt(v)+'</text>'; });
+  S.curveStages.forEach((s,i)=>{ gh+='<text class="axc" x="'+XS[i]+'" y="'+(YB+24)+'" text-anchor="'+(i===0?'start':i===N-1?'end':'middle')+'">'+s.c.toUpperCase()+'</text>'; });
+  host.querySelector('#cGrid').innerHTML = gh;
+  const prof=[]; for(let i=0;i<=80;i++){ const e=i/80; prof.push({x:XE(e), y:YOF(priceAt(e))}); }
+  const mainD = monotonePath(prof);
+  host.querySelector('#cCurve').setAttribute('d', mainD);
+  host.querySelector('#cArea').setAttribute('d', mainD+' L'+X1+' '+YB+' L'+X0+' '+YB+' Z');
+  const fx=XS[2], fy=YOF(SP[2]), ex=XS[3];
+  host.querySelector('#cBandPath').setAttribute('d','M'+fx+' '+fy+' L'+ex+' '+YOF(S.marketHi)+' L'+ex+' '+YOF(S.marketLo)+' Z');
+  host.querySelector('#cBandLab').innerHTML =
+    '<g transform="translate('+(ex+10)+','+YOF(S.marketHi)+')"><text class="axv" y="-4" fill="#9d968a">якщо вдало</text><text class="band-end" y="16" fill="#f0eae0" font-size="17">'+fmt(S.marketHi)+'</text></g>'
+    +'<g transform="translate('+(ex+10)+','+YOF(S.marketLo)+')"><text class="axv" y="-4" fill="#9d968a">якщо скромно</text><text class="band-end" y="16" fill="#f0eae0" font-size="17">'+fmt(S.marketLo)+'</text></g>';
+  const cv=host.querySelector('#cCurve'); const len=cv.getTotalLength(), K=80, lut=[];
+  for(let i=0;i<=K;i++){ const pt=cv.getPointAtLength(len*i/K); lut.push({x:pt.x,y:pt.y}); }
+  const lutAtP=p=>{ const f=clamp(p,0,1)*K,i=Math.floor(f),t=f-i,a=lut[i],b=lut[Math.min(i+1,K)]; return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}; };
+  const pAtX=tx=>{ for(let i=0;i<lut.length-1;i++){ if(tx>=lut[i].x&&tx<=lut[i+1].x){ const t=(tx-lut[i].x)/((lut[i+1].x-lut[i].x)||1); return (i+t)/K; } } return tx<=lut[0].x?0:1; };
+  function paintTip(drawP, price){
+    const x=XE(drawP), y=YOF(price), pLen=pAtX(x);
+    cv.style.strokeDashoffset = 1-pLen;
+    host.querySelector('#cAreaRect').setAttribute('width',((X1-X0)*drawP).toFixed(1));
+    if(drawP<=0.002||drawP>=0.999){ host.querySelector('#cTip').style.opacity=0; host.querySelector('#cTrail').innerHTML=''; return; }
+    const tip=host.querySelector('#cTip'); tip.setAttribute('cx',x); tip.setAttribute('cy',y); tip.style.opacity=1;
+    if(reduced){ host.querySelector('#cTrail').innerHTML=''; return; }
+    let th=''; [12,24,36].forEach((back,k)=>{ const tl=len*pLen-back; if(tl>0){ const c=lutAtP(tl/len); th+='<circle class="trail-dot" cx="'+c.x.toFixed(1)+'" cy="'+c.y.toFixed(1)+'" r="'+(2.6-k*0.6)+'" opacity="'+(0.45-k*0.13).toFixed(2)+'"></circle>'; } });
+    host.querySelector('#cTrail').innerHTML=th;
+  }
+  function paintGrid(headPrice){ gridVals.forEach(v=>{ const line=host.querySelector('.gridline[data-v="'+v+'"]'),txt=host.querySelector('.gridtext[data-v="'+v+'"]');
+    const passed=headPrice>=v-2,current=Math.abs(headPrice-v)<40; const op=current?.34:passed?.22:.08; line.style.opacity=op; txt.style.opacity=Math.max(op,passed?.5:.22); line.setAttribute('stroke-width',current?1.4:1); }); }
+  /* герой прибутку = площа × дельта (СИНХРОН: одометр кривої = висота кінчика priceAt) */
+  const gain=PriceModel.resaleGain(area, START, HANDOVER);
+  host.querySelector('#cGain').innerHTML='+'+fmt(gain)+' $ <small style="font-size:14px;color:#9d968a">разово</small>';
+  host.querySelector('#cSub').innerHTML='квартира <b>'+area+' м²</b> · вхід '+fmt(PriceModel.entryTotal(area,START))+' $';
+  D._how={ title:'смарт '+area+' м²', lines:[
+    'вхід поки будують: '+area+' × '+fmt(START)+' = <b>'+fmt(PriceModel.entryTotal(area,START))+' $</b>',
+    'на здачі метр ~'+fmt(HANDOVER)+' $ · квартира = <b>'+fmt(area*HANDOVER)+' $</b>',
+    'ваш прибуток: '+fmt(area*HANDOVER)+' − '+fmt(PriceModel.entryTotal(area,START))+' = <b>+'+fmt(gain)+' $ разово</b> (+'+Math.round((HANDOVER-START)/START*100)+'% до входу)' ] };
+  function play(){
+    if(reduced){ const pr=priceAt(1); odo.set(pr); rollCls(host.querySelector('#cOdo'),true);
+      cv.style.strokeDashoffset=0; host.querySelector('#cAreaRect').setAttribute('width',X1-X0);
+      host.querySelector('#cTip').setAttribute('cx',X1); host.querySelector('#cTip').setAttribute('cy',YOF(pr)); host.querySelector('#cTip').style.opacity=1;
+      paintGrid(pr); host.querySelector('#cBandPath').style.opacity=1; host.querySelector('#cBandLab').style.opacity=1;
+      host.querySelector('#cPay').classList.add('on'); host.querySelector('#cState').textContent='ціна метра · '+fmt(START)+' → '+fmt(HANDOVER); return; }
+    const t0=performance.now(), DUR=1550;
+    function step(now){ const drawP=clamp((now-t0)/DUR,0,1); const price=priceAt(drawP);
+      rollCls(host.querySelector('#cOdo'), drawP>=1); odo.set(price);
+      paintTip(drawP, price); paintGrid(price);
+      host.querySelector('#cBandPath').style.opacity=W(drawP,.82,1); host.querySelector('#cBandLab').style.opacity=W(drawP,.9,1);
+      if(drawP>=1){ host.querySelector('#cState').textContent='ціна метра · '+fmt(START)+' → '+fmt(HANDOVER);
+        setTimeout(()=>host.querySelector('#cPay').classList.add('on'),200); return; }
+      requestAnimationFrame(step); }
+    odo.set(START); requestAnimationFrame(step);
+  }
+  requestAnimationFrame(()=>requestAnimationFrame(play));
+  return { path:'Купую, щоб інвестувати › <b>Перепродати</b>' };
+}
+
+/* ============ DATA ============ */
+const DATA = {
+  section: 'Інвестиційна пропозиція',
+  eyebrow: 'Інвестиція у смарт',
+  title: 'Смарт: ваш вхід, ваші числа',
+  lede: 'Оберіть площу й намір, і прототип покаже платіж або прибуток з перепродажу. Оренду не рахуємо: у фактажі ЖК немає підтвердженої ставки.',
+  bridge: 'Малий бюджет робить квартиру найдоступнішим активом у передмісті.',
+  demoNote: 'демо-дані шаблону · приклад',
+  dataAsOf: '03.07.2026',
+  assumptionNote: 'Приклад розрахунку · ціни станом на 03.07.2026 · рахуємо по мінімуму, щоб не завищувати.',
+  offerNote: 'Не є публічною офертою.',
+  smart: {
+    areas: [24, 27], areaDefault: 24,
+    presalePerM2: 950,
+    months: 12, downLo: 20, downHi: 60, downDefault: 40,
+    keysWhen: '1-2 квартал 2027', keysNote: 'старт будівництва червень 2026 · ключі 1-2 квартал 2027',
+    marketLo: 1100, marketHi: 1200,
+    curveStages: [ {c:'котлован',p:950}, {c:'коробка',p:1030}, {c:'фасад',p:1090}, {c:'здача',p:1150} ],
+    curveYMin: 900, curveYMax: 1250, curveGrid: [950,1050,1150,1250]
+  },
+  howLabel: 'Як ми це рахували', hideLabel: 'Сховати розрахунок'
+};
+window.DATA = DATA;
+AreaState.area = DATA.smart.areaDefault;
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+(function guard(){ const req=['section','eyebrow','title','lede','bridge','demoNote','dataAsOf','assumptionNote','offerNote','smart'];
+  const miss=req.filter(k=>DATA[k]==null); if(miss.length) document.body.insertAdjacentHTML('afterbegin','<div class="data-fail">TEMPLATE CONTRACT FAIL · '+miss.join(', ')+'</div>'); })();
+$$('[data-slot]').forEach(el => { const v = DATA[el.dataset.slot]; if (v != null) el.textContent = v; });
+
+/* ============ ОБОЛОНКА-ДЕРЕВО (пін НЕМА; чіп площі керує математикою) ============ */
+const L1=[{k:'live',label:'Купую, щоб жити'},{k:'invest',label:'Купую, щоб інвестувати'}];
+/* smart: під «інвестувати» лише «Перепродати» (оренди нема) -> L2 одиничний, ховається */
+const L2=[{k:'resale',label:'Перепродати'}];
+const leaves={ live:h=>mountInstallmentScene(h,DATA), resale:h=>mountCurveScene(h,DATA) };
+const mediaByLeaf={ live:'#mediaLive', resale:'#mediaResale' };
+const state={ l1:'live', l2:'resale' };
+const leafKey=()=> state.l1==='live'?'live':'resale';
+
+function buildChips(){
+  $('#areachip').innerHTML = '<span class="lbl">Площа</span>' + DATA.smart.areas.map(a=>'<button class="chip" role="radio" data-a="'+a+'" aria-checked="'+(a===AreaState.area)+'">'+a+' м²</button>').join('');
+  $$('#areachip .chip').forEach(c=> c.addEventListener('click', ()=>{ AreaState.area=+c.dataset.a; paintChips(); mountActive(null); }));
+}
+function paintChips(){ $$('#areachip .chip').forEach(c=>{ const on=+c.dataset.a===AreaState.area; c.classList.toggle('on',on); c.setAttribute('aria-checked',on); }); }
+function buildTabs(){
+  $('#l1tabs').innerHTML = L1.map((b,i)=>'<button class="tab" role="tab" data-b="'+b.k+'"><span class="n">0'+(i+1)+'</span><span class="t">'+b.label+'</span></button>').join('');
+  $$('#l1tabs .tab').forEach(t=> t.addEventListener('click', ()=> selectL1(t.dataset.b)));
+  $('#l2tabs').innerHTML = L2.map(b=>'<button class="subtab" role="tab" data-b="'+b.k+'">'+b.label+'</button>').join('');
+  $$('#l2tabs .subtab').forEach(t=> t.addEventListener('click', ()=> selectL2(t.dataset.b)));
+}
+function paintTabs(){
+  $$('#l1tabs .tab').forEach(t=> t.classList.toggle('on', t.dataset.b===state.l1));
+  $$('#l2tabs .subtab').forEach(t=> t.classList.toggle('on', t.dataset.b===state.l2));
+  /* єдиний підсценарій -> не показуємо порожній ряд табів, шлях і так у breadcrumb */
+  $('#l2tabs').classList.remove('on');
+}
+function mountActive(dir){
+  const host=$('#stage'); host.innerHTML='';
+  const res = leaves[leafKey()](host);
+  ['#mediaLive','#mediaResale'].forEach(sel=> $(sel).classList.toggle('on', sel===mediaByLeaf[leafKey()]));
+  $('#path').innerHTML = res.path;
+  if(!reduced && dir!=null && host.firstElementChild) host.firstElementChild.animate([{opacity:0,transform:'translateX('+dir+'px)'},{opacity:1,transform:'none'}],{duration:440,easing:'cubic-bezier(.16,1,.3,1)'});
+  $('#howPanel').hidden=true; $('#howBtn').setAttribute('aria-expanded','false');
+}
+function selectL1(k){ if(k===state.l1) return; const dir=k==='invest'?34:-34; state.l1=k; if(k==='invest') state.l2='resale'; paintTabs(); mountActive(dir); }
+function selectL2(k){ state.l2=k; state.l1='invest'; paintTabs(); mountActive(34); }
+
+$('#howBtn').onclick = ()=>{ const p=$('#howPanel');
+  if(p.hidden){ const h=DATA._how||{title:'',lines:[]}; p.innerHTML='<h3>Приклад розрахунку · '+h.title+'</h3>'+h.lines.map(l=>'<p>'+l+'</p>').join('')+'<p class="dim">'+DATA.demoNote+' · '+DATA.assumptionNote+'</p>'; p.hidden=false; $('#howBtn').setAttribute('aria-expanded','true'); }
+  else { p.hidden=true; $('#howBtn').setAttribute('aria-expanded','false'); } };
+
+window.__zeroBlankProbe = () => ({ ok: getComputedStyle($('.console')).opacity==='1' });
+window.__leafKey = () => leafKey();
+window.__area = () => AreaState.area;
+
+function arm(){ buildChips(); buildTabs(); paintChips(); paintTabs(); $('#howBtn').textContent=DATA.howLabel; mountActive(null); }
+const imgs=$$('.media img');
+function decodeGuard(){ return Promise.all(imgs.map(i => i.decode ? Promise.race([i.decode().catch(()=>0), new Promise(r=>setTimeout(r,1200))]) : 0)); }
+decodeGuard().then(arm);
+</script>
+</body>
+</html>

@@ -145,3 +145,26 @@ desktop drill (hover bands, side panels, veil locators) breaks on touch. The pat
   dark skin needs explicit bar/list overrides.
 - The building geometry stays the live-smarts container (aspect-ratio 2.357 + cover) on desktop — see F-41;
   mobile switches that ONE combo to contain because the picker moves off the building to the bottom bar.
+
+### 5b. MOBILE TOWNS ROW-PICK + TOWN-PAGE (the Claude Design phone grammar, verified live 2026-07-01)
+When the object is a ROW of identical houses (TOWNS family), the phone splits into two page kinds, each a
+distinct scroll model — do NOT make the row-pick scroll:
+- **Row-pick = a FIXED `100dvh` app**, never scrolls: `.app{display:flex;flex-direction:column;height:100dvh}`.
+  Big building render fills the middle (`.hero{flex:1;min-height:0}` + `img{object-fit:contain;max-height:100%}`
+  = whole row shown, static, read-only pins over it). Pick is a docked 3-col grid of large buttons at the
+  bottom (`.grid{grid-template-columns:repeat(3,1fr)}`, `.hbtn{min-height:60px}` showing №/82м²/status).
+  Free tap → `setTimeout(180ms)` → `location.href=TOWN`; sold/reserved tap → an inline status card (never
+  navigate). States painted with TRANSPARENT `backdrop-filter` washes (`grayscale` sold / `sepia` reserved),
+  masked to the house strip — house stays visible (F-43). Verify signature: `scrollable=false`, hero
+  `naturalWidth>0`, 6 picker buttons.
+- **Town-page = single-column REAL scroll** (`scrollable=true`): sticky top (back/brand/Заявка), hero above
+  the fold (№, 82м², від $67тис., full-width CTA), then a TAP-DRIVEN plan — `.floor-tabs` (Поверх 1/2), an
+  SVG `.plansvg` whose room tap swaps a render in a `.viewer` BELOW the plan with its own per-room День/Вечір
+  toggle; then an interiors `.stack` (each card its own day/night), yard, honest price row, form (inputs
+  `font-size:16px;min-height:52px` so iOS doesn't zoom). ONE town-page template is reused across all
+  directions — only the back-link, serif/palette tokens, and section headings differ. Verify signature:
+  imgs≈15 all `naturalWidth>0`, plan rooms drawn, `scrollable=true`.
+- Gallery index (`all-prototypes-mobile.html`) is a card/iframe list — expect `imgs=0, pickerBtns=0`; that's
+  correct, not a failure.
+- Assets the phone build needs: `assets/row/selector-row-6-day.png` (row render), `assets/interiors/*.jpg`
+  (day+night pairs), `assets/yard/*.webp`. Confirm all three dirs before deploy.

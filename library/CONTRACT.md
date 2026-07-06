@@ -56,7 +56,9 @@ meaning:                         # REQUIRED. when/lands must be non-empty for of
 source:                          # REQUIRED. provenance = reproducibility anchor
   grammar: "originating site / section"
   recording: "rec.mov | null"
-  registry_ref: ["T-###"]        # link INTO the 163-brain (or [])
+  registry_ref: ["T-###"]        # REQUIRED on official (H17): T-###/T-M## з _REGISTRY_TID,
+                                 #   або "x:<чому поза реєстром>". verify: WARN порожній,
+                                 #   FAIL кривий формат / dangling T-ID
 stack: "vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis"
 webgl: false
 motion_props: [transform, opacity, clip-path]   # ONLY animatable props (perf contract)
@@ -126,6 +128,22 @@ A technique reaches `status:official` only when ALL exist + verify is green:
 3. runnable `lab.html` that sets `window.__LAB_OK__ = true` after acceptance fires
 4. `acceptance[]` front-matter (each string maps to a lab probe)
 5. green `scripts/library-verify.mjs`
+6. `source.registry_ref` заповнений (T-### або "x:<чому>") — одна система імен
+   бібліотека↔реєстр (H17)
+
+Lab acceptance probes MUST cover, where applicable (закон B14 конституції):
+bbox ключових елементів у viewport · pinTop===0 після скролу 1.2vh (pin-модулі) ·
+offsetHeight ≤ innerHeight (sticky-тіри) · bottomSpread===0 (одометри) ·
+COUNT геометрії в DOM (карти/SVG) · driven-інтеракція з семплами значень у часі ·
+**load-stability**: CLS < 0.1 (PerformanceObserver layout-shift з першого кадру) +
+дрейф документних bbox статичних якорів ≤4px між 600ms і 2500ms після load.
+`__LAB_OK__` без гео-проб = гейт, що бреше (К1 — найчастіший клас фейлів: 6 у 4 сесіях).
+
+**СЦЕНАРНІ ПРОБИ — ТІЛЬКИ В HEADLESS.** Проби, що скролять/клікають/стрибають
+сторінкою, гейтяться `navigator.webdriver || ?probe` і НІКОЛИ не ганяються в
+живому перегляді (invest-combo 2026-07-05: власник бачив «стрибає одна секція
+за іншою» — то проби ганяли сторінку на кожному відкритті). Живий перегляд =
+нуль автоскролів, scrollRestoration='manual' + top, overflow-anchor:none (D14).
 
 WebGL rows (`webgl:true`) get `status:candidate` until a GL-capable headless
 context exists; verify SKIPS their headless step.

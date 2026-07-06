@@ -1,0 +1,23 @@
+/* ============================================================
+   DE-BLEED · component.css
+   Full-bleed photo that insets into a contained card with a wordmark BEHIND it.
+   The card geometry/word/editorial are composition; the engine drives the clip.
+   ============================================================ */
+
+.db-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+
+/* the giant wordmark BEHIND the media (revealed in the gutters as it de-bleeds) */
+.db-word { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center;
+  pointer-events: none; }
+
+/* the media: starts full-bleed (inset 0), insets into a centred card on scroll */
+.db-media { position: absolute; inset: 0; z-index: 2; will-change: clip-path; backface-visibility: hidden; }
+.db-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* editorial elements that fade/rise in around the card as it forms */
+.db-around { position: absolute; z-index: 3; will-change: transform, opacity; }
+
+/* NO mix-blend / NO backdrop over the scrubbed media. clip-path + transform + opacity. */
+
+/* reduced-motion / <=820px: rest in the contained-card pose */
+.db-stage.db-static .db-around { opacity: 1 !important; transform: none !important; }

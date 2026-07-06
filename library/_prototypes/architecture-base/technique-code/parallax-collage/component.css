@@ -1,0 +1,34 @@
+/* ============================================================
+   PARALLAX-COLLAGE · component.css
+   The editorial collage SKIN. Owns: the tile grid scaffold, the mask shapes, the
+   wordmark-behind z-placement, and the decor GPU isolation. The specific photos,
+   exact rects, decor art and copy are composition (set per site in the lab/page).
+   ============================================================ */
+
+.pc-stage { position: relative; width: 100%; }
+
+/* the wordmark sits BEHIND the tiles as a depth plane (shows through the gutters) */
+.pc-word { position: absolute; z-index: 1; pointer-events: none; }
+
+/* tiles live above the wordmark */
+.pc-tile { position: absolute; z-index: 2; overflow: hidden; }
+.pc-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* mask variants (EVER: a round tile + a tall rectangle) */
+.pc-tile--round { border-radius: 50%; }
+.pc-tile--rect { border-radius: 0; }
+.pc-tile--oval { border-radius: 50% / 50%; }     /* a true ellipse if w!=h */
+
+/* floating decor — its own GPU layer, mouse-parallaxed by the engine */
+.pc-stage [data-deco] {
+  position: absolute; z-index: 3; pointer-events: none;
+  will-change: transform; backface-visibility: hidden;
+}
+.pc-stage [data-deco] img { width: 100%; height: 100%; display: block; object-fit: contain; }
+
+/* meta layer (title group, counter, + button) above everything */
+.pc-meta { position: absolute; z-index: 4; }
+
+/* NO mix-blend-mode / NO backdrop-filter over the moving decor. transform-only. */
+
+/* reduced-motion: the engine skips parallax; the collage just rests composed */

@@ -11,6 +11,7 @@ license: MIT
 
 ## Reference
 - [PB_discovery_strategy](./references/PB_discovery_strategy) — повний 5-крок метод (research→інтерв'ю→позиц→бренд→копі), 7 блоків інтерв'ю, artefacts.
+- [_DEV_BRIEF_QUESTIONNAIRE](./references/_DEV_BRIEF_QUESTIONNAIRE.md) — консолідований питальник ЗАБУДОВНИКА (38 питань / 6 груп, 16 критичних ★, «чого не спитали» з болю 4 сайтів, чек-лист матеріалів із форматами). У кроці 2 блок «обʼєкт/матеріали/технічне» бери ЗВІДСИ — це жнива реальних проєктів (tauny/nahirna/smart/quadro), не вигадка.
 
 ## Суть (повний метод у reference)
 1. **Research** (через skill research-engine): конкуренти=СЕНСИ (ЦА/болі/позиц/відмінність), не візуал. Цитуй джерела.

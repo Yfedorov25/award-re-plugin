@@ -7,7 +7,11 @@ license: MIT
 
 # higgsfield-craft — виконання законів G
 
-Агент-власник: media-director. Закони G1-G13 у `../../CLAUDE.md`. Робочі рецепти:
+Агент-власник: media-director. Закони G1-G25 у `../../CLAUDE.md`. Робочі рецепти:
+
+Медіа-QA дельта (каталог 11 галюцинацій, Закон-11 руху камери в i2v — рішення власника
+2026-07-04, дослівні промпт-локи, 5-шаровий QA, дельта-закони Δ1-Δ14 поза G1-G25):
+`references/_MEDIA_QA_CHECKLIST.md`.
 
 ## ФОТО (nano-banana-pro, resolution:"4k" ЗАВЖДИ)
 - День→ніч: i2i від РЕАЛЬНОГО денного кадру, «change ONLY the lighting to ...; keep

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Інвестиційна пропозиція · тауни · жити чи здавати</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<!--
+  ІНВЕСТИЦІЙНА ПРОПОЗИЦІЯ · група ТАУНИ · внутрішній код t1-live · BRANCH CONSOLE (C-hybrid)
+  Архітектура ради 3/3 (ARCH-verdict): консоль поєднує ГОТОВІ композиції, не переписує плоско.
+  ОДИН #pin, ОДИН драйвер render(branch, e). Неактивна гілка = DATA в памʼяті, нуль DOM у потоці.
+  ТРИ РІВНІ ГЛИБИНИ:
+    L1 консоль - обидві гілки за табами, порівняння за секунду.
+    L2 активна гілка ЗБАГАЧЕНА reveal IN PLACE (no scroll-scrub, IntersectionObserver): full-bleed
+       медіа-підкладка на гілку + band-pick (rent) + герой:решта >=6:1 + payoff-after-pause.
+    L3 кнопка «Подивитись, як це виглядає» -> inline-expand ПОВНОЇ cinema-сцени оренди
+       (та сама композиція t3-rent, той самий price-model, нуль дубльованої математики).
+  ДЕДУП: rentMonthly()/payback()/installment() = ОДИН price-model, який читають і консоль,
+    і cinema-сцена. Grep-контракт: одна формула окупності.
+  Знак «+» лише на орендному припливі. Нуль жаргону, нуль дешів.
+-->
+<style>
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#12100d;color:#f0eae0;font-family:"Jost","Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:clip}
+.serif{font-family:"Cormorant Garamond",Georgia,serif}
+.cap{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9d968a;font-weight:500}
+.section-tag{position:fixed;left:72px;top:26px;z-index:30;color:#c89f6a;letter-spacing:.22em;pointer-events:none}
+/* КОНСОЛЬ = двоколонка; L2 reveal керує IntersectionObserver, не пін-скраб */
+.console{position:relative;min-height:100vh;overflow:clip;display:grid;grid-template-columns:36% 64%}
+/* медіа-підкладка per-гілка: два шари, active fade */
+.media{position:absolute;inset:0;z-index:0}
+.media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;filter:saturate(.72) brightness(.66);transition:opacity .55s ease}
+.media img.on{opacity:.18}
+.veil{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,#12100d 0%,rgba(18,16,13,.85) 42%,rgba(18,16,13,.5) 100%)}
+.veil-b{position:absolute;left:0;right:0;bottom:0;height:30vh;z-index:1;background:linear-gradient(180deg,rgba(18,16,13,0),#12100d)}
+/* ліва колона: індекс + таби */
+.index{position:relative;z-index:5;padding:9vh 40px 8vh 72px;display:flex;flex-direction:column;gap:15px;border-right:1px solid rgba(240,234,224,.1)}
+.index>*{flex:none}
+h1{font-size:42px;line-height:1.06;font-weight:600;margin:6px 0 4px}
+.lede{font-size:15px;color:#9d968a;margin:0 0 6px;line-height:1.55;max-width:22em}
+.tabs{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.tab{display:flex;align-items:baseline;gap:12px;text-align:left;background:none;border:0;border-left:2px solid transparent;padding:13px 0 13px 16px;cursor:pointer;color:#9d968a;transition:color .4s,border-color .4s;min-height:44px}
+.tab .n{font-family:"Cormorant Garamond",serif;font-size:15px;opacity:.55}
+.tab .t{font-family:"Cormorant Garamond",serif;font-size:25px;font-weight:600;line-height:1.05}
+.tab.on{color:#f0eae0;border-color:#c89f6a}
+.tab.on .t{color:#f0eae0}.tab.on .n{color:#c89f6a;opacity:1}
+.bridge{margin-top:auto;font-family:"Cormorant Garamond",serif;font-size:21px;font-weight:500;color:#f0eae0;line-height:1.22;max-width:17em}
+.demo-cap{margin-top:12px;color:#c89f6a;opacity:.85}
+/* права колона: вікно гілки */
+.window{position:relative;z-index:5;padding:9vh 72px 8vh 56px;display:flex;flex-direction:column;justify-content:center;overflow:clip}
+.flow{display:flex;flex-direction:column;gap:3px}
+.flow-eyebrow{color:#9d968a;margin-bottom:8px}
+.hero-state{color:#9d968a}
+.hero-row{display:flex;align-items:baseline;gap:.05em;line-height:.95}
+.plus{font-family:"Cormorant Garamond",serif;font-size:58px;font-weight:500;color:#c89f6a;line-height:.9;opacity:0;width:0;transition:opacity .3s}
+.plus.on{opacity:1;width:auto;margin-right:.04em}
+.odo{display:inline-flex;align-items:baseline;font-variant-numeric:tabular-nums;line-height:1;font-family:"Cormorant Garamond",serif}
+.hero-odo{font-size:94px;font-weight:600;letter-spacing:-.01em}
+.unit{font-family:"Cormorant Garamond",serif;font-size:37px;font-weight:500;color:#c89f6a;margin-left:.1em}
+.hero-role{color:#f0eae0;font-size:15px;margin-top:5px}
+.hero-sub{color:#9d968a;font-size:14px;margin-top:3px}
+.hero-sub b{color:#f0eae0;font-weight:500;font-variant-numeric:tabular-nums}
+.odo-col{display:inline-block;width:1ch;height:1em;overflow:hidden}
+.odo-strip{display:block;transform:translateY(0)}
+.odo-cell{display:block;height:1em;line-height:1}
+.odo-sep{display:inline-block;width:.30ch;height:1em}
+.odo.roll .odo-strip{transition:transform .14s cubic-bezier(.33,0,.3,1)}
+.odo.settle .odo-strip{transition:transform .52s cubic-bezier(.16,.84,.26,1)}
+/* band (rent-гілка) */
+.band{margin:20px 0 2px;width:min(100%,430px);opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.band.on{opacity:1;transform:none}
+.band svg{width:100%;height:auto;display:block;overflow:visible}
+.band .endlab{font-family:"Jost";font-size:11px;fill:#9d968a;letter-spacing:.04em}
+.band .endval{font-family:"Cormorant Garamond",serif;font-size:18px;font-weight:600;fill:#f0eae0;font-variant-numeric:tabular-nums}
+#pickLab{font-family:"Jost";font-size:11px;fill:#c89f6a;letter-spacing:.06em}
+/* слайдер */
+.ctrl{margin-top:20px;width:min(100%,450px);display:flex;flex-direction:column;gap:8px}
+.ctrl label{font-size:13px;color:#9d968a;display:flex;gap:12px;align-items:baseline}
+.ctrl label b{color:#f0eae0;font-weight:500;font-family:"Cormorant Garamond",serif;font-size:18px}
+input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:44px;background:transparent;cursor:pointer;--f:0;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,#c89f6a 0,#c89f6a calc(var(--f)*100%),rgba(240,234,224,.22) calc(var(--f)*100%),rgba(240,234,224,.22) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#f0eae0;margin-top:-13px;box-shadow:0 0 0 8px rgba(200,159,106,.14)}
+input[type=range]::-moz-range-track{height:2px;background:rgba(240,234,224,.22)}
+input[type=range]::-moz-range-progress{height:2px;background:#c89f6a}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#f0eae0;border:0;box-shadow:0 0 0 8px rgba(200,159,106,.14)}
+.tickrow{display:flex;justify-content:space-between;font-size:11px;color:#9d968a}
+/* payoff (after pause) */
+.payoff{margin-top:22px;display:flex;flex-direction:column;gap:5px;max-width:26em;opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s}
+.payoff.on{opacity:1;transform:none}
+.payoff .prow{display:flex;align-items:baseline;gap:.4em}
+.payoff .when{color:#f0eae0;font-size:15px}
+.payoff .big{font-family:"Cormorant Garamond",serif;font-size:33px;font-weight:600;color:#c89f6a;line-height:1;font-variant-numeric:tabular-nums}
+.payoff .note{color:#9d968a;font-size:13px;line-height:1.5}
+/* L3 кнопки */
+.acts{margin-top:20px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.how{background:none;border:0;padding:0;color:#c89f6a;font-size:14px;cursor:pointer;text-align:left;width:max-content;border-bottom:1px solid rgba(200,159,106,.5);min-height:26px}
+.panel{margin-top:14px;background:rgba(24,21,17,.98);border:1px solid rgba(240,234,224,.16);padding:20px 22px;max-width:560px}
+.panel[hidden]{display:none}
+.panel h3{font-family:"Jost";font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9d968a;font-weight:600;margin:0 0 12px}
+.panel p{margin:0 0 9px;font-size:14.5px;line-height:1.5;font-variant-numeric:tabular-nums}
+.panel p b{font-family:"Cormorant Garamond",serif;font-size:16px;font-weight:600}
+.panel p.dim{color:#9d968a;font-size:12.5px;margin-top:12px}
+.offer{position:absolute;left:72px;bottom:16px;z-index:6;color:#9d968a}
+.data-fail{background:#7c2320;color:#fff;padding:14px 72px;font-size:14px}
+button:focus-visible,input:focus-visible{outline:2px solid #c89f6a;outline-offset:3px}
+/* L3 · cinema-сцена (inline-expand, пін ВМИКАЄТЬСЯ тільки коли розгорнуто) */
+#cinema{position:relative;z-index:10;max-height:0;overflow:hidden;transition:max-height .5s ease}
+#cinema.open{max-height:none}
+.cine-close{position:absolute;right:72px;top:24px;z-index:14;background:rgba(24,21,17,.9);border:1px solid rgba(240,234,224,.2);color:#f0eae0;font-family:"Jost";font-size:13px;padding:9px 16px;cursor:pointer}
+@media (max-width:900px){
+  .section-tag{left:24px}
+  .console{grid-template-columns:1fr;min-height:auto}
+  .index{padding:5vh 24px 20px;border-right:0;border-bottom:1px solid rgba(240,234,224,.1)}
+  h1{font-size:29px}
+  .tabs{flex-direction:row;gap:8px}
+  .tab{border-left:0;border-bottom:2px solid transparent;padding:10px 4px}
+  .tab .t{font-size:18px}.tab .n{display:none}
+  .bridge{display:none}
+  .window{padding:24px 24px 40px}
+  .hero-odo{font-size:58px}.plus{font-size:38px}.unit{font-size:25px}
+  .offer{position:static;padding:0 24px 20px}
+  .cine-close{right:24px}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} .odo-strip{transition:none!important} }
+</style>
+</head>
+<body>
+<p class="cap section-tag" data-slot="section"></p>
+<div class="console" id="console" data-screen-label="Інвестиційна пропозиція · тауни · жити чи здавати">
+  <div class="media" aria-hidden="true">
+    <img id="mediaLive" src="assets/renders-smarts/day-04-vikno.webp" alt="">
+    <img id="mediaRent" src="assets/towns/back-yard.webp" alt="">
+  </div>
+  <img src="assets/towns/hero-day.webp" alt="Візуалізація ряду таунхаусів, приклад" style="display:none">
+  <div class="veil"></div><div class="veil-b"></div>
+  <aside class="index">
+    <p class="cap" data-slot="eyebrow"></p>
+    <h1 class="serif" data-slot="title"></h1>
+    <p class="lede" data-slot="lede"></p>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <p class="bridge serif" data-slot="bridge"></p>
+    <p class="cap demo-cap" data-slot="demoNote"></p>
+  </aside>
+  <main class="window">
+    <div class="flow" id="flow">
+      <p class="cap flow-eyebrow" id="flowEyebrow"></p>
+      <p class="cap hero-state" id="heroState"></p>
+      <div class="hero-row" id="hero" data-value="">
+        <span class="plus" id="heroPlus">+</span>
+        <span class="odo hero-odo" id="heroOdo" aria-hidden="true"></span>
+        <span class="unit" id="heroUnit"></span>
+        <span id="heroSr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)" role="status"></span>
+      </div>
+      <p class="hero-role" id="heroRole"></p>
+      <p class="hero-sub" id="heroSub"></p>
+      <div class="band" id="bandWrap" aria-hidden="true">
+        <svg viewBox="0 0 440 116" preserveAspectRatio="xMidYMid meet">
+          <rect x="16" y="52" width="408" height="20" rx="2" fill="#9d968a" fill-opacity="0.14"></rect>
+          <rect id="bandFill" x="16" y="52" width="0" height="20" rx="2" fill="#c89f6a" fill-opacity="0.28"></rect>
+          <g transform="translate(16,52)"><text class="endlab" y="-9">якщо скромно</text><text class="endval" id="loVal" y="42"></text></g>
+          <g transform="translate(424,52)"><text class="endlab" y="-9" text-anchor="end">якщо вдало</text><text class="endval" id="hiVal" y="42" text-anchor="end"></text></g>
+          <g id="pick"><line y1="42" y2="82" stroke="#c89f6a" stroke-width="1.4"></line><circle cy="62" r="6" fill="#c89f6a"></circle><text id="pickLab" y="34" text-anchor="middle">ваша ставка</text></g>
+        </svg>
+      </div>
+      <div class="ctrl">
+        <label for="rng"><span id="sliderLabel"></span> <b id="rngOut"></b></label>
+        <input type="range" id="rng">
+        <div class="tickrow"><span id="minLab"></span><span id="maxLab"></span></div>
+      </div>
+      <div class="payoff" id="payoff"><div class="prow"><span class="when" id="payoffWhen"></span> <span class="big serif" id="payoffBig"></span></div><p class="note" id="payoffNote"></p></div>
+      <div class="acts">
+        <button class="how" id="howBtn" aria-expanded="false"></button>
+        <button class="how" id="cineBtn" aria-expanded="false"></button>
+      </div>
+      <div class="panel" id="howPanel" hidden></div>
+    </div>
+  </main>
+  <p class="cap offer" data-slot="offerNote"></p>
+</div>
+
+<!-- L3 · cinema (повна оренда-сцена, монтується за кнопкою тим самим price-model) -->
+<div id="cinema" aria-hidden="true"></div>
+
+<script>
+/* ============ ДЕДУП PRICE-MODEL (одна формула, читають консоль І cinema) ============ */
+const PriceModel = {
+  installment(priceUsd, entryPct, months){ const rest = priceUsd - Math.round(priceUsd*entryPct/100); return Math.round(rest/months); },
+  entry(priceUsd, entryPct){ return Math.round(priceUsd*entryPct/100); },
+  rentMonthly(rate){ return Math.round(rate); },
+  payback(investedUsd, monthlyUsd){ const yr = monthlyUsd*12; return { years: investedUsd/yr, yieldPct: yr/investedUsd*100, yr }; }
+};
+window.PriceModel = PriceModel;
+
+/* TEMPLATE CONTRACT · t1-live · BRANCH CONSOLE
+   ОБОВʼЯЗКОВІ: section, eyebrow, title, lede, bridge, demoNote, dataAsOf, assumptionNote,
+     offerNote, town{m2, priceUsd, entryPct, term{lo,hi,default}, keysMonths, rent{lo,hi,default},
+     investedUsd, mediaLive, mediaRent}, branches{live{...}, rent{...}}. Нуль em/en-дешів. */
+const DATA = {
+  section: 'Інвестиційна пропозиція',
+  eyebrow: 'Інвестиції в тауни',
+  title: 'Таун: жити чи здавати',
+  lede: 'Одна консоль, дві відповіді. Оберіть, що плануєте, і побачите свої числа.',
+  bridge: 'Ви обираєте свою дорогу, числа рахуємо ми.',
+  demoNote: 'демо-дані шаблону · приклад',
+  dataAsOf: '03.07.2026',
+  assumptionNote: 'Приклад розрахунку · ціни станом на 03.07.2026 · рахуємо по мінімуму, щоб не завищувати.',
+  offerNote: 'Не є публічною офертою.',
+  town: {
+    m2: 82, priceUsd: 73800, entryPct: 30,
+    term: { lo: 12, hi: 18, default: 15 }, keysMonths: 18,
+    rent: { lo: 550, hi: 700, default: 600 }, investedUsd: 94300,
+    mediaLive: 'assets/renders-smarts/day-04-vikno.webp',
+    mediaRent: 'assets/towns/back-yard.webp'
+  },
+  branches: {
+    live: { label: 'Купую, щоб жити', state: 'платіж', unit: '$', plus: false,
+      role: 'ваш платіж до ключів', slider: 'На скільки місяців розбити',
+      payoffWhen: 'ключі через', payoffNote: 'і таун ваш, без оренди комусь.' },
+    rent: { label: 'Купую, щоб здавати', state: 'оренда', unit: '$', plus: true,
+      role: 'приходить вам щомісяця', slider: 'Скільки просити за оренду',
+      payoffWhen: 'окупиться за', payoffNote: 'За цей час оренда поверне все, що ви вклали в таун.' }
+  },
+  cineLabel: 'Подивитись, як це виглядає',
+  cineClose: 'Згорнути',
+  howLabel: 'Як ми це рахували',
+  hideLabel: 'Сховати розрахунок'
+};
+window.DATA = DATA;
+const T = DATA.town;
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
+const fmt = n => Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const fmt1 = x => (Math.round(x*10)/10).toString().replace('.', ',');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+(function guard(){
+  const req = ['section','eyebrow','title','lede','bridge','demoNote','dataAsOf','assumptionNote','offerNote','town','branches'];
+  const miss = req.filter(k => DATA[k] == null);
+  if (miss.length) document.body.insertAdjacentHTML('afterbegin','<div class="data-fail">TEMPLATE CONTRACT FAIL · ' + miss.join(', ') + '</div>');
+})();
+$$('[data-slot]').forEach(el => { const v = DATA[el.dataset.slot]; if (v != null) el.textContent = v; });
+
+/* одометр (двигун бази) */
+function makeOdo(el, maxVal){
+  const maxStr = fmt(maxVal); el.textContent=''; const cols=[];
+  for (const ch of maxStr){
+    if (ch>='0'&&ch<='9'){ const c=document.createElement('span');c.className='odo-col';
+      const s=document.createElement('span');s.className='odo-strip';
+      s.innerHTML='<span class="odo-cell"> </span>'+Array.from({length:10},(_,d)=>'<span class="odo-cell">'+d+'</span>').join('');
+      c.appendChild(s);el.appendChild(c);cols.push({s,last:null});
+    } else { const sp=document.createElement('span');sp.className='odo-sep';sp.textContent=' ';el.appendChild(sp);cols.push(null); } }
+  return { set(v){ const str=fmt(v); let si=str.length-1;
+    for (let i=cols.length-1;i>=0;i--){ if(!cols[i]){ if(si>=0&&!/[0-9]/.test(str[si]))si--; continue; }
+      const ch=si>=0?str[si--]:''; if(cols[i].last===ch)continue; cols[i].last=ch;
+      cols[i].s.style.transform='translateY('+(-(ch===''?0:1+(+ch)))+'em)'; } } };
+}
+function roll(el, settle){ el.classList.remove('roll','settle'); el.classList.add(settle?'settle':'roll'); }
+const heroOdo = makeOdo($('#heroOdo'), Math.max(PriceModel.installment(T.priceUsd,T.entryPct,T.term.lo), T.rent.hi));
+
+const state = { branch: 'live', months: T.term.default, rent: T.rent.default };
+const BX0=16, BX1=424;
+const bandX = r => BX0 + (BX1-BX0)*(r-T.rent.lo)/(T.rent.hi-T.rent.lo);
+
+function buildTabs(){
+  $('#tabs').innerHTML = ['live','rent'].map((b,i)=>'<button class="tab" role="tab" data-b="'+b+'"><span class="n">0'+(i+1)+'</span><span class="t">'+DATA.branches[b].label+'</span></button>').join('');
+  $$('#tabs .tab').forEach(t=> t.addEventListener('click', ()=> switchTo(t.dataset.b)));
+}
+function paintTabs(){ $$('#tabs .tab').forEach(t=> t.classList.toggle('on', t.dataset.b===state.branch)); }
+
+/* єдиний render(branch) - обидві гілки через ОДИН price-model */
+function render(settle){
+  const b = state.branch, br = DATA.branches[b], isRent = b==='rent';
+  const val = isRent ? PriceModel.rentMonthly(state.rent) : PriceModel.installment(T.priceUsd, T.entryPct, state.months);
+  $('#flowEyebrow').textContent = br.label;
+  $('#heroState').textContent = br.state;
+  $('#heroPlus').classList.toggle('on', br.plus);
+  $('#heroUnit').textContent = br.unit;
+  $('#heroRole').textContent = br.role;
+  roll($('#heroOdo'), settle); heroOdo.set(val); $('#hero').dataset.value = val;
+  /* медіа-підкладка активної гілки */
+  $('#mediaLive').classList.toggle('on', !isRent);
+  $('#mediaRent').classList.toggle('on', isRent);
+  const rng = $('#rng');
+  $('#sliderLabel').textContent = br.slider;
+  if (isRent){
+    rng.min=T.rent.lo; rng.max=T.rent.hi; rng.step=10; rng.value=state.rent;
+    rng.style.setProperty('--f',(state.rent-T.rent.lo)/(T.rent.hi-T.rent.lo));
+    $('#rngOut').textContent = fmt(state.rent)+' $ / міс';
+    rng.setAttribute('aria-valuetext', fmt(state.rent)+' $ на місяць');
+    $('#heroSub').textContent = '';
+    $('#bandWrap').classList.add('on');
+    $('#minLab').textContent=T.rent.lo+' $'; $('#maxLab').textContent=T.rent.hi+' $';
+    $('#loVal').textContent=fmt(T.rent.lo); $('#hiVal').textContent=fmt(T.rent.hi);
+    const x=bandX(state.rent);
+    $('#bandFill').setAttribute('width',(x-BX0).toFixed(1)); $('#pick').setAttribute('transform','translate('+x.toFixed(1)+',0)');
+    const pb = PriceModel.payback(T.investedUsd, state.rent);
+    $('#payoffWhen').textContent=br.payoffWhen; $('#payoffBig').textContent=fmt1(pb.years)+' років'; $('#payoffNote').textContent=br.payoffNote;
+    $('#heroSr').textContent='оренда +'+fmt(state.rent)+' $ на місяць';
+  } else {
+    rng.min=T.term.lo; rng.max=T.term.hi; rng.step=1; rng.value=state.months;
+    rng.style.setProperty('--f',(state.months-T.term.lo)/(T.term.hi-T.term.lo));
+    $('#rngOut').textContent = state.months+' міс';
+    rng.setAttribute('aria-valuetext', state.months+' місяців · платіж '+fmt(val)+' $ на місяць');
+    $('#heroSub').innerHTML = 'вхід <b>'+fmt(PriceModel.entry(T.priceUsd,T.entryPct))+' $</b>, решта '+state.months+' платежами';
+    $('#bandWrap').classList.remove('on');
+    $('#payoffWhen').textContent=br.payoffWhen; $('#payoffBig').textContent=T.keysMonths+' місяців'; $('#payoffNote').textContent=br.payoffNote;
+    $('#heroSr').textContent='платіж '+fmt(val)+' $ на місяць до ключів';
+  }
+  paintHow();
+}
+function paintHow(){
+  const entry = PriceModel.entry(T.priceUsd,T.entryPct), rest=T.priceUsd-entry;
+  const pay = PriceModel.installment(T.priceUsd,T.entryPct,state.months);
+  const pb = PriceModel.payback(T.investedUsd, state.rent);
+  $('#howPanel').innerHTML = (state.branch==='live'
+    ? '<h3>Приклад розрахунку · таун '+T.m2+' м²</h3>'
+      + '<p>ціна поки будують: '+T.m2+' × 900 = <b>'+fmt(T.priceUsd)+' $</b></p>'
+      + '<p>вхід '+T.entryPct+'%: <b>'+fmt(entry)+' $</b> · решта '+fmt(rest)+' $ на '+state.months+' місяців = <b>'+fmt(pay)+' $ на місяць</b></p>'
+      + '<p>через '+T.keysMonths+' місяців будинок здають і таун ваш</p>'
+    : '<h3>Приклад розрахунку · таун '+T.m2+' м²</h3>'
+      + '<p>оренда: <b>'+fmt(state.rent)+' $ на місяць</b> · за рік '+fmt(pb.yr)+' $ (ринок району '+T.rent.lo+' до '+T.rent.hi+')</p>'
+      + '<p>вкладено коли добудують: <b>'+fmt(T.investedUsd)+' $</b> · окупність '+fmt(T.investedUsd)+' / '+fmt(pb.yr)+' = <b>'+fmt1(pb.years)+' років</b></p>')
+    + '<p class="dim">'+DATA.demoNote+' · '+DATA.assumptionNote+'</p>'
+    + '<p><button class="how" id="hideBtn">'+DATA.hideLabel+'</button></p>';
+  $('#hideBtn').onclick = ()=>{ $('#howPanel').hidden=true; $('#howBtn').setAttribute('aria-expanded','false'); };
+}
+$('#rng').addEventListener('input', ()=>{ if(state.branch==='rent') state.rent=+$('#rng').value; else state.months=+$('#rng').value; render(false); });
+$('#rng').addEventListener('change', ()=> render(true));
+$('#howBtn').onclick = ()=>{ const p=$('#howPanel'); p.hidden=!p.hidden; $('#howBtn').setAttribute('aria-expanded', String(!p.hidden)); };
+
+/* push-swap гілки: латч спершу (стара застигає), тоді морф вікна */
+function switchTo(b){
+  if (b===state.branch) return;
+  const dir = b==='rent' ? 34 : -34;
+  state.branch = b; paintTabs(); render(true);
+  if (reduced) return;
+  $('#flow').animate([{opacity:0, transform:'translateX('+dir+'px)'},{opacity:1, transform:'none'}], {duration:460, easing:'cubic-bezier(.16,1,.3,1)'});
+  revealSeq();
+}
+
+/* L2 reveal IN PLACE (no scroll-scrub): band + payoff по черзі при вході/перемиканні */
+function revealSeq(){
+  $('#payoff').classList.remove('on');
+  const rentOn = state.branch==='rent';
+  setTimeout(()=>{ if(rentOn) $('#bandWrap').classList.add('on'); }, 120);
+  setTimeout(()=>{ $('#payoff').classList.add('on'); }, 420);   /* пауза перед пуантом */
+}
+
+/* L3 · inline cinema-сцена (та сама оренда-композиція, той самий price-model) */
+let cineBuilt=false;
+function buildCinema(){
+  if (cineBuilt) return; cineBuilt=true;
+  const host=$('#cinema');
+  host.innerHTML =
+    '<button class="cine-close" id="cineClose">'+DATA.cineClose+'</button>'
+    + '<div style="position:relative;min-height:92vh;overflow:clip;display:flex;flex-direction:column;justify-content:center;padding:0 72px">'
+    + '<img src="'+T.mediaRent+'" alt="Візуалізація подвірʼя таунхаусів, приклад" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.3;filter:brightness(.5)">'
+    + '<div style="position:absolute;inset:0;background:linear-gradient(90deg,#12100d,rgba(18,16,13,.55))"></div>'
+    + '<div style="position:relative;z-index:2;max-width:40em">'
+    + '<p class="cap" style="color:#c89f6a">повна сцена · оренда тауна</p>'
+    + '<h2 class="serif" style="font-size:44px;font-weight:600;margin:10px 0 8px">Таун здається щомісяця</h2>'
+    + '<p class="hero-role" style="font-size:16px;color:#9d968a;max-width:24em">Це та сама відповідь, розгорнута сценою: скільки приходить щомісяця і за скільки років повертає вкладене.</p>'
+    + '<div class="hero-row" style="margin-top:24px"><span class="plus on" style="opacity:1;width:auto">+</span><span class="odo hero-odo" id="cineOdo"></span><span class="unit">$</span></div>'
+    + '<p class="hero-role" id="cineRole" style="margin-top:4px"></p>'
+    + '<p class="payoff-note" id="cinePb" style="margin-top:18px;font-family:\'Cormorant Garamond\',serif;font-size:30px;font-weight:600;color:#c89f6a"></p>'
+    + '<p class="cap" style="margin-top:16px;color:#9d968a">'+DATA.demoNote+' · '+DATA.assumptionNote+'</p>'
+    + '</div></div>';
+  const cineOdo = makeOdo($('#cineOdo'), T.rent.hi); cineOdo.set(state.rent);
+  const pb = PriceModel.payback(T.investedUsd, state.rent);          /* ТОЙ САМИЙ price-model */
+  $('#cineRole').textContent = 'приходить вам щомісяця · таун '+T.m2+' м²';
+  $('#cinePb').textContent = 'окупиться за '+fmt1(pb.years)+' років';
+  $('#cineClose').onclick = ()=> toggleCinema(false);
+}
+function toggleCinema(open){
+  buildCinema();
+  const c=$('#cinema'); c.classList.toggle('open', open); c.setAttribute('aria-hidden', String(!open));
+  $('#cineBtn').setAttribute('aria-expanded', String(open));
+  if (open) c.scrollIntoView({ behavior: reduced?'auto':'smooth', block:'start' });
+}
+$('#cineBtn').textContent = DATA.cineLabel;
+$('#cineBtn').onclick = ()=> toggleCinema($('#cinema').getAttribute('aria-hidden')!=='false' ? true : false);
+
+window.__zeroBlankProbe = () => ({ ok: getComputedStyle($('.console')).opacity==='1' });
+window.__model = { installment: (m)=>PriceModel.installment(T.priceUsd,T.entryPct,m), rentPayback:(r)=>PriceModel.payback(T.investedUsd,r).years };
+
+/* decode-guard перед стартом */
+function arm(){
+  buildTabs(); paintTabs();
+  $('#howBtn').textContent = DATA.howLabel;
+  render(true);
+  $('#mediaLive').classList.add('on');
+  if (!reduced){ const io=new IntersectionObserver(es=>{ es.forEach(en=>{ if(en.isIntersecting){ revealSeq(); io.disconnect(); } }); },{threshold:.3}); io.observe($('#flow')); }
+  else { $('#bandWrap').classList.add('on'); $('#payoff').classList.add('on'); }
+}
+const imgs = $$('.media img');
+function decodeGuard(){ return Promise.all(imgs.map(i => i.decode ? Promise.race([i.decode().catch(()=>0), new Promise(r=>setTimeout(r,1200))]) : 0)); }
+decodeGuard().then(arm);
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!--
+  PASSPORT · A1 «Вечір вдома»  (ROUND 2 - СУПЕРКОМПОЗИЦІЯ)
+  Питання: ЯКИМ ТУТ БУДЕ ВЕЧІР?  (дім 1, dn-ext пара)
+  atoms_used (>=3, код перенесено ДОСЛІВНО, конфігуровано через опції):
+    1. daynight-masked-windows  - ЯДРО. Вікна загоряються по одному. Координати вікон НЕ
+       передаю -> атом бере власні TUNED DEFAULT_WINDOWS (x:9/31/46/62/79 ...) ДОСЛІВНО.
+       DayNightMaskedWindows.create(stage,{dayMedia,nightMedia}); драйв mw.set(t) скролом.
+    2. daynight-engine          - канон під композитом (window.DayNight). Композит будує його
+       (DN.create, mode manual, reveal opacity). У фіналі піднімаю mw.dn.set() -> повний
+       присмерк + ліхтарі вздовж доріжки (крос-фейд нічного рендера через set() каноном).
+    3. content-stage-cascade    - хореограф появи: відкриття (сцена -> заголовок -> кью) у
+       фіксованому depth-порядку, і ФІНАЛ (рядок про ліхтарі) через окремий play().
+  Типо: Fraunces + Inter (house). Ease: --aw-ease-air cubic-bezier(.25,.74,.22,.99).
+  Закони: копі дослівно; нуль em/en-dash; пілюлі collision-safe (одна в кадрі); rest повний;
+  тільки видиме; NO WebGL/mix-blend/backdrop; один дім (цегляний); renders/ відносні.
+-->
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вечір вдома</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- atom stylesheets (verbatim) -->
+<link rel="stylesheet" href="technique-code/_tokens.css">
+<link rel="stylesheet" href="technique-code/daynight-engine/component.css">
+<link rel="stylesheet" href="technique-code/daynight-masked-windows/component.css">
+<link rel="stylesheet" href="technique-code/content-stage-cascade/component.css">
+<style>
+  :root{
+    --serif:"Fraunces",Georgia,serif;
+    --sans:"Inter",system-ui,sans-serif;
+    --air:var(--aw-ease-air);          /* house ease cubic-bezier(.25,.74,.22,.99) */
+    --amber:var(--aw-gold-accent);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05070b;color:#f4efe7;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+
+  .track{position:relative;height:560vh}
+  .sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#05070b}
+
+  .stage{position:relative;width:min(100vw, calc(100vh * 16 / 9));aspect-ratio:16/9}
+
+  /* dusk gradient (pure gradient, mine) rides the same t as the windows */
+  .dusk{position:absolute;inset:0;z-index:3;opacity:0;pointer-events:none;
+    background:linear-gradient(180deg, rgba(11,17,38,0.66) 0%, rgba(19,24,45,0.40) 40%, rgba(40,32,30,0.10) 66%, rgba(52,36,26,0.26) 100%)}
+
+  /* leader lines (SVG over stage) */
+  .leads{position:absolute;inset:0;z-index:6;pointer-events:none;overflow:visible}
+  .leads line{stroke:rgba(240,214,163,0.92);stroke-width:1.3px;vector-effect:non-scaling-stroke;opacity:0;transition:opacity .5s var(--air)}
+  .leads circle{fill:rgba(240,214,163,0.98);opacity:0;transition:opacity .5s var(--air)}
+
+  /* caption pills */
+  .pill{position:absolute;z-index:7;transform:translate(-50%,-50%) translateY(7px);
+    background:rgba(9,11,15,0.66);border:1px solid rgba(240,214,163,0.30);
+    padding:10px 16px;border-radius:2px;opacity:0;pointer-events:none;
+    transition:opacity .45s var(--air), transform .45s var(--air);white-space:nowrap}
+  .pill.on{opacity:1;transform:translate(-50%,-50%) translateY(0)}
+  .pill .rm{font-family:var(--serif);font-weight:400;font-size:clamp(17px,2vw,27px);line-height:1;color:#fdf6e9}
+  .pill .rm b{font-weight:500}
+  .pill .rm i{font-style:italic;color:var(--amber);font-weight:400}
+
+  /* headline (rest state) */
+  .head{position:absolute;left:0;right:0;top:8%;z-index:8;text-align:center;padding:0 6vw}
+  .head .eyebrow{font-family:var(--sans);font-size:var(--aw-type-eyebrow);letter-spacing:.4em;
+    text-transform:uppercase;color:var(--amber);font-weight:600;margin-bottom:20px;
+    display:inline-flex;align-items:center;gap:14px}
+  .head .eyebrow::before,.head .eyebrow::after{content:"";width:34px;height:1px;background:var(--amber);opacity:.7}
+  .head h1{font-family:var(--serif);font-weight:300;font-size:clamp(30px,4.8vw,72px);line-height:1.02;
+    letter-spacing:var(--aw-tracking-tight);text-shadow:0 2px 34px rgba(0,0,0,.5)}
+
+  .final{position:absolute;left:0;right:0;bottom:10%;z-index:8;text-align:center;padding:0 6vw;opacity:0}
+  .final p{font-family:var(--serif);font-weight:300;font-style:italic;font-size:clamp(24px,3.4vw,52px);
+    letter-spacing:var(--aw-tracking-tight);text-shadow:0 2px 30px rgba(0,0,0,.6)}
+  .final p em{font-style:italic;color:var(--amber);font-weight:400}
+
+  .cue{position:absolute;left:50%;bottom:5%;transform:translateX(-50%);z-index:8;
+    font-family:var(--sans);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.6);
+    display:flex;flex-direction:column;align-items:center;gap:9px}
+  .cue .bar{width:1px;height:34px;background:linear-gradient(rgba(255,255,255,.7),transparent);animation:drop 1.9s ease-in-out infinite}
+  @keyframes drop{0%{transform:scaleY(.2);transform-origin:top;opacity:.3}50%{transform:scaleY(1);opacity:1}100%{transform:scaleY(.2);transform-origin:bottom;opacity:.3}}
+  @media (prefers-reduced-motion: reduce){ .cue .bar{animation:none} }
+</style>
+</head>
+<body>
+<div class="track" id="track">
+  <div class="sticky">
+    <div class="stage" id="stage">
+      <svg class="leads" id="leads" viewBox="0 0 100 56.25" preserveAspectRatio="none"></svg>
+      <div class="dusk" id="dusk"></div>
+
+      <div class="head" id="head">
+        <div class="eyebrow" id="a1-eyebrow">Дім 1</div>
+        <h1 id="a1-head">О сьомій вечора дім вмикається.</h1>
+      </div>
+      <div class="final" id="a1-final"><p>Ліхтарі проведуть <em>до дверей.</em></p></div>
+      <div class="cue" id="a1-cue"><span>Гортайте</span><span class="bar"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- atoms (verbatim) -->
+<script src="technique-code/daynight-engine/component.js"></script>
+<script src="technique-code/daynight-masked-windows/component.js"></script>
+<script src="technique-code/content-stage-cascade/component.js"></script>
+<script>
+(function(){
+  var stage = document.getElementById('stage');
+  var dusk  = document.getElementById('dusk');
+  var leads = document.getElementById('leads');
+  var head  = document.getElementById('head');
+  var finalEl = document.getElementById('a1-final');
+  var cue   = document.getElementById('a1-cue');
+  var track = document.getElementById('track');
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // === ATOM 1+2: masked-window glow (builds daynight-engine canon internally). NO windows
+  //     option -> the atom uses its OWN tuned DEFAULT_WINDOWS (x:9/31/46/62/79) verbatim. ===
+  var mw = window.DayNightMaskedWindows.create(stage, {
+    dayMedia:  'renders/dn-ext-day.webp',
+    nightMedia:'renders/dn-ext-night.webp'
+  });
+
+  // life captions mapped onto the atom's tuned windows (idx0 carport = no room).
+  // rect centres read from the SAME tuned coords the atom crops with (idx1..4).
+  var ROOMS = [
+    { i:1, cx:37.5, cy:67, px:30, py:40, room:'Кухня.',   life:'Вечеря.' },        // left group  x31 w13
+    { i:2, cx:52.5, cy:67, px:49, py:33, room:'Вітальня.',life:'Кіно.' },          // centre      x46 w13
+    { i:3, cx:69.5, cy:67, px:67, py:33, room:'Дитяча.',  life:'Казка на ніч.' },  // right       x62 w15
+    { i:4, cx:83.0, cy:67, px:82, py:42, room:'Спальня.', life:'Тиша.' }           // far-right   x79 w8
+  ];
+  var WIN_T0 = [0.00,0.12,0.28,0.46,0.62];  // atom t0 ladder (for pill/active sync)
+
+  // build pills + leader lines
+  var pills=[], lns=[], dots=[];
+  ROOMS.forEach(function(r){
+    var ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1', r.px); ln.setAttribute('y1', r.py*0.5625);
+    ln.setAttribute('x2', r.cx); ln.setAttribute('y2', r.cy*0.5625);
+    leads.appendChild(ln); lns.push(ln);
+    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx', r.cx); dot.setAttribute('cy', r.cy*0.5625); dot.setAttribute('r', 0.32);
+    leads.appendChild(dot); dots.push(dot);
+    var pill=document.createElement('div'); pill.className='pill';
+    pill.style.left=r.px+'%'; pill.style.top=r.py+'%';
+    pill.innerHTML='<div class="rm"><b>'+r.room+'</b> <i>'+r.life+'</i></div>';
+    stage.appendChild(pill); pills.push(pill);
+  });
+
+  // === ATOM 3: content-stage-cascade — opening choreography (depth order, header last) ===
+  var openCascade = window.ContentStageCascade.create({
+    stages:[
+      { el:'#a1-eyebrow', kind:'slide-x', from:-28, dur:0.6 },
+      { el:'#a1-head',    kind:'fade', dur:0.8, gapAfter:0.5 },
+      { el:'#a1-cue',     kind:'fade', dur:0.6 }
+    ], gap:0.12
+  });
+  // …and a second cascade dedicated to the FINAL line
+  var finalCascade = window.ContentStageCascade.create({
+    stages:[ { el:'#a1-final', kind:'fade', dur:0.9 } ], gap:0
+  });
+  var finalPlayed=false;
+
+  function clamp(v,a,b){return v<a?a:v>b?b:v;}
+  function ease(p){p=clamp(p,0,1);return p*p*(3-2*p);}
+
+  var P1=0.72;                 // phase-1 end: windows all lit
+  function render(ts){
+    if (ts < P1){
+      // PHASE 1 — windows light one by one via the atom's own t0 ladder
+      var u = ts / P1;
+      mw.set(u);
+      // one pill in frame at a time (collision-safe): the most-recently-started room
+      var active=-1;
+      for (var k=0;k<ROOMS.length;k++){
+        var t0=WIN_T0[ROOMS[k].i];
+        if (u>=t0 && (k===ROOMS.length-1 || u<WIN_T0[ROOMS[k+1].i])) active=k;
+      }
+      for (var j=0;j<pills.length;j++){
+        var lit = ease((u-WIN_T0[ROOMS[j].i])/0.12) > 0.4;
+        var on = (j===active) && lit;
+        pills[j].classList.toggle('on', on);
+        lns[j].style.opacity = on?1:0; dots[j].style.opacity = on?1:0;
+      }
+      dusk.style.opacity = ease((ts-0.10)/0.5);
+      if (mw.dn && mw.dn.get()!==0) mw.dn.set(0);
+    } else {
+      // PHASE 2 — payoff: raise the CANON night (atom 2) -> full dusk + path lanterns
+      mw.set(1);
+      for (var m=0;m<pills.length;m++){ pills[m].classList.remove('on'); lns[m].style.opacity=0; dots[m].style.opacity=0; }
+      dusk.style.opacity = 1;
+      var v = ease((ts-P1)/(1-P1));
+      if (mw.dn) mw.dn.set(v*0.96);
+      if (v>0.35 && !finalPlayed){ finalPlayed=true; finalCascade.play(); }
+      if (v<0.30 && finalPlayed){ finalPlayed=false; finalCascade.reset(); finalEl.style.opacity=0; }
+    }
+    // headline recedes once scrolling starts; cue fades quickly
+    var hf = ease(ts/0.12);
+    head.style.opacity = 1-hf;
+    head.style.transform = 'translateY(' + (-16*hf) + 'px)';
+    cue.style.opacity = 1-ease(ts/0.08);
+  }
+
+  function onScroll(){
+    var rect = track.getBoundingClientRect();
+    var total = rect.height - window.innerHeight;
+    render(clamp(-rect.top/total, 0, 1));
+  }
+
+  // opening reveal, then wire scroll
+  if (reduced){
+    mw.set(1); if(mw.dn) mw.dn.set(0.96); dusk.style.opacity=1;
+    finalEl.style.opacity=1; head.style.opacity=0; cue.style.opacity=0;
+  } else {
+    openCascade.play();
+    var ticking=false;
+    window.addEventListener('scroll', function(){ if(!ticking){requestAnimationFrame(function(){onScroll();ticking=false;});ticking=true;} }, {passive:true});
+    window.addEventListener('resize', onScroll);
+    render(0);
+  }
+})();
+</script>
+</body>
+</html>

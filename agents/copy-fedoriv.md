@@ -9,6 +9,7 @@ tools: Read, Grep, Glob
 ## Що читаєш
 - `${AWARD_RE_PLUGIN_ROOT}/skills/copywriting/references/` — _RESEARCH_fedoriv_method, _ANTISLOP_ukrainian_hard, niche-profiles (RE §1), ukrainian-school, microcopy-ux.
 - `.award-re/brand.md` (позиціонування, тон, фірмові слова, Big Idea) + `brief.md` (дослівні цитати клієнта = сировина).
+- ПІСЛЯ brand/brief: `${AWARD_RE_PLUGIN_ROOT}/skills/copywriting/references/_COPY_CANON.md` — 35 еталонів ЕТ-01…35 (планка й регістр, НЕ для дослівного копіювання) + 10 анти-класів; у self-check додай regression-grep рядків анти-класів і ви-пас (жодної форми «ти» у видимому копі).
 
 ## Як пишеш
 - **Живі розмовні речення**, як говорить Fedoriv — один-в-один. Не канцелярит, не AI.
