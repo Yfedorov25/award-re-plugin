@@ -1,0 +1,53 @@
+/* ============================================================
+   FAVOURITES-PANEL · component.css
+   Живі величини: панель = modal--side--left --wide (desktop зліва) /
+   T-M30 моб slide-down зверху; крива modal-фаз 0.8s
+   cubic-bezier(.7,0,.3,1); ♡-темп 0.2s.
+   ============================================================ */
+:root.fvp-lock { overflow: hidden; }
+
+[data-fvp] { position: fixed; z-index: 35; background: #f4f2ee; color: #111110;
+  box-shadow: 0 0 60px rgba(17, 17, 16, .25);
+  transition: transform .8s cubic-bezier(.7,0,.3,1); }
+[data-fvp].fvp-closed { visibility: hidden; }
+
+/* desktop: зліва (живий modal--side--left --wide) */
+[data-fvp].fvp-left { left: 0; top: 0; bottom: 0; width: min(480px, 92vw);
+  transform: translateX(-100%); overflow-y: auto; }
+[data-fvp].fvp-left.fvp-open { transform: translateX(0); }
+
+/* моб (T-M30): slide-down ЗВЕРХУ */
+[data-fvp].fvp-top { left: 0; right: 0; top: 0; max-height: 86svh;
+  transform: translateY(-100%); overflow-y: auto; border-radius: 0 0 10px 10px; }
+[data-fvp].fvp-top.fvp-open { transform: translateY(0); }
+
+.fvp-pad { padding: 26px 26px 30px; }
+.fvp-h { font-size: clamp(26px, 3vw, 40px); font-weight: 300; }
+[data-fvp-count] { font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: #55544f; margin-top: 8px; }
+[data-fvp-close] { position: absolute; top: 14px; right: 14px; width: 40px; height: 40px;
+  border-radius: 4px; border: 1px solid rgba(17, 17, 16, .3); background: none;
+  font-size: 14px; cursor: pointer; }
+
+[data-fvp-empty] p { font-size: 19px; font-weight: 300; line-height: 1.4; margin: 20px 0; }
+.fvp-btn { display: inline-flex; gap: 1.6em; align-items: center; font: inherit;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 13px 16px; border-radius: 4px; border: 1px solid rgba(17, 17, 16, .35);
+  background: none; color: inherit; cursor: pointer; text-decoration: none; }
+.fvp-btn--primary { background: #111110; color: #f4f2ee; border-color: #111110; }
+
+[data-fvp-list] { list-style: none; margin: 18px 0; padding: 0; display: flex;
+  flex-direction: column; gap: 8px; }
+[data-fvp-list] li { display: flex; align-items: baseline; gap: 12px; font-size: 13px;
+  color: #55544f; background: #ecebe6; border-radius: 4px; padding: 12px 14px; }
+.fvp-i-nr { color: #111110; }
+[data-fvp-list] b { margin-left: auto; font-weight: 400; color: #111110; }
+.fvp-i-x { border: 0; background: none; cursor: pointer; font-size: 12px; color: #8b8a86; }
+
+[data-fvp-form] { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+[data-fvp-form] input[type="email"] { font: inherit; padding: 12px 14px; border-radius: 4px;
+  border: 1px solid rgba(17, 17, 16, .3); background: #fff; }
+[data-fvp-form] label { font-size: 12px; color: #55544f; display: flex; gap: 8px; }
+[data-fvp-done] { font-size: 14px; color: #111110; }
+.fvp-shake { animation: fvpshake .4s ease-out; }
+@keyframes fvpshake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }

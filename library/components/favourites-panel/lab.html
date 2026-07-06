@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · favourites-panel · T-408 + T-M30 (панель ♡ + email-шит)</title>
+<!--
+================================================================================
+  LAB: favourites-panel — ядро T-408. Контракт: живий /offices
+  (modal--side--left --wide, favouriteList empty/list, transchoice
+  «N offices») + T-M30 (моб slide-down зверху; email-шит: поле+consent+
+  SEND). Success-стан живим НЕ ЗНЯТИЙ — скромний done за A-07.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. open з empty-станом (панель відкрита transform 0,
+  напрям: desktop зліва / моб зверху); 3. add 2 офіси → list-стан:
+  «2 offices», 2 рядки; ✕ одного → «1 office»; 4. Send by email →
+  форма; сабміт без consent → invalid++ (done схований); валідний
+  сабміт → done видимий, onSend отримав список; 5. Escape закриває
+  (панель closed); errors == 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 40; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  main { min-height: 100svh; display: grid; place-content: center; gap: 2vh; text-align: center; }
+  main button { font: inherit; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    padding: 13px 18px; border-radius: 4px; border: 1px solid rgba(17,17,16,.35);
+    background: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · favourites-panel · t-408 + t-m30 · тисни ♡-кнопки</div>
+
+<main>
+  <h1 style="font-weight:300">Favourites-панель</h1>
+  <button id="openBtn">♡ Відкрити панель</button>
+  <button id="addBtn">Додати офіс №18 і №59</button>
+</main>
+
+<div data-fvp aria-label="Favorites" role="dialog">
+  <button data-fvp-close aria-label="Close">✕</button>
+  <div class="fvp-pad">
+    <p class="fvp-h">Favorites</p>
+    <div data-fvp-empty>
+      <p>Your selected offices will appear here</p>
+      <a class="fvp-btn fvp-btn--primary" href="#офіси">Choose an office ✛</a>
+    </div>
+    <div data-fvp-list-wrap hidden>
+      <p data-fvp-count></p>
+      <ul data-fvp-list></ul>
+      <button class="fvp-btn" data-fvp-email type="button">Send by email ✉</button>
+    </div>
+    <form data-fvp-form hidden novalidate>
+      <input data-fvp-mail type="email" placeholder="Email" aria-label="Email">
+      <label><input data-fvp-consent type="checkbox"> Погоджуюсь на обробку даних</label>
+      <button class="fvp-btn fvp-btn--primary" data-fvp-send type="submit">Send ✛</button>
+      <p data-fvp-done hidden>Запит надіслано. Підбірка вже летить на пошту.</p>
+    </form>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  var sent = [];
+  var fvp = window.FavouritesPanel.create({ onSend: function (l) { sent = l; } });
+  window.__FVP = fvp;
+  document.getElementById('openBtn').addEventListener('click', fvp.open);
+  document.getElementById('addBtn').addEventListener('click', function () {
+    fvp.add({ nr: '18', area: 59.9, floor: 9, price: 39611870 });
+    fvp.add({ nr: '59', area: 70.4, floor: 7, price: 47914240 });
+  });
+
+  var report = { stability: null, empty: null, list: null, form: null, esc: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  var panel = document.querySelector('[data-fvp]');
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    var anchor = document.querySelector('main h1');
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* 2: open + empty + напрям */
+    document.getElementById('openBtn').click();
+    await delay(950);
+    var r = panel.getBoundingClientRect();
+    report.empty = {
+      open: panel.classList.contains('fvp-open'),
+      emptyShown: !document.querySelector('[data-fvp-empty]').hasAttribute('hidden'),
+      dir: touch ? (panel.classList.contains('fvp-top') && Math.abs(r.top) <= 2)
+                 : (panel.classList.contains('fvp-left') && Math.abs(r.left) <= 2)
+    };
+    report.empty.ok = report.empty.open && report.empty.emptyShown && report.empty.dir;
+    ok = report.empty.ok && ok;
+
+    /* 3: list-стан */
+    document.getElementById('addBtn').click();
+    await delay(80);
+    var count = document.querySelector('[data-fvp-count]').textContent;
+    var rows = document.querySelectorAll('[data-fvp-list] li').length;
+    document.querySelector('[data-fvp-x="18"]').click();
+    await delay(60);
+    report.list = { count2: count, rows2: rows,
+                    count1: document.querySelector('[data-fvp-count]').textContent };
+    report.list.ok = count === '2 offices' && rows === 2 &&
+                     report.list.count1 === '1 office';
+    ok = report.list.ok && ok;
+
+    /* 4: email-шит */
+    document.querySelector('[data-fvp-email]').click();
+    await delay(60);
+    document.querySelector('[data-fvp-send]').click();     /* без пошти/consent */
+    await delay(60);
+    var invalid = fvp.gate.invalid;
+    var doneHidden = document.querySelector('[data-fvp-done]').hasAttribute('hidden');
+    document.querySelector('[data-fvp-mail]').value = 'test@air.space';
+    document.querySelector('[data-fvp-consent]').checked = true;
+    document.querySelector('[data-fvp-send]').click();
+    await delay(60);
+    report.form = { invalid: invalid, doneHiddenBefore: doneHidden,
+                    doneShown: !document.querySelector('[data-fvp-done]').hasAttribute('hidden'),
+                    sent: sent.join(',') };
+    report.form.ok = invalid === 1 && doneHidden && report.form.doneShown && sent.length === 1;
+    ok = report.form.ok && ok;
+
+    /* 5: Escape */
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await delay(950);
+    report.esc = { closed: panel.classList.contains('fvp-closed'),
+                   ok: panel.classList.contains('fvp-closed') };
+    ok = report.esc.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:favourites-panel]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>
