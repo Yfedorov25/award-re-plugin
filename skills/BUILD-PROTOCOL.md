@@ -8,7 +8,11 @@
 ## 0. Перед стартом будь-якої сесії
 1. Прочитай `~/Downloads/KAI/STATE.md` → `AIR-COMPLETE-PLAN.md` (черга юнітів).
 2. `git status` у репо — дерево має бути чистим; tpreview-* НЕ ЧІПАТИ.
-3. Сервер прототипів: `python3 -m http.server 8820 --bind 0.0.0.0 --directory ~/Downloads/award-re-plugin/library`; IP: `ipconfig getifaddr en0` (плаває!).
+3. Сервер прототипів: `python3 -m http.server 8820 --bind 0.0.0.0 --directory ~/Downloads/award-re-plugin/library`.
+   ⚠️ ЗАКОН ЛІНКА (порушувався двічі, 2026-07-06): перед КОЖНИМ повідомленням
+   з лінком — (а) `ipconfig getifaddr en0` (IP плаває між підмережами),
+   (б) `curl -s -o /dev/null -w "%{http_code}" localhost:8820/…` — сервер
+   ВМИРАЄ при зміні мережі, піднімати nohup-ом наново.
 
 ## 1. ЖИВА ПРАВДА (найважливіший крок — тут народжуються всі помилки)
 1. Спершу `skills/teardowns/live-archive/README.md` — можливо, витяг УЖЕ є.
