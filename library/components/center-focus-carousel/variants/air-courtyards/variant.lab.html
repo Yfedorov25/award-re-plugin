@@ -48,16 +48,14 @@
   #yards { position: relative; padding: 4vh 0 8vh; }
   .cfc-stage { --cfc-ground: transparent; --cfc-ink: #111110; --cfc-line: #b9b7b1;
     --cfc-serif: var(--sans); --cfc-sans: var(--sans);
-    --cfc-panel-w: 44vw; --cfc-aspect: 7/4; --cfc-gap: 10px; --cfc-cap: 0px; }
+    --cfc-panel-w: 54vw; --cfc-aspect: 1.75; --cfc-gap: 10px; --cfc-cap: 0px; }
   .cfc-panel-cap { display: none; }               /* живі двори без капшенів */
   .cfc-panel { background: transparent; }
-  .cfc-panel-img { border-radius: 6px; overflow: clip;
-    transition: transform .7s cubic-bezier(.25,.74,.22,.99); } /* подієва ротація, не скраб */
-  /* скіс тільки на широких: моб = рівна нативна стрічка (живий AIR) */
-  @media (min-width: 821px) {
-    .cfc-panel.is-l .cfc-panel-img { transform: perspective(1100px) rotateY(24deg); }
-    .cfc-panel.is-r .cfc-panel-img { transform: perspective(1100px) rotateY(-24deg); }
-  }
+  .cfc-panel::after { display: none; }            /* caption-градієнт бази глушиться */
+  .cfc-panel-img { border-radius: 6px; overflow: clip; }
+  /* скіс БЕЗПЕРЕРВНИЙ ПОЗИЦІЙНИЙ (rAF від центру, фікс-кол 1 2026-07-06:
+     WebGL-оригінал гне панель пропорційно відстані КОЖЕН кадр руху —
+     дискретні класи по індексу давали кашу в польоті). transition нема. */
 
   /* стрілки 48px (матриця §4) + лічильник */
   .cfc-nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 4vh; }
@@ -131,20 +129,41 @@
   var panels = Array.prototype.slice.call(stage.querySelectorAll('.cfc-panel'));
   var counterEl = stage.querySelector('.cfc-counter');
 
-  /* ---- дельта 1: позиційні класи скосу (база незаймана) ---- */
-  function tiltFor(idx) {
-    panels.forEach(function (pn, i) {
-      pn.classList.toggle('is-l', i < idx);
-      pn.classList.toggle('is-r', i > idx);
+  /* ---- дельта 1: скіс БЕЗПЕРЕРВНИЙ ПОЗИЦІЙНИЙ (база незаймана) ----
+     кожна панель гнеться пропорційно відстані її центру від центру
+     в'юпорта КОЖЕН кадр руху рейки; rAF гейтований IO (перф-закон) */
+  var viewportEl = stage.querySelector('.cfc-viewport');
+  var reducedT = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var TILT_MAX = 24, wide = window.matchMedia('(min-width: 821px)');
+  var tActive = false, tRunning = false;
+  function tiltFrame() {
+    if (!tActive || !wide.matches || reducedT) {
+      panels.forEach(function (pn) {
+        pn.querySelector('.cfc-panel-img').style.transform = '';
+        pn.dataset.roty = '0';
+      });
+      tRunning = false;
+      return;
+    }
+    var vr = viewportEl.getBoundingClientRect();
+    var cx = vr.left + vr.width / 2;
+    var half = Math.max(1, vr.width / 2);
+    panels.forEach(function (pn) {
+      var r = pn.getBoundingClientRect();
+      var d = (r.left + r.width / 2 - cx) / half;
+      var rot = Math.max(-TILT_MAX, Math.min(TILT_MAX, d * TILT_MAX * 1.15));
+      pn.querySelector('.cfc-panel-img').style.transform =
+        'perspective(1100px) rotateY(' + (-rot).toFixed(2) + 'deg)';
+      pn.dataset.roty = rot.toFixed(2);
     });
+    requestAnimationFrame(tiltFrame);
   }
-  function curFromCounter() {
-    var m = /(\d+)/.exec(counterEl.textContent || '');
-    return m ? parseInt(m[1], 10) - 1 : 0;
-  }
-  new MutationObserver(function () { tiltFor(curFromCounter()); })
-    .observe(counterEl, { childList: true, characterData: true, subtree: true });
-  tiltFor(curFromCounter());
+  function tiltStart() { if (!tRunning && tActive) { tRunning = true; requestAnimationFrame(tiltFrame); } }
+  new IntersectionObserver(function (en) {
+    tActive = en[0].isIntersecting;
+    tiltStart();
+  }, { rootMargin: '25% 0%' }).observe(viewportEl);
+  wide.addEventListener ? wide.addEventListener('change', tiltStart) : wide.addListener(tiltStart);
 
   /* ---- дельта 2: деко-парадакс (живий −15svh→+15svh, rAF, transform-only) ---- */
   var yards = document.getElementById('yards');
@@ -225,22 +244,21 @@
     report.enter = { centreOpacity: centreOp, ok: centreOp > 0.9 };
     ok = report.enter.ok && ok;
 
-    /* 3: скіс — центр (idx 0 на старті) рівний, праві сусіди 3d */
-    report.tilt = { c0: is3d(panels[0].querySelector('.cfc-panel-img')),
-                    r1: is3d(panels[1].querySelector('.cfc-panel-img')),
-                    r2: is3d(panels[2].querySelector('.cfc-panel-img')) };
-    report.tilt.ok = !report.tilt.c0 && report.tilt.r1 && report.tilt.r2;
+    /* 3: скіс позиційний — центр (idx 0) ~0°, сусіди помітно гнуться */
+    function roty(i) { return Math.abs(parseFloat(panels[i].dataset.roty || '0')); }
+    report.tilt = { c0: roty(0), r1: roty(1), r2: roty(2) };
+    report.tilt.ok = report.tilt.c0 < 6 && report.tilt.r1 > 10 && report.tilt.r2 > 10;
     ok = report.tilt.ok && ok;
 
-    /* 4: ротація — next(): 01→02, новий центр (p1) рівний, старий (p0) скошений */
+    /* 4: ротація — next(): 01→02; після твіну НОВИЙ центр (p1) розгинається
+       БЕЗПЕРЕРВНО до ~0°, старий (p0) загинається */
     var before = counterEl.textContent;
     stage.querySelector('.cfc-next').click();
-    await delay(900);
+    await delay(1100);
     report.rotate = { before: before, after: counterEl.textContent,
-                      newCentreFlat: !is3d(panels[1].querySelector('.cfc-panel-img')),
-                      oldCentreTilted: is3d(panels[0].querySelector('.cfc-panel-img')) };
+                      newCentre: roty(1), oldCentre: roty(0) };
     report.rotate.ok = before !== report.rotate.after &&
-                       report.rotate.newCentreFlat && report.rotate.oldCentreTilted;
+                       report.rotate.newCentre < 6 && report.rotate.oldCentre > 10;
     ok = report.rotate.ok && ok;
 
     /* 5: деко-парадакс слідує прогресу */

@@ -22,19 +22,19 @@ uses:
   - { atom: air-menu-overlay, job: "хедер (A-18 themed) + двофазне меню (A-17/T-M11)" }
   - { atom: spread-row-headline, job: "spread-бенди impulse/life/people (T-310)" }
   - { atom: text-blur-reveal, job: "reveal-канон актів (T-322)" }
-  - { atom: pinned-counter-slideshow, job: "Format-пін з лічильником-курсором (T-513)" }
-  - { atom: sticky-card-parallax, job: "Harmony: картка замерзає, фасад пливе (T-215)" }
-  - { atom: giant-number-fact, job: "Life: числа району 1/3/7/11 (T-422)" }
+  - { atom: pinned-counter-slideshow, job: "Format-пін з лічильником-курсором (T-513) + живий Vimeo-луп фоном" }
+  - { atom: giant-number-fact, job: "Life: числа району 1/3/7/11 (T-422), brv-каскад карток" }
   - { atom: center-focus-carousel, job: "двори зі скосом — дельта варіанта air-courtyards (no-WebGL переклад)" }
   - { atom: image-slider-wipe, job: "Status: слайдер 1/2 + шов-кліп (T-512/T-M23)" }
 pin:
-  owner: "послідовні акти: fmtpin (T-513) · scp (T-215) · isw (T-512) — по одному на біт, як на живій головній"
-  count: 3
+  owner: "послідовні акти: fmtpin (T-513) · isw (T-512) — по одному на біт, як на живій головній (harmony = зустрічні дрейфи БЕЗ піна, живі keyframes)"
+  count: 2
 gated_by: [R_pin_budget, R_perf_limits, R_no_webgl, R_timing_layers]
 acceptance:
-  - "порядок актів = живий (top→impulse→format→harmony→life→people→status→footer); PROBE-гейт: усі 10 движків init, errors 0, дрейф якоря ≤4px"
+  - "порядок актів = живий (top→impulse→format→harmony→life→people→status→footer); PROBE-гейт: движки init, errors 0, дрейф якоря ≤4px + гейти фікс-кола 1"
+  - "ФІКС-КОЛ 1 (2026-07-06, зауваження Єгора «мало плавності»): (1) Lenis lerp 0.1 — жива величина Locomotive AIR (гейт: api.lenis на desktop); (2) reveal-канон на ВСІ великі фото і life-контент (гейт: ≥16 [data-brv]); (3) harmony = живі зустрічні дрейфи фон −40→+40svh / картка +20→−20svh, нуль піна (гейт: обидва transform міняються); (4) Vimeo-луп у Format-пін (гейт: iframe присутній); (5) двори: скіс БЕЗПЕРЕРВНИЙ ПОЗИЦІЙНИЙ (rAF від центру, IO-гейтований) — як WebGL-оригінал (гейт: |rotY| краю > центру); (6) hero-спіраль обертається ambient-CSS; (7) brv-каскад life-карток"
   - "ЕКЗАМЕН (вирішальний): два вікна поруч з aircenter.space, desktop І телефон, синхронний скрол Єгора; розбіжність = фікс до збігу"
-  - "свідомі діри v1 (на фікс-кола): Vimeo-фон Format (стоїть live-постер) · grid→fullbleed скейл фото · внутрішній дрейф фото слайдера ±16.666% · курсор-стрілка каруселі · шви sectionToSticky між актами (T-510 сім'я)"
+  - "лишається на фікс-кол 2: повні sectionToSticky/under-next шви між актами (T-510 хореограф) · grid→fullbleed скейл фото · внутрішній дрейф фото слайдера ±16.666% · курсор-стрілка каруселі · smooth-туш на моб (живий AIR smartphone:{smooth:true})"
 files: [combo-lab.html, RECIPE.md]
 ---
 

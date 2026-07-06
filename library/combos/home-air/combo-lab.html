@@ -38,6 +38,7 @@
 <link rel="stylesheet" href="../../components/image-slider-wipe/component.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 
 <style>
   :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', 'Onest', system-ui, -apple-system, sans-serif; }
@@ -73,10 +74,18 @@
   /* ---- 1 · TOP (hero) ---- */
   #top { position: relative; background: var(--paper); }
   #top .spiral { position: absolute; left: 50%; top: 38vh; width: 34vw; aspect-ratio: 1;
-    transform: translateX(-50%); pointer-events: none; opacity: .6;
+    transform: translateX(-50%); pointer-events: none; opacity: .6; }
+  /* живий hero AIR — 3D-луп, що обертається завжди: CSS-життя спіралі
+     (ambient transform-only, НЕ скраб) */
+  #top .spiral .coil { position: absolute; inset: 0;
     background: repeating-conic-gradient(from 6deg at 50% 50%, rgba(17,17,16,.07) 0 5deg, transparent 5deg 10deg);
     -webkit-mask-image: radial-gradient(circle, transparent 26%, #000 27% 72%, transparent 73%);
-            mask-image: radial-gradient(circle, transparent 26%, #000 27% 72%, transparent 73%); }
+            mask-image: radial-gradient(circle, transparent 26%, #000 27% 72%, transparent 73%);
+    animation: coilspin 46s linear infinite; }
+  #top .spiral .coil + .coil { inset: 12%; opacity: .6;
+    animation-duration: 30s; animation-direction: reverse; }
+  @keyframes coilspin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { #top .spiral .coil { animation: none; } }
   #top .hero-note { position: absolute; top: 16vh; left: 50%; transform: translateX(-50%);
     text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #55544f; }
   #top .hero-class { position: absolute; top: 52vh; right: 12vw; font-size: 11px;
@@ -103,6 +112,10 @@
   #format .photo { padding: 2vh 3vw; }
   #format .photo img { border-radius: 6px; width: 100%; }
   #fmtpin [data-pcs-bg] img { width: 100%; height: 100%; object-fit: cover; }
+  /* живий фон піна = Vimeo-луп спіралі (background=1), постер під ним */
+  #fmtpin [data-pcs-bg] iframe { position: absolute; left: 50%; top: 50%;
+    width: max(100%, calc(100svh * 1.889)); aspect-ratio: 1428 / 756;
+    height: auto; transform: translate(-50%, -50%); border: 0; pointer-events: none; }
   .pcs-row { position: absolute; inset: 0; display: flex; align-items: center; }
   [data-pcs-card] { margin-left: 52%; width: 36%; display: grid; }
   .pcs-tint { position: absolute; inset: -12% -30% -12% -18%; z-index: -1;
@@ -116,16 +129,23 @@
     [data-pcs-ticks] { position: absolute; left: 6vw; right: 6vw; bottom: 10vh; color: #111110; }
   }
 
-  /* ---- 4 · HARMONY (темний акт) ---- */
+  /* ---- 4 · HARMONY (темний акт): живі зустрічні дрейфи ----
+     фон landingHarmonyBackground −40→+40svh · картка-шар +20→−20svh
+     (живі keyframes, лінійно, нуль піна) */
   #harmony { background: #161616; color: #f2f1ee; }
-  #harmony [data-scp-bg] img { width: 100%; height: 100%; object-fit: cover; }
-  #harmony [data-scp-card] { max-width: min(420px, 86vw); margin-left: auto; margin-right: 6vw;
+  .hm-stage { position: relative; min-height: 175svh; overflow: clip; }
+  .hm-bg { position: absolute; left: 0; right: 0; top: -42svh; bottom: -42svh;
+           will-change: transform; }
+  .hm-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .hm-cardlayer { position: relative; min-height: 175svh; display: flex;
+                  align-items: center; will-change: transform; }
+  .hm-card { max-width: min(420px, 86vw); margin-left: auto; margin-right: 6vw;
     background: rgba(24, 24, 23, .78); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     border-radius: 6px; padding: 4vh 2.2vw; display: flex; flex-direction: column; gap: 3vh; }
-  #harmony [data-scp-card] h2 { font-size: clamp(18px, 1.7vw, 26px); font-weight: 300; line-height: 1.3; }
-  #harmony [data-scp-card] img { border-radius: 4px; }
+  .hm-card h2 { font-size: clamp(18px, 1.7vw, 26px); font-weight: 300; line-height: 1.3; }
+  .hm-card img { border-radius: 4px; }
   #harmony .btn-air { border-color: rgba(242, 241, 238, .3); }
-  @media (max-width: 768px) { #harmony [data-scp-card] { margin: 0 4vw; padding: 3vh 5vw; } }
+  @media (max-width: 768px) { .hm-card { margin: 0 4vw; padding: 3vh 5vw; } }
 
   /* ---- 5 · LIFE (чорний акт) ---- */
   #life { background: #0d0d0c; color: #f2f1ee; padding: 14vh 3vw 12vh; }
@@ -152,15 +172,12 @@
   #yards { position: relative; padding: 3vh 0 9vh; }
   .cfc-stage { --cfc-ground: transparent; --cfc-ink: #111110; --cfc-line: #b9b7b1;
     --cfc-serif: var(--sans); --cfc-sans: var(--sans);
-    --cfc-panel-w: 44vw; --cfc-aspect: 7/4; --cfc-gap: 10px; --cfc-cap: 0px; }
+    --cfc-panel-w: 54vw; --cfc-aspect: 1.75; --cfc-gap: 10px; --cfc-cap: 0px; }
   .cfc-panel-cap { display: none; }
   .cfc-panel { background: transparent; }
-  .cfc-panel-img { border-radius: 6px; overflow: clip;
-    transition: transform .7s cubic-bezier(.25,.74,.22,.99); }
-  @media (min-width: 821px) {
-    .cfc-panel.is-l .cfc-panel-img { transform: perspective(1100px) rotateY(24deg); }
-    .cfc-panel.is-r .cfc-panel-img { transform: perspective(1100px) rotateY(-24deg); }
-  }
+  .cfc-panel::after { display: none; }   /* caption-градієнт бази глушиться: живі двори чисті */
+  .cfc-panel-img { border-radius: 6px; overflow: clip; }
+  /* скіс тепер БЕЗПЕРЕРВНИЙ (позиційний, rAF від центру) — transition не потрібен */
   .cfc-nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 4vh; }
   .cfc-prev, .cfc-next { width: 48px; height: 48px; border-radius: 4px;
     border: 1px solid #c9c7c1; background: none; color: #111110; font-size: 18px; cursor: pointer; }
@@ -260,8 +277,8 @@
   <div class="intro-copy" data-brv-group>
     <p data-brv data-brv-order="0">AIR is a new generation of offices that brings a new level of premium quality and style to class A business real estate.</p>
   </div>
-  <div class="bleed" data-srh-section>
-    <img src="https://aircenter.space/media/cache/homepage_impulse_bg_xxl/assets/images/media/landing/2.impulse/background%40xxxl.webp" alt="">
+  <div class="bleed" data-srh-section data-brv-group>
+    <img data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_impulse_bg_xxl/assets/images/media/landing/2.impulse/background%40xxxl.webp" alt="">
     <h2 class="h1" id="impulseSpread"><span data-srh-group>The momentum</span><span data-srh-group>to rise higher</span></h2>
   </div>
   <div class="after" data-brv-group>
@@ -280,12 +297,16 @@
     <h2 class="h1" data-brv data-brv-order="0"><span>A new</span><span>premium</span><span>format</span></h2>
     <p class="lead" data-brv data-brv-order="1">AIR is not only a new generation of offices but also a strong architectural statement by ADM architects.</p>
   </div>
-  <div class="photo">
-    <img src="https://aircenter.space/media/cache/homepage_format_bg_xxl/assets/images/media/landing/3.format/background%40xxxl.webp" alt="">
+  <div class="photo" data-brv-group>
+    <img data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_format_bg_xxl/assets/images/media/landing/3.format/background%40xxxl.webp" alt="">
   </div>
   <div id="fmtpin">
     <div data-pcs-layer>
-      <div data-pcs-bg><img src="https://aircenter.space/assets/images/media/landing/3.format/placeholder@xs.webp" alt=""></div>
+      <div data-pcs-bg>
+        <img src="https://aircenter.space/assets/images/media/landing/3.format/placeholder@xs.webp" alt="">
+        <iframe src="https://player.vimeo.com/video/1145253326?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
+                allow="autoplay; encrypted-media" title="spiral loop" loading="lazy"></iframe>
+      </div>
       <div class="pcs-row">
         <div data-pcs-card>
           <div class="pcs-tint"></div>
@@ -302,16 +323,18 @@
   </div>
 </section>
 
-<!-- 4 · HARMONY — картка замерзає, фон пливе -->
+<!-- 4 · HARMONY — два зустрічні дрейфи (живі l-harmony keyframes) -->
 <section id="harmony" data-amo-theme="dark">
-  <div id="scp">
-    <div data-scp-bg>
+  <div class="hm-stage" id="hmStage">
+    <div class="hm-bg" id="hmBg">
       <img src="https://aircenter.space/media/cache/homepage_harmony_bg_xxl/assets/images/media/landing/4.harmony/background%40xxxl.webp" alt="">
     </div>
-    <div data-scp-card>
-      <h2>An intelligent harmony of curved glass and radiant metal</h2>
-      <img src="https://aircenter.space/assets/images/media/landing/4.harmony/card-image@xs.webp" alt="">
-      <a class="btn-air" href="#life">Learn more <span>✛</span></a>
+    <div class="hm-cardlayer" id="hmCardLayer">
+      <div class="hm-card">
+        <h2>An intelligent harmony of curved glass and radiant metal</h2>
+        <img src="https://aircenter.space/assets/images/media/landing/4.harmony/card-image@xs.webp" alt="">
+        <a class="btn-air" href="#life">Learn more <span>✛</span></a>
+      </div>
     </div>
   </div>
 </section>
@@ -321,23 +344,25 @@
   <div data-srh-section>
     <h2 class="h1" id="lifeSpread"><span data-srh-group>At the center</span><span data-srh-group>of life</span></h2>
   </div>
-  <p class="lead">The premium AIR business center is designed to become a symbol the city &mdash; a large-scale area spanning one of the city&rsquo;s primary business districts.</p>
+  <div data-brv-group>
+  <p class="lead" data-brv data-brv-order="0">The premium AIR business center is designed to become a symbol the city &mdash; a large-scale area spanning one of the city&rsquo;s primary business districts.</p>
   <div class="photo">
-    <img src="https://aircenter.space/media/cache/homepage_life_img_xxl/assets/images/media/landing/5.life/image%40xxxl.webp" alt="">
+    <img data-brv data-brv-order="1" src="https://aircenter.space/media/cache/homepage_life_img_xxl/assets/images/media/landing/5.life/image%40xxxl.webp" alt="">
   </div>
   <div class="cards">
-    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="1">0</div><p class="cap">min walk<b>Mall</b></p></div>
-    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="3">0</div><p class="cap">min walk<b>Metro station</b></p></div>
-    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="7">0</div><p class="cap">min drive<b>Downtown</b></p></div>
-    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="11">0</div><p class="cap">min drive<b>Highway</b></p></div>
+    <div class="card" data-brv data-brv-order="2" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="1">0</div><p class="cap">min walk<b>Mall</b></p></div>
+    <div class="card" data-brv data-brv-order="3" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="3">0</div><p class="cap">min walk<b>Metro station</b></p></div>
+    <div class="card" data-brv data-brv-order="4" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="7">0</div><p class="cap">min drive<b>Downtown</b></p></div>
+    <div class="card" data-brv data-brv-order="5" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="11">0</div><p class="cap">min drive<b>Highway</b></p></div>
+  </div>
   </div>
   <p style="margin-top:7vh"><a class="btn-air" href="#people" style="border-color:rgba(242,241,238,.3)">Location <span>✛</span></a></p>
 </section>
 
 <!-- 6 · PEOPLE — двори -->
 <section id="people" data-amo-theme="dark">
-  <div class="bleed" data-srh-section>
-    <img src="https://aircenter.space/media/cache/homepage_people_bg_xxl/assets/images/media/landing/6.people/background%40xxxl.webp" alt="">
+  <div class="bleed" data-srh-section data-brv-group>
+    <img data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_people_bg_xxl/assets/images/media/landing/6.people/background%40xxxl.webp" alt="">
     <h2 class="h1" id="peopleSpread"><span data-srh-group>Designed with</span><span data-srh-group>people in mind</span></h2>
   </div>
   <div style="background:var(--paper); color:var(--ink)" data-amo-theme="light">
@@ -448,7 +473,6 @@
 <script src="../../components/spread-row-headline/component.js"></script>
 <script src="../../components/text-blur-reveal/component.js"></script>
 <script src="../../components/pinned-counter-slideshow/component.js"></script>
-<script src="../../components/sticky-card-parallax/component.js"></script>
 <script src="../../components/giant-number-fact/component.js"></script>
 <script src="../../components/center-focus-carousel/component.js"></script>
 <script src="../../components/image-slider-wipe/component.js"></script>
@@ -464,6 +488,18 @@
   var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
 
   var api = {};
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ЖИВИЙ СКРОЛ-ДВИГУН: Locomotive-сім'я, lerp 0.1 (жива величина AIR).
+     Всі движки читають window-скрол через rAF → отримують згладжені
+     значення автоматично. На тачі і в reduced — нативний скрол. */
+  api.lenis = null;
+  if (!touch && !reduced && window.Lenis) {
+    api.lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    window.__lenis = api.lenis;
+    if (window.ScrollTrigger) api.lenis.on('scroll', ScrollTrigger.update);
+    (function raf(t) { api.lenis.raf(t); requestAnimationFrame(raf); })(0);
+  }
 
   /* прелоадер-конвой (official) — авто-прогрес по декодах */
   api.plc = window.PreloaderLogoConvoy.create({});
@@ -486,29 +522,78 @@
   /* format-пін (T-513) */
   api.pcs = window.PinnedCounterSlideshow.create('#fmtpin', {});
 
-  /* harmony (T-215) */
-  api.scp = window.StickyCardParallax.create('#scp', {});
+  /* harmony: живі зустрічні дрейфи (нуль піна) — фон −40→+40svh,
+     картка-шар +20→−20svh, лінійно за прохід секції */
+  (function () {
+    var stage = document.getElementById('hmStage');
+    var bg = document.getElementById('hmBg');
+    var cl = document.getElementById('hmCardLayer');
+    var last = -1, ticking = false;
+    function render() {
+      var r = stage.getBoundingClientRect();
+      var vh = innerHeight;
+      var p = Math.max(0, Math.min(1, (vh - r.top) / (r.height + vh)));
+      var q = Math.round(p * 1000);
+      if (q === last) return;
+      last = q;
+      if (touch || reduced) return; /* сімейний закон: нуль дрейфів на тачі */
+      bg.style.transform = 'translateY(' + (-40 + 80 * p) + 'svh)';
+      cl.style.transform = 'translateY(' + (20 - 40 * p) + 'svh)';
+    }
+    addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; render(); });
+    }, { passive: true });
+    render();
+    api.hm = { render: render, ok: !!(stage && bg && cl) };
+  }());
 
   /* life числа (T-422) */
   api.gnf = Array.prototype.map.call(document.querySelectorAll('[data-gnf]'), function (el) {
     return window.GiantNumberFact.create(el, {});
   });
 
-  /* двори (air-courtyards дельта) */
+  /* двори (air-courtyards дельта): скіс БЕЗПЕРЕРВНИЙ і ПОЗИЦІЙНИЙ —
+     як WebGL-оригінал: кожна панель гнеться пропорційно відстані її
+     центру від центру в'юпорта, КОЖЕН кадр руху рейки (rAF, без
+     transition). tiltMax 24° на відстані ~половини в'юпорта. */
   api.cfc = window.CenterFocusCarousel.create('#cfc', { loop: true });
-  var panels = Array.prototype.slice.call(document.querySelectorAll('#cfc .cfc-panel'));
-  var cfcCounter = document.querySelector('#cfc .cfc-counter');
-  function tiltFor(idx) {
-    panels.forEach(function (pn, i) {
-      pn.classList.toggle('is-l', i < idx);
-      pn.classList.toggle('is-r', i > idx);
-    });
-  }
-  new MutationObserver(function () {
-    var m = /(\d+)/.exec(cfcCounter.textContent || '');
-    tiltFor(m ? parseInt(m[1], 10) - 1 : 0);
-  }).observe(cfcCounter, { childList: true, characterData: true, subtree: true });
-  tiltFor(0);
+  (function () {
+    var panels = Array.prototype.slice.call(document.querySelectorAll('#cfc .cfc-panel'));
+    var viewport = document.querySelector('#cfc .cfc-viewport');
+    var TILT_MAX = 24, wide = window.matchMedia('(min-width: 821px)');
+    var active = false, running = false;
+    function frame() {
+      if (!active || !wide.matches || reduced) {
+        panels.forEach(function (pn) {
+          pn.querySelector('.cfc-panel-img').style.transform = '';
+          pn.dataset.roty = '0';
+        });
+        running = false;
+        return; /* rAF гаситься — цикл живе лише біля в'юпорта (перф-закон) */
+      }
+      var vr = viewport.getBoundingClientRect();
+      var cx = vr.left + vr.width / 2;
+      var half = Math.max(1, vr.width / 2);
+      panels.forEach(function (pn) {
+        var r = pn.getBoundingClientRect();
+        var d = (r.left + r.width / 2 - cx) / half;     /* −1..1 від центру */
+        var rot = Math.max(-TILT_MAX, Math.min(TILT_MAX, d * TILT_MAX * 1.15));
+        pn.querySelector('.cfc-panel-img').style.transform =
+          'perspective(1100px) rotateY(' + (-rot).toFixed(2) + 'deg)';
+        pn.dataset.roty = rot.toFixed(2);
+      });
+      requestAnimationFrame(frame);
+    }
+    function start() { if (!running && active) { running = true; requestAnimationFrame(frame); } }
+    new IntersectionObserver(function (en) {
+      active = en[0].isIntersecting;
+      start();
+    }, { rootMargin: '25% 0%' }).observe(viewport);
+    wide.addEventListener ? wide.addEventListener('change', start) : wide.addListener(start);
+    api.tilt = { panels: panels.length, start: start };
+  }());
   var yards = document.getElementById('yards'), deco = document.getElementById('yardsDeco');
   var tick = false;
   addEventListener('scroll', function () {
@@ -539,6 +624,10 @@
   var report = { stability: null, engines: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function jump(y) { /* детермінований стрибок проби навіть під Lenis */
+    if (api.lenis) api.lenis.scrollTo(y, { immediate: true, force: true });
+    else window.scrollTo(0, y);
+  }
 
   async function run() {
     if (!PM) { window.__LAB_OK__ = 'live-mode'; return; } /* без автоскролів */
@@ -557,13 +646,42 @@
       plc: !!(api.plc && !api.plc.error), klh: !!(api.klh && !api.klh.error),
       amo: !!(api.amo && !api.amo.error), srh: !!(api.srh1 && api.srh2 && api.srh3),
       brv: !!api.brv, pcs: !!(api.pcs && !api.pcs.error),
-      scp: !!(api.scp && !api.scp.error), gnf: api.gnf.length === 4,
-      cfc: !!api.cfc, isw: !!(api.isw && !api.isw.error)
+      hm: !!(api.hm && api.hm.ok), gnf: api.gnf.length === 4,
+      cfc: !!api.cfc, isw: !!(api.isw && !api.isw.error),
+      lenis: touch || !!api.lenis,                       /* фікс-кол 1: живий lerp 0.1 */
+      vimeo: !!document.querySelector('#fmtpin iframe'), /* фікс-кол 1: Vimeo-луп */
+      reveals: document.querySelectorAll('[data-brv]').length >= 16 /* фото+тексти вкриті */
     };
+    /* фікс-кол 1: harmony — зустрічні дрейфи живі (двi позиції скролу) */
+    if (!touch) {
+      var hb = document.getElementById('hmBg'), hcl = document.getElementById('hmCardLayer');
+      var hy = document.getElementById('hmStage').getBoundingClientRect().top + scrollY;
+      jump(hy - innerHeight * 0.5);
+      await delay(150);
+      var b1 = hb.style.transform, c1 = hcl.style.transform;
+      jump(hy + innerHeight * 0.4);
+      await delay(150);
+      report.hmDrift = { moved: hb.style.transform !== b1 && hcl.style.transform !== c1 };
+      /* фікс-кол 1: скіс позиційний — |rotY| краю > |rotY| центру */
+      var yv = document.querySelector('#cfc .cfc-viewport');
+      jump(yv.getBoundingClientRect().top + scrollY - innerHeight * 0.4);
+      await delay(1500); /* enter-стаггер бази + твін рейки 0.7s мають сісти */
+      var rots = Array.prototype.map.call(
+        document.querySelectorAll('#cfc .cfc-panel'),
+        function (pn) { return Math.abs(parseFloat(pn.dataset.roty || '0')); });
+      var minR = Math.min.apply(null, rots), maxR = Math.max.apply(null, rots);
+      report.tilt = { min: minR, max: maxR, ok: maxR > 10 && minR < 6 };
+      jump(0);
+      await delay(200);
+    } else {
+      report.hmDrift = { moved: true };
+      report.tilt = { ok: true };
+    }
     var enginesOk = Object.keys(report.engines).every(function (k) { return report.engines[k]; });
     report.errors = errs;
     /* CLS-виняток: прелоадер ховає перший рендер — рахуємо після нього */
-    window.__LAB_OK__ = !!(enginesOk && errs === 0 && report.stability.drift <= 4);
+    window.__LAB_OK__ = !!(enginesOk && errs === 0 && report.stability.drift <= 4 &&
+                           report.hmDrift.moved && report.tilt.ok);
     console.log('[зборка:home-air]', JSON.stringify(report));
   }
   if (document.readyState === 'complete') run();
