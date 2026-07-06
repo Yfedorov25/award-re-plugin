@@ -15,8 +15,22 @@ export function extractFrontMatter(text) {
   return body;
 }
 
+/* strip a trailing unquoted " #comment" (YAML: '#' starts a comment only when
+   preceded by whitespace and outside quotes) — else `status: official  # note`
+   parses as "official  # note" and every ===-check on it silently misses */
+function stripComment(s) {
+  let q = null;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (q) { if (ch === q) q = null; continue; }
+    if (ch === '"' || ch === "'") { q = ch; continue; }
+    if (ch === '#' && (i === 0 || /\s/.test(s[i - 1]))) return s.slice(0, i);
+  }
+  return s;
+}
+
 function parseScalar(s) {
-  s = s.trim();
+  s = stripComment(s).trim();
   if (s === '') return '';
   if (s === 'null' || s === '~') return null;
   if (s === 'true') return true;

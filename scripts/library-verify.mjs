@@ -175,6 +175,41 @@ for (const [id, e] of Object.entries(components)) {
   }
 }
 
+/* ---- 6b: registry cross-ref (H17) — бібліотека↔реєстр = одна система імен ---- */
+const REGISTRY_MD = join(ROOT, 'skills', 'grammar', 'references', '_REGISTRY_TID.md');
+const registryIds = new Set();
+if (existsSync(REGISTRY_MD))
+  for (const m of readFileSync(REGISTRY_MD, 'utf8').matchAll(/\bT-M?\d+(?:\.\d+)?\b/g)) registryIds.add(m[0]);
+for (const [id, e] of [...Object.entries(components), ...Object.entries(combos)]) {
+  const raw = e.source && typeof e.source === 'object' ? e.source.registry_ref : undefined;
+  const refs = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+  if (!refs.length) {
+    if (e.status === 'official') warn(id, 'source.registry_ref порожній на official (H17: додай T-### або "x:<чому поза реєстром>")');
+    continue;
+  }
+  for (const r of refs.map(String)) {
+    if (r.startsWith('x:')) continue; // явно поза реєстром, причина в рядку
+    if (!/^T-M?\d+(\.\d+)?$/.test(r)) {
+      // legacy slug-конвенція (locmap-canon, SMARTS-location-etalon…) — борг, не типо
+      warn(id, `registry_ref '${r}' = slug, не T-ID (H17: додай T-### поруч або "x:<чому>" при наступному дотику)`);
+      continue;
+    }
+    if (registryIds.size && !registryIds.has(r)) fail(id, `registry_ref '${r}' відсутній у _REGISTRY_TID.md (dangling cross-ref)`);
+  }
+}
+
+/* ---- 6c: hygiene (B16 / К1.7 / К7) ---- */
+const ENTITY_TEXTCONTENT_RE = /textContent\s*=\s*[^;\n]*&[a-z]+;/;
+for (const [id, e] of Object.entries(components)) {
+  if (e.status === 'seed') continue;
+  const js = join(e._dir, 'component.js');
+  if (existsSync(js) && ENTITY_TEXTCONTENT_RE.test(readFileSync(js, 'utf8')))
+    fail(id, 'HTML-entity у textContent-рядку — рендериться літерально; пиши реальний символ (К7)');
+  const css = join(e._dir, 'component.css');
+  if (existsSync(css) && /overflow-x\s*:\s*hidden/.test(readFileSync(css, 'utf8')))
+    warn(id, 'overflow-x: hidden — ламає position:sticky у предків; заміна = overflow-x: clip (К1.7)');
+}
+
 /* ---- 7: headless labs ---- */
 async function headless() {
   if (NO_HEADLESS) { skip('*', 'headless skipped (--no-headless)'); return; }
