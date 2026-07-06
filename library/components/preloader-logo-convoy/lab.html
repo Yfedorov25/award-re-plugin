@@ -94,13 +94,15 @@
     /* 1. старт: оверлей + парковка */
     var logos = document.querySelectorAll('.plc__logo');
     var header = document.querySelector('[data-plc-top]');
+    var lastLogoW = logos[2] ? logos[2].getBoundingClientRect().width : 0;
     report.start = {
       overlay: !!document.querySelector('.plc'), logos: logos.length,
       bar: !!document.querySelector('.plc__bar'),
-      parked: /-100%/.test(header.style.transform)
+      parked: /-100%/.test(header.style.transform),
+      giantVw: Math.round(lastLogoW / window.innerWidth * 100) /* 1-в-1 AIR: гігант на всю ширину */
     };
     ok = report.start.overlay && report.start.logos === 3 && report.start.bar &&
-         report.start.parked && ok;
+         report.start.parked && report.start.giantVw >= 85 && report.start.giantVw <= 99 && ok;
 
     /* 2. конвой: прогрес кроками, x кожного лого росте монотонно */
     var cls = 0;

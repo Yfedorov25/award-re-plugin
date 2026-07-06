@@ -7,13 +7,15 @@
    СТАДІЯ A (завантаження, драйвер = progress 0..1):
      - оверлей fixed z-14 на фоні сторінки;
      - прогрес-бар 2px зверху: translateX(p*100vw - 100vw);
-     - КОНВОЙ з 3 копій wordmark: кожна їде зліва зі своїм зсувом
-         logo-1: p_half*100vw - 100vw + (1-p_half)*76.6%
-         logo-2: p     *100vw - 100vw + (1-p)     *38.5%
-         logo-3: p     *100vw - 100vw
-       (p_half = min(1, p*2)) — три проходи різними швидкостями,
-       усі сходяться в 0 на p=1. Це «logo-parallax» реєстру і
-       «zoom-тикер 3 проходи» мобільного тірдауна.
+     - КОНВОЙ ЛІТЕР (1-в-1 з живим DOM AIR, витяг 2026-07-06):
+       кожен шар = повноширинна прозора смуга з ОДНІЄЮ літерою
+       wordmark на її фінальній позиції РОЗВЕДЕНОГО рядка
+       (A···I···R spread, мотив hero/футер T-311); шар i їде
+         перший:  p_half*100vw - 100vw + (1-p_half)*76.6%
+         середні: p*100vw - 100vw + (1-p)*offset (інтерпол. 76.6→0)
+         останній:p*100vw - 100vw
+       (p_half = min(1, p*2)) — літери сходяться в бренд-рядок.
+       НЕ «3 копії wordmark»: logo--1/2/3 у DOM AIR = букви A/I/R.
    СТАДІЯ B (вихід, коли p=1 і сторінка готова):
      - fade-out 2s cubic-bezier(.7,0,.3,1): контент оверлея opacity->0,
        бар доїжджає вправо (translateX(100%)); потім display:none.
@@ -58,7 +60,7 @@
       ink: options.ink || '#111110',
       duration: options.duration != null ? options.duration : 2,
       auto: options.auto !== false,
-      minShowMs: options.minShowMs != null ? options.minShowMs : 900,
+      minShowMs: options.minShowMs != null ? options.minShowMs : 1500, /* = data-preloader-landing-min-delay AIR */
       sessionOnce: !!options.sessionOnce
     };
     var reduced = global.matchMedia &&
@@ -105,29 +107,57 @@
     var content = doc.createElement('div');
     content.className = 'plc__content';
     content.style.cssText = 'position:absolute;inset:0';
+    /* КОНВОЙ ЛІТЕР — 1-в-1 з живим DOM AIR (витяг 2026-07-06):
+       кожен шар конвою = ПОВНОШИРИННА прозора смуга (92vw, як
+       .preloader__content-logo width:100%-2×spacing) з ОДНІЄЮ літерою
+       wordmark на її ФІНАЛЬНІЙ позиції розведеного рядка (A···I···R
+       spread — той самий мотив, що hero/футер T-311). Літери сходяться
+       конвоєм у розведений бренд-рядок. НЕ три копії wordmark —
+       помилкова інтерпретація виправлена витягом DOM (logo--1 = буква A,
+       logo--2 = I по центру полотна, logo--3 = R праворуч).
+       Кегль: desktop ≈ 140/1420 полотна ≈ 13.5vw font; mobile viewBox
+       350×80 ≈ 29vw font (ті САМІ літери — «наростання кегля» з
+       тірдауна було прочитанням проходів літер різної ширини). */
+    var letters = String(opt.wordmark).replace(/\s+/g, '').split('');
+    var N = letters.length;
+    var mobileVP = global.innerWidth <= 768;
     var logos = [];
-    for (var i = 1; i <= 3; i++) {
-      var l = doc.createElement('div');
-      l.className = 'plc__logo plc__logo--' + i;
-      l.textContent = opt.wordmark;
-      l.style.cssText = 'position:absolute;top:50%;left:4vw;width:92vw;' +
-        'font-weight:300;letter-spacing:.02em;color:' + opt.ink + ';' +
-        'font-size:14vw;line-height:1;transform:translate(-100vw,-50%);white-space:nowrap';
-      content.appendChild(l);
-      logos.push(l);
-    }
+    letters.forEach(function (ch, i) {
+      var wrap = doc.createElement('div');
+      wrap.className = 'plc__logo plc__logo--' + (i + 1);
+      wrap.style.cssText = 'position:absolute;top:50%;left:4vw;width:92vw;' +
+        'transform:translate(-100vw,-50%)';
+      var frac = N === 1 ? 0 : i / (N - 1);
+      var s = doc.createElement('span');
+      s.textContent = ch;
+      s.style.cssText = 'position:absolute;top:50%;left:' + (frac * 100) + '%;' +
+        'transform:translate(' + (-frac * 100) + '%,-50%);' +
+        'font-weight:300;line-height:1;color:' + opt.ink + ';' +
+        'font-size:' + (mobileVP ? '29vw' : '13.5vw');
+      wrap.appendChild(s);
+      content.appendChild(wrap);
+      logos.push(wrap);
+    });
     overlay.appendChild(content);
     opt.target.appendChild(overlay);
 
-    /* --- стадія A: прогрес-рендер (transform only) --- */
+    /* --- стадія A: прогрес-рендер (transform only) ---
+       формули живого CSS AIR: перша літера на p_half=min(1,2p) з
+       офсетом 76.6%, решта на p з офсетами, інтерпольованими до 0
+       (AIR 3 літери: 76.6 / 38.5 / 0) --- */
     function render(p) {
       p = Math.max(0, Math.min(1, p));
       gate.progress = p;
       var ph = Math.min(1, p * 2);
       bar.style.transform = 'translateX(' + (p * 100 - 100) + 'vw)';
-      logos[0].style.transform = 'translate(calc(' + (ph * 100 - 100) + 'vw + ' + ((1 - ph) * 76.6) + '%),-50%)';
-      logos[1].style.transform = 'translate(calc(' + (p * 100 - 100) + 'vw + ' + ((1 - p) * 38.5) + '%),-50%)';
-      logos[2].style.transform = 'translate(' + (p * 100 - 100) + 'vw,-50%)';
+      logos.forEach(function (w, i) {
+        var frac = N === 1 ? 1 : i / (N - 1);
+        var pr = i === 0 ? ph : p;
+        var off = 76.6 * (1 - frac);
+        w.style.transform = off > 0
+          ? 'translate(calc(' + (pr * 100 - 100) + 'vw + ' + ((1 - pr) * off) + '%),-50%)'
+          : 'translate(' + (pr * 100 - 100) + 'vw,-50%)';
+      });
     }
     render(0);
 
