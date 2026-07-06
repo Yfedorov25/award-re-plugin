@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · aerial-journey · T-121 + T-210 + T-M27 (аеро: фрейм→fullbleed, зум-посадка, зони)</title>
+<!--
+================================================================================
+  LAB: aerial-journey — аеро-журней /location #infrastructure.
+  Контракт (живий shared.js ДОСЛІВНО): Outer = scale(grid/viewport)+
+  radius 5px → scale(1)+0 (фрейм росте у fullbleed); Inner = 1.25 → 1
+  (аеро «сідає»); easeInOutQuad. T-210: зони-полігони + хв-картки
+  з'являються після посадки (p≥0.55) стаггером 120ms.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. до входу: outer scale < 0.97 і radius > 2px,
+  inner scale > 1.2, зони СХОВАНІ; 3. mid-пін: outer = 1 (±0.01),
+  radius ~0, inner = 1 (±0.02); 4. p>0.55: клас aj-zones-on, зони
+  opacity→1, картки видимі (стаггер-делеї виставлені); 5. reverse:
+  назад до входу — зони знову сховані, скейли повертаються (±0.02);
+  6. errors == 0. Моб: touch-гілка (та сама механіка, швидший вхід).
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; overflow-x: clip; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .intro, .outro { min-height: 90vh; display: flex; align-items: center; padding: 0 6vw; color: #6b6b68; }
+  #act .head { padding: 10vh 3vw 6vh; text-align: center; }
+  #act .head h2 { font-size: clamp(28px, 4.2vw, 60px); font-weight: 300;
+    display: flex; justify-content: space-between; text-transform: uppercase; }
+  #act .head p { max-width: 42ch; margin: 3vh auto 0; font-size: 14px; line-height: 1.55; color: #6b6b68; }
+
+  /* аеро-заглушка: місто згори градієнтами */
+  .aero { position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 45% at 62% 40%, #33413a 0%, transparent 70%),
+      repeating-linear-gradient(23deg, #2c3336 0 26px, #343c40 26px 52px),
+      repeating-linear-gradient(-67deg, transparent 0 60px, rgba(244,242,238,.06) 60px 63px),
+      #272d30; }
+  .aero::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(50% 50% at 50% 50%, transparent 55%, rgba(13,13,12,.5) 100%); }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · aerial-journey · t-121 + t-210 + t-m27 · скроль</div>
+
+<section class="intro"><p>… скроль: фрейм-аеро росте у fullbleed, місто «сідає» зумом, потім проступають зони …</p></section>
+
+<section id="act">
+  <div class="head">
+    <h2><span>Surroundings</span><span>and</span><span>infrastructure</span></h2>
+    <p>Оточення без відриву від району: парки, корти і кав'ярні за хвилини пішки.</p>
+  </div>
+  <div id="aj">
+    <div data-aj-layer>
+      <div data-aj-outer>
+        <div data-aj-inner><div class="aero aj-fill"></div></div>
+        <svg data-aj-zones viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <g data-aj-zone><polygon points="180,560 470,500 560,700 240,760" fill="rgba(102,178,255,.28)" stroke="rgba(102,178,255,.7)"/></g>
+          <g data-aj-zone><polygon points="980,220 1290,180 1360,380 1040,430" fill="rgba(120,220,150,.26)" stroke="rgba(120,220,150,.7)"/></g>
+          <g data-aj-zone><polygon points="640,640 900,600 960,800 700,840" fill="rgba(255,180,90,.26)" stroke="rgba(255,180,90,.7)"/></g>
+        </svg>
+        <div data-aj-cards>
+          <div data-aj-card style="left:23%; top:60%"><b>Sports courts</b> · 4 min walk</div>
+          <div data-aj-card style="left:73%; top:24%"><b>Park</b> · 6 min walk</div>
+          <div data-aj-card style="left:50%; top:70%"><b>Cafes &amp; coffee</b> · 3 min walk</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="outro"><p>… кінець проби …</p></section>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var aj = window.AerialJourney.create('#aj', {});
+  window.__AJ = aj;
+
+  var root = document.getElementById('aj');
+  var outer = root.querySelector('[data-aj-outer]');
+  var inner = root.querySelector('[data-aj-inner]');
+  var report = { stability: null, before: null, pinned: null, zones: null,
+                 reverse: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function sc(el) {
+    var m = /scale\((\d*\.?\d+)\)/.exec(el.style.transform || '');
+    return m ? parseFloat(m[1]) : 1;
+  }
+  function yTo(pinP) {
+    var top = root.getBoundingClientRect().top + window.scrollY;
+    return top + pinP * (root.offsetHeight - window.innerHeight);
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(120);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('#act .head h2');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* 2: до входу (секція наполовину знизу) */
+    window.scrollTo(0, root.getBoundingClientRect().top + scrollY - innerHeight * 0.75);
+    await delay(300);
+    report.before = { outer: sc(outer), inner: sc(inner),
+                      radius: parseFloat(outer.style.borderRadius) || 0,
+                      zones: root.classList.contains('aj-zones-on') };
+    report.before.ok = report.before.outer < 0.985 && report.before.inner > 1.05 &&
+                       !report.before.zones;
+    ok = report.before.ok && ok;
+
+    /* 3: mid-пін (посадка) */
+    window.scrollTo(0, yTo(0.4));
+    await delay(300);
+    report.pinned = { outer: sc(outer), inner: sc(inner),
+                      radius: parseFloat(outer.style.borderRadius) || 0 };
+    report.pinned.ok = Math.abs(report.pinned.outer - 1) <= 0.01 &&
+                       Math.abs(report.pinned.inner - 1) <= 0.02 &&
+                       report.pinned.radius <= 0.5;
+    ok = report.pinned.ok && ok;
+
+    /* 4: зони після p≥0.55 */
+    window.scrollTo(0, yTo(0.7));
+    await delay(800);
+    var z = root.querySelector('[data-aj-zone]');
+    report.zones = { on: root.classList.contains('aj-zones-on'),
+                     zoneOp: parseFloat(getComputedStyle(z).opacity),
+                     delays: Array.prototype.map.call(
+                       root.querySelectorAll('[data-aj-card]'),
+                       function (c) { return c.style.transitionDelay; }).join(',') };
+    report.zones.ok = report.zones.on && report.zones.zoneOp > 0.9 &&
+                      report.zones.delays === '0ms,120ms,240ms';
+    ok = report.zones.ok && ok;
+
+    /* 5: reverse */
+    window.scrollTo(0, root.getBoundingClientRect().top + scrollY - innerHeight * 0.75);
+    await delay(400);
+    report.reverse = { outer: sc(outer), zones: root.classList.contains('aj-zones-on') };
+    report.reverse.ok = Math.abs(report.reverse.outer - report.before.outer) <= 0.02 &&
+                        !report.reverse.zones;
+    ok = report.reverse.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:aerial-journey]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>
