@@ -75,20 +75,27 @@
   @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
 
   /* ---- 1 · TOP (hero) ---- */
-  #top { position: relative; background: var(--paper); }
-  #top .spiral { position: absolute; left: 50%; top: 38vh; width: 34vw; aspect-ratio: 1;
-    transform: translateX(-50%); pointer-events: none; opacity: .6; }
-  /* живий hero AIR — 3D-луп, що обертається завжди: CSS-життя спіралі
-     (ambient transform-only, НЕ скраб) */
-  #top .spiral .coil { position: absolute; inset: 0;
-    background: repeating-conic-gradient(from 6deg at 50% 50%, rgba(17,17,16,.07) 0 5deg, transparent 5deg 10deg);
-    -webkit-mask-image: radial-gradient(circle, transparent 26%, #000 27% 72%, transparent 73%);
-            mask-image: radial-gradient(circle, transparent 26%, #000 27% 72%, transparent 73%);
-    animation: coilspin 46s linear infinite; }
-  #top .spiral .coil + .coil { inset: 12%; opacity: .6;
-    animation-duration: 30s; animation-direction: reverse; }
-  @keyframes coilspin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { #top .spiral .coil { animation: none; } }
+  /* живий intro = section--full-height: висота зарезервована В CSS (не движком) —
+     інакше перший рендер #top=0 і #impulse стрибає на 900px (CLS 0.625) */
+  #top { position: relative; background: var(--paper); min-height: 100svh; }
+  /* живий hero AIR = Vimeo-луп homepage_1 (1145251536, біла спіраль 20s,
+     background=1) у .background--cover — обертання ВСЕРЕДИНІ відео (T-207 розкрито
+     дозйомкою 2026-07-06, live-archive/README «T-207 БРЕНД-ОБ'ЄКТ») */
+  #top .spiral { position: absolute; inset: 0; overflow: clip; pointer-events: none; }
+  /* бокс лупа резервує СТАБІЛЬНА обгортка (див. фікс CLS: iframe при завантаженні
+     міняє власний бокс 450→900 — обгортка df ніколи не рухається) */
+  #top .spiral .fit { position: absolute; left: 50%; top: 50%;
+    width: max(100%, calc(100svh * 1.885)); aspect-ratio: 426 / 226;
+    transform: translate(-50%, -50%); }
+  #top .spiral iframe { position: absolute; inset: 0; width: 100%; height: 100%;
+    border: 0; pointer-events: none; }
+  #top .spiral .fit-mob { display: none; }
+  @media (max-width: 768px) {
+    /* мобільний hero-луп homepage_1_m (1145256182, 240×296) — окремий iframe, як у живого */
+    #top .spiral .fit-desk { display: none; }
+    #top .spiral .fit-mob { display: block; width: max(100%, calc(100svh * 0.811));
+      aspect-ratio: 240 / 296; }
+  }
   #top .hero-note { position: absolute; top: 16vh; left: 50%; transform: translateX(-50%);
     text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #55544f; }
   #top .hero-class { position: absolute; top: 52vh; right: 12vw; font-size: 11px;
@@ -159,7 +166,18 @@
   @media (max-width: 768px) { .hm-card { margin: 0 4vw; padding: 3vh 5vw; } }
 
   /* ---- 5 · LIFE (чорний акт) ---- */
-  #life { background: #0d0d0c; color: #f2f1ee; padding: 14vh 3vw 12vh; }
+  #life { background: #0d0d0c; color: #f2f1ee; padding: 14vh 3vw 12vh; overflow: clip; }
+  /* T-207: чорна металева спіраль homepage_3 (1145253896) — живий ui-background
+     секції life (дозйомка 2026-07-06); контент поверх, лупу pointer-events нема */
+  #life .life-loop { position: absolute; inset: 0; pointer-events: none; opacity: .85;
+    overflow: clip; }
+  /* центр лупа на верхній третині — у живого спіраль видна за заголовком
+     «At the heart of business/of life», не під фото */
+  #life .life-loop .fit { position: absolute; left: 50%; top: 26%;
+    width: max(100%, calc(100svh * 1.885)); aspect-ratio: 426 / 226;
+    transform: translate(-50%, -50%); }
+  #life .life-loop iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #life > div, #life > p { position: relative; z-index: 1; }
   #life h2 { display: flex; justify-content: space-between; margin-bottom: 6vh; }
   #life .lead { max-width: 44ch; color: #c9c7c2; }
   #life .photo { margin: 7vh 0; }
@@ -287,7 +305,12 @@
 
 <!-- 1 · TOP — kinetic letters hero -->
 <section id="top" data-amo-theme="light">
-  <div class="spiral"></div>
+  <div class="spiral">
+    <div class="fit fit-desk"><iframe src="https://player.vimeo.com/video/1145251536?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
+            allow="autoplay; encrypted-media" title="brand spiral loop" loading="lazy"></iframe></div>
+    <div class="fit fit-mob"><iframe src="https://player.vimeo.com/video/1145256182?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
+            allow="autoplay; encrypted-media" title="brand spiral loop mobile" loading="lazy"></iframe></div>
+  </div>
   <p class="hero-note" data-plc-text>The architecture<br>of new success</p>
   <p class="hero-class">Class (A)<br>premium business<br>center</p>
 </section>
@@ -363,6 +386,10 @@
 
 <!-- 5 · LIFE — числа району -->
 <section id="life" data-amo-theme="dark">
+  <div class="life-loop" aria-hidden="true">
+    <div class="fit"><iframe src="https://player.vimeo.com/video/1145253896?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
+            allow="autoplay; encrypted-media" title="brand dark spiral loop" loading="lazy"></iframe></div>
+  </div>
   <div data-brv-group>
     <h2 class="h1 spread"><span data-brv data-brv-order="0">At the center</span><span data-brv data-brv-order="1">of life</span></h2>
   </div>
@@ -790,6 +817,10 @@
       cfc: !!api.cfc, isw: !!(api.isw && !api.isw.error),
       lenis: !!api.lenis,                       /* фікс-кол 1: живий lerp 0.1 */
       vimeo: !!document.querySelector('#fmtpin iframe'), /* фікс-кол 1: Vimeo-луп */
+      /* T-207 (дозйомка 2026-07-06): живі бренд-лупи hero + life, нуль CSS-сурогатів спіралі */
+      brandLoops: !!document.querySelector('#top .spiral iframe') &&
+                  !!document.querySelector('#life .life-loop iframe') &&
+                  document.querySelectorAll('.coil').length === 0,
       reveals: document.querySelectorAll('[data-brv]').length >= 16, /* фото+тексти вкриті */
       /* фікс-кол 2 */
       fmtScale: touch || (api.fmtScale && api.fmtScale.on === true),
