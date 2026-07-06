@@ -59,6 +59,28 @@
   aside input:checked + label { color: #f2f1ee; }
   #minutes { margin-top: 3vh; font-size: 12px; color: #8b8a86; }
   #minutes b { display: block; font-size: 34px; font-weight: 300; color: #f2f1ee; }
+
+  /* T-M26: POI-свайп-картки над темною картою (моб) */
+  #poiStrip { display: none; }
+  @media (max-width: 820px), (pointer: coarse) {
+    aside { display: none; }
+    #poiStrip { display: flex; gap: 10px; overflow-x: scroll;
+      scroll-snap-type: x mandatory; scrollbar-width: none;
+      padding: 14px 4vw calc(14px + 2vh);
+      margin-top: -1vh; }
+    #poiStrip::-webkit-scrollbar { display: none; }
+    .poi-card { flex: 0 0 74vw; scroll-snap-align: center; border-radius: 6px;
+      background: #161615; padding: 16px 18px; color: #c9c7c2; font-size: 13px;
+      border: 1px solid #26272a;
+      transition: border-color .6s cubic-bezier(.25,.74,.22,.99); }
+    .poi-card.is-active { border-color: #f2f1ee; }
+    .poi-card b { display: block; color: #f2f1ee; font-weight: 400; margin-bottom: 6px; }
+    .poi-card .mins { margin-top: 8px; font-size: 11px; letter-spacing: .08em;
+      text-transform: uppercase; color: #8b8a86; }
+  }
+  /* пан/зум карти до активного POI (transform-only, жива ~0.5s) */
+  .loc [data-lm-stage] { transition: transform .5s cubic-bezier(.25,.74,.22,.99);
+    transform-origin: 50% 50%; will-change: transform; }
 </style>
 </head>
 <body>
@@ -70,6 +92,7 @@
   <section class="loc" id="loc">
     <div data-lm-stage></div>
   </section>
+  <div id="poiStrip" aria-label="Points of interest"></div>
   <aside>
     <h2>Infrastructure</h2>
     <form id="cats"></form>
@@ -126,7 +149,63 @@
   applyCat('park');
   catsForm.addEventListener('change', function (ev) { applyCat(ev.target.value); });
 
-  var report = { stability: null, theme: null, cats: null, route: null, errors: null };
+  /* ---- T-M26: POI-свайп-картки (моб) ---- */
+  var touch = window.matchMedia('(max-width: 820px), (pointer: coarse)').matches;
+  var strip = document.getElementById('poiStrip');
+  var poiGate = { selects: 0, active: null };
+  window.__POI = poiGate;
+  if (touch && strip && data.pois && data.pois.length) {
+    map.setMode('loc');
+    var stage = document.querySelector('.loc [data-lm-stage]');
+    var vb = { w: 1594, h: 780 };
+    data.pois.forEach(function (p, i) {
+      var el = document.createElement('div');
+      el.className = 'poi-card';
+      el.setAttribute('data-poi', String(p.id != null ? p.id : i));
+      /* число хвилин СТАТИЧНЕ на моб (T-M26: count-up не зафіксовано) */
+      el.innerHTML = '<b>' + (p.name || ('POI ' + (i + 1))) + '</b>' +
+        (p.cat || '') + '<span class="mins">' + (p.min || p.walk || '7') + ' min walk</span>';
+      strip.appendChild(el);
+    });
+    var cards = strip.querySelectorAll('.poi-card');
+    function activate(i) {
+      if (poiGate.active === i) return;
+      poiGate.active = i;
+      poiGate.selects++;
+      cards.forEach(function (c, k) { c.classList.toggle('is-active', k === i); });
+      var p = data.pois[i];
+      map.select(p.id != null ? p.id : i);   /* стара траса гасне, нова малюється (движок) */
+      /* пан/зум до POI ~0.5s (transform-only) */
+      if (stage && p.x != null) {
+        var svgEl = document.querySelector('.loc svg');
+        var W = svgEl ? (svgEl.viewBox.baseVal.width || vb.w) : vb.w;
+        var H = svgEl ? (svgEl.viewBox.baseVal.height || vb.h) : vb.h;
+        var dx = (0.5 - p.x / W) * 40;   /* легкий пан у % */
+        var dy = (0.5 - p.y / H) * 40;
+        stage.style.transform = 'scale(1.35) translate(' + dx.toFixed(1) + '%,' + dy.toFixed(1) + '%)';
+      }
+    }
+    var sTick = false;
+    strip.addEventListener('scroll', function () {
+      if (sTick) return;
+      sTick = true;
+      requestAnimationFrame(function () {
+        sTick = false;
+        var sr = strip.getBoundingClientRect();
+        var cx = sr.left + sr.width / 2;
+        var best = 0, bd = 1e9;
+        cards.forEach(function (c, k) {
+          var r = c.getBoundingClientRect();
+          var d = Math.abs(r.left + r.width / 2 - cx);
+          if (d < bd) { bd = d; best = k; }
+        });
+        activate(best);
+      });
+    }, { passive: true });
+    activate(0);
+  }
+
+  var report = { stability: null, theme: null, cats: null, route: null, poi: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
@@ -173,13 +252,27 @@
     /* 4: маршрут по select(POI) */
     map.setMode('loc');
     await delay(500);
-    var firstPoi = (data.pois && data.pois[0] && (data.pois[0].id || 0)) || 0;
-    map.select(firstPoi);
+    var pick = touch ? 1 : 0; /* на моб activate(0) вже вибрав перший — беремо інший */
+    var pPoi = data.pois && data.pois[pick];
+    map.select(pPoi ? (pPoi.id != null ? pPoi.id : pick) : 0);
     await delay(1600);
     var routeEl = svg.querySelector('[class*="route"], [class*="lm-rt"], .lm-walk, [stroke-dasharray]');
     report.route = { found: !!routeEl };
     report.route.ok = !!routeEl;
     ok = report.route.ok && ok;
+
+    /* 5 (моб): T-M26 свайп-картки */
+    if (touch && strip) {
+      var stage2 = document.querySelector('.loc [data-lm-stage]');
+      var t0 = stage2.style.transform;
+      strip.scrollTo({ left: strip.scrollWidth, behavior: 'auto' });
+      await delay(700);
+      report.poi = { selects: poiGate.selects, active: poiGate.active,
+                     panned: stage2.style.transform !== t0 && /scale\(1\.35\)/.test(stage2.style.transform),
+                     cards: strip.querySelectorAll('.poi-card').length };
+      report.poi.ok = poiGate.selects >= 2 && report.poi.cards >= 3 && report.poi.panned;
+      ok = report.poi.ok && ok;
+    } else { report.poi = { ok: true, skipped: 'desktop' }; }
 
     report.errors = errs;
     window.__LAB_OK__ = !!(ok && errs === 0);
