@@ -1,0 +1,37 @@
+/* COOKIE-CONSENT — живі величини air-global.css (.cookie-consent*) */
+[data-cc] {
+  position: fixed;
+  left: 20px; right: 20px;                       /* var(--spacing-layout) */
+  bottom: calc(env(safe-area-inset-bottom) + 20px);
+  z-index: 13;                                    /* живий z-index 13 */
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;                           /* .cookie-consent--simple */
+}
+[data-cc-box] {
+  display: flex; align-items: center; gap: 20px;
+  max-width: fit-content;
+  padding: 10px 10px 10px 20px;                   /* живий padding */
+  border-radius: 5px;                             /* calc(--scale-px * 5) */
+  background: #fff;
+  box-shadow: 0 0 80px rgba(0, 0, 0, .2);         /* живий shadow */
+  pointer-events: all;
+}
+[data-cc-box] p {
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  color: #55544f; white-space: nowrap;
+}
+[data-cc-box] p a { color: #111110; text-decoration: none; }
+[data-cc-accept] {
+  margin-left: auto;                              /* живий .btn { margin-left: auto } */
+  border: 0; border-radius: 4px; cursor: pointer;
+  padding: 9px 14px;                              /* btn--xs */
+  background: #ececea; color: #111110;            /* btn--secondary */
+  font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  transition: color .6s cubic-bezier(.25, .74, .22, .99); /* живий ховер кнопок */
+}
+@media (max-width: 768px) {
+  [data-cc] { left: 0; right: 0; bottom: 0; }     /* живий --n-md: full-width */
+  [data-cc-box] { max-width: none; width: 100%; border-radius: 0;
+    padding: 10px 20px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 0 80px rgba(0, 0, 0, .15); }
+}
