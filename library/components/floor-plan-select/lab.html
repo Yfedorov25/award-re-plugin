@@ -39,6 +39,10 @@
   header.vs .logo { letter-spacing: .32em; font-weight: 500; }
   .wrap { max-width: 1200px; margin: 4vh auto 8vh; padding: 0 3vw; }
   .fps-mobile-stub { padding: 10vh 8vw; text-align: center; color: #55544f; }
+  .fps-multi-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
+  .fps-multi-btns button { font: inherit; font-size: 11px; letter-spacing: .06em;
+    text-transform: uppercase; padding: 9px 10px; border-radius: 4px;
+    border: 1px solid rgba(17,17,16,.3); background: none; cursor: pointer; }
   .fps-mobile-stub b { display: block; margin-bottom: 2vh; font-weight: 400;
     letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
 </style>
@@ -52,6 +56,12 @@
     <div data-fps-side>
       <div data-fps-info></div>
       <div data-fps-nav></div>
+      <div class="fps-multi-btns">
+        <button type="button" data-fps-multi="show">Select multiple ✛</button>
+        <button type="button" data-fps-multi="all">All</button>
+        <button type="button" data-fps-multi="none">None</button>
+        <button type="button" data-fps-multi="hide">✕</button>
+      </div>
     </div>
     <div data-fps-stage>
       <div data-fps-svg><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 720 420" style="enable-background:new 0 0 720 420;" xml:space="preserve">
@@ -865,7 +875,9 @@
 </svg></div>
       <div data-fps-markers></div>
       <div data-fps-tooltip></div>
+      <div data-fps-compass aria-hidden="true"></div>
     </div>
+    <div data-fps-panel></div>
     <div data-fps-mobile hidden>
       <div class="fps-mobile-stub">
         <b>Selecting on the plan is only available on desktop</b>
@@ -912,7 +924,7 @@
   window.__FPS = fps;
 
   var report = { stability: null, hover: null, off: null, click: null,
-                 nav: null, tempo: null, mob: null, errors: null };
+                 nav: null, multi: null, tempo: null, mob: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
@@ -989,6 +1001,32 @@
     report.nav.ok = items.length === 18 && report.nav.active === '18' &&
                     disabled === 2 && links === 15;
     ok = report.nav.ok && ok;
+
+    /* 5b: SELECT MULTIPLE (живий office-toggle/panel) + компас */
+    document.querySelector('[data-fps-multi="show"]').click();
+    await delay(80);
+    var pluses = document.querySelectorAll('.fps-plus').length;   /* лише живі юніти */
+    fps.multi.toggle('158');
+    await delay(80);
+    var panel = document.querySelector('[data-fps-panel]');
+    var ptxt = panel.textContent.replace(/\s+/g, ' ');
+    var plusActive = document.querySelector('.fps-plus').classList.contains('fps-plus-active');
+    fps.multi.none();
+    await delay(60);
+    var emptyBack = /Select offices on the floor plan/.test(panel.textContent);
+    document.querySelector('[data-fps-multi="hide"]').click();
+    await delay(60);
+    var plusesGone = document.querySelectorAll('.fps-plus').length === 0;
+    var comp = document.querySelector('[data-fps-compass]');
+    report.multi = { pluses: pluses, txt: ptxt.slice(0, 120), plusActive: plusActive,
+                     emptyBack: emptyBack, plusesGone: plusesGone,
+                     compass: comp.style.transform };
+    report.multi.ok = pluses === 1 && plusActive &&
+                      /№158/.test(ptxt) && /742\.6 м²/.test(ptxt) &&
+                      /Show 1 office/.test(ptxt) && /432 935 800/.test(ptxt) &&
+                      emptyBack && plusesGone &&
+                      /rotate\(-15deg\)/.test(comp.style.transform);
+    ok = report.multi.ok && ok;
 
     /* 6: темп */
     var dur = getComputedStyle(document.querySelector('.fps-plate')).transitionDuration;

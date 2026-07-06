@@ -162,7 +162,103 @@
     svg.addEventListener('mouseout', onOut);
     svg.addEventListener('click', onClick);
 
+    /* ---- SELECT MULTIPLE (живий js-plan-multi-select + office-toggle) ---- */
+    var multi = { on: false, sel: {} };
+    var panel = root.querySelector('[data-fps-panel]');
+    function fmtList() {
+      if (!panel) return;
+      var nrs = Object.keys(multi.sel);
+      if (!nrs.length) {
+        panel.innerHTML = '<p class="fps-panel-title">Your selection</p>' +
+          '<p class="fps-panel-empty">Select offices on the floor plan</p>';
+        return;
+      }
+      var rows = '', totalArea = 0, totalPrice = 0;
+      nrs.forEach(function (nr) {
+        var u = byNr[nr];
+        totalArea += u.area;
+        totalPrice += (u.discountPrice || u.actualPrice);
+        rows += '<li><span>№' + u.nr + '</span><span>' + u.area + ' м²</span>' +
+                '<span>' + fmt(u.discountPrice || u.actualPrice) + '</span></li>';
+      });
+      panel.innerHTML = '<p class="fps-panel-title">Your selection</p>' +
+        '<ul class="fps-panel-list">' + rows + '</ul>' +
+        '<p class="fps-panel-total"><span>Show ' + nrs.length + ' office' +
+        (nrs.length === 1 ? '' : 's') + '</span><b>' +
+        (Math.round(totalArea * 10) / 10) + ' м²</b>' +
+        '<b>' + fmt(totalPrice) + '</b></p>';
+      gate.multiTotalArea = Math.round(totalArea * 10) / 10;
+    }
+    function toggleUnit(nr) {
+      var u = byNr[String(nr)];
+      if (!u || u.disabled || !multi.on) return;
+      if (multi.sel[u.nr]) { delete multi.sel[u.nr]; u._plus.classList.remove('fps-plus-active'); }
+      else { multi.sel[u.nr] = true; u._plus.classList.add('fps-plus-active'); }
+      gate.multiCount = Object.keys(multi.sel).length;
+      fmtList();
+    }
+    function enterMulti() {
+      if (multi.on) return;
+      multi.on = true;
+      root.classList.add('fps-multi');
+      config.units.forEach(function (u) {
+        if (u.disabled || u._plus) return;
+        var g = svg.querySelector('[data-hoverable="' + u.nr + '"]');
+        if (!g) return;
+        var bb = g.getBBox();
+        var p = doc.createElement('button');
+        p.type = 'button';
+        p.className = 'fps-plus';           /* живий office-toggle: ✛, active → 45° */
+        p.innerHTML = '<i>+</i>';
+        p.style.left = ((bb.x + bb.width / 2) / vb.width * 100) + '%';
+        p.style.top = ((bb.y + bb.height / 4) / vb.height * 100) + '%';
+        p.addEventListener('click', function (ev) { ev.stopPropagation(); toggleUnit(u.nr); });
+        markersBox.appendChild(p);
+        u._plus = p;
+      });
+      fmtList();
+    }
+    function exitMulti() {
+      multi.on = false;
+      root.classList.remove('fps-multi');
+      multi.sel = {};
+      gate.multiCount = 0;
+      config.units.forEach(function (u) {
+        if (u._plus) { u._plus.remove(); delete u._plus; }
+      });
+      if (panel) panel.innerHTML = '';
+    }
+    function selAll() {
+      if (!multi.on) return;
+      config.units.forEach(function (u) {
+        if (!u.disabled && !multi.sel[u.nr]) toggleUnit(u.nr);
+      });
+    }
+    function selNone() {
+      Object.keys(multi.sel).forEach(function (nr) { toggleUnit(nr); });
+    }
+    Array.prototype.forEach.call(root.querySelectorAll('[data-fps-multi]'), function (btn) {
+      var act = btn.getAttribute('data-fps-multi');
+      btn.addEventListener('click', function () {
+        if (act === 'show') enterMulti();
+        else if (act === 'hide') exitMulti();
+        else if (act === 'all') selAll();
+        else if (act === 'none') selNone();
+      });
+    });
+
+    /* ---- компас (живий .compass, кут інлайновим transform) ---- */
+    var compass = root.querySelector('[data-fps-compass]');
+    if (compass) {
+      var deg = options.compassDeg != null ? options.compassDeg : -15; /* живий rotate(-15deg) */
+      compass.innerHTML = '<i class="fps-compass-arrow"></i><i class="fps-compass-circle"></i>';
+      compass.style.transform = 'rotate(' + deg + 'deg)';
+    }
+
     return {
+      multi: { enter: enterMulti, exit: exitMulti, toggle: toggleUnit,
+               all: selAll, none: selNone,
+               selection: function () { return Object.keys(multi.sel); } },
       hover: function (nr) {
         var g = svg.querySelector('[data-hoverable="' + nr + '"]');
         if (g) onOver({ target: g });

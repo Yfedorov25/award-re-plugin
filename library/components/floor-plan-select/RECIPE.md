@@ -7,7 +7,7 @@ status: candidate            # official ТІЛЬКИ після вердикту
 entry:
   call: "FloorPlanSelect.create(root, config, opts?)  // root: [data-fps-svg] (інлайн SVG з data-hoverable='nr') + [data-fps-markers]/[data-fps-tooltip]/[data-fps-nav]/[data-fps-info]/[data-fps-mobile]. config = { building, floor, units:[живий формат data-plan-plans], floors:[{floor,available,href}] }. opts: { onSelect(unit), touchMq }"
   module: iife
-  returns: "{ hover(nr), leave(), gate, destroy } (touch: { touch:true } — T-M32)"
+  returns: "{ hover(nr), leave(), multi:{enter,exit,toggle,all,none,selection}, gate, destroy } (touch: { touch:true } — T-M32)"
 meaning:
   what: "Рівень 2 visual-search дрілу AIR (живий /visual-search/building/2/floor/18, знято дослівно): SVG-план поверху з юнітами-плитами (T-104), маркер-номер на кожному юніті (інверсія на hover), і T-407-попавер ЖИВОГО шаблону visual-search-floor: area м² + ціна з пробілами + закреслена стара при знижці + МІНІ-ПЛАН юніта зображенням; placement top з triangle. Драбинка floor-nav зліва: живі поверхи лінками, мертві is-disabled, поточний підкреслений; nav-info «Building B / Floor F». Вся палітра станів на одній живій кривій 0.6s cubic-bezier(.25,.74,.22,.99). Лаба працює на СПРАВЖНЬОМУ плані 2_18.svg з живими юнітами 157/158 і цінами."
   when: "Другий крок фунела після building-floor-drill: поверх обраний — тепер юніт. Будь-який RE-сайт з поповерховими планами."
@@ -36,6 +36,8 @@ acceptance:
   - "disabled-юніт: без попавера, без кліку (gate.clickBlocked)"
   - "клік живого → gate.selected + onSelect(unit)"
   - "драбинка: <a> живі / is-disabled мертві / is-active поточний; column-reverse; nav-info Building/Floor"
+  - "SELECT MULTIPLE (живий js-plan-multi-select): enter → ✛-плюсики ЛИШЕ на живих юнітах (office-toggle, active → 45°); панель «Your selection»: список №/м²/ціна + «Show N offices» + totalArea + сумарна ціна; all/none/hide; кнопки по [data-fps-multi]"
+  - "компас (живий .compass--right-bottom): слот [data-fps-compass], кут opts.compassDeg (живий −15°)"
   - "T-M32: на тачі план+сайдбар сховані, заглушка видима"
   - "нуль CLS; destroy() чистить"
 ---
@@ -44,6 +46,4 @@ acceptance:
 
 Другий юніт Спринту-3. Лаба на СПРАВЖНЬОМУ живому плані (2_18.svg,
 юніти 157/158, ціни з конфіга) — формат data-plan-plans 1-в-1, на зборці
-фунела вставляється реальний конфіг без перекладу. Далі: T-428 FLIP +
-T-530 штора між рівнями 1↔2, SELECT MULTIPLE (плюсики office-toggle),
-компас.
+фунела вставляється реальний конфіг без перекладу. SELECT MULTIPLE і компас вшиті (юніт 3 спринту). Далі: T-428 FLIP + T-530 штора між рівнями 1↔2.

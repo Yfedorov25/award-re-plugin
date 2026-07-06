@@ -62,3 +62,32 @@ a.fps-nav-item:hover { border-color: #111110; color: #111110; }
 /* T-M32 моб */
 .fps-touch [data-fps-stage], .fps-touch [data-fps-side] { display: none; }
 [data-fps-mobile][hidden] { display: none; }
+
+/* ---- SELECT MULTIPLE (живий office-toggle: ✛ → 45° при active) ---- */
+.fps-plus { position: absolute; transform: translate(-50%, -50%); width: 30px; height: 30px;
+  border-radius: 50%; border: 1px solid rgba(17, 17, 16, .3); background: #f4f2ee;
+  color: #111110; cursor: pointer; pointer-events: all; padding: 0; display: grid;
+  place-items: center; }
+.fps-plus i { font-style: normal; font-size: 15px; line-height: 1; display: block;
+  transition: transform .6s cubic-bezier(.25,.74,.22,.99); }
+.fps-plus-active { background: #111110; color: #f4f2ee; }
+.fps-plus-active i { transform: rotate(45deg); }   /* живий plan-marker__icon */
+
+/* панель вибірки (живий visual-search-info) */
+[data-fps-panel] { flex: 0 0 230px; }
+.fps-panel-title { font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: #55544f; margin-bottom: 14px; }
+.fps-panel-empty { font-size: 17px; font-weight: 300; line-height: 1.4; color: #111110; }
+.fps-panel-list { list-style: none; margin: 0 0 16px; padding: 12px 14px;
+  background: #fff; border-radius: 4px; font-size: 12px; }
+.fps-panel-list li { display: flex; justify-content: space-between; gap: 1em; padding: 4px 0; }
+.fps-panel-total { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: #55544f; }
+.fps-panel-total b { font-weight: 400; color: #111110; font-size: 18px; }
+
+/* компас (живий .compass--right-bottom) */
+[data-fps-compass] { position: absolute; right: 3%; bottom: 4%; width: 34px; height: 34px; }
+.fps-compass-circle { position: absolute; inset: 0; border: 1px solid rgba(17,17,16,.4);
+  border-radius: 50%; display: block; }
+.fps-compass-arrow { position: absolute; left: 50%; top: 50%; width: 2px; height: 20px;
+  background: #111110; transform: translate(-50%, -50%); display: block;
+  clip-path: polygon(50% 0, 100% 22%, 65% 22%, 65% 100%, 35% 100%, 35% 22%, 0 22%); }
