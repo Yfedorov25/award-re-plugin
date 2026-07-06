@@ -129,7 +129,8 @@
   var q = new URLSearchParams(location.search);
   function num(k) { var v = parseFloat(q.get(k)); return isNaN(v) ? undefined : v; }
   var brv = window.TextBlurReveal.create('#s0, #s1, #s2, #s3', {
-    duration: num('dur'), lag: num('lag'), blurFrom: num('blur')
+    duration: num('dur'), lag: num('lag'), blurFrom: num('blur'),
+    ease: q.get('ease') || undefined
   });
   window.__BRV = brv;
 
