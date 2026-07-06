@@ -16,10 +16,14 @@
   sticky-card-parallax (cand) · giant-number-fact (official) ·
   center-focus-carousel/air-courtyards (cand) · image-slider-wipe (cand).
 
-  Свідомо ПОЗА v1 зборки (на фікс-кола після вердикту):
-  Vimeo-фон Format (стоїть live-постер) · grid→fullbleed скейл фото
-  (landingFormatImageWrapper) · gravity-well T-509 · внутрішній дрейф
-  фото слайдера ±16.666% · курсор-стрілка каруселі.
+  Фікс-кол 1 (2026-07-06): Lenis lerp 0.1 · reveal-канон на всі фото ·
+  Harmony зустрічні дрейфи без піна · Vimeo-луп Format · безперервний
+  позиційний скіс дворів · ambient-спіраль hero.
+  Фікс-кол 2 (2026-07-06): дрейф фото слайдера ±16.666% (в атомі) ·
+  grid→fullbleed скейл Format-фото · under-next шов harmony→life ·
+  approach-rides актів · курсор-стрілка дворів · Lenis syncTouch на моб.
+  Лишається: gravity-well T-509 (свідомо останнім) · повний T-510
+  хореограф усіх швів · сфера/спіраль як 3D-рендери (дозйомка бренду).
 
   ГЕЙТ (PROBE_MODE): loadStability + всі движки iніціалізовані
   (gate/api живі) + console errors == 0. Живий перегляд — нуль автоскролів.
@@ -110,7 +114,9 @@
   #format .head h2 { display: flex; justify-content: space-between; }
   #format .head p { max-width: 40ch; margin: 4vh auto 0; text-align: center; }
   #format .photo { padding: 2vh 3vw; }
-  #format .photo img { border-radius: 6px; width: 100%; }
+  #format .photo img { border-radius: 6px; width: 100%;
+    will-change: transform; transform-origin: 50% 100%; }
+    /* живий landingFormatImageWrapper: фото росте з грід-ширини у fullbleed */
   #fmtpin [data-pcs-bg] img { width: 100%; height: 100%; object-fit: cover; }
   /* живий фон піна = Vimeo-луп спіралі (background=1), постер під ним */
   #fmtpin [data-pcs-bg] iframe { position: absolute; left: 50%; top: 50%;
@@ -132,8 +138,11 @@
   /* ---- 4 · HARMONY (темний акт): живі зустрічні дрейфи ----
      фон landingHarmonyBackground −40→+40svh · картка-шар +20→−20svh
      (живі keyframes, лінійно, нуль піна) */
-  #harmony { background: #161616; color: #f2f1ee; }
-  .hm-stage { position: relative; min-height: 175svh; overflow: clip; }
+  /* under-next шов (T-503): life наїжджає на хвіст harmony, фон якого
+     ще дрейфує під наїздом — глибина стику без піна */
+  #harmony { background: #161616; color: #f2f1ee; margin-bottom: -50svh; }
+  #life { position: relative; z-index: 2; }
+  .hm-stage { position: relative; min-height: 205svh; overflow: clip; }
   .hm-bg { position: absolute; left: 0; right: 0; top: -42svh; bottom: -42svh;
            will-change: transform; }
   .hm-bg img { width: 100%; height: 100%; object-fit: cover; }
@@ -182,6 +191,15 @@
   .cfc-prev, .cfc-next { width: 48px; height: 48px; border-radius: 4px;
     border: 1px solid #c9c7c1; background: none; color: #111110; font-size: 18px; cursor: pointer; }
   .cfc-counter { font-size: 13px; color: #6b6b68; min-width: 5em; text-align: center; }
+  /* курсор-стрілка каруселі (живий cursor--arrow: єдиний доведений ховер) */
+  @media (hover: hover) and (pointer: fine) {
+    #cfc .cfc-viewport { cursor: none; }
+  }
+  #yardsCursor { position: fixed; left: 0; top: 0; z-index: 15; width: 48px; height: 48px;
+    display: grid; place-items: center; border-radius: 4px; background: rgba(17,17,16,.85);
+    color: #f2f1ee; font-size: 18px; pointer-events: none; opacity: 0;
+    margin: -24px 0 0 -24px; will-change: transform; transition: opacity .25s ease-out; }
+  #yardsCursor.on { opacity: 1; }
   .yards-deco { position: absolute; left: 3vw; top: 46%; width: 26vw; aspect-ratio: 1;
     pointer-events: none; opacity: .5; will-change: transform;
     background: repeating-conic-gradient(from 8deg, rgba(17,17,16,.07) 0 6deg, transparent 6deg 12deg);
@@ -287,18 +305,18 @@
       <span class="small" data-brv data-brv-order="2">At this level,<br>AIR has no competitors.</span>
       <p style="margin-top:6vh"><a class="btn-air" href="#format" data-brv data-brv-order="3">About the project <span>✛</span></a></p>
     </div>
-    <img src="https://aircenter.space/media/cache/homepage_impulse_slider_img_xxl/assets/images/media/landing/2.impulse/image-1%40xxxl.webp" alt="" data-brv data-brv-order="2">
+    <img width="1176" height="672" src="https://aircenter.space/media/cache/homepage_impulse_slider_img_xxl/assets/images/media/landing/2.impulse/image-1%40xxxl.webp" alt="" data-brv data-brv-order="2">
   </div>
 </section>
 
 <!-- 3 · FORMAT — пін з лічильником-курсором -->
 <section id="format" data-amo-theme="light">
-  <div class="head" data-brv-group>
+  <div class="head" data-brv-group data-ride="12">
     <h2 class="h1" data-brv data-brv-order="0"><span>A new</span><span>premium</span><span>format</span></h2>
     <p class="lead" data-brv data-brv-order="1">AIR is not only a new generation of offices but also a strong architectural statement by ADM architects.</p>
   </div>
   <div class="photo" data-brv-group>
-    <img data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_format_bg_xxl/assets/images/media/landing/3.format/background%40xxxl.webp" alt="">
+    <img width="2044" height="2088" data-brv data-brv-order="0" src="https://aircenter.space/media/cache/homepage_format_bg_xxl/assets/images/media/landing/3.format/background%40xxxl.webp" alt="">
   </div>
   <div id="fmtpin">
     <div data-pcs-layer>
@@ -332,7 +350,7 @@
     <div class="hm-cardlayer" id="hmCardLayer">
       <div class="hm-card">
         <h2>An intelligent harmony of curved glass and radiant metal</h2>
-        <img src="https://aircenter.space/assets/images/media/landing/4.harmony/card-image@xs.webp" alt="">
+        <img width="700" height="700" src="https://aircenter.space/assets/images/media/landing/4.harmony/card-image@xs.webp" alt="">
         <a class="btn-air" href="#life">Learn more <span>✛</span></a>
       </div>
     </div>
@@ -344,10 +362,10 @@
   <div data-srh-section>
     <h2 class="h1" id="lifeSpread"><span data-srh-group>At the center</span><span data-srh-group>of life</span></h2>
   </div>
-  <div data-brv-group>
+  <div data-brv-group data-ride="12">
   <p class="lead" data-brv data-brv-order="0">The premium AIR business center is designed to become a symbol the city &mdash; a large-scale area spanning one of the city&rsquo;s primary business districts.</p>
   <div class="photo">
-    <img data-brv data-brv-order="1" src="https://aircenter.space/media/cache/homepage_life_img_xxl/assets/images/media/landing/5.life/image%40xxxl.webp" alt="">
+    <img width="1176" height="672" data-brv data-brv-order="1" src="https://aircenter.space/media/cache/homepage_life_img_xxl/assets/images/media/landing/5.life/image%40xxxl.webp" alt="">
   </div>
   <div class="cards">
     <div class="card" data-brv data-brv-order="2" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="1">0</div><p class="cap">min walk<b>Mall</b></p></div>
@@ -366,13 +384,13 @@
     <h2 class="h1" id="peopleSpread"><span data-srh-group>Designed with</span><span data-srh-group>people in mind</span></h2>
   </div>
   <div style="background:var(--paper); color:var(--ink)" data-amo-theme="light">
-    <div class="copy" data-brv-group>
+    <div class="copy" data-brv-group data-ride="10">
       <p data-brv data-brv-order="0">AIR celebrates freedom and self-sufficiency. The architects chose not to connect the towers with a shared podium level, creating cozy open courtyards instead.</p>
     </div>
     <div id="yards">
       <div class="yards-deco" id="yardsDeco"></div>
       <div class="cfc-stage" id="cfc">
-        <div class="cfc-viewport">
+        <div class="cfc-viewport" data-lenis-prevent>
           <div class="cfc-rail">
             <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-1%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
             <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-2%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
@@ -381,6 +399,7 @@
             <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-5%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
           </div>
         </div>
+        <div id="yardsCursor" aria-hidden="true">›</div>
         <div class="cfc-nav">
           <button class="cfc-prev" aria-label="previous">‹</button>
           <span class="cfc-counter">01 / 05</span>
@@ -393,14 +412,14 @@
 
 <!-- 7 · STATUS — слайдер 1/2 з шов-кліпом -->
 <section id="status" data-amo-theme="light" style="background:var(--paper)">
-  <div class="head" data-brv-group>
+  <div class="head" data-brv-group data-ride="12">
     <h2 class="h1" data-brv data-brv-order="0"><span>A tangible sense</span><span>of status</span></h2>
     <p class="lead" data-brv data-brv-order="1">The facades of AIR resemble frozen waves. HAAST Bureau continuing this elemental metaphor in the lobby design.</p>
   </div>
   <div id="isw">
     <div data-isw-layer>
       <div class="isw-row">
-        <div data-isw-stage id="iswStage">
+        <div data-isw-stage id="iswStage" data-lenis-prevent>
           <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-1%40xxxl.webp" alt=""></figure>
           <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-2%40xxxl.webp" alt=""></figure>
         </div>
@@ -494,8 +513,10 @@
      Всі движки читають window-скрол через rAF → отримують згладжені
      значення автоматично. На тачі і в reduced — нативний скрол. */
   api.lenis = null;
-  if (!touch && !reduced && window.Lenis) {
-    api.lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  if (!reduced && window.Lenis) {
+    /* живий AIR: smooth і на смартфоні (smartphone:{smooth:true}) —
+       на тачі syncTouch; внутрішні стрічки з data-lenis-prevent */
+    api.lenis = new Lenis({ lerp: 0.1, smoothWheel: true, syncTouch: touch });
     window.__lenis = api.lenis;
     if (window.ScrollTrigger) api.lenis.on('scroll', ScrollTrigger.update);
     (function raf(t) { api.lenis.raf(t); requestAnimationFrame(raf); })(0);
@@ -607,6 +628,91 @@
     });
   }, { passive: true });
 
+  /* format: grid→fullbleed скейл фото (живий landingFormatImageWrapper) —
+     фото росте з грід-ширини у повну під час підльоту до піна */
+  (function () {
+    var img = document.querySelector('#format .photo img');
+    if (!img || touch || reduced) { api.fmtScale = { on: false }; return; }
+    var wrap = img.parentElement;
+    var last = -1, ticking = false;
+    function smooth(t) { return t * t * (3 - 2 * t); } /* easeInOutQuad-рідня */
+    function render() {
+      var r = wrap.getBoundingClientRect();
+      var vh = innerHeight;
+      var p = Math.max(0, Math.min(1, (vh - r.top) / (vh + r.height * 0.6)));
+      var q = Math.round(p * 1000);
+      if (q === last) return;
+      last = q;
+      var s = 0.70 + (1.064 - 0.70) * smooth(p); /* 8/12 колонок → fullbleed поверх падінгів */
+      img.style.transform = 'scale(' + s.toFixed(4) + ')';
+    }
+    addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; render(); });
+    }, { passive: true });
+    render();
+    api.fmtScale = { on: true, render: render };
+  }());
+
+  /* approach-rides актів (сім'я sectionToSticky, слабка безпечна форма):
+     контейнер в'їжджає +14svh → 0 доки секція заходить у порт */
+  (function () {
+    var rides = Array.prototype.slice.call(document.querySelectorAll('[data-ride]'));
+    if (!rides.length || touch || reduced) { api.rides = rides.length; return; }
+    var ticking = false;
+    function render() {
+      rides.forEach(function (el) {
+        var amp = parseFloat(el.getAttribute('data-ride')) || 14;
+        var r = el.getBoundingClientRect();
+        var vh = innerHeight;
+        var p = Math.max(0, Math.min(1, (vh - r.top) / (vh * 0.8)));
+        el.style.transform = 'translateY(' + (amp * (1 - p)).toFixed(2) + 'svh)';
+      });
+    }
+    addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; render(); });
+    }, { passive: true });
+    render();
+    api.rides = rides.length;
+  }());
+
+  /* курсор-стрілка дворів (живий cursor--arrow js-cursor-button):
+     віджет липне до курсора над стрічкою, ‹/› за половиною, клік = гортання */
+  (function () {
+    var cur = document.getElementById('yardsCursor');
+    var vp = document.querySelector('#cfc .cfc-viewport');
+    if (!cur || !vp || touch || reduced ||
+        !matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      api.cursorArrow = { on: false };
+      return;
+    }
+    var mx = 0, my = 0, fx = 0, fy = 0, on = false, raf = null;
+    function loop() {
+      fx += (mx - fx) * 0.2;
+      fy += (my - fy) * 0.2;
+      cur.style.transform = 'translate(' + fx + 'px, ' + fy + 'px)';
+      raf = on ? requestAnimationFrame(loop) : null;
+    }
+    vp.addEventListener('mousemove', function (ev) {
+      mx = ev.clientX; my = ev.clientY;
+      var vr = vp.getBoundingClientRect();
+      cur.textContent = ev.clientX < vr.left + vr.width / 2 ? '‹' : '›';
+      if (!on) { on = true; fx = mx; fy = my; cur.classList.add('on'); loop(); }
+    });
+    vp.addEventListener('mouseleave', function () {
+      on = false; cur.classList.remove('on');
+    });
+    vp.addEventListener('click', function (ev) {
+      if (!on) return;
+      var vr = vp.getBoundingClientRect();
+      ev.clientX < vr.left + vr.width / 2 ? api.cfc.prev() : api.cfc.next();
+    });
+    api.cursorArrow = { on: true, el: cur };
+  }());
+
   /* status-слайдер (T-512) + моб-пілюля */
   api.isw = window.ImageSliderWipe.create('#isw', {});
   var navCount = document.getElementById('navCount');
@@ -631,26 +737,41 @@
 
   async function run() {
     if (!PM) { window.__LAB_OK__ = 'live-mode'; return; } /* без автоскролів */
-    var cls = 0;
+    var cls = 0, clsTop = [];
     try {
       new PerformanceObserver(function (list) {
-        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+        list.getEntries().forEach(function (e) {
+          if (e.hadRecentInput) return;
+          cls += e.value;
+          clsTop.push({ v: Math.round(e.value * 1000) / 1000, t: Math.round(e.startTime),
+                        src: (e.sources || []).slice(0, 2).map(function (sr) {
+                          var n = sr.node;
+                          return n && n.nodeName ? n.nodeName + '#' + (n.id || '') + '.' + String(n.className || '').slice(0, 30) : '?';
+                        }) });
+        });
       }).observe({ type: 'layout-shift', buffered: true });
     } catch (e) {}
     await delay(2600); /* прелоадер догорає */
     var a1 = document.querySelector('.hero-note').getBoundingClientRect().top;
     await delay(600);
     var a2 = document.querySelector('.hero-note').getBoundingClientRect().top;
-    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1) };
+    clsTop.sort(function (a, b) { return b.v - a.v; });
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1), top: clsTop.slice(0, 3) };
     report.engines = {
       plc: !!(api.plc && !api.plc.error), klh: !!(api.klh && !api.klh.error),
       amo: !!(api.amo && !api.amo.error), srh: !!(api.srh1 && api.srh2 && api.srh3),
       brv: !!api.brv, pcs: !!(api.pcs && !api.pcs.error),
       hm: !!(api.hm && api.hm.ok), gnf: api.gnf.length === 4,
       cfc: !!api.cfc, isw: !!(api.isw && !api.isw.error),
-      lenis: touch || !!api.lenis,                       /* фікс-кол 1: живий lerp 0.1 */
+      lenis: !!api.lenis,                       /* фікс-кол 1: живий lerp 0.1 */
       vimeo: !!document.querySelector('#fmtpin iframe'), /* фікс-кол 1: Vimeo-луп */
-      reveals: document.querySelectorAll('[data-brv]').length >= 16 /* фото+тексти вкриті */
+      reveals: document.querySelectorAll('[data-brv]').length >= 16, /* фото+тексти вкриті */
+      /* фікс-кол 2 */
+      fmtScale: touch || (api.fmtScale && api.fmtScale.on === true),
+      rides: api.rides >= 4,
+      cursorArrow: touch || (api.cursorArrow && api.cursorArrow.on === true),
+      iswDrift: touch || document.getElementById('isw').classList.contains('isw-drift'),
+      underNext: parseFloat(getComputedStyle(document.getElementById('harmony')).marginBottom) < -100
     };
     /* фікс-кол 1: harmony — зустрічні дрейфи живі (двi позиції скролу) */
     if (!touch) {

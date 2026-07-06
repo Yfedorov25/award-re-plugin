@@ -36,6 +36,14 @@
   object-fit: cover;
   display: block;
 }
+/* дрейф-режим (живий imageSliderImage ДОСЛІВНО): фото 120% висоти,
+   якір згори; translateY у діапазоні [−16.666%, 0] фото-висоти —
+   нижній край рівно flush на −16.666%, краї не оголюються */
+.isw-drift [data-isw-slide] img,
+.isw-drift [data-isw-slide] .isw-fill {
+  height: 120%;
+  will-change: transform;
+}
 [data-isw-slide].is-off { visibility: hidden; }
 
 /* тексти/CTA: стек в одній грід-клітинці (живий content-animation--center:

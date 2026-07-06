@@ -131,6 +131,9 @@
       textDelayMs: options.textDelayMs != null ? options.textDelayMs : 250,
       lineStaggerMs: options.lineStaggerMs != null ? options.lineStaggerMs : 60,
       blurPx: options.blurPx != null ? options.blurPx : 10,
+      /* живий imageSliderImage ДОСЛІВНО: фото 120% висоти, дрейф
+         −16.666%→0 на вході піна і 0→−16.666% на виході */
+      driftPct: options.driftPct != null ? options.driftPct : 16.666,
       mobile: options.mobile || 'tap',
       touchMq: options.touchMq || '(pointer: coarse), (max-width: 768px)'
     };
@@ -351,6 +354,30 @@
     root.classList.add('isw-mode-pin');
     root.style.minHeight = 'calc(100svh + ' + (N - 1) * opt.stepSvh + 'svh)';
 
+    /* дрейф фото (T-510-сім'я, живий imageSliderImage): на вході піна фото
+       їде з +drift до 0, на виході 0 → −drift; всередині піна стоїть.
+       Тільки desktop (сімейний закон enableTouch:false). */
+    var driftImgs = opt.driftPct > 0 && !touch && !reduced
+      ? slides.map(function (s) { return s.querySelector('img, .isw-fill'); })
+      : [];
+    if (driftImgs.length && driftImgs.every(Boolean)) root.classList.add('isw-drift');
+    else driftImgs = [];
+    function renderDrift() {
+      if (!driftImgs.length) return;
+      var r = root.getBoundingClientRect();
+      var vh = global.innerHeight;
+      var entry = clamp01((vh - r.top) / vh);          /* 0 → 1 доки пін чіпляється */
+      var span = Math.max(1, r.height - vh);
+      var sp = clamp01(-r.top / span);                 /* прогрес самого піна */
+      var exit = clamp01((sp - 0.8) / 0.2);            /* останні 20% спану = відпускання */
+      /* живі keyframes: вхід −16.666→0, вихід 0→−16.666; діапазон [−drift, 0] */
+      var ty = Math.max(-opt.driftPct,
+                        -opt.driftPct * ((1 - entry) + exit));
+      gate.driftTy = Math.round(ty * 100) / 100;
+      for (var i = 0; i < driftImgs.length; i++)
+        driftImgs[i].style.transform = 'translateY(' + ty + '%)';
+    }
+
     /* прогрес піна: 0 = шар прилип, 1 = шар відпускає (живий sticky-плагін) */
     function progress() {
       var r = root.getBoundingClientRect();
@@ -378,10 +405,15 @@
     function onScroll() {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(function () { ticking = false; render(progress()); });
+      requestAnimationFrame(function () {
+        ticking = false;
+        render(progress());
+        renderDrift(); /* дрейф живе і поза піном (вхід/вихід) */
+      });
     }
     global.addEventListener('scroll', onScroll, { passive: true });
     render(progress());
+    renderDrift();
 
     return {
       mode: 'pin', render: render, progress: progress,

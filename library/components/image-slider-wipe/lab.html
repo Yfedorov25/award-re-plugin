@@ -111,8 +111,8 @@
     <div data-isw-layer>
       <div class="isw-row">
         <div data-isw-stage id="iswStage">
-          <figure data-isw-slide><div class="ph" id="ph1"></div></figure>
-          <figure data-isw-slide><div class="ph" id="ph2"></div></figure>
+          <figure data-isw-slide><div class="ph isw-fill" id="ph1"></div></figure>
+          <figure data-isw-slide><div class="ph isw-fill" id="ph2"></div></figure>
         </div>
         <div class="isw-card" data-isw-card>
           <div data-isw-ticks></div>
@@ -169,8 +169,8 @@
   var layer = root.querySelector('[data-isw-layer]');
   var stage = document.getElementById('iswStage');
   var slides = root.querySelectorAll('[data-isw-slide]');
-  var report = { stability: null, pin: null, ticks: null, fwd: null, back: null,
-                 tap: null, errors: null };
+  var report = { stability: null, drift: null, pin: null, ticks: null, fwd: null,
+                 back: null, tap: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function tickX(i) {
@@ -209,6 +209,22 @@
 
   async function runDesktop() {
     var ok = await probeStability(document.querySelector('#act h2'));
+
+    /* 1b: дрейф фото (живий imageSliderImage): на підльоті ty < 0,
+       у піні ≈ 0, на відпусканні знову < 0 */
+    var rootTop = root.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, rootTop - window.innerHeight * 0.55);
+    await delay(250);
+    var dEnter = isw.gate.driftTy;
+    window.scrollTo(0, yTo(0.25));
+    await delay(250);
+    var dPin = isw.gate.driftTy;
+    window.scrollTo(0, yTo(1) + window.innerHeight * 0.5);
+    await delay(250);
+    var dExit = isw.gate.driftTy;
+    report.drift = { enter: dEnter, pin: dPin, exit: dExit,
+                     ok: dEnter < -6 && Math.abs(dPin) < 1.5 && dExit < -6 };
+    ok = report.drift.ok && ok;
 
     /* 2: пін + вихідний стан */
     window.scrollTo(0, yTo(0.25));

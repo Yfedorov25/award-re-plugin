@@ -37,7 +37,8 @@ acceptance:
   - "ticks: безперервний fill скролом (transform-only, БЕЗ transition), реверсивний (та сама p → той самий fill ±2%)"
   - "текст: out blur(0→10)+opacity одразу; in delay 0.25s + порядковий каскад 60ms/рядок (md-up, спани розгорнуті після settle); стек у грід-клітинці — нуль CLS на свапі"
   - "tap-режим (T-M23): snap-стрічка x mandatory; тап → лічильник ОДРАЗУ → smooth-скрол у snap-ціль (слайд по центру); краї is-disabled (без loop); свайп синхронить лічильник"
-  - "reduced-motion: свапи миттєві (без кліпів/blur), лічильник і ticks живі"
+  - "дрейф фото (фікс-кол 2, живий imageSliderImage ДОСЛІВНО): фото 120% висоти, translateY −16.666%→0 на вході піна і 0→−16.666% на останніх 20% спану; діапазон [−16.666, 0] — краї не оголюються; desktop-only (enableTouch:false); клас .isw-drift, gate.driftTy"
+  - "reduced-motion: свапи миттєві (без кліпів/blur), лічильник і ticks живі; дрейф вимкнений"
   - "CLS < 0.1; рух = clip-path/transform/filter/opacity ТІЛЬКИ; destroy() чистить слухачі, стилі, анімації"
 ---
 
@@ -69,6 +70,6 @@ acceptance:
 
 Що лишилось за межами атома (свідомо, для зборки сторінки):
 в'їзд/вихід ряду −50svh/+50svh (sectionToSticky — це сім'я
-`pin-release-seam`, T-510) і внутрішній дрейф фото ±16.666%
-(imageSliderImage parallax, фото 120% висоти) — обидва шви
-докладаються на ЗБОРЦІ ГОЛОВНОЇ поверх цього атома.
+`pin-release-seam`, T-510). Внутрішній дрейф фото ±16.666%
+(imageSliderImage) з фікс-кола 2 вшитий В атом (opt.driftPct,
+клас .isw-drift, лише desktop).
