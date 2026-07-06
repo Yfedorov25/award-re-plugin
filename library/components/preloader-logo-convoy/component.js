@@ -142,11 +142,13 @@
         render(1);
         try { if (opt.sessionOnce) sessionStorage.setItem(KEY, '1'); } catch (e) {}
         var tr = 'transform ' + opt.duration + 's ' + EASE;
-        /* B: контент гасне, бар доїжджає */
-        content.style.transition = 'opacity ' + opt.duration + 's ' + EASE;
+        /* B: ВЕСЬ оверлей (разом із тлом-завісою) розчиняється — сторінка
+           в'їжджає ВИДИМО крізь нього (баг-урок 2026-07-06: гасити лише
+           контент = глуха завіса до removeChild і page-pop одним кадром) */
+        overlay.style.transition = 'opacity ' + opt.duration + 's ' + EASE;
         bar.style.transition = tr;
         requestAnimationFrame(function () { requestAnimationFrame(function () {
-          content.style.opacity = '0';
+          overlay.style.opacity = '0';
           bar.style.transform = 'translateX(100%)';
           /* C: панелі роз'їжджаються — синхронно, той самий bezier */
           [].concat(tops, bottoms, texts).forEach(function (el) {

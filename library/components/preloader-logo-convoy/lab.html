@@ -16,8 +16,10 @@
      (header translateY(-100%), bottom +100%, text +20px);
   2. прогрес-конвой: setProgress 0->1 кроками — transform КОЖНОГО лого
      міняється монотонно (x росте), бар їде; нуль layout-зсувів (CLS<0.1);
-  3. done(): через duration+запас оверлей ЗНЯТИЙ З DOM ПОВНІСТЮ,
-     вхідні елементи на identity (transform '' / translateY(0));
+  3. done() mid-flight: на СЕРЕДИНІ виходу завіса напівпрозора
+     (opacity 0.03..0.97) І хедер уже в кадрі — вхід видимий КРІЗЬ
+     завісу (баг-урок «вистрибування» 2026-07-06); після duration+запас
+     оверлей ЗНЯТИЙ З DOM, вхідні на identity;
   4. console errors == 0.
   Живий перегляд (без ?probe): auto:true — справжній ритуал на load.
 ================================================================================
@@ -123,16 +125,26 @@
     report.convoy = { mono: mono, cls: Math.round(cls * 1000) / 1000 };
     ok = mono[0] && mono[1] && mono[2] && cls < 0.1 && ok;
 
-    /* 3. done(): оверлей знятий, вхідні на identity */
+    /* 3. done() + MID-FLIGHT (баг-урок 2026-07-06 «вистрибування»):
+       на середині виходу завіса МУСИТЬ бути напівпрозорою (розчиняється),
+       а хедер УЖЕ в кадрі — вхід видимий КРІЗЬ завісу, не за нею */
     plc.done();
-    await delay(80 + 800 + 300); /* minShow 0 + duration 0.8s + запас */
+    await delay(80 + 400); /* ~середина duration 0.8s */
+    var ovEl = document.querySelector('.plc');
+    var ovMid = ovEl ? parseFloat(getComputedStyle(ovEl).opacity) : -1;
+    var headerMidIn = header.getBoundingClientRect().bottom > 2;
+    await delay(400 + 300); /* решта duration + запас */
     var headerT = header.style.transform;
     report.exit = {
+      ovMid: Math.round(ovMid * 100) / 100,
+      dissolving: ovMid > 0.03 && ovMid < 0.97,
+      headerMidIn: headerMidIn,
       overlayGone: !document.querySelector('.plc'),
       headerHome: headerT === '' || /translateY\(0/.test(headerT),
       removedT: plc.gate.removedT > 0
     };
-    ok = report.exit.overlayGone && report.exit.headerHome && report.exit.removedT && ok;
+    ok = report.exit.dissolving && report.exit.headerMidIn &&
+         report.exit.overlayGone && report.exit.headerHome && report.exit.removedT && ok;
 
     report.errors = errs;
     ok = ok && errs === 0;
