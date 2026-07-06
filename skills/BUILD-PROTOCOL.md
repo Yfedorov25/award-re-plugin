@@ -6,6 +6,10 @@
 > там, де протокол каже «цитуй». Сильнішій: те саме.
 
 ## 0. Перед стартом будь-якої сесії
+0. Хуки-охоронці ВЖЕ стоять (реєстр: skills/ANTI-ISC.md — читати при провалах):
+   git pre-commit блокує коміт без verify GREEN; SessionStart-хук KAI ганяє
+   scripts/linkcheck.sh (mDNS-лінк + самолікування сервера). ЛІНКИ ДАВАТИ
+   ЧЕРЕЗ http://yehors-macbook-air.local:8820/ — IP більше не потрібен.
 1. Прочитай `~/Downloads/KAI/STATE.md` → `AIR-COMPLETE-PLAN.md` (черга юнітів).
 2. `git status` у репо — дерево має бути чистим; tpreview-* НЕ ЧІПАТИ.
 3. Сервер прототипів: `python3 -m http.server 8820 --bind 0.0.0.0 --directory ~/Downloads/award-re-plugin/library`.
