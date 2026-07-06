@@ -1,0 +1,16 @@
+{
+  "extends": "center-focus-carousel",
+  "variant": "air-courtyards",
+  "registry_ref": ["x: без T-ID — двори-карусель головної AIR, родич T-110 (матриця §4); WebGL-оригінал (carouselWebGl) переклано на CSS за законом no-WebGL"],
+  "contract": "живий DOM aircenter.space #people (витяг 2026-07-06): l-people-carousel = carouselWebGl cursor (desktop) + mobile-scrollable (моб); деко-спіраль l-people-carousel-deco з парадаксом translateY(-50%)∓15svh",
+  "params": {
+    "sideScale": { "value": 0.86, "law": "бічні піки менші; AIR тримає їх світлими (не морозить)" },
+    "sideDim": { "value": 0.92, "law": "світле поле AIR: приглушення ледь помітне — скіс працює замість темряви" },
+    "tiltDeg": { "value": 24, "law": "CSS-переклад WebGL-кривизни: perspective(1100px) rotateY(±24°) на ВНУТРІШНЬОМУ .cfc-panel-img (база тінить transform самої панелі — не чіпаємо)" },
+    "slideDur": { "value": 0.7, "unit": "s", "law": "база; темп ротації живої каруселі" },
+    "panel": { "value": "44vw, аспект 7/4 (живі фото 840×480), gap 10px", "law": "живий homepage_people_slider_img_md + gap стрічки AIR" },
+    "arrows": { "value": "48px квадратні ‹ › (btn--square)", "law": "матриця §4: «стрілки 48px»" },
+    "decoParallax": { "value": "translateY(-50%) + (−15svh → +15svh) лінійно за прохід секції", "law": "живий l-people-carousel-deco__deco: parallax-100-0 → −50%−15svh · parallax-0-100 → −50%+15svh" },
+    "mobile": { "value": "нативна свайп-стрічка (база ≤820px)", "law": "живий AIR: карусель is-hidden--sm-down, моб = mobile-scrollable" }
+  }
+}
