@@ -5,11 +5,11 @@ level: 1
 kind: component
 status: candidate            # official ТІЛЬКИ після вердикту власника (прототип-перший)
 entry:
-  call: "TextBlurReveal.create(sections, opts)  // sections = селектор/Element/Element[] секцій-груп; у кожній [data-brv] елементи з data-brv-order (0=заголовок, 1=цифри, 2=параграфи, 3=CTA). opts усі опційні: { duration (0.3s), lag (0.18s), blurFrom (10px), ease ('out-quad'|'air'), threshold (0.18), jumpVh (0.45), keyMedia (decode-гейт), autoArm (true) }"
+  call: "TextBlurReveal.create(sections, opts)  // sections = селектор/Element/Element[] секцій-груп; у кожній [data-brv] елементи з data-brv-order (0=заголовок, 1=цифри, 2=параграфи, 3=CTA). opts усі опційні: { duration (1s — живий CSS AIR, вердикт 2026-07-06), lag (0.12s), blurFrom (10px), ease ('air'|'out-quad'), threshold (0.18), jumpVh (0.45), keyMedia (decode-гейт), autoArm (true) }"
   module: iife
   returns: "{ groups, gate, log, arm, settled, destroy }  (або { static:true, destroy } у reduced-motion / no-GSAP гілці — контент видимий одразу)"
 meaning:
-  what: "ОСНОВНИЙ reveal-канон AIR: текст в'їжджає filter blur(10px)→0 + opacity, БЕЗ y-зсуву. ОДИН каскад на секцію за ордером (заголовок → цифри → параграфи) з лагом 0.18s, 0.3s на елемент, once по скрол-тригеру. Секція, досягнута стрибком або мідскролом, рендериться settled МИТТЄВО без анімації (Д4б); звичайний скрол-крок скасовує стрибок-мітку (maintenance-фікс); озброєння чекає decode() ключових медіа."
+  what: "ОСНОВНИЙ reveal-канон AIR: текст в'їжджає filter blur(10px)→0 + opacity, БЕЗ y-зсуву. ОДИН каскад на секцію за ордером (заголовок → цифри → параграфи), 1s на елемент air-ease (живий CSS aircenter.space: transition 1s cubic-bezier(.25,.74,.22,.99), delay line-index×60ms; вердикт власника «прийняв» 2026-07-06), лаг 0.12s, once по скрол-тригеру. Секція, досягнута стрибком або мідскролом, рендериться settled МИТТЄВО без анімації (Д4б); звичайний скрол-крок скасовує стрибок-мітку (maintenance-фікс); озброєння чекає decode() ключових медіа."
   when: "Будь-яка текстова поява на сайті з reveal-мовою AIR — kicker'и, заголовки, службові числа, параграфи карток, CTA-ряди. Це системний атом-канон: усі секції сайту говорять ОДНІЄЮ мовою появи (half T-M23 mobile reveal-канону — та сама механіка на тачі)."
   lands: "Текст не «під'їжджає», а ПРОЯВЛЯЄТЬСЯ з розфокуса на своєму місці — дорого і тихо, як наведення різкості в кіно. Каскад дає порядок читання (спершу заголовок, тоді цифри, тоді дрібне), нуль стрибків лейауту, нуль повторних програвань."
   not_when: "Медіа/картинки (це ТЕКСТОВИЙ канон; медіа-blur→sharp = окремий шов). Секції під піном, де текст мусить скрабитись прогресом (канон = time-based once, НІКОЛИ не scrub). Сайти без AIR reveal-мови (у SAISEI/Springs свої канони появи)."
@@ -32,7 +32,7 @@ params_ref: tokens.json
 files: [component.js, component.css, lab.html, tokens.json]
 acceptance:
   - "рух = filter blur(10px→0) + opacity ТІЛЬКИ, БЕЗ y-зсуву (контракт §3.1): top елемента до/після reveal стабільний ±1.5px"
-  - "D4-виняток свідомий: one-shot ≤0.3s/елемент, time-based, НІКОЛИ не scrub; will-change ставиться перед твіном і чиститься onComplete"
+  - "D4-виняток свідомий (переписаний вердиктом 2026-07-06): one-shot time-based reveal до 1s/елемент (= оригінал AIR), НІКОЛИ не scrub; will-change ставиться перед твіном і чиститься onComplete"
   - "Д4(а): ОДИН каскад на секцію, delay = order × lag (елементи одного ордера разом), once — група ніколи не перезапускається"
   - "Д4(б): стрибок/мідскрол-прихід/проскочена секція = settled МИТТЄВО без анімації; після стрибка НУЛЬ [data-brv] у проміжних станах (opacity 0.05..0.95 / blur 0.5..9.5px)"
   - "рейс-стійкість: рішення «каскад чи instant» відкладене на один кадр після IO-колбека; звичайний скрол-крок (delta>2px) скасовує стрибок-мітку"

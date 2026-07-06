@@ -165,7 +165,7 @@
 
   async function probeCascade() {
     /* s0 у в'юпорті з завантаження -> чесний каскад */
-    await delay(1300); /* 0 + lag*1 + dur = ~0.5s; запас на decode/arm */
+    await delay(1900); /* lag*1 + dur(1s) = ~1.12s; запас на decode/arm */
     var l = brv.log.filter(function (e) { return e.g === 's0'; });
     var mono = l.length >= 2 && l.every(function (e, i) {
       return i === 0 || e.order >= l[i - 1].order;
@@ -173,7 +173,7 @@
     var lagOk = true;
     if (l.length >= 2) {
       var dt = l[1].t - l[0].t;
-      lagOk = dt > 90 && dt < 270; /* 0.18s +-90ms */
+      lagOk = dt > 50 && dt < 270; /* канон 0.12s; допуск 50-270ms */
     }
     var topAfter = h1.getBoundingClientRect().top;
     var noShift = Math.abs(topAfter - topBefore) <= 1.5;
@@ -204,7 +204,7 @@
       window.scrollTo(0, y);
       await delay(90);
     }
-    await delay(900);
+    await delay(1900); /* хвіст каскаду 1s + лаги мають догоріти */
     var out = { settled: brv.settled(), mid: midStates(),
                 runs: JSON.parse(JSON.stringify(brv.gate.groupRuns)) };
     out.ok = out.settled && out.mid === 0;

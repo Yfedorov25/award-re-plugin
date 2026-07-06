@@ -26,10 +26,12 @@
      чесний каскад у хибний instant.
    DECODE-ГЕЙТ: озброєння чекає на decode() ключових медіа
      (opts.keyMedia) — reveal не стартує на пікселях, яких нема.
-   D4-ВИНЯТОК (доктрина): blur не в списку transform/opacity/
-     clip-path — дозволений СВІДОМО як one-shot <=0.3s/елемент,
-     time-based, НІКОЛИ не scrub. Хто хоче скрабити блюр — іде
-     переписувати конституцію, не цей файл.
+   D4-ВИНЯТОК (доктрина, ПЕРЕПИСАНА вердиктом 2026-07-06): blur не
+     в списку transform/opacity/clip-path — дозволений СВІДОМО як
+     one-shot time-based reveal до 1s/елемент (= оригінал AIR:
+     transition 1s у живому global.css; старий кап 0.3s знято
+     вердиктом власника). НІКОЛИ не scrub. Хто хоче скрабити блюр —
+     іде переписувати конституцію, не цей файл.
 
    РОЗМІТКА:
      секція-група   = будь-який контейнер (аргумент sections)
@@ -39,10 +41,10 @@
    TextBlurReveal.create(sections, opts)
      sections: селектор | Element | Element[] — кожен = група-каскад
      opts (усі опційні): {
-       duration: 0.3,      // s на елемент (контракт 0.3; НЕ scrub)
-       lag: 0.18,          // s між ордерами (контракт 0.15-0.25)
-       blurFrom: 10,       // стартовий blur px
-       ease: 'out-quad',   // 'out-quad' | 'air'
+       duration: 1,        // s на елемент (живий CSS AIR; НЕ scrub)
+       lag: 0.12,          // s між ордерами (AIR: 60ms/рядок)
+       blurFrom: 10,       // стартовий blur px (живий CSS AIR)
+       ease: 'air',        // 'air' | 'out-quad'
        threshold: 0.18,    // IO-поріг запуску групи
        jumpVh: 0.45,       // частка vh: більша дельта = стрибок
        keyMedia: [],       // селектор|Element[] — decode-гейт
@@ -97,11 +99,15 @@
     var roots = toElements(sections);
     if (!roots.length) return { error: 'no sections' };
 
+    /* КАНОН-ДЕФОЛТИ = вердикт власника 2026-07-06 («прийняв» D-темп):
+       живий CSS AIR global.css: transition filter/opacity 1s
+       cubic-bezier(.25,.74,.22,.99), blur(10px); каскад 60-120ms.
+       Доктрина-кап 0.3s знятий вердиктом для one-shot reveal. */
     var opt = {
-      duration: options.duration != null ? options.duration : 0.3,
-      lag: options.lag != null ? options.lag : 0.18,
+      duration: options.duration != null ? options.duration : 1,
+      lag: options.lag != null ? options.lag : 0.12,
       blurFrom: options.blurFrom != null ? options.blurFrom : 10,
-      ease: options.ease || 'out-quad',
+      ease: options.ease || 'air',
       threshold: options.threshold != null ? options.threshold : 0.18,
       jumpVh: options.jumpVh != null ? options.jumpVh : 0.45,
       autoArm: options.autoArm !== false
