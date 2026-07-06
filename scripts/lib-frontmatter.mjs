@@ -131,7 +131,11 @@ export function parseYaml(body) {
 }
 
 export function readRecipe(path) {
-  const text = readFileSync(path, 'utf8');
+  /* каталог без RECIPE.md (tpreview-каталоги, прев'ю, скретч) = не
+     library-entry: null замість крешу цілого verify (урок 2026-07-06) */
+  let text;
+  try { text = readFileSync(path, 'utf8'); }
+  catch (e) { if (e && e.code === 'ENOENT') return null; throw e; }
   const fm = extractFrontMatter(text);
   if (!fm) return null;
   try { return parseYaml(fm); }
