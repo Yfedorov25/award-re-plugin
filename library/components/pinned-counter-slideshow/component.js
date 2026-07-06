@@ -58,28 +58,6 @@
   function all(root, sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
   function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 
-  /* порядковий split (канон text-blur-reveal): слова → спани,
-     рядок за offsetTop, розгортання після reveal */
-  function splitLines(el) {
-    var words = el.textContent.split(/(\s+)/);
-    var html = '';
-    for (var i = 0; i < words.length; i++) {
-      html += /\S/.test(words[i])
-        ? '<span class="pcs-w" style="display:inline">' + words[i] + '</span>'
-        : words[i];
-    }
-    var saved = el.innerHTML;
-    el.innerHTML = html;
-    var spans = all(el, '.pcs-w');
-    var tops = [], lineOf = [];
-    for (var j = 0; j < spans.length; j++) {
-      var t = spans[j].offsetTop;
-      if (!tops.length || t - tops[tops.length - 1] > 2) tops.push(t);
-      lineOf.push(tops.length - 1);
-    }
-    return { spans: spans, lineOf: lineOf,
-             unwrap: function () { el.innerHTML = saved; } };
-  }
 
   function create(section, options) {
     options = options || {};
@@ -115,7 +93,6 @@
     var gate = { swaps: 0, lastDir: 0, renders: 0, follower: false };
     var idx = 0;
     var anims = [];
-    var unwrapText = null;
 
     if (total) total.textContent = '/ ' + N;
     if (counter) counter.textContent = '1';
@@ -143,7 +120,6 @@
     function killAnims() {
       anims.forEach(function (a) { try { a.cancel(); } catch (e) {} });
       anims = [];
-      if (unwrapText) { unwrapText(); unwrapText = null; }
     }
 
     /* ---- текст-свап (лічильник — НА СТАРТІ, живий counter) ---- */
@@ -171,31 +147,15 @@
       aOut.onfinish = function () { oldT.classList.add('is-off'); aOut.cancel(); };
       anims.push(aOut);
       newT.classList.remove('is-off');
-      if (!touch) {
-        var sp = splitLines(newT);
-        var done = 0;
-        unwrapText = sp.unwrap;
-        sp.spans.forEach(function (w, k) {
-          var a = w.animate(
-            { filter: ['blur(' + b + 'px)', 'blur(0px)'], opacity: [0, 1] },
-            { duration: 1000, easing: 'ease-out', fill: 'both',
-              delay: opt.textDelayMs + sp.lineOf[k] * opt.lineStaggerMs });
-          a.onfinish = function () {
-            a.cancel();
-            if (++done === sp.spans.length && unwrapText === sp.unwrap) {
-              sp.unwrap(); unwrapText = null;
-            }
-          };
-          anims.push(a);
-        });
-      } else {
-        var aIn = newT.animate(
-          { filter: ['blur(' + b + 'px)', 'blur(0px)'], opacity: [0, 1] },
-          { duration: 1000, easing: 'ease-out', fill: 'both',
-            delay: opt.textDelayMs });
-        aIn.onfinish = function () { aIn.cancel(); };
-        anims.push(aIn);
-      }
+      /* свап ЦІЛИМ блоком (фікс-кол 4, запис 18.35.34): спліт-спани на свапі
+         мерехтіли шрифтом (пошаровий AA + unwrap-blink); канон 60ms/line
+         лишається за ВХІДНИМИ reveal (text-blur-reveal, T-322) */
+      var aIn = newT.animate(
+        { filter: ['blur(' + b + 'px)', 'blur(0px)'], opacity: [0, 1] },
+        { duration: 1000, easing: 'ease-out', fill: 'both',
+          delay: opt.textDelayMs });
+      aIn.onfinish = function () { aIn.cancel(); };
+      anims.push(aIn);
     }
 
     /* ---- скрол-драйвер (живий sticky-плагін) ---- */

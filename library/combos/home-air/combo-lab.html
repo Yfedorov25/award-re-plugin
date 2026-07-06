@@ -394,7 +394,7 @@
     <div id="yards">
       <div class="yards-deco" id="yardsDeco"></div>
       <div class="cfc-stage" id="cfc">
-        <div class="cfc-viewport" data-lenis-prevent>
+        <div class="cfc-viewport">
           <div class="cfc-rail">
             <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-1%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
             <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-2%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
@@ -423,7 +423,7 @@
   <div id="isw">
     <div data-isw-layer>
       <div class="isw-row">
-        <div data-isw-stage id="iswStage" data-lenis-prevent>
+        <div data-isw-stage id="iswStage">
           <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-1%40xxxl.webp" alt=""></figure>
           <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-2%40xxxl.webp" alt=""></figure>
         </div>
@@ -516,6 +516,14 @@
      Всі движки читають window-скрол через rAF → отримують згладжені
      значення автоматично. На тачі і в reduced — нативний скрол. */
   api.lenis = null;
+  /* фікс-кол 4 (запис 18.36.00): data-lenis-prevent на стрічках робив
+     НАТИВНИЙ скрол над дворами/слайдером на desktop → стрибки проти lerp.
+     Атрибут потрібен ЛИШЕ на тачі (свайп стрічок) — ставимо його тут. */
+  if (touch) {
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#iswStage, #cfc .cfc-viewport'),
+      function (el) { el.setAttribute('data-lenis-prevent', ''); });
+  }
   if (!reduced && window.Lenis) {
     /* живий AIR: smooth і на смартфоні (smartphone:{smooth:true}) —
        на тачі syncTouch; внутрішні стрічки з data-lenis-prevent */
@@ -707,6 +715,10 @@
     vp.addEventListener('mouseleave', function () {
       on = false; cur.classList.remove('on');
     });
+    var nav = document.querySelector('#cfc .cfc-nav');
+    if (nav) nav.addEventListener('mouseenter', function () {
+      on = false; cur.classList.remove('on');
+    });
     vp.addEventListener('click', function (ev) {
       if (!on) return;
       var vr = vp.getBoundingClientRect();
@@ -727,6 +739,11 @@
   /* фікс-кол 3: перерахунок GSAP-тригерів ПІСЛЯ довантаження всіх фото —
      пізній hotlink-декод більше не зсуває сторінку посеред скролу */
   window.addEventListener('load', function () {
+    /* фікс-кол 4: важкі hotlink-фото декодуються ЗАЗДАЛЕГІДЬ —
+       перший прохід без декод-фризів («пролагування») */
+    Array.prototype.forEach.call(document.images, function (im) {
+      if (im.decode) im.decode().catch(function () {});
+    });
     if (window.ScrollTrigger) setTimeout(function () { ScrollTrigger.refresh(); }, 300);
   });
 
@@ -779,7 +796,10 @@
       rides: api.rides >= 4,
       cursorArrow: touch || (api.cursorArrow && api.cursorArrow.on === true),
       iswDrift: touch || document.getElementById('isw').classList.contains('isw-drift'),
-      underNext: parseFloat(getComputedStyle(document.getElementById('harmony')).marginBottom) < -100
+      underNext: parseFloat(getComputedStyle(document.getElementById('harmony')).marginBottom) < -100,
+      /* фікс-кол 4 */
+      lenisOwnsWheel: touch || document.querySelectorAll('[data-lenis-prevent]').length === 0,
+      noSwapSpans: document.querySelectorAll('.pcs-w, .isw-w').length === 0
     };
     /* фікс-кол 3 (зауваження «стрибає»): висота документа СТАЛА за прохід —
        пізні декоди/сплітання більше не ростять сторінку посеред скролу */
