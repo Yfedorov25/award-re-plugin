@@ -1185,6 +1185,79 @@
     "_path": "library/components/oval-mask/",
     "_variantsResolved": []
   },
+  "preloader-logo-convoy": {
+    "id": "preloader-logo-convoy",
+    "name": "Прелоадер конвой-wordmark + вхід панелей (AIR-ритуал)",
+    "level": 1,
+    "kind": "component",
+    "status": "candidate",
+    "entry": {
+      "call": "PreloaderLogoConvoy.create(opts)  // opts усі опційні: { wordmark ('AIR'), target (body), bg ('#f4f2ee'), ink ('#111110'), duration (2s — живий CSS AIR), auto (true: прогрес = img-декоди + load), minShowMs (900, анти-блимання), sessionOnce (false) }. Вхідні елементи сторінки маркуються: [data-plc-top] хедер згори, [data-plc-bottom] низ знизу, [data-plc-text] текст +20px.",
+      "module": "iife",
+      "returns": "{ setProgress(p), done(), overlay, gate, destroy }  (або { static:true } у reduced-motion / sessionOnce-повторі — оверлей не монтується взагалі)"
+    },
+    "meaning": {
+      "what": "Брендовий ритуал входу AIR (T-524): фіксований оверлей з КОНВОЄМ із 3 копій wordmark, що їдуть екраном різними швидкостями під прогрес завантаження (зсуви 76.6% / 38.5% / 0, p_half = min(1, 2p)) + прогрес-бар 2px. На готовності: вихід оверлея 2s cubic-bezier(.7,0,.3,1) СИНХРОННО з «роз'їздом панелей» — хедер в'їжджає згори (−100%→0), низ сторінки знизу (+100%→0), текст осідає з +20px. Один bezier на всі стадії. Знято дослівно з живого global.css aircenter.space.",
+      "when": "Перше завантаження лендінга/головної будь-якого сайту сім'ї: прелоадер = перша фраза бренду і хореограф уваги (глядач дивиться на екран, коли hero проявляється — reveal-канон T-322 більше не грає в порожнечу). T-M22-initial: та сама механіка на мобільному (3 проходи тикера).",
+      "lands": "Завантаження відчувається як задум, не як очікування: wordmark тричі проходить кадром у різному темпі (паралакс-глибина без 3D), тонкий бар чесно каже скільки лишилось, і сторінка не «з'являється», а РОЗ'ЇЖДЖАЄТЬСЯ з-за країв одним диханням з відходом оверлея.",
+      "not_when": "Повторні заходи в межах сесії (sessionOnce) і внутрішні переходи сторінок — там T-M22-шов (одна біла штора знизу, окремий атом) або T-520-стек. Не для сторінок каталогу/фунела (там T-530/T-M29 чорна штора — інший ритуал). Reduced-motion = нуль оверлея взагалі."
+    },
+    "source": {
+      "grammar": "AIR T-524: конвой = .preloader--landing .preloader__content-logo--1/2/3 (зсуви 76.6/38.5/0), бар = .preloader__progress, вихід = .animation--fade-out 2s, вхід = .animation--preloader-top-in/-bottom-in/-text-in (−100% / +100% / 20px, 2s той самий bezier) — знято з живого global.css 2026-07-06; мобільне підтвердження = D_AIR_mobile_video pre-01..30 («zoom-тикер wordmark, 3 проходи»)",
+      "recording": "aircenter.space global.css (live-CSS extraction) + skills/teardowns/references/D_AIR_mobile_video.md §1",
+      "registry_ref": [
+        "T-524",
+        "T-M22"
+      ]
+    },
+    "stack": "vanilla, нуль залежностей (стадія A = прямий style.transform-рендер; стадії B/C = CSS transition)",
+    "webgl": false,
+    "motion_props": [
+      "transform",
+      "opacity"
+    ],
+    "trigger": "прогрес завантаження (img.decode() + window load), НЕ скрол; done() можна кликати вручну (auto:false)",
+    "timing_layer": [
+      "B-entrance"
+    ],
+    "owns_pin": false,
+    "page_beat": [
+      "hero"
+    ],
+    "combines_with": [
+      "text-blur-reveal",
+      "spread-row-headline",
+      "theme-tween"
+    ],
+    "anti_combos": [
+      "second-preloader"
+    ],
+    "gated_by": [
+      "R_anti_combos",
+      "R_perf_limits",
+      "R_timing_layers"
+    ],
+    "variants": [],
+    "params_ref": "tokens.json",
+    "files": [
+      "component.js",
+      "component.css",
+      "lab.html",
+      "tokens.json"
+    ],
+    "acceptance": [
+      "конвой = 3 копії wordmark зі зсувами 76.6% / 38.5% / 0 (p_half = min(1,2p)), усі сходяться на p=1 — формули живого CSS AIR дослівно",
+      "рух = transform + opacity ТІЛЬКИ (D4 чистий); драйвер стадії A = прогрес ЗАВАНТАЖЕННЯ, не скрол",
+      "вихід оверлея і в'їзд панелей СИНХРОННІ, 2s, ОДИН bezier(.7,0,.3,1) на всі стадії (закон «одне дихання»)",
+      "вхідні елементи ([data-plc-top/-bottom/-text]) паркуються до першого кадру і повертаються на identity після входу; інлайн-стилі знімаються",
+      "оверлей після виходу ЗНІМАЄТЬСЯ з DOM повністю (нуль постійної ваги); повторний вхід за sessionOnce не монтує його взагалі",
+      "no-JS не бачить оверлей ніколи (він будується JS-ом); reduced-motion = static-гілка без прелоадера і без парковки",
+      "анти-блимання: minShowMs гарантує мінімальний показ на швидкому кеші",
+      "нуль layout-зсувів: CLS < 0.1 упродовж усього ритуалу (парковки — transform, не layout)"
+    ],
+    "_path": "library/components/preloader-logo-convoy/",
+    "_variantsResolved": []
+  },
   "puzzle-image": {
     "id": "puzzle-image",
     "name": "Scroll-assembled WIDE cover -> modest scale-up",
@@ -1961,12 +2034,12 @@
     "kind": "component",
     "status": "candidate",
     "entry": {
-      "call": "TextBlurReveal.create(sections, opts)  // sections = селектор/Element/Element[] секцій-груп; у кожній [data-brv] елементи з data-brv-order (0=заголовок, 1=цифри, 2=параграфи, 3=CTA). opts усі опційні: { duration (0.3s), lag (0.18s), blurFrom (10px), ease ('out-quad'|'air'), threshold (0.18), jumpVh (0.45), keyMedia (decode-гейт), autoArm (true) }",
+      "call": "TextBlurReveal.create(sections, opts)  // sections = селектор/Element/Element[] секцій-груп; у кожній [data-brv] елементи з data-brv-order (0=заголовок, 1=цифри, 2=параграфи, 3=CTA). opts усі опційні: { duration (1s — живий CSS AIR, вердикт 2026-07-06), lag (0.12s), blurFrom (10px), ease ('air'|'out-quad'), threshold (0.18), jumpVh (0.45), keyMedia (decode-гейт), autoArm (true) }",
       "module": "iife",
       "returns": "{ groups, gate, log, arm, settled, destroy }  (або { static:true, destroy } у reduced-motion / no-GSAP гілці — контент видимий одразу)"
     },
     "meaning": {
-      "what": "ОСНОВНИЙ reveal-канон AIR: текст в'їжджає filter blur(10px)→0 + opacity, БЕЗ y-зсуву. ОДИН каскад на секцію за ордером (заголовок → цифри → параграфи) з лагом 0.18s, 0.3s на елемент, once по скрол-тригеру. Секція, досягнута стрибком або мідскролом, рендериться settled МИТТЄВО без анімації (Д4б); звичайний скрол-крок скасовує стрибок-мітку (maintenance-фікс); озброєння чекає decode() ключових медіа.",
+      "what": "ОСНОВНИЙ reveal-канон AIR: текст в'їжджає filter blur(10px)→0 + opacity, БЕЗ y-зсуву. ОДИН каскад на секцію за ордером (заголовок → цифри → параграфи), 1s на елемент air-ease (живий CSS aircenter.space: transition 1s cubic-bezier(.25,.74,.22,.99), delay line-index×60ms; вердикт власника «прийняв» 2026-07-06), лаг 0.12s, once по скрол-тригеру. Секція, досягнута стрибком або мідскролом, рендериться settled МИТТЄВО без анімації (Д4б); звичайний скрол-крок скасовує стрибок-мітку (maintenance-фікс); озброєння чекає decode() ключових медіа.",
       "when": "Будь-яка текстова поява на сайті з reveal-мовою AIR — kicker'и, заголовки, службові числа, параграфи карток, CTA-ряди. Це системний атом-канон: усі секції сайту говорять ОДНІЄЮ мовою появи (half T-M23 mobile reveal-канону — та сама механіка на тачі).",
       "lands": "Текст не «під'їжджає», а ПРОЯВЛЯЄТЬСЯ з розфокуса на своєму місці — дорого і тихо, як наведення різкості в кіно. Каскад дає порядок читання (спершу заголовок, тоді цифри, тоді дрібне), нуль стрибків лейауту, нуль повторних програвань.",
       "not_when": "Медіа/картинки (це ТЕКСТОВИЙ канон; медіа-blur→sharp = окремий шов). Секції під піном, де текст мусить скрабитись прогресом (канон = time-based once, НІКОЛИ не scrub). Сайти без AIR reveal-мови (у SAISEI/Springs свої канони появи)."
@@ -2020,12 +2093,13 @@
     ],
     "acceptance": [
       "рух = filter blur(10px→0) + opacity ТІЛЬКИ, БЕЗ y-зсуву (контракт §3.1): top елемента до/після reveal стабільний ±1.5px",
-      "D4-виняток свідомий: one-shot ≤0.3s/елемент, time-based, НІКОЛИ не scrub; will-change ставиться перед твіном і чиститься onComplete",
+      "D4-виняток свідомий (переписаний вердиктом 2026-07-06): one-shot time-based reveal до 1s/елемент (= оригінал AIR), НІКОЛИ не scrub; will-change ставиться перед твіном і чиститься onComplete",
       "Д4(а): ОДИН каскад на секцію, delay = order × lag (елементи одного ордера разом), once — група ніколи не перезапускається",
       "Д4(б): стрибок/мідскрол-прихід/проскочена секція = settled МИТТЄВО без анімації; після стрибка НУЛЬ [data-brv] у проміжних станах (opacity 0.05..0.95 / blur 0.5..9.5px)",
       "рейс-стійкість: рішення «каскад чи instant» відкладене на один кадр після IO-колбека; звичайний скрол-крок (delta>2px) скасовує стрибок-мітку",
       "decode-гейт: озброєння після decode() keyMedia — reveal не стартує на пікселях, яких ще нема",
       "no-GSAP / prefers-reduced-motion = контент видимий одразу, движок не ховає нічого (static-гілка)",
+      "порядковий каскад (data-brv-lines): параграф проявляється РЯДОК за рядком (+60ms/line-index — канон AIR word-wrap); спани-обгортки РОЗГОРТАЮТЬСЯ назад у чистий текст після reveal (нуль постійної ваги в DOM); вкладена розмітка = чесний фолбек на поблоковий",
       "loadStability: CLS < 0.1, дрейф якоря ≤ 4px"
     ],
     "_path": "library/components/text-blur-reveal/",
