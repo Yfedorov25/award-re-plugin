@@ -143,6 +143,14 @@ for (const [id, e] of Object.entries(combos)) {
     const atom = (u && typeof u === 'object') ? u.atom : u;
     return components[atom] && components[atom].owns_pin === true && !killed.has(atom);
   }).map(u => (u && typeof u === 'object') ? u.atom : u);
+  // page-assembly: пін-бюджет діє ПО АКТАХ, не по сторінці (жива головна AIR
+  // має послідовні піни format/harmony/status) — pin.count мусить збігатись.
+  if (e.kind === 'page-assembly') {
+    const declared = e.pin && e.pin.count;
+    if (declared != null && Number(declared) !== pinOwners.length)
+      fail(id, `page-assembly pin.count=${declared} != owns_pin атомів у стеку (${pinOwners.length}: ${pinOwners.join(', ')})`);
+    continue;
+  }
   if (pinOwners.length > 1) fail(id, `more than one owns_pin atom in stack: ${pinOwners.join(', ')} (R_pin_budget: one pin-owner per section; add pin_killed:[id] if one is killed at wire-time)`);
   if (pinOwners.length === 1 && owner && owner !== pinOwners[0])
     warn(id, `pin.owner '${owner}' != the owns_pin atom '${pinOwners[0]}'`);

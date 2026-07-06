@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЗБОРКА · home-air — головна AIR цілком (спринт-2 екзамен)</title>
+<!--
+================================================================================
+  ЗБОРКА ГОЛОВНОЇ (перший посторінковий екзамен за DoD, спринт-2).
+  Акти в живому порядку: top → impulse → format → harmony → life → people →
+  status → footer. Фото і копі — ЖИВІ з aircenter.space (hotlink; для
+  порівняння «два вікна поруч»). Змонтовані атоми:
+  preloader-logo-convoy (official) · kinetic-letters-hero (cand) ·
+  air-menu-overlay (cand) · spread-row-headline (official) ·
+  text-blur-reveal (official) · pinned-counter-slideshow (cand) ·
+  sticky-card-parallax (cand) · giant-number-fact (official) ·
+  center-focus-carousel/air-courtyards (cand) · image-slider-wipe (cand).
+
+  Свідомо ПОЗА v1 зборки (на фікс-кола після вердикту):
+  Vimeo-фон Format (стоїть live-постер) · grid→fullbleed скейл фото
+  (landingFormatImageWrapper) · gravity-well T-509 · внутрішній дрейф
+  фото слайдера ±16.666% · курсор-стрілка каруселі.
+
+  ГЕЙТ (PROBE_MODE): loadStability + всі движки iніціалізовані
+  (gate/api живі) + console errors == 0. Живий перегляд — нуль автоскролів.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/preloader-logo-convoy/component.css">
+<link rel="stylesheet" href="../../components/kinetic-letters-hero/component.css">
+<link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
+<link rel="stylesheet" href="../../components/spread-row-headline/component.css">
+<link rel="stylesheet" href="../../components/text-blur-reveal/component.css">
+<link rel="stylesheet" href="../../components/pinned-counter-slideshow/component.css">
+<link rel="stylesheet" href="../../components/sticky-card-parallax/component.css">
+<link rel="stylesheet" href="../../components/giant-number-fact/component.css">
+<link rel="stylesheet" href="../../components/center-focus-carousel/component.css">
+<link rel="stylesheet" href="../../components/image-slider-wipe/component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', 'Onest', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; background: var(--paper); }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  .h1 { font-size: clamp(30px, 4.6vw, 72px); font-weight: 300; line-height: 1.06;
+        text-transform: uppercase; letter-spacing: -.01em; }
+  .lead { font-size: 14px; line-height: 1.55; font-weight: 300; }
+  .small { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; }
+  .btn-air { display: inline-flex; justify-content: space-between; gap: 2.5em; align-items: center;
+             border: 1px solid rgba(127,127,127,.4); border-radius: 4px; padding: 13px 16px;
+             font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .container { padding-inline: 3vw; }
+
+  /* ---- хедер ---- */
+  [data-amo-header] { background: rgba(244, 242, 238, .8); color: #111110;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .8); color: #f2f1ee; }
+  .hrow { display: flex; align-items: center; gap: 12px; padding: 12px 3vw; }
+  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; margin-right: auto; }
+  .hbtn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+          border: 1px solid currentColor; border-radius: 4px; padding: 10px 13px;
+          background: none; color: inherit; cursor: pointer; }
+  [data-amo-burger] { display: inline-flex; align-items: center; gap: 10px;
+    background: #111110; color: #f2f1ee; border: 0; border-radius: 4px;
+    padding: 11px 15px; font-size: 11px; letter-spacing: .1em; cursor: pointer; }
+  .amo-header-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
+  @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
+
+  /* ---- 1 · TOP (hero) ---- */
+  #top { position: relative; background: var(--paper); }
+  #top .spiral { position: absolute; left: 50%; top: 38vh; width: 34vw; aspect-ratio: 1;
+    transform: translateX(-50%); pointer-events: none; opacity: .6;
+    background: repeating-conic-gradient(from 6deg at 50% 50%, rgba(17,17,16,.07) 0 5deg, transparent 5deg 10deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 26%, #000 27% 72%, transparent 73%);
+            mask-image: radial-gradient(circle, transparent 26%, #000 27% 72%, transparent 73%); }
+  #top .hero-note { position: absolute; top: 16vh; left: 50%; transform: translateX(-50%);
+    text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #55544f; }
+  #top .hero-class { position: absolute; top: 52vh; right: 12vw; font-size: 11px;
+    letter-spacing: .14em; text-transform: uppercase; color: #8b8a86; text-align: center; line-height: 1.7; }
+
+  /* ---- 2 · IMPULSE ---- */
+  #impulse .intro-copy { min-height: 64vh; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 12vh 6vw; }
+  #impulse .intro-copy p { max-width: 44ch; font-size: clamp(15px, 1.4vw, 21px); line-height: 1.5; font-weight: 300; }
+  #impulse .bleed { position: relative; height: 108svh; overflow: clip; }
+  #impulse .bleed img { width: 100%; height: 100%; object-fit: cover; }
+  #impulse .bleed h2 { position: absolute; left: 0; right: 0; bottom: 6vh; color: #f2f1ee;
+    display: flex; justify-content: space-between; padding: 0 3vw; }
+  #impulse .after { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; padding: 12vh 3vw; align-items: start; }
+  #impulse .after .txt { max-width: 46ch; margin-top: 6vh; }
+  #impulse .after .small { display: block; margin-top: 5vh; }
+  #impulse .after img { border-radius: 6px; }
+  @media (max-width: 768px) { #impulse .after { grid-template-columns: 1fr; } }
+
+  /* ---- 3 · FORMAT ---- */
+  #format .head { padding: 12vh 3vw 5vh; }
+  #format .head h2 { display: flex; justify-content: space-between; }
+  #format .head p { max-width: 40ch; margin: 4vh auto 0; text-align: center; }
+  #format .photo { padding: 2vh 3vw; }
+  #format .photo img { border-radius: 6px; width: 100%; }
+  #fmtpin [data-pcs-bg] img { width: 100%; height: 100%; object-fit: cover; }
+  .pcs-row { position: absolute; inset: 0; display: flex; align-items: center; }
+  [data-pcs-card] { margin-left: 52%; width: 36%; display: grid; }
+  .pcs-tint { position: absolute; inset: -12% -30% -12% -18%; z-index: -1;
+              background: radial-gradient(80% 90% at 50% 50%, rgba(244,242,238,.82) 30%, rgba(244,242,238,0) 100%); }
+  [data-pcs-text] p { font-size: clamp(14px, 1.2vw, 18px); font-weight: 300; line-height: 1.55; }
+  [data-pcs-widget] { width: 92px; }
+  [data-pcs-widget] .nums { display: flex; gap: .6em; font-size: 12px; margin-top: 10px; }
+  #fmtpin:not(.pcs-touch) [data-pcs-widget]:not(.pcs-widget-cursor) { position: absolute; right: 4vw; bottom: 6vh; }
+  @media (max-width: 768px) {
+    [data-pcs-card] { margin: 0 6vw 24vh; width: 88%; }
+    [data-pcs-ticks] { position: absolute; left: 6vw; right: 6vw; bottom: 10vh; color: #111110; }
+  }
+
+  /* ---- 4 · HARMONY (темний акт) ---- */
+  #harmony { background: #161616; color: #f2f1ee; }
+  #harmony [data-scp-bg] img { width: 100%; height: 100%; object-fit: cover; }
+  #harmony [data-scp-card] { max-width: min(420px, 86vw); margin-left: auto; margin-right: 6vw;
+    background: rgba(24, 24, 23, .78); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-radius: 6px; padding: 4vh 2.2vw; display: flex; flex-direction: column; gap: 3vh; }
+  #harmony [data-scp-card] h2 { font-size: clamp(18px, 1.7vw, 26px); font-weight: 300; line-height: 1.3; }
+  #harmony [data-scp-card] img { border-radius: 4px; }
+  #harmony .btn-air { border-color: rgba(242, 241, 238, .3); }
+  @media (max-width: 768px) { #harmony [data-scp-card] { margin: 0 4vw; padding: 3vh 5vw; } }
+
+  /* ---- 5 · LIFE (чорний акт) ---- */
+  #life { background: #0d0d0c; color: #f2f1ee; padding: 14vh 3vw 12vh; }
+  #life h2 { display: flex; justify-content: space-between; margin-bottom: 6vh; }
+  #life .lead { max-width: 44ch; color: #c9c7c2; }
+  #life .photo { margin: 7vh 0; }
+  #life .photo img { border-radius: 6px; width: 100%; max-height: 78svh; object-fit: cover; }
+  #life .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6vh; }
+  #life .card { background: #161615; border-radius: 6px; padding: 22px 20px 18px; min-height: 34vh;
+    display: flex; flex-direction: column; justify-content: space-between; }
+  #life .card .gnf-num { font-size: clamp(40px, 4.6vw, 84px); font-weight: 300; line-height: 1; }
+  #life .card .cap { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #8b8a86; }
+  #life .card .cap b { display: block; color: #f2f1ee; font-weight: 400; margin-top: 6px; }
+  @media (max-width: 768px) { #life .cards { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ---- 6 · PEOPLE (двори) ---- */
+  #people .bleed { position: relative; height: 100svh; overflow: clip; }
+  #people .bleed img { width: 100%; height: 100%; object-fit: cover; }
+  #people .bleed h2 { position: absolute; left: 0; right: 0; bottom: 6vh; color: #f2f1ee;
+    display: flex; justify-content: space-between; padding: 0 3vw; }
+  #people .copy { padding: 11vh 3vw 4vh; }
+  #people .copy p { max-width: 46ch; margin-left: auto; font-size: clamp(16px, 1.6vw, 24px);
+    font-weight: 300; line-height: 1.45; }
+  #yards { position: relative; padding: 3vh 0 9vh; }
+  .cfc-stage { --cfc-ground: transparent; --cfc-ink: #111110; --cfc-line: #b9b7b1;
+    --cfc-serif: var(--sans); --cfc-sans: var(--sans);
+    --cfc-panel-w: 44vw; --cfc-aspect: 7/4; --cfc-gap: 10px; --cfc-cap: 0px; }
+  .cfc-panel-cap { display: none; }
+  .cfc-panel { background: transparent; }
+  .cfc-panel-img { border-radius: 6px; overflow: clip;
+    transition: transform .7s cubic-bezier(.25,.74,.22,.99); }
+  @media (min-width: 821px) {
+    .cfc-panel.is-l .cfc-panel-img { transform: perspective(1100px) rotateY(24deg); }
+    .cfc-panel.is-r .cfc-panel-img { transform: perspective(1100px) rotateY(-24deg); }
+  }
+  .cfc-nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 4vh; }
+  .cfc-prev, .cfc-next { width: 48px; height: 48px; border-radius: 4px;
+    border: 1px solid #c9c7c1; background: none; color: #111110; font-size: 18px; cursor: pointer; }
+  .cfc-counter { font-size: 13px; color: #6b6b68; min-width: 5em; text-align: center; }
+  .yards-deco { position: absolute; left: 3vw; top: 46%; width: 26vw; aspect-ratio: 1;
+    pointer-events: none; opacity: .5; will-change: transform;
+    background: repeating-conic-gradient(from 8deg, rgba(17,17,16,.07) 0 6deg, transparent 6deg 12deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 32%, #000 33% 70%, transparent 71%);
+            mask-image: radial-gradient(circle, transparent 32%, #000 33% 70%, transparent 71%); }
+  .cfc-viewport, .cfc-nav { position: relative; z-index: 1; }
+
+  /* ---- 7 · STATUS ---- */
+  #status .head { padding: 12vh 3vw 5vh; text-align: center; }
+  #status .head h2 { display: flex; justify-content: space-between; text-align: left; }
+  #status .head p { max-width: 42ch; margin: 4vh auto 0; }
+  #isw [data-isw-layer] { padding-bottom: 3vh; }
+  .isw-row { display: flex; gap: 10px; height: 84svh; align-items: stretch; padding: 0 3vw; }
+  [data-isw-stage] { flex: 0 0 65%; border-radius: 6px; overflow: clip; }
+  .isw-card { flex: 1; display: flex; flex-direction: column; border-radius: 6px;
+              padding: 4vh 1.8vw; background: rgba(24, 24, 23, .82);
+              backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); color: #f2f1ee; }
+  .isw-counter { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4.5vh; }
+  .isw-counter [data-isw-count] { font-size: clamp(40px, 4.2vw, 78px); font-weight: 300; line-height: 1; }
+  .isw-counter [data-isw-total] { font-size: 13px; color: rgba(242, 241, 238, .5); }
+  .isw-texts { flex: 1; display: grid; align-content: center; }
+  .isw-texts p { font-size: 13.5px; font-weight: 300; line-height: 1.55; color: #c9c7c2; }
+  .isw-cta { margin-top: 3vh; display: grid; }
+  .isw-cta .btn-air { border-color: rgba(242, 241, 238, .25); color: #f2f1ee; width: 100%; }
+  .isw-nav { display: none; }
+  @media (max-width: 768px) {
+    .isw-row { display: block; height: auto; padding: 0; }
+    [data-isw-stage] { border-radius: 0; overflow-x: scroll; overflow-y: hidden; }
+    .isw-strip [data-isw-slide] { height: 56svh; border-radius: 6px; overflow: clip; }
+    .isw-card { margin: 12px 4vw 0; padding: 3.2vh 5vw; }
+    .isw-counter { display: none; }
+    .isw-nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 2.4vh; }
+    .isw-nav button { width: 44px; height: 44px; border-radius: 4px;
+      border: 1px solid rgba(242,241,238,.3); background: none; color: #f2f1ee; font-size: 16px; }
+    .isw-nav .nn { font-size: 13px; color: #f2f1ee; min-width: 3.4em; text-align: center; }
+  }
+
+  /* ---- 8 · FOOTER ---- */
+  footer { background: #0d0d0c; color: #f2f1ee; padding: 14vh 3vw 4vh; }
+  .foot-mark { margin-bottom: 8vh; }
+  .foot-legal { display: flex; justify-content: space-between; gap: 2em;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; }
+
+  /* ---- меню-оверлей скін ---- */
+  [data-amo-bg] { background: var(--paper); }
+  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0;
+    background: repeating-conic-gradient(from 10deg at 72% 60%, rgba(17,17,16,.05) 0 6deg, transparent 6deg 12deg);
+    -webkit-mask-image: radial-gradient(circle at 72% 60%, transparent 12%, #000 13% 46%, transparent 47%);
+            mask-image: radial-gradient(circle at 72% 60%, transparent 12%, #000 13% 46%, transparent 47%); }
+  [data-amo-giant] { left: 3vw; top: 11vh; font-size: clamp(38px, 5.4vw, 84px);
+    letter-spacing: .3em; font-weight: 500; color: #111110; }
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center;
+              justify-content: center; padding: 12vh 3vw 5vh; }
+  [data-amo-panel] { width: min(1120px, 94vw); background: rgba(236, 234, 229, .75); }
+  [data-amo-left] { padding: 4vh 2.6vw; display: flex; flex-direction: column; justify-content: space-between; }
+  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  [data-amo-left] ul.small-list { gap: 10px; margin-top: 5vh; }
+  ul.large [data-amo-item] a { font-size: clamp(24px, 3.1vw, 48px); font-weight: 400;
+    text-transform: uppercase; letter-spacing: -.02em; line-height: 1.07; }
+  ul.small-list [data-amo-item] a { font-size: 13px; color: #55544f; }
+  [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between;
+    padding: 22px; font-size: 13px; min-height: 150px; }
+  [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px;
+    border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  @media (max-width: 768px) {
+    .amo-wrap { align-items: flex-end; padding: 15vh 4vw 4vh; }
+    [data-amo-panel] { background: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ХЕДЕР (A-18 themed + A-17 бургер) -->
+<header data-amo-header data-plc-top>
+  <div class="hrow">
+    <span class="hlogo">AIR</span>
+    <button class="hbtn hide-m" type="button">Choose an office ✛</button>
+    <button data-amo-burger type="button" aria-label="Open menu">
+      <span data-amo-burger-lines><i></i><i></i></span> Menu
+    </button>
+  </div>
+</header>
+
+<!-- 1 · TOP — kinetic letters hero -->
+<section id="top" data-amo-theme="light">
+  <div class="spiral"></div>
+  <p class="hero-note" data-plc-text>The architecture<br>of new success</p>
+  <p class="hero-class">Class (A)<br>premium business<br>center</p>
+</section>
+
+<!-- 2 · IMPULSE -->
+<section id="impulse" data-amo-theme="light">
+  <div class="intro-copy" data-brv-group>
+    <p data-brv data-brv-order="0">AIR is a new generation of offices that brings a new level of premium quality and style to class A business real estate.</p>
+  </div>
+  <div class="bleed" data-srh-section>
+    <img src="https://aircenter.space/media/cache/homepage_impulse_bg_xxl/assets/images/media/landing/2.impulse/background%40xxxl.webp" alt="">
+    <h2 class="h1" id="impulseSpread"><span data-srh-group>The momentum</span><span data-srh-group>to rise higher</span></h2>
+  </div>
+  <div class="after" data-brv-group>
+    <div class="txt">
+      <p class="lead" data-brv data-brv-order="1">Efficient layouts and premium infrastructure, panoramic glazing and impressive views, luxurious lobbies, and forward-looking facades set a new benchmark for business environment.</p>
+      <span class="small" data-brv data-brv-order="2">At this level,<br>AIR has no competitors.</span>
+      <p style="margin-top:6vh"><a class="btn-air" href="#format" data-brv data-brv-order="3">About the project <span>✛</span></a></p>
+    </div>
+    <img src="https://aircenter.space/media/cache/homepage_impulse_slider_img_xxl/assets/images/media/landing/2.impulse/image-1%40xxxl.webp" alt="" data-brv data-brv-order="2">
+  </div>
+</section>
+
+<!-- 3 · FORMAT — пін з лічильником-курсором -->
+<section id="format" data-amo-theme="light">
+  <div class="head" data-brv-group>
+    <h2 class="h1" data-brv data-brv-order="0"><span>A new</span><span>premium</span><span>format</span></h2>
+    <p class="lead" data-brv data-brv-order="1">AIR is not only a new generation of offices but also a strong architectural statement by ADM architects.</p>
+  </div>
+  <div class="photo">
+    <img src="https://aircenter.space/media/cache/homepage_format_bg_xxl/assets/images/media/landing/3.format/background%40xxxl.webp" alt="">
+  </div>
+  <div id="fmtpin">
+    <div data-pcs-layer>
+      <div data-pcs-bg><img src="https://aircenter.space/assets/images/media/landing/3.format/placeholder@xs.webp" alt=""></div>
+      <div class="pcs-row">
+        <div data-pcs-card>
+          <div class="pcs-tint"></div>
+          <div data-pcs-text><p>Three towers ranging from 14 to 34 floors reflect the dynamic character of office life through their expressive forms. They symbolize one of the capital&rsquo;s key business districts.</p></div>
+          <div data-pcs-text class="is-off"><p>The smooth rotation of the facades around a central axis adds movement and energy to the overall silhouette. The rotational effect creates a distinctive architectural rhythm.</p></div>
+        </div>
+      </div>
+      <div data-pcs-widget>
+        <div data-pcs-bar-track><div data-pcs-bar></div></div>
+        <p class="nums"><span data-pcs-count>1</span><span data-pcs-total>/ 2</span></p>
+      </div>
+      <div data-pcs-ticks></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · HARMONY — картка замерзає, фон пливе -->
+<section id="harmony" data-amo-theme="dark">
+  <div id="scp">
+    <div data-scp-bg>
+      <img src="https://aircenter.space/media/cache/homepage_harmony_bg_xxl/assets/images/media/landing/4.harmony/background%40xxxl.webp" alt="">
+    </div>
+    <div data-scp-card>
+      <h2>An intelligent harmony of curved glass and radiant metal</h2>
+      <img src="https://aircenter.space/assets/images/media/landing/4.harmony/card-image@xs.webp" alt="">
+      <a class="btn-air" href="#life">Learn more <span>✛</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · LIFE — числа району -->
+<section id="life" data-amo-theme="dark">
+  <div data-srh-section>
+    <h2 class="h1" id="lifeSpread"><span data-srh-group>At the center</span><span data-srh-group>of life</span></h2>
+  </div>
+  <p class="lead">The premium AIR business center is designed to become a symbol the city &mdash; a large-scale area spanning one of the city&rsquo;s primary business districts.</p>
+  <div class="photo">
+    <img src="https://aircenter.space/media/cache/homepage_life_img_xxl/assets/images/media/landing/5.life/image%40xxxl.webp" alt="">
+  </div>
+  <div class="cards">
+    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="1">0</div><p class="cap">min walk<b>Mall</b></p></div>
+    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="3">0</div><p class="cap">min walk<b>Metro station</b></p></div>
+    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="7">0</div><p class="cap">min drive<b>Downtown</b></p></div>
+    <div class="card" data-gnf><div class="gnf-num" data-gnf-num data-gnf-value="11">0</div><p class="cap">min drive<b>Highway</b></p></div>
+  </div>
+  <p style="margin-top:7vh"><a class="btn-air" href="#people" style="border-color:rgba(242,241,238,.3)">Location <span>✛</span></a></p>
+</section>
+
+<!-- 6 · PEOPLE — двори -->
+<section id="people" data-amo-theme="dark">
+  <div class="bleed" data-srh-section>
+    <img src="https://aircenter.space/media/cache/homepage_people_bg_xxl/assets/images/media/landing/6.people/background%40xxxl.webp" alt="">
+    <h2 class="h1" id="peopleSpread"><span data-srh-group>Designed with</span><span data-srh-group>people in mind</span></h2>
+  </div>
+  <div style="background:var(--paper); color:var(--ink)" data-amo-theme="light">
+    <div class="copy" data-brv-group>
+      <p data-brv data-brv-order="0">AIR celebrates freedom and self-sufficiency. The architects chose not to connect the towers with a shared podium level, creating cozy open courtyards instead.</p>
+    </div>
+    <div id="yards">
+      <div class="yards-deco" id="yardsDeco"></div>
+      <div class="cfc-stage" id="cfc">
+        <div class="cfc-viewport">
+          <div class="cfc-rail">
+            <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-1%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
+            <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-2%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
+            <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-3%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
+            <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-4%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
+            <div class="cfc-panel"><div class="cfc-panel-img"><img src="https://aircenter.space/media/cache/homepage_people_slider_img_xxl/assets/images/media/landing/6.people/image-5%40xxxl.webp" alt=""></div><div class="cfc-panel-cap"></div></div>
+          </div>
+        </div>
+        <div class="cfc-nav">
+          <button class="cfc-prev" aria-label="previous">‹</button>
+          <span class="cfc-counter">01 / 05</span>
+          <button class="cfc-next" aria-label="next">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · STATUS — слайдер 1/2 з шов-кліпом -->
+<section id="status" data-amo-theme="light" style="background:var(--paper)">
+  <div class="head" data-brv-group>
+    <h2 class="h1" data-brv data-brv-order="0"><span>A tangible sense</span><span>of status</span></h2>
+    <p class="lead" data-brv data-brv-order="1">The facades of AIR resemble frozen waves. HAAST Bureau continuing this elemental metaphor in the lobby design.</p>
+  </div>
+  <div id="isw">
+    <div data-isw-layer>
+      <div class="isw-row">
+        <div data-isw-stage id="iswStage">
+          <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-1%40xxxl.webp" alt=""></figure>
+          <figure data-isw-slide><img src="https://aircenter.space/media/cache/homepage_status_slider_img_xxl/assets/images/media/landing/7.status/image-2%40xxxl.webp" alt=""></figure>
+        </div>
+        <div class="isw-card" data-isw-card>
+          <div data-isw-ticks></div>
+          <p class="isw-counter">
+            <span data-isw-count>1</span>
+            <span data-isw-total>/ 2</span>
+          </p>
+          <div class="isw-texts">
+            <p data-isw-text>Glass wave forms on the ceilings make the interior a continuation of the architecture. Ceilings up to eight meters high, supported by unique inclined columns, give the lobby a sense of lightness and monumentality.</p>
+            <p data-isw-text class="is-off">Wood wall panels, high-tech media screens, natural stone floors, and premium upholstery communicate the status of AIR&rsquo;s resident companies even before visitors reach the office spaces.</p>
+          </div>
+          <div class="isw-cta">
+            <div data-isw-extra><a class="btn-air" href="#top">Learn more <span>✛</span></a></div>
+            <div data-isw-extra class="is-off"><a class="btn-air" href="#top">Learn more <span>✛</span></a></div>
+          </div>
+          <div class="isw-nav">
+            <button data-isw-prev aria-label="previous photo">←</button>
+            <span class="nn"><span id="navCount">1</span> / 2</span>
+            <button data-isw-next aria-label="next photo">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · FOOTER — дзеркало A I R -->
+<footer data-amo-theme="dark" data-plc-bottom>
+  <div class="foot-mark" id="footMark"></div>
+  <div class="foot-legal">
+    <span>Home</span>
+    <span>© 2026 Tekta Group</span>
+    <span>Website by Vide Infra</span>
+  </div>
+</footer>
+
+<!-- МЕНЮ-ОВЕРЛЕЙ (A-17) -->
+<div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div data-amo-bg></div>
+  <div data-amo-bg-image></div>
+  <div data-amo-giant>AIR</div>
+  <div class="amo-wrap">
+    <nav data-amo-panel>
+      <div data-amo-left>
+        <ul class="large">
+          <li data-amo-item><a href="#top" aria-current="page">Main page</a></li>
+          <li data-amo-item><a href="#impulse">About the project</a></li>
+          <li data-amo-item><a href="#life">Location</a></li>
+          <li data-amo-item><a href="#status">Investment</a></li>
+        </ul>
+        <ul class="small-list">
+          <li data-amo-item><a href="#top">Construction progress</a></li>
+          <li data-amo-item><a href="#top">News and offers</a></li>
+          <li data-amo-item><a href="#top">About the developer</a></li>
+        </ul>
+      </div>
+      <div data-amo-right>
+        <a data-amo-card href="#top"><span>Choose an<br>office</span><span class="sq">→</span></a>
+        <a data-amo-card href="#top"><span>Choose a<br>parking spot</span><span class="sq">→</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<script src="../../components/preloader-logo-convoy/component.js"></script>
+<script src="../../components/kinetic-letters-hero/component.js"></script>
+<script src="../../components/air-menu-overlay/component.js"></script>
+<script src="../../components/spread-row-headline/component.js"></script>
+<script src="../../components/text-blur-reveal/component.js"></script>
+<script src="../../components/pinned-counter-slideshow/component.js"></script>
+<script src="../../components/sticky-card-parallax/component.js"></script>
+<script src="../../components/giant-number-fact/component.js"></script>
+<script src="../../components/center-focus-carousel/component.js"></script>
+<script src="../../components/image-slider-wipe/component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  var api = {};
+
+  /* прелоадер-конвой (official) — авто-прогрес по декодах */
+  api.plc = window.PreloaderLogoConvoy.create({});
+
+  /* hero: конвой літер → лого хедера */
+  api.klh = window.KineticLettersHero.create('#top', { wordmark: 'AIR' });
+  api.kfoot = window.KineticLettersHero.footer('#footMark', { wordmark: 'AIR', ink: '#f2f1ee' });
+
+  /* меню + themed-хедер */
+  api.amo = window.AirMenuOverlay.create({});
+
+  /* spread-заголовки (T-310) */
+  api.srh1 = window.SpreadRowHeadline.create('#impulseSpread', {});
+  api.srh2 = window.SpreadRowHeadline.create('#lifeSpread', {});
+  api.srh3 = window.SpreadRowHeadline.create('#peopleSpread', {});
+
+  /* reveal-канон (T-322) */
+  api.brv = window.TextBlurReveal.create('[data-brv-group]', {});
+
+  /* format-пін (T-513) */
+  api.pcs = window.PinnedCounterSlideshow.create('#fmtpin', {});
+
+  /* harmony (T-215) */
+  api.scp = window.StickyCardParallax.create('#scp', {});
+
+  /* life числа (T-422) */
+  api.gnf = Array.prototype.map.call(document.querySelectorAll('[data-gnf]'), function (el) {
+    return window.GiantNumberFact.create(el, {});
+  });
+
+  /* двори (air-courtyards дельта) */
+  api.cfc = window.CenterFocusCarousel.create('#cfc', { loop: true });
+  var panels = Array.prototype.slice.call(document.querySelectorAll('#cfc .cfc-panel'));
+  var cfcCounter = document.querySelector('#cfc .cfc-counter');
+  function tiltFor(idx) {
+    panels.forEach(function (pn, i) {
+      pn.classList.toggle('is-l', i < idx);
+      pn.classList.toggle('is-r', i > idx);
+    });
+  }
+  new MutationObserver(function () {
+    var m = /(\d+)/.exec(cfcCounter.textContent || '');
+    tiltFor(m ? parseInt(m[1], 10) - 1 : 0);
+  }).observe(cfcCounter, { childList: true, characterData: true, subtree: true });
+  tiltFor(0);
+  var yards = document.getElementById('yards'), deco = document.getElementById('yardsDeco');
+  var tick = false;
+  addEventListener('scroll', function () {
+    if (tick) return;
+    tick = true;
+    requestAnimationFrame(function () {
+      tick = false;
+      var r = yards.getBoundingClientRect();
+      var p = Math.max(0, Math.min(1, (innerHeight - r.top) / (r.height + innerHeight)));
+      deco.style.transform = 'translateY(' + (-15 + 30 * p).toFixed(2) + 'svh)';
+    });
+  }, { passive: true });
+
+  /* status-слайдер (T-512) + моб-пілюля */
+  api.isw = window.ImageSliderWipe.create('#isw', {});
+  var navCount = document.getElementById('navCount');
+  var iswCount = document.querySelector('[data-isw-count]');
+  if (navCount && iswCount) {
+    new MutationObserver(function () { navCount.textContent = iswCount.textContent; })
+      .observe(iswCount, { childList: true, characterData: true, subtree: true });
+  }
+
+  window.__HOME = api;
+  /* старі атоми ставлять __LAB_OK__ на init — вердикт зборки авторитетний */
+  if (PM) { try { delete window.__LAB_OK__; } catch (e) { window.__LAB_OK__ = undefined; } }
+
+  /* ---- гейт зборки ---- */
+  var report = { stability: null, engines: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; } /* без автоскролів */
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    await delay(2600); /* прелоадер догорає */
+    var a1 = document.querySelector('.hero-note').getBoundingClientRect().top;
+    await delay(600);
+    var a2 = document.querySelector('.hero-note').getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1) };
+    report.engines = {
+      plc: !!(api.plc && !api.plc.error), klh: !!(api.klh && !api.klh.error),
+      amo: !!(api.amo && !api.amo.error), srh: !!(api.srh1 && api.srh2 && api.srh3),
+      brv: !!api.brv, pcs: !!(api.pcs && !api.pcs.error),
+      scp: !!(api.scp && !api.scp.error), gnf: api.gnf.length === 4,
+      cfc: !!api.cfc, isw: !!(api.isw && !api.isw.error)
+    };
+    var enginesOk = Object.keys(report.engines).every(function (k) { return report.engines[k]; });
+    report.errors = errs;
+    /* CLS-виняток: прелоадер ховає перший рендер — рахуємо після нього */
+    window.__LAB_OK__ = !!(enginesOk && errs === 0 && report.stability.drift <= 4);
+    console.log('[зборка:home-air]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>
