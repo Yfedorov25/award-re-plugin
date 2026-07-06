@@ -18,11 +18,13 @@
   2. початковий каскад групи s0 ЧЕСНИЙ: лог ордерів монотонний, лаг
      ордерів ~0.18s (+-90ms), нуль y-зсуву (top елемента стабільний +-1px
      до/після reveal);
-  3. стрибок у середину -> через 350ms НУЛЬ [data-brv] у проміжних станах
+  3. порядковий каскад: повільний захід у s1 -> лог lines>=2, .tbr-w
+     спани існують у польоті і РОЗГОРНУТІ назад у текст після settle;
+  4. стрибок у s3 -> через 350ms НУЛЬ [data-brv] у проміжних станах
      (opacity 0.05..0.95 або blur 0.5..9.5px), стрибкова група у
      gate.instant;
-  4. повний прохід: всі групи settled (runs=1), решта каскадом;
-  5. console errors == 0.
+  5. повний прохід: всі групи settled (runs=1), нуль спанів у DOM;
+  6. console errors == 0.
   Живий перегляд (без ?probe) = НУЛЬ автоскролів (закон PROBE_MODE).
 ================================================================================
 -->
@@ -78,19 +80,19 @@
   <div class="grid">
     <div>
       <h3 data-brv data-brv-order="0">Оплата</h3>
-      <p data-brv data-brv-order="1">Платите всю суму одразу та отримуєте знижку. З ремонтом під ключ, вхід від 22 800 доларів.</p>
+      <p data-brv data-brv-order="1" data-brv-lines>Платите всю суму одразу та отримуєте знижку. З ремонтом під ключ, вхід від 22 800 доларів.</p>
     </div>
     <div>
       <h3 data-brv data-brv-order="0">Розтермінування</h3>
-      <p data-brv data-brv-order="1">Графік платежів складаємо під ваш бюджет. Узгодимо розтермінування або знижку за повну оплату і забронюємо її за вами.</p>
+      <p data-brv data-brv-order="1" data-brv-lines>Графік платежів складаємо під ваш бюджет. Узгодимо розтермінування або знижку за повну оплату і забронюємо її за вами.</p>
     </div>
     <div>
       <h3 data-brv data-brv-order="0">Супровід</h3>
-      <p data-brv data-brv-order="1">Наш менеджер веде вашу угоду до ключів. Підкажемо, яка квартира вам підійде. Особисто або відеозв'язком · як зручно Вам.</p>
+      <p data-brv data-brv-order="1" data-brv-lines>Наш менеджер веде вашу угоду до ключів. Підкажемо, яка квартира вам підійде. Особисто або відеозв'язком · як зручно Вам.</p>
     </div>
     <div>
       <h3 data-brv data-brv-order="0">Строки</h3>
-      <p data-brv data-brv-order="1">Від старту до ключів менше року. Малий будинок на 3 поверхи будується швидко. Назвемо, коли зафіксуємо їх у документах.</p>
+      <p data-brv data-brv-order="1" data-brv-lines>Від старту до ключів менше року. Малий будинок на 3 поверхи будується швидко. Назвемо, коли зафіксуємо їх у документах.</p>
     </div>
   </div>
 </section>
@@ -144,7 +146,7 @@
     }).length;
   }
 
-  var report = { stability: null, cascade: null, jump: null, settle: null, errors: null };
+  var report = { stability: null, cascade: null, lines: null, jump: null, settle: null, errors: null };
   window.__LAB_REPORT = report;
 
   async function probeStability() {
@@ -183,12 +185,36 @@
     return out.ok;
   }
 
+  async function probeLines() {
+    /* повільний захід у s1 -> ЧЕСНИЙ порядковий каскад (data-brv-lines):
+       лог-запис має lines>=2, у польоті існують .tbr-w спани */
+    var s1 = document.getElementById('s1');
+    var goal = s1.offsetTop - window.innerHeight * 0.5;
+    var y = window.scrollY;
+    while (y < goal) {
+      y = Math.min(y + window.innerHeight * 0.3, goal);
+      window.scrollTo(0, y);
+      await delay(80);
+    }
+    await delay(300); /* каскад у польоті */
+    var midSpans = document.querySelectorAll('.tbr-w').length;
+    await delay(1900); /* дочекатись unwrap */
+    var l = brv.log.filter(function (e) { return e.g === 's1' && e.lines; });
+    var out = { entries: l.length, maxLines: l.reduce(function (m, e) { return Math.max(m, e.lines); }, 0),
+                midSpans: midSpans, spansAfter: document.querySelectorAll('#s1 .tbr-w').length,
+                cascade: brv.gate.instant.indexOf('s1') < 0 };
+    out.ok = out.entries >= 1 && out.maxLines >= 2 && out.midSpans > 0 &&
+             out.spansAfter === 0 && out.cascade;
+    report.lines = out;
+    return out.ok;
+  }
+
   async function probeJump() {
-    /* стрибок у s2 -> instant, нуль проміжних станів */
-    var s2 = document.getElementById('s2');
-    window.scrollTo(0, s2.offsetTop - window.innerHeight * 0.3);
+    /* стрибок у s3 -> instant, нуль проміжних станів */
+    var s3 = document.getElementById('s3');
+    window.scrollTo(0, s3.offsetTop - window.innerHeight * 0.3);
     await delay(350);
-    var out = { mid: midStates(), instant: brv.gate.instant.indexOf('s2') >= 0,
+    var out = { mid: midStates(), instant: brv.gate.instant.indexOf('s3') >= 0,
                 ok: false };
     out.ok = out.mid === 0 && out.instant;
     report.jump = out;
@@ -206,8 +232,9 @@
     }
     await delay(1900); /* хвіст каскаду 1s + лаги мають догоріти */
     var out = { settled: brv.settled(), mid: midStates(),
+                spans: document.querySelectorAll('.tbr-w').length,
                 runs: JSON.parse(JSON.stringify(brv.gate.groupRuns)) };
-    out.ok = out.settled && out.mid === 0;
+    out.ok = out.settled && out.mid === 0 && out.spans === 0; /* unwrap: спанів по settle нема */
     report.settle = out;
     return out.ok;
   }
@@ -217,6 +244,7 @@
     var ok = true;
     ok = await probeStability() && ok;
     ok = await probeCascade() && ok;
+    ok = await probeLines() && ok;
     ok = await probeJump() && ok;
     ok = await probeSettle() && ok;
     report.errors = errs;

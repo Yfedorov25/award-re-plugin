@@ -37,12 +37,18 @@
      секція-група   = будь-який контейнер (аргумент sections)
      елемент        = [data-brv] всередині секції
      ордер          = data-brv-order="0|1|2|3" (дефолт 0)
+     порядковий     = + data-brv-lines: параграф каскадить РЯДОК за
+                      рядком (+lineLag 60ms/рядок — канон AIR word-wrap
+                      спанів). Тільки прості текст-елементи без вкладеної
+                      розмітки (інакше чесний фолбек на поблоковий);
+                      після reveal спани розгортаються назад у текст.
 
    TextBlurReveal.create(sections, opts)
      sections: селектор | Element | Element[] — кожен = група-каскад
      opts (усі опційні): {
        duration: 1,        // s на елемент (живий CSS AIR; НЕ scrub)
-       lag: 0.12,          // s між ордерами (AIR: 60ms/рядок)
+       lag: 0.12,          // s між ордерами каскаду секції
+       lineLag: 0.06,      // s між РЯДКАМИ data-brv-lines (AIR: 60ms/line-index)
        blurFrom: 10,       // стартовий blur px (живий CSS AIR)
        ease: 'air',        // 'air' | 'out-quad'
        threshold: 0.18,    // IO-поріг запуску групи
@@ -94,6 +100,46 @@
     return Array.prototype.slice.call(x);
   }
 
+  /* ---- ПОРЯДКОВИЙ каскад (AIR: word-wrap спани, delay = line-index × 60ms).
+     Розбиваємо ТІЛЬКИ прості текстові елементи (без вкладеної розмітки —
+     інакше чесний фолбек на поблоковий reveal). Після завершення reveal
+     спани розгортаються назад у чистий текст: нуль постійної ваги в DOM,
+     resize після settle нічого не ламає. ---- */
+  function splitLines(el) {
+    for (var i = 0; i < el.childNodes.length; i++)
+      if (el.childNodes[i].nodeType !== 3) return null; /* є розмітка — не чіпаємо */
+    var text = el.textContent;
+    if (!text.trim()) return null;
+    el.__origText = text;
+    el.textContent = '';
+    var frag = doc.createDocumentFragment(), spans = [];
+    text.split(/(\s+)/).forEach(function (tok) {
+      if (!tok) return;
+      if (/^\s+$/.test(tok)) { frag.appendChild(doc.createTextNode(tok)); return; }
+      var s = doc.createElement('span');
+      s.className = 'tbr-w';
+      s.style.display = 'inline-block';
+      s.textContent = tok;
+      frag.appendChild(s);
+      spans.push(s);
+    });
+    el.appendChild(frag);
+    /* групування за рядками по offsetTop (допуск 3px на субпіксель) */
+    var lines = [], top = null, cur = null;
+    spans.forEach(function (s) {
+      var t = s.offsetTop;
+      if (top === null || Math.abs(t - top) > 3) { top = t; cur = []; lines.push(cur); }
+      cur.push(s);
+    });
+    return lines.length > 1 ? lines : (unsplit(el), null); /* 1 рядок = нема чого каскадити */
+  }
+  function unsplit(el) {
+    if (el.__origText == null) return;
+    el.textContent = el.__origText;
+    el.__origText = null;
+    el.__lines = null;
+  }
+
   function create(sections, options) {
     options = options || {};
     var roots = toElements(sections);
@@ -106,6 +152,7 @@
     var opt = {
       duration: options.duration != null ? options.duration : 1,
       lag: options.lag != null ? options.lag : 0.12,
+      lineLag: options.lineLag != null ? options.lineLag : 0.06,
       blurFrom: options.blurFrom != null ? options.blurFrom : 10,
       ease: options.ease || 'air',
       threshold: options.threshold != null ? options.threshold : 0.18,
@@ -129,14 +176,19 @@
 
     var groups = roots.map(function (root, i) {
       var els = Array.prototype.slice.call(root.querySelectorAll('[data-brv]'));
-      els.forEach(function (el) { el.__order = +el.getAttribute('data-brv-order') || 0; });
+      els.forEach(function (el) {
+        el.__order = +el.getAttribute('data-brv-order') || 0;
+        el.__lines = el.hasAttribute('data-brv-lines') ? splitLines(el) : null;
+      });
       return { id: root.id || 'g' + i, root: root, els: els, runs: 0, io: null };
     }).filter(function (g) { return g.els.length; });
 
-    /* ховаємо ЛИШЕ тут — коли точно відомо, що движок анімуватиме */
+    /* ховаємо ЛИШЕ тут — коли точно відомо, що движок анімуватиме;
+       порядкові елементи ховаються НА СПАНАХ (сам елемент лишається видимим) */
     groups.forEach(function (g) {
       g.els.forEach(function (el) {
-        gsap.set(el, { opacity: 0, filter: 'blur(' + opt.blurFrom + 'px)', willChange: 'filter,opacity' });
+        var targets = el.__lines ? [].concat.apply([], el.__lines) : [el];
+        gsap.set(targets, { opacity: 0, filter: 'blur(' + opt.blurFrom + 'px)', willChange: 'filter,opacity' });
       });
     });
 
@@ -146,12 +198,33 @@
     function applyInstant(g) {
       gate.instant.push(g.id);
       g.els.forEach(function (el) {
+        if (el.__lines) { unsplit(el); } /* спани геть, чистий текст */
         gsap.set(el, { opacity: 1, filter: 'blur(0px)', clearProps: 'will-change' });
       });
     }
-    /* Д4(а): один каскад на секцію, лаг за ОРДЕРОМ */
+    /* Д4(а): один каскад на секцію, лаг за ОРДЕРОМ;
+       порядкові елементи: + line-index × lineLag на кожен рядок (канон AIR),
+       після останнього рядка спани розгортаються назад у текст */
     function applyCascade(g) {
       g.els.forEach(function (el) {
+        if (el.__lines) {
+          var lines = el.__lines, left = lines.length;
+          lines.forEach(function (line, li) {
+            gsap.to(line, {
+              opacity: 1, filter: 'blur(0px)', duration: opt.duration,
+              delay: el.__order * opt.lag + li * opt.lineLag, ease: easeFn,
+              onStart: li === 0 ? function () {
+                var t = performance.now();
+                if (gate.firstRevealT < 0) gate.firstRevealT = t;
+                log.push({ g: g.id, order: el.__order, lines: lines.length, t: t });
+              } : null,
+              onComplete: function () {
+                if (--left === 0) { unsplit(el); gsap.set(el, { opacity: 1, filter: 'blur(0px)', clearProps: 'will-change' }); }
+              }
+            });
+          });
+          return;
+        }
         gsap.to(el, {
           opacity: 1, filter: 'blur(0px)', duration: opt.duration,
           delay: el.__order * opt.lag, ease: easeFn,
@@ -225,7 +298,9 @@
       groups.forEach(function (g) {
         if (g.io) g.io.disconnect();
         g.els.forEach(function (el) {
+          if (el.__lines) gsap.killTweensOf([].concat.apply([], el.__lines));
           gsap.killTweensOf(el);
+          unsplit(el);
           gsap.set(el, { clearProps: 'opacity,filter,will-change' });
         });
       });
