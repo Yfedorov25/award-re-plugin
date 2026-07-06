@@ -1,0 +1,33 @@
+/* ============================================================
+   PHOTO-PILL-FORM · component.css
+   B6/T-M21: pills = чекбокс+label (жива схема); active = інверсія
+   0.2s; форма на фото; done тихий (A-07).
+   ============================================================ */
+[data-ppf] { position: relative; overflow: clip; }
+[data-ppf-bg] { position: absolute; inset: 0; }
+[data-ppf-bg] img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+[data-ppf-form] { position: relative; }
+[data-ppf-group] { margin-bottom: 3vh; }
+[data-ppf-group] .ppf-label { display: block; font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: #8b8a86; margin-bottom: 12px; }
+[data-ppf-group] .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+[data-ppf-group] input[type="checkbox"] { position: absolute; opacity: 0; pointer-events: none; }
+[data-ppf-group] label.pill { font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+  padding: 11px 14px; border-radius: 4px; border: 1px solid rgba(17, 17, 16, .3);
+  cursor: pointer; user-select: none;
+  transition: background-color .2s ease-out, color .2s ease-out, border-color .2s ease-out; }
+[data-ppf-group] input:checked + label.pill { background: #111110; color: #f4f2ee;
+  border-color: #111110; }
+
+[data-ppf-form] input[type="text"], [data-ppf-form] input[type="tel"] {
+  width: 100%; font: inherit; padding: 13px 14px; border-radius: 4px;
+  border: 1px solid rgba(17, 17, 16, .3); background: #fff; margin-bottom: 10px; }
+[data-ppf-send] { display: inline-flex; justify-content: space-between; gap: 2em;
+  width: 100%; font: inherit; font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 14px 16px; border-radius: 4px;
+  background: #111110; color: #f4f2ee; border: 1px solid #111110; cursor: pointer; }
+[data-ppf-done] { margin-top: 14px; font-size: 14px; color: #111110; }
+[data-ppf-done][hidden] { display: none; }
+.ppf-shake { animation: ppfshake .4s ease-out; }
+@keyframes ppfshake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }

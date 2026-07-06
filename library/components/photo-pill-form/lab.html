@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · photo-pill-form · B6 (T-411/A-07 + T-M21 tap-pills)</title>
+<!--
+================================================================================
+  LAB: photo-pill-form — B6 CTA-форма на живій схемі /investment
+  (investment-contact): фото-фон + «Receive a personalized selection»
+  + групи ЧЕКБОКС-pills (Investment goal: Rental income/Asset resale;
+  Budget: Up to 50M / 50–150M / 150M+) + ім'я/телефон + сабміт.
+  Сабміт-стани живим НЕ ЗНЯТІ (діра №4) → тихі ворота A-07.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. pills: тап 2 у Budget → ОБИДВІ активні
+  (multi-select, жива схема чекбоксів), values() віддає їх;
+  3. сабміт порожній → invalid+shake, done схований; 4. валідний →
+  done видимий, onSend отримав goals/budgets/name/phone; 5. errors 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  [data-ppf] { min-height: 100svh; display: grid; align-items: center; padding: 10vh 3vw; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; position: relative;
+    max-width: 1150px; margin: 0 auto; width: 100%; }
+  @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+  h2 { font-size: clamp(30px, 4vw, 58px); font-weight: 300; line-height: 1.1; color: #f2f1ee; }
+  .card { background: rgba(244, 242, 238, .94); border-radius: 6px; padding: 4vh 2.4vw; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · photo-pill-form · b6 + t-m21 · тапай pills</div>
+
+<section data-ppf id="ppf">
+  <div data-ppf-bg>
+    <img src="https://aircenter.space/media/cache/homepage_impulse_bg_xxl/assets/images/media/landing/2.impulse/background%40xxxl.webp" alt="">
+  </div>
+  <div class="grid">
+    <h2>Receive<br>a personalized<br>selection</h2>
+    <form class="card" data-ppf-form novalidate>
+      <div data-ppf-group>
+        <span class="ppf-label">Investment goal</span>
+        <div class="pills">
+          <input type="checkbox" name="goal[]" value="rent" id="g-rent">
+          <label class="pill" for="g-rent">Rental income</label>
+          <input type="checkbox" name="goal[]" value="resale" id="g-resale">
+          <label class="pill" for="g-resale">Asset resale</label>
+        </div>
+      </div>
+      <div data-ppf-group>
+        <span class="ppf-label">Budget</span>
+        <div class="pills">
+          <input type="checkbox" name="budget[]" value="50" id="b-50">
+          <label class="pill" for="b-50">Up to 50 000 000</label>
+          <input type="checkbox" name="budget[]" value="50-150" id="b-150">
+          <label class="pill" for="b-150">50–150 million</label>
+          <input type="checkbox" name="budget[]" value="150+" id="b-max">
+          <label class="pill" for="b-max">150+ million</label>
+        </div>
+      </div>
+      <input data-ppf-name type="text" placeholder="Your name" aria-label="Your name">
+      <input data-ppf-phone type="tel" placeholder="Phone number" aria-label="Phone number">
+      <button data-ppf-send type="submit">Send <span>✛</span></button>
+      <p data-ppf-done hidden>Запит надіслано. Підбірка вже готується.</p>
+    </form>
+  </div>
+</section>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var sent = null;
+  var ppf = window.PhotoPillForm.create('#ppf', { onSend: function (v) { sent = v; } });
+  window.__PPF = ppf;
+
+  var report = { stability: null, pills: null, invalid: null, send: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(120);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('h2');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* 2: multi-select pills */
+    document.querySelector('label[for="b-50"]').click();
+    document.querySelector('label[for="b-150"]').click();
+    document.querySelector('label[for="g-rent"]').click();
+    await delay(100);
+    var v = ppf.values();
+    report.pills = { budgets: v.budgets.join(','), goals: v.goals.join(','),
+                     toggles: ppf.gate.toggles,
+                     b50Active: document.getElementById('b-50').checked };
+    report.pills.ok = v.budgets.length === 2 && v.goals.length === 1 &&
+                      ppf.gate.toggles === 3 && report.pills.b50Active;
+    ok = report.pills.ok && ok;
+
+    /* 3: invalid сабміт */
+    document.querySelector('[data-ppf-send]').click();
+    await delay(100);
+    report.invalid = { invalid: ppf.gate.invalid,
+                       doneHidden: document.querySelector('[data-ppf-done]').hasAttribute('hidden') };
+    report.invalid.ok = ppf.gate.invalid === 1 && report.invalid.doneHidden;
+    ok = report.invalid.ok && ok;
+
+    /* 4: валідний */
+    document.querySelector('[data-ppf-name]').value = 'Єгор';
+    document.querySelector('[data-ppf-phone]').value = '+380 67 123 45 67';
+    document.querySelector('[data-ppf-send]').click();
+    await delay(100);
+    report.send = { sends: ppf.gate.sends,
+                    doneShown: !document.querySelector('[data-ppf-done]').hasAttribute('hidden'),
+                    sent: sent ? (sent.goals.length + '/' + sent.budgets.length) : null };
+    report.send.ok = ppf.gate.sends === 1 && report.send.doneShown && report.send.sent === '1/2';
+    ok = report.send.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:photo-pill-form]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>
