@@ -1,0 +1,113 @@
+/* INVEST-CARD-REVEAL · component.css
+   AIR T-430: темна картка переваги мовчить (індекс + титул унизу), на ховері
+   титул під'їжджає вгору і під ним розкривається повний текст.
+   T-M18 (mobile ≤768px, з реального телефонного запису AIR): ховер-розкриття
+   ВБИТЕ — картки стають горизонтальною scroll-snap стрічкою МОРОЗНИХ карток
+   поверх темного макро-фото (фото дає host-розмітка ЗА стрічкою); текст
+   відкритий одразу, сусідня картка виглядає з-за краю як свайп-кью.
+   ЗАКОНИ: GSAP керує ТІЛЬКИ transform / opacity / clip-path (D4); нуль CSS
+   transition на цих властивостях (D3); нуль hidden по осі x (К1.7 — clip);
+   backdrop-filter ЛИШЕ над статичним фото (дозвіл реєстру T-M18, виняток D2).
+   БЕЗ .icr-wired (no-JS / reduced-motion) картка = СТАТИЧНА ПРАВДА:
+   повний текст видимий у природному потоці. Кольори/кегль тримає host —
+   атом керує лише розкладкою і станами. Нуль квадратів у хромі (C12):
+   радіус картки — house-токен. */
+
+[data-icr-card] {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-radius: var(--icr-radius, 22px);
+  padding: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  background: var(--icr-bg, #141210);
+  color: var(--icr-ink, #ece5d8);
+  min-height: var(--icr-min-h, clamp(260px, 24vw, 380px));
+  overflow: clip;
+}
+
+[data-icr-card]:focus-visible {
+  outline: 1px solid var(--icr-focus, rgba(236, 229, 216, 0.6));
+  outline-offset: 3px;
+}
+
+[data-icr-index] {
+  position: absolute;
+  top: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  left: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  opacity: 0.55;
+}
+
+/* СТАТИЧНА ПРАВДА (дефолт без JS): титул і повний текст у потоці, видимі */
+[data-icr-title] { margin: 0; }
+[data-icr-body] { margin: 0.9em 0 0; opacity: 0.82; }
+
+/* волосок над тілом (створює компонент; домальовується scaleX 0→1) */
+.icr-rule {
+  display: block;
+  height: 1px;
+  margin-bottom: 0.9em;
+  background: var(--icr-rule, rgba(236, 229, 216, 0.28));
+  transform-origin: left center;
+}
+
+/* WIRED (desktop, JS + motion): титул притиснутий до низу, тіло сховане ПІД
+   ним. Розмір картки при розкритті НЕ міняється — грід стабільний,
+   bbox-перетин із сусідами = 0 (C28). Закриті значення тут = CSS-правда,
+   GSAP тюнить від них. */
+[data-icr-card].icr-wired [data-icr-title] {
+  position: absolute;
+  left: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  right: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  bottom: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  will-change: transform;
+}
+[data-icr-card].icr-wired [data-icr-body] {
+  position: absolute;
+  left: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  right: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  bottom: var(--icr-pad, clamp(22px, 2.2vw, 34px));
+  margin: 0;
+  opacity: 0;
+  clip-path: inset(0px 0px 100% 0px);
+}
+[data-icr-card].icr-wired .icr-rule { transform: scaleX(0); }
+[data-icr-card].icr-wired { cursor: pointer; }
+
+/* статична гілка з JS (reduced-motion / no-GSAP) — те саме, що дефолт */
+[data-icr-card].icr-static [data-icr-body] { opacity: 0.82; clip-path: none; }
+[data-icr-card].icr-static .icr-rule { transform: scaleX(1); }
+
+/* ============ T-M18: МОРОЗНА СВАЙП-СТРІЧКА (mobile ≤768px) ============
+   Горизонтальний scroll-snap трек; текст відкритий ОДРАЗУ; сусідня картка
+   виглядає з-за краю (ширина картки < ширини трека = свайп-кью). Морозне
+   скло читається ЛИШЕ коли за треком лежить темне СТАТИЧНЕ макро-фото —
+   його дає host-розмітка (position:relative обгортка з <img> під треком). */
+.icr-swipe {
+  display: flex;
+  gap: var(--icr-swipe-gap, 12px);
+  overflow-x: auto;
+  overflow-y: clip;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--icr-swipe-pad, 6px);
+  scrollbar-width: none;
+}
+.icr-swipe::-webkit-scrollbar { display: none; }
+
+.icr-swipe [data-icr-card] {
+  flex: 0 0 var(--icr-card-w, 78%);
+  scroll-snap-align: center;
+  justify-content: space-between;      /* титул зверху · повний текст знизу */
+  min-height: var(--icr-swipe-min-h, 300px);
+}
+.icr-swipe [data-icr-card].icr-frost {
+  background: var(--icr-frost-bg, rgba(20, 18, 16, 0.42));
+  -webkit-backdrop-filter: blur(var(--icr-frost-blur, 14px));
+  backdrop-filter: blur(var(--icr-frost-blur, 14px));
+}
+.icr-swipe [data-icr-title] { margin-top: 1.6rem; }   /* повітря під індексом */
+.icr-swipe [data-icr-body] { margin-top: 1em; opacity: 0.92; }
+.icr-swipe .icr-rule { transform: scaleX(1); }

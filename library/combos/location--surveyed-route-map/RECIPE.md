@@ -1,5 +1,4 @@
 ---
----
 id: location--surveyed-route-map
 name: "Маршрут по справжніх вулицях"
 level: 2

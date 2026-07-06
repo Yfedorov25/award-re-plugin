@@ -1,0 +1,37 @@
+/* SPREAD-ROW-HEADLINE · component.css
+   AIR T-310: слова act-заголовка розведені по всій ширині рядка (CSS-правда =
+   flex space-between), скрол з'їжджає/роз'їжджає їх по горизонталі transform-ом.
+   T-M01 (mobile ≤768px): лівий 2-рядковий wrap по смисловій парі, БЕЗ spread.
+   ЗАКОНИ: transform translateX ONLY на .srh-word; НУЛЬ CSS transition на
+   scroll-керованих властивостях (D3); NO mix-blend / NO backdrop; NO WebGL.
+   Нуль горизонтальних clip-обгорток на предках (К1.7). Типографіку
+   (кегль/шрифт/register) тримає host-елемент — атом керує лише розкладкою ряду. */
+
+/* host: заголовок, який атом розібрав на слова */
+.srh-host { display: block; }
+
+/* ДЕСКТОП: один рядок, слова розподілені по всій ширині — spread = CSS-правда,
+   тож no-JS / reduced-motion бачать канонічний AIR-стан без жодного скрипта. */
+.srh-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* єдина рухома річ. will-change лишається на життя scrub-а свідомо:
+   слів ≤6, чисті текстові шари — Layerize-податок мізерний (пор. D5). */
+.srh-word {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* статична гілка (reduced-motion / no-GSAP / <2 слів): чиста CSS-правда */
+.srh-host.srh-static .srh-word { transform: none; will-change: auto; }
+
+/* МОБАЙЛ (T-M01): колапс у лівий стек по смисловій парі [data-srh-group].
+   Нуль spread, нуль transform, нуль pin (C7) — роль act-розділювача на
+   мобайлі перебирає інверсія фону (T-M07), не цей атом. */
+.srh-host.srh-stack { display: block; text-align: left; }
+.srh-host.srh-stack .srh-line { display: block; }

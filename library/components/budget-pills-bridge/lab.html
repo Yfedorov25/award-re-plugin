@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- D14: перший кадр керується інлайн-скриптом + ранній CLS-спостерігач -->
+<script>
+history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+window.__CLS = 0;
+try {
+  new PerformanceObserver(function (l) {
+    l.getEntries().forEach(function (e) { if (!e.hadRecentInput) window.__CLS += e.value; });
+  }).observe({ type: 'layout-shift', buffered: true });
+} catch (e) {}
+</script>
+<title>LAB · budget-pills-bridge · бюджет-міст із deep-link пре-фільтром ціни (AIR B4 · A-12/T-409)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · budget-pills-bridge · v1 (хвиля 2 стратегічної машини)
+================================================================================
+  Контракт D_AIR_invest_1to1 §1 B4: після КОЖНОЇ моделі - ряд бюджет-кнопок
+  з deep-link у каталог `?price[from]=F&price[to]=T` (живе підтвердження
+  A-12/T-409: статус-бар AIR показував offices?price[from]=…&price[to]=…).
+  Пілюлі за рішенням координатора + C12 (контракт міряв прямокутники з
+  малим радіусом - розбіжність у RECIPE, вердикт власника). Висота ~4.4vh,
+  плюс-іконка праворуч; моб тап-таргет >= 44px.
+  ДІАПАЗОНИ = фільтр-межі інтерфейсу, прив'язані до канон-якорів інвентаря
+  (22 800 смарт · 67 000 таунхаус), НЕ ринкові твердження (F1).
+  DEEP-LINK: base = заглушка '#каталог' (visual-search ще не збудований);
+  проба верифікує ФОРМАТ параметрів, не приймача.
+
+  ЗАКОНИ КОЛА: PROBE_MODE (webdriver/?probe) · D14 head-inline ·
+  loadStability (CLS < 0.1 + дрейф якорів <= 4px).
+
+  ГЕЙТ: 1. loadStability; 2. РІВНО 3 пілюлі, кожен href МІСТИТЬ
+  price[from]= і price[to]= з числами розмітки; 3. пілюля: radius >=
+  висота/2 - 1 (C12), висота ~4.4vh (моб >= 44px), плюс-іконка є;
+  4. один ряд на десктопі (top-и рівні +-2px); 5. контраст >= 4.5:1;
+  6. сторінка без x-переповнення (моб), текст-ректи >= 16px;
+  7. console errors == 0.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --paper:#f4f2ee; --ink:#111110; --panel:#ececea;
+    --sans:'Inter',system-ui,-apple-system,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html{overflow-anchor:none}   /* D14 */
+  html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+
+  .intro{background:var(--ink);color:var(--paper);padding:9vh clamp(20px,4vw,64px) 8vh}
+  .intro__kicker{font-size:.68rem;letter-spacing:.34em;text-transform:uppercase;opacity:.55;margin-bottom:2.2rem}
+  .intro__title{font-weight:300;font-size:clamp(22px,2.4vw,40px);line-height:1.25;max-width:26ch}
+  .intro__hint{margin-top:2.4rem;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  .media{position:relative;height:80vh;overflow:clip;background:var(--ink)}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .media__cap{position:absolute;left:clamp(20px,4vw,60px);bottom:5vh;color:#fff;
+    font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+    background:rgba(17,17,16,.5);padding:.7em 1.5em;border-radius:999px}
+
+  /* B4-міст на світлій панелі: титул 16-22px CAPS + ряд пілюль */
+  .bridge{background:var(--panel);padding:14vh 2.8vw}
+  .bridge__title{font-size:clamp(16px,1.55vw,22px);text-transform:uppercase;
+    letter-spacing:.08em;font-weight:400;margin-bottom:4.5vh}
+
+  .tail{padding:7vh 20px;text-align:center;font-size:.62rem;
+    letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  @media (max-width:768px){
+    .media{height:60vh}
+    .bridge{padding:10vh clamp(16px,5vw,28px)}
+  }
+</style>
+</head>
+<body>
+
+  <header class="intro">
+    <p class="intro__kicker">Lab · budget-pills-bridge · AIR B4 · A-12/T-409</p>
+    <h1 class="intro__title">Бюджет-міст. Кожна пілюля веде в каталог із готовим фільтром ціни.</h1>
+    <p class="intro__hint">Гортайте вниз</p>
+  </header>
+
+  <section class="media">
+    <img src="renders/terrace.webp" alt="Тераса, вечір">
+    <div class="media__cap">Контекст-сусід · тераса</div>
+  </section>
+
+  <!-- B4-міст: CTA-титул (формула канону: дієслово + об'єкт) + пілюлі.
+       Діапазони = фільтр-межі навколо канон-якорів 22 800 і 67 000 -->
+  <section class="bridge" id="bridge">
+    <h2 class="bridge__title" id="anchorTitle">Обрати місце в ряду</h2>
+    <nav data-bpb data-bpb-base="#каталог" id="bpb" aria-label="Бюджет">
+      <a data-bpb-pill data-from="0" data-to="30000">До 30 000 доларів</a>
+      <a data-bpb-pill data-from="30000" data-to="70000">30 000 · 70 000 доларів</a>
+      <a data-bpb-pill data-from="70000" data-to="200000">Від 70 000 доларів</a>
+    </nav>
+  </section>
+
+  <footer class="tail">budget-pills-bridge · кінець проби</footer>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var errs = 0;
+  var NET_RE = /Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|ERR_INTERNET|ERR_NAME/;
+  var _e = console.error;
+  console.error = function () {
+    var s = Array.prototype.join.call(arguments, ' ');
+    if (!NET_RE.test(s)) errs++;
+    return _e.apply(console, arguments);
+  };
+  window.addEventListener('error', function (ev) {
+    var s = String((ev && ev.message) || '');
+    if (!NET_RE.test(s)) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function raf2() { return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); }); }
+  function rect(el) { return el.getBoundingClientRect(); }
+  function parseColor(css) {
+    var m = css.match(/[\d.]+/g) || [0, 0, 0];
+    return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+  }
+  function relLum(c) {
+    function f(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  }
+  function wcag(fg, bg) {
+    var a = relLum(fg), b = relLum(bg);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+  function blend(top, base) {
+    return { r: top.a * top.r + (1 - top.a) * base.r,
+             g: top.a * top.g + (1 - top.a) * base.g,
+             b: top.a * top.b + (1 - top.a) * base.b };
+  }
+
+  var bpb = BudgetPillsBridge.create('#bpb');
+  var PROBE_MODE = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var report = { viewport: null, stability: null, links: null, shape: null,
+                 contrast: null, hygiene: null, errors: null };
+
+  async function probeStability() {
+    var out = { cls: -1, drift: -1, ok: false };
+    var anchors = [document.getElementById('anchorTitle'), document.getElementById('bpb')];
+    var y0 = anchors.map(function (el) { return rect(el).top + window.scrollY; });
+    await delay(1000);
+    var drift = 0;
+    anchors.forEach(function (el, i) {
+      drift = Math.max(drift, Math.abs(rect(el).top + window.scrollY - y0[i]));
+    });
+    out.cls = +(window.__CLS || 0).toFixed(4);
+    out.drift = +drift.toFixed(1);
+    out.ok = out.cls < 0.1 && out.drift <= 4;
+    return out;
+  }
+
+  function probeLinks() {
+    var out = { n: 0, hrefs: [], ok: false };
+    var want = [['0', '30000'], ['30000', '70000'], ['70000', '200000']];
+    out.n = bpb.pills.length;
+    out.hrefs = bpb.links();
+    var allOk = out.n === 3 && out.hrefs.every(function (h, i) {
+      return h.indexOf('price[from]=' + want[i][0]) >= 0 &&
+             h.indexOf('price[to]=' + want[i][1]) >= 0 &&
+             h.indexOf('#каталог') === 0;
+    });
+    out.ok = allOk;
+    return out;
+  }
+
+  function probeShape() {
+    var out = { heights: [], pill: false, plus: 0, singleRow: false, hVh: 0, ok: false };
+    var mobile = window.innerWidth <= 768;
+    var tops = [];
+    bpb.pills.forEach(function (a) {
+      var r = rect(a);
+      out.heights.push(+r.height.toFixed(1));
+      tops.push(r.top);
+    });
+    var h0 = out.heights[0];
+    out.hVh = +(h0 / window.innerHeight * 100).toFixed(2);
+    out.pill = bpb.pills.every(function (a) {
+      return parseFloat(getComputedStyle(a).borderRadius) >= rect(a).height / 2 - 1;
+    });
+    out.plus = document.querySelectorAll('.bpb__plus').length;
+    out.singleRow = tops.every(function (t) { return Math.abs(t - tops[0]) <= 2; });
+    var hOk = mobile ? out.heights.every(function (h) { return h >= 44; })
+                     : Math.abs(out.hVh - 4.4) <= 1.2;
+    out.ok = out.pill && out.plus === 3 && hOk && (mobile || out.singleRow);
+    return out;
+  }
+
+  function probeContrast() {
+    var out = { contrast: 0, ok: false };
+    var a = bpb.pills[0];
+    var panelBg = parseColor(getComputedStyle(document.getElementById('bridge')).backgroundColor);
+    var pillBg = blend(parseColor(getComputedStyle(a).backgroundColor), panelBg);
+    out.contrast = +wcag(parseColor(getComputedStyle(a).color), pillBg).toFixed(2);
+    out.ok = out.contrast >= 4.5;
+    return out;
+  }
+
+  function probeHygiene() {
+    var out = { pageNoXScroll: false, minTextLeft: 9999, ok: false };
+    out.pageNoXScroll = document.documentElement.scrollWidth <= window.innerWidth + 1;
+    var minLeft = 9999;
+    ['.intro__title', '.bridge__title', '.bpb__pill'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      var rng = document.createRange();
+      rng.selectNodeContents(el);
+      var r = rng.getBoundingClientRect();
+      if (r.width > 0) minLeft = Math.min(minLeft, r.left);
+    });
+    out.minTextLeft = +minLeft.toFixed(1);
+    out.ok = out.pageNoXScroll && out.minTextLeft >= 16;
+    return out;
+  }
+
+  async function runProbes() {
+    await bpb.ready;
+    await raf2();
+    report.viewport = window.innerWidth + 'x' + window.innerHeight;
+    report.stability = await probeStability();
+    var y = rect(document.getElementById('bridge')).top + window.scrollY - window.innerHeight * 0.25;
+    window.scrollTo(0, Math.max(0, y));
+    await raf2();
+    report.links = probeLinks();
+    report.shape = probeShape();
+    report.contrast = probeContrast();
+    report.hygiene = probeHygiene();
+    report.errors = errs;
+    return report.stability.ok && report.links.ok && report.shape.ok &&
+           report.contrast.ok && report.hygiene.ok && errs === 0;
+  }
+
+  window.addEventListener('load', async function () {
+    if (!PROBE_MODE) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = false;
+    try { ok = await runProbes(); }
+    catch (e) { report.exception = String(e); ok = false; }
+    window.scrollTo(0, 0);
+    window.__PROBE = report;
+    window.__LAB_OK__ = !!ok;
+    if (!ok) console.log('[LAB budget-pills-bridge] probe report:', JSON.stringify(report));
+  });
+})();
+</script>
+</body>
+</html>

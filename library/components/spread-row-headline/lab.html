@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · spread-row-headline · act-подія: слово-речення роз'їжджається на весь екран (AIR T-310 + T-M01)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · spread-row-headline · FIX ROUND v3 (v2 + sticky-супровід ряду)
+================================================================================
+  AIR T-310: 2-4 слова act-заголовка. При p=0 — зібране слово-речення в центрі
+  (майже впритул, tracking-tight); при p=1 — розведені до країв ряду ~96vw.
+  ПРОГРЕС = РЕАЛЬНИЙ ПРОХІД секції-пасу крізь в'юпорт (C21):
+  [data-srh-section] 200vh, scrub 'top top'->'bottom bottom', тобто
+  p=(-rect.top)/(rect.height-vh). V3 (дефект v2 = порожні кольорові смуги,
+  C22-порожнеча): ряд слів разом із kicker живе в CSS sticky-обгортці 100vh
+  і тримається вертикально по центру в'юпорта ПРОТЯГОМ УСЬОГО проходу
+  1800px - слова супроводжують весь акт, як на AIR. БЕЗ GSAP pin: тільки
+  sticky (owns_pin false, пін-бюджет цілий; sticky-тір 100vh = innerHeight,
+  закон B14). T-M01: на <=768px spread гине - лівий 2-рядковий wrap по
+  смисловій парі (тут - форсований 360px бокс).
+
+  КОНТЕКСТ (C11): lab симулює РЕАЛЬНУ роботу розділювача - він стоїть МІЖ
+  full-bleed медіа-секціями (реальні рендери, symlink renders/ за домашнім
+  патерном бібліотеки), не в океані порожнечі. Хвіст = малий маркер.
+
+  ГЕЙТ (B14/B15 - гейт не бреше): __LAB_OK__ = true ЛИШЕ після РЕАЛЬНИХ
+  гео-проб, не «вантажиться без errors»:
+    1. АМПЛІТУДА (машинний анти-регрес): spread-дельта bbox слів
+       (last.right - first.left) між p=0 і p=1 ПЕРЕВИЩУЄ 40% ширини в'юпорта
+       на ОБОХ десктоп-актах; перше слово проїжджає >=15% vw;
+    2. на 5 позиціях [0/.25/.5/.75/1]: ПОВНИЙ bbox КОЖНОГО слова всередині
+       в'юпорта (sticky тримає ряд по центру весь трек - кромкових винятків
+       більше нема);
+    3. порядок слів збережений, перекриття сусідів = 0 на всіх 5 позиціях;
+    4. edge-lock при p=1: перше слово в лівому краї ряду, останнє в правому (±3px);
+    5. converge при p=0: кластер <=55% ряду, КОЖЕН міжслівний зазор малий
+       (зібране слово-речення), центр кластера в центрі ряду (±10%);
+    6. масштаб (C27): ряд >=90% ширини в'юпорта;
+    7. DEAD-BAND СКАН (урок v2, назавжди): прохід усієї сторінки кроком 300px;
+       якщо акт-секція покриває >60% в'юпорта - ряд слів МУСИТЬ перетинати
+       зону 60..(vh-60). Нуль мертвих смуг. + К1.7: жоден предок sticky
+       не сміє мати overflow-x:hidden (перевіряється по ланцюгу предків);
+    8. мобільний бокс (360px, mode:'mobile'): рівно 2 лівих статичних рядки по
+       смисловій парі, текст без transform, без переповнення боксу;
+    9. console errors == 0 (мережеві збої CDN відфільтровано).
+
+  МОБІЛЬНИЙ ГЕЙТ (viewport <=768px, напр. 390x844 - реальний телефон власника):
+  __LAB_OK__ перемикається на мобільний пакет проб (клас К1 - мертві зони):
+    М1. обидва акти перебудовані у mobile-гілку (T-M01), нуль трігерів;
+    М2. сторінка КОМПАКТНА: сумарна висота <= 7 екранів (секції на мобайлі
+        короткі, без десктопного runway 200vh);
+    М3. нуль мертвих зон: жоден проміжок між сусідніми контент-блоками
+        не перевищує 1.5 екрана;
+    М4. safe-padding: bbox.left >= 16px у ВСІХ текстових елементів
+        (обрізаний зліва інтро-лейбл v1 = провал цього класу);
+    М5. слова акту центровані вертикально всередині своєї секції
+        (симетричні відступи, не прилипають до верху);
+    М6. СЕМАНТИЧНИЙ wrap: рядки мобільного стека = ТОЧНО [data-srh-group]
+        пари («Час рости»/«вище», «Новий»/«тип дому»), кожен рядок без
+        внутрішнього авто-переносу; розбивка ЯВНА в markup, не механічна;
+    М7. форсований 360px бокс + console errors == 0, як на десктопі.
+
+  Пробний прогін драйвить НАТИВНИЙ scroll (Lenis стартує ПІСЛЯ проб, лише для
+  живого перегляду). NO WebGL. Компонент __LAB_OK__ не торкається.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* AIR-палітра: чистий ч/б ритм інверсії, гротеск light, версал */
+  :root{
+    --paper:#f4f2ee; --ink:#111110;
+    --sans:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+
+  /* сусід-секції: full-bleed медіа (C11) - розділювач працює МІЖ ними */
+  .media{position:relative;height:100vh;overflow:hidden;background:var(--ink)}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  /* safe-padding: на вузьких екранах текст ніколи не ріжеться лівою кромкою */
+  .media__cap{position:absolute;left:clamp(20px,4vw,60px);bottom:5vh;color:#fff;
+    font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+    background:rgba(17,17,16,.5);padding:.7em 1.5em;border-radius:999px;
+    max-width:calc(100vw - 2*clamp(20px,4vw,60px))}
+
+  /* act-розділювач: секція-пас 200vh (C21). Ряд слів (разом із kicker) живе
+     в CSS sticky-обгортці 100vh (top:0, grid-центр => ряд вертикально по
+     центру в'юпорта) і супроводжує ВЕСЬ прохід 1800px - нуль порожніх
+     кольорових смуг (дефект v2, C22-порожнеча). БЕЗ GSAP pin: тільки sticky,
+     owns_pin false, sticky-тір 100vh = innerHeight (B14). К1.7: жоден предок
+     (body/html/.act) НЕ має overflow-x:hidden - sticky живий; за потреби
+     обрізати - тільки overflow-x:clip. Ряд ~96vw (C27: act-подія). */
+  .act{height:200vh}
+  .act--dark{background:var(--ink);color:var(--paper)}
+  .act__sticky{position:sticky;top:0;height:100vh;display:grid;
+    place-items:center;padding-inline:2vw}
+  .act__inner{position:relative;width:100%}
+  .act__kicker{position:absolute;bottom:100%;left:0;right:0;margin-bottom:2.4rem;
+    text-align:center;font-size:.68rem;letter-spacing:.34em;
+    text-transform:uppercase;opacity:.55}
+  .act__title{font-weight:300;text-transform:uppercase;
+    font-size:clamp(32px,5.7vw,122px);line-height:1.02;letter-spacing:-.025em}
+
+  /* T-M01 демо: форсований мобільний бокс 360px */
+  .mob{padding:16vh 6vw 18vh}
+  .mob__note{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;
+    opacity:.5;margin-bottom:1.6rem}
+  .mob__frame{width:360px;max-width:100%;border:1px solid rgba(17,17,16,.22);
+    padding:28px 20px;border-radius:14px}
+  .mob__title{font-weight:300;text-transform:uppercase;
+    font-size:30px;line-height:1.18;letter-spacing:.02em}
+
+  /* малий маркер-хвіст одразу після останньої сусід-секції, не мертвий екран */
+  .tail{padding:7vh 20px;text-align:center;font-size:.62rem;
+    letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  /* МОБАЙЛ: секції КОРОТКІ (без десктопного runway 200vh - клас К1, мертві
+     зони заборонені). Акт центрується вертикально симетричними відступами,
+     всі тексти в safe-padding >=20px. */
+  @media (max-width:768px){
+    .media{height:80vh}
+    .act{height:auto;padding:22vh clamp(20px,6vw,32px)}
+    .act__sticky{position:static;height:auto;padding:0}
+    .act__kicker{position:static;margin-bottom:1.4rem;text-align:left}
+    .mob{padding:12vh clamp(20px,6vw,32px) 14vh}
+  }
+</style>
+</head>
+<body>
+
+  <!-- СУСІД-СЕКЦІЯ A · медіа (C11): розділювач живе між рендерами -->
+  <section class="media">
+    <img src="renders/day-front.webp" alt="Квартал, фасад, день">
+    <div class="media__cap">Сусід-секція · день · скрол вниз</div>
+  </section>
+
+  <!-- АКТ 1 · light · пас 200vh, ряд у sticky-обгортці супроводжує прохід.
+       Пара: «Час рости» + «вище» -->
+  <section class="act" id="act1" data-srh-section>
+    <div class="act__sticky">
+      <div class="act__inner">
+        <div class="act__kicker">Акт I · динаміка</div>
+        <h2 class="act__title" id="act1Title" data-srh>
+          <span data-srh-group>Час рости</span>
+          <span data-srh-group>вище</span>
+        </h2>
+      </div>
+    </div>
+  </section>
+
+  <!-- СУСІД-СЕКЦІЯ B · медіа -->
+  <section class="media">
+    <img src="renders/terrace.webp" alt="Тераса, вечір">
+    <div class="media__cap">Сусід-секція · тераса</div>
+  </section>
+
+  <!-- АКТ 2 · dark (theme-flip ритм) · пас 200vh, sticky-супровід.
+       Пара: «Новий» + «тип дому» -->
+  <section class="act act--dark" id="act2" data-srh-section>
+    <div class="act__sticky">
+      <div class="act__inner">
+        <div class="act__kicker">Акт II · формат</div>
+        <h2 class="act__title" id="act2Title" data-srh>
+          <span data-srh-group>Новий</span>
+          <span data-srh-group>тип дому</span>
+        </h2>
+      </div>
+    </div>
+  </section>
+
+  <!-- СУСІД-СЕКЦІЯ C · медіа -->
+  <section class="media">
+    <img src="renders/night-front.webp" alt="Фасад, ніч">
+    <div class="media__cap">Сусід-секція · ніч</div>
+  </section>
+
+  <!-- T-M01 · мобільний колапс у форсованому 360px боксі -->
+  <section class="mob">
+    <div class="mob__note">T-M01 · 360px · лівий wrap по смисловій парі</div>
+    <div class="mob__frame" id="mobFrame">
+      <h3 class="mob__title" id="mobTitle" data-srh>
+        <span data-srh-group>У центрі</span>
+        <span data-srh-group>життя</span>
+      </h3>
+    </div>
+  </section>
+
+  <footer class="tail">T-310 · кінець проби</footer>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---- лічильник console-помилок (мережеві збої CDN/шрифтів не рахуємо) ---- */
+  var errs = 0;
+  var NET_RE = /Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|ERR_INTERNET|ERR_NAME/;
+  var _e = console.error;
+  console.error = function () {
+    var s = Array.prototype.join.call(arguments, ' ');
+    if (!NET_RE.test(s)) errs++;
+    return _e.apply(console, arguments);
+  };
+  window.addEventListener('error', function (ev) {
+    var s = String((ev && ev.message) || '');
+    if (!NET_RE.test(s)) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  function raf2() {
+    return new Promise(function (res) {
+      requestAnimationFrame(function () { requestAnimationFrame(res); });
+    });
+  }
+  function delay(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+
+  /* ---- інстанси: секція-пас підхоплюється з [data-srh-section] (C21) ---- */
+  var a1 = SpreadRowHeadline.create('#act1Title', { ease: 'air', stagger: 0.06 });
+  var a2 = SpreadRowHeadline.create('#act2Title', { ease: 'air', stagger: 0.08, convergeAnchor: 0.5 });
+  var am = SpreadRowHeadline.create('#mobTitle', { mode: 'mobile' });
+
+  /* =====================================================================
+     B14 ГЕО-ПРОБИ. Все нижче міряє РЕАЛЬНУ геометрію через
+     getBoundingClientRect на нативному скролі.
+     ===================================================================== */
+  var report = { acts: [], deadBands: null, mobile: null, mobilePage: null, viewport: null, errors: null };
+
+  /* ЯВНИЙ контракт семантичних пар (T-M01): мобільні рядки = ТОЧНО ці групи,
+     ніколи механічний авто-wrap. Джерело правди = markup [data-srh-group]. */
+  var SEMANTIC_PAIRS = {
+    act1Title: ['Час рости', 'вище'],
+    act2Title: ['Новий', 'тип дому']
+  };
+
+  function rects(words) {
+    return words.map(function (w) { return w.getBoundingClientRect(); });
+  }
+
+  async function probeAct(api, hostId, label) {
+    var out = { label: label, positions: [], edgeLock: false, converge: false,
+                rowWide: false, spread0: 0, spread1: 0, spreadDelta: 0,
+                spreadDeltaPct: 0, travel: 0, ok: false };
+    var st = api.trigger;
+    if (!st || api.mode !== 'desktop' || api.words.length < 3) { out.fail = 'not wired as desktop'; return out; }
+    var span = st.end - st.start;
+    var firstLeftAt = {};
+    var allOk = true;
+
+    for (var k = 0; k < 5; k++) {
+      var f = [0, 0.25, 0.5, 0.75, 1][k];
+      window.scrollTo(0, st.start + f * span);
+      ScrollTrigger.update();
+      await raf2();
+
+      var rs = rects(api.words);
+      var vw = window.innerWidth, vh = window.innerHeight;
+      /* горизонталь: КОЖНЕ слово в межах в'юпорта на всіх 5 позиціях */
+      var horizIn = rs.every(function (r) { return r.left >= -1 && r.right <= vw + 1; });
+      /* v3: sticky тримає ряд по центру в'юпорта ВЕСЬ трек - повний bbox
+         КОЖНОГО слова мусить бути всередині на ВСІХ 5 позиціях (кромкових
+         винятків v2 більше нема) */
+      var fullIn = rs.every(function (r) {
+        return r.left >= -1 && r.right <= vw + 1 && r.top >= -1 && r.bottom <= vh + 1;
+      });
+      var ordered = true;
+      for (var i = 0; i < rs.length - 1; i++)
+        if (rs[i].right > rs[i + 1].left + 1.5) ordered = false;
+
+      var spread = +(rs[rs.length - 1].right - rs[0].left).toFixed(1);
+      var pos = { p: f, progress: +st.progress.toFixed(3), spread: spread,
+                  horizIn: horizIn, fullIn: fullIn, ordered: ordered };
+      out.positions.push(pos);
+      if (!horizIn || !fullIn || !ordered) allOk = false;
+
+      var rowR = api.words[0].parentNode.getBoundingClientRect();
+      var fs = parseFloat(getComputedStyle(document.getElementById(hostId)).fontSize) || 16;
+      if (f === 0) {
+        firstLeftAt[0] = rs[0].left;
+        out.spread0 = spread;
+        /* converge-доказ: зібране слово-речення. Кластер <=55% ряду, кожен
+           міжслівний зазор малий (майже впритул), центр кластера = центр ряду */
+        var gapsTight = true;
+        for (var g = 0; g < rs.length - 1; g++)
+          if (rs[g + 1].left - rs[g].right > Math.max(22, fs * 0.22)) gapsTight = false;
+        var clusterC = (rs[0].left + rs[rs.length - 1].right) / 2;
+        var rowC = (rowR.left + rowR.right) / 2;
+        out.converge = spread <= rowR.width * 0.55 && gapsTight &&
+                       Math.abs(clusterC - rowC) <= rowR.width * 0.1;
+      }
+      if (f === 1) {
+        firstLeftAt[1] = rs[0].left;
+        out.spread1 = spread;
+        out.edgeLock =
+          Math.abs(rs[0].left - rowR.left) <= 3 &&
+          Math.abs(rowR.right - rs[rs.length - 1].right) <= 3;
+        /* масштаб (C27): розведений ряд = act-подія >=90% ширини в'юпорта */
+        out.rowWide = rowR.width >= vw * 0.9;
+      }
+    }
+    out.travel = +Math.abs(firstLeftAt[0] - firstLeftAt[1]).toFixed(1);
+    out.spreadDelta = +(out.spread1 - out.spread0).toFixed(1);
+    out.spreadDeltaPct = +(out.spreadDelta / window.innerWidth * 100).toFixed(1);
+    /* АМПЛІТУДА (машинний анти-регрес): дельта > 40% vw, прохід >= 15% vw */
+    out.ok = allOk && out.edgeLock && out.converge && out.rowWide &&
+             out.spreadDelta > window.innerWidth * 0.40 &&
+             out.travel >= window.innerWidth * 0.15;
+    return out;
+  }
+
+  async function probeMobile(api) {
+    var out = { lines: 0, leftAligned: false, stacked: false, noTransform: false, fits: false, inViewport: false, ok: false };
+    if (api.mode !== 'mobile') { out.fail = 'not mobile branch'; return out; }
+    var frame = document.getElementById('mobFrame');
+    /* довеземо бокс у в'юпорт - міряємо видиму геометрію, не абстракцію */
+    var fr = frame.getBoundingClientRect();
+    window.scrollTo(0, window.scrollY + fr.top - window.innerHeight * 0.4);
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    await raf2();
+
+    var lines = api.lines;
+    out.lines = lines.length;
+    if (lines.length !== 2) return out;
+
+    var hostR = document.getElementById('mobTitle').getBoundingClientRect();
+    var t = lines.map(function (ln) {
+      var rng = document.createRange();
+      rng.selectNodeContents(ln);
+      return rng.getBoundingClientRect();
+    });
+    out.leftAligned = Math.abs(t[0].left - hostR.left) <= 2 && Math.abs(t[1].left - hostR.left) <= 2;
+    out.stacked = t[1].top >= t[0].bottom - 2;
+    out.fits = t.every(function (r) { return r.right <= frame.getBoundingClientRect().right + 1; });
+    out.noTransform = lines.every(function (ln) {
+      var tf = getComputedStyle(ln).transform;
+      return tf === 'none' || tf === 'matrix(1, 0, 0, 1, 0, 0)';
+    });
+    var vw = window.innerWidth, vh = window.innerHeight;
+    out.inViewport = t.every(function (r) {
+      return r.left >= -1 && r.right <= vw + 1 && r.top >= -1 && r.bottom <= vh + 1;
+    });
+    out.ok = out.leftAligned && out.stacked && out.fits && out.noTransform && out.inViewport;
+    return out;
+  }
+
+  /* ============ DEAD-BAND СКАН (v3, урок C22-порожнечі - назавжди) ==========
+     Прохід усієї сторінки кроком 300px: якщо акт-секція покриває >60%
+     в'юпорта, ряд слів МУСИТЬ перетинати зону 60..(vh-60). Дефект v2: 8
+     мертвих смуг (y=600/900/1800/2100/3300/3600/4500/4800 при 1440x900).
+     + К1.7: жоден предок sticky-обгортки не сміє мати overflow-x:hidden. */
+  async function probeDeadBands() {
+    var out = { scanned: 0, checked: 0, bands: [], overflowSafe: true, ok: false };
+    var vh = window.innerHeight;
+    var acts = [
+      { el: document.getElementById('act1'), api: a1 },
+      { el: document.getElementById('act2'), api: a2 }
+    ];
+    /* К1.7: ланцюг предків без overflow-x:hidden (sticky вмирає від hidden) */
+    var anc = document.querySelector('.act__sticky');
+    while (anc && anc.parentElement) {
+      anc = anc.parentElement;
+      if (getComputedStyle(anc).overflowX === 'hidden') out.overflowSafe = false;
+    }
+    var maxY = document.documentElement.scrollHeight - vh;
+    for (var y = 0; y <= maxY; y += 300) {
+      window.scrollTo(0, y);
+      if (window.ScrollTrigger) ScrollTrigger.update();
+      await raf2();
+      out.scanned++;
+      for (var a = 0; a < acts.length; a++) {
+        var s = acts[a].el.getBoundingClientRect();
+        var cover = Math.min(vh, s.bottom) - Math.max(0, s.top);
+        if (cover <= vh * 0.6) continue;
+        out.checked++;
+        var row = acts[a].api.words[0].parentNode.getBoundingClientRect();
+        var visible = row.bottom > 60 && row.top < vh - 60;
+        if (!visible)
+          out.bands.push({ y: y, act: a + 1, coverPct: +(cover / vh * 100).toFixed(0),
+                           rowTop: +row.top.toFixed(0), rowBottom: +row.bottom.toFixed(0) });
+      }
+    }
+    out.ok = out.bands.length === 0 && out.overflowSafe && out.checked > 0;
+    return out;
+  }
+
+  /* ================== МОБІЛЬНИЙ ПАКЕТ ПРОБ (viewport <=768px, клас К1) =====
+     Реальний телефон власника (напр. 390x844): компактна сторінка без мертвих
+     зон, safe-padding текстів, вертикальне центрування акту, семантичний wrap. */
+  async function probeMobilePage() {
+    var out = { modes: [a1.mode, a2.mode], screens: 0, maxGapScreens: 0,
+                minTextLeft: 9999, actsCentered: false, semantic: false,
+                singleLine: false, ok: false };
+    var vh = window.innerHeight, vw = window.innerWidth;
+    window.scrollTo(0, 0);
+    await raf2();
+
+    /* М2: сторінка компактна - без десктопного runway */
+    out.screens = +(document.documentElement.scrollHeight / vh).toFixed(2);
+
+    /* М3: нуль мертвих зон - проміжок між сусідніми контент-блоками <=1.5 екрана */
+    var blocks = Array.prototype.slice.call(
+      document.querySelectorAll('.media img, .act__inner, .mob__frame, .tail'));
+    var spans = blocks.map(function (el) {
+      var r = el.getBoundingClientRect();
+      return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY };
+    }).sort(function (a, b) { return a.top - b.top; });
+    var maxGap = Math.max(0, spans.length ? spans[0].top : 0);
+    for (var i = 0; i < spans.length - 1; i++)
+      maxGap = Math.max(maxGap, spans[i + 1].top - spans[i].bottom);
+    out.maxGapScreens = +(maxGap / vh).toFixed(2);
+
+    /* М4: safe-padding - жоден текст не ріжеться лівою кромкою. Міряємо РЕКТ
+       САМОГО ТЕКСТУ (Range), не бокс блока: центрований блок має left 0,
+       але текст всередині - ні */
+    var textEls = Array.prototype.slice.call(
+      document.querySelectorAll('.media__cap, .act__kicker, .srh-line, .mob__note, .tail'));
+    var minLeft = 9999;
+    textEls.forEach(function (el) {
+      var rng = document.createRange();
+      rng.selectNodeContents(el);
+      var r = rng.getBoundingClientRect();
+      if (r.width > 0) minLeft = Math.min(minLeft, r.left);
+    });
+    out.minTextLeft = +minLeft.toFixed(1);
+
+    /* М5: акт центрований вертикально в секції (симетрія відступів ±15%) */
+    out.actsCentered = ['act1', 'act2'].every(function (id) {
+      var sec = document.getElementById(id).getBoundingClientRect();
+      var inner = document.getElementById(id).querySelector('.act__inner').getBoundingClientRect();
+      var above = inner.top - sec.top, below = sec.bottom - inner.bottom;
+      return Math.abs(above - below) <= Math.max(24, sec.height * 0.15);
+    });
+
+    /* М6: семантичний wrap - рядки стека = ТОЧНО пари [data-srh-group],
+       кожен рядок в один фізичний рядок (без внутрішнього авто-переносу) */
+    var sem = true, single = true;
+    [['act1Title', a1], ['act2Title', a2]].forEach(function (pair) {
+      var want = SEMANTIC_PAIRS[pair[0]], api = pair[1];
+      if (api.lines.length !== want.length) { sem = false; return; }
+      api.lines.forEach(function (ln, li) {
+        if ((ln.textContent || '').trim() !== want[li]) sem = false;
+        var fs = parseFloat(getComputedStyle(ln).fontSize) || 16;
+        if (ln.getBoundingClientRect().height > fs * 1.9) single = false;
+      });
+    });
+    out.semantic = sem;
+    out.singleLine = single;
+
+    out.ok = a1.mode === 'mobile' && a2.mode === 'mobile' &&
+             out.screens <= 7 && out.maxGapScreens <= 1.5 &&
+             out.minTextLeft >= 16 && out.actsCentered &&
+             out.semantic && out.singleLine;
+    return out;
+  }
+
+  async function runProbes() {
+    await Promise.all([a1.ready, a2.ready, am.ready]);
+    await raf2();
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+    await raf2();
+
+    report.viewport = window.innerWidth + 'x' + window.innerHeight;
+    var mobileVP = window.innerWidth <= 768;
+
+    report.acts = [];
+    if (mobileVP) {
+      /* мобільний в'юпорт: акти живуть у T-M01-гілці - десктопні scrub-проби
+         не застосовні, гейт тримає мобільний пакет (М1-М7) */
+      report.mobilePage = await probeMobilePage();
+      report.mobile = await probeMobile(am);
+      report.errors = errs;
+      return report.mobilePage.ok && report.mobile.ok && errs === 0;
+    }
+
+    report.acts.push(await probeAct(a1, 'act1Title', 'act1 · Час рости вище'));
+    report.acts.push(await probeAct(a2, 'act2Title', 'act2 · Новий тип дому'));
+    report.deadBands = await probeDeadBands();
+    report.mobile = await probeMobile(am);
+    report.errors = errs;
+
+    return report.acts.every(function (a) { return a.ok; }) &&
+           report.deadBands.ok && report.mobile.ok && errs === 0;
+  }
+
+  window.addEventListener('load', async function () {
+    var ok = false;
+    try {
+      ok = await runProbes();
+      if (!ok) { await delay(600); ok = await runProbes(); } /* другий шанс пізнім шрифтам */
+    } catch (e) {
+      report.exception = String(e);
+      ok = false;
+    }
+    /* повертаємось нагору і лише ТЕПЕР вмикаємо Lenis для живого перегляду */
+    window.scrollTo(0, 0);
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    if (ok && window.Lenis && window.gsap &&
+        !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      lenis.on('scroll', function () { if (window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+      gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__PROBE = report;
+    window.__LAB_OK__ = !!ok;
+    if (!ok) console.log('[LAB spread-row-headline] probe report:', JSON.stringify(report));
+  });
+})();
+</script>
+</body>
+</html>

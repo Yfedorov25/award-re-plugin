@@ -16,7 +16,7 @@ meaning:
 source:
   grammar: "EVER per-section palette (slate/brown/green) with the header tinting to the incoming theme across each seam and modals inheriting the active theme; live-read."
   recording: "ever-live-here.com (live) + apps/quadro/.award-re/teardowns/EVER-MOTION-SPEC-live.md"
-  registry_ref: ["T-themetween-ever"]
+  registry_ref: ["T-501", "T-M07", "x:T-themetween-ever legacy slug"]
 stack: "vanilla JS only (IntersectionObserver + rAF lerp; no libs). Linear-RGB interpolation."
 webgl: false
 motion_props: [color]

@@ -1,0 +1,130 @@
+/* CASE-TABS-TABLE · component.css
+   AIR MODEL-механіка (контракт §1 B3): біла CASE-картка. Таби-клітинки з
+   label 11px CAPS верх-ліво, актив = ЧОРНИЙ border-bottom 2px на всю
+   клітинку, неактив = сіра hairline. Тіло: head 1.9vw зліва + таблиця
+   праворуч (лейбл 10px сірий / значення 12px чорне right-aligned, hairline,
+   крок ~5.6vh). Результат: пари label -> значення 1.9vw.
+   T-M19 (≤768px): таби на всю ширину, таблиця full-width, числа справа,
+   слайдерів не існує. ЗАКОНИ: рух = opacity (ghost-кросфейд, D4); нуль
+   CSS transition на GSAP-властивостях (актив-таб = state-стиль, не твін);
+   нуль hidden по осі x (К1.7). Кольори поверхні можна перевизначити
+   --ctt-* токенами. */
+
+.ctt {
+  background: var(--ctt-card, #ffffff);
+  color: var(--ctt-ink, #111110);
+}
+
+/* ---- таби: клітинки, актив = чорний border-bottom 2px ---- */
+.ctt__tabs { display: flex; }
+.ctt__tab {
+  flex: 1 1 0;
+  min-height: var(--ctt-tab-h, 11.5vh);
+  padding: 1.1vw 1.2vw;
+  text-align: left;
+  vertical-align: top;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--ctt-hairline, rgba(17, 17, 16, 0.18));
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  display: block;
+}
+.ctt__tab-label {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ctt-gray, #6f6f6a);
+  display: block;
+}
+.ctt__tab.is-active { border-bottom: 2px solid var(--ctt-ink, #111110); }
+.ctt__tab.is-active .ctt__tab-label { color: var(--ctt-ink, #111110); }
+.ctt__tab:focus-visible { outline: 1px solid rgba(17, 17, 16, 0.5); outline-offset: -4px; }
+
+/* ---- тіло: head зліва + таблиця праворуч (контрактна сітка) ---- */
+.ctt__body {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, var(--ctt-table-w, 46%));
+  gap: 2vw;
+  padding: 2.2vw 1.2vw 1.6vw;
+}
+.ctt__head {
+  font-size: var(--ctt-head-size, 1.9vw);
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+}
+.ctt__table { display: block; }
+.ctt__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.5em;
+  min-height: var(--ctt-row-h, 5.6vh);
+  border-bottom: 1px solid var(--ctt-hairline, rgba(17, 17, 16, 0.18));
+  padding-top: 1.4vh;
+}
+.ctt__label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ctt-gray, #6f6f6a);
+}
+.ctt__value {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- результат-рядок: пари 1.9vw ---- */
+.ctt__result {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4vw;
+  padding: 2vw 1.2vw 2.2vw;
+}
+.ctt__res-pair { text-align: right; }
+.ctt__res-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ctt-gray, #6f6f6a);
+  margin-bottom: 0.7em;
+}
+.ctt__res-value {
+  font-size: var(--ctt-res-size, 1.9vw);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---- ghost-кросфейд: обгортка .ctt-swap тримає .ctt-cur (живий текст) і
+   абсолютний привид старого поверх (right-aligned для чисел, left для head).
+   Привид = сiблінг, тож твін .ctt-cur його не чіпає; нуль layout-зсуву. ---- */
+.ctt-swap { position: relative; display: block; }
+.ctt__value.ctt-swap, .ctt__res-value.ctt-swap { display: inline-block; }
+.ctt-cur { display: inline-block; }
+.ctt-ghost {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: auto;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.ctt-swap--left .ctt-ghost { right: auto; left: 0; }
+
+/* ---- T-M19 (≤768px): full-width, числа справа, read-only ---- */
+@media (max-width: 768px) {
+  .ctt__tab { min-height: 56px; padding: 12px 14px; }
+  .ctt__body { grid-template-columns: 1fr; gap: 4vw; padding: 5vw 4vw 3vw; }
+  .ctt__head { font-size: 22px; }
+  .ctt__row { min-height: 44px; }
+  .ctt__result { padding: 4vw; gap: 8vw; justify-content: space-between; }
+  .ctt__res-value { font-size: 20px; }
+}
