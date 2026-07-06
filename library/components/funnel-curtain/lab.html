@@ -114,20 +114,24 @@
       coverTop = panel ? panel.getBoundingClientRect().top : 999;
       swapPages();
     }, 'curtain');
-    await delay(600); /* ~середина підйому 1.2s */
+    await delay(900); /* середина БРЕНД-ПАУЗИ (0.42s вискок + пауза 1.15s) */
     var panel = document.querySelector('.fcr');
     var midTop = panel ? panel.getBoundingClientRect().top : -1;
     var edge = panel ? panel.querySelector('.fcr__edge') : null;
     var spans = edge ? edge.querySelectorAll('span') : [];
-    var spread = false;
+    var spread = false, centerZone = false;
     if (spans.length >= 2) {
       var first = spans[0].getBoundingClientRect(), last = spans[spans.length - 1].getBoundingClientRect();
       spread = first.left < window.innerWidth * 0.12 && last.right > window.innerWidth * 0.88;
+      var cy = (first.top + first.bottom) / 2;
+      centerZone = cy > window.innerHeight * 0.55 && cy < window.innerHeight * 0.92; /* білборд: центр видимої чорної зони */
     }
-    report.rise = { midTop: Math.round(midTop), inViewport: midTop > 0 && midTop < window.innerHeight,
-                    letters: spans.length, spread: spread,
+    var vh = window.innerHeight;
+    report.rise = { midTop: Math.round(midTop),
+                    billboard: midTop > vh * 0.35 && midTop < vh * 0.62, /* пауза на ~52% */
+                    letters: spans.length, spread: spread, centerZone: centerZone,
                     giant: spans.length ? spans[0].getBoundingClientRect().height > window.innerWidth * 0.12 : false };
-    ok = report.rise.inViewport && spans.length === 3 && spread && report.rise.giant && ok;
+    ok = report.rise.billboard && spans.length === 3 && spread && centerZone && report.rise.giant && ok;
 
     await p;
     var dur = performance.now() - t0;

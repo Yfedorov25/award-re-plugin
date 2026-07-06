@@ -3,13 +3,14 @@
    ------------------------------------------------------------
    T-M29 чорна wordmark-штора фунела + T-530 flash-перехід дрілу.
    Контракт: D_AIR_mobile_video (dense tr-05..32, виміряно по кадрах):
-   тап [CHOOSE AN OFFICE ✛] → ЧОРНА панель їде знизу→вгору, у її
-   ВЕРХНІЙ частині їде ГІГАНТСЬКИЙ розведений рядок wordmark (~1.7s
-   підйом; плаваюча CTA-пілюля лишається видимою над кромкою) →
-   покриття → свап → швидкий вихід (~0.3s, нова сторінка вже стоїть);
-   повний ритуал ~2.2s. УТОЧНЕНО живим відео 2026-07-06 (2fps-розкладка
-   t22.6–25.0 MOBILE-air-4): «A I R A I R» ×2 і довгий вихід з тірдауна
-   НЕ підтвердились — один гігант-прохід, вихід швидкий.
+   тап [CHOOSE AN OFFICE ✛] → ДВОФАЗНИЙ ритуал-білборд (side-by-side
+   аналіз REF|ATOM 2026-07-06): (1) панель ШВИДКО вискакує до ~52%
+   екрана (~0.42s), гігантський розведений wordmark сидить У ЦЕНТРІ
+   видимої чорної зони; (2) БРЕНД-ПАУЗА ~1.15s — панель стоїть як
+   білборд (це і є «~1.2с» тірдауна — пауза, не підйом; плаваюча
+   CTA-пілюля видима над кромкою); (3) швидке докриття (~0.26s) →
+   свап під покриттям → миттєвий вихід (~0.32s, нова сторінка вже
+   стоїть). Повний ритуал ~2.25s. «A I R A I R» ×2 не підтвердився.
    Це ДОВГИЙ брендовий ритуал входу у фунел — контраст зі швидкою
    білою міжсторінковою шторою T-M22 (~0.5s, окремий атом).
 
@@ -53,9 +54,12 @@
       repeat: options.repeat != null ? options.repeat : 1, /* живе відео: ОДИН гігант-прохід (A I R ×2 з тірдауна не підтвердився) */
       bg: options.bg || '#111110',
       ink: options.ink || '#f4f2ee',
-      riseMs: options.riseMs != null ? options.riseMs : 1700, /* живе відео: підйом ~1.7s */
-      holdMs: options.holdMs != null ? options.holdMs : 140,
-      exitMs: options.exitMs != null ? options.exitMs : 320, /* живе відео: свап+вихід швидкий, список стоїть за ~0.3s */
+      rise1Ms: options.rise1Ms != null ? options.rise1Ms : 420,
+      pauseMs: options.pauseMs != null ? options.pauseMs : 1150,
+      pauseAt: options.pauseAt != null ? options.pauseAt : 0.52,
+      rise2Ms: options.rise2Ms != null ? options.rise2Ms : 260,
+      holdMs: options.holdMs != null ? options.holdMs : 100,
+      exitMs: options.exitMs != null ? options.exitMs : 320,
       flashMs: options.flashMs != null ? options.flashMs : 450,
       zIndex: options.zIndex != null ? options.zIndex : 15
     };
@@ -75,9 +79,12 @@
         /* розведений рядок на ВЕРХНІЙ КРОМЦІ — їде разом з панеллю */
         var edge = doc.createElement('div');
         edge.className = 'fcr__edge';
+        /* центр видимої зони при паузі: панель-топ на (1-pauseAt)·100vh,
+           видима зона (1-pauseAt)..100vh, її центр мінус пів-літери */
+        var padTop = ((1 - opt.pauseAt) / 2 * 100 - 10.5) + 'vh';
         edge.style.cssText = 'position:absolute;top:0;left:0;right:0;' +
           'display:flex;justify-content:space-between;align-items:flex-start;' +
-          'padding:5vh 4vw 0;pointer-events:none';
+          'padding:' + padTop + ' 4vw 0;pointer-events:none';
         var letters = String(opt.wordmark).replace(/\s+/g, '').split('');
         for (var r = 0; r < opt.repeat; r++) {
           letters.forEach(function (ch) {
@@ -115,16 +122,34 @@
       gate.plays++;
       gate.lastMode = mode;
       var panel = buildPanel(mode);
-      var rise = mode === 'flash' ? Math.round(opt.flashMs / 2) : opt.riseMs;
-      var exit = mode === 'flash' ? Math.round(opt.flashMs / 2) : opt.exitMs;
-      var hold = mode === 'flash' ? 40 : opt.holdMs;
-      return step(panel, 'translateY(0)', rise)          /* знизу → покриття */
+      if (mode === 'flash') {
+        return step(panel, 'translateY(0)', Math.round(opt.flashMs / 2))
+          .then(function () {
+            gate.coveredT = performance.now();
+            swapFn();
+            return delay(40);
+          })
+          .then(function () { return step(panel, 'translateY(-100%)', Math.round(opt.flashMs / 2)); })
+          .then(function () {
+            if (panel.parentNode) panel.parentNode.removeChild(panel);
+            gate.doneT = performance.now();
+            busy = false;
+            return 'done';
+          });
+      }
+      /* ДВОФАЗНИЙ ритуал: вискок до паузи → білборд → докриття → свап → вихід */
+      return step(panel, 'translateY(' + ((1 - opt.pauseAt) * 100) + '%)', opt.rise1Ms)
+        .then(function () {
+          gate.pausedT = performance.now();
+          return delay(opt.pauseMs);                       /* бренд-пауза */
+        })
+        .then(function () { return step(panel, 'translateY(0)', opt.rise2Ms); }) /* докриття */
         .then(function () {
           gate.coveredT = performance.now();
           swapFn();                                       /* свап під повним покриттям */
-          return delay(hold);
+          return delay(opt.holdMs);
         })
-        .then(function () { return step(panel, 'translateY(-100%)', exit); }) /* далі вгору */
+        .then(function () { return step(panel, 'translateY(-100%)', opt.exitMs); }) /* вихід */
         .then(function () {
           if (panel.parentNode) panel.parentNode.removeChild(panel);
           gate.doneT = performance.now();
