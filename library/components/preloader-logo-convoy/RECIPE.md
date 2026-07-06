@@ -3,7 +3,7 @@ id: preloader-logo-convoy
 name: "Прелоадер конвой-wordmark + вхід панелей (AIR-ритуал)"
 level: 1
 kind: component
-status: candidate            # official ТІЛЬКИ після вердикту власника (прототип-перший)
+status: official             # вердикт власника «топ» 2026-07-06 (відео-проби desktop+mobile, 2 фікс-цикли за зауваженнями)
 entry:
   call: "PreloaderLogoConvoy.create(opts)  // opts усі опційні: { wordmark ('AIR'), target (body), bg ('#f4f2ee'), ink ('#111110'), duration (2s — живий CSS AIR), auto (true: прогрес = img-декоди + load), minShowMs (900, анти-блимання), sessionOnce (false) }. Вхідні елементи сторінки маркуються: [data-plc-top] хедер згори, [data-plc-bottom] низ знизу, [data-plc-text] текст +20px."
   module: iife

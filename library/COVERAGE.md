@@ -2,7 +2,7 @@
 # library COVERAGE
 
 - Total entries: **175** (components+combos+shared-utils)
-- status:official: **99**
+- status:official: **101**
 - status:seed/wip (build backlog): **8**
 - registry T-IDs total: **122** · implemented by library: **20** · not yet implemented: **102**
 

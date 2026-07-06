@@ -3,7 +3,7 @@ id: text-blur-reveal
 name: "Text blur-reveal каскад (AIR reveal-канон)"
 level: 1
 kind: component
-status: candidate            # official ТІЛЬКИ після вердикту власника (прототип-перший)
+status: official             # вердикт власника «топ» 2026-07-06 (відео-проби desktop+mobile, 2 фікс-цикли за зауваженнями)
 entry:
   call: "TextBlurReveal.create(sections, opts)  // sections = селектор/Element/Element[] секцій-груп; у кожній [data-brv] елементи з data-brv-order (0=заголовок, 1=цифри, 2=параграфи, 3=CTA). opts усі опційні: { duration (1s — живий CSS AIR, вердикт 2026-07-06), lag (0.12s), blurFrom (10px), ease ('air'|'out-quad'), threshold (0.18), jumpVh (0.45), keyMedia (decode-гейт), autoArm (true) }"
   module: iife
@@ -66,7 +66,8 @@ acceptance:
 
 Конституційна примітка: `filter: blur` не входить у D4-список
 (transform/opacity/clip-path). Виняток дозволений СВІДОМО і вузько —
-one-shot ≤0.3s/елемент, time-based. Скрабити блюр заборонено назавжди.
+one-shot time-based до 1s/елемент (= оригінал AIR; кап 0.3s знято
+вердиктом власника 2026-07-06). Скрабити блюр заборонено назавжди.
 
 Порядковий каскад (канон AIR `word-wrap` + `--line-index`):
 `data-brv-lines` на параграфі → слова обгортаються в спани, групуються
