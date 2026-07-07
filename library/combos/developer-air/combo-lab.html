@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЗБОРКА · developer-air — /developer AIR (сервісна, спринт-7)</title>
+<!--
+================================================================================
+  ЗБОРКА /developer (сервісна сторінка-збірка, спринт-7 юніт 2/5).
+  Жива правда: recon-20260706/live-developer.html + live-developer-top.png.
+  Граматика (ДОСЛІВНО з живого DOM/скріна):
+    HERO (статичний спред-ряд group--between): «TEKTA … GROUP» роз'їхані до
+      країв ряду (flex space-between = живий .group--between; НЕ converge-
+      act-divider — на скріні title стоїть спред статично) + центр-kicker
+      «Building the best on every site» + СТАТИЧНА спіраль-луп (на /developer
+      Vimeo НЕМАЄ — спіраль = lazy-картинка; асет-діра → наш градієнт).
+    INTRO: «TEKTA Group is a full-cycle development company. We create
+      distinctive business- and premium-class projects… AIR — the first
+      project in this line…» (жива копі).
+    PROJECT TEAM: 3 партнер-картки з ✛-розкриттям (plus-toggle-cards):
+      ADM Bureau (Architecture, 2006) · haast (Interiors, 2016) ·
+      Sawatzky (Technical consultant, 1,100+, 2016). Живі описи.
+    FOOTER ui-dark: breadcrumb Home / About the developer.
+  Змонтовані атоми: air-menu-overlay (cand, №9) · plus-toggle-cards (cand,
+    партнери) · cookie-consent (cand). HERO title = статичний CSS
+    group--between (не окремий атом). Пін: pin.count = 0.
+
+  ГЕЙТ (PROBE_MODE): loadStability (CLS<0.1 + дрейф ≤4px) · спред-ряд
+    статичний (зазор TEKTA↔GROUP > 30% ширини ряду) · plus-cards toggle
+    (стан міняється) · menu open/close · cookie visible→removed ·
+    console errors == 0. Живий перегляд (без ?probe) = НУЛЬ автоскролів.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
+<link rel="stylesheet" href="../../components/plus-toggle-cards/component.css">
+<link rel="stylesheet" href="../../components/cookie-consent/component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --dark: #111110; --sans: 'Inter', 'Onest', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; background: var(--paper); }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  .container { padding-inline: 3vw; }
+  .lead { font-size: clamp(15px, 1.5vw, 20px); line-height: 1.55; font-weight: 300; }
+  .kick { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; }
+
+  /* ---- хедер (той самий скін) ---- */
+  [data-amo-header] { background: rgba(244, 242, 238, .8); color: #111110;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .8); color: #f2f1ee; }
+  .hrow { display: flex; align-items: center; gap: 12px; padding: 12px 3vw; }
+  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; margin-right: auto; }
+  .hbtn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+          border: 1px solid currentColor; border-radius: 4px; padding: 10px 13px;
+          background: none; color: inherit; cursor: pointer; }
+  [data-amo-burger] { display: inline-flex; align-items: center; gap: 10px;
+    background: #111110; color: #f2f1ee; border: 0; border-radius: 4px;
+    padding: 11px 15px; font-size: 11px; letter-spacing: .1em; cursor: pointer; }
+  .amo-header-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
+  @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
+
+  /* ---- модал-меню (як menu-lab, 690 no-giant) ---- */
+  [data-amo-bg] { background: var(--paper); }
+  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0;
+    background: radial-gradient(closest-side at 72% 60%, transparent 30%, rgba(17,17,16,.05) 31% 60%, transparent 61%),
+                repeating-conic-gradient(from 10deg at 72% 60%, rgba(17,17,16,.05) 0 6deg, transparent 6deg 12deg); }
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12vh 4vw 6vh; }
+  [data-amo-panel] { width: min(690px, 92vw); background: rgba(236, 234, 229, .75); }
+  [data-amo-left] { padding: 4vh 3vw; display: flex; flex-direction: column; justify-content: space-between; gap: 6vh; }
+  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  [data-amo-left] ul.small { gap: 10px; margin-top: 5vh; }
+  ul.large [data-amo-item] a { font-size: clamp(26px, 3.4vw, 52px); font-weight: 400; text-transform: uppercase; letter-spacing: -.02em; line-height: 1.07; }
+  ul.small [data-amo-item] a { font-size: 13px; color: #55544f; }
+  [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between; padding: 24px; color: #111110; text-decoration: none; font-size: 13px; min-height: 160px; }
+  [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px; border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  @media (min-width: 769px) { [data-amo-giant] { display: none; } }
+
+  /* ---- HERO: статичний спред-ряд group--between (живий developer__title) ----
+     Жива /developer title = CSS group--between (flex space-between), НЕ
+     converge-act-divider. TEKTA ліворуч, GROUP праворуч, kicker по центру. */
+  .dev-hero { position: relative; min-height: 84vh; display: grid; align-items: center;
+    padding: 16vh 3vw 8vh; overflow: clip; }
+  .dev-hero__spiral { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .85;
+    background:
+      radial-gradient(closest-side at 66% 52%, transparent 24%, rgba(17,17,16,.05) 25% 54%, transparent 55%),
+      repeating-conic-gradient(from 30deg at 66% 52%, rgba(17,17,16,.05) 0 5deg, transparent 5deg 11deg); }
+  .dev-hero__row { position: relative; z-index: 1; display: flex; justify-content: space-between;
+    align-items: baseline; width: 100%; gap: 4vw;
+    font-size: clamp(40px, 8.5vw, 150px); font-weight: 300; text-transform: uppercase;
+    letter-spacing: -.02em; line-height: 1; margin: 0; }
+  .dev-hero__kicker { position: relative; z-index: 1; margin-top: 3vh; text-align: center; max-width: 26ch;
+    margin-inline: auto; }
+
+  /* ---- INTRO ---- */
+  .dev-intro { position: relative; z-index: 1; background: var(--paper); padding: 12vh 3vw; }
+  .dev-intro .lead { max-width: 62ch; }
+  .dev-intro .lead + .lead { margin-top: 3vh; }
+
+  /* ---- PROJECT TEAM: plus-toggle-cards ---- */
+  .dev-team { position: relative; z-index: 1; background: var(--paper); padding: 4vh 3vw 12vh; }
+  .dev-team__head { font-size: clamp(24px, 3vw, 44px); font-weight: 300; text-transform: uppercase; letter-spacing: -.01em; margin-bottom: 5vh; }
+  .ptc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 768px) { .ptc-grid { grid-template-columns: 1fr; } }
+  [data-ptc-card] { position: relative; border: 1px solid rgba(17,17,16,.14); border-radius: 6px;
+    min-height: 260px; padding: 24px; overflow: clip; background: rgba(255,255,255,.4); }
+  [data-ptc-face] { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+  .ptc-name { font-size: 22px; font-weight: 400; }
+  .ptc-role { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #8b8a86; margin-top: 6px; }
+  [data-ptc-plus] { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px;
+    border: 1px solid rgba(17,17,16,.3); display: grid; place-items: center; font-size: 18px; }
+  [data-ptc-popup] { font-size: 13px; line-height: 1.5; padding: 24px; }
+
+  /* ---- FOOTER ---- */
+  .footer { position: relative; z-index: 1; background: var(--dark); color: #d9d8d4; padding: 7vh 3vw 4vh; }
+  .breadcrumbs { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+  .breadcrumbs a { color: #d9d8d4; }
+  .breadcrumbs .divider, .breadcrumbs .current { color: #6b6a66; }
+  .breadcrumbs .current { pointer-events: none; }
+
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 60; font-size: 10px; letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  [data-cc] { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 50; }
+</style>
+</head>
+<body>
+<div class="lab-tag">зборка · developer-air · сервісна · тисни Menu / ✛-картки</div>
+
+<header data-amo-header>
+  <div class="hrow">
+    <span class="hlogo">AIR</span>
+    <button class="hbtn hide-m" type="button">Choose an office ✛</button>
+    <button data-amo-burger type="button" aria-label="Open menu">
+      <span data-amo-burger-lines><i></i><i></i></span> Menu
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO: статичний спред-ряд TEKTA … GROUP (живий group--between) -->
+  <section class="dev-hero" data-amo-theme="light">
+    <div class="dev-hero__spiral" aria-hidden="true"></div>
+    <h1 class="dev-hero__row">
+      <span>TEKTA</span>
+      <span>GROUP</span>
+    </h1>
+    <p class="dev-hero__kicker kick">Building the best on every site</p>
+  </section>
+
+  <!-- INTRO (жива копі) -->
+  <section class="dev-intro" data-amo-theme="light">
+    <p class="lead">TEKTA Group is a full-cycle development company. We create distinctive business- and premium-class projects. We don't just build — we craft, the way a scientific lab develops breakthrough technologies.</p>
+    <p class="lead">TEKTA Group's expertise goes beyond residential development. We shape new approaches to designing workplaces. AIR — the first project in this line — will demonstrate just how innovative and comfortable a premium office can be.</p>
+  </section>
+
+  <!-- PROJECT TEAM: 3 партнер-картки з ✛ -->
+  <section class="dev-team" data-amo-theme="light">
+    <h2 class="dev-team__head">Project team</h2>
+    <div class="ptc-grid" data-ptc-root>
+      <article data-ptc-card>
+        <div data-ptc-face>
+          <div><div class="ptc-name">ADM Bureau</div><div class="ptc-role">Architecture</div></div>
+          <button data-ptc-plus type="button" aria-label="Reveal">✛</button>
+        </div>
+        <div data-ptc-popup>One of the leading architectural studios, founded in 2006 by Andrey Romanov and Ekaterina Kuznetsova. The name ADM — "Architectural Dialogue with the Metropolis" — reflects its core focus: designing buildings for the modern city.</div>
+      </article>
+      <article data-ptc-card>
+        <div data-ptc-face>
+          <div><div class="ptc-name">haast</div><div class="ptc-role">Interiors</div></div>
+          <button data-ptc-plus type="button" aria-label="Reveal">✛</button>
+        </div>
+        <div data-ptc-popup>Founded in 2016, the bureau designs private, office, and public spaces, delivering interior and architectural solutions of any complexity — from large business centers to private homes.</div>
+      </article>
+      <article data-ptc-card>
+        <div data-ptc-face>
+          <div><div class="ptc-name">Sawatzky</div><div class="ptc-role">Technical consultant</div></div>
+          <button data-ptc-plus type="button" aria-label="Reveal">✛</button>
+        </div>
+        <div data-ptc-popup>A provider of a full range of high-quality property management services, backed by years of hands-on experience and a team of over 1,100 professionals. Joined the Guild of Managers and Developers in 2016.</div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <ol class="breadcrumbs">
+    <li><a href="/">Home</a></li>
+    <li class="divider">/</li>
+    <li class="current">About the developer</li>
+  </ol>
+</footer>
+
+<!-- меню-модал -->
+<div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div data-amo-bg></div>
+  <div data-amo-bg-image></div>
+  <div data-amo-giant>AIR</div>
+  <div class="amo-wrap">
+    <nav data-amo-panel>
+      <div data-amo-left>
+        <ul class="large">
+          <li data-amo-item><a href="#about">About the project</a></li>
+          <li data-amo-item><a href="#location">Location</a></li>
+          <li data-amo-item><a href="#management">Project management</a></li>
+          <li data-amo-item><a href="#investment">Investment</a></li>
+        </ul>
+        <ul class="small">
+          <li data-amo-item><a href="#progress">Construction progress</a></li>
+          <li data-amo-item><a href="#news">News and offers</a></li>
+          <li data-amo-item><a href="#developer" aria-current="page">About the developer</a></li>
+        </ul>
+      </div>
+      <div data-amo-right>
+        <a data-amo-card href="#office"><span>Choose an<br>office</span><span class="sq">✛</span></a>
+        <a data-amo-card href="#parking"><span>Choose a<br>parking spot</span><span class="sq">✛</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div data-cc>
+  <div data-cc-box>
+    <p>This website uses <a href="#">cookies</a></p>
+    <button data-cc-accept type="button">Accept</button>
+  </div>
+</div>
+
+<script src="../../components/air-menu-overlay/component.js"></script>
+<script src="../../components/plus-toggle-cards/component.js"></script>
+<script src="../../components/cookie-consent/component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  /* Lenis (guarded) — spread-row scrub любить smooth-scroll; на тачі нативний */
+  var lenis = null;
+  try {
+    if (window.Lenis && !('ontouchstart' in window)) {
+      lenis = new Lenis({ lerp: 0.1 });
+      function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+      requestAnimationFrame(raf);
+      if (window.ScrollTrigger) { lenis.on('scroll', ScrollTrigger.update); }
+    }
+  } catch (e) {}
+
+  var amo = window.AirMenuOverlay.create({});
+  var ptc = window.PlusToggleCards.create(document.querySelector('[data-ptc-root]'));
+  var cc  = window.CookieConsent.create(document.querySelector('[data-cc]'), { storageKey: 'air-dev-cc-lab', storage: null });
+  window.__AMO = amo; window.__PTC = ptc; window.__CC = cc;
+
+  var report = { stability: null, spread: null, cards: null, menu: null, cookie: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  async function probeStability(anchor){
+    var cls=0;
+    try { new PerformanceObserver(function(l){ l.getEntries().forEach(function(e){ if(!e.hadRecentInput) cls+=e.value; }); }).observe({ type:'layout-shift', buffered:true }); } catch(e){}
+    var a1=anchor.getBoundingClientRect().top; await delay(600);
+    var a2=anchor.getBoundingClientRect().top;
+    var out={ cls:Math.round(cls*1000)/1000, drift:Math.abs(a2-a1), ok: cls<0.1 && Math.abs(a2-a1)<=4 };
+    report.stability=out; return out.ok;
+  }
+
+  function probeSpread(){
+    /* статичний спред-ряд (живий group--between): TEKTA ліворуч, GROUP праворуч.
+       Перевірка: два слова по краях ряду (зазор між ними > 30% ширини ряду). */
+    var row = document.querySelector('.dev-hero__row');
+    var sp = row.querySelectorAll('span');
+    var a = sp[0].getBoundingClientRect(), b = sp[1].getBoundingClientRect();
+    var gap = b.left - a.right, rowW = row.getBoundingClientRect().width;
+    report.spread = { gap: Math.round(gap), rowW: Math.round(rowW),
+                      spread: gap > rowW * 0.3, ok: gap > rowW * 0.3 };
+    return report.spread.ok;
+  }
+
+  async function probeCards(){
+    var plus = document.querySelector('[data-ptc-card] [data-ptc-plus]');
+    var s0 = ptc.states ? JSON.stringify(ptc.states()) : '';
+    plus.click(); await delay(400);
+    var s1 = ptc.states ? JSON.stringify(ptc.states()) : '';
+    plus.click(); await delay(400);
+    report.cards = { changed: s0 !== s1, ok: s0 !== s1 };
+    return report.cards.ok;
+  }
+
+  async function probeMenu(){
+    var g0=amo.gate.opens; amo.open(); await delay(1750);
+    var opened=amo.isOpen() && amo.gate.opens===g0+1;
+    amo.close(); await delay(1750);
+    report.menu={ opened:opened, closed:!amo.isOpen(), ok: opened && !amo.isOpen() };
+    return report.menu.ok;
+  }
+
+  async function probeCookie(){
+    var v0=cc.visible(); cc.accept(); await delay(50);
+    var gone=!document.querySelector('[data-cc]');
+    report.cookie={ visibleBefore:v0, removedAfter:gone, ok: v0 && gone };
+    return report.cookie.ok;
+  }
+
+  async function run(){
+    if (!PM) { window.__LAB_OK__='live-mode'; return; }
+    var ok = await probeStability(document.querySelector('.dev-hero__row'));
+    ok = probeSpread() && ok;
+    ok = await probeCards() && ok;
+    ok = await probeMenu() && ok;
+    ok = await probeCookie() && ok;
+    report.errors=errs; ok = ok && errs===0;
+    window.__LAB_OK__=!!ok;
+    console.log('[lab:developer-air]', JSON.stringify(report));
+  }
+  if (document.readyState==='complete') run();
+  else window.addEventListener('load', function(){ run(); });
+}());
+</script>
+</body>
+</html>
