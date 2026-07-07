@@ -81,7 +81,24 @@ for (const [id, e] of Object.entries(components)) {
 }
 for (const [id, e] of Object.entries(combos)) {
   checkFields(id, e, false);
-  if (!existsSync(join(e._dir, 'combo-lab.html'))) warn(id, 'missing combo-lab.html (needed for headless proof)');
+  const lab = join(e._dir, 'combo-lab.html');
+  if (!existsSync(lab)) { warn(id, 'missing combo-lab.html (needed for headless proof)'); continue; }
+  // ANTI-ISC #14: dead-link gate. FAIL лише на явний 404 (абсолютний шлях від
+  // кореня library на неіснуючий файл — саме баг Єгора). Якорі #x = WARN (часто
+  // JS-driven з preventDefault, статично не відрізнити від мертвих).
+  const html = readFileSync(lab, 'utf8');
+  const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]));
+  for (const m of html.matchAll(/href="([^"]+)"/g)) {
+    const h = m[1];
+    if (h.startsWith('/combos/') || h.startsWith('/components/')) {
+      if (!existsSync(join(LIB, h.replace(/^\//, '')))) fail(id, `dead link → неіснуючий файл: ${h} (ANTI-ISC #14)`);
+    } else if (/^\/[a-z]/i.test(h)) {
+      // абсолютний шлях НЕ у library (напр. живий-сайт-slug /news/tekta-…) — це і був 404 баг
+      fail(id, `dead link → шлях поза library (живий-сайт-slug → 404): ${h} (ANTI-ISC #14)`);
+    } else if (h.startsWith('#') && h.length > 1 && !ids.has(h.slice(1))) {
+      warn(id, `href якір без id="${h.slice(1)}" у DOM — переконайся що це JS-driven, не мертвий (ANTI-ISC #14)`);
+    }
+  }
 }
 for (const [id, e] of Object.entries(shared)) {
   checkFields(id, e, false);
