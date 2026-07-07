@@ -1,20 +1,25 @@
 /* ============================================================
    REVOLVES-CAROUSEL · component.js (vanilla, нуль залежностей)
    ------------------------------------------------------------
-   T-119-ПЕРЕКЛАД: єдина WebGL-карусель /about (carouselWebGl,
-   UV-дисторсія на свапі) → CSS clip+scale+blur за законом no-WebGL
-   (реєстр: «T-119 🔴 → CSS clip+scale переклад»; компенсація
-   дисторсії = системний blur→sharp, закон T-M23).
-   Живі факти (live-archive 2026-07-06): 3 фото 1176×672 над
-   Vimeo-луп; thumbnails; cursor-стрілки ‹/›; desktop-only
-   (is-hidden--sm-down; моб = mobile-scrollable стрічка — T-M23
-   tap-режим уже закритий image-slider-wipe).
+   T-119 desktop = SLIDE-PUSH (⚠️ виправлення інтерпретації №8,
+   самостійна дозйомка живого desktop 2026-07-06: recon-20260706/
+   carousel-midslide.jpg + AIR-REF--about-carousel-desktop.mp4):
+   старий кадр їде вліво, новий заходить справа, між ними БІЛИЙ
+   ҐЕП ~20px; всередині кожного кадру фото КОНТРПАРАЛАКСИТЬ
+   (відстає від треку, як imageSliderImage); ~1.0–1.2s air-ease.
+   Морфу НЕМАЄ — WebGL живого лише рендерить текстури (canvas),
+   видимий рух чисто трековий. Попередній clip+blur переклад був
+   з мобільних кадрів (T-M23) — лишається у моб-стрічці системним
+   blur-reveal, а desktop тепер 1-в-1 живий.
+   Живі факти (live-archive): 3 фото 1176×672; thumbnails;
+   стрілки = cursor-зони T-432 (js-carousel-next display:none) —
+   в лабі кнопки, у зборці їх веде cursor-follower.
 
-   СВАП (переклад дисторсії):
-     вхідне фото: clip-path inset L→R (0 100% 0 0 → 0) + scale
-       1.06→1 + blur 8px→0 — «хвиля» проходить кадром;
-     вихідне: scale 1→0.97 + opacity 1→0 під ним.
-     Темп: 1s ease-out (жива сім'я свапів contentAnimation).
+   СВАП (slide-push, dir=+1):
+     вхідний слайд: translateX(calc(100% + gap) → 0)
+     вихідний:      translateX(0 → calc(-100% - gap))
+     фото всередині: вхідне -parallax%→0, вихідне 0→+parallax%
+     (фото 112% ширини, left -6% — запас на дрейф без країв).
    Лічильник свапається НА СТАРТІ (сімейний закон).
 
    РОЗМІТКА:
@@ -25,7 +30,7 @@
        <span data-rvc-count>1</span><span data-rvc-total>/ N</span>
 
    RevolvesCarousel.create(root, opts?):
-     swapMs (1000), blurPx (8), scaleFrom (1.06), touchMq
+     swapMs (1100), gapPx (20), parallaxPct (6), touchMq
    API: { go(i), next(), prev(), index(), gate, destroy }
    ============================================================ */
 (function (global) {
@@ -46,11 +51,12 @@
     var total = root.querySelector('[data-rvc-total]');
     var N = slides.length;
     var opt = {
-      swapMs: options.swapMs != null ? options.swapMs : 1000,
-      blurPx: options.blurPx != null ? options.blurPx : 8,
-      scaleFrom: options.scaleFrom != null ? options.scaleFrom : 1.06,
+      swapMs: options.swapMs != null ? options.swapMs : 1100,
+      gapPx: options.gapPx != null ? options.gapPx : 20,
+      parallaxPct: options.parallaxPct != null ? options.parallaxPct : 6,
       touchMq: options.touchMq || '(pointer: coarse), (max-width: 768px)'
     };
+    var EASE = 'cubic-bezier(.25,.74,.22,.99)'; /* air-крива */
     var reduced = global.matchMedia &&
       global.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var touch = global.matchMedia && global.matchMedia(opt.touchMq).matches;
@@ -105,21 +111,32 @@
         slides.forEach(function (s, i) { s.classList.toggle('is-off', i !== next); });
         return;
       }
-      /* T-119-переклад: clip L→R (за напрямом) + scale + blur */
-      var fromClip = dir > 0 ? 'inset(0 100% 0 0)' : 'inset(0 0 0 100%)';
+      /* живий slide-push (виправлення №8): трек з ґепом + контрпаралакс фото */
+      var off = 'calc(' + (dir > 0 ? '' : '-') + '100% + ' + (dir > 0 ? '' : '-') + opt.gapPx + 'px)';
+      var offOut = 'calc(' + (dir > 0 ? '-' : '') + '100% + ' + (dir > 0 ? '-' : '') + opt.gapPx + 'px)';
+      var timing = { duration: opt.swapMs, easing: EASE, fill: 'both' };
       var aIn = newS.animate(
-        { clipPath: [fromClip, 'inset(0 0 0 0)'],
-          transform: ['scale(' + opt.scaleFrom + ')', 'scale(1)'],
-          filter: ['blur(' + opt.blurPx + 'px)', 'blur(0px)'] },
-        { duration: opt.swapMs, easing: 'ease-out', fill: 'both' });
-      aIn.onfinish = function () { newS.style.clipPath = ''; aIn.cancel(); };
+        { transform: ['translateX(' + off + ')', 'translateX(0)'] }, timing);
+      aIn.onfinish = function () { aIn.cancel(); };
       var aOut = oldS.animate(
-        { transform: ['scale(1)', 'scale(0.97)'], opacity: [1, 0] },
-        { duration: opt.swapMs, easing: 'ease-out', fill: 'both' });
-      aOut.onfinish = function () {
-        oldS.classList.add('is-off'); oldS.style.opacity = ''; aOut.cancel();
-      };
+        { transform: ['translateX(0)', 'translateX(' + offOut + ')'] }, timing);
+      aOut.onfinish = function () { oldS.classList.add('is-off'); aOut.cancel(); };
       anims.push(aIn, aOut);
+      /* фото відстає від треку (контрпаралакс, як imageSliderImage) */
+      var newImg = newS.querySelector('img'), oldImg = oldS.querySelector('img');
+      var px = opt.parallaxPct;
+      if (newImg) {
+        var pIn = newImg.animate(
+          { transform: ['translateX(' + (dir > 0 ? -px : px) + '%)', 'translateX(0%)'] }, timing);
+        pIn.onfinish = function () { pIn.cancel(); };
+        anims.push(pIn);
+      }
+      if (oldImg) {
+        var pOut = oldImg.animate(
+          { transform: ['translateX(0%)', 'translateX(' + (dir > 0 ? px : -px) + '%)'] }, timing);
+        pOut.onfinish = function () { pOut.cancel(); };
+        anims.push(pOut);
+      }
     }
     function next() { go(idx + 1, 1); }
     function prev() { go(idx - 1, -1); }

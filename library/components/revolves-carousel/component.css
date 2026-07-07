@@ -1,13 +1,18 @@
 /* ============================================================
    REVOLVES-CAROUSEL · component.css
-   T-119-переклад: стейдж стеком, свап веде JS (WAAPI clip+scale+blur);
-   thumbnails і стрілки — жива композиція; моб = snap-стрічка.
+   T-119 desktop = slide-push з ґепом + контрпаралакс фото
+   (виправлення №8, дозйомка 2026-07-06); свап веде JS (WAAPI
+   transform-only); thumbnails і стрілки — жива композиція;
+   моб = snap-стрічка.
    ============================================================ */
 [data-rvc-stage] { position: relative; overflow: clip; border-radius: 6px; }
 [data-rvc-slide] { margin: 0; }
-[data-rvc-stage] [data-rvc-slide] { position: absolute; inset: 0; will-change: transform, clip-path, filter; }
+[data-rvc-stage] [data-rvc-slide] { position: absolute; inset: 0; will-change: transform;
+  overflow: clip; border-radius: 6px; }
 [data-rvc-stage] [data-rvc-slide]:first-child { position: relative; }
-[data-rvc-slide] img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* фото 112% з випуском -6% — запас на контрпаралакс ±6% без голих країв */
+[data-rvc-slide] img { width: 112%; height: 100%; margin-left: -6%;
+  object-fit: cover; display: block; will-change: transform; }
 [data-rvc-slide].is-off { visibility: hidden; }
 
 [data-rvc-thumbs] { display: flex; gap: 8px; }
@@ -25,4 +30,5 @@
 .rvc-strip [data-rvc-stage]::-webkit-scrollbar { display: none; }
 .rvc-strip [data-rvc-slide] { position: relative; flex: 0 0 76vw;
   scroll-snap-align: center; border-radius: 6px; overflow: clip; visibility: visible; }
+.rvc-strip [data-rvc-slide] img { width: 100%; margin-left: 0; }
 .rvc-strip [data-rvc-thumbs], .rvc-strip [data-rvc-prev], .rvc-strip [data-rvc-next] { display: none; }

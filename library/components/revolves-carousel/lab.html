@@ -3,20 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LAB · revolves-carousel · T-119-переклад (clip+scale+blur замість шейдера)</title>
+<title>LAB · revolves-carousel · T-119 desktop slide-push (виправлення №8)</title>
 <!--
 ================================================================================
-  LAB: revolves-carousel — T-119-переклад на ЖИВИХ фото /about
-  (image-1/2/3 revolves, 1176×672 hotlink). Свап = clip L→R за напрямом
-  + scale 1.06→1 + blur 8→0 (вх.) / scale→0.97 + fade (вих.), 1s
-  ease-out; лічильник на старті; thumbnails активний стан.
+  LAB: revolves-carousel — живий desktop slide-push на ЖИВИХ фото /about
+  (image-1/2/3 revolves, 1176×672 hotlink). Дозйомка 2026-07-06
+  (carousel-midslide.jpg): старий кадр вліво, новий справа, БІЛИЙ ҐЕП
+  ~20px, фото контрпаралаксить всередині кадру; 1.1s air-ease;
+  лічильник на старті; thumbnails активний стан.
 
   ГЕЙТ (PROBE_MODE):
-  1. loadStability; 2. next(): лічильник «2» ОДРАЗУ, вхідний слайд
-  у польоті (clip-path інтерпольований, є анімації), thumb-2 active;
-  через 1.2s старий схований; 3. prev(): клип з протилежного краю
-  (inset left>0 на старті); 4. thumbnail-клік → go(2); 5. errors 0.
-  mobile: rvc-strip (snap-стрічка, thumbnails/стрілки сховані).
+  1. loadStability; 2. next(): лічильник «2» ОДРАЗУ, thumb-2 active;
+  СЕРЕД ПОЛЬОТУ: ґеп між кадрами = gapPx ±6px (newS.left−oldS.right),
+  фото обох кадрів мають transform (контрпаралакс), нуль clip-path;
+  через 1.3s старий схований; 3. prev(): вхідний заходить ЗЛІВА
+  (rect.left < stage.left у польоті); 4. thumbnail-клік → go(2);
+  5. errors 0. mobile: rvc-strip (snap-стрічка, навігація схована).
 ================================================================================
 -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -77,10 +79,9 @@
   var report = { stability: null, fwd: null, back: null, thumb: null, mob: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-  function clipLeft(el) {
-    var c = getComputedStyle(el).clipPath || '';
-    var m = /inset\(\s*[\d.]+(?:px|%)?\s+[\d.]+(?:px|%)?\s+[\d.]+(?:px|%)?\s+([\d.]+)(px|%)/.exec(c);
-    return m ? parseFloat(m[1]) : -1;
+  function imgMoving(i) {
+    var t = getComputedStyle(slides[i].querySelector('img')).transform;
+    return t && t !== 'none' && t !== 'matrix(1, 0, 0, 1, 0, 0)';
   }
 
   async function run() {
@@ -112,31 +113,38 @@
       return;
     }
 
-    /* 2: next — лічильник на старті + в польоті */
+    /* 2: next — лічильник на старті; серед польоту: ҐЕП + контрпаралакс */
     document.querySelector('[data-rvc-next]').click();
     await delay(120);
     var early = { count: count.textContent,
                   animating: slides[1].getAnimations && slides[1].getAnimations().length > 0,
                   thumb2: document.querySelectorAll('.rvc-thumb')[1].classList.contains('is-active') };
-    await delay(1300);
-    report.fwd = { early: early, s1off: slides[0].classList.contains('is-off'),
+    await delay(300); /* ~40% польоту — обидва кадри в стейджі */
+    var r0 = slides[0].getBoundingClientRect(), r1 = slides[1].getBoundingClientRect();
+    var mid = { gap: Math.round((r1.left - r0.right) * 10) / 10,
+                parallax: imgMoving(0) && imgMoving(1),
+                noClip: (getComputedStyle(slides[1]).clipPath || 'none') === 'none' };
+    await delay(1000);
+    report.fwd = { early: early, mid: mid, s1off: slides[0].classList.contains('is-off'),
                    s2on: !slides[1].classList.contains('is-off') };
     report.fwd.ok = early.count === '2' && early.animating && early.thumb2 &&
+                    Math.abs(mid.gap - 20) <= 6 && mid.parallax && mid.noClip &&
                     report.fwd.s1off && report.fwd.s2on;
     ok = report.fwd.ok && ok;
 
-    /* 3: prev — клип з протилежного краю */
+    /* 3: prev — вхідний заходить ЗЛІВА */
+    var stageL = document.querySelector('[data-rvc-stage]').getBoundingClientRect().left;
     document.querySelector('[data-rvc-prev]').click();
-    await delay(100);
-    var cl = clipLeft(slides[0]);
-    await delay(1300);
-    report.back = { clipLeftEarly: cl, count: count.textContent };
-    report.back.ok = cl > 20 && count.textContent === '1';
+    await delay(200);
+    var fromLeft = slides[0].getBoundingClientRect().left < stageL - 10;
+    await delay(1200);
+    report.back = { fromLeft: fromLeft, count: count.textContent };
+    report.back.ok = fromLeft && count.textContent === '1';
     ok = report.back.ok && ok;
 
     /* 4: thumbnail → go(2) */
     document.querySelectorAll('.rvc-thumb')[2].click();
-    await delay(1300);
+    await delay(1400);
     report.thumb = { idx: rvc.index(), count: count.textContent,
                      ok: rvc.index() === 2 && count.textContent === '3' };
     ok = report.thumb.ok && ok;
