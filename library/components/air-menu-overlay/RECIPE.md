@@ -31,7 +31,8 @@ variants: []
 params_ref: tokens.json
 files: [component.js, component.css, lab.html, tokens.json]
 acceptance:
-  - "open двофазний: фон 0.8s bezier(.7,0,.3,1) ПЕРШИЙ; панель/спіраль/гігант з delay .8s (панель translateY 30→0)"
+  - "open двофазний: фон 0.8s bezier(.7,0,.3,1) ПЕРШИЙ; панель/спіраль з delay .8s (панель translateY 30→0). ⚠️ виправлення інтерпретації №9: гігант-лого лишень на МОБ (T-M11 video); desktop БЕЗ гіганта (int-menu-open.png + AIR-REF--menu-desktop.mp4 t≈11 — тільки хедерний AIR + спіраль)"
+  - "панель md-up: ширина 690px центрована (жива int-menu-open.png 1440×900: card x375→1065=690px, ділильник x848 → 473/217 = 68.6/31.4), плитки ✛ у нижньому правому куті"
   - "close дзеркальний: панель (до −30)/спіраль/гігант гаснуть одразу, фон чекає .8s; після хвоста модал visibility:hidden"
   - "панель md-up: frosted blur 20px, 68.571/31.429, плитки через 1px лінію"
   - "A-18: хедер background-color/color 1.2s air-bezier; тема = секція під лінією хедера (IO верхні 12%); меню відкрите → тема меню, close → повернення теми секції"

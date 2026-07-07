@@ -20,7 +20,8 @@
   desktop:
   1. loadStability: CLS < 0.1 + дрейф якоря <= 4px;
   2. open двофазний: клік → ~250ms фон у польоті (0.03<op<0.95),
-     панель ще 0; ~1750ms — панель op≈1, ty≈0, гігант видимий;
+     панель ще 0; ~1750ms — панель op≈1, ty≈0, гігант СХОВАНИЙ (desktop
+     без гігант-лого, виправлення інтерпретації №9);
   3. бургер = хрест (спани мають transform), close: ~250ms панель
      гасне ПЕРШОЮ (op<0.9) а фон ще ≥0.9; ~1900ms модал visibility
      hidden;
@@ -72,7 +73,10 @@
     letter-spacing: .3em; font-weight: 500; color: #111110; }
   .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center;
               justify-content: center; padding: 12vh 4vw 6vh; }
-  [data-amo-panel] { width: min(1080px, 92vw); background: rgba(236, 234, 229, .75); }
+  [data-amo-panel] { width: min(690px, 92vw); background: rgba(236, 234, 229, .75); }
+  /* виправлення інтерпретації №9: desktop меню БЕЗ гігант-лого (int-menu-open.png
+     + AIR-REF--menu-desktop.mp4 t≈11s — лишень хедерний AIR + спіраль). Моб лишає (T-M11). */
+  @media (min-width: 769px) { [data-amo-giant] { display: none; } }
   [data-amo-left] { padding: 4vh 3vw; display: flex; flex-direction: column;
                     justify-content: space-between; gap: 6vh; }
   [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
@@ -124,9 +128,9 @@
     <nav data-amo-panel>
       <div data-amo-left>
         <ul class="large">
-          <li data-amo-item><a href="#про" aria-current="page">Головна</a></li>
           <li data-amo-item><a href="#про">Про проєкт</a></li>
           <li data-amo-item><a href="#локація">Локація</a></li>
+          <li data-amo-item><a href="#управління" aria-current="page">Управління проєктом</a></li>
           <li data-amo-item><a href="#інвестиції">Інвестиції</a></li>
         </ul>
         <ul class="small">
@@ -136,8 +140,8 @@
         </ul>
       </div>
       <div data-amo-right>
-        <a data-amo-card href="#офіс"><span>Обрати<br>офіс</span><span class="sq">→</span></a>
-        <a data-amo-card href="#паркінг"><span>Обрати<br>паркомісце</span><span class="sq">→</span></a>
+        <a data-amo-card href="#офіс"><span>Обрати<br>офіс</span><span class="sq">✛</span></a>
+        <a data-amo-card href="#паркінг"><span>Обрати<br>паркомісце</span><span class="sq">✛</span></a>
       </div>
     </nav>
   </div>
@@ -198,11 +202,13 @@
     var early = { bg: op(bg), panel: op(panel),
                   burgerX: burger.classList.contains('amo-burger-x') };
     await delay(1500);
-    var late = { panel: op(panel), ty: Math.round(ty(panel)), giant: op(giant) };
+    /* виправлення інтерпретації №9: desktop меню БЕЗ гігант-лого (display:none md-up) */
+    var giantHidden = getComputedStyle(giant).display === 'none';
+    var late = { panel: op(panel), ty: Math.round(ty(panel)), giantHidden: giantHidden };
     report.openPhases = { early: early, late: late };
     report.openPhases.ok = early.bg > 0.03 && early.bg < 0.95 && early.panel < 0.05 &&
                            early.burgerX && late.panel > 0.98 && Math.abs(late.ty) <= 1 &&
-                           late.giant > 0.98;
+                           late.giantHidden;
 
     burger.click();
     await delay(380); /* bezier(.7,0,.3,1) стартує повільно — точка виміру далі */
