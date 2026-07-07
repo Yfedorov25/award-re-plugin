@@ -256,9 +256,20 @@
   var cc  = window.CookieConsent.create(document.querySelector('[data-cc]'), { storageKey: 'air-dev-cc-lab', storage: null });
   window.__AMO = amo; window.__PTC = ptc; window.__CC = cc;
 
-  var report = { stability: null, spread: null, cards: null, menu: null, cookie: null, errors: null };
+  var report = { stability: null, docHeight: null, spread: null, cards: null, menu: null, cookie: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  /* ГЕЙТ #4 (ANTI-ISC): docHeight стабільна за прохід (декоди/GSAP). Ідентично home-air. */
+  async function probeDocHeight(){
+    var doc1 = document.body.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight); await delay(400);
+    window.scrollTo(0, 0); await delay(300);
+    var after = document.body.scrollHeight;
+    report.docHeight = { before: doc1, after: after, stable: Math.abs(after - doc1) <= 2,
+                         ok: Math.abs(after - doc1) <= 2 };
+    return report.docHeight.ok;
+  }
 
   async function probeStability(anchor){
     var cls=0;
@@ -309,6 +320,7 @@
   async function run(){
     if (!PM) { window.__LAB_OK__='live-mode'; return; }
     var ok = await probeStability(document.querySelector('.dev-hero__row'));
+    ok = await probeDocHeight() && ok;
     ok = probeSpread() && ok;
     ok = await probeCards() && ok;
     ok = await probeMenu() && ok;

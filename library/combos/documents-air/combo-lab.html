@@ -195,7 +195,7 @@
              { storageKey: 'air-doc-cc-lab', storage: null });
   window.__AMO = amo; window.__CC = cc;
 
-  var report = { stability: null, menu: null, cookie: null, list: null, errors: null };
+  var report = { stability: null, docHeight: null, menu: null, cookie: null, list: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
@@ -238,9 +238,22 @@
     return report.list.ok;
   }
 
+  /* ГЕЙТ #4 (ANTI-ISC): docHeight стабільна за прохід — ловить пізні
+     декоди/GSAP-мірянки, що ростять сторінку. Ідентично home-air. */
+  async function probeDocHeight() {
+    var doc1 = document.body.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight); await delay(400);
+    window.scrollTo(0, 0); await delay(300);
+    var after = document.body.scrollHeight;
+    report.docHeight = { before: doc1, after: after, stable: Math.abs(after - doc1) <= 2,
+                         ok: Math.abs(after - doc1) <= 2 };
+    return report.docHeight.ok;
+  }
+
   async function run() {
     if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
     var ok = await probeStability(document.querySelector('.doc-title'));
+    ok = await probeDocHeight() && ok;
     ok = await probeMenu() && ok;
     ok = probeList() && ok;
     ok = await probeCookie() && ok;   /* cookie ОСТАННІМ — видаляє вузол */
