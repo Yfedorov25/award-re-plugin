@@ -19,3 +19,12 @@ ARCH="$HOME/Downloads/award-re-plugin/skills/teardowns/live-archive/air/air-shar
 AGE="?"
 [ -f "$ARCH" ] && AGE="$(( ( $(date +%s) - $(stat -f %m "$ARCH") ) / 86400 )) дн."
 echo "ПРОТОТИПИ: http://${HOST}:8820/ (стабільне ім'я, IP не потрібен) · запасний IP: ${IP} · сервер: ${SRV} · live-archive вік: ${AGE}"
+
+# ── ВХІД У СЕСІЮ: STATE.md = єдине джерело правди. Нова сесія НЕ потребує промта —
+#    читає STATE і продовжує. Друкуємо наказ + перший рядок наступного кроку. ──
+STATE="$HOME/Downloads/KAI/STATE.md"
+if [ -f "$STATE" ]; then
+  echo "▶ ПЕРШИМ ДІЛОМ: прочитай $STATE (§ ГОЛОВНИЙ ПРІОРИТЕТ / § НАСТУПНИЙ КРОК) і продовжуй звідти. Контекст НЕ передається — уся правда в STATE."
+  NEXT="$(grep -m1 -A1 'ГОЛОВНИЙ ПРІОРИТЕТ\|НАСТУПНИЙ КРОК НОВОЇ СЕСІЇ' "$STATE" 2>/dev/null | tail -1)"
+  [ -n "$NEXT" ] && echo "  наступний крок (з STATE): ${NEXT:0:160}"
+fi
