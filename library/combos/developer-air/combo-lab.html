@@ -282,13 +282,17 @@
 
   function probeSpread(){
     /* статичний спред-ряд (живий group--between): TEKTA ліворуч, GROUP праворуч.
-       Перевірка: два слова по краях ряду (зазор між ними > 30% ширини ряду). */
+       Перевірка = крайове прилягання (перше слово до лівого краю, останнє до
+       правого), НЕ міжслівний зазор — довгі слова легітимно з'їдають зазор. */
     var row = document.querySelector('.dev-hero__row');
+    var r = row.getBoundingClientRect();
     var sp = row.querySelectorAll('span');
-    var a = sp[0].getBoundingClientRect(), b = sp[1].getBoundingClientRect();
-    var gap = b.left - a.right, rowW = row.getBoundingClientRect().width;
-    report.spread = { gap: Math.round(gap), rowW: Math.round(rowW),
-                      spread: gap > rowW * 0.3, ok: gap > rowW * 0.3 };
+    var a = sp[0].getBoundingClientRect(), b = sp[sp.length-1].getBoundingClientRect();
+    var leftAnchored = Math.abs(a.left - r.left) <= 4;
+    var rightAnchored = Math.abs(b.right - r.right) <= 4;
+    report.spread = { leftGap: Math.round(a.left - r.left), rightGap: Math.round(r.right - b.right),
+                      leftAnchored: leftAnchored, rightAnchored: rightAnchored,
+                      ok: leftAnchored && rightAnchored };
     return report.spread.ok;
   }
 
