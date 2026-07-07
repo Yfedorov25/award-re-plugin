@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · gravity-well · T-509 (м'який магніт скролу, НЕ trap)</title>
+<!--
+================================================================================
+  LAB: gravity-well — T-509 магнітний доводчик скролу (НЕ snap-trap).
+  Жива правда: air-shared.js updateGravityWellLerp/Delta — біля точки
+  lerp меншає (в'язкість), ціль підтягується; вільний скрол проходить.
+  desktop-only (на тачі вимкнено, живий закон). Точні константи Pe.* = діра.
+
+  ГЕЙТ (PROBE_MODE) desktop:
+  1. loadStability: CLS<0.1 + дрейф якоря ≤4px;
+  2. ANTI-TRAP (найважливіший): при швидкості > settleVel pull==0 —
+     активне гортання НІКОЛИ не смикається (скрол вільний);
+  3. напрям: у зоні НИЖЧЕ центру pull<0 (тягне вгору, до центру), ВИЩЕ
+     центру pull>0 (тягне вниз); РІВНО в центрі pull==0 (нема дзижчання);
+  4. згасання: |pull| ≤ nudgeMax скрізь; поза зоною (|d|>radius) pull==0;
+  5. жива доводка: після settle біля точки gate.nudges росте і scrollY
+     СХОДИТЬСЯ до центру (не осцилює повз);
+  6. console errors == 0.
+  mobile (390): атом ВИМКНЕНИЙ (gate.disabled == true, нуль nudges).
+  Живий перегляд (без ?probe) = НУЛЬ автоскролів (лише реакція на власний).
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 40; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .spacer { height: 140vh; display: grid; place-items: center; color: #b9b8b3; font-size: 13px;
+    letter-spacing: .12em; text-transform: uppercase; }
+  /* КОРОТКІ index/map секції — саме де магніт дозволений (не під reveal) */
+  .idx { height: 82vh; display: grid; place-items: center; margin: 0 4vw; border-radius: 12px;
+    background: rgba(17,17,16,.045); border: 1px solid rgba(17,17,16,.08); }
+  .idx b { font-size: clamp(22px, 3vw, 40px); font-weight: 300; text-transform: uppercase; letter-spacing: -.01em; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · gravity-well · t-509 · скроль повільно біля блоків — відчуй тяжіння</div>
+
+<div class="spacer">довгий контент (reveal-зона) — БЕЗ магніту</div>
+
+<section class="idx" data-gw-point><b>Index · well 1</b></section>
+<div class="spacer">проміжок</div>
+<section class="idx" data-gw-point><b>Map · well 2</b></section>
+<div class="spacer">проміжок</div>
+<section class="idx" data-gw-point><b>Index · well 3</b></section>
+
+<div class="spacer">кінець — довгий контент, знову без магніту</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  /* desktop: enableTouch за замовчуванням false — на тачі атом сам вимкнеться */
+  var gw = window.GravityWell.create({});
+  window.__GW = gw;
+
+  var report = { stability: null, antiTrap: null, direction: null, decay: null, converge: null, mobileOff: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  async function probeStability(anchor){
+    var cls=0;
+    try { new PerformanceObserver(function(l){ l.getEntries().forEach(function(e){ if(!e.hadRecentInput) cls+=e.value; }); }).observe({ type:'layout-shift', buffered:true }); } catch(e){}
+    var a1=anchor.getBoundingClientRect().top; await delay(600);
+    var a2=anchor.getBoundingClientRect().top;
+    var out={ cls:Math.round(cls*1000)/1000, drift:Math.abs(a2-a1), ok: cls<0.1 && Math.abs(a2-a1)<=4 };
+    report.stability=out; return out.ok;
+  }
+
+  function nudgeMax(){ return 3.2; }  /* дефолт атома */
+  function radiusPx(){ return 42/100 * window.innerHeight; }
+
+  function probeAntiTrap(){
+    /* центр першої свердловини */
+    var c = gw.points()[0];
+    /* висока швидкість БУДЬ-ДЕ у зоні → pull МАЄ бути 0 (вільний скрол) */
+    var fast = [ gw._pullAt(c, 40), gw._pullAt(c - radiusPx()*0.5, 60), gw._pullAt(c + radiusPx()*0.3, -80) ];
+    var allZero = fast.every(function(p){ return p === 0; });
+    report.antiTrap = { fastPulls: fast, allZero: allZero, ok: allZero };
+    return report.antiTrap.ok;
+  }
+
+  function probeDirection(){
+    var c = gw.points()[0], rad = radiusPx();
+    var below = gw._pullAt(c + rad*0.5, 0);   /* нижче центру → тягне ВГОРУ (pull<0) */
+    var above = gw._pullAt(c - rad*0.5, 0);   /* вище центру → тягне ВНИЗ (pull>0) */
+    var atCenter = gw._pullAt(c, 0);          /* у центрі → 0 (нема дзижчання) */
+    report.direction = { below: Math.round(below*100)/100, above: Math.round(above*100)/100,
+                         atCenter: Math.round(atCenter*100)/100,
+                         ok: below < 0 && above > 0 && atCenter === 0 };
+    return report.direction.ok;
+  }
+
+  function probeDecay(){
+    var c = gw.points()[0], rad = radiusPx(), nm = nudgeMax();
+    /* поза зоною → 0; скрізь |pull| ≤ nudgeMax */
+    var outside = gw._pullAt(c + rad*1.4, 0);
+    var samples = [];
+    for (var k = -0.95; k <= 0.95; k += 0.1) samples.push(Math.abs(gw._pullAt(c + rad*k, 0)));
+    var maxP = Math.max.apply(null, samples);
+    report.decay = { outside: outside, maxPull: Math.round(maxP*100)/100, nudgeMax: nm,
+                     ok: outside === 0 && maxP <= nm + 0.001 };
+    return report.decay.ok;
+  }
+
+  async function probeConverge(){
+    /* поставити скрол ЗБОКУ від центру (у робочій зоні, поза мертвою),
+       відпустити (нуль швидкості), дати rAF доводити — scrollY має
+       СХОДИТИСЬ до центру, не осцилювати повз */
+    var c = gw.points()[0];
+    window.scrollTo(0, Math.round(c + radiusPx()*0.6));   /* 0.6: pull≈1.28>minPull */
+    await delay(180);                                     /* дати velocity згаснути */
+    var start = Math.abs(window.scrollY - c);
+    var n0 = gw.gate.nudges;
+    /* дати спокій: не скролимо самі, лише rAF (швидкість природно ~0) */
+    await delay(1600);
+    var end = Math.abs(window.scrollY - c);
+    var closed = end < start;                 /* наблизились */
+    var didNudge = gw.gate.nudges > n0;       /* магніт справді працював */
+    /* не перестрибнули на інший бік далеко (не осциляція) */
+    var noOvershoot = end <= start + 4;
+    report.converge = { startDist: Math.round(start), endDist: Math.round(end),
+                        nudged: didNudge, closed: closed, noOvershoot: noOvershoot,
+                        ok: closed && didNudge && noOvershoot };
+    return report.converge.ok;
+  }
+
+  async function runDesktop(){
+    var ok = await probeStability(document.querySelector('.idx b'));
+    ok = probeAntiTrap() && ok;
+    ok = probeDirection() && ok;
+    ok = probeDecay() && ok;
+    ok = await probeConverge() && ok;
+    return ok;
+  }
+
+  function runMobile(){
+    /* на тачі атом вимкнений: gate.disabled, points()==[], нуль nudges */
+    report.mobileOff = { disabled: gw.gate.disabled, points: gw.points().length, nudges: gw.gate.nudges,
+                         ok: gw.gate.disabled === true && gw.points().length === 0 && gw.gate.nudges === 0 };
+    return report.mobileOff.ok;
+  }
+
+  async function run(){
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = touch ? runMobile() : await runDesktop();
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    window.scrollTo(0, 0);
+    console.log('[lab:gravity-well]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function(){ run(); });
+}());
+</script>
+</body>
+</html>
