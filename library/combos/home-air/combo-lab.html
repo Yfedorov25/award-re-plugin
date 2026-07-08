@@ -97,9 +97,28 @@
       aspect-ratio: 240 / 296; }
   }
   #top .hero-note { position: absolute; top: 16vh; left: 50%; transform: translateX(-50%);
-    text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #55544f; }
+    text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #55544f; z-index: 3; }
   #top .hero-class { position: absolute; top: 52vh; right: 12vw; font-size: 11px;
-    letter-spacing: .14em; text-transform: uppercase; color: #8b8a86; text-align: center; line-height: 1.7; }
+    letter-spacing: .14em; text-transform: uppercase; color: #8b8a86; text-align: center; line-height: 1.7; z-index: 3; }
+
+  /* живі ГІГАНТ-ЛІТЕРИ A·I·R — 3 окремі SVG (live-archive air-home.html l.350-395,
+     viewBox 1420×140 desk / 350×80 mob), розкидані на всю ширину (A ліво, I центр,
+     R право), scale 140→50 + розхід на скролі easeOutQuad. z поверх спіралі, під копі. */
+  #top .giant-air { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: clip; }
+  #top .giant-air .gl { position: absolute; top: 50%; height: min(19vh, 140px);
+    transform: translateY(-50%); will-change: transform; }
+  #top .giant-air .gl svg { height: 100%; width: auto; display: block; }
+  #top .giant-air .gl path { fill: #111110; }
+  #top .giant-air .gl-a { left: 2vw; }
+  #top .giant-air .gl-i { left: 50%; }
+  #top .giant-air .gl-r { right: 2vw; }
+  #top .giant-air svg.gl-desk { display: block; }
+  #top .giant-air svg.gl-mob { display: none; }
+  @media (max-width: 768px) {
+    #top .giant-air .gl { height: min(11vh, 80px); }
+    #top .giant-air svg.gl-desk { display: none; }
+    #top .giant-air svg.gl-mob { display: block; }
+  }
 
   /* ---- 2 · IMPULSE ---- */
   #impulse .intro-copy { min-height: 64vh; display: flex; align-items: center; justify-content: center;
@@ -264,13 +283,19 @@
     font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; }
 
   /* ---- меню-оверлей скін ---- */
+  /* живе desktop меню = чистий фон + Vimeo-спіраль справа (та сама 1145251536, як hero),
+     БЕЗ сунбурст-променів (то був фейк). int-menu-open.png підтверджує. */
   [data-amo-bg] { background: var(--paper); }
-  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0;
-    background: repeating-conic-gradient(from 10deg at 72% 60%, rgba(17,17,16,.05) 0 6deg, transparent 6deg 12deg);
-    -webkit-mask-image: radial-gradient(circle at 72% 60%, transparent 12%, #000 13% 46%, transparent 47%);
-            mask-image: radial-gradient(circle at 72% 60%, transparent 12%, #000 13% 46%, transparent 47%); }
-  [data-amo-giant] { left: 3vw; top: 11vh; font-size: clamp(38px, 5.4vw, 84px);
-    letter-spacing: .3em; font-weight: 500; color: #111110; }
+  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0; overflow: clip; }
+  [data-amo-bg-image] iframe { position: absolute; right: -8%; top: 50%; transform: translateY(-50%);
+    width: 62vh; height: 62vh; border: 0; pointer-events: none; }
+  /* гігант-AIR у меню: живе DESKTOP = БЕЗ гіганта (лише хедерний AIR) — вердикт №9.
+     На mobile лишаємо (T-M11). */
+  [data-amo-giant] { display: none; }
+  @media (max-width: 768px) {
+    [data-amo-giant] { display: block; left: 3vw; top: 11vh; font-size: clamp(38px, 5.4vw, 84px);
+      letter-spacing: .3em; font-weight: 500; color: #111110; }
+  }
   .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center;
               justify-content: center; padding: 12vh 3vw 5vh; }
   [data-amo-panel] { width: min(1120px, 94vw); background: rgba(236, 234, 229, .75); }
@@ -303,13 +328,28 @@
   </div>
 </header>
 
-<!-- 1 · TOP — kinetic letters hero -->
+<!-- 1 · TOP — гігант-літери A·I·R (3 SVG, живі path) поверх спіралі Vimeo -->
 <section id="top" data-amo-theme="light">
   <div class="spiral">
     <div class="fit fit-desk"><iframe src="https://player.vimeo.com/video/1145251536?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
             allow="autoplay; encrypted-media" title="brand spiral loop" loading="lazy"></iframe></div>
     <div class="fit fit-mob"><iframe src="https://player.vimeo.com/video/1145256182?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
             allow="autoplay; encrypted-media" title="brand spiral loop mobile" loading="lazy"></iframe></div>
+  </div>
+  <!-- гігант A·I·R: живі SVG-path з aircenter.space (desktop viewBox 138×140 crop / mobile) -->
+  <div class="giant-air" aria-hidden="true">
+    <div class="gl gl-a">
+      <svg class="gl-desk" viewBox="0 0 138 140" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M40.3666 86.4578L67.3714 16.4163H70.5558L97.5605 86.4578H40.3666ZM118.269 140H138L83.9176 0H54.0095L0 140H19.7306L34.0603 102.947H103.992L118.259 140H118.269Z"/></svg>
+      <svg class="gl-mob" viewBox="0 0 79 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M23.0667 49.4044L38.4979 9.38074H40.3176L55.7489 49.4044H23.0667ZM67.5825 80H78.8571L47.9529 0H30.8626L0 80H11.2746L19.463 58.8267H59.4238L67.5765 80H67.5825Z"/></svg>
+    </div>
+    <div class="gl gl-i">
+      <svg class="gl-desk" viewBox="700 0 20 140" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M720 0H700V140H720V0Z"/></svg>
+      <svg class="gl-mob" viewBox="169 0 12 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M180.429 0H169V80H180.429V0Z"/></svg>
+    </div>
+    <div class="gl gl-r">
+      <svg class="gl-desk" viewBox="1302 0 118 140" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1321.61 16.4895H1368.6C1383.39 16.4895 1395.41 28.4913 1395.41 43.2499C1395.41 58.0086 1383.39 70.0104 1368.6 70.0104H1321.61V16.4895ZM1420 140L1377.09 86.1371C1398.52 83.515 1415.1 65.3154 1415.1 43.2396C1415.1 19.3811 1395.68 0 1371.78 0H1302V139.917H1321.69V86.4066H1352.85L1395.47 139.917H1420V139.99V140Z"/></svg>
+      <svg class="gl-mob" viewBox="282 0 69 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M293.809 9.42256H320.658C329.107 9.42256 335.978 16.2807 335.978 24.7142C335.978 33.1478 329.107 40.0059 320.658 40.0059H293.809V9.42256ZM350.029 80L325.511 49.2212C337.752 47.7228 347.228 37.3231 347.228 24.7083C347.228 11.0749 336.132 0 322.473 0H282.6V79.9526H293.85V49.3752H311.657L336.014 79.9526H350.029V79.9941V80Z"/></svg>
+    </div>
   </div>
   <p class="hero-note" data-plc-text>The architecture<br>of new success</p>
   <p class="hero-class">Class (A)<br>premium business<br>center</p>
@@ -492,15 +532,15 @@
 <!-- МЕНЮ-ОВЕРЛЕЙ (A-17) -->
 <div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
   <div data-amo-bg></div>
-  <div data-amo-bg-image></div>
+  <div data-amo-bg-image class="is-hidden--sm-down"><iframe src="https://player.vimeo.com/video/1145251536?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1" allow="autoplay; encrypted-media" title="menu spiral" loading="lazy"></iframe></div>
   <div data-amo-giant>AIR</div>
   <div class="amo-wrap">
     <nav data-amo-panel>
       <div data-amo-left>
         <ul class="large">
-          <li data-amo-item><a href="#top" aria-current="page">Main page</a></li>
           <li data-amo-item><a href="/combos/about-air/combo-lab.html">About the project</a></li>
           <li data-amo-item><a href="/combos/location-air/combo-lab.html">Location</a></li>
+          <li data-amo-item><a href="#" data-todo="management-air not built yet — restore link when built (live → /management-service)">Project management</a></li>
           <li data-amo-item><a href="/combos/funnel-air/combo-lab.html">Investment</a></li>
         </ul>
         <ul class="small-list">
@@ -563,8 +603,40 @@
   /* прелоадер-конвой (official) — авто-прогрес по декодах */
   api.plc = window.PreloaderLogoConvoy.create({});
 
-  /* hero: конвой літер → лого хедера */
-  api.klh = window.KineticLettersHero.create('#top', { wordmark: 'AIR' });
+  /* hero гігант-літери A·I·R: живий parallax landingIntroLogoA/I/R —
+     scale 140→50 (=50/140) + розхід A вліво / R вправо на прогресі скролу,
+     easeOutQuad; спіраль Vimeo лишається фоном. Наш переклад parallax→scroll:
+     чиста render(p) від 0 (top hero) до 1 (hero вигорнуто). desktop-міри. */
+  (function heroGiant(){
+    var wrap = document.querySelector('#top .giant-air');
+    if (!wrap) return;
+    var A = wrap.querySelector('.gl-a'), I = wrap.querySelector('.gl-i'), R = wrap.querySelector('.gl-r');
+    var top = document.getElementById('top');
+    var easeOutQuad = function(t){ return t*(2-t); };
+    var SCALE_END = 50/140;            // живий кінцевий масштаб
+    function render(p){
+      p = p < 0 ? 0 : (p > 1 ? 1 : p);
+      var e = easeOutQuad(p);
+      var s = 1 + (SCALE_END - 1) * e;           // 1 → 0.357
+      var spread = 8 * e;                        // vw розходу країв на скролі
+      // I центрована (лише scale), A/R розходяться від країв
+      if (A) A.style.transform = 'translateY(-50%) translateX(' + (-spread) + 'vw) scale(' + s + ')';
+      if (I) I.style.transform = 'translate(-50%,-50%) scale(' + s + ')';
+      if (R) R.style.transform = 'translateY(-50%) translateX(' + (spread) + 'vw) scale(' + s + ')';
+      wrap.style.opacity = String(1 - e * 0.85); // згасання як живий шар (opacity 1→0 на виході)
+    }
+    function onScroll(){
+      var r = top.getBoundingClientRect();
+      var vh = window.innerHeight || 1;
+      // p=0 коли hero повністю у в'юпорті зверху, p=1 коли hero майже вигорнуто
+      var p = (-r.top) / vh;
+      render(p);
+    }
+    render(0);
+    (window.__lenis ? window.__lenis.on('scroll', onScroll) : window.addEventListener('scroll', onScroll, {passive:true}));
+    window.addEventListener('resize', onScroll);
+    if (window.__LAB_PROBE__) window.__heroGiantRender = render; // для гейтів
+  })();
   api.kfoot = window.KineticLettersHero.footer('#footMark', { wordmark: 'AIR', ink: '#f2f1ee' });
 
   /* меню + themed-хедер */

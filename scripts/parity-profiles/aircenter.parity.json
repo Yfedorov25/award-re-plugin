@@ -1,0 +1,61 @@
+{
+  "site": "aircenter",
+  "live_base": "https://aircenter.space",
+  "ours_base": "http://localhost:8820/combos",
+  "viewports": [
+    { "tag": "desktop", "w": 1440, "h": 820 },
+    { "tag": "mobile", "w": 390, "h": 844 }
+  ],
+  "probe_bypass": true,
+  "scroll_step_ratio": 0.5,
+  "settle_ms": 1200,
+  "_human_scroll": "ПРАВИЛО ТЕМПУ (виміряно з Desktop-air.mp4, скрол Єгора): людський скрол = БАГАТО дрібних wheel-тіків підряд (не один стрибок на пів-екрана). Темп ~300-400 px/сек безперервного руху + паузи де контент пінований/свайпається. Один крок кадру = серія дрібних тіків (tick_px ~80, tick_ms ~16) що сумарно дають step, потім settle. Це і людськи у відео, і докручує Locomotive/Lenis (він слухає плавні wheel-події, гине від стрибків).",
+  "tick_px": 80,
+  "tick_ms": 16,
+  "human_speed_px_s": 350,
+  "_progress_grid": "СИНХРОН КРОКІВ (сесія 12, дозрів G20): обидві сторони йдуть до СПІЛЬНОЇ сітки нормалізованого прогресу прокрутки [0..1], а не по фіксованих px. Тому step-N живе і step-N наше = ТОЙ САМИЙ % глибини сторінки → усунуто розсинхрон live(60)/ours(32) що давав фальшиві 57%. Прогрес читається в сторінці: native/Lenis scrollY / (scrollHeight-innerH), АБО (коли Locomotive тримає scrollY=0) з translateY повзунка кастомного скролбару / (trackH-thumbH). Доведено на aircenter (thumb) + наш combo-lab (native): обидва досягають 0.1/0.2/…/1.0 з точністю ±1%. progress_step=0.1 → 11 кроків (0.0..1.0). Змінити на 0.05 для 21 кроку (детальніше). progress_grid=[...] — явна сітка замість рівномірної.",
+  "progress_step": 0.1,
+  "progress_tolerance": 0.008,
+  "_doc": "Профіль для G20 site-scan. Кожна page: live-URL + наш-URL (combo-lab) + тригери (кліки перед/під час проходу). Маршрут проходить обидва однаково. dynamic_masks — зони що ігнорувати в diff (Vimeo-спіраль, живі фото — вони НЕ мають бути 1-в-1).",
+  "pages": [
+    {
+      "name": "home",
+      "live": "/",
+      "ours": "/home-air/combo-lab.html",
+      "route": "scroll",
+      "align": "grid",
+      "triggers": [],
+      "dynamic_masks": [],
+      "_mask_note": "iframe/vimeo прибрано — на home Vimeo-спіраль = full-screen iframe, маска з'їдала ВЕСЬ кадр → diff 0%. Без маски: спіраль дасть шум на своїй зоні, але хедер/літери/текст/контейнери порівнюються чесно. Точкове маскування спіралі — докрутка."
+    },
+    {
+      "name": "home-sections",
+      "live": "/",
+      "ours": "/home-air/combo-lab.html",
+      "route": "scroll",
+      "align": "sections",
+      "section_map": [[1,0],[2,1],[3,2],[4,3],[5,4],[7,5],[9,6]],
+      "_sections_note": "СЕКЦІЙНЕ ВИРІВНЮВАННЯ (сесія 12, запит Єгора). align:sections → цілі скролу = прогреси кожної секції-якоря (data-scroll-section→section), а не рівномірні 10%. Матч по section_map [[liveIdx,oursIdx],…]. Пуста = авто-парування пропорційно. Це вирішує головну проблему: наш сайт коротший (7 секцій) → на однаковому % різні секції; тут step-N = ТА САМА секція. Також шлях до mobile (wheel/touch не рухають живий Locomotive-mobile, а секційні цілі-прогреси досяжні). ✅ section_map ВПИСАНА СЕМАНТИЧНО (сесія 12, за текстовими відбитками заголовків): [1,0]hero(живий full-height #1, не порожній logo-wrapper #0)↔наш hero · [2,1]momentum · [3,2]new-premium-format · [4,3]intelligent-harmony · [5,4]at-the-center · [7,5]designed-with-people(живий #7) · [9,6]tangible-status. Живі #0(logo-wrapper) #6/#8(декор-смуги h≈947) #10(footer) — БЕЗ пари (у нас нема окремих секцій). Точні заголовки збігаються 1-в-1 крім hero(2→1) і пропущених декор-смуг.",
+      "triggers": [],
+      "dynamic_masks": []
+    },
+    {
+      "name": "menu",
+      "live": "/",
+      "ours": "/home-air/combo-lab.html",
+      "route": "click-then-hold",
+      "triggers": [
+        { "action": "click", "selector": "header button.js-modal-toggle, header [class*=burger], header [class*=menu-toggle]", "wait_ms": 1800 }
+      ],
+      "dynamic_masks": ["iframe", "[class*=spiral]"]
+    },
+    {
+      "name": "funnel",
+      "live": "/visual-search",
+      "ours": "/visual-search-drill/combo-lab.html",
+      "route": "scroll",
+      "triggers": [],
+      "dynamic_masks": [".master-plan-bg", "img"]
+    }
+  ]
+}
