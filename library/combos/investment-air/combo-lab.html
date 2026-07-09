@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЗБОРКА · investment-air — сторінка /investment</title>
+<!--
+================================================================================
+  ЗБОРКА /about (фінал спринту-6). Акти в живому порядку /about:
+  hero-заголовок → лобі-факти (8m/680m² гігант-числа) → revolves-
+  карусель (T-119-переклад) → headquarters-слайдер (image-slider-wipe
+  3 слайди, живий №2 інстанс!) → ✛-пари (plus-toggle-cards) →
+  площі (area-tabs-accordion) → футер. Живі фото/копі hotlink.
+  ГЕЙТ: движки init, слайдер headquarters 3 слайди свапає, docHeight
+  стабільна, errors 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Onest', 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; overflow-x: clip; background: #f4f2ee; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ═══ ХЕДЕР (перенесено з home-air, доведений сесіями 13-15) ═══
+     Живий: h70, 3-грід край-центр-край. ЗЛІВА бургер+♡, ЦЕНТР лого AIR,
+     СПРАВА CHOOSE AN OFFICE (чорна pill). /about hero = ТЕМНИЙ → хедер СВІТЛИЙ
+     (data-plugin themed: над dark секцією білий контент). */
+  [data-amo-header] { position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+    background: transparent; color: #f2f1ee; }  /* over-dark-hero: білий контент */
+  [data-amo-header].is-scrolled { background: rgba(244, 242, 238, .8);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #111110; }
+  [data-amo-header] .hlogo { opacity: 1; }
+  .hrow { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    gap: 12px; padding: 0 20px; height: 70px; }
+  .hleft { display: inline-flex; align-items: center; gap: 10px; justify-self: start; }
+  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; justify-self: center; }
+  .hbtn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+          border: 0; border-radius: 8px; height: 30px; width: 217px;
+          display: inline-flex; align-items: center; justify-content: space-between;
+          padding: 0 12px; box-sizing: border-box;
+          background: #111110; color: #f2f1ee; cursor: pointer; justify-self: end;
+          text-decoration: none; }
+  /* живий /about хедер над dark-hero (crop-вимір): ♡ = напівпрозора СІРА плашка з білим серцем
+     (не голе серце), бургер = ЧОРНА плашка (не світла інверсія), CHOOSE = чорна pill з ✛-насічками */
+  .hfav { display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; color: #f2f1ee; background: rgba(255,255,255,.14);
+    border-radius: 8px; }
+  [data-amo-header].is-scrolled .hfav { background: rgba(17,17,16,.06); color: #111110; }
+  [data-amo-burger] { display: inline-flex; align-items: center; justify-content: center;
+    background: #111110; color: #f2f1ee; border: 0; border-radius: 8px;
+    width: 60px; height: 40px; cursor: pointer; }
+  /* CHOOSE ✛ = registration mark з насічками (як меню-плюс сесії 15), не простий + */
+  .hbtn span { position: relative; width: 14px; height: 14px; font-size: 0; }
+  .hbtn span::before { content: ""; position: absolute; inset: 0;
+    background:
+      linear-gradient(currentColor,currentColor) center/14px 1px no-repeat,
+      linear-gradient(currentColor,currentColor) center/1px 14px no-repeat,
+      linear-gradient(currentColor,currentColor) top center/5px 1px no-repeat,
+      linear-gradient(currentColor,currentColor) bottom center/5px 1px no-repeat,
+      linear-gradient(currentColor,currentColor) center left/1px 5px no-repeat,
+      linear-gradient(currentColor,currentColor) center right/1px 5px no-repeat; }
+  @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
+  .scroll-dn { position: fixed; right: 20px; bottom: 20px; width: 30px; height: 30px;
+    background: #e9e8e4; color: #111110; border-radius: 6px; z-index: 40;
+    display: flex; align-items: center; justify-content: center; }
+  /* cookie-бар (доведений сесіями 13-15) */
+  .cookies { position: fixed; left: 50%; bottom: 25px; transform: translateX(-50%);
+    z-index: 30; display: flex; align-items: center; gap: 14px; height: 40px;
+    padding: 0 8px 0 20px; border-radius: 8px; background: #fff; color: #6d6b66;
+    font-size: 11px; letter-spacing: 0; text-transform: uppercase; white-space: nowrap; }
+  .cookies b { color: #111110; font-weight: 500; }
+  .cookies button { font: inherit; letter-spacing: inherit; text-transform: inherit;
+    border: 0; border-radius: 8px; background: #ebe9e5; color: #111110;
+    padding: 11px 15px; cursor: pointer; }
+
+  /* ═══ HERO (#top) — dark, фото вежі full-bleed + THE PROJECT: CONFIDENCE IN AIR ═══
+     Живий about-1440: dark #000, фото вежі cover, текст розкиданий spread по ширині
+     на y≈267 (THE PROJECT: зліва / CONFIDENCE центр / IN AIR справа), білий. */
+  #top { position: relative; height: 100svh; background: #b9c6d2; overflow: clip; color: #fff; }  /* investment hero СВІТЛИЙ (фото веж) */
+  #top .hero-bg { position: absolute; inset: 0; }
+  #top .hero-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  #top .hero-line { position: absolute; left: 0; right: 0; top: 236px;
+    display: flex; justify-content: space-between; padding: 0 30px;
+    font-size: clamp(30px, 4.9vw, 66px); font-weight: 300; line-height: 1;
+    text-transform: uppercase; letter-spacing: -.01em; color: #fff; pointer-events: none; }  /* живий вимір: текст y242 (не 267), THE PROJECT w439 (кегль 66 не 62) */
+  @media (max-width: 768px) {
+    /* живий about-390 (baseline): AIR лого ВЕЛИКЕ зліва / ♡+бургер СПРАВА (дзеркало desktop);
+       текст ЗВЕРХУ (y≈180), фото вежі знизу. */
+    .hrow { grid-template-columns: 1fr auto; }
+    .hlogo { grid-column: 1; justify-self: start; font-size: 41px; letter-spacing: .06em; }
+    .hleft { grid-column: 2; justify-self: end; flex-direction: row-reverse; order: 2; }
+    #top .hero-line { flex-direction: column; align-items: flex-start; gap: 4px;
+      top: 176px; bottom: auto; padding: 0 20px; font-size: 42px; line-height: 1.04; }  /* живий вимір: y180, ширина 276 (кегль 42 не 40), крок трохи більший */
+    /* живий mobile: вежа дрібніша, зсунута ВНИЗ (roofY 374 vs наш 250 при cover-center).
+       object-position bottom → вежа в нижні 55%, більше неба зверху. */
+    #top .hero-bg img { object-position: center bottom; object-fit: cover; }
+  }
+  .h1 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 300; text-transform: uppercase; line-height: 1.06; }
+  .spread { display: flex; justify-content: space-between; }
+  .act { padding: 10vh 3vw; max-width: 1200px; margin: 0 auto; }
+  .lead { font-size: 14px; line-height: 1.55; color: #6b6b68; max-width: 44ch; }
+  .facts { display: flex; gap: 6vw; margin-top: 5vh; }
+  .facts .gnf-num { font-size: clamp(40px, 5vw, 84px); font-weight: 300; line-height: 1; }
+  .facts .cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
+  /* headquarters слайдер */
+  #hq { background: #101112; color: #f2f1ee; }
+  #hq .act { max-width: none; padding: 10vh 0 0; }
+  #hq .head { padding: 0 3vw 5vh; max-width: 1200px; margin: 0 auto; }
+  .isw-row { display: flex; gap: 10px; height: 84svh; align-items: stretch; padding: 0 3vw; }
+  [data-isw-stage] { flex: 0 0 65%; border-radius: 6px; overflow: clip; }
+  .isw-card { flex: 1; display: flex; flex-direction: column; border-radius: 6px;
+    padding: 4vh 1.8vw; background: rgba(236, 235, 230, .12);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); color: #f2f1ee; }
+  .isw-counter { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4vh; }
+  .isw-counter [data-isw-count] { font-size: clamp(40px, 4.2vw, 78px); font-weight: 300; line-height: 1; }
+  .isw-counter [data-isw-total] { font-size: 13px; color: rgba(242,241,238,.5); }
+  .isw-texts { flex: 1; display: grid; align-content: center; }
+  .isw-texts p { font-size: 13.5px; font-weight: 300; line-height: 1.55; color: #c9c7c2; }
+  .isw-nav { display: none; }
+  @media (max-width: 768px) {
+    .isw-row { display: block; height: auto; padding: 0; }
+    [data-isw-stage] { border-radius: 0; overflow-x: scroll; overflow-y: hidden; }
+    .isw-strip [data-isw-slide] { height: 56svh; border-radius: 6px; overflow: clip; }
+    .isw-card { margin: 12px 4vw 0; padding: 3.2vh 5vw; }
+    .isw-counter { display: none; }
+    .isw-nav { display: flex; align-items: center; justify-content: center; gap: 18px;
+      margin-top: 2.4vh; padding-bottom: 3vh; }
+    .isw-nav button { width: 44px; height: 44px; border-radius: 4px;
+      border: 1px solid rgba(242,241,238,.3); background: none; color: #f2f1ee; font-size: 16px; }
+    .isw-nav .nn { font-size: 13px; color: #f2f1ee; min-width: 3.4em; text-align: center; }
+  }
+  /* ✛-пари */
+  [data-ptc] { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  [data-ptc-card] { min-height: 240px; border-radius: 6px; background: rgba(236,235,230,.9); }
+  [data-ptc-face] { height: 100%; padding: 20px; display: flex; flex-direction: column; }
+  [data-ptc-face] .ic { flex: 1; display: grid; place-items: center; font-size: 40px; font-weight: 200; color: #8b8a86; }
+  [data-ptc-face] [data-ptc-plus] { align-self: flex-end; }
+  [data-ptc-popup] { padding: 20px; background: rgba(236,235,230,.98); font-size: 12.5px; line-height: 1.5; color: #3c3b39; }
+  /* revolves */
+  [data-rvc-stage] { aspect-ratio: 1176 / 672; }
+  .rvc-bar { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+  .rvc-bar button.nav { width: 48px; height: 48px; border-radius: 4px; font-size: 18px;
+    border: 1px solid rgba(17,17,16,.3); background: none; cursor: pointer; }
+  [data-ata-panel] .inner { display: grid; grid-template-columns: 1fr auto; gap: 3vw; align-items: center; padding: 3vh 0; }
+  [data-ata-panel] img { width: min(420px, 100%); aspect-ratio: 540 / 420; object-fit: contain; background: #fff; border-radius: 4px; }
+  .giant { font-size: clamp(40px, 5.4vw, 88px); font-weight: 300; line-height: 1; }
+  footer { background: #0d0d0c; color: #8b8a86; padding: 6vh 3vw; display: flex;
+    justify-content: space-between; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+  /* ---- меню-оверлей скін ---- */
+  /* живе desktop меню = чистий фон + Vimeo-спіраль справа (та сама 1145251536, як hero),
+     БЕЗ сунбурст-променів (то був фейк). int-menu-open.png підтверджує. */
+  [data-amo-bg] { background: var(--paper); }
+  /* живий фон меню = СТАТИЧНЕ фото спіралі (menu/background@xxl.webp, 2044×1092),
+     picture.background--top: width:100% / height:auto (НЕ cover!) → фото на всю ширину
+     екрана, аспект збережений, притиснуте до ВЕРХУ. При 1440 → 1440×770. Спіраль
+     розтягнута по всій ширині зверху. НЕ Vimeo — маска не потрібна (фази нема). */
+  /* живий: <img class="background background--top"> — width:100%, height:auto, top:0
+     (буквальна копія живого рендера, не CSS background — точний масштаб/позиція фото). */
+  [data-amo-bg-image] { position: fixed; left: 0; top: 0; width: 100%; height: 100svh;
+    opacity: 0; overflow: clip; }
+  [data-amo-bg-image] img { position: absolute; left: 0; top: 0; width: 100%; height: auto;
+    display: block; }
+  /* гігант-AIR у меню: живе DESKTOP І MOBILE menu = БЕЗ гіганта (лише хедерний AIR
+     x20 зверху-зліва) — menu-390 baseline (сесія 14) показав ОДНЕ лого, не задвоєне.
+     (Раніше mobile показував giant → задвоєння з хедерним AIR.) */
+  [data-amo-giant] { display: none; }
+  /* живий menu-baseline: панель TOP-aligned на y≈147 (не центрована по вертикалі).
+     align-items:flex-start + top-padding = висота хедера. (Було center → зсув +105px.) */
+  /* панель зсунута правіше центру (живий центр x780 vs екран 720 → +60px):
+     padding-left більший за right через margin на самій панелі. */
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: flex-start;
+              justify-content: center; padding: 128px 3vw 5vh; }
+  .amo-wrap [data-amo-panel] { margin-left: 120px; margin-right: 0; }  /* ліва кромка → x375 (центр +60) */
+  /* живий контейнер меню (виміряно з baseline): x375→1185 = ШИРИНА 810px (НЕ на всю
+     ширину!), центр x780 (зсув +60px правіше центру екрана). Це `col--md-6 offset--md-3`
+     живого — центр-права половина сітки. Наш був min(1120,94vw)=1119 → на 309px ширший. */
+  [data-amo-panel] { width: 810px; height: 571px; background: rgba(236, 234, 229, .75);
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }  /* живий air-global.css body — тонший штрих (без нього великий список Δink +64..+170; лок. до меню щоб не чіпати hero) */
+  /* живий: текст списку на x≈395; панель x375 (810px) → лівий inset ≈20px; малий список
+     притиснутий до низу (space-between), padding-bottom дає точну позицію y636. */
+  [data-amo-left] { padding: 25px 2.6vw 19px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+  [data-amo-left] ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+  [data-amo-left] ul.small-list { gap: 0; line-height: 1.65; }  /* живий малий список h≈44 для 3 рядків — щільно */
+  /* живий menu-baseline (перезаміряно): 4 пункти кеглем ~29px, кожен ОДИН рядок,
+     line-height ~1.2, «PROJECT MANAGEMENT» ~322px. (Мій замір 52px/504px був хибний —
+     зона захопила і великий, і малий список.) */
+  ul.large [data-amo-item] a { font-size: clamp(19px, 1.9vw, 27px); font-weight: 400;
+    text-transform: uppercase; letter-spacing: -.005em; line-height: 1.28; }
+  ul.small-list [data-amo-item] a { font-size: 11px; color: #4d4d4d;
+    text-transform: uppercase; letter-spacing: .05em; }  /* живий колір виміряно з baseline = rgb(77,77,77) #4d4d4d (був #55544f світліший) */
+  [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between;
+    padding: 22px; font-size: 13px; min-height: 150px;
+    text-transform: uppercase; letter-spacing: .04em; }  /* живий baseline: картки UPPERCASE */
+  [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px;
+    border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  /* ── мобільний layout меню (menu-390 baseline, сесія 14) ──
+     живий 390: вертикальний стек ЗВЕРХУ (не донизу): картки 2-колонки y145 →
+     великий список y449 → малий список y773. Панель на всю ширину, без desktop-810px.
+     Хедерний AIR зліва x20 (одне лого). */
+  @media (max-width: 768px) {
+    .amo-wrap { align-items: flex-start; justify-content: flex-start; padding: 0; }
+    .amo-wrap [data-amo-panel] { margin: 0; }
+    [data-amo-panel] { width: 100%; height: auto; background: none;
+      display: flex; flex-direction: column; }
+    /* картки ПЕРШІ (зверху), список ПІД ними — реордер flex */
+    [data-amo-right] { order: -1; display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0; margin: 135px 0 0; padding: 0 20px; }  /* картки-написи → y≈150 (було y160) */
+    [data-amo-card] { min-height: 88px; padding: 12px 21px; font-size: 11px;
+      letter-spacing: -.01em; background: rgba(236, 234, 229, .6); }  /* текст живого x41/y150 (вимір): padL 16→21, padT 10→12 */
+    [data-amo-left] { order: 0; padding: 0 20px; display: block; }
+    /* живий великий список ПОЧИНАЄТЬСЯ на y449 (ink-list-precise, сесія 14 фікс:
+       перший рядок ABOUT top=449). margin від кінця карток. Крок рядка живий 35px
+       (449→484→519→554) → наш крок теж 34-35px. Кегль живого ~26px (не 30 — той
+       давав наш список ВИЩЕ і піднятий на 120px). */
+    [data-amo-left] ul.large { margin: 189px 0 0; }       /* великий список → ABOUT y≈449 */
+    /* ширина живого "PROJECT MANAGEMENT" = 320px, наш 314 → +трохи letter-spacing
+       (не кегль — щоб Y-крок не зрушити). Крок рядка живий 35px (line-height 1.30). */
+    /* живі значення menu__link (air-global.css): weight 400, letter-spacing -.02em.
+       Підбір кегля щоб ширина "PROJECT MANAGEMENT" = 320px при -.02em. */
+    ul.large [data-amo-item] a { font-size: 28px; font-weight: 400; line-height: 1.25; letter-spacing: -.02em; }
+    /* живий малий список притиснутий ДОНИЗУ (y≈773). Тепер великий нижче → малий
+       відступ менший щоб сісти на y773. */
+    [data-amo-left] ul.small-list { margin: 185px 0 0; }  /* малий список → y≈773 (був y768) */
+    /* живий малий список: 3 рядки h52 (крок 17px). Наш крок був 27px (li додавав
+       ~10px) → рядки розтягувались, 3-й з'їжджав за екран. Стиснути li до кроку 17. */
+    ul.small-list [data-amo-item] a { font-size: 11px; line-height: 1.5; letter-spacing: -.02em; display: block; }
+    ul.small-list [data-amo-item] { line-height: 1.5; }
+    /* хедерний AIR зліва зверху y≈20 — fixed, вирвати з хедер-гриду. Живе лого
+       71×30 (ink-list-precise) → кегль ~34px (наш 28px давав 45×20 = замале). */
+    [data-amo-header].amo-menu-open .hlogo { position: fixed; left: 20px; top: 9px;
+      justify-self: unset; font-size: 41px; letter-spacing: .06em; font-weight: 500; }
+    /* живий X-close у відкритому меню = ЧОРНИЙ ЗАПОВНЕНИЙ квадрат (не голий X як зараз):
+       бургер стає темною кнопкою 40×30 зі світлим тонким хрестом. */
+    [data-amo-header].amo-menu-open [data-amo-burger] { background: #111110;
+      border-radius: 6px; width: 40px; height: 30px; }
+    [data-amo-header].amo-menu-open [data-amo-burger] i { background: #f2f1ee; }
+    /* живий mobile cookie = ПОВНОШИРИННА смуга внизу (вимір baseline: x0-389 w389 y780-843 h63),
+       не центрована пігулка 289px як desktop. Текст на y821-827 (центр вертикалі бару). */
+    .cookies { left: 0; right: 0; bottom: 0; transform: none; width: 100%;
+      height: 34px; border-radius: 0; justify-content: space-between; padding: 0 20px;
+      background: #fff; }  /* живий mobile: текст ЗЛІВА (THIS WEBSITE USES COOKIES) / кнопка ACCEPT СПРАВА (space-between), не center */
+    .cookies button { background: #e6e6e6; border-radius: 6px; padding: 6px 14px; }  /* живий: світло-сіра плашка ACCEPT справа */
+    /* 🔴 ВЕРДИКТ ОКА ЄГОРА (сесія 15): фон меню живого = БІЛИЙ (вимір: rgb 255,255,255
+       скрізь, наш був теплий беж #f4f2ee). Спіраль сіра тільки зверху (y130 rgb187). */
+    .amo-open [data-amo-bg] { background: #ffffff; }  /* меню-контейнер = DIV.amo-open (батько data-amo-bg) */
+    /* картки на білому = ледь сірі (живий card-inside rgb242,242,242), не теплий беж */
+    [data-amo-card] { background: rgba(240, 240, 240, .55); }
+    /* живий плюс = світло-сіра ЗАПОВНЕНА плашка (rgb224) з тонким хрестом-насічками,
+       не прозора з бордером + не простий товстий '+'. SVG щоб не залежати від гліфа шрифту. */
+    [data-amo-card] .sq { border: 0; background: #e6e6e6; width: 30px; height: 30px;
+      border-radius: 5px; font-size: 0; position: relative; }
+    /* живий хрест = тонкий ✛ з КОРОТКИМИ насічками на 4 кінцях (registration mark),
+       не простий '+'. Малюю gradient-фоном: центральний хрест + 4 короткі перпендикуляри. */
+    [data-amo-card] .sq::before { content: ""; width: 15px; height: 15px; display: block;
+      background:
+        linear-gradient(#3a3a3a,#3a3a3a) center/15px 1px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) center/1px 15px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) top center/5px 1px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) bottom center/5px 1px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) center left/1px 5px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) center right/1px 5px no-repeat; }
+  }
+
+  /* ═══════════ КОНТЕНТ-СЕКЦІЇ /about (13 актів живого) ═══════════ */
+  .sec-dark { background: #000; color: #f2f1ee; }
+  .sec-dark .lead { color: #a7a6a2; }
+  .sec-dark .h1 { color: #f2f1ee; }
+  strong { font-weight: 500; }
+  em { font-style: italic; color: inherit; }
+
+  /* 1 INFO-TOP */
+  .info-top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: center; margin-top: 6vh; }
+  .info-top-grid img { width: 100%; border-radius: 6px; display: block; }
+  .metric-row { display: flex; gap: 5vw; margin-top: 5vh; flex-wrap: wrap; }
+  .metric-row .m-num { font-size: clamp(34px, 4vw, 64px); font-weight: 300; line-height: 1; }
+  .metric-row .m-cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
+
+  /* 2 INFO-BOTTOM */
+  .ib-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; margin-top: 6vh; }
+  .ib-grid img { width: 100%; border-radius: 6px; display: block; }
+  .callout { margin-top: 6vh; padding: 4vh 3vw; background: #ecebe6; border-radius: 8px;
+    display: flex; flex-direction: column; gap: 2.4vh; align-items: flex-start; }
+  .sec-dark .callout { background: rgba(236,235,230,.08); }
+  .callout p { font-size: clamp(18px, 2vw, 30px); font-weight: 300; line-height: 1.3; max-width: 30ch; }
+  .cta-link { display: inline-flex; align-items: center; gap: 10px; font-size: 12px;
+    letter-spacing: .1em; text-transform: uppercase; padding: 12px 22px; border-radius: 8px;
+    background: #111110; color: #f2f1ee; }
+  .sec-dark .cta-link { background: #f2f1ee; color: #111110; }
+  .ib-map { width: 100%; border-radius: 6px; margin-top: 2vw; display: block; }
+
+  /* 3 ARCHITECTURE + 5/12 sliders reuse .isw */
+  #hq2 { background: #101112; }
+
+  /* 6 SPACE / 11 LAYOUT-INTRO — full-bleed dark */
+  .fullbleed { position: relative; min-height: 78svh; display: flex; align-items: flex-end;
+    background: #000; color: #f2f1ee; overflow: clip; }
+  .fullbleed img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fullbleed .fb-in { position: relative; z-index: 1; padding: 8vh 3vw; max-width: 1200px; margin: 0 auto; width: 100%; }
+  .fullbleed h2 { color: #fff; }
+
+  /* 7 COMFORT list */
+  .comfort-list { list-style: none; margin: 5vh 0 0; padding: 0; columns: 2; column-gap: 5vw; }
+  .comfort-list li { font-size: 14px; line-height: 1.5; color: #3c3b39; padding: 12px 0;
+    border-top: 1px solid rgba(17,17,16,.12); break-inside: avoid; }
+
+  /* 8 AUTONOMY */
+  .aut-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2vw; margin-top: 6vh; }
+  .aut-grid .col-stack { display: grid; gap: 2vw; }
+  .aut-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
+
+  /* 9 SERVICES cards */
+  .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6vh; }
+  .svc-card { padding: 4vh 2vw; border-radius: 8px; background: rgba(236,235,230,.07); }
+  .svc-card h3 { font-size: 14px; letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
+    color: #f2f1ee; margin-bottom: 2.4vh; }
+  .svc-card ul { list-style: none; margin: 0; padding: 0; }
+  .svc-card li { font-size: 13px; line-height: 1.5; color: #a7a6a2; padding: 11px 0;
+    border-top: 1px solid rgba(242,241,238,.1); }
+  .svc-card li b { color: #f2f1ee; font-weight: 500; }
+  .svc-img { width: 100%; border-radius: 6px; margin-top: 6vh; display: block; }
+  @media (max-width: 768px) { .svc-grid, .aut-grid, .ib-grid, .info-top-grid { grid-template-columns: 1fr; }
+    .comfort-list { columns: 1; } }
+
+  /* 10 CLEVER */
+  .clever-wrap { position: relative; border-radius: 8px; overflow: clip; margin-top: 6vh;
+    min-height: 60svh; display: flex; align-items: flex-end; color: #f2f1ee; }
+  .clever-wrap img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .clever-wrap .clever-in { position: relative; z-index: 1; padding: 5vh 3vw; }
+  .clever-logo { height: 44px; margin-bottom: 3vh; display: block; }
+
+  /* 12 LAYOUT-DETAIL office plans */
+  .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6vh; }
+  .plan-card { background: #fff; border-radius: 6px; padding: 18px; display: flex;
+    flex-direction: column; gap: 14px; }
+  .plan-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; display: block; }
+  .plan-card .p-num { font-size: clamp(22px, 2.2vw, 34px); font-weight: 300; line-height: 1; color: #111110; }
+  .plan-card .p-num span { font-size: 13px; color: #8b8a86; }
+  .cta-split { display: flex; gap: 12px; margin-top: 6vh; flex-wrap: wrap; align-items: center; }
+  .cta-split .lbl { font-size: 13px; color: #6b6b68; }
+  @media (max-width: 768px) { .plans-grid { grid-template-columns: 1fr 1fr; } }
+
+</style>
+</style>
+</head>
+<!-- ХЕДЕР (home-air доведений; /about hero темний → світлий варіант) -->
+<header data-amo-header data-plc-top>
+  <div class="hrow">
+    <span class="hleft">
+      <button data-amo-burger type="button" aria-label="Open menu">
+        <span data-amo-burger-lines><i></i><i></i></span>
+      </button>
+      <a class="hfav" href="/combos/funnel-air/combo-lab.html" aria-label="Favourites">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7.5-4.9-9.7-9.2C1 8.9 2.3 6 5.2 6c1.9 0 3.1 1.1 3.8 2.3C9.7 7.1 10.9 6 12.8 6c2.9 0 4.2 2.9 2.9 5.8C13.5 16.1 12 21 12 21z"/></svg>
+      </a>
+    </span>
+    <a class="hlogo" href="/combos/home-air/combo-lab.html">AIR</a>
+    <a class="hbtn hide-m" href="/combos/funnel-air/combo-lab.html">Choose an office <span></span></a>
+  </div>
+</header>
+<a class="scroll-dn" href="#a-intro" aria-label="Scroll down">
+  <svg width="14" height="16" viewBox="0 0 12 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 0v12M1 8l5 5 5-5"/></svg>
+</a>
+<div class="cookies" id="cookiesBar">This website uses&nbsp;&nbsp;<b>cookies</b><button type="button" onclick="document.getElementById('cookiesBar').remove()">Accept</button></div>
+
+<!-- HERO #top: світлий, фото 3 веж + INVESTING / IN AIR / OFFICES (живий /investment) -->
+<section id="top">
+  <div class="hero-bg"><picture>
+    <source srcset="assets/intro-bg-xs.webp" media="(max-width: 768px)">
+    <img src="assets/intro-bg.webp" alt="AIR investment offices towers">
+  </picture></div>
+  <div class="hero-line"><span>Investing</span><span>in AIR</span><span>offices</span></div>
+</section>
+
+<!-- КОНТЕНТ-СЕКЦІЇ /investment — білдер за розвідкою -->
+<div class="act"><p class="lead">Investment sections placeholder — build from recon.</p></div>
+
+
+<!-- МЕНЮ-ОВЕРЛЕЙ (home-air доведений) -->
+<div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div data-amo-bg></div>
+  <div data-amo-bg-image aria-hidden="true"><picture>
+    <source srcset="../home-air/assets/menu-bg-xs.webp" media="(max-width: 567px)">
+    <img src="../home-air/assets/menu-bg.webp" alt="" draggable="false">
+  </picture></div>
+  <div data-amo-giant>AIR</div>
+  <div class="amo-wrap">
+    <nav data-amo-panel>
+      <div data-amo-left>
+        <ul class="large">
+          <li data-amo-item><a href="/combos/about-air/combo-lab.html">About the project</a></li>
+          <li data-amo-item><a href="/combos/location-air/combo-lab.html">Location</a></li>
+          <li data-amo-item><a href="#" data-todo="management-air not built yet">Project management</a></li>
+          <li data-amo-item><a href="/combos/funnel-air/combo-lab.html">Investment</a></li>
+        </ul>
+        <ul class="small-list">
+          <li data-amo-item><a href="/combos/progress-air/combo-lab.html">Construction progress</a></li>
+          <li data-amo-item><a href="/combos/news-air/combo-lab.html">News and offers</a></li>
+          <li data-amo-item><a href="/combos/developer-air/combo-lab.html">About the developer</a></li>
+        </ul>
+      </div>
+      <div data-amo-right>
+        <a data-amo-card href="/combos/funnel-air/combo-lab.html"><span>Choose an<br>office</span><span class="sq">✛</span></a>
+        <a data-amo-card href="/combos/parking-air/combo-lab.html"><span>Choose a<br>parking spot</span><span class="sq">✛</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+
+<script src="../../components/air-menu-overlay/component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var api = {};
+  if (!touch && !reduced && window.Lenis) {
+    api.lenis = new Lenis({ lerp: 0.1, smoothWheel: true }); window.__lenis = api.lenis;
+    (function raf(t) { api.lenis.raf(t); requestAnimationFrame(raf); })(0);
+  }
+  api.amo = window.AirMenuOverlay.create({});
+  /* хедер: прозорий над dark-hero (світлий контент) → після скролу is-scrolled (темний) */
+  (function(){
+    var hdr=document.querySelector('[data-amo-header]');
+    if(!hdr) return;
+    function onScroll(){
+      var y=(window.__lenis&&typeof window.__lenis.scroll==='number')?window.__lenis.scroll:window.scrollY;
+      hdr.classList.toggle('is-scrolled', y>40);
+    }
+    (window.__lenis?window.__lenis.on('scroll',onScroll):window.addEventListener('scroll',onScroll,{passive:true}));
+    onScroll();
+  })();
+  api.rvc = window.RevolvesCarousel.create('#rvc', {});
+  api.isw = Array.prototype.map.call(
+    document.querySelectorAll('#isw-arch, #isw-hq, #isw-layout'),
+    function (el) { return window.ImageSliderWipe.create('#' + el.id, { mobile: 'tap' }); }
+  );
+  window.__ABOUT = api;
+
+  var report = { stability: null, engines: null, hq: null, docHeight: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function jump(y) { api.lenis ? api.lenis.scrollTo(y, { immediate: true }) : window.scrollTo(0, y); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(150);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('.h1');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    var doc1 = document.body.scrollHeight;
+    report.engines = {
+      rvc: !!(api.rvc && !api.rvc.error),
+      isw: api.isw.length === 3 && api.isw.every(function (s) { return s && !s.error; }),
+      lenis: touch || !!api.lenis
+    };
+    ok = Object.keys(report.engines).every(function (k) { return report.engines[k]; }) && ok;
+
+    /* headquarters-слайдер (#isw-hq): 3 слайди, свап на порозі */
+    if (!touch) {
+      var iswRoot = document.getElementById('isw-hq');
+      var top = iswRoot.getBoundingClientRect().top + scrollY;
+      jump(top + (iswRoot.offsetHeight - innerHeight) * 0.5);
+      await delay(200);
+      var count = iswRoot.querySelector('[data-isw-count]').textContent;
+      jump(0);
+      await delay(300);
+      report.hq = { count: count, ok: count === '2' };
+      ok = report.hq.ok && ok;
+    } else { report.hq = { ok: true, skipped: 'touch' }; }
+
+    report.docHeight = { stable: Math.abs(document.body.scrollHeight - doc1) <= 2 };
+    ok = report.docHeight.stable && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[зборка:about-air]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>
