@@ -29,7 +29,13 @@
    Usage:
      node scripts/visual-parity.mjs --ours <URL> --baseline <PNG> [--label <name>]
         [--viewport 1440x820] [--out <dir>] [--threshold 3] [--pixel-threshold 32]
-        [--mask "<css>,<css>"] [--click "<css>[,<css>]"] [--click-wait 1800]
+        [--mask "<css>,<css>"] [--click "<css>[,<css>]"] [--click-wait 1800] [--erode N]
+
+   --erode N: a diff pixel counts only if it has >= N different 8-neighbours
+        (0=off). Removes 1px anti-alias contour edges — the "AA ceiling" that
+        keeps text/photo pages at 3-5% when positions/assets already match Δ≈0.
+        Also diagnostic: if the number barely drops under erode, the residual is
+        REAL structural divergence, not AA. Try N=5 for text/photo heavy heroes.
 
    --click: CSS selector(s) clicked after settle, before the shot — opens a menu
    overlay or panel so the parity shot captures a state a plain load can't reach
@@ -92,6 +98,11 @@ const BOARD_PATH = join(PARITY_DIR, 'parity-board.html');
 const THRESHOLD_PCT = args.threshold !== undefined ? Number(args.threshold) : 3;
 // per-pixel euclidean RGB distance threshold, 0..255
 const PIXEL_THRESHOLD = args['pixel-threshold'] !== undefined ? Number(args['pixel-threshold']) : 32;
+// --erode N: a diff pixel counts only if it has >= N different 8-neighbours.
+// Kills 1px anti-alias contour edges (the "AA ceiling" that keeps text/photo
+// pages at 3-5% even when positions/assets already match Δ≈0), leaving solid
+// structural divergence. 0 = off (default; identical to legacy numbers).
+const ERODE = args.erode !== undefined ? Number(args.erode) : 0;
 
 // dynamic-mask CSS selectors (comma-separated), G20 semantics
 const MASK_SELECTORS = args.mask
@@ -168,7 +179,7 @@ async function resolveChromium() {
    red mask over a translucent baseline. Returns { diffRatio, sizes, diffDataUrl }.
    Everything here must be pure browser JS (no node). ---- */
 const DIFF_IN_PAGE = async (params) => {
-  const { baselineUrl, oursUrl, pixelThreshold, maskRects } = params;
+  const { baselineUrl, oursUrl, pixelThreshold, maskRects, erode } = params;
 
   function load(url) {
     return new Promise((res, rej) => {
@@ -217,20 +228,52 @@ const DIFF_IN_PAGE = async (params) => {
 
   const bd = b.data, od = o.data;
   const total = W * H;
-  let different = 0;
   const thr = pixelThreshold; // 0..255
+  const ERO = erode | 0;
 
+  // pass 1: raw per-pixel difference bitmap
+  const raw = new Uint8Array(total);
   for (let i = 0; i < total; i++) {
     const p = i * 4;
     const dr = bd[p] - od[p];
     const dg = bd[p + 1] - od[p + 1];
     const db = bd[p + 2] - od[p + 2];
     const dist = Math.sqrt(dr * dr + dg * dg + db * db) / Math.sqrt(3); // 0..255
-    if (dist > thr) {
+    if (dist > thr) raw[i] = 1;
+  }
+
+  // pass 2 (optional erode): a diff pixel survives only if it has >= ERO
+  // different 8-neighbours. Kills 1px anti-alias contour edges (glyph/photo
+  // outlines) that are structurally aligned but always flagged by pixel-diff.
+  let final = raw;
+  if (ERO > 0) {
+    final = new Uint8Array(total);
+    for (let y = 0; y < H; y++) {
+      for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        if (!raw[i]) continue;
+        let n = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = y + dy; if (yy < 0 || yy >= H) continue;
+          for (let dx = -1; dx <= 1; dx++) {
+            if (dx === 0 && dy === 0) continue;
+            const xx = x + dx; if (xx < 0 || xx >= W) continue;
+            if (raw[yy * W + xx]) n++;
+          }
+        }
+        if (n >= ERO) final[i] = 1;
+      }
+    }
+  }
+
+  // paint mask + count from final bitmap
+  let different = 0;
+  for (let i = 0; i < total; i++) {
+    const p = i * 4;
+    if (final[i]) {
       different++;
       md[p] = 255; md[p + 1] = 0; md[p + 2] = 0; md[p + 3] = 255; // solid red
     } else {
-      // translucent baseline underneath, dimmed
       md[p] = bd[p]; md[p + 1] = bd[p + 1]; md[p + 2] = bd[p + 2]; md[p + 3] = 70;
     }
   }
@@ -453,7 +496,7 @@ async function runOne(browser, vp) {
     try {
       await diffPage.goto('about:blank');
       result = await diffPage.evaluate(DIFF_IN_PAGE, {
-        baselineUrl, oursUrl, pixelThreshold: PIXEL_THRESHOLD, maskRects,
+        baselineUrl, oursUrl, pixelThreshold: PIXEL_THRESHOLD, maskRects, erode: ERODE,
       });
     } finally {
       await diffPage.close().catch(() => {});
