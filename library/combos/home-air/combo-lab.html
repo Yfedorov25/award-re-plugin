@@ -328,9 +328,16 @@
   /* живе desktop меню = чистий фон + Vimeo-спіраль справа (та сама 1145251536, як hero),
      БЕЗ сунбурст-променів (то був фейк). int-menu-open.png підтверджує. */
   [data-amo-bg] { background: var(--paper); }
-  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0; overflow: clip; }
-  [data-amo-bg-image] iframe { position: absolute; right: -8%; top: 50%; transform: translateY(-50%);
-    width: 62vh; height: 62vh; border: 0; pointer-events: none; }
+  /* живий фон меню = СТАТИЧНЕ фото спіралі (menu/background@xxl.webp, 2044×1092),
+     picture.background--top: width:100% / height:auto (НЕ cover!) → фото на всю ширину
+     екрана, аспект збережений, притиснуте до ВЕРХУ. При 1440 → 1440×770. Спіраль
+     розтягнута по всій ширині зверху. НЕ Vimeo — маска не потрібна (фази нема). */
+  /* живий: <img class="background background--top"> — width:100%, height:auto, top:0
+     (буквальна копія живого рендера, не CSS background — точний масштаб/позиція фото). */
+  [data-amo-bg-image] { position: fixed; left: 0; top: 0; width: 100%; height: 100svh;
+    opacity: 0; overflow: clip; }
+  [data-amo-bg-image] img { position: absolute; left: 0; top: 0; width: 100%; height: auto;
+    display: block; }
   /* гігант-AIR у меню: живе DESKTOP = БЕЗ гіганта (лише хедерний AIR) — вердикт №9.
      На mobile лишаємо (T-M11). */
   [data-amo-giant] { display: none; }
@@ -340,14 +347,20 @@
   }
   /* живий menu-baseline: панель TOP-aligned на y≈147 (не центрована по вертикалі).
      align-items:flex-start + top-padding = висота хедера. (Було center → зсув +105px.) */
+  /* панель зсунута правіше центру (живий центр x780 vs екран 720 → +60px):
+     padding-left більший за right через margin на самій панелі. */
   .amo-wrap { position: absolute; inset: 0; display: flex; align-items: flex-start;
-              justify-content: center; padding: 130px 3vw 5vh; }
-  [data-amo-panel] { width: min(1120px, 94vw); min-height: 572px; background: rgba(236, 234, 229, .75); }  /* живий: панель y135→707 */
-  /* живий menu-baseline: список починається на x≈396 (панель x160 → лівий inset ≈196px),
-     верх на y≈160; малий список притиснутий до НИЗУ панелі (space-between). */
-  [data-amo-left] { padding: 25px 2.6vw 30px 196px; display: flex; flex-direction: column; justify-content: flex-start; }
-  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 0; }
-  [data-amo-left] ul.small-list { gap: 12px; margin-top: 328px; }  /* живий: малий список на y≈636 (панель top 135) */
+              justify-content: center; padding: 128px 3vw 5vh; }
+  .amo-wrap [data-amo-panel] { margin-left: 120px; margin-right: 0; }  /* ліва кромка → x375 (центр +60) */
+  /* живий контейнер меню (виміряно з baseline): x375→1185 = ШИРИНА 810px (НЕ на всю
+     ширину!), центр x780 (зсув +60px правіше центру екрана). Це `col--md-6 offset--md-3`
+     живого — центр-права половина сітки. Наш був min(1120,94vw)=1119 → на 309px ширший. */
+  [data-amo-panel] { width: 810px; height: 571px; background: rgba(236, 234, 229, .75); }  /* живий: y128→699 (фіксована висота, не тягнеться) */
+  /* живий: текст списку на x≈395; панель x375 (810px) → лівий inset ≈20px; малий список
+     притиснутий до низу (space-between), padding-bottom дає точну позицію y636. */
+  [data-amo-left] { padding: 25px 2.6vw 19px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+  [data-amo-left] ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+  [data-amo-left] ul.small-list { gap: 0; line-height: 1.65; }  /* живий малий список h≈44 для 3 рядків — щільно */
   /* живий menu-baseline (перезаміряно): 4 пункти кеглем ~29px, кожен ОДИН рядок,
      line-height ~1.2, «PROJECT MANAGEMENT» ~322px. (Мій замір 52px/504px був хибний —
      зона захопила і великий, і малий список.) */
@@ -594,7 +607,7 @@
 <!-- МЕНЮ-ОВЕРЛЕЙ (A-17) -->
 <div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
   <div data-amo-bg></div>
-  <div data-amo-bg-image class="is-hidden--sm-down"><iframe src="https://player.vimeo.com/video/1145251536?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1" allow="autoplay; encrypted-media" title="menu spiral" loading="lazy"></iframe></div>
+  <div data-amo-bg-image class="is-hidden--sm-down" aria-hidden="true"><img src="assets/menu-bg.webp" alt="" draggable="false"></div>
   <div data-amo-giant>AIR</div>
   <div class="amo-wrap">
     <nav data-amo-panel>
