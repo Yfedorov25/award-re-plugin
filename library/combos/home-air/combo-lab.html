@@ -160,6 +160,24 @@
     #top .giant-air .gl { height: min(11vh, 80px); }
     #top .giant-air svg.gl-desk { display: none; }
     #top .giant-air svg.gl-mob { display: block; }
+    /* живий hero-390 baseline (G15, сесія 14, ink-390): гігант y-центр на 26px
+       вище нашого (наш y382 vs живий y356) — підняти. cx збігається Δ0. */
+    #top .giant-air .gl { top: calc(50% - 26px); }
+    /* headline центрований на 390 (живий cx193, y204, 2 рядки wrap, кегль ~20px),
+       НЕ desktop top:16px/nowrap-праворуч під хедером */
+    #top .hero-note { top: 200px; left: 50%; right: auto; transform: translateX(-50%);
+      width: auto; max-width: 86vw; white-space: normal; text-align: center;
+      font-size: 20px; line-height: 24px; }
+    /* CLASS(A) центрований під літерами (живий cx195, y525), НЕ desktop right:354 */
+    #top .hero-class { top: 522px; left: 50%; right: auto; transform: translateX(-50%);
+      text-align: center; font-size: 11px; line-height: 15px; }
+  }
+  /* мобільний хедер: ♡ + бургер СПРАВА (живий 390: ♡ cx297, бургер cx342),
+     прозорий фон (не чорна кнопка як desktop), лого приховане на топі */
+  @media (max-width: 768px) {
+    .hrow .hleft { grid-column: 3; justify-self: end; flex-direction: row-reverse; }
+    [data-amo-burger] { background: transparent; color: #111110; width: 40px; }
+    [data-amo-burger] i { background: #111110; }
   }
 
   /* ---- 2 · IMPULSE ---- */
@@ -338,13 +356,10 @@
     opacity: 0; overflow: clip; }
   [data-amo-bg-image] img { position: absolute; left: 0; top: 0; width: 100%; height: auto;
     display: block; }
-  /* гігант-AIR у меню: живе DESKTOP = БЕЗ гіганта (лише хедерний AIR) — вердикт №9.
-     На mobile лишаємо (T-M11). */
+  /* гігант-AIR у меню: живе DESKTOP І MOBILE menu = БЕЗ гіганта (лише хедерний AIR
+     x20 зверху-зліва) — menu-390 baseline (сесія 14) показав ОДНЕ лого, не задвоєне.
+     (Раніше mobile показував giant → задвоєння з хедерним AIR.) */
   [data-amo-giant] { display: none; }
-  @media (max-width: 768px) {
-    [data-amo-giant] { display: block; left: 3vw; top: 11vh; font-size: clamp(38px, 5.4vw, 84px);
-      letter-spacing: .3em; font-weight: 500; color: #111110; }
-  }
   /* живий menu-baseline: панель TOP-aligned на y≈147 (не центрована по вертикалі).
      align-items:flex-start + top-padding = висота хедера. (Було center → зсув +105px.) */
   /* панель зсунута правіше центру (живий центр x780 vs екран 720 → +60px):
@@ -373,9 +388,35 @@
     text-transform: uppercase; letter-spacing: .04em; }  /* живий baseline: картки UPPERCASE */
   [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px;
     border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  /* ── мобільний layout меню (menu-390 baseline, сесія 14) ──
+     живий 390: вертикальний стек ЗВЕРХУ (не донизу): картки 2-колонки y145 →
+     великий список y449 → малий список y773. Панель на всю ширину, без desktop-810px.
+     Хедерний AIR зліва x20 (одне лого). */
   @media (max-width: 768px) {
-    .amo-wrap { align-items: flex-end; padding: 15vh 4vw 4vh; }
-    [data-amo-panel] { background: none; }
+    .amo-wrap { align-items: flex-start; justify-content: flex-start; padding: 0; }
+    .amo-wrap [data-amo-panel] { margin: 0; }
+    [data-amo-panel] { width: 100%; height: auto; background: none;
+      display: flex; flex-direction: column; }
+    /* картки ПЕРШІ (зверху), список ПІД ними — реордер flex */
+    [data-amo-right] { order: -1; display: grid; grid-template-columns: 1fr 1fr;
+      gap: 0; margin: 135px 0 0; padding: 0 20px; }  /* картки-написи → y≈150 (було y160) */
+    [data-amo-card] { min-height: 88px; padding: 10px 16px; font-size: 12px;
+      background: rgba(236, 234, 229, .6); }
+    [data-amo-left] { order: 0; padding: 0 20px; display: block; }
+    [data-amo-left] ul.large { margin: 70px 0 0; }        /* великий список → y≈449 */
+    /* живий великий список: крок рядка ~31px (y449→h125/4). Кегль ~30px, tight
+       line-height щоб крок збігся. Ширина живого (320px) більша за наш Onest —
+       це ГАРНІТУРНА різниця (живий шрифт ширший), не кегль: більший кегль ламає
+       крок рядка. Тримаємо крок 1-в-1, ширину лишаємо (піде під поріг з маскою). */
+    ul.large [data-amo-item] a { font-size: 30px; line-height: 1.13; letter-spacing: -.01em; }
+    /* живий малий список притиснутий ДОНИЗУ (y≈773), НЕ одразу під великим —
+       у живого ~210px порожнечі між списками (desktop space-between). */
+    [data-amo-left] ul.small-list { margin: 300px 0 0; }  /* малий список → y≈773 */
+    ul.small-list [data-amo-item] a { line-height: 1.55; }
+    /* хедерний AIR зліва зверху y≈20 як живий — fixed, вирвати з хедер-гриду
+       (у гриді сидів на y74, живий на y20). Кегль ~28px під живі 71×30. */
+    [data-amo-header].amo-menu-open .hlogo { position: fixed; left: 20px; top: 20px;
+      justify-self: unset; font-size: 28px; letter-spacing: .02em; }
   }
 </style>
 </head>
