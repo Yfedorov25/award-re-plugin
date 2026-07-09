@@ -96,11 +96,11 @@
     .hrow { grid-template-columns: 1fr auto; }
     .hlogo { grid-column: 1; justify-self: start; font-size: 41px; letter-spacing: .06em; }
     .hleft { grid-column: 2; justify-self: end; flex-direction: row-reverse; order: 2; }
+    /* живий /progress mobile: CONSTRUCTION+PROGRESS стек 42px чорні зверху,
+       COMMISSIONING 2028 переходить ПІД заголовок (не центр) 13px сірий. */
     #top .hero-line { flex-direction: column; align-items: flex-start; gap: 4px;
-      top: 176px; bottom: auto; padding: 0 20px; font-size: 42px; line-height: 1.04; }  /* живий вимір: y180, ширина 276 (кегль 42 не 40), крок трохи більший */
-    /* живий mobile: вежа дрібніша, зсунута ВНИЗ (roofY 374 vs наш 250 при cover-center).
-       object-position bottom → вежа в нижні 55%, більше неба зверху. */
-    #top .hero-bg img { object-position: center bottom; object-fit: cover; }
+      padding: 0 20px; font-size: 42px; line-height: 1.06; }
+    #top .hero-mid { order: 3; text-align: left; margin-top: 8px; }
   }
   .h1 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 300; text-transform: uppercase; line-height: 1.06; }
   .spread { display: flex; justify-content: space-between; }
@@ -379,8 +379,136 @@
   <div class="hero-rule"></div>
 </section>
 
-<!-- КОНТЕНТ /progress — білдер (галерея-слайдер) -->
-<div class="act" id="a-intro"><p class="lead">Progress gallery placeholder — build from recon.</p></div>
+<!-- КОНТЕНТ /progress — білдер (галерея fade-switcher по місяцях) -->
+<style>
+  #a-intro { padding: 8vh 3vw 12vh; }
+  .pg-stage { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #e6e3dd; }
+  .pg-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s ease; }
+  .pg-stage img.is-on { opacity: 1; }
+  /* навігатор-пілюля по центру */
+  .pg-nav { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 22px auto 0; width: max-content; padding: 8px 10px; border-radius: 999px; background: rgba(120,118,112,.16); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .pg-arrow { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: none; border-radius: 999px; background: transparent; color: #111110; cursor: pointer; transition: background .2s ease; }
+  .pg-arrow:hover { background: rgba(255,255,255,.5); }
+  .pg-arrow svg { width: 14px; height: 14px; }
+  .pg-label { position: relative; display: inline-flex; align-items: center; gap: 8px; border: none; background: transparent; color: #111110; font-family: var(--sans); font-size: 14px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; padding: 6px 8px; white-space: nowrap; }
+  .pg-label .pg-caret { transition: transform .25s ease; }
+  .pg-label[aria-expanded="true"] .pg-caret { transform: rotate(180deg); }
+  /* дропдаун */
+  .pg-menu { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%) translateY(6px); min-width: 190px; padding: 6px; border-radius: 12px; background: #fbfaf7; box-shadow: 0 12px 40px rgba(0,0,0,.16); opacity: 0; visibility: hidden; transition: opacity .2s ease, transform .2s ease; z-index: 5; }
+  .pg-menu.is-open { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  .pg-menu button { display: block; width: 100%; text-align: left; border: none; background: transparent; color: #111110; font-family: var(--sans); font-size: 14px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background .15s ease; }
+  .pg-menu button:hover, .pg-menu button[aria-selected="true"] { background: rgba(120,118,112,.14); }
+  /* мініатюри */
+  .pg-thumbs { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 26px; }
+  .pg-thumb { width: 132px; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; border: 2px solid transparent; padding: 0; background: #e6e3dd; cursor: pointer; transition: border-color .2s ease, opacity .2s ease; opacity: .72; }
+  .pg-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pg-thumb.is-active { border-color: #111110; opacity: 1; }
+  .pg-thumb:hover { opacity: 1; }
+  @media (max-width: 768px) {
+    .pg-thumb { width: 88px; }
+    .pg-label { font-size: 13px; }
+  }
+</style>
+<div class="act" id="a-intro">
+  <div class="pg-stage" id="pgStage"></div>
+  <div class="pg-nav">
+    <button class="pg-arrow" id="pgPrev" type="button" aria-label="Previous month">
+      <svg viewBox="0 0 12 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1L2 7l6 6"/></svg>
+    </button>
+    <button class="pg-label" id="pgLabel" type="button" aria-haspopup="true" aria-expanded="false">
+      <span id="pgLabelText">February 2026</span>
+      <svg class="pg-caret" viewBox="0 0 12 8" width="12" height="8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l5 5 5-5"/></svg>
+      <div class="pg-menu" id="pgMenu" role="menu"></div>
+    </button>
+    <button class="pg-arrow" id="pgNext" type="button" aria-label="Next month">
+      <svg viewBox="0 0 12 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1l6 6-6 6"/></svg>
+    </button>
+  </div>
+  <div class="pg-thumbs" id="pgThumbs"></div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var XXXL = 'https://aircenter.space/media/cache/progress_image_xxxl/uploads/1/';
+  var months = [
+    { label: 'February 2026', photos: ['p3160604_1774864688_1776412269.webp', 'p3160583_1774864689_1776412270.webp', 'p3160651_1774864686_1776412270.webp'] },
+    { label: 'August 2025', photos: ['p8189718_1764669934_1776411992.webp', 'p8189609_1764669933_1776411992.webp'] }
+  ];
+  var stage = document.getElementById('pgStage');
+  var thumbsEl = document.getElementById('pgThumbs');
+  var menuEl = document.getElementById('pgMenu');
+  var labelText = document.getElementById('pgLabelText');
+  var labelBtn = document.getElementById('pgLabel');
+  var am = 0, ap = 0;
+
+  // build month dropdown once
+  months.forEach(function (m, i) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = m.label; b.setAttribute('role', 'menuitem');
+    b.addEventListener('click', function (e) { e.stopPropagation(); setMonth(i); closeMenu(); });
+    menuEl.appendChild(b);
+  });
+
+  function render() {
+    var m = months[am];
+    // stage images (fade)
+    stage.innerHTML = '';
+    m.photos.forEach(function (p, i) {
+      var img = document.createElement('img');
+      img.src = XXXL + p;
+      img.alt = m.label + ' — photo ' + (i + 1);
+      img.loading = 'lazy'; img.decoding = 'async';
+      if (i === ap) img.className = 'is-on';
+      stage.appendChild(img);
+    });
+    // thumbnails
+    thumbsEl.innerHTML = '';
+    m.photos.forEach(function (p, i) {
+      var t = document.createElement('button');
+      t.type = 'button'; t.className = 'pg-thumb' + (i === ap ? ' is-active' : '');
+      t.setAttribute('aria-label', 'Show photo ' + (i + 1));
+      var ti = document.createElement('img');
+      ti.src = XXXL + p; ti.alt = ''; ti.loading = 'lazy'; ti.decoding = 'async';
+      t.appendChild(ti);
+      t.addEventListener('click', function () { setPhoto(i); });
+      thumbsEl.appendChild(t);
+    });
+    // label + menu selection
+    labelText.textContent = m.label;
+    Array.prototype.forEach.call(menuEl.children, function (b, i) {
+      b.setAttribute('aria-selected', i === am ? 'true' : 'false');
+    });
+  }
+
+  function setPhoto(i) {
+    if (i === ap) return;
+    ap = i;
+    var imgs = stage.querySelectorAll('img');
+    Array.prototype.forEach.call(imgs, function (im, k) { im.classList.toggle('is-on', k === ap); });
+    var ths = thumbsEl.querySelectorAll('.pg-thumb');
+    Array.prototype.forEach.call(ths, function (th, k) { th.classList.toggle('is-active', k === ap); });
+  }
+
+  function setMonth(i) {
+    am = ((i % months.length) + months.length) % months.length;
+    ap = 0;
+    render();
+  }
+
+  function openMenu() { menuEl.classList.add('is-open'); labelBtn.setAttribute('aria-expanded', 'true'); }
+  function closeMenu() { menuEl.classList.remove('is-open'); labelBtn.setAttribute('aria-expanded', 'false'); }
+
+  labelBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (menuEl.classList.contains('is-open')) closeMenu(); else openMenu();
+  });
+  document.getElementById('pgPrev').addEventListener('click', function () { setMonth(am - 1); });
+  document.getElementById('pgNext').addEventListener('click', function () { setMonth(am + 1); });
+  document.addEventListener('click', function () { closeMenu(); });
+
+  render();
+}());
+</script>
 
 
 <!-- МЕНЮ-ОВЕРЛЕЙ (home-air доведений) -->
