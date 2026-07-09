@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ЗБОРКА · about-air — сторінка /about (екзамен DoD №4)</title>
+<title>ЗБОРКА · location-air — сторінка /location</title>
 <!--
 ================================================================================
   ЗБОРКА /about (фінал спринту-6). Акти в живому порядку /about:
@@ -384,38 +384,240 @@
   <div class="hero-line"><span>Place</span><span class="hero-mid">Modern<br>business cluster</span><span>to grow</span></div>
 </section>
 
-<div class="head" id="a-intro">
-  <h2 class="h1 spread"><span>Surroundings</span><span>and</span><span>infrastructure</span></h2>
-  <p>Staying in the flow. A prime location ensures an optimal work–life balance for employees and top management working at AIR.</p>
-</div>
+<!-- ═══════════ КОНТЕНТ /location (8 актів живого, чергування light/dark) ═══════════ -->
+<style>
+  /* аеро-журней (з aerial-journey/component.css — не лінкований у head) */
+  #aj [data-aj-layer] { position: sticky; top: 0; height: 100svh; overflow: clip;
+    display: grid; place-items: center; }
+  #aj [data-aj-outer] { position: relative; width: 100%; height: 100%;
+    overflow: clip; will-change: transform; }
+  #aj [data-aj-inner] { position: absolute; inset: 0; will-change: transform; }
+  #aj [data-aj-inner] img, #aj [data-aj-inner] .aj-fill { width: 100%; height: 100%;
+    object-fit: cover; display: block; }
+  #aj .aj-fill { background:
+    linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)),
+    url("https://aircenter.space/media/cache/location_panorama_bg_xxxl/assets/images/media/location/4.panorama/background@xxxl.webp") center/cover no-repeat; }
+  #aj [data-aj-zones] { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #aj [data-aj-zone] { opacity: 0; transition: opacity .6s cubic-bezier(.25,.74,.22,.99); }
+  #aj.aj-zones-on [data-aj-zone] { opacity: 1; }
+  #aj [data-aj-cards] { position: absolute; inset: 0; pointer-events: none; }
+  #aj [data-aj-card] { position: absolute; transform: translate(-50%, -110%);
+    padding: 10px 13px; border-radius: 4px; background: rgba(244, 242, 238, .92);
+    color: #111110; font-size: 12px; white-space: nowrap; opacity: 0; translate: 0 6px;
+    transition: opacity .6s cubic-bezier(.25,.74,.22,.99), translate .6s cubic-bezier(.25,.74,.22,.99); }
+  #aj [data-aj-card] b { font-weight: 500; }
+  #aj.aj-zones-on [data-aj-card] { opacity: 1; translate: 0 0; }
+
+  /* locmap-engine (з locmap-engine/component.css — не лінкований у head) */
+  #mapAct { --lm-ink:#f3f1ec; --lm-bg-1:#161410; --lm-bg-2:#0b0a08;
+    --lm-accent:#b06a4f; --lm-accent-soft:#c98a72; --lm-lit:236,178,118; }
+  #mapAct .lm__stage { position: relative; overflow: clip;
+    background: radial-gradient(120% 100% at 40% 30%, var(--lm-bg-1), var(--lm-bg-2)); }
+  #mapAct .lm__map { width: 100%; height: 100%; display: block; }
+  #mapAct .lm-gw--green { fill: rgba(140,170,130,0.05); }
+  #mapAct .lm-gw--water { fill: rgba(120,150,190,0.07); }
+  #mapAct .lm-bld { fill: rgba(243,241,236,0.04); stroke: rgba(243,241,236,0.04); stroke-width: 0.7; }
+  #mapAct .lm-bld--lit { fill: rgba(var(--lm-lit),0.22); stroke: rgba(var(--lm-lit),0.18); animation: lmFlick 5.5s ease-in-out infinite; }
+  #mapAct .lm-bld--lit:nth-child(3n) { animation-delay: 1.8s; }
+  #mapAct .lm-bld--lit:nth-child(5n) { animation-delay: 3.2s; }
+  #mapAct .lm-rdc { fill: none; stroke: var(--lm-bg-2); stroke-linecap: round; stroke-linejoin: round; }
+  #mapAct .lm-rd  { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  #mapAct .lm-rd--hwy   { stroke: rgba(243,241,236,0.4);  stroke-width: 7; }   #mapAct .lm-rdc--hwy   { stroke-width: 11; }
+  #mapAct .lm-rd--main  { stroke: rgba(201,138,114,0.65); stroke-width: 5; }   #mapAct .lm-rdc--main  { stroke-width: 9; }
+  #mapAct .lm-rd--mid   { stroke: rgba(243,241,236,0.2);  stroke-width: 3.4; } #mapAct .lm-rdc--mid   { stroke-width: 6; }
+  #mapAct .lm-rd--minor { stroke: rgba(243,241,236,0.13); stroke-width: 2.2; } #mapAct .lm-rdc--minor { stroke-width: 4; }
+  #mapAct .lm-rd--faint { stroke: rgba(243,241,236,0.05); stroke-width: 1.2; } #mapAct .lm-rdc--faint { display: none; }
+  #mapAct .lm-rdname { fill: rgba(243,241,236,0.4); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; }
+  #mapAct .lm-parcel { fill: url(#lmHatch); stroke: var(--lm-accent-soft); stroke-width: 1.6; }
+  #mapAct .lm-pulse  { fill: none; stroke: var(--lm-accent-soft); stroke-width: 1.3; opacity: 0; }
+  #mapAct .lm.is-born .lm-pulse { animation: lmPulse 3s cubic-bezier(0.25,0.46,0.45,0.94) infinite; }
+  #mapAct .lm.is-born .lm-pulse--2 { animation-delay: 1.5s; }
+  #mapAct .lm-sitetag { fill: var(--lm-ink); font-size: 12.5px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  #mapAct .lm-ring  { fill: none; stroke: rgba(243,241,236,0.22); stroke-width: 1.2; stroke-dasharray: 5 7; }
+  #mapAct .lm-ringt { fill: rgba(243,241,236,0.45); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+  #mapAct .lm-pt { cursor: pointer; }
+  #mapAct .lm-pt .lm-hit { fill: transparent; stroke: none; }
+  #mapAct .lm-pt circle { fill: #1d1813; stroke: rgba(201,138,114,0.8); stroke-width: 1.4; transition: fill 0.3s, stroke 0.3s; }
+  #mapAct .lm-pt text { fill: var(--lm-ink); font-size: 11.5px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  #mapAct .lm-pt:hover circle, #mapAct .lm-pt.is-on circle { fill: var(--lm-accent); stroke: var(--lm-ink); }
+  #mapAct .lm-pt.is-dim { opacity: 0.3; }
+  #mapAct .lm-route  { fill: none; stroke: var(--lm-accent-soft); stroke-width: 3.2; stroke-dasharray: 8 8; }
+  #mapAct .lm-walker { fill: var(--lm-ink); stroke: var(--lm-accent); stroke-width: 2; }
+  #mapAct .lm-livet  { fill: var(--lm-ink); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; }
+  #mapAct .lm-livebg { fill: rgba(16,19,26,0.85); stroke: rgba(201,138,114,0.5); stroke-width: 1; }
+  #mapAct .lm-infra { fill: rgba(243,241,236,0.5); }
+  #mapAct .lm-cluster__bg { fill: var(--lm-accent); }
+  #mapAct .lm-cluster__n  { fill: #fff; font-size: 12px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+  @keyframes lmFlick { 0%,100% { opacity: 0.5; } 45% { opacity: 1; } 70% { opacity: 0.65; } }
+  @keyframes lmPulse { 0% { transform: scale(0.5); opacity: 0.7; } 100% { transform: scale(2.4); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { #mapAct .lm-bld--lit, #mapAct .lm.is-born .lm-pulse { animation: none; } }
+
+  /* 1 TEXT — світлий, великий UPPERCASE абзац на фото-фоні */
+  #text { position: relative; min-height: 92svh; display: flex; align-items: center;
+    background: #cfd4d8 center/cover no-repeat; color: #f2f1ee; overflow: clip; }
+  #text .text-in { position: relative; z-index: 1; }
+  #text::after { content: ""; position: absolute; inset: 0; background: rgba(20,22,24,.42); }
+  #text .big { position: relative; z-index: 1; font-size: clamp(20px, 2.5vw, 40px);
+    font-weight: 300; line-height: 1.35; text-transform: uppercase; letter-spacing: -.01em; max-width: 24ch; }
+
+  /* 2 TRANSPORT — dark, схема з пінами-відстанями */
+  #transport .lead-c { font-size: 14.5px; line-height: 1.6; color: #a7a6a2;
+    max-width: 60ch; margin: 3vh auto 0; text-align: center; }
+  .tr-map { position: relative; margin-top: 7vh; border-radius: 8px; overflow: clip;
+    background: #0b0a08; }
+  .tr-map img { width: 100%; display: block; opacity: .9; }
+  .tr-pins { list-style: none; margin: 6vh 0 0; padding: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2px; }
+  .tr-pins li { padding: 2.4vh 1.4vw; background: rgba(236,235,230,.04);
+    border-radius: 6px; display: flex; flex-direction: column; gap: 6px; }
+  .tr-pins .p-name { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #cfcdc8; }
+  .tr-pins .p-time { font-size: clamp(22px, 2.2vw, 34px); font-weight: 300; line-height: 1; color: #f2f1ee; }
+  .tr-pins .p-dist { font-size: 12px; color: #8b8a86; }
+
+  /* 3 PANORAMA — dark, full-bleed фото */
+  #panorama { min-height: 82svh; background: #000 center/cover no-repeat; }
+
+  /* 4 INFRASTRUCTURE head + walk-метрики (переюз aj нижче) */
+  #infrastructure .lead { max-width: 56ch; margin-top: 3vh; }
+  .walk-row { display: flex; gap: 4vw; margin-top: 5vh; flex-wrap: wrap; }
+  .walk-row .w-num { font-size: clamp(28px, 3vw, 52px); font-weight: 300; line-height: 1; }
+  .walk-row .w-cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
+
+  /* 5 LOCATION-CARDS — dark, 2 фото */
+  .loc-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4vh; }
+  .loc-card { position: relative; border-radius: 8px; overflow: clip; min-height: 62svh;
+    display: flex; align-items: flex-end; }
+  .loc-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .loc-card figcaption { position: relative; z-index: 1; padding: 3vh 2vw;
+    font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #f2f1ee;
+    text-shadow: 0 1px 20px rgba(0,0,0,.5); }
+  @media (max-width: 768px) { .loc-cards { grid-template-columns: 1fr; }
+    .tr-pins { grid-template-columns: 1fr 1fr; } }
+
+  /* 6 MAP — dark, карта інфраструктури */
+  #mapAct { padding: 8vh 3vw; }
+  #mapAct .wrap { max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr; gap: 0;
+    border-radius: 8px; overflow: clip; }
+  @media (min-width: 900px) { #mapAct .wrap { grid-template-columns: 1.55fr 0.95fr; } }
+  #mapAct .loc { display: block; min-height: 62vh; }
+  @media (min-width: 900px) { #mapAct .loc { min-height: 78vh; } }
+  #mapAct .lm__stage { min-height: 62vh; height: 100%; }
+  @media (min-width: 900px) { #mapAct .lm__stage { min-height: 78vh; } }
+  #mapAct aside { border-left: 1px solid rgba(243,241,236,.1);
+    padding: clamp(2rem,5vh,4rem) clamp(1.4rem,3vw,3rem);
+    display: flex; flex-direction: column; gap: 1.6rem; justify-content: center;
+    background: #100e0b; }
+  #mapAct aside h2 { font-size: 13px; letter-spacing: .2em; text-transform: uppercase;
+    color: #c98a72; font-weight: 500; }
+  #mapAct #cats { display: flex; gap: .5rem; flex-wrap: wrap; }
+  #mapAct #cats input { position: absolute; opacity: 0; pointer-events: none; }
+  #mapAct #cats label { font: 500 11px/1 var(--sans); letter-spacing: .06em;
+    text-transform: uppercase; color: rgba(243,241,236,.6);
+    background: rgba(243,241,236,.05); border: 1px solid rgba(243,241,236,.14);
+    padding: .6rem .8rem; border-radius: 6px; cursor: pointer; transition: .2s; }
+  #mapAct #cats input:checked + label { color: #20272c; background: #c98a72; border-color: #c98a72; }
+
+  @media (max-width: 768px) {
+    #text .big { max-width: none; }
+    .walk-row { gap: 6vw; }
+  }
+</style>
+
+<!-- 1 · TEXT (light) — модерн-бізнес-район, ринок оренди -->
+<section id="text" style="background-image:linear-gradient(rgba(20,22,24,.15),rgba(20,22,24,.35)),url('https://aircenter.space/media/cache/location_text_bg_xxxl/assets/images/media/location/2.text/background@xxxl.webp');">
+  <div class="act text-in">
+    <p class="big">The modern business district is among the top three areas for commercial rental growth. Every third office search in the city is concentrated here. The area faces a significant shortage of both small office spaces and standalone buildings suitable for corporate headquarters. Located between the mall and nature park, AIR offers next-generation premium offices — aesthetic and functional, with advanced engineering and a high-quality urban environment.</p>
+  </div>
+</section>
+
+<!-- 2 · TRANSPORT / ACCESSIBILITY (dark) -->
+<section id="transport" style="background:#000;color:#f2f1ee">
+  <div class="act">
+    <h2 class="h1 spread"><span>Transport</span><span>accessibility</span></h2>
+    <p class="lead-c">AIR residents benefit from direct access to one of the city's key arteries, allowing quick travel to both the city center and Airport. Proximity to the Highway also connects AIR to other business districts.</p>
+    <div class="tr-map">
+      <img src="https://aircenter.space/assets/images/media/location/5.infrastructure/map-large.svg" alt="Transport accessibility scheme around AIR">
+    </div>
+    <ul class="tr-pins">
+      <li><span class="p-name">Mall</span><span class="p-time">1 min</span><span class="p-dist">on foot</span></li>
+      <li><span class="p-name">Metro Stn</span><span class="p-time">3 min</span><span class="p-dist">1.7 km</span></li>
+      <li><span class="p-name">Fairview Stn</span><span class="p-time">20 min</span><span class="p-dist">2.0 km</span></li>
+      <li><span class="p-name">Airport Stn</span><span class="p-time">24 min</span><span class="p-dist">2.6 km</span></li>
+      <li><span class="p-name">Northern Ave</span><span class="p-time">6 min</span><span class="p-dist">2.8 km</span></li>
+      <li><span class="p-name">Highway</span><span class="p-time">11 min</span><span class="p-dist">5.5 km</span></li>
+      <li><span class="p-name">MRR</span><span class="p-time">18 min</span><span class="p-dist">12.5 km</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 3 · PANORAMA (dark) — full-bleed фото, без тексту -->
+<section id="panorama" style="background-image:url('https://aircenter.space/media/cache/location_panorama_bg_xxxl/assets/images/media/location/4.panorama/background@xxxl.webp');" aria-label="Panoramic view of the district"></section>
+
+<!-- 4 · SURROUNDINGS AND INFRASTRUCTURE (light) — head + walk-метрики + аеро-журней -->
+<section id="infrastructure">
+  <div class="head act" id="a-intro">
+    <h2 class="h1 spread"><span>Surroundings</span><span>and</span><span>infrastructure</span></h2>
+    <p class="lead">Staying in the flow. A prime location ensures an optimal work–life balance for employees and top management working at AIR, allowing them to enjoy the very best of the city without leaving the district.</p>
+    <div class="walk-row">
+      <div><div class="w-num">1 min</div><div class="w-cap">Walk — Nature Park</div></div>
+      <div><div class="w-num">10 min</div><div class="w-cap">Walk — Birch Grove Park</div></div>
+      <div><div class="w-num">20 min</div><div class="w-cap">Walk — Historical Park</div></div>
+    </div>
+  </div>
+</section>
 
 <div id="aj">
   <div data-aj-layer>
     <div data-aj-outer>
       <div data-aj-inner><div class="aero aj-fill"></div></div>
       <svg data-aj-zones viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        <g data-aj-zone><polygon points="180,560 470,500 560,700 240,760" fill="rgba(102,178,255,.28)" stroke="rgba(102,178,255,.7)"/></g>
-        <g data-aj-zone><polygon points="980,220 1290,180 1360,380 1040,430" fill="rgba(120,220,150,.26)" stroke="rgba(120,220,150,.7)"/></g>
-        <g data-aj-zone><polygon points="640,640 900,600 960,800 700,840" fill="rgba(255,180,90,.26)" stroke="rgba(255,180,90,.7)"/></g>
+        <g data-aj-zone><polygon points="180,560 470,500 560,700 240,760" fill="rgba(120,220,150,.28)" stroke="rgba(120,220,150,.7)"/></g>
+        <g data-aj-zone><polygon points="980,220 1290,180 1360,380 1040,430" fill="rgba(120,220,150,.24)" stroke="rgba(120,220,150,.7)"/></g>
+        <g data-aj-zone><polygon points="640,640 900,600 960,800 700,840" fill="rgba(176,106,79,.26)" stroke="rgba(201,138,114,.75)"/></g>
       </svg>
       <div data-aj-cards>
-        <div data-aj-card style="left:23%; top:60%"><b>Sports courts</b> · 4 min walk</div>
-        <div data-aj-card style="left:73%; top:24%"><b>Park</b> · 6 min walk</div>
-        <div data-aj-card style="left:50%; top:70%"><b>Cafes &amp; coffee</b> · 3 min walk</div>
+        <div data-aj-card style="left:23%; top:60%"><b>Nature Park</b> · 1 min walk</div>
+        <div data-aj-card style="left:73%; top:24%"><b>Birch Grove Park</b> · 10 min walk</div>
+        <div data-aj-card style="left:50%; top:70%"><b>Historical Park</b> · 20 min walk</div>
       </div>
     </div>
   </div>
 </div>
 
-<section id="mapAct">
+<!-- 5 · LOCATION CARDS (dark) — MALL + FITNESS -->
+<section id="location-cards" style="background:#000;color:#f2f1ee">
+  <div class="act">
+    <div class="loc-cards">
+      <figure class="loc-card">
+        <img src="https://aircenter.space/media/cache/location_location_mall_img_xxxl/uploads/gemini_generated_image_rq11efrq11efrq11_1_1776090080.webp" alt="Mall next to AIR">
+        <figcaption>Mall · 1 min walk</figcaption>
+      </figure>
+      <figure class="loc-card">
+        <img src="https://aircenter.space/media/cache/location_location_fitness_img_xxxl/assets/images/media/location/7.location/image-2@xxxl.webp" alt="Fitness club near AIR">
+        <figcaption>Fitness · in the district</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · INFRASTRUCTURE MAP (dark) — інтерактивна карта з фільтрами (LocMap engine) -->
+<section id="mapAct" style="background:#000;color:#f2f1ee">
   <div class="wrap">
-    <section class="loc" id="loc"><div data-lm-stage></div></section>
+    <section class="loc" id="loc"><div class="lm__stage" data-lm-stage></div></section>
     <aside>
       <h2>Infrastructure</h2>
       <form id="cats"></form>
     </aside>
   </div>
 </section>
+
+<!-- 7 · FOOTER (dark) -->
+<footer style="background:#000;color:#8b8a86">
+  <span><a href="/combos/home-air/combo-lab.html">Home</a> / Location</span>
+  <span>© 2026 Tekta group</span>
+  <span>Website by Vide Infra</span>
+</footer>
 
 <!-- МЕНЮ-ОВЕРЛЕЙ (home-air доведений) -->
 <div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
