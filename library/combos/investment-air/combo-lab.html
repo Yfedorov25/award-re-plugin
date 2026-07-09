@@ -95,11 +95,12 @@
     .hrow { grid-template-columns: 1fr auto; }
     .hlogo { grid-column: 1; justify-self: start; font-size: 41px; letter-spacing: .06em; }
     .hleft { grid-column: 2; justify-self: end; flex-direction: row-reverse; order: 2; }
-    #top .hero-line { flex-direction: column; align-items: flex-start; gap: 4px;
-      top: 176px; bottom: auto; padding: 0 20px; font-size: 42px; line-height: 1.04; }  /* живий вимір: y180, ширина 276 (кегль 42 не 40), крок трохи більший */
-    /* живий mobile: вежа дрібніша, зсунута ВНИЗ (roofY 374 vs наш 250 при cover-center).
-       object-position bottom → вежа в нижні 55%, більше неба зверху. */
-    #top .hero-bg img { object-position: center bottom; object-fit: cover; }
+    /* живий /investment mobile: «INVESTING IN AIR» тече в ОДИН рядок, «OFFICES»
+       переноситься → 2 рядки (не 3 окремі стовпчиком). flex-wrap потоком, gap=пробіл. */
+    #top .hero-line { flex-direction: row; flex-wrap: wrap; align-items: flex-start;
+      gap: 0 .3em; justify-content: flex-start;
+      top: 176px; bottom: auto; padding: 0 20px; font-size: 42px; line-height: 1.06; }
+    #top .hero-bg img { object-fit: cover; }
   }
   .h1 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 300; text-transform: uppercase; line-height: 1.06; }
   .spread { display: flex; justify-content: space-between; }
