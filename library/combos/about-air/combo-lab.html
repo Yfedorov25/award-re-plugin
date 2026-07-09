@@ -110,6 +110,25 @@
   .spread { display: flex; justify-content: space-between; }
   .act { padding: 10vh 3vw; max-width: 1200px; margin: 0 auto; }
   .lead { font-size: 14px; line-height: 1.55; color: #6b6b68; max-width: 44ch; }
+
+  /* ═══ REVEAL-ТЕКСТ (живий animation--text) — переюзний утиліт ═══
+     Живе: великий UPPERCASE #8d8d8d, з'являється WORD-BY-WORD blur(10px)→0
+     + opacity 0→1, stagger --line-index*60ms, ease cubic-bezier(.25,.74,.22,.99),
+     1s. НЕ translateY. strong+heading = #000 (--t-heading). Наш білдер робив
+     дрібний чорний lowercase статичний — це і був p9-провал. */
+  .reveal-text { font-size: clamp(20px, 2.6vw, 40px); font-weight: 400; line-height: 1.15;
+    letter-spacing: -.02em; text-transform: uppercase; color: #8d8d8d; max-width: 24ch; }
+  .reveal-text strong { color: #000; font-weight: 400; }
+  .reveal-text .rv-w { display: inline-block; white-space: pre; }
+  .reveal-text.rv-armed .rv-w { filter: blur(10px); opacity: 0; }
+  .reveal-text .rv-w { transition: filter 1s cubic-bezier(.25,.74,.22,.99),
+    opacity 1s cubic-bezier(.25,.74,.22,.99);
+    transition-delay: calc(var(--rv-i, 0) * 60ms); }
+  .sec-dark .reveal-text { color: #8d8d8d; }
+  .sec-dark .reveal-text strong { color: #fff; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-text.rv-armed .rv-w { filter: none; opacity: 1; }
+  }
   .facts { display: flex; gap: 6vw; margin-top: 5vh; }
   .facts .gnf-num { font-size: clamp(40px, 5vw, 84px); font-weight: 300; line-height: 1; }
   .facts .cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
@@ -414,14 +433,15 @@
   </div>
 </section>
 
-<!-- ═══ 2 · INFO-BOTTOM (light) ═══ -->
+<!-- ═══ 2 · INFO-BOTTOM (light) — живе: 2 фото зверху → UPPERCASE reveal-текст під ними ═══ -->
 <section class="act">
-  <p class="lead" style="max-width:64ch;font-size:15px;line-height:1.55;color:#3c3b39">Developed by <strong>TEKTA</strong> professionals and managed by <strong>Commonwealth Partnership</strong> experts, AIR becomes a solid foundation for businesses of any scale and ambition. Here, private investors, IT startups, regional companies opening offices in the city, and many other forward-looking organizations will find space to strengthen their financial positions.</p>
+  <p class="lead" style="max-width:64ch;font-size:15px;line-height:1.55;color:#3c3b39;margin-bottom:5vh">Developed by <strong>TEKTA</strong> professionals and managed by <strong>Commonwealth Partnership</strong> experts, AIR becomes a solid foundation for businesses of any scale and ambition.</p>
   <div class="ib-grid">
     <img loading="lazy" alt="AIR interior" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-1%40xxxl.webp">
     <img loading="lazy" alt="AIR lobby" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-2%40xxxl.webp">
   </div>
-  <div class="callout">
+  <p class="reveal-text" style="margin-top:6vh;max-width:none">Here, private investors, IT startups, regional companies opening offices in the city, and many other forward-looking organizations will find space to strengthen their financial positions.</p>
+  <div class="callout" style="margin-top:8vh">
     <p>A large corporation can reach a new level by establishing a representative headquarters in <strong>Building 3</strong>.</p>
     <a class="cta-link" href="/combos/funnel-air/combo-lab.html">Learn more <span>›</span></a>
   </div>
@@ -727,6 +747,39 @@
     (window.__lenis?window.__lenis.on('scroll',onScroll):window.addEventListener('scroll',onScroll,{passive:true}));
     onScroll();
   })();
+  /* ═══ REVEAL-текст: split на слова + IntersectionObserver (живий animation--text) ═══ */
+  (function initReveal(){
+    var nodes = document.querySelectorAll('.reveal-text');
+    if (!nodes.length) return;
+    nodes.forEach(function(el){
+      /* обгортаємо кожне СЛОВО у span.rv-w зі stagger-індексом, зберігаючи <strong> */
+      var i = 0;
+      (function walk(node){
+        Array.prototype.slice.call(node.childNodes).forEach(function(ch){
+          if (ch.nodeType === 3) { /* текст → розбити на слова */
+            var frag = document.createDocumentFragment();
+            ch.textContent.split(/(\s+)/).forEach(function(tok){
+              if (tok === '') return;
+              if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
+              var w = document.createElement('span');
+              w.className = 'rv-w'; w.style.setProperty('--rv-i', i++); w.textContent = tok;
+              frag.appendChild(w);
+            });
+            node.replaceChild(frag, ch);
+          } else if (ch.nodeType === 1) { walk(ch); } /* <strong> → зайти всередину */
+        });
+      })(el);
+      el.classList.add('rv-armed');
+    });
+    if (reduced) { nodes.forEach(function(el){ el.classList.remove('rv-armed'); }); return; }
+    var io = new IntersectionObserver(function(ents){
+      ents.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.remove('rv-armed'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.25 });
+    nodes.forEach(function(el){ io.observe(el); });
+  })();
+
   api.rvc = window.RevolvesCarousel.create('#rvc', {});
   api.isw = Array.prototype.map.call(
     document.querySelectorAll('#isw-arch, #isw-hq, #isw-layout'),
