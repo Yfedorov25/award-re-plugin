@@ -29,7 +29,12 @@
    Usage:
      node scripts/visual-parity.mjs --ours <URL> --baseline <PNG> [--label <name>]
         [--viewport 1440x820] [--out <dir>] [--threshold 3] [--pixel-threshold 32]
-        [--mask "<css>,<css>"]
+        [--mask "<css>,<css>"] [--click "<css>[,<css>]"] [--click-wait 1800]
+
+   --click: CSS selector(s) clicked after settle, before the shot — opens a menu
+   overlay or panel so the parity shot captures a state a plain load can't reach
+   (G15 has no scroll/interaction; this is the click-then-hold equivalent). Masks
+   are captured AFTER the clicks, so they read from the resulting open state.
 
    --mask (same semantics as G20 dynamic_masks): comma-separated CSS selectors
    whose bounding boxes (measured on OUR settled page) are filled BLACK in BOTH
@@ -92,6 +97,16 @@ const PIXEL_THRESHOLD = args['pixel-threshold'] !== undefined ? Number(args['pix
 const MASK_SELECTORS = args.mask
   ? String(args.mask).split(',').map(s => s.trim()).filter(Boolean)
   : [];
+
+// optional pre-shot click sequence — for states G15 can't reach by loading alone
+// (menu overlay, opened panel). CSS selector(s), comma-separated, clicked IN ORDER
+// after the settle window and before mask capture, so masks are read from the
+// resulting (open) state. --click-wait ms waits after EACH click (default 1800,
+// enough for the menu-overlay open transition to finish).
+const CLICK_SELECTORS = args.click
+  ? String(args.click).split(',').map(s => s.trim()).filter(Boolean)
+  : [];
+const CLICK_WAIT_MS = args['click-wait'] !== undefined ? Number(args['click-wait']) : 1800;
 
 // explicit mask rects "x,y,w,h;x,y,w,h" — for when the dynamic element's DOM box
 // is full-bleed (hero Vimeo iframe = 1546x820) and masking by selector would eat
@@ -388,6 +403,20 @@ async function runOne(browser, vp) {
       }
     });
     await page.waitForTimeout(300);               // paint settle
+
+    // optional pre-shot clicks: open a menu overlay / panel so we screenshot a
+    // state that a plain load won't reach. Runs after settle, before mask capture.
+    if (CLICK_SELECTORS.length) {
+      for (const sel of CLICK_SELECTORS) {
+        try {
+          await page.locator(sel).first().click({ timeout: 5000 });
+          await page.waitForTimeout(CLICK_WAIT_MS);
+        } catch (e) {
+          console.warn(`  ! ${LABEL} ${vp.tag}: --click "${sel}" failed — ${String(e.message || e).slice(0, 80)}`);
+        }
+      }
+      rec.clickSelectors = CLICK_SELECTORS;
+    }
 
     // capture dynamic-mask bounding boxes (viewport-relative), G20 captureMasks.
     const maskRects = [...MASK_RECTS_CLI];

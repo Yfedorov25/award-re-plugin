@@ -67,7 +67,8 @@
   [data-amo-header].is-scrolled { background: rgba(244, 242, 238, .8);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
   [data-amo-header] .hlogo { opacity: 0; transition: opacity .4s; }
-  [data-amo-header].is-scrolled .hlogo { opacity: 1; }
+  [data-amo-header].is-scrolled .hlogo,
+  [data-amo-header].amo-menu-open .hlogo { opacity: 1; }  /* у відкритому меню лого видиме (живий baseline) */
   [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .8); color: #f2f1ee; }
   /* живий хедер (виміряно з aircenter, 1440×820): h=70; 3 зони —
      ЗЛІВА бургер(x30)+♡favourite(x90), ЦЕНТР лого AIR, СПРАВА CHOOSE AN OFFICE(x1203).
@@ -100,6 +101,16 @@
   .scroll-dn { position: fixed; right: 20px; bottom: 20px; width: 30px; height: 30px;
     background: #e9e8e4; color: #111110; border-radius: 6px; z-index: 40;
     display: flex; align-items: center; justify-content: center; }
+  /* живий cookie-бар знизу по центру (той самий, що funnel — присутній і на home,
+     видимий у hero під маскою і в меню-стані) */
+  .cookies { position: fixed; left: 50%; bottom: 25px; transform: translateX(-50%);
+    z-index: 30; display: flex; align-items: center; gap: 14px; height: 40px;
+    padding: 0 8px 0 20px; border-radius: 8px; background: #fff; color: #6d6b66;
+    font-size: 11px; letter-spacing: 0; text-transform: uppercase; white-space: nowrap; }
+  .cookies b { color: #111110; font-weight: 500; }
+  .cookies button { font: inherit; letter-spacing: inherit; text-transform: inherit;
+    border: 0; border-radius: 8px; background: #ebe9e5; color: #111110;
+    padding: 11px 15px; cursor: pointer; }
 
   /* ---- 1 · TOP (hero) ---- */
   /* живий intro = section--full-height: висота зарезервована В CSS (не движком) —
@@ -327,17 +338,26 @@
     [data-amo-giant] { display: block; left: 3vw; top: 11vh; font-size: clamp(38px, 5.4vw, 84px);
       letter-spacing: .3em; font-weight: 500; color: #111110; }
   }
-  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center;
-              justify-content: center; padding: 12vh 3vw 5vh; }
-  [data-amo-panel] { width: min(1120px, 94vw); background: rgba(236, 234, 229, .75); }
-  [data-amo-left] { padding: 4vh 2.6vw; display: flex; flex-direction: column; justify-content: space-between; }
-  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
-  [data-amo-left] ul.small-list { gap: 10px; margin-top: 5vh; }
-  ul.large [data-amo-item] a { font-size: clamp(24px, 3.1vw, 48px); font-weight: 400;
-    text-transform: uppercase; letter-spacing: -.02em; line-height: 1.07; }
-  ul.small-list [data-amo-item] a { font-size: 13px; color: #55544f; }
+  /* живий menu-baseline: панель TOP-aligned на y≈147 (не центрована по вертикалі).
+     align-items:flex-start + top-padding = висота хедера. (Було center → зсув +105px.) */
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: flex-start;
+              justify-content: center; padding: 130px 3vw 5vh; }
+  [data-amo-panel] { width: min(1120px, 94vw); min-height: 572px; background: rgba(236, 234, 229, .75); }  /* живий: панель y135→707 */
+  /* живий menu-baseline: список починається на x≈396 (панель x160 → лівий inset ≈196px),
+     верх на y≈160; малий список притиснутий до НИЗУ панелі (space-between). */
+  [data-amo-left] { padding: 25px 2.6vw 30px 196px; display: flex; flex-direction: column; justify-content: flex-start; }
+  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 0; }
+  [data-amo-left] ul.small-list { gap: 12px; margin-top: 328px; }  /* живий: малий список на y≈636 (панель top 135) */
+  /* живий menu-baseline (перезаміряно): 4 пункти кеглем ~29px, кожен ОДИН рядок,
+     line-height ~1.2, «PROJECT MANAGEMENT» ~322px. (Мій замір 52px/504px був хибний —
+     зона захопила і великий, і малий список.) */
+  ul.large [data-amo-item] a { font-size: clamp(19px, 1.9vw, 27px); font-weight: 400;
+    text-transform: uppercase; letter-spacing: -.005em; line-height: 1.28; }
+  ul.small-list [data-amo-item] a { font-size: 11px; color: #55544f;
+    text-transform: uppercase; letter-spacing: .05em; }  /* живий: малий список UPPERCASE */
   [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between;
-    padding: 22px; font-size: 13px; min-height: 150px; }
+    padding: 22px; font-size: 13px; min-height: 150px;
+    text-transform: uppercase; letter-spacing: .04em; }  /* живий baseline: картки UPPERCASE */
   [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px;
     border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
   @media (max-width: 768px) {
@@ -367,6 +387,8 @@
 <a class="scroll-dn" href="#impulse" aria-label="Scroll down">
   <svg width="14" height="16" viewBox="0 0 12 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 0v12M1 8l5 5 5-5"/></svg>
 </a>
+<!-- живий cookie-бар (присутній на home; у hero під маскою спіралі, у меню-стані видимий) -->
+<div class="cookies" id="cookiesBar">This website uses&nbsp;&nbsp;<b>cookies</b><button type="button" onclick="document.getElementById('cookiesBar').remove()">Accept</button></div>
 
 <!-- 1 · TOP — гігант-літери A·I·R (3 SVG, живі path) поверх спіралі Vimeo -->
 <section id="top" data-amo-theme="light">
