@@ -368,10 +368,37 @@
     height: 60svh; background: #000; pointer-events: none; z-index: 1;
     opacity: calc(var(--seam-p, 0) * .5); }  /* живий: 0→.5 по прогресу виходу */
 
-  /* 7 COMFORT list */
-  .comfort-list { list-style: none; margin: 5vh 0 0; padding: 0; columns: 2; column-gap: 5vw; }
-  .comfort-list li { font-size: 14px; line-height: 1.5; color: #3c3b39; padding: 12px 0;
-    border-top: 1px solid rgba(17,17,16,.12); break-inside: avoid; }
+  /* 7 COMFORT — живе: fullscreen карусель лоббі (4 слайди «1/4» + thumb-рейка)
+     → 7 glass-карток фіч (card-team ui-background-alt blur, offset-грід). */
+  /* карусель лоббі */
+  .lobby { position: relative; margin-top: 7vh; border-radius: 8px; overflow: clip;
+    aspect-ratio: 16 / 9; background: #ecebe6; }
+  .lobby-track { position: absolute; inset: 0; }
+  .lobby-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s cubic-bezier(.25,.74,.22,.99); }
+  .lobby-slide.is-on { opacity: 1; }
+  .lobby-slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lobby-ui { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 20px;
+    padding: 24px 26px; color: #fff; }
+  .lobby-count { font-size: 13px; letter-spacing: .06em; }
+  .lobby-count b { font-weight: 400; }
+  .lobby-count span { opacity: .5; }
+  .lobby-thumbs { display: flex; gap: 8px; }
+  .lobby-thumb { width: 54px; height: 40px; border-radius: 4px; overflow: clip; cursor: pointer;
+    opacity: .5; transition: opacity .3s; border: 1px solid rgba(255,255,255,.4); }
+  .lobby-thumb.is-on { opacity: 1; }
+  .lobby-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* 7 glass-карток фіч (offset-грід) */
+  .comfort-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 7vh; }
+  .cft { position: relative; min-height: 190px; border-radius: 6px; padding: 20px;
+    background: rgba(17,17,16,.04); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(17,17,16,.06); }
+  .cft .cft-ic { font-size: 26px; font-weight: 200; color: rgba(17,17,16,.28); line-height: 1; }
+  .cft h4 { font-size: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: -.01em;
+    line-height: 1.2; color: #111110; }
+  /* offset-грід: 2-й і 4-й стовпці зсунуті вниз (як живий наїзд) */
+  .comfort-cards .cft:nth-child(2), .comfort-cards .cft:nth-child(4),
+  .comfort-cards .cft:nth-child(6) { transform: translateY(28px); }
 
   /* 8 AUTONOMY — 2-кол інтро-грід (текст+3 фото) → інтерактивна PLAN-МАПА
      (живе: about-automony-plan = світлий фон+спіраль, титул «4000м²», ~7 POI plan-marker--pin
@@ -435,9 +462,14 @@
   .svc-img { width: 100%; border-radius: 6px; margin-top: 4vh; display: block; }
   @media (max-width: 1024px) { .svc-large { grid-template-columns: repeat(2, 1fr); }
     .svc-small { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 1024px) { .comfort-cards { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 768px) { .svc-large, .svc-small { grid-template-columns: 1fr 1fr; }
     .aut-grid, .ib-grid, .info-top-grid { grid-template-columns: 1fr; }
-    .comfort-list { columns: 1; }
+    .comfort-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .comfort-cards .cft:nth-child(2), .comfort-cards .cft:nth-child(4),
+    .comfort-cards .cft:nth-child(6) { transform: none; }
+    .lobby { aspect-ratio: 4 / 5; }
+    .lobby-thumbs { display: none; }  /* мобільно тільки лічильник */
     .aplan { aspect-ratio: 3 / 4; }
     .aplan-bg { object-position: center; }
     .poi__txt { display: none; }  /* мобільно: лише піни, як живий plan--mobile-scroll */
@@ -629,15 +661,36 @@
   </div>
   <h3 class="h1" style="font-size:clamp(22px,2.6vw,40px);margin-top:6vh;margin-bottom:2vh">Everything for visitor comfort</h3>
   <p class="lead" style="max-width:62ch">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
-  <ul class="comfort-list">
-    <li>Visitor lounge areas</li>
-    <li>Reception zones</li>
-    <li>Smart mailboxes</li>
-    <li>Dedicated areas for ATMs</li>
-    <li>Lobby bar</li>
-    <li>Centralized scenting and background music system</li>
-    <li>Shoe-cleaning machines and umbrella wrapping stations</li>
-  </ul>
+
+  <!-- живе: fullscreen карусель лоббі (4 слайди, thumb-рейка, лічильник 1/4) -->
+  <div class="lobby" id="lobby-carousel" data-lobby>
+    <div class="lobby-track">
+      <div class="lobby-slide is-on"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-1@xxxl.webp"></div>
+      <div class="lobby-slide"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-2@xxxl.webp"></div>
+      <div class="lobby-slide"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-3@xxxl.webp"></div>
+      <div class="lobby-slide"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-4@xxxl.webp"></div>
+    </div>
+    <div class="lobby-ui">
+      <div class="lobby-count"><b data-lobby-cur>1</b> <span>/ 4</span></div>
+      <div class="lobby-thumbs">
+        <button class="lobby-thumb is-on" data-lobby-to="0"><img loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/image-1@xxxl.webp"></button>
+        <button class="lobby-thumb" data-lobby-to="1"><img loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/image-2@xxxl.webp"></button>
+        <button class="lobby-thumb" data-lobby-to="2"><img loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/image-3@xxxl.webp"></button>
+        <button class="lobby-thumb" data-lobby-to="3"><img loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/image-4@xxxl.webp"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- живе: 7 glass-карток фіч (card-team ui-background-alt, offset-грід) -->
+  <div class="comfort-cards">
+    <div class="cft"><div class="cft-ic">◇</div><h4>Visitor lounge areas</h4></div>
+    <div class="cft"><div class="cft-ic">◈</div><h4>Reception zones</h4></div>
+    <div class="cft"><div class="cft-ic">▤</div><h4>Smart mailboxes</h4></div>
+    <div class="cft"><div class="cft-ic">▦</div><h4>Dedicated areas for ATMs</h4></div>
+    <div class="cft"><div class="cft-ic">◑</div><h4>Lobby bar</h4></div>
+    <div class="cft"><div class="cft-ic">♪</div><h4>Centralized scenting &amp; background music</h4></div>
+    <div class="cft"><div class="cft-ic">✦</div><h4>Shoe-cleaning &amp; umbrella wrapping stations</h4></div>
+  </div>
 </section>
 
 <!-- ═══ 8 · AUTONOMY (light) → SERVICES(dark): fade-шов ═══ -->
@@ -913,6 +966,30 @@
     document.querySelectorAll('#isw-arch, #isw-hq, #isw-layout'),
     function (el) { return window.ImageSliderWipe.create('#' + el.id, { mobile: 'tap' }); }
   );
+
+  /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */
+  (function initLobby(){
+    var root = document.querySelector('[data-lobby]');
+    if (!root) return;
+    var slides = root.querySelectorAll('.lobby-slide');
+    var thumbs = root.querySelectorAll('[data-lobby-to]');
+    var cur = root.querySelector('[data-lobby-cur]');
+    var i = 0, timer = null;
+    function go(n){
+      i = (n + slides.length) % slides.length;
+      slides.forEach(function(s,k){ s.classList.toggle('is-on', k === i); });
+      thumbs.forEach(function(t,k){ t.classList.toggle('is-on', k === i); });
+      if (cur) cur.textContent = String(i + 1);
+    }
+    thumbs.forEach(function(t){ t.addEventListener('click', function(){ go(+t.getAttribute('data-lobby-to')); restart(); }); });
+    function restart(){ if (timer) clearInterval(timer); if (!reduced) timer = setInterval(function(){ go(i + 1); }, 4200); }
+    /* автоцикл лише коли секція у в'юпорті */
+    var io = new IntersectionObserver(function(ents){
+      ents.forEach(function(e){ e.isIntersecting ? restart() : (timer && clearInterval(timer)); });
+    }, { threshold: 0.3 });
+    io.observe(root);
+  })();
+
   window.__ABOUT = api;
 
   var report = { stability: null, engines: null, hq: null, docHeight: null, errors: null };
