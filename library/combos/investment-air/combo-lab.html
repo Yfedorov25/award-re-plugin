@@ -377,8 +377,304 @@
   <div class="hero-line"><span>Investing</span><span>in AIR</span><span>offices</span></div>
 </section>
 
-<!-- КОНТЕНТ-СЕКЦІЇ /investment — білдер за розвідкою -->
-<div class="act"><p class="lead">Investment sections placeholder — build from recon.</p></div>
+<!-- КОНТЕНТ-СЕКЦІЇ /investment — 4 акти (KEY ADVANTAGES · STRATEGIES · CONTACT · FOOTER) -->
+<style>
+  /* ── investment-only scoped tokens ── */
+  .inv-h2 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 300; text-transform: uppercase; line-height: 1.06; }
+  .inv-intro { font-size: clamp(15px, 1.5vw, 20px); font-weight: 300; line-height: 1.5;
+    text-transform: uppercase; letter-spacing: .01em; max-width: 62ch; margin-top: 4vh; }
+
+  /* 1 KEY ADVANTAGES (dark) */
+  #inv-adv { background: #000; color: #f2f1ee; }
+  .adv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    margin-top: 8vh; background: rgba(242,241,238,.14); border: 1px solid rgba(242,241,238,.14); border-radius: 8px; overflow: clip; }
+  .adv-card { background: #000; padding: 5vh 2.6vw; display: flex; flex-direction: column; gap: 2.4vh; }
+  .adv-card .n { font-size: 12px; letter-spacing: .12em; color: #6f6f6c; }
+  .adv-card h3 { font-size: clamp(16px, 1.5vw, 21px); font-weight: 500; text-transform: uppercase;
+    letter-spacing: .02em; line-height: 1.15; color: #f2f1ee; }
+  .adv-card p { font-size: 13px; line-height: 1.55; color: #a7a6a2; text-transform: uppercase; letter-spacing: .01em; }
+
+  /* 2 INVESTMENT STRATEGIES (light) */
+  #inv-strat { background: #fff; color: #111110; position: relative; overflow: clip; }
+  #inv-strat .inv-intro { color: #3c3b39; }
+  .strat-deco { position: absolute; top: 0; right: 0; width: 46%; max-width: 720px;
+    opacity: .9; pointer-events: none; z-index: 0; }
+  #inv-strat .act { position: relative; z-index: 1; }
+  .model-switch { display: flex; gap: 8px; margin-top: 7vh; flex-wrap: wrap; }
+  .model-switch button { font-family: inherit; cursor: pointer; font-size: 12px; letter-spacing: .1em;
+    text-transform: uppercase; padding: 13px 24px; border-radius: 8px; border: 1px solid rgba(17,17,16,.2);
+    background: transparent; color: #111110; transition: background .2s, color .2s, border-color .2s; }
+  .model-switch button.is-active { background: #111110; color: #f2f1ee; border-color: #111110; }
+  .model-panel { display: none; margin-top: 6vh; }
+  .model-panel.is-active { display: block; }
+  .model-panel .m-title { font-size: clamp(20px, 2.4vw, 34px); font-weight: 300; text-transform: uppercase; line-height: 1.1; }
+  .model-panel .m-desc { font-size: 14px; line-height: 1.55; color: #3c3b39; text-transform: uppercase;
+    letter-spacing: .01em; max-width: 60ch; margin-top: 2.6vh; }
+  .m-metric { margin-top: 5vh; padding: 4vh 3vw; background: #f0efea; border-radius: 8px;
+    display: flex; align-items: baseline; gap: 22px; flex-wrap: wrap; }
+  .m-metric .big { font-size: clamp(30px, 3.6vw, 56px); font-weight: 300; line-height: 1; white-space: nowrap; }
+  .m-metric .cap { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: #6b6b68; max-width: 40ch; }
+
+  .case-switch { display: flex; gap: 8px; margin-top: 5vh; }
+  .case-switch button { font-family: inherit; cursor: pointer; font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; padding: 11px 22px; border-radius: 8px; border: 1px solid rgba(17,17,16,.2);
+    background: transparent; color: #111110; transition: background .2s, color .2s, border-color .2s; }
+  .case-switch button.is-active { background: #111110; color: #f2f1ee; border-color: #111110; }
+  .case-panel { display: none; margin-top: 4vh; }
+  .case-panel.is-active { display: block; }
+  .case-dl { margin: 0; display: grid; grid-template-columns: 1fr; border-top: 1px solid rgba(17,17,16,.12); }
+  .case-dl .row { display: flex; justify-content: space-between; gap: 4vw; align-items: baseline;
+    padding: 16px 0; border-bottom: 1px solid rgba(17,17,16,.12); }
+  .case-dl dt { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: #6b6b68; }
+  .case-dl dd { margin: 0; font-size: 15px; font-weight: 400; text-transform: uppercase; text-align: right; }
+
+  .steps { list-style: none; margin: 5vh 0 0; padding: 0; display: grid; gap: 1px;
+    background: rgba(17,17,16,.12); border: 1px solid rgba(17,17,16,.12); border-radius: 8px; overflow: clip; }
+  .steps li { background: #fff; padding: 4vh 2.6vw; display: flex; gap: 22px; align-items: flex-start; }
+  .steps .s-n { font-size: clamp(26px, 3vw, 44px); font-weight: 300; line-height: 1; color: #b8b6b0; }
+  .steps p { font-size: 14px; line-height: 1.5; color: #3c3b39; text-transform: uppercase; letter-spacing: .01em; }
+  .adv-list { list-style: none; margin: 5vh 0 0; padding: 0; columns: 2; column-gap: 5vw; }
+  .adv-list li { font-size: 13px; line-height: 1.5; color: #3c3b39; text-transform: uppercase; letter-spacing: .01em;
+    padding: 13px 0; border-top: 1px solid rgba(17,17,16,.12); break-inside: avoid; }
+
+  .strat-cta { margin-top: 8vh; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  .strat-cta .go { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; padding: 14px 26px;
+    border-radius: 8px; background: #111110; color: #f2f1ee; }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pills .pill { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 11px 20px;
+    border-radius: 8px; border: 1px solid rgba(17,17,16,.2); color: #3c3b39; }
+  .strat-note { margin-top: 5vh; font-size: 11px; line-height: 1.5; color: #8b8a86;
+    text-transform: uppercase; letter-spacing: .04em; max-width: 70ch; }
+
+  /* 3 CONTACT (dark, bg image) */
+  #inv-contact { position: relative; background: #000; color: #f2f1ee; overflow: clip; }
+  #inv-contact .cbg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5; z-index: 0; }
+  #inv-contact .cbg-over { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.85), rgba(0,0,0,.4)); z-index: 0; }
+  #inv-contact .act { position: relative; z-index: 1; }
+  #inv-contact .inv-h2 { color: #fff; }
+  .inv-form { margin-top: 7vh; max-width: 720px; display: grid; gap: 5vh; }
+  .fg > .fg-lbl { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #a7a6a2; margin-bottom: 2.2vh; }
+  .fg .pills .pill { color: #d8d7d3; border-color: rgba(242,241,238,.28); cursor: pointer; user-select: none; }
+  .fg .pills input { position: absolute; opacity: 0; pointer-events: none; }
+  .fg .pills input:checked + .pill { background: #f2f1ee; color: #111110; border-color: #f2f1ee; }
+  .inv-form .txt { width: 100%; background: transparent; border: 0; border-bottom: 1px solid rgba(242,241,238,.3);
+    color: #f2f1ee; font-family: inherit; font-size: 16px; padding: 12px 0; }
+  .inv-form .txt::placeholder { color: #6f6f6c; text-transform: uppercase; letter-spacing: .06em; font-size: 13px; }
+  .inv-form .txt:focus { outline: 0; border-color: #f2f1ee; }
+  .form-consent { font-size: 11px; line-height: 1.5; color: #8b8a86; text-transform: uppercase; letter-spacing: .04em; max-width: 52ch; }
+  .form-submit { justify-self: start; font-family: inherit; cursor: pointer; font-size: 12px; letter-spacing: .1em;
+    text-transform: uppercase; padding: 16px 36px; border-radius: 8px; border: 0; background: #f2f1ee; color: #111110; }
+
+  /* 4 FOOTER (dark) */
+  #inv-footer { background: #000; color: #f2f1ee; }
+  #inv-footer .frow { display: flex; justify-content: space-between; gap: 4vw; flex-wrap: wrap;
+    font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: #8d8d8d; }
+  #inv-footer .frow a { color: #a7a6a2; }
+
+  @media (max-width: 768px) {
+    .adv-grid, .adv-list { grid-template-columns: 1fr; columns: 1; }
+    .strat-deco { display: none; }
+  }
+</style>
+
+<!-- 1 · KEY ADVANTAGES (dark) -->
+<section id="inv-adv" style="background:#000;color:#f2f1ee;">
+  <div class="act">
+    <h2 class="inv-h2">Key Advantages</h2>
+    <p class="inv-intro">Investing in office spaces at the AIR business center offers owners strong opportunities for <strong>stable income</strong> and <strong>capital growth</strong>. A prime location, high demand for Class A office space, and well-designed infrastructure make the project particularly attractive to investors.</p>
+    <div class="adv-grid">
+      <div class="adv-card">
+        <span class="n">01</span>
+        <h3>High Demand</h3>
+        <p>In the most sought-after locations, such as Khodynskoye Field, the supply of Class A office space is limited — new inventory is quickly absorbed by tenants. According to NF Group, the overall vacancy rate for completed Class A office space in the Leningradsky Corridor, which includes Khodynskoye Field, stands at <strong>2.9%</strong>.</p>
+      </div>
+      <div class="adv-card">
+        <span class="n">02</span>
+        <h3>Strong Tenant Base</h3>
+        <p>Corporate clients are more likely to enter into long-term lease agreements and demonstrate high payment reliability. Lease contracts are typically signed for an average term of <strong>five years or more</strong>. The longer a single tenant occupies a space, the more stable the cash flow becomes.</p>
+      </div>
+      <div class="adv-card">
+        <span class="n">03</span>
+        <h3>Tenants Prefer Shell &amp; Core</h3>
+        <p>Tenants typically prefer spaces without fit-out, allowing them to design the interior in their own style.</p>
+      </div>
+      <div class="adv-card">
+        <span class="n">04</span>
+        <h3>Ease of Management</h3>
+        <p>The management company provides in-house services and brokerage, oversees tenant relations, and can even be entrusted with fit-out works and furniture procurement.</p>
+      </div>
+      <div class="adv-card">
+        <span class="n">05</span>
+        <h3>Guaranteed Investment Security</h3>
+        <p>Office sales at AIR are conducted under shared construction participation agreements. Each transaction is securely protected by law through mandatory state registration of contracts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · INVESTMENT STRATEGIES (light) -->
+<section id="inv-strat">
+  <img class="strat-deco" src="https://aircenter.space/assets/images/media/investment/3.strategy/deco@xxxl.webp" alt="" aria-hidden="true">
+  <div class="act">
+    <h2 class="inv-h2">Investment Strategies</h2>
+    <p class="inv-intro">There are several ways for private investors to generate returns from office real estate.</p>
+
+    <div class="model-switch" role="tablist" aria-label="Investment models">
+      <button type="button" class="is-active" data-model="m1" aria-selected="true">Model 1 — Rental Income</button>
+      <button type="button" data-model="m2" aria-selected="false">Model 2 — Asset Resale</button>
+    </div>
+
+    <!-- MODEL 1 -->
+    <div class="model-panel is-active" data-panel="m1">
+      <p class="m-title">Rental Income</p>
+      <p class="m-desc">Regular rental payments create a <strong>predictable cash flow</strong>. The management company selects tenants and provides legal support for the transaction.</p>
+      <div class="m-metric">
+        <span class="big">From 8 years</span>
+        <span class="cap">Investment payback period</span>
+      </div>
+
+      <div class="case-switch" role="tablist" aria-label="Cases">
+        <button type="button" class="is-active" data-case="c1" aria-selected="true">Case 1</button>
+        <button type="button" data-case="c2" aria-selected="false">Case 2</button>
+      </div>
+
+      <div class="case-panel is-active" data-casepanel="c1">
+        <dl class="case-dl">
+          <div class="row"><dt>Office</dt><dd>110.6 m²</dd></div>
+          <div class="row"><dt>Unit Price</dt><dd>60 241 520</dd></div>
+          <div class="row"><dt>Annual Rental Rate</dt><dd>60 000 / m²</dd></div>
+          <div class="row"><dt>Annual Rental Indexation</dt><dd>7%</dd></div>
+          <div class="row"><dt>Annual Operating Costs</dt><dd>7 000 / m²</dd></div>
+          <div class="row"><dt>Tax Regime</dt><dd>6%</dd></div>
+          <div class="row"><dt>Payback Period</dt><dd>~ 8.2 years</dd></div>
+          <div class="row"><dt>Monthly Rental Income</dt><dd>~ 553 000</dd></div>
+        </dl>
+      </div>
+      <div class="case-panel" data-casepanel="c2">
+        <dl class="case-dl">
+          <div class="row"><dt>Office</dt><dd>84.7 m²</dd></div>
+          <div class="row"><dt>Unit Price</dt><dd>—</dd></div>
+          <div class="row"><dt>Annual Rental Rate</dt><dd>60 000 / m²</dd></div>
+          <div class="row"><dt>Annual Rental Indexation</dt><dd>7%</dd></div>
+          <div class="row"><dt>Annual Operating Costs</dt><dd>7 000 / m²</dd></div>
+          <div class="row"><dt>Tax Regime</dt><dd>6%</dd></div>
+          <div class="row"><dt>Payback Period</dt><dd>—</dd></div>
+          <div class="row"><dt>Monthly Rental Income</dt><dd>—</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <!-- MODEL 2 -->
+    <div class="model-panel" data-panel="m2">
+      <p class="m-title">Asset Resale</p>
+      <ol class="steps">
+        <li><span class="s-n">1</span><p>The investor acquires the property at the construction stage, when the price per square meter is at its lowest.</p></li>
+        <li><span class="s-n">2</span><p>As the project approaches completion, its value increases, turning the asset into a <strong>liquid investment instrument</strong>.</p></li>
+        <li><span class="s-n">3</span><p>Sale at the final stage of construction or after commissioning — either as a vacant unit or with a signed tenant in place.</p></li>
+      </ol>
+      <div class="m-metric">
+        <span class="big">~40%</span>
+        <span class="cap">Potential increase in property value when purchased at early stages</span>
+      </div>
+      <ul class="adv-list">
+        <li>Attractive price per square meter</li>
+        <li>Option to arrange long-term installment payments</li>
+        <li>Wide selection of the most liquid units</li>
+      </ul>
+    </div>
+
+    <div class="strat-cta">
+      <a class="go" href="/combos/funnel-air/combo-lab.html">Choose an office</a>
+      <div class="pills">
+        <span class="pill">Up to 50 million</span>
+        <span class="pill">50–150 million</span>
+        <span class="pill">150+ million</span>
+      </div>
+    </div>
+    <p class="strat-note">*All calculations and information presented on this website are for informational purposes only and do not constitute a public offer.</p>
+  </div>
+</section>
+
+<!-- 3 · RECEIVE A PERSONALIZED SELECTION (dark, form) -->
+<section id="inv-contact" style="background:#000;color:#f2f1ee;">
+  <img class="cbg" src="https://aircenter.space/media/cache/investment_contact_bg_xxxl/assets/images/media/investment/4.contact/background%40xxxl.webp" alt="" aria-hidden="true">
+  <div class="cbg-over" aria-hidden="true"></div>
+  <div class="act">
+    <h2 class="inv-h2">Receive<br>A Personalized<br>Selection</h2>
+    <form class="inv-form" id="invForm" novalidate>
+      <div class="fg">
+        <span class="fg-lbl">Investment Goal</span>
+        <div class="pills">
+          <label><input type="radio" name="goal" value="rental" checked><span class="pill">Rental Income</span></label>
+          <label><input type="radio" name="goal" value="resale"><span class="pill">Asset Resale</span></label>
+        </div>
+      </div>
+      <div class="fg">
+        <span class="fg-lbl">Budget</span>
+        <div class="pills">
+          <label><input type="radio" name="budget" value="50" checked><span class="pill">Up to 50 million</span></label>
+          <label><input type="radio" name="budget" value="50-150"><span class="pill">50–150 million</span></label>
+          <label><input type="radio" name="budget" value="150"><span class="pill">150+ million</span></label>
+        </div>
+      </div>
+      <div class="fg">
+        <span class="fg-lbl">Your Name</span>
+        <input class="txt" type="text" name="name" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="fg">
+        <span class="fg-lbl">Phone Number</span>
+        <input class="txt" type="tel" name="phone" placeholder="Phone number" autocomplete="tel">
+      </div>
+      <p class="form-consent">By clicking the 'Send' button, you consent to the processing of your personal data.</p>
+      <button class="form-submit" type="submit">Get an offer</button>
+    </form>
+  </div>
+</section>
+
+<!-- 4 · FOOTER (dark) -->
+<footer id="inv-footer" style="background:#000;color:#f2f1ee;">
+  <div class="act">
+    <div class="frow">
+      <span><a href="/combos/home-air/combo-lab.html">Home</a> / Investment</span>
+      <span>© 2026 Tekta group</span>
+      <span>Website by Vide Infra</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* investment tabs — pure vanilla, scoped to #inv-strat + form; does not touch existing lab script */
+(function () {
+  var strat = document.getElementById('inv-strat');
+  if (strat) {
+    strat.querySelectorAll('.model-switch button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-model');
+        strat.querySelectorAll('.model-switch button').forEach(function (b) {
+          var on = b === btn; b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on);
+        });
+        strat.querySelectorAll('.model-panel').forEach(function (p) {
+          p.classList.toggle('is-active', p.getAttribute('data-panel') === id);
+        });
+      });
+    });
+    strat.querySelectorAll('.case-switch button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-case');
+        strat.querySelectorAll('.case-switch button').forEach(function (b) {
+          var on = b === btn; b.classList.toggle('is-active', on); b.setAttribute('aria-selected', on);
+        });
+        strat.querySelectorAll('.case-panel').forEach(function (p) {
+          p.classList.toggle('is-active', p.getAttribute('data-casepanel') === id);
+        });
+      });
+    });
+  }
+  var form = document.getElementById('invForm');
+  if (form) form.addEventListener('submit', function (e) { e.preventDefault(); });
+}());
+</script>
+
 
 
 <!-- МЕНЮ-ОВЕРЛЕЙ (home-air доведений) -->
@@ -443,17 +739,11 @@
     (window.__lenis?window.__lenis.on('scroll',onScroll):window.addEventListener('scroll',onScroll,{passive:true}));
     onScroll();
   })();
-  api.rvc = window.RevolvesCarousel.create('#rvc', {});
-  api.isw = Array.prototype.map.call(
-    document.querySelectorAll('#isw-arch, #isw-hq, #isw-layout'),
-    function (el) { return window.ImageSliderWipe.create('#' + el.id, { mobile: 'tap' }); }
-  );
-  window.__ABOUT = api;
+  window.__INVESTMENT = api;
 
-  var report = { stability: null, engines: null, hq: null, docHeight: null, errors: null };
+  var report = { stability: null, engines: null, docHeight: null, errors: null };
   window.__LAB_REPORT = report;
   function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-  function jump(y) { api.lenis ? api.lenis.scrollTo(y, { immediate: true }) : window.scrollTo(0, y); }
 
   async function run() {
     if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
@@ -475,32 +765,15 @@
     ok = report.stability.ok && ok;
 
     var doc1 = document.body.scrollHeight;
-    report.engines = {
-      rvc: !!(api.rvc && !api.rvc.error),
-      isw: api.isw.length === 3 && api.isw.every(function (s) { return s && !s.error; }),
-      lenis: touch || !!api.lenis
-    };
+    report.engines = { menu: !!api.amo, lenis: touch || !!api.lenis };
     ok = Object.keys(report.engines).every(function (k) { return report.engines[k]; }) && ok;
-
-    /* headquarters-слайдер (#isw-hq): 3 слайди, свап на порозі */
-    if (!touch) {
-      var iswRoot = document.getElementById('isw-hq');
-      var top = iswRoot.getBoundingClientRect().top + scrollY;
-      jump(top + (iswRoot.offsetHeight - innerHeight) * 0.5);
-      await delay(200);
-      var count = iswRoot.querySelector('[data-isw-count]').textContent;
-      jump(0);
-      await delay(300);
-      report.hq = { count: count, ok: count === '2' };
-      ok = report.hq.ok && ok;
-    } else { report.hq = { ok: true, skipped: 'touch' }; }
 
     report.docHeight = { stable: Math.abs(document.body.scrollHeight - doc1) <= 2 };
     ok = report.docHeight.stable && ok;
 
     report.errors = errs;
     window.__LAB_OK__ = !!(ok && errs === 0);
-    console.log('[зборка:about-air]', JSON.stringify(report));
+    console.log('[зборка:investment-air]', JSON.stringify(report));
   }
   if (document.readyState === 'complete') run();
   else window.addEventListener('load', function () { run(); });
