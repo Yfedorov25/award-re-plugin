@@ -106,7 +106,9 @@
        object-position bottom → вежа в нижні 55%, більше неба зверху. */
     #top .hero-bg img { object-position: center bottom; object-fit: cover; }
   }
-  .h1 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 300; text-transform: uppercase; line-height: 1.06; }
+  .h1 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 400; text-transform: uppercase;
+    line-height: .97; letter-spacing: -.03em; color: #000; }  /* живий .h1: w400, ls -.04em, heading #000 */
+  .sec-dark .h1 { color: #f2f1ee; }
   .spread { display: flex; justify-content: space-between; }
   .act { padding: 10vh 3vw; max-width: 1200px; margin: 0 auto; }
   .lead { font-size: 14px; line-height: 1.55; color: #6b6b68; max-width: 44ch; }
@@ -132,10 +134,7 @@
   .facts { display: flex; gap: 6vw; margin-top: 5vh; }
   .facts .gnf-num { font-size: clamp(40px, 5vw, 84px); font-weight: 300; line-height: 1; }
   .facts .cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
-  /* headquarters слайдер */
-  #hq { background: #101112; color: #f2f1ee; }
-  #hq .act { max-width: none; padding: 10vh 0 0; }
-  #hq .head { padding: 0 3vw 5vh; max-width: 1200px; margin: 0 auto; }
+  /* headquarters слайдер — ui-light (фон вежі + світла glass як architecture) */
   /* ═══ image-slider-sticky — FULLBLEED pin (живий about p18) ═══
      Живе: фото на ВЕСЬ екран (100vw×100svh) під pin-шаром, glass-панель
      ABSOLUTE overlay справа (blur 40px, rgba(0,0,0,.12), radius 5px, pad 20px),
@@ -337,8 +336,6 @@
   .sec-dark .cta-link { background: #f2f1ee; color: #111110; }
   .ib-map { width: 100%; border-radius: 6px; margin-top: 2vw; display: block; }
 
-  /* 3 ARCHITECTURE + 5/12 sliders reuse .isw */
-  #hq2 { background: #101112; }
 
   /* 6 SPACE / 11 LAYOUT-INTRO — full-bleed dark */
   .fullbleed { position: relative; min-height: 78svh; display: flex; align-items: flex-end;
@@ -507,16 +504,18 @@
     <p>We designed the <strong>third building</strong> as the most advanced headquarters in the Leningradsky business district.</p>
   </div>
 </section>
-<section id="isw-hq" style="background:url('https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp') center/cover no-repeat #101112;color:#f2f1ee;padding:1px 0">
+<!-- 5 HEADQUARTERS — живе: ui-light, ОДИН фон вежі B3 (не 3 фото-слайди),
+     glass-панель справа міняє лише ТЕКСТ (14-story/autonomous/infrastructure) -->
+<section id="isw-hq">
   <div data-isw-layer>
     <div class="isw-row">
       <div data-isw-stage>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-1%40xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-2%40xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-3%40xxxl.webp" alt=""></figure>
+        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt="AIR Building 3 headquarters"></figure>
+        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></figure>
+        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></figure>
       </div>
       <div class="isw-card" data-isw-card>
-        <div data-isw-ticks style="color:#f2f1ee"></div>
+        <div data-isw-ticks></div>
         <p class="isw-counter"><span data-isw-count>1</span><span data-isw-total>/ 3</span></p>
         <div class="isw-texts">
           <p data-isw-text>The <strong>14-story tower</strong> is designed specifically as the headquarters of a large company and is fully autonomous.</p>
@@ -528,7 +527,7 @@
           <span class="nn"><span data-isw-count>1</span> / 3</span>
           <button data-isw-next aria-label="next">→</button>
         </div>
-        <a class="cta-link" style="margin-top:3vh;align-self:flex-start;background:#f2f1ee;color:#111110" href="/combos/funnel-air/combo-lab.html">Advantages of independence <span>›</span></a>
+        <a class="cta-link" style="margin-top:3vh;align-self:flex-start" href="/combos/funnel-air/combo-lab.html">Advantages of independence <span>›</span></a>
       </div>
     </div>
   </div>
