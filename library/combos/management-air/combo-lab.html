@@ -379,8 +379,149 @@
   <div class="hero-line"><span>Collaborate</span><span class="hero-mid">Management<br>services</span><span>with the strong</span></div>
 </section>
 
-<!-- КОНТЕНТ /management — білдер за розвідкою -->
-<div class="act" id="a-intro"><p class="lead">Management sections placeholder — build from recon.</p></div>
+<!-- КОНТЕНТ /management — 3 секції -->
+<style>
+  /* ═══════════ /management контент ═══════════ */
+  /* 1 QUOTE (dark) */
+  #m-quote { position: relative; overflow: clip; min-height: 92svh; display: flex;
+    align-items: center; background: #000; color: #f2f1ee; }
+  #m-quote .m-q-bg { position: absolute; inset: 0; z-index: 0; }
+  #m-quote .m-q-bg img { width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: grayscale(1); opacity: .28; }
+  #m-quote .m-q-bg::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.9)); }
+  #m-quote .m-q-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto;
+    padding: 14vh 3vw; width: 100%; display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: 6vh; }
+  #m-quote .m-q-logo { width: 92px; height: auto; display: block; opacity: .92; }
+  #m-quote .m-q-text { font-size: clamp(20px, 2.9vw, 44px); font-weight: 300;
+    line-height: 1.28; text-transform: uppercase; max-width: 26ch; color: #f2f1ee; }
+  #m-quote .m-q-page { position: absolute; z-index: 1; left: 3vw; bottom: 5vh;
+    font-size: 11px; letter-spacing: .12em; color: rgba(242,241,238,.5); }
+
+  /* 2 SERVICES (light) */
+  #m-serv { background: #fff; color: #111110; }
+  #m-serv .m-s-desc { margin-top: 4vh; }
+  #m-serv .m-grid { display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2vw 2.4vw; margin-top: 8vh; }
+  #m-serv .m-cell { display: flex; flex-direction: column; gap: 14px;
+    padding-top: 3vh; border-top: 1px solid #e3e1db; }
+  #m-serv .m-cell img { width: 40px; height: 40px; object-fit: contain; display: block; }
+  #m-serv .m-cell h3 { font-size: 15px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: .02em; line-height: 1.2; }
+  #m-serv .m-cell p { font-size: 12.5px; line-height: 1.55; color: #8D8D8D; }
+  @media (max-width: 1024px) { #m-serv .m-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px)  {
+    #m-serv .m-grid { grid-template-columns: 1fr; gap: 0; }
+    #m-quote .m-q-inner { gap: 5vh; }
+  }
+
+  /* 3 FOOTER (dark) */
+  #m-foot { background: #000; color: #f2f1ee; }
+  #m-foot .act { display: flex; justify-content: space-between; align-items: flex-end;
+    flex-wrap: wrap; gap: 4vh; padding: 12vh 3vw; }
+  #m-foot .m-crumb { font-size: 12px; letter-spacing: .08em; color: rgba(242,241,238,.55);
+    text-transform: uppercase; }
+  #m-foot .m-crumb b { color: #f2f1ee; font-weight: 400; }
+  #m-foot .m-meta { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(242,241,238,.5); text-align: right; line-height: 1.9; }
+  @media (max-width: 640px) { #m-foot .m-meta { text-align: left; } }
+</style>
+
+<!-- 1 QUOTE (dark) -->
+<section id="m-quote">
+  <div class="m-q-bg">
+    <img src="https://aircenter.space/assets/images/media/landing/5.life/placeholder@xxxl.webp?v=1781014343" alt="">
+  </div>
+  <div class="m-q-inner">
+    <img class="m-q-logo" src="https://aircenter.space/assets/images/media/management-service/2.info/logo.svg" alt="AIR">
+    <p class="m-q-text">Peter Drucker believed that the measure of management quality is ordinary people doing extraordinary things. AIR, however, chose to be managed by extraordinary people delivering truly exceptional results.</p>
+  </div>
+  <span class="m-q-page">1 / 2</span>
+</section>
+
+<!-- 2 SERVICES (light) -->
+<section id="m-serv">
+  <div class="act">
+    <div class="spread"><h2 class="h1">Delegate</h2><h2 class="h1">With confidence</h2></div>
+    <p class="lead m-s-desc">Commonwealth Partnership forms a management company capable of delivering premium service across the entire office lifecycle — from tenant acquisition and design to day-to-day administration.</p>
+    <div class="m-grid">
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-1.svg" alt="">
+        <h3>Brokerage</h3>
+        <p>Tenant search and acquisition; property presentation; creation of marketing materials; promotion of the property across advertising platforms; commercial negotiations in the owner's interests; legal support.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-2.svg" alt="">
+        <h3>Lease Management</h3>
+        <p>Support of lease processes; administration of lease agreements, renewals, and indexation; document management; accounting and legal support of lease relations; management, accounting, and tax reporting.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-3.svg" alt="">
+        <h3>Interior Design</h3>
+        <p>Development of design concepts, project documentation, and visualizations for the owner's property.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-4.svg" alt="">
+        <h3>Fit-Out Project Management</h3>
+        <p>Provision of supervision and control throughout fit-out project execution.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-5.svg" alt="">
+        <h3>Interior Fit-Out and Renovation</h3>
+        <p>Execution of interior fit-out and renovation works in accordance with the design concept and project documentation, including installation of engineering systems.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-6.svg" alt="">
+        <h3>IT Infrastructure Support and Maintenance</h3>
+        <p>System administration of office IT infrastructure; IT outsourcing and office software support; system administrator services.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-7.svg" alt="">
+        <h3>Reception Service Organization and Management</h3>
+        <p>Organization and management of on-site reception services; outstaffing of administrative personnel, including receptionists and coffee attendants.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-8.svg" alt="">
+        <h3>Office Equipment Maintenance</h3>
+        <p>Maintenance of office equipment, MFPs, printers, and copiers; supply of consumables for office equipment.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-9.svg" alt="">
+        <h3>24/7 Helpdesk Service and Support Hotline</h3>
+        <p>Office technical support via ticketing system, 24/7; resolution of technical issues within building operations, 24/7; handyman service for prompt minor repairs and urgent office tasks.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-10.svg" alt="">
+        <h3>Marketing Support and Services</h3>
+        <p>Development and production of marketing materials for office needs; design and production of branded stationery; production of branded corporate gifts.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-11.svg" alt="">
+        <h3>Office Administrative Support</h3>
+        <p>Administrative assistance; supply of food and beverages for office needs; provision of stationery, furniture, and other equipment; execution of minor repair works.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-12.svg" alt="">
+        <h3>Floristry and Plant Care</h3>
+        <p>Floristry and interior landscaping; professional plant care and maintenance; decoration with live, artificial, and preserved plants.</p>
+      </article>
+      <article class="m-cell">
+        <img src="https://aircenter.space/assets/images/media/management-service/3.services/logo-13.svg" alt="">
+        <h3>Mail and Courier Services</h3>
+        <p>Mail and courier services, including handling of correspondence and shipments.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 3 FOOTER (dark) -->
+<section id="m-foot">
+  <div class="act">
+    <div class="m-crumb">Home / <b>Management services</b></div>
+    <div class="m-meta">© 2026 Tekta group<br>Website by Vide Infra</div>
+  </div>
+</section>
 
 
 <!-- МЕНЮ-ОВЕРЛЕЙ (home-air доведений) -->
