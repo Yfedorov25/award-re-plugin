@@ -184,11 +184,25 @@
   [data-ptc-face] .ic { flex: 1; display: grid; place-items: center; font-size: 40px; font-weight: 200; color: #8b8a86; }
   [data-ptc-face] [data-ptc-plus] { align-self: flex-end; }
   [data-ptc-popup] { padding: 20px; background: rgba(236,235,230,.98); font-size: 12.5px; line-height: 1.5; color: #3c3b39; }
-  /* revolves */
+  /* revolves — живе: fullbleed DARK pin + Vimeo-фон (l-life-cards-background--about)
+     + карусель поверхів, що «обертаються». Заголовок spread 4 частини зверху. */
+  #revolves { position: relative; min-height: 100svh; overflow: clip;
+    display: flex; flex-direction: column; justify-content: center; padding: 12vh 3vw; }
+  #revolves .rvc-bg { position: absolute; inset: 0; z-index: 0; }
+  #revolves .rvc-bg iframe { position: absolute; top: 50%; left: 50%;
+    width: max(100%, 100svh); height: max(100%, 100svh); transform: translate(-50%,-50%);
+    border: 0; opacity: .55; }
+  #revolves .rvc-bg::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(#000 0%, rgba(0,0,0,.35) 40%, rgba(0,0,0,.55) 100%); }
+  #revolves .rvc-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
+  #revolves .rvc-head { display: flex; justify-content: space-between; margin-bottom: 5vh;
+    font-size: clamp(28px, 4.6vw, 66px); font-weight: 400; text-transform: uppercase;
+    line-height: 1; letter-spacing: -.03em; color: #f2f1ee; }
+  @media (max-width: 768px) { #revolves .rvc-head { flex-direction: column; gap: 2px; } }
   [data-rvc-stage] { aspect-ratio: 1176 / 672; }
   .rvc-bar { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
   .rvc-bar button.nav { width: 48px; height: 48px; border-radius: 4px; font-size: 18px;
-    border: 1px solid rgba(17,17,16,.3); background: none; cursor: pointer; }
+    border: 1px solid rgba(242,241,238,.3); background: none; cursor: pointer; color: #f2f1ee; }
   [data-ata-panel] .inner { display: grid; grid-template-columns: 1fr auto; gap: 3vw; align-items: center; padding: 3vh 0; }
   [data-ata-panel] img { width: min(420px, 100%); aspect-ratio: 540 / 420; object-fit: contain; background: #fff; border-radius: 4px; }
   .giant { font-size: clamp(40px, 5.4vw, 88px); font-weight: 300; line-height: 1; }
@@ -487,10 +501,16 @@
 </section>
 
 <!-- ═══ 4 · REVOLVES (DARK) — revolves-carousel ═══ -->
-<section class="sec-dark">
-  <div class="act">
-    <h2 class="h1" style="margin-bottom:2vh">Everything revolves around you</h2>
-    <p class="lead" style="max-width:62ch;margin-bottom:4vh">In typical office buildings, floor plans are utilitarian and centered around a core. At AIR, the core and the structural column grid <em>rotate</em> together with the building facade. All offices at AIR maintain <strong>correct geometry</strong> and commercial efficiency.</p>
+<!-- 4 REVOLVES — живе: fullbleed DARK + Vimeo-фон (1145246264) + карусель поверхів,
+     заголовок spread 4 частини ("Everything / revolves / around / you") -->
+<section class="sec-dark" id="revolves">
+  <div class="rvc-bg" aria-hidden="true">
+    <iframe src="https://player.vimeo.com/video/1145246264?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
+      allow="autoplay; encrypted-media" title="revolving floors loop" loading="lazy"></iframe>
+  </div>
+  <div class="rvc-inner">
+    <h2 class="rvc-head"><span>Everything</span><span>revolves</span><span>around</span><span>you</span></h2>
+    <p class="lead" style="max-width:62ch;margin-bottom:4vh;color:#c9c7c2">In typical office buildings, floor plans are utilitarian and centered around a core. At AIR, the core and the structural column grid <em>rotate</em> together with the building facade. All offices at AIR maintain <strong>correct geometry</strong> and commercial efficiency.</p>
     <div data-rvc id="rvc">
       <div data-rvc-stage>
         <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xs/assets/images/media/about/5.revolves/image-1%40xs.webp" alt=""></figure>
@@ -498,9 +518,9 @@
         <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xs/assets/images/media/about/5.revolves/image-3%40xs.webp" alt=""></figure>
       </div>
       <div class="rvc-bar">
-        <button class="nav" data-rvc-prev aria-label="previous" style="color:#f2f1ee;border-color:rgba(242,241,238,.3)">‹</button>
-        <span style="font-size:13px;color:#a7a6a2"><b data-rvc-count style="font-weight:300;font-size:26px;color:#f2f1ee">1</b> <span data-rvc-total>/ 3</span></span>
-        <button class="nav" data-rvc-next aria-label="next" style="color:#f2f1ee;border-color:rgba(242,241,238,.3)">›</button>
+        <button class="nav" data-rvc-prev aria-label="previous">‹</button>
+        <span style="font-size:13px;color:#c9c7c2"><b data-rvc-count style="font-weight:400;font-size:26px;color:#f2f1ee">1</b> <span data-rvc-total>/ 3</span></span>
+        <button class="nav" data-rvc-next aria-label="next">›</button>
         <div data-rvc-thumbs></div>
       </div>
     </div>
