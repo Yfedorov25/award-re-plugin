@@ -400,23 +400,35 @@
     /* картки ПЕРШІ (зверху), список ПІД ними — реордер flex */
     [data-amo-right] { order: -1; display: grid; grid-template-columns: 1fr 1fr;
       gap: 0; margin: 135px 0 0; padding: 0 20px; }  /* картки-написи → y≈150 (було y160) */
-    [data-amo-card] { min-height: 88px; padding: 10px 16px; font-size: 12px;
-      background: rgba(236, 234, 229, .6); }
+    [data-amo-card] { min-height: 88px; padding: 10px 16px; font-size: 11px;
+      letter-spacing: -.01em; background: rgba(236, 234, 229, .6); }
     [data-amo-left] { order: 0; padding: 0 20px; display: block; }
-    [data-amo-left] ul.large { margin: 70px 0 0; }        /* великий список → y≈449 */
-    /* живий великий список: крок рядка ~31px (y449→h125/4). Кегль ~30px, tight
-       line-height щоб крок збігся. Ширина живого (320px) більша за наш Onest —
-       це ГАРНІТУРНА різниця (живий шрифт ширший), не кегль: більший кегль ламає
-       крок рядка. Тримаємо крок 1-в-1, ширину лишаємо (піде під поріг з маскою). */
-    ul.large [data-amo-item] a { font-size: 30px; line-height: 1.13; letter-spacing: -.01em; }
-    /* живий малий список притиснутий ДОНИЗУ (y≈773), НЕ одразу під великим —
-       у живого ~210px порожнечі між списками (desktop space-between). */
-    [data-amo-left] ul.small-list { margin: 300px 0 0; }  /* малий список → y≈773 */
-    ul.small-list [data-amo-item] a { line-height: 1.55; }
-    /* хедерний AIR зліва зверху y≈20 як живий — fixed, вирвати з хедер-гриду
-       (у гриді сидів на y74, живий на y20). Кегль ~28px під живі 71×30. */
-    [data-amo-header].amo-menu-open .hlogo { position: fixed; left: 20px; top: 20px;
-      justify-self: unset; font-size: 28px; letter-spacing: .02em; }
+    /* живий великий список ПОЧИНАЄТЬСЯ на y449 (ink-list-precise, сесія 14 фікс:
+       перший рядок ABOUT top=449). margin від кінця карток. Крок рядка живий 35px
+       (449→484→519→554) → наш крок теж 34-35px. Кегль живого ~26px (не 30 — той
+       давав наш список ВИЩЕ і піднятий на 120px). */
+    [data-amo-left] ul.large { margin: 189px 0 0; }       /* великий список → ABOUT y≈449 */
+    /* ширина живого "PROJECT MANAGEMENT" = 320px, наш 314 → +трохи letter-spacing
+       (не кегль — щоб Y-крок не зрушити). Крок рядка живий 35px (line-height 1.30). */
+    /* живі значення menu__link (air-global.css): weight 400, letter-spacing -.02em.
+       Підбір кегля щоб ширина "PROJECT MANAGEMENT" = 320px при -.02em. */
+    ul.large [data-amo-item] a { font-size: 28px; font-weight: 400; line-height: 1.25; letter-spacing: -.02em; }
+    /* живий малий список притиснутий ДОНИЗУ (y≈773). Тепер великий нижче → малий
+       відступ менший щоб сісти на y773. */
+    [data-amo-left] ul.small-list { margin: 185px 0 0; }  /* малий список → y≈773 (був y768) */
+    /* живий малий список: 3 рядки h52 (крок 17px). Наш крок був 27px (li додавав
+       ~10px) → рядки розтягувались, 3-й з'їжджав за екран. Стиснути li до кроку 17. */
+    ul.small-list [data-amo-item] a { font-size: 11px; line-height: 1.5; letter-spacing: -.02em; display: block; }
+    ul.small-list [data-amo-item] { line-height: 1.5; }
+    /* хедерний AIR зліва зверху y≈20 — fixed, вирвати з хедер-гриду. Живе лого
+       71×30 (ink-list-precise) → кегль ~34px (наш 28px давав 45×20 = замале). */
+    [data-amo-header].amo-menu-open .hlogo { position: fixed; left: 20px; top: 9px;
+      justify-self: unset; font-size: 41px; letter-spacing: .06em; font-weight: 500; }
+    /* живий X-close у відкритому меню = ЧОРНИЙ ЗАПОВНЕНИЙ квадрат (не голий X як зараз):
+       бургер стає темною кнопкою 40×30 зі світлим тонким хрестом. */
+    [data-amo-header].amo-menu-open [data-amo-burger] { background: #111110;
+      border-radius: 6px; width: 40px; height: 30px; }
+    [data-amo-header].amo-menu-open [data-amo-burger] i { background: #f2f1ee; }
   }
 </style>
 </head>
@@ -648,7 +660,10 @@
 <!-- МЕНЮ-ОВЕРЛЕЙ (A-17) -->
 <div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
   <div data-amo-bg></div>
-  <div data-amo-bg-image class="is-hidden--sm-down" aria-hidden="true"><img src="assets/menu-bg.webp" alt="" draggable="false"></div>
+  <div data-amo-bg-image aria-hidden="true"><picture>
+    <source srcset="assets/menu-bg-xs.webp" media="(max-width: 567px)">
+    <img src="assets/menu-bg.webp" alt="" draggable="false">
+  </picture></div>
   <div data-amo-giant>AIR</div>
   <div class="amo-wrap">
     <nav data-amo-panel>
