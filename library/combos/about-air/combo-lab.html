@@ -378,17 +378,32 @@
   .aut-grid .col-stack { display: grid; gap: 2vw; }
   .aut-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
 
-  /* 9 SERVICES cards */
-  .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6vh; }
-  .svc-card { padding: 4vh 2vw; border-radius: 8px; background: rgba(236,235,230,.07); }
-  .svc-card h3 { font-size: 14px; letter-spacing: .1em; text-transform: uppercase; font-weight: 500;
-    color: #f2f1ee; margin-bottom: 2.4vh; }
-  .svc-card ul { list-style: none; margin: 0; padding: 0; }
-  .svc-card li { font-size: 13px; line-height: 1.5; color: #a7a6a2; padding: 11px 0;
-    border-top: 1px solid rgba(242,241,238,.1); }
-  .svc-card li b { color: #f2f1ee; font-weight: 500; }
-  .svc-img { width: 100%; border-radius: 6px; margin-top: 6vh; display: block; }
-  @media (max-width: 768px) { .svc-grid, .aut-grid, .ib-grid, .info-top-grid { grid-template-columns: 1fr; }
+  /* 9 SERVICES — живе: 7 великих glass-карток (card-team--service--large, col-4)
+     + 6 малих (col-2). glass blur, велика декор-іконка, назва + опис. */
+  .svc-block-title { font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    font-weight: 500; color: #8d8d8d; margin: 6vh 0 2vh; }
+  .svc-large { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .svc-lg { position: relative; min-height: 300px; border-radius: 5px;
+    background: rgba(255,255,255,.07); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
+    overflow: clip; }
+  .svc-lg .svc-ic { font-size: 44px; font-weight: 200; color: rgba(242,241,238,.35);
+    line-height: 1; margin-bottom: auto; }
+  .svc-lg h4 { font-size: clamp(15px, 1.5vw, 21px); font-weight: 400; text-transform: uppercase;
+    letter-spacing: -.01em; line-height: 1.1; color: #f2f1ee; }
+  .svc-lg p { font-size: 12.5px; line-height: 1.45; color: #8d8d8d; margin-top: 10px; }
+  .svc-small { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 10px; }
+  .svc-sm { border-radius: 5px; background: rgba(255,255,255,.05);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    padding: 18px; min-height: 150px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .svc-sm h5 { font-size: 12.5px; font-weight: 400; text-transform: uppercase; line-height: 1.15;
+    color: #f2f1ee; }
+  .svc-sm p { font-size: 11px; line-height: 1.4; color: #8d8d8d; margin-top: 6px; }
+  .svc-img { width: 100%; border-radius: 6px; margin-top: 4vh; display: block; }
+  @media (max-width: 1024px) { .svc-large { grid-template-columns: repeat(2, 1fr); }
+    .svc-small { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 768px) { .svc-large, .svc-small { grid-template-columns: 1fr 1fr; }
+    .aut-grid, .ib-grid, .info-top-grid { grid-template-columns: 1fr; }
     .comfort-list { columns: 1; } }
 
   /* 10 CLEVER */
@@ -607,32 +622,28 @@
   <div class="act">
     <h2 class="h1" style="margin-bottom:2vh">Service excellence</h2>
     <p class="lead" style="max-width:64ch">Privileges define status. At AIR, exceptional attention to residents and care for their well-being and privacy. Wide parking driveways, silent VIP elevators, adaptive climate control, and high-speed Wi-Fi. From electric vehicle charging stations to advanced security technologies, premium service at AIR is elevated to a <strong>guiding principle</strong>.</p>
-    <div class="svc-grid">
-      <div class="svc-card">
-        <h3>Premium technologies</h3>
-        <ul>
-          <li><b>High-speed elevators</b> — Sword elevators up to 5 m/s, max waiting 40 seconds</li>
-          <li><b>Spacious underground parking</b> — 490 spaces, ceiling on level -1 = 3.1 m</li>
-          <li>VIP elevator for top management</li>
-          <li>Drop-off zone</li>
-          <li>Increased turnstiles</li>
-          <li>EV charging</li>
-          <li><b>Advanced security</b> — 24/7, Face ID, BLE/NFC/QR, license-plate + RFID</li>
-        </ul>
-      </div>
-      <div class="svc-card">
-        <h3>Innovative engineering</h3>
-        <ul>
-          <li>Dedicated service elevators</li>
-          <li><b>Central AC &amp; ventilation</b> — air exchange ≥ 60 m³/hour per person</li>
-          <li>Seamless Wi-Fi</li>
-          <li>BMS</li>
-          <li><b>Efficient power supply</b> — ≥ 100 W per sq m, three-phase</li>
-          <li>Automated fire safety</li>
-        </ul>
-      </div>
-    </div>
     <img class="svc-img" loading="lazy" alt="AIR service" src="https://aircenter.space/media/cache/about_service_img_xxxl/assets/images/media/about/9.services/image%40xxxl.webp">
+    <!-- живе: 7 великих glass-карток (Premium technologies) -->
+    <p class="svc-block-title">Premium technologies</p>
+    <div class="svc-large">
+      <div class="svc-lg"><div class="svc-ic">↑</div><div><h4>High-speed elevators</h4><p>Schindler elevators up to 5 m/s, max waiting 40 seconds.</p></div></div>
+      <div class="svc-lg"><div class="svc-ic">▤</div><div><h4>Spacious underground parking</h4><p>490 spaces, ceiling on level −1 = 3.1 m.</p></div></div>
+      <div class="svc-lg"><div class="svc-ic">▲</div><div><h4>VIP elevator for top management</h4></div></div>
+      <div class="svc-lg"><div class="svc-ic">◇</div><div><h4>Drop-off zone</h4></div></div>
+      <div class="svc-lg"><div class="svc-ic">╫</div><div><h4>Increased number of turnstiles</h4></div></div>
+      <div class="svc-lg"><div class="svc-ic">⌁</div><div><h4>Electric vehicle charging stations</h4></div></div>
+      <div class="svc-lg"><div class="svc-ic">◎</div><div><h4>Advanced security technologies</h4><p>24/7 · Face ID, BLE/NFC/QR turnstiles, license-plate + RFID.</p></div></div>
+    </div>
+    <!-- живе: 6 малих glass-карток (Innovative engineering) -->
+    <p class="svc-block-title">Innovative engineering</p>
+    <div class="svc-small">
+      <div class="svc-sm"><h5>Dedicated service elevators</h5></div>
+      <div class="svc-sm"><h5>Central air conditioning &amp; ventilation</h5><p>Air exchange ≥ 60 m³/hour per person.</p></div>
+      <div class="svc-sm"><h5>Seamless Wi-Fi</h5></div>
+      <div class="svc-sm"><h5>Intelligent building management</h5></div>
+      <div class="svc-sm"><h5>Efficient power supply</h5><p>≥ 100 W per sq m, three-phase.</p></div>
+      <div class="svc-sm"><h5>Automated fire safety</h5></div>
+    </div>
   </div>
 </section>
 
