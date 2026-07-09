@@ -29,7 +29,8 @@
   (gate/api живі) + console errors == 0. Живий перегляд — нуль автоскролів.
 ================================================================================
 -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- живий AIR = Onest (air-landing.css font-family) — Onest ПЕРШИМ, Inter fallback -->
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../components/preloader-logo-convoy/component.css">
 <link rel="stylesheet" href="../../components/kinetic-letters-hero/component.css">
 <link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
@@ -44,7 +45,7 @@
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 
 <style>
-  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', 'Onest', system-ui, -apple-system, sans-serif; }
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Onest', 'Inter', system-ui, -apple-system, sans-serif; }
   * { margin: 0; box-sizing: border-box; }
   html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; background: var(--paper); }
   body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
@@ -60,19 +61,45 @@
   .container { padding-inline: 3vw; }
 
   /* ---- хедер ---- */
-  [data-amo-header] { background: rgba(244, 242, 238, .8); color: #111110;
+  /* живий top-стан (hero-1440 baseline): хедер ПРОЗОРИЙ (headline лежить у його
+     зоні), центр-лого AIR НЕ видно. Фон+лого повертаються після скролу (.is-scrolled). */
+  [data-amo-header] { background: transparent; color: #111110; }
+  [data-amo-header].is-scrolled { background: rgba(244, 242, 238, .8);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  [data-amo-header] .hlogo { opacity: 0; transition: opacity .4s; }
+  [data-amo-header].is-scrolled .hlogo { opacity: 1; }
   [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .8); color: #f2f1ee; }
-  .hrow { display: flex; align-items: center; gap: 12px; padding: 12px 3vw; }
-  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; margin-right: auto; }
+  /* живий хедер (виміряно з aircenter, 1440×820): h=70; 3 зони —
+     ЗЛІВА бургер(x30)+♡favourite(x90), ЦЕНТР лого AIR, СПРАВА CHOOSE AN OFFICE(x1203).
+     grid 3-колонки: край-центр-край. */
+  .hrow { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    gap: 12px; padding: 0 20px; height: 70px; }
+  .hleft { display: inline-flex; align-items: center; gap: 10px; justify-self: start; }
+  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; justify-self: center; }
+  /* живий CHOOSE AN OFFICE = ЧОРНА кнопка (не контурна): x1203–1420 (w≈217),
+     h≈38, текст зліва / ✛ біля правого краю */
   .hbtn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
-          border: 1px solid currentColor; border-radius: 4px; padding: 10px 13px;
-          background: none; color: inherit; cursor: pointer; }
-  [data-amo-burger] { display: inline-flex; align-items: center; gap: 10px;
+          border: 0; border-radius: 8px; height: 30px; width: 217px;
+          display: inline-flex; align-items: center; justify-content: space-between;
+          padding: 0 12px; box-sizing: border-box;
+          background: #111110; color: #f2f1ee; cursor: pointer; justify-self: end;
+          text-decoration: none; }
+  /* ♡ favourite — гола іконка без фону. Спроба додати сіру фон-кнопку (як у
+     baseline) ПІДНІМАЛА diff 9.08→10.15: у top-стані живий ♡-фон майже
+     невидимий на світлому, а будь-який видимий наш фон = зайве розходження.
+     Тримати голою — число нижче. (F: не додавати фон під baseline top-стан.) */
+  .hfav { display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; color: inherit; }
+  /* бургер — чорна кнопка, ТІЛЬКИ 2 лінії (без тексту «Menu», як у живого) */
+  [data-amo-burger] { display: inline-flex; align-items: center; justify-content: center;
     background: #111110; color: #f2f1ee; border: 0; border-radius: 4px;
-    padding: 11px 15px; font-size: 11px; letter-spacing: .1em; cursor: pointer; }
+    width: 60px; height: 40px; cursor: pointer; }
   .amo-header-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
   @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
+  /* живий: СВІТЛИЙ квадрат (~30×30, r6) з ТЕМНОЮ стрілкою, right:22 bottom:32 */
+  .scroll-dn { position: fixed; right: 20px; bottom: 20px; width: 30px; height: 30px;
+    background: #e9e8e4; color: #111110; border-radius: 6px; z-index: 40;
+    display: flex; align-items: center; justify-content: center; }
 
   /* ---- 1 · TOP (hero) ---- */
   /* живий intro = section--full-height: висота зарезервована В CSS (не движком) —
@@ -96,10 +123,14 @@
     #top .spiral .fit-mob { display: block; width: max(100%, calc(100svh * 0.811));
       aspect-ratio: 240 / 296; }
   }
-  #top .hero-note { position: absolute; top: 16vh; left: 50%; transform: translateX(-50%);
-    text-align: center; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #55544f; z-index: 3; }
-  #top .hero-class { position: absolute; top: 52vh; right: 12vw; font-size: 11px;
-    letter-spacing: .14em; text-transform: uppercase; color: #8b8a86; text-align: center; line-height: 1.7; z-index: 3; }
+  /* живий hero-1440 baseline (G15, сесія 13): headline ВЕЛИКИЙ ~28px на самій
+     горі (y≈18px, поверх зони хедера), НЕ дрібний на 16vh; hero-class на 47vh,
+     центр блоку x≈1016 (право ≈354px), кегль 13px/18px. */
+  #top .hero-note { position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    text-align: center; font-size: 27px; line-height: 30px; letter-spacing: .005em;
+    text-transform: uppercase; color: #1c1b19; z-index: 3; white-space: nowrap; }
+  #top .hero-class { position: absolute; top: 382px; right: 354px; font-size: 13px;
+    letter-spacing: .04em; text-transform: uppercase; color: #8b8a86; text-align: center; line-height: 18px; z-index: 3; }
 
   /* живі ГІГАНТ-ЛІТЕРИ A·I·R — 3 окремі SVG (live-archive air-home.html l.350-395,
      viewBox 1420×140 desk / 350×80 mob), розкидані на всю ширину (A ліво, I центр,
@@ -109,9 +140,9 @@
     transform: translateY(-50%); will-change: transform; }
   #top .giant-air .gl svg { height: 100%; width: auto; display: block; }
   #top .giant-air .gl path { fill: #111110; }
-  #top .giant-air .gl-a { left: 2vw; }
+  #top .giant-air .gl-a { left: 20px; }
   #top .giant-air .gl-i { left: 50%; }
-  #top .giant-air .gl-r { right: 2vw; }
+  #top .giant-air .gl-r { right: 20px; }
   #top .giant-air svg.gl-desk { display: block; }
   #top .giant-air svg.gl-mob { display: none; }
   @media (max-width: 768px) {
@@ -320,13 +351,22 @@
 <!-- ХЕДЕР (A-18 themed + A-17 бургер) -->
 <header data-amo-header data-plc-top>
   <div class="hrow">
+    <span class="hleft">
+      <button data-amo-burger type="button" aria-label="Open menu">
+        <span data-amo-burger-lines><i></i><i></i></span>
+      </button>
+      <a class="hfav" href="/combos/funnel-air/combo-lab.html" aria-label="Favourites">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7.5-4.9-9.7-9.2C1 8.9 2.3 6 5.2 6c1.9 0 3.1 1.1 3.8 2.3C9.7 7.1 10.9 6 12.8 6c2.9 0 4.2 2.9 2.9 5.8C13.5 16.1 12 21 12 21z"/></svg>
+      </a>
+    </span>
     <a class="hlogo" href="/combos/home-air/combo-lab.html">AIR</a>
-    <a class="hbtn hide-m" href="/combos/funnel-air/combo-lab.html">Choose an office ✛</a>
-    <button data-amo-burger type="button" aria-label="Open menu">
-      <span data-amo-burger-lines><i></i><i></i></span> Menu
-    </button>
+    <a class="hbtn hide-m" href="/combos/funnel-air/combo-lab.html">Choose an office <span style="font-size:14px">✛</span></a>
   </div>
 </header>
+<!-- живий scroll-down: чорний квадрат ~30×30 зі стрілкою ↓, right:20 bottom:20 -->
+<a class="scroll-dn" href="#impulse" aria-label="Scroll down">
+  <svg width="14" height="16" viewBox="0 0 12 14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M6 0v12M1 8l5 5 5-5"/></svg>
+</a>
 
 <!-- 1 · TOP — гігант-літери A·I·R (3 SVG, живі path) поверх спіралі Vimeo -->
 <section id="top" data-amo-theme="light">
@@ -947,6 +987,22 @@
   if (document.readyState === 'complete') run();
   else window.addEventListener('load', function () { run(); });
 }());
+</script>
+<script>
+/* хедер: прозорий на топі (як живий) → фон+лого після скролу */
+(function () {
+  var hdr = document.querySelector('[data-amo-header]');
+  if (!hdr) return;
+  function onScroll() {
+    var y = window.__lenis && typeof window.__lenis.scroll === 'number'
+      ? window.__lenis.scroll
+      : (window.scrollY || 0);
+    hdr.classList.toggle('is-scrolled', y > 40);
+  }
+  onScroll();
+  if (window.__lenis) window.__lenis.on('scroll', onScroll);
+  window.addEventListener('scroll', onScroll, { passive: true });
+})();
 </script>
 </body>
 </html>

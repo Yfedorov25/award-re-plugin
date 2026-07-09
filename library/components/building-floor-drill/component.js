@@ -89,7 +89,8 @@
       var el = doc.createElement('div');
       el.className = 'bfd-marker';
       el.innerHTML = '<span class="bfd-marker-content">' + m.title + '</span>';
-      var anchor = svg.querySelector('[data-hoverable="' + m.anchor + '"]');
+      var anchor = svg.querySelector('[data-hoverable="' + m.anchor + '"]')
+                || svg.querySelector('[data-anchor="' + m.anchor + '"]'); /* живі маркери на data-anchor k1/k2/k3 */
       if (anchor && anchor.getBBox && svg.viewBox && svg.viewBox.baseVal.width) {
         var bb = anchor.getBBox();
         var vb = svg.viewBox.baseVal;
