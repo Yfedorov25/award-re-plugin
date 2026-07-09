@@ -370,7 +370,8 @@
   /* живий контейнер меню (виміряно з baseline): x375→1185 = ШИРИНА 810px (НЕ на всю
      ширину!), центр x780 (зсув +60px правіше центру екрана). Це `col--md-6 offset--md-3`
      живого — центр-права половина сітки. Наш був min(1120,94vw)=1119 → на 309px ширший. */
-  [data-amo-panel] { width: 810px; height: 571px; background: rgba(236, 234, 229, .75); }  /* живий: y128→699 (фіксована висота, не тягнеться) */
+  [data-amo-panel] { width: 810px; height: 571px; background: rgba(236, 234, 229, .75);
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }  /* живий air-global.css body — тонший штрих (без нього великий список Δink +64..+170; лок. до меню щоб не чіпати hero) */
   /* живий: текст списку на x≈395; панель x375 (810px) → лівий inset ≈20px; малий список
      притиснутий до низу (space-between), padding-bottom дає точну позицію y636. */
   [data-amo-left] { padding: 25px 2.6vw 19px 20px; display: flex; flex-direction: column; justify-content: space-between; }
@@ -381,8 +382,8 @@
      зона захопила і великий, і малий список.) */
   ul.large [data-amo-item] a { font-size: clamp(19px, 1.9vw, 27px); font-weight: 400;
     text-transform: uppercase; letter-spacing: -.005em; line-height: 1.28; }
-  ul.small-list [data-amo-item] a { font-size: 11px; color: #55544f;
-    text-transform: uppercase; letter-spacing: .05em; }  /* живий: малий список UPPERCASE */
+  ul.small-list [data-amo-item] a { font-size: 11px; color: #4d4d4d;
+    text-transform: uppercase; letter-spacing: .05em; }  /* живий колір виміряно з baseline = rgb(77,77,77) #4d4d4d (був #55544f світліший) */
   [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between;
     padding: 22px; font-size: 13px; min-height: 150px;
     text-transform: uppercase; letter-spacing: .04em; }  /* живий baseline: картки UPPERCASE */
@@ -400,8 +401,8 @@
     /* картки ПЕРШІ (зверху), список ПІД ними — реордер flex */
     [data-amo-right] { order: -1; display: grid; grid-template-columns: 1fr 1fr;
       gap: 0; margin: 135px 0 0; padding: 0 20px; }  /* картки-написи → y≈150 (було y160) */
-    [data-amo-card] { min-height: 88px; padding: 10px 16px; font-size: 11px;
-      letter-spacing: -.01em; background: rgba(236, 234, 229, .6); }
+    [data-amo-card] { min-height: 88px; padding: 12px 21px; font-size: 11px;
+      letter-spacing: -.01em; background: rgba(236, 234, 229, .6); }  /* текст живого x41/y150 (вимір): padL 16→21, padT 10→12 */
     [data-amo-left] { order: 0; padding: 0 20px; display: block; }
     /* живий великий список ПОЧИНАЄТЬСЯ на y449 (ink-list-precise, сесія 14 фікс:
        перший рядок ABOUT top=449). margin від кінця карток. Крок рядка живий 35px
@@ -429,6 +430,31 @@
     [data-amo-header].amo-menu-open [data-amo-burger] { background: #111110;
       border-radius: 6px; width: 40px; height: 30px; }
     [data-amo-header].amo-menu-open [data-amo-burger] i { background: #f2f1ee; }
+    /* живий mobile cookie = ПОВНОШИРИННА смуга внизу (вимір baseline: x0-389 w389 y780-843 h63),
+       не центрована пігулка 289px як desktop. Текст на y821-827 (центр вертикалі бару). */
+    .cookies { left: 0; right: 0; bottom: 0; transform: none; width: 100%;
+      height: 34px; border-radius: 0; justify-content: space-between; padding: 0 20px;
+      background: #fff; }  /* живий mobile: текст ЗЛІВА (THIS WEBSITE USES COOKIES) / кнопка ACCEPT СПРАВА (space-between), не center */
+    .cookies button { background: #e6e6e6; border-radius: 6px; padding: 6px 14px; }  /* живий: світло-сіра плашка ACCEPT справа */
+    /* 🔴 ВЕРДИКТ ОКА ЄГОРА (сесія 15): фон меню живого = БІЛИЙ (вимір: rgb 255,255,255
+       скрізь, наш був теплий беж #f4f2ee). Спіраль сіра тільки зверху (y130 rgb187). */
+    .amo-open [data-amo-bg] { background: #ffffff; }  /* меню-контейнер = DIV.amo-open (батько data-amo-bg) */
+    /* картки на білому = ледь сірі (живий card-inside rgb242,242,242), не теплий беж */
+    [data-amo-card] { background: rgba(240, 240, 240, .55); }
+    /* живий плюс = світло-сіра ЗАПОВНЕНА плашка (rgb224) з тонким хрестом-насічками,
+       не прозора з бордером + не простий товстий '+'. SVG щоб не залежати від гліфа шрифту. */
+    [data-amo-card] .sq { border: 0; background: #e6e6e6; width: 30px; height: 30px;
+      border-radius: 5px; font-size: 0; position: relative; }
+    /* живий хрест = тонкий ✛ з КОРОТКИМИ насічками на 4 кінцях (registration mark),
+       не простий '+'. Малюю gradient-фоном: центральний хрест + 4 короткі перпендикуляри. */
+    [data-amo-card] .sq::before { content: ""; width: 15px; height: 15px; display: block;
+      background:
+        linear-gradient(#3a3a3a,#3a3a3a) center/15px 1px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) center/1px 15px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) top center/5px 1px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) bottom center/5px 1px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) center left/1px 5px no-repeat,
+        linear-gradient(#3a3a3a,#3a3a3a) center right/1px 5px no-repeat; }
   }
 </style>
 </head>
