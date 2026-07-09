@@ -337,12 +337,22 @@
   .ib-map { width: 100%; border-radius: 6px; margin-top: 2vw; display: block; }
 
 
-  /* 6 SPACE / 11 LAYOUT-INTRO — full-bleed dark */
-  .fullbleed { position: relative; min-height: 78svh; display: flex; align-items: flex-end;
+  /* 6 SPACE / 11 LAYOUT-INTRO — splash: 100svh fullbleed фото + ЦЕНТР заголовок spread
+     (живий about-space-intro: h1 group--between "A space of / opportunities") */
+  .fullbleed { position: relative; height: 100svh; display: flex; align-items: center;
     background: #000; color: #f2f1ee; overflow: clip; }
   .fullbleed img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-  .fullbleed .fb-in { position: relative; z-index: 1; padding: 8vh 3vw; max-width: 1200px; margin: 0 auto; width: 100%; }
-  .fullbleed h2 { color: #fff; }
+  .fullbleed .fb-in { position: relative; z-index: 1; padding: 0 30px; max-width: none; margin: 0 auto; width: 100%; }
+  .fullbleed h2 { color: #fff; display: flex; justify-content: space-between;
+    font-size: clamp(30px, 4.9vw, 66px); line-height: 1; }  /* spread як hero */
+  @media (max-width: 768px) { .fullbleed h2 { flex-direction: column; align-items: flex-start; gap: 2px; } }
+
+  /* ═══ FADE-ШОВ (живий section-fade-overlay): чорна панель 100svh внизу СВІТЛОЇ
+     секції, opacity 0→.5 по скролу (не gradient). Робить перехід «одним фільмом». ═══ */
+  .fade-seam { position: relative; }
+  .fade-seam::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+    height: 60svh; background: #000; pointer-events: none; z-index: 1;
+    opacity: calc(var(--seam-p, 0) * .5); }  /* живий: 0→.5 по прогресу виходу */
 
   /* 7 COMFORT list */
   .comfort-list { list-style: none; margin: 5vh 0 0; padding: 0; columns: 2; column-gap: 5vw; }
@@ -536,7 +546,7 @@
 <!-- ═══ 6 · SPACE (DARK) full-bleed ═══ -->
 <section class="fullbleed">
   <img loading="lazy" alt="AIR space" src="https://aircenter.space/media/cache/about_space_bg_xxxl/assets/images/media/about/7.space/background-top%40xxxl.webp">
-  <div class="fb-in"><h2 class="h1">A space of opportunities</h2></div>
+  <div class="fb-in"><h2 class="h1"><span>A space of</span><span>opportunities</span></h2></div>
 </section>
 
 <!-- ═══ 7 · COMFORT (light) ═══ -->
@@ -558,8 +568,8 @@
   </ul>
 </section>
 
-<!-- ═══ 8 · AUTONOMY (light) ═══ -->
-<section class="act">
+<!-- ═══ 8 · AUTONOMY (light) → SERVICES(dark): fade-шов ═══ -->
+<section class="act fade-seam">
   <h2 class="h1" style="margin-bottom:2vh">Maximum autonomy</h2>
   <p class="lead" style="max-width:64ch">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Coffee points in the lobbies of Buildings 1 and 2. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
   <div class="metric-row"><div><div class="m-num">4000 <span style="font-size:.4em">м²</span></div><div class="m-cap">commercial ground floors</div></div></div>
@@ -606,8 +616,8 @@
   </div>
 </section>
 
-<!-- ═══ 10 · CLEVER (light) ═══ -->
-<section class="act">
+<!-- ═══ 10 · CLEVER (light) → LAYOUT-INTRO(dark): fade-шов ═══ -->
+<section class="act fade-seam">
   <h2 class="h1" style="margin-bottom:1vh">CLEVER certificate</h2>
   <p class="m-cap" style="margin-bottom:2vh">The ecology of successful business</p>
   <p class="lead" style="max-width:62ch">AIR meets the <strong>CLEVER eco-certification</strong> standards at the <strong>Gold level</strong>. The practices comply with <strong>ESG</strong> principles and create a comfortable and healthy working environment for every employee.</p>
@@ -622,7 +632,7 @@
 <!-- ═══ 11 · LAYOUT-INTRO (DARK) full-bleed ═══ -->
 <section class="fullbleed">
   <img loading="lazy" alt="AIR layout" src="https://aircenter.space/media/cache/about_solutions_bg_xxxl/assets/images/media/about/11.solutions/background%40xxxl.webp">
-  <div class="fb-in"><h2 class="h1">Layout solutions</h2></div>
+  <div class="fb-in"><h2 class="h1"><span>Layout</span><span>solutions</span></h2></div>
 </section>
 
 <!-- ═══ 12 · LAYOUT-DETAIL (light) — image-slider-wipe + office plans ═══ -->
@@ -777,6 +787,27 @@
       });
     }, { threshold: 0.25 });
     nodes.forEach(function(el){ io.observe(el); });
+  })();
+
+  /* ═══ FADE-ШВИ: opacity 0→.5 коли світла секція виходить у темну (живий overlay-parallax) ═══ */
+  (function initSeams(){
+    var seams = document.querySelectorAll('.fade-seam');
+    if (!seams.length) return;
+    var ticking = false;
+    function upd(){
+      ticking = false;
+      var vh = window.innerHeight;
+      seams.forEach(function(s){
+        var r = s.getBoundingClientRect();
+        /* прогрес виходу: 0 доки низ секції нижче в'юпорту, 1 коли низ дійшов верху */
+        var p = 1 - Math.max(0, Math.min(1, r.bottom / (vh + r.height * 0.6)));
+        s.classList.toggle('seam-on', p > 0.02);
+        s.style.setProperty('--seam-p', p.toFixed(3));
+      });
+    }
+    function onScroll(){ if (ticking) return; ticking = true; requestAnimationFrame(upd); }
+    (window.__lenis ? window.__lenis.on('scroll', onScroll) : window.addEventListener('scroll', onScroll, { passive: true }));
+    upd();
   })();
 
   api.rvc = window.RevolvesCarousel.create('#rvc', {});
