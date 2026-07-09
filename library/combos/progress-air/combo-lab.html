@@ -96,8 +96,9 @@
     .hrow { grid-template-columns: 1fr auto; }
     .hlogo { grid-column: 1; justify-self: start; font-size: 41px; letter-spacing: .06em; }
     .hleft { grid-column: 2; justify-self: end; flex-direction: row-reverse; order: 2; }
-    /* живий /progress mobile: CONSTRUCTION+PROGRESS стек 42px чорні зверху,
-       COMMISSIONING 2028 переходить ПІД заголовок (не центр) 13px сірий. */
+    /* живий /progress mobile: заголовок НИЖЧЕ (~y205 vs desktop), CONSTRUCTION+
+       PROGRESS стек 42px чорні, COMMISSIONING 2028 під заголовок 13px сірий. */
+    #top { padding-top: 178px; }
     #top .hero-line { flex-direction: column; align-items: flex-start; gap: 4px;
       padding: 0 20px; font-size: 42px; line-height: 1.06; }
     #top .hero-mid { order: 3; text-align: left; margin-top: 8px; }
@@ -405,6 +406,12 @@
   .pg-thumb.is-active { border-color: #111110; opacity: 1; }
   .pg-thumb:hover { opacity: 1; }
   @media (max-width: 768px) {
+    /* живий /progress mobile: фото ВИЩЕ (~4:5 портрет), навігатор-пілюля OVERLAY
+       поверх НИЗУ фото (не під ним) через negative margin, мініатюри під фото. */
+    .pg-stage { aspect-ratio: 4 / 5; }
+    .pg-nav { position: relative; z-index: 2; left: 0; right: 0; margin: -66px 20px 0;
+      width: auto; justify-content: space-between; }
+    .pg-thumbs { margin-top: 22px; }
     .pg-thumb { width: 88px; }
     .pg-label { font-size: 13px; }
   }
