@@ -146,7 +146,7 @@
   .h2r { max-width: 660px; font-size: 28px; line-height: 1.0714; letter-spacing: -.02em; color: #111110; }
   .h2r.h2r-ind { text-indent: 235px; }
   @media (max-width: 768px) { .h2r { font-size: 21px; } .h2r.h2r-ind { text-indent: 0; } }
-  .reveal-text .rv-w { display: inline-block; white-space: pre; }
+  .reveal-text .rv-w { display: inline-block; white-space: pre; text-indent: 0; }  /* text-indent успадковується у inline-block спани → кожен отримував 235px порожнечі */
   .reveal-text.rv-armed .rv-w { filter: blur(10px); opacity: 0; }
   .reveal-text .rv-w { transition: filter 1s cubic-bezier(.25,.74,.22,.99),
     opacity 1s cubic-bezier(.25,.74,.22,.99);
@@ -525,7 +525,7 @@
     object-position: center; display: block; z-index: 0; }
   .cft-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr;
     gap: 3vw; max-width: 1200px; margin: 0 auto; }
-  .cft-left h3 { position: sticky; top: 76vh; font-size: clamp(22px,2.6vw,40px); }  /* живий пін біля низу */
+  .cft-left h3 { position: sticky; top: 64vh; font-size: clamp(24px,2.9vw,42px); line-height: 1.0; letter-spacing: -.02em; }  /* живий text-h2-large 42px, 3 рядки, низ-ліво */
   .comfort-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .cft { position: relative; min-height: 350px; border-radius: 6px; padding: 18px;
     background: rgba(255,255,255,.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -593,8 +593,8 @@
 
   /* 9 SERVICES — живе: 7 великих glass-карток (card-team--service--large, col-4)
      + 6 малих (col-2). glass blur, велика декор-іконка, назва + опис. */
-  .svc-block-title { font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
-    font-weight: 500; color: #8d8d8d; margin: 6vh 0 2vh; }
+  .svc-block-title { font-size: clamp(24px, 2.9vw, 42px); letter-spacing: -.02em; text-transform: uppercase;
+    font-weight: 400; color: #f2f1ee; line-height: 1.07; margin: 6vh 0 4vh; }  /* живий text-h2-large, 2 рядки */
   .svc-large { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   /* живий card-team--service--large: НАЗВА зверху · декор-іконка ЦЕНТР велика ·
      ✛ у нижньому куті · ОПИС ПРИХОВАНИЙ (hover-popup cardHover) — та сама помилка
@@ -602,13 +602,19 @@
   .svc-lg { position: relative; min-height: 420px; border-radius: 5px;
     background: rgba(255,255,255,.07); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     padding: 20px; overflow: clip; }
-  /* живий ступінчастий offset-грід (діагональ) */
-  .svc-large .svc-lg:nth-child(3n+2) { transform: translateY(42px); }
-  .svc-large .svc-lg:nth-child(3n) { transform: translateY(84px); }
+  /* живий ступінчастий грід ПОРОЖНІМИ слотами (col-4, offset 8/4/0/0/0/4/0 з air-about.html):
+     ряди [·,·,C1] [·,C2,C3] [C4,C5,·] [·,C6,C7] — sparse auto-placement */
+  .svc-large .svc-lg:nth-child(1) { grid-column: 3; }
+  .svc-large .svc-lg:nth-child(2) { grid-column: 2; }
+  .svc-large .svc-lg:nth-child(3) { grid-column: 3; }
+  .svc-large .svc-lg:nth-child(4) { grid-column: 1; }
+  .svc-large .svc-lg:nth-child(5) { grid-column: 2; }
+  .svc-large .svc-lg:nth-child(6) { grid-column: 2; }
+  .svc-large .svc-lg:nth-child(7) { grid-column: 3; }
   .svc-lg .svc-ic { position: absolute; inset: 0; display: grid; place-items: center;
     font-size: 110px; font-weight: 100; color: rgba(242,241,238,.22); line-height: 1;
     transition: opacity .35s; pointer-events: none; }  /* живі: великий тонкий контур-гліф */
-  .svc-lg h4 { font-size: clamp(15px, 1.5vw, 21px); font-weight: 400; text-transform: uppercase;
+  .svc-lg h4 { font-size: 16px; font-weight: 400; text-transform: uppercase;
     letter-spacing: -.01em; line-height: 1.1; color: #f2f1ee; max-width: 18ch; }
   .svc-lg .svc-desc { position: absolute; inset: 0; padding: 20px; display: flex;
     align-items: flex-end; background: rgba(0,0,0,.6);
@@ -653,12 +659,12 @@
     .comfort-cards::-webkit-scrollbar { display: none; }
     .cft { flex: 0 0 78vw; height: 340px; min-height: 0; scroll-snap-align: center; }
     .comfort-cards .cft:nth-child(even) { transform: none; }
-    .svc-large .svc-lg:nth-child(3n+2), .svc-large .svc-lg:nth-child(3n) { transform: none; }
     .svc-large, .svc-small { display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
       gap: 10px; width: 100vw; margin-left: calc(50% - 50vw); padding: 0 6vw 6px;
       scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     .svc-large::-webkit-scrollbar, .svc-small::-webkit-scrollbar { display: none; }
     .svc-lg { flex: 0 0 82vw; height: 420px; min-height: 0; scroll-snap-align: center; }
+    .svc-large .svc-lg { grid-column: auto; }
     /* опис services на мобілі = постійно видимий шар знизу картки (без hover) */
     .svc-lg .svc-desc { opacity: 1; inset: auto 0 0 0; padding: 14px 16px;
       background: rgba(0,0,0,.55); align-items: flex-start; }
@@ -1003,7 +1009,7 @@
   <div class="cft-pin">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xs.webp"><img class="cft-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xxxl.webp"></picture>
     <div class="cft-grid">
-      <div class="cft-left"><h3 class="h1">Everything for visitor comfort</h3></div>
+      <div class="cft-left"><h3 class="h1">Everything<br>for&nbsp;visitor<br>comfort</h3></div>
       <div class="comfort-cards">
     <div class="cft"><div class="cft-ic">◇</div><h4>Visitor lounge areas</h4></div>
     <div class="cft"><div class="cft-ic">◈</div><h4>Reception zones</h4></div>
@@ -1083,7 +1089,7 @@
 <section class="sec-dark" id="services-cards">
   <div class="act">
     <!-- живе: 7 великих glass-карток (Premium technologies) -->
-    <p class="svc-block-title">Premium technologies</p>
+    <p class="svc-block-title">Premium <br>technologies</p>
     <div class="svc-large">
       <div class="svc-lg"><h4>High-speed elevators</h4><div class="svc-ic">↑</div><div class="svc-desc"><p>Sword elevators with speeds of up to 5 m/s and a maximum waiting time of 40 seconds. Zoning of elevator groups in Buildings 1 and 2 reduces waiting times and minimizes stops.</p></div><span class="svc-plus">✛</span></div>
       <div class="svc-lg"><h4>Spacious underground parking</h4><div class="svc-ic">▤</div><div class="svc-desc"><p>An underground parking facility with 490 spaces. Ceiling height in the main driveways on level −1 is 3.1 m, ensuring comfortable vehicle access.</p></div><span class="svc-plus">✛</span></div>
@@ -1094,7 +1100,7 @@
       <div class="svc-lg"><h4>Advanced security technologies</h4><div class="svc-ic">◎</div><div class="svc-desc"><p>24/7 · Face ID, BLE/NFC/QR turnstiles, license-plate + RFID.</p></div><span class="svc-plus">✛</span></div>
     </div>
     <!-- живе: 6 малих glass-карток (Innovative engineering) -->
-    <p class="svc-block-title">Innovative engineering</p>
+    <p class="svc-block-title">Innovative <br>engineering</p>
     <div class="svc-small">
       <div class="svc-sm"><h5>Dedicated service elevators</h5></div>
       <div class="svc-sm"><h5>Central air conditioning &amp; ventilation</h5><p>Air exchange ≥ 60 m³/hour per person.</p></div>
