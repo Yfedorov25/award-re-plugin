@@ -332,6 +332,20 @@
         linear-gradient(#3a3a3a,#3a3a3a) center right/1px 5px no-repeat; }
   }
 
+  /* живий revolves: 3 фото ВІЯЛОМ у ряд (нахилені низи, наїзд на dark) — не карусель.
+     Оверрайд поверх revolves-carousel без зміни компонента. */
+  #rvc { width: 100vw; margin-left: calc(50% - 50vw); }  /* живе: фото від краю до краю */
+  #rvc [data-rvc-stage] { display: grid !important; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; height: auto !important; padding: 0 10px; }
+  #rvc [data-rvc-slide] { position: static !important; opacity: 1 !important;
+    visibility: visible !important; }
+  #rvc [data-rvc-slide] img { width: 100%; height: 42svh; object-fit: cover;
+    border-radius: 6px; display: block; }
+  #rvc [data-rvc-slide]:nth-child(1) { transform: rotate(-3.5deg) translateY(16px); }
+  #rvc [data-rvc-slide]:nth-child(2) { transform: rotate(1.2deg); }
+  #rvc [data-rvc-slide]:nth-child(3) { transform: rotate(3.5deg) translateY(10px); }
+  #rvc .rvc-bar { display: none; }
+
   /* ═══════════ КОНТЕНТ-СЕКЦІЇ /about (13 актів живого) ═══════════ */
   .sec-dark { background: #000; color: #f2f1ee; }
   .sec-dark .lead { color: #a7a6a2; }
@@ -530,7 +544,7 @@
     object-position: top center; display: block; z-index: 0; }
   .cert-in { position: absolute; inset: 0; z-index: 1; }
   /* split-титул зверху на всю ширину (живий — великий, майже до країв) */
-  .cert-title { display: flex; justify-content: space-between; padding: 4vh 24px 0;
+  .cert-title { display: flex; justify-content: space-between; padding: 1vh 24px 0;
     font-size: clamp(34px, 7.2vw, 112px); font-weight: 300; line-height: .95; letter-spacing: -.02em; }
   .cert-cap { padding: 1vh 30px 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
     color: #8b8a86; text-align: center; }  /* живе: caption по центру між CLEVER і CERTIFICATE */
@@ -686,9 +700,9 @@
     <p class="reveal-text" style="max-width:60ch;margin:0 auto 4vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
     <div data-rvc id="rvc">
       <div data-rvc-stage>
-        <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xs/assets/images/media/about/5.revolves/image-1%40xs.webp" alt=""></figure>
-        <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xs/assets/images/media/about/5.revolves/image-2%40xs.webp" alt=""></figure>
-        <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xs/assets/images/media/about/5.revolves/image-3%40xs.webp" alt=""></figure>
+        <figure data-rvc-slide><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xxxl.webp" alt=""></figure>
+        <figure data-rvc-slide><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-2@xxxl.webp" alt=""></figure>
+        <figure data-rvc-slide><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-3@xxxl.webp" alt=""></figure>
       </div>
       <div class="rvc-bar">
         <button class="nav" data-rvc-prev aria-label="previous">‹</button>
@@ -697,6 +711,7 @@
         <div data-rvc-thumbs></div>
       </div>
     </div>
+    <p class="reveal-text" style="max-width:42ch;margin:10vh 0 4vh auto;text-align:left;font-size:clamp(16px,1.9vw,28px)">All offices at AIR maintain correct geometry and commercial efficiency. At the same time, each floor — with its staircases and utilities — is slightly rotated around the vertical axis relative to the previous one.</p>
   </div>
 </section>
 
