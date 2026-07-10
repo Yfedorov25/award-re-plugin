@@ -36,10 +36,14 @@
      Живий: h70, 3-грід край-центр-край. ЗЛІВА бургер+♡, ЦЕНТР лого AIR,
      СПРАВА CHOOSE AN OFFICE (чорна pill). /about hero = ТЕМНИЙ → хедер СВІТЛИЙ
      (data-plugin themed: над dark секцією білий контент). */
+  /* Живий about-хедер: фон ЗАВЖДИ прозорий, контент інвертується за темністю секції під ним
+     (ui-dark над темними → білі плашки; ui-light над світлими → чорні плашки). */
   [data-amo-header] { position: fixed; top: 0; left: 0; right: 0; z-index: 40;
-    background: transparent; color: #f2f1ee; }  /* over-dark-hero: білий контент */
-  [data-amo-header].is-scrolled { background: rgba(244, 242, 238, .8);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #111110; }
+    background: transparent; color: #f2f1ee; }  /* дефолт над dark-hero: білий контент */
+  /* над СВІТЛИМИ секціями (скрол з hero) — чорний контент, фон лишається прозорим */
+  [data-amo-header].is-scrolled:not(.over-dark) { color: #111110; }
+  /* над ТЕМНИМИ секціями (revolves/services/layout-intro) — світлий контент назад */
+  [data-amo-header].over-dark { color: #f2f1ee; }
   [data-amo-header] .hlogo { opacity: 1; }
   .hrow { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
     gap: 12px; padding: 0 20px; height: 70px; }
@@ -56,10 +60,15 @@
   .hfav { display: inline-flex; align-items: center; justify-content: center;
     width: 40px; height: 40px; color: #f2f1ee; background: rgba(255,255,255,.14);
     border-radius: 8px; }
-  [data-amo-header].is-scrolled .hfav { background: rgba(17,17,16,.06); color: #111110; }
+  [data-amo-header].is-scrolled:not(.over-dark) .hfav { background: rgba(17,17,16,.06); color: #111110; }
   [data-amo-burger] { display: inline-flex; align-items: center; justify-content: center;
     background: #111110; color: #f2f1ee; border: 0; border-radius: 8px;
     width: 60px; height: 40px; cursor: pointer; }
+  /* над ТЕМНИМИ секціями — плашки світлі (інверсія), фон прозорий */
+  [data-amo-header].over-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
+  [data-amo-header].over-dark [data-amo-burger] i { background: #111110; }
+  [data-amo-header].over-dark .hbtn { background: #f2f1ee; color: #111110; }
+  [data-amo-header].over-dark .hfav { background: rgba(255,255,255,.14); color: #f2f1ee; }
   /* CHOOSE ✛ = registration mark з насічками (як меню-плюс сесії 15), не простий + */
   .hbtn span { position: relative; width: 14px; height: 14px; font-size: 0; }
   .hbtn span::before { content: ""; position: absolute; inset: 0;
@@ -954,16 +963,34 @@
     (function raf(t) { api.lenis.raf(t); requestAnimationFrame(raf); })(0);
   }
   api.amo = window.AirMenuOverlay.create({});
-  /* хедер: прозорий над dark-hero (світлий контент) → після скролу is-scrolled (темний) */
+  /* хедер (живий about): фон завжди прозорий; контент інвертується за темністю секції під ним.
+     is-scrolled = вже не над hero-top; over-dark = під хедером зараз ТЕМНА секція. */
   (function(){
     var hdr=document.querySelector('[data-amo-header]');
     if(!hdr) return;
-    function onScroll(){
+    /* темні секції: hero #top, revolves, всі .sec-dark (services), .fullbleed (space/layout-intro) */
+    var darkSecs=[].slice.call(document.querySelectorAll('#top, #revolves, .sec-dark, .fullbleed'));
+    var ticking=false;
+    function isDarkUnder(){
+      var probeY=35; /* центр хедера */
+      var vw=window.innerWidth;
+      /* геометрична перевірка: чи якась темна секція перекриває лінію y=probeY */
+      for(var i=0;i<darkSecs.length;i++){
+        var r=darkSecs[i].getBoundingClientRect();
+        if(r.top<=probeY && r.bottom>probeY && r.left<vw && r.right>0) return true;
+      }
+      return false;
+    }
+    function upd(){
+      ticking=false;
       var y=(window.__lenis&&typeof window.__lenis.scroll==='number')?window.__lenis.scroll:window.scrollY;
       hdr.classList.toggle('is-scrolled', y>40);
+      hdr.classList.toggle('over-dark', isDarkUnder());
     }
+    function onScroll(){ if(ticking)return; ticking=true; requestAnimationFrame(upd); }
     (window.__lenis?window.__lenis.on('scroll',onScroll):window.addEventListener('scroll',onScroll,{passive:true}));
-    onScroll();
+    window.addEventListener('resize',onScroll,{passive:true});
+    upd();
   })();
   /* ═══ REVEAL-текст: split на слова + IntersectionObserver (живий animation--text) ═══ */
   (function initReveal(){
