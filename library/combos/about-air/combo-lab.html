@@ -521,6 +521,14 @@
      контекст і, пізніші в DOM, б'ють z1 пін-секції (position:relative
      БЕЗ z-index стекінг-контексту НЕ створює). Обидва в'юпорти. */
   #revolves, #space-splash, #services { isolation: isolate; }
+  /* під arch-віпом live показує ЧОРНЕ (live-058/060), крізь яке ВИДНО
+     revolves-контент: чорнота = розширення revolves УГОРУ (::before),
+     видиме крізь спорожнілий прозорий шар. НЕ фон #isw-arch — той z1
+     і закривав би сам revolves до фізичного релізу. */
+  #revolves::before { content: ""; position: absolute; left: 0; right: 0;
+    bottom: 100%; height: 110svh; background: #111110; }
+  /* clip лише по X (нахили віяла) — Y visible, інакше ::before зрізається */
+  #revolves { overflow-x: clip; overflow-y: visible; }
   .fade-seam::after { content: ""; position: absolute; bottom: 0;
     left: calc(50% - 50vw); right: calc(50% - 50vw);  /* фулблід: .act вужчий за екран (с22) */
     height: 60svh; background: #000; pointer-events: none; z-index: 1;
@@ -1010,13 +1018,13 @@
     #a-intro, #a-intro + .act, #architecture { padding-top: 6vh; padding-bottom: 6vh; }
     .m-adm { margin: 3vh auto 3vh 0 !important; }
     .callout { margin-top: 4vh !important; }
-    /* с22 стекінг m390: +underNext-хвіст У ЦИХ ЖЕ правилах (CSS !important б'є
-       inline JS — свапи рахуються від фактичної висоти мінус underNextSvh,
-       тому хвіст МУСИТЬ бути і тут, і в опції). Модель «наш реліз = live
-       шов-старт»: arch шов-кінець = rv-head top0 .2676 → старт .2304 →
-       +17svh (реліз був .2241) · hq: наш .4114 вже ≈ live шов-старт .4076 → 0 */
-    #isw-arch { min-height: calc(100svh + 160svh + 17svh) !important; }  /* свап-спан 160 + хвіст 17 */
-    #isw-hq { min-height: calc(100svh + 190svh) !important; }            /* JS давав 220svh */
+    /* с22 стекінг m390 (ітерація 3): +underNext-хвіст У ЦИХ ЖЕ правилах
+       (CSS !important б'є inline JS — свапи рахуються від фактичної висоти
+       мінус underNextSvh, тому хвіст МУСИТЬ бути і тут, і в опції).
+       Шар тримає до live-релізу (.2676/.4448), видимий вихід = exitWipe
+       на офсеті шов-старту (.2304 / ~.41). */
+    #isw-arch { min-height: calc(100svh + 160svh + 117svh) !important; }  /* свап-спан 160 + хвіст 117 (exitWipe на +17) */
+    #isw-hq { min-height: calc(100svh + 190svh) !important; }             /* hq без віпа: реліз = шов-старт */
     /* c20 desktop-виміри НЕ протікають на 390 */
     .aut-mid, .aut-right { margin-top: 0; }
     #comfort > .reveal-text { max-width: 350px !important; font-size: 21px !important;
@@ -1636,18 +1644,20 @@
          крок 85→110svh під живий бюджет hq→space 10.07% */
       /* pin-curves проба (свапи живого @1440): arch 0.198/0.216 → step 91svh,
          hq 0.371/0.385 → step 80svh (слайд-2 у живого ~480-490px, був 660) */
-      /* с22 стекінг: НАШ реліз шару = live ШОВ-СТАРТ (борд-урок: живий шар
-         «пінить» до .2585 лише як контейнер — фото НЕ opaque-фулскрін; візуальний
-         шов їде 1:1 зі скролом від ~.233 і закінчується на rv-head top0 .2609.
-         Наш опаковий слайд при релізі дає такий самий 1:1 шов знизу-вгору →
-         реліз має збігатись зі стартом live-шва, НЕ з релізом live-шару).
-         Кадри-докази: live-055 фулскрін · live-058 шов на 245px · live-100
-         splash-лоббі під швом. arch: реліз .2277→.2333 (+19svh desktop, +17 m390) ·
-         hq: .3950→.4001 (+18svh desktop; m390 .4114 вже ≈ шов-старт .4076 → 0). */
+      /* с22 стекінг, ітерація 3 (борд-докази live-055/058/060/100): вихід
+         живого слайдера = кліп-віп АНІМАЦІЯ (1s ease-out, час-базована) у
+         порожнечу поверх ще пінованого прозорого шару. Наш еквівалент:
+         underNext тримає шар до live-РЕЛІЗУ (.2585/.4237 desktop), а видимий
+         вихід робить exitWipe на офсеті live ШОВ-СТАРТУ (.233/.400) після
+         кінця свап-спану. m390 дзеркально (.2676/.4448 і .2304/~.41). */
+      /* hq БЕЗ віпа (ітерація 2: реліз = шов-старт .4001/.4109) — під live-швом
+         там towers-СМУГА і лоббі, не чорнота; віп-у-порожнечу лишав білу дірку.
+         arch З віпом: під live-швом чорне (#isw-arch дістав темний фон). */
       el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 80,
         underNextSvh: window.innerWidth > 768 ? 18 : 0 } :
-      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91,
-        underNextSvh: window.innerWidth > 768 ? 19 : 17 } : { mobile: 'tap' }); }
+      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91, exitWipe: true,
+        underNextSvh: window.innerWidth > 768 ? 105 : 117,
+        exitOffsetSvh: window.innerWidth > 768 ? 19 : 17 } : { mobile: 'tap' }); }
   );
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */

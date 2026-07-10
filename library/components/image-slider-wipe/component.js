@@ -117,6 +117,12 @@
          (margin-bottom −underNextSvh + z-index:1 на секції). Свапи НЕ
          зсуваються: хвіст виключений зі спану index-мапінгу. */
       underNextSvh: options.underNextSvh != null ? options.underNextSvh : 0,
+      /* живий ВИХІД слайдера (борд-доказ с22, live-058/060): НЕ зісковзування —
+         кліп-віп АНІМАЦІЯ (imageClipOutVertical 1s ease-out) останнього слайда
+         у ПОРОЖНЕЧУ поверх ще пінованого прозорого шару + фейд картки; реверс
+         при скролі назад. Тригер: exitOffsetSvh ПІСЛЯ кінця свап-спану. */
+      exitWipe: !!options.exitWipe,
+      exitOffsetSvh: options.exitOffsetSvh != null ? options.exitOffsetSvh : 0,
       mobile: options.mobile || 'tap',
       touchMq: options.touchMq || '(pointer: coarse), (max-width: 768px)'
     };
@@ -376,6 +382,59 @@
           'translateX(' + (-100 * (1 - clamp01(p * N - i))) + '%)';
     }
 
+    /* ---- exit-wipe (T-512 у порожнечу): свапи = WAAPI подіями, ідемпотентно ---- */
+    var exited = false;
+    var card = root.querySelector('[data-isw-card]');
+    function setExit(on) {
+      if (!opt.exitWipe || on === exited) return;
+      exited = on;
+      gate.exited = on;
+      killAnims();
+      var cur = slides[idx];
+      /* перерваний свап міг лишити НЕ-поточний слайд видимим (kill скасовує
+         onfinish → is-off не ставиться) — за віпом було б фото замість
+         підкладки; примусова зачистка = ідемпотентний кінцевий стан */
+      slides.forEach(function (s, i) {
+        if (s === cur) return;
+        s.classList.toggle('is-off', i !== idx);
+        s.style.clipPath = '';
+      });
+      if (reduced || !cur.animate) {
+        cur.classList.toggle('is-off', on);
+        cur.style.clipPath = '';
+        if (card) card.style.opacity = on ? '0' : '';
+        return;
+      }
+      if (on) {
+        var aOut = cur.animate({ clipPath: [FULL, TOP_LINE] },
+          { duration: opt.wipeMs, easing: opt.wipeEase, fill: 'both' });
+        aOut.onfinish = function () { cur.classList.add('is-off'); cur.style.clipPath = ''; aOut.cancel(); };
+        anims.push(aOut);
+      } else {
+        cur.classList.remove('is-off');
+        var aIn = cur.animate({ clipPath: [TOP_LINE, FULL] },
+          { duration: opt.wipeMs, easing: opt.wipeEase, fill: 'both' });
+        aIn.onfinish = function () { cur.style.clipPath = ''; aIn.cancel(); };
+        anims.push(aIn);
+      }
+      if (card) {
+        var cf = card.animate({ opacity: on ? [1, 0] : [0, 1] },
+          { duration: 400, easing: 'ease-out', fill: 'both' });
+        cf.onfinish = function () { card.style.opacity = on ? '0' : ''; cf.cancel(); };
+        anims.push(cf);
+      }
+    }
+    function checkExit() {
+      if (!opt.exitWipe) return;
+      var r = root.getBoundingClientRect();
+      var vh = global.innerHeight;
+      var spanSwap = r.height - vh - opt.underNextSvh / 100 * vh;
+      var edge = spanSwap + opt.exitOffsetSvh / 100 * vh;
+      /* гістерезис 30px: скраб-коливання довкола порога не дриґає віп */
+      if (!exited && -r.top > edge) setExit(true);
+      else if (exited && -r.top < edge - 30) setExit(false);
+    }
+
     var ticking = false;
     function onScroll() {
       if (ticking) return;
@@ -384,11 +443,13 @@
         ticking = false;
         render(progress());
         renderDrift(); /* дрейф живе і поза піном (вхід/вихід) */
+        checkExit();
       });
     }
     global.addEventListener('scroll', onScroll, { passive: true });
     render(progress());
     renderDrift();
+    checkExit();
 
     return {
       mode: 'pin', render: render, progress: progress,
