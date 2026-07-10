@@ -861,6 +861,10 @@
     #a-intro { padding-bottom: 74vh; }
     #a-intro .a-ill { position: sticky; top: 15vh; }
     #headquarters { padding-top: 6vh; padding-bottom: 4vh; }
+    /* pin-curves: свапи живого пізніші за наші → старти пінів зсунуто вниз
+       (arch +480px, hq +640px); span'и вкоротились через stepSvh 91/80 */
+    #isw-arch { margin-top: 53vh; }
+    #isw-hq { margin-top: 71vh; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
     /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
        (кластер #094-113); перекладаємо хвостовий padding у інтро, регіон незмінний */
@@ -1576,8 +1580,10 @@
     function (el) { return window.ImageSliderWipe.create('#' + el.id,
       /* hq: живий слайдер гортає ПОВІЛЬНІШЕ (на 0.340 живий ще слайд 1, наш був 2) —
          крок 85→110svh під живий бюджет hq→space 10.07% */
-      el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 110 } :
-      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 110 } : { mobile: 'tap' }); }  /* моб arch+hq: живий пінить слайди вертикально і на 390; stepSvh 110 = живий +450px JS-травел arch-слайдера (знахідка token-extractor) */
+      /* pin-curves проба (свапи живого @1440): arch 0.198/0.216 → step 91svh,
+         hq 0.371/0.385 → step 80svh (слайд-2 у живого ~480-490px, був 660) */
+      el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 80 } :
+      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91 } : { mobile: 'tap' }); }
   );
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */
