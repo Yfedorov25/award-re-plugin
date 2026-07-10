@@ -10,10 +10,11 @@
      --live https://aircenter.space/about \
      --ours http://localhost:8820/combos/about-air/combo-lab.html \
      --steps 120 --out library/boards/about-scrub-m390
-   Кадри: live-NNN.jpg / ours-NNN.jpg + meta.json (мобільні анкори живого).
+   Кадри: live-NNN.jpg / ours-NNN.jpg + meta.json (мобільні анкори живого)
+   + board.html (canvas-вьювер, скрол = синхронний скраб — сесія 19).
    ============================================================ */
 import { mkdirSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve, basename } from 'path';
 import { pathToFileURL } from 'url';
 
 async function resolveChromium() {
@@ -88,5 +89,76 @@ let anchors = { limit: 0, list: [] };
 }
 writeFileSync(`${OUT}/meta.json`, JSON.stringify({ n: N, anchors: anchors.list,
   limit: anchors.limit, live: LIVE, ours: OURS, at: new Date().toISOString() }, null, 1));
+
+/* ─── board.html: той самий canvas-вьювер що в scroll-scrub-capture,
+   портретні панелі 390×844, fracs рівномірні ─── */
+const fracs = Array.from({ length: N }, (_, i) => +(i / (N - 1)).toFixed(4));
+writeFileSync(`${OUT}/board.html`, `<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>scrub m390: ${basename(OUT)}</title>
+<style>
+*{margin:0;box-sizing:border-box}
+body{background:#0f0f0e;color:#eee;font:13px/1.4 -apple-system,system-ui;height:${Math.max(N * 55, 8000)}px}
+.stage{position:fixed;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#000}
+.pane{position:relative;overflow:hidden}
+canvas{width:100%;height:100%;display:block;background:#111}
+.tag{position:absolute;top:10px;left:10px;z-index:2;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:4px;background:rgba(0,0,0,.7);color:#eee}
+.tag.l{background:rgba(201,161,94,.92);color:#111}
+.hud{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:3;display:flex;gap:10px;align-items:center;background:rgba(15,15,14,.85);backdrop-filter:blur(8px);padding:8px 14px;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.hud b{color:#c9a15e;min-width:52px}
+.hud .sec{color:#999;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jump{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:4px}
+.jump button{font-size:9px;letter-spacing:.06em;text-transform:uppercase;background:rgba(15,15,14,.8);color:#bbb;border:1px solid #333;border-radius:4px;padding:4px 7px;cursor:pointer}
+.jump button:hover{color:#fff;border-color:#c9a15e}
+@media(max-width:820px){.stage{grid-template-columns:1fr 1fr}.jump{display:none}}
+</style>
+<div class="stage">
+  <div class="pane"><span class="tag l">живе @390</span><canvas id="CL"></canvas></div>
+  <div class="pane"><span class="tag">наше @390</span><canvas id="CR"></canvas></div>
+</div>
+<div class="hud"><b id="pct">0%</b><span class="sec" id="sec"></span><span style="color:#666" id="st">скрол = скраб</span></div>
+<div class="jump" id="jump"></div>
+<script>
+const N=${N}, FRACS=${JSON.stringify(fracs)}, ANCHORS=${JSON.stringify(anchors.list)};
+const FW=390, FH=844;
+const pad=i=>String(i).padStart(3,'0');
+const CL=document.getElementById('CL'), CR=document.getElementById('CR');
+const pct=document.getElementById('pct'), secEl=document.getElementById('sec'), st=document.getElementById('st');
+const L=Array(N), R=Array(N), ok=new Set();
+function ensure(i){ if(i<0||i>=N) return;
+  if(!L[i]){ const a=new Image(); a.src='live-'+pad(i)+'.jpg'; L[i]=a;
+    const b=new Image(); b.src='ours-'+pad(i)+'.jpg'; R[i]=b;
+    Promise.all([a.decode().catch(()=>{}),b.decode().catch(()=>{})]).then(()=>ok.add(i)); } }
+function nearestReady(i){ if(ok.has(i))return i; for(let d=1;d<N;d++){ if(ok.has(i-d))return i-d; if(ok.has(i+d))return i+d; } return -1; }
+function fit(c){ const r=c.parentElement.getBoundingClientRect(); const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=r.width*dpr; c.height=r.height*dpr; }
+addEventListener('resize',()=>{fit(CL);fit(CR);last=-1;});
+fit(CL); fit(CR);
+function draw(c,img){ const x=c.getContext('2d'); const cw=c.width,ch=c.height;
+  const s=Math.min(cw/FW,ch/FH), w=FW*s,h=FH*s;
+  x.fillStyle='#111'; x.fillRect(0,0,cw,ch); x.drawImage(img,(cw-w)/2,(ch-h)/2,w,h); }
+let cur=0,last=-1,dir=1,prevT=0;
+function secName(fr){ let s=''; for(const a of ANCHORS){ if(a.frac<=fr+0.002) s=a.id; } return s; }
+function loop(){
+  const max=document.body.scrollHeight-innerHeight;
+  const t=Math.max(0,Math.min(1,scrollY/max))*(N-1);
+  dir = t>prevT?1:(t<prevT?-1:dir); prevT=t;
+  cur += (t-cur)*0.25; if(Math.abs(t-cur)<0.4) cur=t;
+  const i=Math.round(cur);
+  for(let k=-4;k<=30;k++) ensure(i+k*dir);
+  for(let k=0;k<N;k+=12) ensure(k);
+  const r=nearestReady(i);
+  if(r>=0 && r!==last){ draw(CL,L[r]); draw(CR,R[r]); last=r;
+    pct.textContent=(FRACS[r]*100).toFixed(1)+'%'; secEl.textContent=secName(FRACS[r]);
+    st.textContent = ok.size<N? ('кеш '+Math.round(100*ok.size/N)+'%') : 'скрол = скраб'; }
+  requestAnimationFrame(loop);
+}
+const jump=document.getElementById('jump');
+ANCHORS.forEach(a=>{ if(!a.id.startsWith('sec')){ const b=document.createElement('button'); b.textContent=a.id;
+  b.onclick=()=>{ const max=document.body.scrollHeight-innerHeight;
+    let bi=0; for(let k=0;k<N;k++){ if(FRACS[k]<=a.frac) bi=k; }
+    scrollTo(0,(bi/(N-1))*max); }; jump.appendChild(b); }});
+requestAnimationFrame(loop);
+</script>`);
 await b.close();
-console.log('DONE', OUT);
+console.log('DONE', OUT, '· BOARD:', `${OUT}/board.html`);
