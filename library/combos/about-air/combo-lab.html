@@ -102,7 +102,16 @@
      Живий about-1440: dark #000, фото вежі cover, текст розкиданий spread по ширині
      на y≈267 (THE PROJECT: зліва / CONFIDENCE центр / IN AIR справа), білий. */
   #top { position: relative; height: 100svh; background: #000; overflow: clip; color: #f2f1ee; }
-  #top .hero-bg { position: absolute; inset: 0; }
+  /* живий вихід hero (air-shared.js, дослівно): landingIntroFade opacity 1→0 +
+     landingIntroMove translateY 0→40% (mobile 30%) на прогресі виходу 0→−80% секції;
+     фон = sticky--under-next (наступна секція наїжджає ПОВЕРХ фото) —
+     еквівалент: контр-translateY фону всередині overflow:clip */
+  #top { --hero-shift: 40svh; }
+  @media (max-width: 768px) { #top { --hero-shift: 30svh; } }
+  #top .hero-line { transform: translateY(calc(var(--hero-ex, 0) * var(--hero-shift)));
+    opacity: calc(1 - var(--hero-ex, 0)); }
+  #top .hero-bg { position: absolute; inset: 0;
+    transform: translateY(calc(var(--hero-px, 0) * 1px)); }
   /* picture МУСИТЬ мати height:100% — інакше img height:100% резолвиться проти
      інтринсик-висоти picture (390×1320/780=660 → чорна смуга під фото @390) */
   #top .hero-bg picture { height: 100%; }
@@ -165,6 +174,7 @@
   .reveal-text strong { color: #000; font-weight: 400; }
   /* живий .h2-reveal абзац: 28px @xxl / 21px @sm, indent 2 кол. лише desktop */
   .h2r { max-width: 660px; font-size: 28px; line-height: 1.0714; letter-spacing: -.02em; color: #111110; }
+  .sec-dark .h2r { color: #f2f1ee; }  /* живий ui-dark: .h2 = --t-heading (white) */
   .h2r.h2r-ind { text-indent: 235px; }
   @media (max-width: 768px) { .h2r { font-size: 21px; } .h2r.h2r-ind { text-indent: 0; } }
   .reveal-text .rv-w { display: inline-block; white-space: pre; text-indent: 0; }  /* text-indent успадковується у inline-block спани → кожен отримував 235px порожнечі */
@@ -188,6 +198,9 @@
      Наш білдер робив flex-бокс 65% + картку поруч — це і був грід-провал p18. */
   .isw-row { position: relative; height: 100svh; padding: 0; }
   [data-isw-stage] { position: absolute; inset: 0; border-radius: 0; overflow: clip; }
+  /* picture-обгортка МУСИТЬ мати висоту слайда: інакше img{height:100%} з component.css
+     резолвиться проти auto-picture → фото падає до інтринсику (769px @1440, 660 @390) */
+  [data-isw-slide] picture { display: block; height: 100%; }
   .isw-card { position: absolute; top: 0; right: 0; height: 100svh;
     width: min(31.6vw, 455px);           /* живий col--md-4-ish, права третина */
     display: flex; flex-direction: column;
@@ -259,7 +272,7 @@
   #revolves .rvc-bg::after { content: ""; position: absolute; inset: 0;
     background: linear-gradient(#000 0%, rgba(0,0,0,.35) 40%, rgba(0,0,0,.55) 100%); }
   #revolves .rvc-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
-  #revolves .rvc-head { display: flex; justify-content: space-between; margin-top: 8vh; margin-bottom: 38vh;
+  #revolves .rvc-head { display: flex; justify-content: space-between; margin-top: 4vh; margin-bottom: 28vh;  /* вступ був задовгий: live 0.26-0.27, ми 0.26-0.31 (таймлайн с20) */
     font-size: clamp(28px, 4.6vw, 66px); font-weight: 400; text-transform: uppercase;
     line-height: 1; letter-spacing: -.03em; color: #f2f1ee; }
   @media (max-width: 768px) { #revolves .rvc-head { flex-direction: column; gap: 2px; } }
@@ -425,7 +438,7 @@
 
 
   /* 12 LAYOUT — живий stack-slider: нумеровані картки стекаються при скролі (sticky) */
-  #stack-layout .stk + .stk { margin-top: 15svh; }  /* Batch D: живий хвіст 17.2% (наш був 14%) — більше скролу на картку стека */
+  #stack-layout .stk + .stk { margin-top: 7svh; }  /* с20: хвіст був +2.3pp (+694px) при 15svh — live 17.2% */
   #stack-layout .stk { position: sticky; top: 0; height: 100svh; display: grid;
     grid-template-columns: 1fr 1fr; background: #ececea; overflow: clip; }
   #stack-layout .stk:nth-child(even) { background: #e4e2de; }
@@ -451,7 +464,7 @@
   /* 1 INFO-TOP */
   /* живий a-illustration: фото col 4-11 (offset 33%), піни B1/B2/B3 НА фото:
      h1-літера + floors-підпис + діагональна лінія-конектор до будівлі (stroke .12) */
-  .a-ill { position: relative; margin: 8vh 0 10vh 26%; width: 66%; }
+  .a-ill { position: relative; margin: 8vh 0 10vh 29%; width: 71.5%; }  /* живий col--md-7 offset--md-4: ~796px @1440 (наш .act вужчий за container-h → % більші) */
   .a-ill img { width: 100%; display: block; }
   .a-pin { position: absolute; margin: 0; }
   .a-pin svg { display: block; margin-top: 6px; }
@@ -559,6 +572,10 @@
       з бейджами, вуличні мітки під кутом, compass rotate(-15°) внизу-справа). */
   .aut-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2vw; margin-top: 6vh; }
   .aut-grid .col-stack { display: grid; gap: 2vw; }
+  .aut-card { background: rgba(0,0,0,.05); border-radius: 6px; padding: 20px;
+    display: grid; align-content: end; }  /* живий card-text ui-background-alt */
+  .aut-card p { font-size: 12.5px; line-height: 1.4; letter-spacing: .02em;
+    text-transform: uppercase; color: #111110; max-width: 30ch; }
   .aut-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
 
   /* --- PLAN-МАПА (about-automony-plan) — живе: 3D-макет кварталу (плити B1/B2/B3 під кутом),
@@ -825,6 +842,27 @@
   }
 
 
+  /* ═══ DESKTOP SYNC BUDGETS (сесія 20, visual-sync-probe) — нуль-сумні добори.
+     Числа: (top)→revolves −616px · hq→space +432 · space→autonomy −275 ·
+     cert→solutions −235. Mobile НЕ чіпати (його бюджети в фінальному @768). ═══ */
+  @media (min-width: 769px) {
+    /* живий info-top = data-scroll-sticky (stickyBottom): вежі ДВОРЯТЬ на екрані
+       поки скрол іде — сталий еквівалент: sticky + додатковий тревел секції */
+    #a-intro { padding-bottom: 74vh; }
+    #a-intro .a-ill { position: sticky; top: 15vh; }
+    #headquarters { padding-top: 6vh; padding-bottom: 4vh; }
+    #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
+    #comfort { padding-bottom: 40vh; }
+    /* живий cert ПІНИТЬ контент (наш був 100svh-блок з margin — контент їхав вище
+       живого, кластер #192-200): секція вища, bg+контент sticky */
+    #certificate { height: calc(100svh + 52vh); margin-bottom: 0; }
+    #certificate > picture { position: sticky; top: 0; height: 100svh; }
+    #certificate .cert-in { position: sticky; inset: auto; top: 0;
+      height: 100svh; margin-top: -100svh; }  /* оверлей поверх sticky-фону */
+    #autonomy { padding-bottom: 36vh; }
+    #stack-layout .stk + .stk { margin-top: 4svh; }
+  }
+
   /* ═══ MOBILE SYNC OVERRIDES (сесія 19) — ОСТАННІЙ блок стилів НАВМИСНО ═══
      Урок: @media НЕ додає специфічності — моб-правило раніше в source програє
      desktop-правилу нижче (так «зник» .stk margin-top:0). Усі моб-переваги — тут. */
@@ -900,6 +938,24 @@
     #comfort .cft-left h3 { font-size: 30px; line-height: 1.12; max-width: 350px; }
     /* усі h1-титули mobile = живі 42px/45 (виміряно live @390: revolves і hq однаково) */
     .h1, .h1.spread, .h1.spread span { font-size: 42px !important; line-height: 45px !important; }
+
+    /* PIN-РЕЖИМ isw НА 390 (біла дірка m390 #018-029): генерик-моб правила вище
+       (.isw-row height:auto + [data-isw-stage] position:static) схлопували стейдж
+       у 0px — слайди absolute жили в нульовому контейнері, видно було лише каптіон.
+       Live пінить слайди фулскріном і на 390. */
+    #isw-arch .isw-row, #isw-hq .isw-row { height: 100svh; }
+    #isw-arch [data-isw-stage], #isw-hq [data-isw-stage] {
+      position: absolute; inset: 0; overflow: clip; }
+
+    /* M390 ФАЗИ (таймлайн с20): наш arch-пін стартував ~0.17 (live 0.143) —
+       інтро/arch роздуті, пін закороткий; hq-пін задовгий; нуль-сумні добори */
+    #a-intro, #a-intro + .act, #architecture { padding-top: 6vh; padding-bottom: 6vh; }
+    .m-adm { margin: 3vh auto 3vh 0 !important; }
+    .callout { margin-top: 4vh !important; }
+    #isw-arch { min-height: calc(100svh + 160svh) !important; }  /* було 120svh */
+    #isw-hq { min-height: calc(100svh + 190svh) !important; }    /* JS давав 220svh */
+    #services-cards { padding-bottom: 38vh !important; }         /* svc→cert був −190px */
+    .cert { margin-bottom: 12vh; }                               /* cert→sol був +118px */
   }
 </style>
 </head>
@@ -1003,7 +1059,7 @@
   </div>
   <div class="rvc-inner">
     <h2 class="rvc-head"><span>Everything</span><span>revolves</span><span>around</span><span>you</span></h2>
-    <p class="reveal-text m-revpara" style="max-width:60ch;margin:0 auto 20vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
+    <p class="reveal-text m-revpara" style="max-width:60ch;margin:0 auto 12vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
     <div data-rvc id="rvc">
       <div data-rvc-stage>
         <figure data-rvc-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xs.webp"><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xxxl.webp" alt=""></picture></figure>
@@ -1129,6 +1185,8 @@
     <div class="col-stack">
       <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-2%40xs.webp"><img loading="lazy" alt="AIR boutique" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-2%40xxxl.webp"></picture>
       <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-3%40xs.webp"><img loading="lazy" alt="AIR cafe" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-3%40xxxl.webp"></picture>
+      <!-- живий card-text ui-background-alt (air-about.html:2382) — був відсутній (кластер #136-142) -->
+      <div class="aut-card"><p>Coffee points integrated into the design concept will appear in the lobbies of Buildings 1 and 2.</p></div>
     </div>
   </div>
 
@@ -1171,15 +1229,18 @@
 </section>
 
 <!-- ═══ 9 · SERVICES (DARK) ═══ -->
-<!-- живий services-інтро СВІТЛИЙ: split-титул + центр-абзац col-4 + h2 28px offset-6
-     + фото col-8 rounded з малим абзацом col-4 праворуч. Dark починається з карток. -->
-<section class="act" id="services">
+<!-- живий #service = section ui-dark ui-background (air-about.html:2661): ВСЯ секція
+     ЧОРНА на обох в'юпортах — титул, privileges, h2-абзац, фото, картки.
+     (сесія 18 помилково переказала інтро як «світлий» — корінь кластера G) -->
+<section class="sec-dark" id="services">
+  <div class="act" style="padding-bottom:0">
   <h2 class="h1 spread" style="margin-bottom:0"><span>Service</span><span>excellence</span></h2>
   <p class="reveal-text" style="max-width:442px;margin:9vh auto;text-align:center;font-size:12px;line-height:1.2;letter-spacing:.02em">Privileges define status.<br>At AIR, exceptional attention to residents and care for their well-being and privacy are felt throughout every space.</p>
   <p class="reveal-text h2r h2r-ind" style="margin:0 0 8vh auto">Wide parking driveways, silent VIP elevators, adaptive climate control, and high-speed Wi-Fi across the entire business center — pursuing ambitious goals here is not only prestigious, but genuinely comfortable.</p>
   <div class="svc-introw">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_service_img_xs/assets/images/media/about/9.services/image%40xs.webp"><img class="svc-img" loading="lazy" alt="AIR service" src="https://aircenter.space/media/cache/about_service_img_xxxl/assets/images/media/about/9.services/image%40xxxl.webp"></picture>
     <p class="reveal-text" style="font-size:12px;line-height:1.4;letter-spacing:.02em;max-width:332px">From electric vehicle charging stations to advanced security technologies, premium service at AIR is elevated to a guiding principle.</p>
+  </div>
   </div>
 </section>
 <section class="sec-dark" id="services-cards" style="padding-bottom:42vh">
@@ -1460,6 +1521,24 @@
     upd();
   })();
 
+  /* ═══ HERO-ВИХІД (живий landingIntroFade+Move + sticky--under-next фон) ═══ */
+  (function initHeroExit(){
+    var top = document.getElementById('top');
+    if (!top || reduced) return;
+    var ticking = false;
+    function upd(){
+      ticking = false;
+      var r = top.getBoundingClientRect();
+      var out = Math.max(0, -r.top);                       /* px секції, що вийшли */
+      var ex = Math.min(1, out / (r.height * 0.8));        /* живий діапазон −80% */
+      top.style.setProperty('--hero-ex', ex.toFixed(3));
+      top.style.setProperty('--hero-px', Math.min(out, r.height).toFixed(1));
+    }
+    function onScroll(){ if (ticking) return; ticking = true; requestAnimationFrame(upd); }
+    (window.__lenis ? window.__lenis.on('scroll', onScroll) : window.addEventListener('scroll', onScroll, { passive: true }));
+    upd();
+  })();
+
   api.rvc = window.RevolvesCarousel.create('#rvc', {});
   api.isw = Array.prototype.map.call(
     document.querySelectorAll('#isw-arch, #isw-hq, #isw-layout'),
@@ -1467,7 +1546,7 @@
       /* hq: живий слайдер гортає ПОВІЛЬНІШЕ (на 0.340 живий ще слайд 1, наш був 2) —
          крок 85→110svh під живий бюджет hq→space 10.07% */
       el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 110 } :
-      el.id === 'isw-arch' ? { mobile: 'pin' } : { mobile: 'tap' }); }  /* моб arch+hq: живий пінить слайди вертикально і на 390 */
+      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 110 } : { mobile: 'tap' }); }  /* моб arch+hq: живий пінить слайди вертикально і на 390; stepSvh 110 = живий +450px JS-травел arch-слайдера (знахідка token-extractor) */
   );
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */
