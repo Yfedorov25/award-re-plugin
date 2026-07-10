@@ -58,8 +58,12 @@ function contextPct(input) {
   try {
     const tp = input.transcript_path || input.transcriptPath;
     if (!tp || !fs.existsSync(tp)) return null;
-    const bytes = fs.statSync(tp).size;
-    return bytes / BYTES_PER_TOKEN / CTX_WINDOW_TOKENS;
+    // base64-зображення роздувають transcript (перший прогін дав «723%») —
+    // рахуємо лише НЕ-base64 текст: довгі A-Za-z0-9+/= послідовності викидаємо.
+    const raw = fs.readFileSync(tp, 'utf8');
+    const textOnly = raw.replace(/[A-Za-z0-9+\/=]{500,}/g, '');
+    const pct = textOnly.length / BYTES_PER_TOKEN / CTX_WINDOW_TOKENS;
+    return Math.min(pct, 0.99); // clamp — оцінка, не факт
   } catch (_) { return null; }
 }
 
