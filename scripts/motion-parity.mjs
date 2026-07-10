@@ -52,7 +52,11 @@ const res = await p.evaluate((LIVE) => {
   const ok = (name, pass, got, want) => out.push({ name, pass: !!pass, got: String(got), want: String(want) });
 
   /* 1. reveal: слова обгорнуті, transition = ease/1s, stagger 60ms, blur 10 у armed-стані */
-  const rv = document.querySelector('.reveal-text');
+  /* семпл БЕЗ inline-кольору: живий патерн має і чорні h2-reveal (інтро),
+     і сірі #8d8d8d — движковий чек кольору валідний лише на дефолтному */
+  const rv = [...document.querySelectorAll('.reveal-text')]
+    .find(e => !(e.getAttribute('style') || '').includes('color')) ||
+    document.querySelector('.reveal-text');
   const w = rv && rv.querySelector('.rv-w');
   ok('reveal: word-split існує', !!w, w ? 'так' : 'нема .rv-w', 'слова обгорнуті');
   if (w) {

@@ -28,8 +28,8 @@
 <style>
   :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Onest', 'Inter', system-ui, -apple-system, sans-serif; }
   * { margin: 0; box-sizing: border-box; }
-  html { overflow-anchor: none; overflow-x: clip; background: #f4f2ee; }
-  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  html { overflow-anchor: none; overflow-x: clip; background: #fff; }  /* живий /about: світлі секції БІЛІ (не беж) — звірка scrub f0/f22/f262 */
+  body { font-family: var(--sans); background: #fff; color: #111110; }
   a { color: inherit; text-decoration: none; }
   picture { display: contents; }  /* <picture>-обгортки @xs-асетів прозорі для grid/flex-лейаутів */
 
@@ -45,7 +45,9 @@
   [data-amo-header].is-scrolled:not(.over-dark) { color: #111110; }
   /* над ТЕМНИМИ секціями (revolves/services/layout-intro) — світлий контент назад */
   [data-amo-header].over-dark { color: #f2f1ee; }
-  [data-amo-header] .hlogo { opacity: 1; }
+  /* живий /about: центр-лого AIR НЕ показується на жодній глибині скролу (scrub f0..f470) */
+  [data-amo-header] .hlogo { opacity: 0; pointer-events: none; }
+  [data-amo-header].amo-menu-open .hlogo { opacity: 1; pointer-events: auto; }
   .hrow { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
     gap: 12px; padding: 0 20px; height: 70px; }
   .hleft { display: inline-flex; align-items: center; gap: 10px; justify-self: start; }
@@ -128,6 +130,7 @@
   .spread { display: flex; justify-content: space-between; }
   /* живі split-титули секцій ідуть ВІД КРАЮ ДО КРАЮ (не в контейнері .act) */
   .h1.spread { width: 100vw; margin-left: calc(50% - 50vw); padding: 0 20px; box-sizing: border-box; }
+  @media (max-width: 768px) { .h1.spread { flex-direction: column; gap: 2px; } }  /* живий mobile: титул стеком, без overflow */
   .act { padding: 10vh 3vw; max-width: 1200px; margin: 0 auto; }
   .lead { font-size: 14px; line-height: 1.55; color: #6b6b68; max-width: 44ch; }
 
@@ -174,6 +177,24 @@
     line-height: .97; letter-spacing: -.04em; color: #000; }  /* .h1: scale-rem*11.3 */
   .isw-counter [data-isw-total] { font-size: 13px; font-weight: 500; letter-spacing: .01em;
     text-transform: uppercase; color: rgba(0,0,0,.4); }
+  /* hq (живий card-slider, anchor-вимір): КАРТКА обмежена (radius 5, центрована),
+     не full-height градієнт; слайд-1 титул 21px, слайди 2-3 базові 13px;
+     фон = ОДНЕ фото з pan (object-position по слайдах імітує живий parallax-пан) */
+  #isw-hq .isw-card { top: 50%; bottom: auto; transform: translateY(-50%);
+    height: min(78svh, 640px); border-radius: 5px; padding: 30px; right: 30px; }
+  #isw-hq .isw-texts p.t-lg { font-size: 21px; line-height: 1.14; }
+  #isw-hq .isw-texts p { font-size: 13px; line-height: 1.3; }
+  #isw-hq [data-isw-slide]:nth-child(1) img { object-position: 50% 0%; }
+  #isw-hq [data-isw-slide]:nth-child(2) img { object-position: 50% 55%; }
+  #isw-hq [data-isw-slide]:nth-child(3) img { object-position: 50% 100%; }
+  .hq-pin { position: absolute; left: 42%; top: 38%; width: 30px; height: 30px; z-index: 2;
+    border-radius: 5px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(255,255,255,.1); }
+  .hq-pin::after { content: ""; position: absolute; inset: 10px; background: #fff; border-radius: 2px; }
+  .hq-line { position: absolute; left: 43%; top: 39.5%; width: 24%; height: 12%; z-index: 1; }
+  .hq-line path { stroke: rgba(0,0,0,.2); }
+  @media (max-width: 768px) { .hq-pin, .hq-line { display: none; }
+    #isw-hq .isw-card { top: auto; bottom: 0; transform: none; height: auto; } }
   .isw-texts { flex: 1; display: grid; align-content: flex-end; }
   .isw-texts p { font-size: clamp(13px, 1.15vw, 16px); font-weight: 400; line-height: 1.3;
     letter-spacing: -.01em; text-transform: uppercase; color: #8d8d8d; }  /* живий reveal-grey */
@@ -406,8 +427,24 @@
   em { font-style: italic; color: inherit; }
 
   /* 1 INFO-TOP */
-  .info-top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; align-items: center; margin-top: 6vh; }
-  .info-top-grid img { width: 100%; border-radius: 6px; display: block; }
+  /* живий a-illustration: фото col 4-11 (offset 33%), піни B1/B2/B3 НА фото:
+     h1-літера + floors-підпис + діагональна лінія-конектор до будівлі (stroke .12) */
+  .a-ill { position: relative; margin: 8vh 0 0 26%; width: 66%; }
+  .a-ill img { width: 100%; display: block; }
+  .a-pin { position: absolute; margin: 0; }
+  .a-pin svg { display: block; margin-top: 6px; }
+  .a-pin-b { display: block; font-size: 64px; font-weight: 400; line-height: 1; letter-spacing: -.02em; }
+  .a-pin-t { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: #8b8a86; margin-top: 6px; }
+  .a-pin-1 { left: -12%; top: 52%; }
+  .a-pin-2 { top: -9%; left: 36%; }   /* B2 над фото, лінія вниз-вліво до вежі */
+  .a-pin-2 svg, .a-pin-3 svg { margin-left: -60px; }
+  .a-pin-3 { right: -6%; top: 30%; }
+  @media (max-width: 768px) {
+    .a-ill { margin-left: 0; width: 100%; }
+    .a-pin-b { font-size: 34px; }
+    .a-pin svg { display: none; }
+    .a-pin-1 { left: 2%; } .a-pin-3 { right: 2%; } .a-pin-2 { top: -12%; } }
   .metric-row { display: flex; gap: 5vw; margin-top: 5vh; flex-wrap: wrap; }
   .metric-row .m-num { font-size: clamp(34px, 4vw, 64px); font-weight: 300; line-height: 1; }
   .metric-row .m-cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
@@ -627,15 +664,18 @@
   .cert-in { position: absolute; inset: 0; z-index: 1; }
   /* split-титул зверху на всю ширину (живий — великий, майже до країв) */
   .cert-title { display: flex; justify-content: space-between; padding: 1vh 24px 0;
-    font-size: clamp(34px, 7.2vw, 112px); font-weight: 300; line-height: .95; letter-spacing: -.02em; }
-  .cert-cap { padding: 1vh 30px 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
-    color: #8b8a86; text-align: center; }  /* живе: caption по центру між CLEVER і CERTIFICATE */
-  /* живий розклад: заява СЕРЕДИНА-праворуч · лого зліва-центр-низ · 2-й абзац низ-праворуч */
-  .cert-claim { position: absolute; right: 30px; top: 34%; max-width: 46ch; text-align: left;
-    font-size: clamp(18px, 2.2vw, 33px); line-height: 1.2; color: #1c1b19; }
-  .cert-logo { position: absolute; left: 50.5%; bottom: 11%; height: 66px; display: block; }
-  .cert-para2 { position: absolute; right: 30px; bottom: 6%; max-width: 40ch;
-    font-size: 12.5px; line-height: 1.5; letter-spacing: .02em; }
+    font-size: clamp(34px, 4.95vw, 71px); font-weight: 400; line-height: .95; letter-spacing: -.02em; }
+  /* живе (anchor-вимір): ecology = 3 рядки <br>, ЛІВИЙ край 50.76% (col offset-6), у РЯДКУ титулів */
+  .cert-cap { position: absolute; left: 50.76%; top: calc(1vh + 6px); max-width: 200px;
+    font-size: 12px; line-height: 1.25; letter-spacing: .12em; text-transform: uppercase;
+    color: #8b8a86; text-align: left; padding: 0; }
+  /* живий розклад (anchor-вимір): заява h2 28px offset-6 з text-indent 2 колонки ·
+     лого 100px на col-6 краю · 2-й абзацправа колонка cols 9-12 */
+  .cert-claim { position: absolute; left: 50.76%; right: 30px; top: 55%; text-align: left;
+    font-size: 28px; line-height: 1.0714; letter-spacing: -.02em; color: #111110; text-indent: 235px; }
+  .cert-logo { position: absolute; left: 50.76%; bottom: 24%; height: 100px; display: block; }
+  .cert-para2 { position: absolute; right: 25px; bottom: 20%; max-width: 332px;
+    font-size: 12.5px; line-height: 1.4; letter-spacing: .02em; }
   @media (max-width: 768px) {
     .cert-title { flex-direction: column; gap: 2px; padding-top: 12vh; }
     /* фікс п.11 аудиту: підзаголовок зліва в 3 рядки (не центр), лого ~112px.
@@ -774,22 +814,21 @@
   <div class="hero-line"><span>The project:</span><span>confidence</span><span>in AIR</span></div>
 </section>
 
-<!-- ═══ 1 · INFO-TOP (light) ═══ -->
+<!-- ═══ 1 · INFO-TOP (light) — живе: h2 UPPERCASE 28px зліва (col-6) + 3-tower фото
+     (col 4-11) з callout-пінами B1/B2/B3 НА фото (h1-цифри + лінії-конектори stroke .12) ═══ -->
 <section class="act" id="a-intro">
-  <p class="lead" style="max-width:60ch;font-size:clamp(16px,1.8vw,24px);color:#3c3b39;line-height:1.4">Business is built on <strong>choosing optimal solutions</strong>. The premium AIR business center comprises <strong>three buildings</strong> of varying heights — from <strong>14 to 34 floors</strong> — and offers ultra-modern, next-generation office spaces.</p>
-  <div class="info-top-grid">
+  <p class="reveal-text" style="max-width:660px;font-size:28px;line-height:1.0714;letter-spacing:-.02em;color:#111110">Business is built on choosing optimal solutions. The premium AIR business center comprises three buildings of varying heights — from 14 to 34 floors — and offers ultra-modern, next-generation office spaces.</p>
+  <div class="a-ill">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_top_img_xs/assets/images/media/about/2.info-top/image%40xs.webp"><img loading="lazy" alt="AIR three towers" src="https://aircenter.space/media/cache/about_info_top_img_xxxl/assets/images/media/about/2.info-top/image%40xxxl.webp"></picture>
-    <div class="metric-row" style="margin-top:0;flex-direction:column;gap:3vh">
-      <div><div class="m-num">B1</div><div class="m-cap">20 floors</div></div>
-      <div><div class="m-num">B2</div><div class="m-cap">34 floors</div></div>
-      <div><div class="m-num">B3</div><div class="m-cap">14 floors</div></div>
-    </div>
+    <p class="a-pin a-pin-1"><span class="a-pin-b">B1</span><span class="a-pin-t">20 floors</span><svg width="179" height="171" viewBox="0 0 179 171" fill="none"><path d="M0 0.5H100L178.089 170" stroke="black" stroke-opacity="0.12"/></svg></p>
+    <p class="a-pin a-pin-2"><span class="a-pin-b">B2</span><span class="a-pin-t">34 floors</span><svg width="155" height="251" viewBox="0 0 155 251" fill="none"><path d="M154.408 0.5H54.4082L0.488754 250" stroke="black" stroke-opacity="0.12"/></svg></p>
+    <p class="a-pin a-pin-3"><span class="a-pin-b">B3</span><span class="a-pin-t">14 floors</span><svg width="172" height="241" viewBox="0 0 172 241" fill="none"><path d="M171.06 0.5H71.0596L0.479996 240" stroke="black" stroke-opacity="0.12"/></svg></p>
   </div>
 </section>
 
 <!-- ═══ 2 · INFO-BOTTOM (light) — живе: 2 фото зверху → UPPERCASE reveal-текст під ними ═══ -->
 <section class="act">
-  <p class="lead" style="max-width:64ch;font-size:15px;line-height:1.55;color:#3c3b39;margin-bottom:5vh">Developed by <strong>TEKTA</strong> professionals and managed by <strong>Commonwealth Partnership</strong> experts, AIR becomes a solid foundation for businesses of any scale and ambition.</p>
+  <p class="reveal-text" style="max-width:442px;margin:0 auto 5vh;text-align:center;font-size:12px;line-height:1.2;letter-spacing:.02em">Developed by TEKTA professionals and managed by Commonwealth Partnership experts, AIR becomes a solid foundation for businesses of any scale and ambition.</p>
   <div class="ib-grid">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_bottom_img_xs/assets/images/media/about/3.info-bottom/image-1%40xs.webp"><img loading="lazy" alt="AIR interior" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-1%40xxxl.webp"></picture>
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_bottom_img_xs/assets/images/media/about/3.info-bottom/image-2%40xs.webp"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-2%40xxxl.webp"></picture>
@@ -807,7 +846,7 @@
   <!-- живе: split-титул spread на всю ширину + reveal-абзаци (інтро центр, заява праворуч) -->
   <h2 class="h1 spread"><span>Architecture</span><span>of efficiency</span></h2>
   <p class="reveal-text" style="max-width:52ch;margin:10vh auto 0;text-align:center;font-size:14px;line-height:1.55;letter-spacing:.02em">Aesthetics as the highest form of pragmatism. The architecture of AIR embodies the rhythm of the present, reflecting the social and business dynamics of the capital.</p>
-  <p class="reveal-text" style="max-width:32ch;margin:12vh 0 0 auto;text-align:right;font-size:clamp(18px,2.2vw,32px);color:#1c1b19">The distinctive style of AIR was created by <strong>ADM</strong>, a leading architectural studio specializing in contemporary urban design.</p>
+  <p class="reveal-text" style="max-width:32ch;margin:12vh 0 0 auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The distinctive style of AIR was created by <strong>ADM</strong>, a leading architectural studio specializing in contemporary urban design.</p>
 </section>
 <section id="isw-arch">
   <div data-isw-layer>
@@ -859,16 +898,15 @@
         <div data-rvc-thumbs></div>
       </div>
     </div>
-    <p class="reveal-text" style="max-width:42ch;margin:10vh 0 4vh auto;text-align:left;font-size:clamp(16px,1.9vw,28px)">All offices at AIR maintain correct geometry and commercial efficiency. At the same time, each floor — with its staircases and utilities — is slightly rotated around the vertical axis relative to the previous one.</p>
+    <p class="reveal-text" style="max-width:42ch;margin:10vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.6vw,23px)">All offices at AIR maintain correct geometry and commercial efficiency. At the same time, each floor — with its staircases and utilities — is slightly rotated around the vertical axis relative to the previous one.</p>
   </div>
 </section>
 
-<!-- ═══ 5 · HEADQUARTERS (light) — image-slider-wipe ═══ -->
+<!-- ═══ 5 · HEADQUARTERS (light) — живе: split-титул ВІД КРАЮ ДО КРАЮ (кап 67px)
+     + малий центрований UPPERCASE reveal-абзац col-4 (442px, 6 рядків) ═══ -->
 <section class="act" id="headquarters">
-  <h2 class="h1" style="margin-bottom:2vh">Headquarters for visionaries</h2>
-  <div class="callout" style="margin-top:0">
-    <p>We designed the <strong>third building</strong> as the most advanced headquarters in the Leningradsky business district.</p>
-  </div>
+  <h2 class="h1 spread" style="margin-bottom:0"><span>Headquarters</span><span>for&nbsp;visionaries</span></h2>
+  <p class="reveal-text" style="max-width:442px;margin:9vh auto 0;text-align:center;font-size:12px;line-height:1.15;letter-spacing:.02em">The distinctive architecture of AIR effectively communicates the image and values of any progressive corporation. Recognizing this PR and GR potential, we designed the third building as the most advanced headquarters in the Leningradsky business district.</p>
 </section>
 <!-- 5 HEADQUARTERS — живе: ui-light, ОДИН фон вежі B3 (не 3 фото-слайди),
      glass-панель справа міняє лише ТЕКСТ (14-story/autonomous/infrastructure) -->
@@ -879,14 +917,16 @@
         <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_headquarters_bg_xs/assets/images/media/about/6.headquarters/background%40xs.webp"><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt="AIR Building 3 headquarters"></picture></figure>
         <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_headquarters_bg_xs/assets/images/media/about/6.headquarters/background%40xs.webp"><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></picture></figure>
         <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_headquarters_bg_xs/assets/images/media/about/6.headquarters/background%40xs.webp"><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></picture></figure>
+        <div class="hq-pin" aria-hidden="true"></div>
+        <svg class="hq-line" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path vector-effect="non-scaling-stroke" d="M 0 0 L 100 100" stroke-width="1" fill="none"/></svg>
       </div>
       <div class="isw-card" data-isw-card>
         <div data-isw-ticks></div>
         <p class="isw-counter"><span data-isw-count>1</span><span data-isw-total>/ 3</span></p>
         <div class="isw-texts">
-          <p data-isw-text>The <strong>14-story tower</strong> is designed specifically as the headquarters of a large company and is fully autonomous.</p>
-          <p data-isw-text class="is-off">Independent (ventilation and air conditioning), isolated when necessary (servers and dispatch systems).</p>
-          <p data-isw-text class="is-off">A company can shape its own service infrastructure.</p>
+          <p data-isw-text class="t-lg">The 14-story tower is designed specifically as the headquarters of a large company and is fully autonomous.</p>
+          <p data-isw-text class="is-off">Its engineering systems are either independent (ventilation and air conditioning), supplied via separate networks (water and heating), or designed to be isolated when necessary (servers and dispatch systems).</p>
+          <p data-isw-text class="is-off">A company that establishes its headquarters in AIR&rsquo;s third tower can shape its own service infrastructure and independently define the building management model and contractors.</p>
         </div>
         <div class="isw-nav">
           <button data-isw-prev aria-label="previous">←</button>
@@ -913,7 +953,7 @@
     <div><div class="m-num">680 <span style="font-size:.4em">M²</span></div><div class="m-cap">maximum<br>lobby area</div></div>
   </div>
   <!-- живе: заява UPPERCASE reveal праворуч (не lowercase lead зліва) -->
-  <p class="reveal-text" style="max-width:34ch;margin:14vh 0 8vh auto;text-align:right;font-size:clamp(16px,1.9vw,28px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
+  <p class="reveal-text" style="max-width:34ch;margin:14vh 0 8vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
 
   <!-- живе: fullscreen карусель лоббі (4 слайди, thumb-рейка, лічильник 1/4) -->
   <!-- фікс п.7 аудиту: слайди БЕЗ lazy (приховані opacity:0 → lazy ніколи не вантажились),
@@ -1046,8 +1086,8 @@
   <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/10.certificate/background@xs.webp"><img class="cert-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/10.certificate/background@xxxl.webp"></picture>
   <div class="cert-in">
     <h2 class="cert-title"><span>CLEVER</span><span>CERTIFICATE</span></h2>
-    <p class="cert-cap">The ecology of successful business</p>
-    <p class="cert-claim reveal-text" style="max-width:46ch;color:#1c1b19">AIR meets the <strong>CLEVER eco-certification</strong> standards at the <strong>Gold level</strong>. The practices applied in the design, construction, and operation of the towers comply with <strong>ESG</strong> principles.</p>
+    <p class="cert-cap">The&nbsp;ecology <br>of&nbsp;successful<br>business</p>
+    <p class="cert-claim reveal-text">AIR meets the CLEVER eco-certification standards at the Gold level. The practices applied in the design, construction, and operation of the towers comply with ESG principles.</p>
     <img class="cert-logo" loading="lazy" alt="CLEVER" src="https://aircenter.space/assets/images/media/about/10.certificate/logo-clever.webp">
     <p class="cert-para2 reveal-text" style="font-size:12.5px">The environmental performance of the premium business center aligns with the internal policies of progressive corporations, as well as the requirements of their regulators and industries. Most importantly, it creates a comfortable and healthy working environment for every employee.</p>
   </div>
@@ -1065,7 +1105,7 @@
     <div><div class="m-num">52.7 <span style="font-size:.4em">M²</span></div><div class="m-cap">minimum office area</div></div>
     <div><div class="m-num">1610.5 <span style="font-size:.4em">M²</span></div><div class="m-cap">maximum full-floor area</div></div>
   </div>
-  <p class="reveal-text" style="max-width:30ch;margin:8vh 0 0 auto;text-align:right;font-size:clamp(18px,2vw,30px);line-height:1.35">The well-considered structural design of the towers allows AIR to <strong>flexibly adapt</strong>. Units on a floor can be combined. Residents can purchase a single office, an entire floor, or even a whole building.</p>
+  <p class="reveal-text" style="max-width:30ch;margin:8vh 0 0 auto;text-align:right;font-size:clamp(15px,1.6vw,23px);line-height:1.15">The well-considered structural design of the towers allows AIR to <strong>flexibly adapt</strong>. Units on a floor can be combined. Residents can purchase a single office, an entire floor, or even a whole building.</p>
 </section>
 <section id="stack-layout">
   <!-- живий desktop stack-slider: 4 нумеровані картки стекаються (sticky), фото праворуч -->
