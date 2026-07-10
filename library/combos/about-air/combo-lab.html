@@ -404,7 +404,7 @@
 
 
   /* 12 LAYOUT — живий stack-slider: нумеровані картки стекаються при скролі (sticky) */
-  #stack-layout .stk + .stk { margin-top: 25svh; }  /* Batch D: живий хвіст 17.2% (наш був 14%) — більше скролу на картку стека */
+  #stack-layout .stk + .stk { margin-top: 15svh; }  /* Batch D: живий хвіст 17.2% (наш був 14%) — більше скролу на картку стека */
   #stack-layout .stk { position: sticky; top: 0; height: 100svh; display: grid;
     grid-template-columns: 1fr 1fr; background: #ececea; overflow: clip; }
   #stack-layout .stk:nth-child(even) { background: #e4e2de; }
@@ -550,7 +550,7 @@
   .aplan { position: relative; margin-top: 8vh; width: 100%; aspect-ratio: 1440 / 760;
     border-radius: 8px; overflow: clip; background: #f4f3f0; }
   /* desktop: живий stickyBottom тримає план ~повний екран поки скрол іде (оверрайд ПІСЛЯ бази) */
-  .aplan-scroll { height: 100svh; }  /* Batch D: живий бюджет autonomy 9.28% — 175svh роздував services/cert на +6..10% */
+  .aplan-scroll { height: 135svh; }  /* Batch D: живий бюджет autonomy 9.28% — 175svh роздував services/cert на +6..10% */
   .aplan { position: sticky; top: 12vh; }
   @media (max-width: 768px) { .aplan-scroll { height: auto; } .aplan { position: static; } }
   /* макет кварталу: діагональна смуга-«стрічка» плит (перспектива зліва-верх → право-низ) */
@@ -595,11 +595,11 @@
      + 6 малих (col-2). glass blur, велика декор-іконка, назва + опис. */
   .svc-block-title { font-size: clamp(24px, 2.9vw, 42px); letter-spacing: -.02em; text-transform: uppercase;
     font-weight: 400; color: #f2f1ee; line-height: 1.07; margin: 6vh 0 4vh; }  /* живий text-h2-large, 2 рядки */
-  .svc-large { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .svc-large { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   /* живий card-team--service--large: НАЗВА зверху · декор-іконка ЦЕНТР велика ·
      ✛ у нижньому куті · ОПИС ПРИХОВАНИЙ (hover-popup cardHover) — та сама помилка
      що management (грід з видимим текстом) виправлена */
-  .svc-lg { position: relative; min-height: 420px; border-radius: 5px;
+  .svc-lg { position: relative; min-height: 520px; border-radius: 5px;
     background: rgba(255,255,255,.07); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     padding: 20px; overflow: clip; }
   /* живий ступінчастий грід ПОРОЖНІМИ слотами (col-4, offset 8/4/0/0/0/4/0 з air-about.html):
@@ -627,10 +627,10 @@
     border-radius: 7px; background: rgba(255,255,255,.12); display: grid; place-items: center;
     font-size: 13px; color: #f2f1ee; z-index: 1; transition: transform .3s; }
   .svc-lg:hover .svc-plus { transform: rotate(45deg); }
-  .svc-small { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 10px; }
+  .svc-small { display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px; margin-top: 20px; }
   .svc-sm { border-radius: 5px; background: rgba(255,255,255,.05);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    padding: 18px; min-height: 150px; display: flex; flex-direction: column; justify-content: flex-end; }
+    padding: 18px; min-height: 240px; display: flex; flex-direction: column; justify-content: flex-end; }
   .svc-sm h5 { font-size: 12.5px; font-weight: 400; text-transform: uppercase; line-height: 1.15;
     color: #f2f1ee; }
   .svc-sm p { font-size: 11px; line-height: 1.4; color: #8d8d8d; margin-top: 6px; }
@@ -681,7 +681,7 @@
 
   /* 10 CERTIFICATE — живе: fullbleed pin (background--top) + split-титул «CLEVER / certificate»
      + велика заява h2 (offset--md-6) + лого CLEVER + абзац. ui-light. */
-  .cert { position: relative; height: 100svh; overflow: clip; color: #111110; }
+  .cert { position: relative; height: 100svh; overflow: clip; color: #111110; margin-bottom: 25vh; }  /* живий cert-пін тримається ~4.3% скролу */
   .cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     object-position: top center; display: block; z-index: 0; }
   .cert-in { position: absolute; inset: 0; z-index: 1; }
@@ -694,10 +694,10 @@
     color: #8b8a86; text-align: left; padding: 0; }
   /* живий розклад (anchor-вимір): заява h2 28px offset-6 з text-indent 2 колонки ·
      лого 100px на col-6 краю · 2-й абзацправа колонка cols 9-12 */
-  .cert-claim { position: absolute; left: 50.76%; right: 30px; top: 55%; text-align: left;
+  .cert-claim { position: absolute; left: 50.76%; right: 30px; top: 52%; text-align: left;
     font-size: 28px; line-height: 1.0714; letter-spacing: -.02em; color: #111110; text-indent: 235px; }
-  .cert-logo { position: absolute; left: 50.76%; bottom: 24%; height: 100px; display: block; }
-  .cert-para2 { position: absolute; right: 25px; bottom: 20%; max-width: 332px;
+  .cert-logo { position: absolute; left: 50.76%; bottom: 6%; height: 100px; display: block; }  /* живий: рядок ПІД claim (не поверх) */
+  .cert-para2 { position: absolute; right: 25px; bottom: 6%; max-width: 332px;
     font-size: 12.5px; line-height: 1.4; letter-spacing: .02em; }
   @media (max-width: 768px) {
     .cert-title { flex-direction: column; gap: 2px; padding-top: 12vh; }
@@ -711,7 +711,7 @@
 
   /* 12 LAYOUT-DETAIL office plans */
   /* office-tabs accordion (живий: md-up = таби площ, sm = акордеон; панель = план+число+опис) */
-  .ata { margin-top: 7vh; }
+  .ata { margin-top: 3vh; }
   .ata [data-ata-tabs] { display: flex; gap: 0; border-bottom: 1px solid rgba(17,17,16,.14);
     flex-wrap: wrap; }
   .ata [data-ata-tabs] a { font-size: 13px; letter-spacing: .04em; color: #8b8a86; cursor: pointer;
@@ -976,7 +976,7 @@
     <div><div class="m-num">680 <span style="font-size:.4em">M²</span></div><div class="m-cap">maximum<br>lobby area</div></div>
   </div>
   <!-- живе: заява UPPERCASE reveal праворуч (не lowercase lead зліва) -->
-  <p class="reveal-text" style="max-width:34ch;margin:8vh 0 5vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
+  <p class="reveal-text" style="max-width:34ch;margin:12vh 0 7vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
 
   <!-- живе: fullscreen карусель лоббі (4 слайди, thumb-рейка, лічильник 1/4) -->
   <!-- фікс п.7 аудиту: слайди БЕЗ lazy (приховані opacity:0 → lazy ніколи не вантажились),
@@ -1086,7 +1086,7 @@
     <p class="reveal-text" style="font-size:12px;line-height:1.4;letter-spacing:.02em;max-width:332px">From electric vehicle charging stations to advanced security technologies, premium service at AIR is elevated to a guiding principle.</p>
   </div>
 </section>
-<section class="sec-dark" id="services-cards">
+<section class="sec-dark" id="services-cards" style="padding-bottom:100vh">
   <div class="act">
     <!-- живе: 7 великих glass-карток (Premium technologies) -->
     <p class="svc-block-title">Premium <br>technologies</p>
