@@ -35,6 +35,7 @@ const LIVE = arg('live'); const OURS = arg('ours');
 const N = +(arg('steps', 80)); const OUT = resolve(arg('out', 'library/boards/scrub'));
 const VP = { width: +(arg('vw', 1440)), height: +(arg('vh', 820)) };
 const Q = +(arg('quality', 52));
+const FROM = +(arg('from', 0)); const TO = +(arg('to', 1));  /* діапазон прогресу (секційний скраб) */
 if (!LIVE || !OURS) { console.error('потрібні --live --ours'); process.exit(1); }
 mkdirSync(OUT, { recursive: true });
 
@@ -65,12 +66,13 @@ const fracs = []; let anchors = [];
     return { thx: r.x + r.width / 2, thy: r.y + r.height / 2, tTop: t.y, tH: t.height, thH: r.height };
   });
   if (!g) { console.error('нема .c-scrollbar_thumb'); process.exit(1); }
-  const y0 = g.tTop + g.thH / 2, y1 = g.tTop + (g.tH - g.thH) + g.thH / 2;
+  const yA = g.tTop + g.thH / 2, yB = g.tTop + (g.tH - g.thH) + g.thH / 2;
+  const y0 = yA + (yB - yA) * FROM, y1 = yA + (yB - yA) * TO;
   await p.mouse.move(g.thx, g.thy); await p.mouse.down();
   for (let i = 0; i < N; i++) {
     const ty = y0 + (y1 - y0) * (i / (N - 1));
     await p.mouse.move(g.thx, ty);
-    await p.waitForTimeout(160);  /* дати Locomotive догнати */
+    await p.waitForTimeout(130);  /* дати Locomotive догнати */
     const fr = await p.evaluate(() => {
       const th = document.querySelector('.c-scrollbar_thumb'); const tr = document.querySelector('.c-scrollbar');
       const m = new WebKitCSSMatrix(getComputedStyle(th).transform);
@@ -95,7 +97,7 @@ const fracs = []; let anchors = [];
       const limit = document.body.scrollHeight - window.innerHeight;
       window.scrollTo(0, Math.round(fr * limit));
     }, fracs[i]);
-    await p.waitForTimeout(220);
+    await p.waitForTimeout(170);
     await p.screenshot({ path: `${OUT}/ours-${String(i).padStart(3, '0')}.jpg`, type: 'jpeg', quality: Q });
     if (i % 10 === 0) console.log(`ours ${i}/${N}`);
   }
@@ -110,13 +112,13 @@ writeFileSync(`${OUT}/board.html`, `<!doctype html><meta charset="utf-8">
 <title>scrub: ${basename(OUT)}</title>
 <style>
 *{margin:0;box-sizing:border-box}
-body{background:#0f0f0e;color:#eee;font:13px/1.4 -apple-system,system-ui;height:${N * 140}px}
+body{background:#0f0f0e;color:#eee;font:13px/1.4 -apple-system,system-ui;height:${Math.max(N * 55, 8000)}px}
 .stage{position:fixed;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:2px;background:#000}
 .pane{position:relative;overflow:hidden}
-.pane img{width:100%;height:100%;object-fit:contain;display:block;background:#111}
-.tag{position:absolute;top:10px;left:10px;z-index:2;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:4px;background:rgba(0,0,0,.7)}
+canvas{width:100%;height:100%;display:block;background:#111}
+.tag{position:absolute;top:10px;left:10px;z-index:2;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:4px;background:rgba(0,0,0,.7);color:#eee}
 .tag.l{background:rgba(201,161,94,.92);color:#111}
-.hud{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:3;display:flex;gap:8px;align-items:center;background:rgba(15,15,14,.85);backdrop-filter:blur(8px);padding:8px 14px;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.hud{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:3;display:flex;gap:10px;align-items:center;background:rgba(15,15,14,.85);backdrop-filter:blur(8px);padding:8px 14px;border-radius:8px;font-family:ui-monospace,Menlo,monospace;font-size:11px}
 .hud b{color:#c9a15e;min-width:52px}
 .hud .sec{color:#999;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jump{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:4px}
@@ -125,32 +127,56 @@ body{background:#0f0f0e;color:#eee;font:13px/1.4 -apple-system,system-ui;height:
 @media(max-width:820px){.stage{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.jump{display:none}}
 </style>
 <div class="stage">
-  <div class="pane"><span class="tag l">живе aircenter</span><img id="L" alt=""></div>
-  <div class="pane"><span class="tag">наше 8820</span><img id="R" alt=""></div>
+  <div class="pane"><span class="tag l">живе aircenter</span><canvas id="CL"></canvas></div>
+  <div class="pane"><span class="tag">наше 8820</span><canvas id="CR"></canvas></div>
 </div>
-<div class="hud"><b id="pct">0%</b><span class="sec" id="sec"></span><span style="color:#666">скрол = скраб обох</span></div>
+<div class="hud"><b id="pct">0%</b><span class="sec" id="sec"></span><span style="color:#666" id="st">скрол = скраб</span></div>
 <div class="jump" id="jump"></div>
 <script>
 const N=${N}, FRACS=${JSON.stringify(fracs)}, ANCHORS=${JSON.stringify(anchors)};
-const L=document.getElementById('L'), R=document.getElementById('R');
-const pct=document.getElementById('pct'), secEl=document.getElementById('sec');
+const FW=${VP.width}, FH=${VP.height};
 const pad=i=>String(i).padStart(3,'0');
-/* прелоад */
-for(let i=0;i<N;i++){ new Image().src='live-'+pad(i)+'.jpg'; new Image().src='ours-'+pad(i)+'.jpg'; }
+const CL=document.getElementById('CL'), CR=document.getElementById('CR');
+const pct=document.getElementById('pct'), secEl=document.getElementById('sec'), st=document.getElementById('st');
+/* canvas-рендер: жодних src-свапів у DOM — draw декодованих Image, фризи декодування прибрані
+   вікном прогріву decode() навколо позиції + по напрямку скролу */
+const L=Array(N), R=Array(N), ok=new Set();
+function ensure(i){ if(i<0||i>=N) return;
+  if(!L[i]){ const a=new Image(); a.src='live-'+pad(i)+'.jpg'; L[i]=a;
+    const b=new Image(); b.src='ours-'+pad(i)+'.jpg'; R[i]=b;
+    Promise.all([a.decode().catch(()=>{}),b.decode().catch(()=>{})]).then(()=>ok.add(i)); } }
+function nearestReady(i){ if(ok.has(i))return i; for(let d=1;d<N;d++){ if(ok.has(i-d))return i-d; if(ok.has(i+d))return i+d; } return -1; }
+function fit(c){ const r=c.parentElement.getBoundingClientRect(); const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=r.width*dpr; c.height=r.height*dpr; }
+addEventListener('resize',()=>{fit(CL);fit(CR);last=-1;});
+fit(CL); fit(CR);
+function draw(c,img){ const x=c.getContext('2d'); const cw=c.width,ch=c.height;
+  const s=Math.min(cw/FW,ch/FH), w=FW*s,h=FH*s;
+  x.fillStyle='#111'; x.fillRect(0,0,cw,ch); x.drawImage(img,(cw-w)/2,(ch-h)/2,w,h); }
+let cur=0,last=-1,dir=1,prevT=0;
 function secName(fr){ let s=''; for(const a of ANCHORS){ if(a.frac<=fr+0.002) s=a.id; } return s; }
-function upd(){
+function loop(){
   const max=document.body.scrollHeight-innerHeight;
-  const p=Math.max(0,Math.min(1,scrollY/max));
-  const i=Math.round(p*(N-1));
-  L.src='live-'+pad(i)+'.jpg'; R.src='ours-'+pad(i)+'.jpg';
-  pct.textContent=(FRACS[i]*100).toFixed(1)+'%';
-  secEl.textContent=secName(FRACS[i]);
+  const t=Math.max(0,Math.min(1,scrollY/max))*(N-1);
+  dir = t>prevT?1:(t<prevT?-1:dir); prevT=t;
+  cur += (t-cur)*0.25; if(Math.abs(t-cur)<0.4) cur=t;   /* lerp-згладжування */
+  const i=Math.round(cur);
+  /* вікно прогріву: позаду 4, попереду 30 у напрямку руху + кожен 12-й для стрибків */
+  for(let k=-4;k<=30;k++) ensure(i+k*dir);
+  for(let k=0;k<N;k+=12) ensure(k);
+  const r=nearestReady(i);
+  if(r>=0 && r!==last){ draw(CL,L[r]); draw(CR,R[r]); last=r;
+    pct.textContent=(FRACS[r]*100).toFixed(1)+'%'; secEl.textContent=secName(FRACS[r]);
+    st.textContent = ok.size<N? ('кеш '+Math.round(100*ok.size/N)+'%') : 'скрол = скраб'; }
+  requestAnimationFrame(loop);
 }
-addEventListener('scroll',()=>requestAnimationFrame(upd),{passive:true});
 const jump=document.getElementById('jump');
 ANCHORS.forEach(a=>{ if(!a.id.startsWith('sec')){ const b=document.createElement('button'); b.textContent=a.id;
-  b.onclick=()=>{ const max=document.body.scrollHeight-innerHeight; scrollTo(0,a.frac*max); }; jump.appendChild(b); }});
-upd();
+  b.onclick=()=>{ const max=document.body.scrollHeight-innerHeight;
+    /* мапа frac якоря → індекс кадру → скрол борда */
+    let bi=0; for(let k=0;k<N;k++){ if(FRACS[k]<=a.frac) bi=k; }
+    scrollTo(0,(bi/(N-1))*max); }; jump.appendChild(b); }});
+requestAnimationFrame(loop);
 </script>`);
 console.log('BOARD:', `${OUT}/board.html`);
 console.log('frames:', N, 'anchors:', anchors.filter(a => !a.id.startsWith('sec')).map(a => a.id).join(' '));
