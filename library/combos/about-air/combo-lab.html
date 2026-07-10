@@ -402,17 +402,25 @@
     opacity: .5; transition: opacity .3s; border: 1px solid rgba(255,255,255,.4); }
   .lobby-thumb.is-on { opacity: 1; }
   .lobby-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  /* 7 glass-карток фіч (offset-грід) */
-  .comfort-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 7vh; }
-  .cft { position: relative; min-height: 190px; border-radius: 6px; padding: 20px;
-    background: rgba(17,17,16,.04); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(17,17,16,.06); }
-  .cft .cft-ic { font-size: 26px; font-weight: 200; color: rgba(17,17,16,.28); line-height: 1; }
-  .cft h4 { font-size: 14px; font-weight: 400; text-transform: uppercase; letter-spacing: -.01em;
-    line-height: 1.2; color: #111110; }
-  /* offset-грід: 2-й і 4-й стовпці зсунуті вниз (як живий наїзд) */
-  .comfort-cards .cft:nth-child(2), .comfort-cards .cft:nth-child(4),
-  .comfort-cards .cft:nth-child(6) { transform: translateY(28px); }
+  /* живий comfort-pin: fullbleed фон (background-bottom) + ПІН-титул зліва-внизу (sticky)
+     поки 7 glass-карток скроляться справа 2-кол. Картки: НАЗВА зверху + контурна іконка ЦЕНТР. */
+  .cft-pin { position: relative; width: 100vw; margin-left: calc(50% - 50vw);
+    margin-top: 10vh; padding: 8vh 3vw; overflow: clip; }
+  .cft-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    object-position: center; display: block; z-index: 0; }
+  .cft-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr;
+    gap: 3vw; max-width: 1200px; margin: 0 auto; }
+  .cft-left h3 { position: sticky; top: 66vh; font-size: clamp(22px,2.6vw,40px); }
+  .comfort-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cft { position: relative; min-height: 280px; border-radius: 6px; padding: 18px;
+    background: rgba(255,255,255,.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(17,17,16,.06); overflow: clip; }
+  .cft .cft-ic { position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: 54px; font-weight: 100; color: rgba(17,17,16,.30); line-height: 1; pointer-events: none; }
+  .cft h4 { font-size: 13.5px; font-weight: 400; text-transform: uppercase; letter-spacing: -.01em;
+    line-height: 1.2; color: #111110; max-width: 20ch; }
+  /* offset: правий стовпець наїжджає вниз (живий stickyBottom-наїзд) */
+  .comfort-cards .cft:nth-child(even) { transform: translateY(34px); }
 
   /* 8 AUTONOMY — 2-кол інтро-грід (текст+3 фото) → інтерактивна PLAN-МАПА
      (живе: about-automony-plan = світлий фон+спіраль, титул «4000м²», ~7 POI plan-marker--pin
@@ -504,9 +512,10 @@
   @media (max-width: 1024px) { .comfort-cards { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 768px) { .svc-large, .svc-small { grid-template-columns: 1fr 1fr; }
     .aut-grid, .ib-grid, .info-top-grid { grid-template-columns: 1fr; }
-    .comfort-cards { grid-template-columns: 1fr 1fr; gap: 8px; }
-    .comfort-cards .cft:nth-child(2), .comfort-cards .cft:nth-child(4),
-    .comfort-cards .cft:nth-child(6) { transform: none; }
+    .comfort-cards { grid-template-columns: 1fr; gap: 8px; }
+    .comfort-cards .cft:nth-child(even) { transform: none; }
+    .cft-grid { grid-template-columns: 1fr; }
+    .cft-left h3 { position: static; }
     .lobby { aspect-ratio: 4 / 5; }
     .lobby-thumbs { display: none; }  /* мобільно тільки лічильник */
     .aplan { aspect-ratio: 3 / 4; }
@@ -762,10 +771,12 @@
     </div>
   </div>
 
-  <!-- живе: pin-титул «Everything for visitor comfort» НАД картками (не над каруселлю) -->
-  <h3 class="h1" style="font-size:clamp(22px,2.6vw,40px);margin-top:10vh;margin-bottom:2vh">Everything for visitor comfort</h3>
-  <!-- живе: 7 glass-карток фіч (card-team ui-background-alt, offset-грід) -->
-  <div class="comfort-cards">
+  <!-- живий comfort-pin: fullbleed фон + sticky-титул зліва-внизу + картки справа -->
+  <div class="cft-pin">
+    <img class="cft-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xxxl.webp">
+    <div class="cft-grid">
+      <div class="cft-left"><h3 class="h1">Everything for visitor comfort</h3></div>
+      <div class="comfort-cards">
     <div class="cft"><div class="cft-ic">◇</div><h4>Visitor lounge areas</h4></div>
     <div class="cft"><div class="cft-ic">◈</div><h4>Reception zones</h4></div>
     <div class="cft"><div class="cft-ic">▤</div><h4>Smart mailboxes</h4></div>
@@ -773,6 +784,8 @@
     <div class="cft"><div class="cft-ic">◑</div><h4>Lobby bar</h4></div>
     <div class="cft"><div class="cft-ic">♪</div><h4>Centralized scenting &amp; background music</h4></div>
     <div class="cft"><div class="cft-ic">✦</div><h4>Shoe-cleaning &amp; umbrella wrapping stations</h4></div>
+      </div>
+    </div>
   </div>
 </section>
 
