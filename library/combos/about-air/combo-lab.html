@@ -142,6 +142,10 @@
   .reveal-text { font-size: clamp(20px, 2.6vw, 40px); font-weight: 400; line-height: 1.15;
     letter-spacing: -.02em; text-transform: uppercase; color: #8d8d8d; max-width: 24ch; }
   .reveal-text strong { color: #000; font-weight: 400; }
+  /* живий .h2-reveal абзац: 28px @xxl / 21px @sm, indent 2 кол. лише desktop */
+  .h2r { max-width: 660px; font-size: 28px; line-height: 1.0714; letter-spacing: -.02em; color: #111110; }
+  .h2r.h2r-ind { text-indent: 235px; }
+  @media (max-width: 768px) { .h2r { font-size: 21px; } .h2r.h2r-ind { text-indent: 0; } }
   .reveal-text .rv-w { display: inline-block; white-space: pre; }
   .reveal-text.rv-armed .rv-w { filter: blur(10px); opacity: 0; }
   .reveal-text .rv-w { transition: filter 1s cubic-bezier(.25,.74,.22,.99),
@@ -624,6 +628,17 @@
   .svc-sm h5 { font-size: 12.5px; font-weight: 400; text-transform: uppercase; line-height: 1.15;
     color: #f2f1ee; }
   .svc-sm p { font-size: 11px; line-height: 1.4; color: #8d8d8d; margin-top: 6px; }
+  /* живі малі картки: текст СХОВАНИЙ під ✛, hover відкриває (scrub f468) — desktop only */
+  @media (min-width: 769px) {
+    .svc-sm { position: relative; }
+    .svc-sm h5, .svc-sm p { opacity: 0; transition: opacity .3s; }
+    .svc-sm:hover h5, .svc-sm:hover p { opacity: 1; }
+    .svc-sm::after { content: "✛"; position: absolute; bottom: 12px; right: 14px;
+      color: #8d8d8d; font-size: 13px; } }
+  /* живий services-інтро: фото col-8 + малий абзац col-4 праворуч */
+  .svc-introw { display: grid; grid-template-columns: 2fr 1fr; gap: 2vw; align-items: end; margin-top: 2vh; }
+  .svc-introw .svc-img { margin-top: 0; }
+  @media (max-width: 768px) { .svc-introw { grid-template-columns: 1fr; } }
   .svc-img { width: 100%; border-radius: 6px; margin-top: 4vh; display: block; }
   @media (max-width: 1024px) { .svc-large { grid-template-columns: repeat(2, 1fr); }
     .svc-small { grid-template-columns: repeat(3, 1fr); } }
@@ -684,7 +699,7 @@
        (border-box: 24px паддінги всередині max-width; браузерний підбір:
         200px = рівно 3 рядки THE ECOLOGY OF / SUCCESSFUL / BUSINESS) */
     .cert-cap { text-align: left; max-width: 200px; padding: 1vh 24px 0; }
-    .cert-claim { position: static; margin: 8vh 24px 0; max-width: 100%; }
+    .cert-claim { position: static; margin: 8vh 24px 0; max-width: 100%; text-indent: 0; font-size: 21px; }
     .cert-logo { position: static; margin: 6vh 24px 0; height: 112px; }
     .cert-para2 { position: static; margin: 3vh 24px 0; } }
 
@@ -819,7 +834,7 @@
 <!-- ═══ 1 · INFO-TOP (light) — живе: h2 UPPERCASE 28px зліва (col-6) + 3-tower фото
      (col 4-11) з callout-пінами B1/B2/B3 НА фото (h1-цифри + лінії-конектори stroke .12) ═══ -->
 <section class="act" id="a-intro">
-  <p class="reveal-text" style="max-width:660px;font-size:28px;line-height:1.0714;letter-spacing:-.02em;color:#111110">Business is built on choosing optimal solutions. The premium AIR business center comprises three buildings of varying heights — from 14 to 34 floors — and offers ultra-modern, next-generation office spaces.</p>
+  <p class="reveal-text h2r">Business is built on choosing optimal solutions. The premium AIR business center comprises three buildings of varying heights — from 14 to 34 floors — and offers ultra-modern, next-generation office spaces.</p>
   <div class="a-ill">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_top_img_xs/assets/images/media/about/2.info-top/image%40xs.webp"><img loading="lazy" alt="AIR three towers" src="https://aircenter.space/media/cache/about_info_top_img_xxxl/assets/images/media/about/2.info-top/image%40xxxl.webp"></picture>
     <p class="a-pin a-pin-1"><span class="a-pin-b">B1</span><span class="a-pin-t">20 floors</span><svg width="179" height="171" viewBox="0 0 179 171" fill="none"><path d="M0 0.5H100L178.089 170" stroke="black" stroke-opacity="0.12"/></svg></p>
@@ -1054,11 +1069,19 @@
 </section>
 
 <!-- ═══ 9 · SERVICES (DARK) ═══ -->
-<section class="sec-dark" id="services">
-  <div class="act">
-    <h2 class="h1" style="margin-bottom:2vh">Service excellence</h2>
-    <p class="lead" style="max-width:64ch">Privileges define status. At AIR, exceptional attention to residents and care for their well-being and privacy. Wide parking driveways, silent VIP elevators, adaptive climate control, and high-speed Wi-Fi. From electric vehicle charging stations to advanced security technologies, premium service at AIR is elevated to a <strong>guiding principle</strong>.</p>
+<!-- живий services-інтро СВІТЛИЙ: split-титул + центр-абзац col-4 + h2 28px offset-6
+     + фото col-8 rounded з малим абзацом col-4 праворуч. Dark починається з карток. -->
+<section class="act" id="services">
+  <h2 class="h1 spread" style="margin-bottom:0"><span>Service</span><span>excellence</span></h2>
+  <p class="reveal-text" style="max-width:442px;margin:9vh auto;text-align:center;font-size:12px;line-height:1.2;letter-spacing:.02em">Privileges define status.<br>At AIR, exceptional attention to residents and care for their well-being and privacy are felt throughout every space.</p>
+  <p class="reveal-text h2r h2r-ind" style="margin:0 0 8vh auto">Wide parking driveways, silent VIP elevators, adaptive climate control, and high-speed Wi-Fi across the entire business center — pursuing ambitious goals here is not only prestigious, but genuinely comfortable.</p>
+  <div class="svc-introw">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_service_img_xs/assets/images/media/about/9.services/image%40xs.webp"><img class="svc-img" loading="lazy" alt="AIR service" src="https://aircenter.space/media/cache/about_service_img_xxxl/assets/images/media/about/9.services/image%40xxxl.webp"></picture>
+    <p class="reveal-text" style="font-size:12px;line-height:1.4;letter-spacing:.02em;max-width:332px">From electric vehicle charging stations to advanced security technologies, premium service at AIR is elevated to a guiding principle.</p>
+  </div>
+</section>
+<section class="sec-dark" id="services-cards">
+  <div class="act">
     <!-- живе: 7 великих glass-карток (Premium technologies) -->
     <p class="svc-block-title">Premium technologies</p>
     <div class="svc-large">
