@@ -498,15 +498,38 @@
     .cert-logo { margin-left: 0; } }
 
   /* 12 LAYOUT-DETAIL office plans */
-  .plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6vh; }
-  .plan-card { background: #fff; border-radius: 6px; padding: 18px; display: flex;
-    flex-direction: column; gap: 14px; }
-  .plan-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; display: block; }
-  .plan-card .p-num { font-size: clamp(22px, 2.2vw, 34px); font-weight: 300; line-height: 1; color: #111110; }
-  .plan-card .p-num span { font-size: 13px; color: #8b8a86; }
-  .cta-split { display: flex; gap: 12px; margin-top: 6vh; flex-wrap: wrap; align-items: center; }
+  /* office-tabs accordion (живий: md-up = таби площ, sm = акордеон; панель = план+число+опис) */
+  .ata { margin-top: 7vh; }
+  .ata [data-ata-tabs] { display: flex; gap: 0; border-bottom: 1px solid rgba(17,17,16,.14);
+    flex-wrap: wrap; }
+  .ata [data-ata-tabs] a { font-size: 13px; letter-spacing: .04em; color: #8b8a86; cursor: pointer;
+    padding: 14px 22px 16px; position: relative; text-decoration: none; white-space: nowrap;
+    transition: color .3s; }
+  .ata [data-ata-tabs] a:hover { color: #3c3b39; }
+  .ata [data-ata-tabs] a.is-active { color: #111110; }
+  .ata [data-ata-tabs] a.is-active::after { content: ""; position: absolute; left: 0; right: 0;
+    bottom: -1px; height: 2px; background: #111110; }
+  /* контракт компонента: активна панель БЕЗ .ata-off, решта — .ata-off (сховані) */
+  .ata.ata-tabs [data-ata-panel] { display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 4vw; align-items: center; padding-top: 6vh; }
+  .ata.ata-tabs [data-ata-panel].ata-off { display: none; }
+  .ata-pane-img { width: 100%; border-radius: 6px; background: #fff; padding: 3vh 3vw;
+    aspect-ratio: 4 / 3; object-fit: contain; display: block; }
+  .ata-pane-body .pane-num { font-size: clamp(34px, 4vw, 64px); font-weight: 300; line-height: 1;
+    color: #111110; }
+  .ata-pane-body .pane-num span { font-size: .4em; color: #8b8a86; }
+  .ata-pane-body p { font-size: 15px; line-height: 1.55; color: #3c3b39; max-width: 46ch; margin-top: 3vh; }
+  /* акордеон (sm): кнопка-рядок + анімована панель */
+  .ata.ata-accordion .ata-acc-head { width: 100%; display: flex; align-items: center;
+    justify-content: space-between; padding: 18px 4px; background: none; border: none;
+    border-top: 1px solid rgba(17,17,16,.14); font: inherit; font-size: 16px; color: #111110;
+    cursor: pointer; }
+  .ata.ata-accordion .ata-acc-plus { font-style: normal; font-size: 18px; color: #8b8a86; transition: transform .3s; }
+  .ata.ata-accordion .ata-acc-head[aria-expanded="true"] .ata-acc-plus { transform: rotate(45deg); }
+  .ata.ata-accordion .ata-acc-panel { overflow: hidden; transition: height .4s cubic-bezier(.25,.74,.22,.99); }
+  .ata.ata-accordion [data-ata-panel] { display: block; }
+  .cta-split { display: flex; gap: 12px; margin-top: 8vh; flex-wrap: wrap; align-items: center; }
   .cta-split .lbl { font-size: 13px; color: #6b6b68; }
-  @media (max-width: 768px) { .plans-grid { grid-template-columns: 1fr 1fr; } }
 
 </style>
 </head>
@@ -807,7 +830,7 @@
     <div><div class="m-num">52.7 <span style="font-size:.4em">м²</span></div><div class="m-cap">minimum office area</div></div>
     <div><div class="m-num">1610.5 <span style="font-size:.4em">м²</span></div><div class="m-cap">maximum full-floor area</div></div>
   </div>
-  <p class="lead" style="max-width:64ch;margin-top:5vh">The well-considered structural design of the towers allows AIR to <strong>flexibly adapt</strong>. Units on a floor can be combined. Residents can purchase a single office, an entire floor, or even a whole building.</p>
+  <p class="reveal-text" style="max-width:30ch;margin:8vh 0 0 auto;text-align:right;font-size:clamp(18px,2vw,30px);line-height:1.35">The well-considered structural design of the towers allows AIR to <strong>flexibly adapt</strong>. Units on a floor can be combined. Residents can purchase a single office, an entire floor, or even a whole building.</p>
 </section>
 <section id="isw-layout">
   <div data-isw-layer>
@@ -837,13 +860,33 @@
   </div>
 </section>
 <section class="act">
-  <div class="plans-grid">
-    <div class="plan-card"><img loading="lazy" alt="office plan 79 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-1.webp"><div class="p-num">79 <span>м²</span></div></div>
-    <div class="plan-card"><img loading="lazy" alt="office plan 136.1 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-2.webp"><div class="p-num">136.1 <span>м²</span></div></div>
-    <div class="plan-card"><img loading="lazy" alt="office plan 220.4 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-3.webp"><div class="p-num">220.4 <span>м²</span></div></div>
-    <div class="plan-card"><img loading="lazy" alt="office plan 340 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-4.webp"><div class="p-num">340 <span>м²</span></div></div>
-    <div class="plan-card"><img loading="lazy" alt="office plan 763.4 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-5.webp"><div class="p-num">763.4 <span>м²</span></div></div>
-    <div class="plan-card"><img loading="lazy" alt="office plan 1566.7 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-6.webp"><div class="p-num">1566.7 <span>м²</span></div></div>
+  <!-- живі office-tabs: 6 табів площ (md-up) / акордеон (sm), панель = план+число+опис -->
+  <div class="ata" data-ata>
+    <nav data-ata-tabs aria-label="Office areas"></nav>
+    <section data-ata-panel data-ata-label="79 м²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 79 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-1.webp">
+      <div class="ata-pane-body"><div class="pane-num">79 <span>м²</span></div><p>The regular geometry of the 79 m² office allows for efficient use of space and the creation of an ergonomic work environment.</p></div>
+    </section>
+    <section data-ata-panel data-ata-label="136.1 м²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 136.1 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-2.webp">
+      <div class="ata-pane-body"><div class="pane-num">136.1 <span>м²</span></div><p>An office of 136.1 m² enables workspaces with abundant natural daylight. An added benefit is impressive evening views of Khodynsky Park and the surrounding cityscape.</p></div>
+    </section>
+    <section data-ata-panel data-ata-label="220.4 м²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 220.4 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-3.webp">
+      <div class="ata-pane-body"><div class="pane-num">220.4 <span>м²</span></div><p>The generous 220.4 m² area and corner panoramic glazing allow for optimal zoning, opening picturesque views from almost any point in the office.</p></div>
+    </section>
+    <section data-ata-panel data-ata-label="340 м²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 340 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-4.webp">
+      <div class="ata-pane-body"><div class="pane-num">340 <span>м²</span></div><p>Corner panoramic glazing in the 340 m² office provides maximum natural daylight during the day and refined views of the city in the evening.</p></div>
+    </section>
+    <section data-ata-panel data-ata-label="763.4 м²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 763.4 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-5.webp">
+      <div class="ata-pane-body"><div class="pane-num">763.4 <span>м²</span></div><p>Thanks to the spacious 763.4 m² area, the office layout allows for easy zoning, while panoramic glazing fills the space with sunlight. Larger offices are primarily located on the upper floors, offering scenic views.</p></div>
+    </section>
+    <section data-ata-panel data-ata-label="1566.7 м²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 1566.7 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-6.webp">
+      <div class="ata-pane-body"><div class="pane-num">1566.7 <span>м²</span></div><p>The 1566.7 m² full-floor layout enables efficient zoning into work and relaxation areas. Panoramic glazing on a high floor ensures excellent daylight exposure and offers the best views of the city.</p></div>
+    </section>
   </div>
   <div class="cta-split">
     <span class="lbl">Choose an office</span>
@@ -1004,6 +1047,9 @@
     }, { threshold: 0.3 });
     io.observe(root);
   })();
+
+  /* office-tabs accordion (площі 79…1566.7 м²) */
+  if (window.AreaTabsAccordion) api.ata = window.AreaTabsAccordion.create('[data-ata]', {});
 
   window.__ABOUT = api;
 
