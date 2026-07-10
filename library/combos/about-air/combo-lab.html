@@ -31,6 +31,7 @@
   html { overflow-anchor: none; overflow-x: clip; background: #f4f2ee; }
   body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
   a { color: inherit; text-decoration: none; }
+  picture { display: contents; }  /* <picture>-обгортки @xs-асетів прозорі для grid/flex-лейаутів */
 
   /* ═══ ХЕДЕР (перенесено з home-air, доведений сесіями 13-15) ═══
      Живий: h70, 3-грід край-центр-край. ЗЛІВА бургер+♡, ЦЕНТР лого AIR,
@@ -114,6 +115,12 @@
     /* живий mobile: вежа дрібніша, зсунута ВНИЗ (roofY 374 vs наш 250 при cover-center).
        object-position bottom → вежа в нижні 55%, більше неба зверху. */
     #top .hero-bg img { object-position: center bottom; object-fit: cover; }
+    /* фікс п.12 аудиту: живі мобільні розміри — ♡ 30×30 (на over-dark БЕЗ сірої
+       підкладки, голе біле серце), бургер 60×30, лого висота ~30px. */
+    .hfav { width: 30px; height: 30px; background: none; }
+    [data-amo-header].over-dark .hfav { background: none; }
+    [data-amo-burger] { height: 30px; }
+    .hlogo { line-height: 1; }
   }
   .h1 { font-size: clamp(30px, 4.6vw, 70px); font-weight: 400; text-transform: uppercase;
     line-height: .97; letter-spacing: -.03em; color: #000; }  /* живий .h1: w400, ls -.04em, heading #000 */
@@ -215,8 +222,30 @@
   [data-ata-panel] .inner { display: grid; grid-template-columns: 1fr auto; gap: 3vw; align-items: center; padding: 3vh 0; }
   [data-ata-panel] img { width: min(420px, 100%); aspect-ratio: 540 / 420; object-fit: contain; background: #fff; border-radius: 4px; }
   .giant { font-size: clamp(40px, 5.4vw, 88px); font-weight: 300; line-height: 1; }
-  footer { background: #0d0d0c; color: #8b8a86; padding: 6vh 3vw; display: flex;
-    justify-content: space-between; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+  /* ═══ FOOTER (живий /about, фікс п.5 аудиту): breadcrumb HOME / ABOUT THE PROJECT
+     з лінією → ГІГАНТ-wordmark A I R на всю ширину (space-between, світлий на темному)
+     → рядок копірайтів → легальний дисклеймер (текст ДОСЛІВНО з живого DOM). ═══ */
+  footer { background: #0d0d0c; color: #8b8a86; padding: 2vh 20px 4vh;
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+  .ft-bc { display: flex; align-items: center; gap: 12px; padding: 14px 0 16px;
+    border-bottom: 1px solid rgba(242,241,238,.16); font-size: 12px; letter-spacing: .03em; }
+  .ft-bc a { color: #f2f1ee; }
+  .ft-bc .sep { color: rgba(242,241,238,.4); }
+  .ft-bc .cur { color: #8b8a86; }
+  .ft-air { display: flex; justify-content: space-between; align-items: baseline;
+    margin: 6vh 0 5vh; color: #f2f1ee; font-weight: 300; line-height: .85;
+    font-size: clamp(58px, 14vw, 210px); letter-spacing: -.02em; }
+  .ft-copy { display: flex; justify-content: center; align-items: center; gap: 30px;
+    margin-bottom: 3.4vh; font-size: 11px; color: #c9c7c2; letter-spacing: .04em; }
+  .ft-copy a { color: #c9c7c2; }
+  .ft-legal { font-size: 10px; line-height: 1.7; letter-spacing: .05em; color: #6b6a66;
+    text-align: center; margin: 0 auto; max-width: 1200px; }
+  @media (max-width: 768px) {
+    /* живий mobile wordmark (logo-footer-xs.svg 351×80): вищий кегль на вузьких */
+    .ft-air { font-size: 27vw; margin: 4vh 0; }
+    .ft-copy { flex-direction: column; gap: 8px; }
+    .ft-legal { text-align: left; }
+  }
   /* ---- меню-оверлей скін ---- */
   /* живе desktop меню = чистий фон + Vimeo-спіраль справа (та сама 1145251536, як hero),
      БЕЗ сунбурст-променів (то був фейк). int-menu-open.png підтверджує. */
@@ -416,6 +445,12 @@
     opacity: .5; transition: opacity .3s; border: 1px solid rgba(255,255,255,.4); }
   .lobby-thumb.is-on { opacity: 1; }
   .lobby-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* фікс п.7 аудиту: живий патерн — стрілки ←/→ ПІД фото по краях + лічильник центр */
+  .lobby-nav { display: flex; align-items: center; justify-content: space-between;
+    width: 100vw; margin-left: calc(50% - 50vw); padding: 14px 20px 0; color: #111110; }
+  .lobby-nav .lobby-count { color: #111110; }
+  .lobby-arr { width: 44px; height: 44px; border-radius: 4px; border: 1px solid rgba(17,17,16,.3);
+    background: none; color: #111110; font-size: 16px; cursor: pointer; }
   /* живий comfort-pin: fullbleed фон (background-bottom) + ПІН-титул зліва-внизу (sticky)
      поки 7 glass-карток скроляться справа 2-кол. Картки: НАЗВА зверху + контурна іконка ЦЕНТР. */
   .cft-pin { position: relative; width: 100vw; margin-left: calc(50% - 50vw);
@@ -572,8 +607,12 @@
     font-size: 12.5px; line-height: 1.5; letter-spacing: .02em; }
   @media (max-width: 768px) {
     .cert-title { flex-direction: column; gap: 2px; padding-top: 12vh; }
+    /* фікс п.11 аудиту: підзаголовок зліва в 3 рядки (не центр), лого ~112px.
+       (border-box: 24px паддінги всередині max-width; браузерний підбір:
+        200px = рівно 3 рядки THE ECOLOGY OF / SUCCESSFUL / BUSINESS) */
+    .cert-cap { text-align: left; max-width: 200px; padding: 1vh 24px 0; }
     .cert-claim { position: static; margin: 8vh 24px 0; max-width: 100%; }
-    .cert-logo { position: static; margin: 6vh 24px 0; }
+    .cert-logo { position: static; margin: 6vh 24px 0; height: 112px; }
     .cert-para2 { position: static; margin: 3vh 24px 0; } }
 
   /* 12 LAYOUT-DETAIL office plans */
@@ -609,6 +648,13 @@
   .ata.ata-accordion [data-ata-panel] { display: block; }
   .cta-split { display: flex; gap: 12px; margin-top: 8vh; flex-wrap: wrap; align-items: center; }
   .cta-split .lbl { font-size: 13px; color: #6b6b68; }
+  /* фікс п.9 аудиту: на мобілі — ОДИН чорний CTA «Choose an office ✛» по центру */
+  .cta-office-m { display: none; }
+  @media (max-width: 768px) {
+    .cta-split { justify-content: center; }
+    .cta-split .lbl, .cta-split .cta-link:not(.cta-office-m) { display: none; }
+    .cta-office-m { display: inline-flex; justify-content: space-between;
+      width: min(340px, 88vw); } }
 
   /* ═══════════ MOBILE-390 ФІКСИ (аудит MOBILE-390-AUDIT-about, сесія 17) ═══════════
      Системний патерн живого mobile: групи фото/карток = full-bleed горизонтальні
@@ -701,7 +747,7 @@
 <section class="act" id="a-intro">
   <p class="lead" style="max-width:60ch;font-size:clamp(16px,1.8vw,24px);color:#3c3b39;line-height:1.4">Business is built on <strong>choosing optimal solutions</strong>. The premium AIR business center comprises <strong>three buildings</strong> of varying heights — from <strong>14 to 34 floors</strong> — and offers ultra-modern, next-generation office spaces.</p>
   <div class="info-top-grid">
-    <img loading="lazy" alt="AIR three towers" src="https://aircenter.space/media/cache/about_info_top_img_xxxl/assets/images/media/about/2.info-top/image%40xxxl.webp">
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_top_img_xs/assets/images/media/about/2.info-top/image%40xs.webp"><img loading="lazy" alt="AIR three towers" src="https://aircenter.space/media/cache/about_info_top_img_xxxl/assets/images/media/about/2.info-top/image%40xxxl.webp"></picture>
     <div class="metric-row" style="margin-top:0;flex-direction:column;gap:3vh">
       <div><div class="m-num">B1</div><div class="m-cap">20 floors</div></div>
       <div><div class="m-num">B2</div><div class="m-cap">34 floors</div></div>
@@ -714,15 +760,15 @@
 <section class="act">
   <p class="lead" style="max-width:64ch;font-size:15px;line-height:1.55;color:#3c3b39;margin-bottom:5vh">Developed by <strong>TEKTA</strong> professionals and managed by <strong>Commonwealth Partnership</strong> experts, AIR becomes a solid foundation for businesses of any scale and ambition.</p>
   <div class="ib-grid">
-    <img loading="lazy" alt="AIR interior" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-1%40xxxl.webp">
-    <img loading="lazy" alt="AIR lobby" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-2%40xxxl.webp">
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_bottom_img_xs/assets/images/media/about/3.info-bottom/image-1%40xs.webp"><img loading="lazy" alt="AIR interior" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-1%40xxxl.webp"></picture>
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_bottom_img_xs/assets/images/media/about/3.info-bottom/image-2%40xs.webp"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-2%40xxxl.webp"></picture>
   </div>
   <p class="reveal-text" style="margin-top:6vh;max-width:none">Here, private investors, IT startups, regional companies opening offices in the city, and many other forward-looking organizations will find space to strengthen their financial positions.</p>
   <div class="callout" style="margin-top:8vh">
     <p>A large corporation can reach a new level by establishing a representative headquarters in <strong>Building 3</strong>.</p>
     <a class="cta-link" href="/combos/funnel-air/combo-lab.html">Learn more <span>›</span></a>
   </div>
-  <img class="ib-map" loading="lazy" alt="AIR location map" src="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xxl.webp">
+  <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xs.webp"><img class="ib-map" loading="lazy" alt="AIR location map" src="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xxl.webp"></picture>
 </section>
 
 <!-- ═══ 3 · ARCHITECTURE (light) — image-slider-wipe ═══ -->
@@ -736,9 +782,9 @@
   <div data-isw-layer>
     <div class="isw-row">
       <div data-isw-stage>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-1%40xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-2%40xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-3%40xxxl.webp" alt=""></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_architecture_slider_img_xs/assets/images/media/about/4.architecture/image-1%40xs.webp"><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-1%40xxxl.webp" alt=""></picture></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_architecture_slider_img_xs/assets/images/media/about/4.architecture/image-2%40xs.webp"><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-2%40xxxl.webp" alt=""></picture></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_architecture_slider_img_xs/assets/images/media/about/4.architecture/image-3%40xs.webp"><img src="https://aircenter.space/media/cache/about_architecture_slider_img_xxxl/assets/images/media/about/4.architecture/image-3%40xxxl.webp" alt=""></picture></figure>
       </div>
       <div class="isw-card" data-isw-card>
         <div data-isw-ticks></div>
@@ -771,9 +817,9 @@
     <p class="reveal-text" style="max-width:60ch;margin:0 auto 4vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
     <div data-rvc id="rvc">
       <div data-rvc-stage>
-        <figure data-rvc-slide><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xxxl.webp" alt=""></figure>
-        <figure data-rvc-slide><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-2@xxxl.webp" alt=""></figure>
-        <figure data-rvc-slide><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-3@xxxl.webp" alt=""></figure>
+        <figure data-rvc-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xs.webp"><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xxxl.webp" alt=""></picture></figure>
+        <figure data-rvc-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/5.revolves/image-2@xs.webp"><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-2@xxxl.webp" alt=""></picture></figure>
+        <figure data-rvc-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/5.revolves/image-3@xs.webp"><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-3@xxxl.webp" alt=""></picture></figure>
       </div>
       <div class="rvc-bar">
         <button class="nav" data-rvc-prev aria-label="previous">‹</button>
@@ -799,9 +845,9 @@
   <div data-isw-layer>
     <div class="isw-row">
       <div data-isw-stage>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt="AIR Building 3 headquarters"></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_headquarters_bg_xs/assets/images/media/about/6.headquarters/background%40xs.webp"><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt="AIR Building 3 headquarters"></picture></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_headquarters_bg_xs/assets/images/media/about/6.headquarters/background%40xs.webp"><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></picture></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_headquarters_bg_xs/assets/images/media/about/6.headquarters/background%40xs.webp"><img src="https://aircenter.space/media/cache/about_headquarters_bg_xxxl/assets/images/media/about/6.headquarters/background%40xxxl.webp" alt=""></picture></figure>
       </div>
       <div class="isw-card" data-isw-card>
         <div data-isw-ticks></div>
@@ -824,7 +870,7 @@
 
 <!-- ═══ 6 · SPACE (DARK) full-bleed ═══ -->
 <section class="fullbleed" id="space-splash">
-  <img loading="lazy" alt="AIR space" src="https://aircenter.space/media/cache/about_space_bg_xxxl/assets/images/media/about/7.space/background-top%40xxxl.webp">
+  <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_space_bg_xs/assets/images/media/about/7.space/background-top%40xs.webp"><img loading="lazy" alt="AIR space" src="https://aircenter.space/media/cache/about_space_bg_xxxl/assets/images/media/about/7.space/background-top%40xxxl.webp"></picture>
   <div class="fb-in"><h2 class="h1"><span>A space of</span><span>opportunities</span></h2></div>
 </section>
 
@@ -833,21 +879,23 @@
   <!-- живе: метрики в ПРАВІЙ половині (зліва порожньо), великі -->
   <div class="metric-row metric-right">
     <div><div class="m-num">8 <span style="font-size:.4em">м</span></div><div class="m-cap">ceiling height<br>above</div></div>
-    <div><div class="m-num">680 <span style="font-size:.4em">м²</span></div><div class="m-cap">maximum<br>lobby area</div></div>
+    <div><div class="m-num">680 <span style="font-size:.4em">M²</span></div><div class="m-cap">maximum<br>lobby area</div></div>
   </div>
   <!-- живе: заява UPPERCASE reveal праворуч (не lowercase lead зліва) -->
   <p class="reveal-text" style="max-width:34ch;margin:14vh 0 8vh auto;text-align:right;font-size:clamp(16px,1.9vw,28px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
 
   <!-- живе: fullscreen карусель лоббі (4 слайди, thumb-рейка, лічильник 1/4) -->
-  <div class="lobby" id="lobby-carousel" data-lobby>
+  <!-- фікс п.7 аудиту: слайди БЕЗ lazy (приховані opacity:0 → lazy ніколи не вантажились),
+       стрілки ←/→ під фото по краях + лічильник 1/4 центр (живий патерн) -->
+  <div class="lobby-wrap" data-lobby>
+  <div class="lobby" id="lobby-carousel">
     <div class="lobby-track">
-      <div class="lobby-slide is-on"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-1@xxxl.webp"></div>
-      <div class="lobby-slide"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-2@xxxl.webp"></div>
-      <div class="lobby-slide"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-3@xxxl.webp"></div>
-      <div class="lobby-slide"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-4@xxxl.webp"></div>
+      <div class="lobby-slide is-on"><img alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-1@xxxl.webp"></div>
+      <div class="lobby-slide"><img alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-2@xxxl.webp"></div>
+      <div class="lobby-slide"><img alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-3@xxxl.webp"></div>
+      <div class="lobby-slide"><img alt="AIR lobby" src="https://aircenter.space/assets/images/media/about/7.space/image-4@xxxl.webp"></div>
     </div>
     <div class="lobby-ui">
-      <div class="lobby-count"><b data-lobby-cur>1</b> <span>/ 4</span></div>
       <div class="lobby-thumbs">
         <button class="lobby-thumb is-on" data-lobby-to="0"><img loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/image-1@xxxl.webp"></button>
         <button class="lobby-thumb" data-lobby-to="1"><img loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/image-2@xxxl.webp"></button>
@@ -856,10 +904,16 @@
       </div>
     </div>
   </div>
+  <div class="lobby-nav">
+    <button type="button" class="lobby-arr" data-lobby-prev aria-label="Previous slide">←</button>
+    <div class="lobby-count"><b data-lobby-cur>1</b> <span>/ 4</span></div>
+    <button type="button" class="lobby-arr" data-lobby-next aria-label="Next slide">→</button>
+  </div>
+  </div>
 
   <!-- живий comfort-pin: fullbleed фон + sticky-титул зліва-внизу + картки справа -->
   <div class="cft-pin">
-    <img class="cft-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xxxl.webp">
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xs.webp"><img class="cft-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xxxl.webp"></picture>
     <div class="cft-grid">
       <div class="cft-left"><h3 class="h1">Everything for visitor comfort</h3></div>
       <div class="comfort-cards">
@@ -881,10 +935,10 @@
   <h2 class="h1" style="text-align:center;margin-bottom:2vh">Maximum<br>autonomy</h2>
   <p class="reveal-text" style="max-width:44ch;margin:10vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.7vw,24px)">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
   <div class="aut-grid">
-    <img loading="lazy" alt="AIR commercial space" src="https://aircenter.space/media/cache/about_autonomy_1_image_xxxl/assets/images/media/about/8.automony/image-1%40xxxl.webp">
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_1_image_xs/assets/images/media/about/8.automony/image-1%40xs.webp"><img loading="lazy" alt="AIR commercial space" src="https://aircenter.space/media/cache/about_autonomy_1_image_xxxl/assets/images/media/about/8.automony/image-1%40xxxl.webp"></picture>
     <div class="col-stack">
-      <img loading="lazy" alt="AIR boutique" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-2%40xxxl.webp">
-      <img loading="lazy" alt="AIR cafe" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-3%40xxxl.webp">
+      <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-2%40xs.webp"><img loading="lazy" alt="AIR boutique" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-2%40xxxl.webp"></picture>
+      <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-3%40xs.webp"><img loading="lazy" alt="AIR cafe" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-3%40xxxl.webp"></picture>
     </div>
   </div>
 
@@ -931,7 +985,7 @@
   <div class="act">
     <h2 class="h1" style="margin-bottom:2vh">Service excellence</h2>
     <p class="lead" style="max-width:64ch">Privileges define status. At AIR, exceptional attention to residents and care for their well-being and privacy. Wide parking driveways, silent VIP elevators, adaptive climate control, and high-speed Wi-Fi. From electric vehicle charging stations to advanced security technologies, premium service at AIR is elevated to a <strong>guiding principle</strong>.</p>
-    <img class="svc-img" loading="lazy" alt="AIR service" src="https://aircenter.space/media/cache/about_service_img_xxxl/assets/images/media/about/9.services/image%40xxxl.webp">
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_service_img_xs/assets/images/media/about/9.services/image%40xs.webp"><img class="svc-img" loading="lazy" alt="AIR service" src="https://aircenter.space/media/cache/about_service_img_xxxl/assets/images/media/about/9.services/image%40xxxl.webp"></picture>
     <!-- живе: 7 великих glass-карток (Premium technologies) -->
     <p class="svc-block-title">Premium technologies</p>
     <div class="svc-large">
@@ -958,7 +1012,7 @@
 
 <!-- ═══ 10 · CERTIFICATE (light) → LAYOUT-INTRO(dark): fade-шов ═══ -->
 <section class="cert fade-seam" id="certificate">
-  <img class="cert-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/10.certificate/background@xxxl.webp">
+  <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/10.certificate/background@xs.webp"><img class="cert-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/10.certificate/background@xxxl.webp"></picture>
   <div class="cert-in">
     <h2 class="cert-title"><span>CLEVER</span><span>CERTIFICATE</span></h2>
     <p class="cert-cap">The ecology of successful business</p>
@@ -970,15 +1024,15 @@
 
 <!-- ═══ 11 · LAYOUT-INTRO (DARK) full-bleed ═══ -->
 <section class="fullbleed" id="layout-splash">
-  <img loading="lazy" alt="AIR layout" src="https://aircenter.space/media/cache/about_solutions_bg_xxxl/assets/images/media/about/11.solutions/background%40xxxl.webp">
+  <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_solutions_bg_xs/assets/images/media/about/11.solutions/background%40xs.webp"><img loading="lazy" alt="AIR layout" src="https://aircenter.space/media/cache/about_solutions_bg_xxxl/assets/images/media/about/11.solutions/background%40xxxl.webp"></picture>
   <div class="fb-in"><h2 class="h1"><span>Layout</span><span>solutions</span></h2></div>
 </section>
 
 <!-- ═══ 12 · LAYOUT-DETAIL (light) — image-slider-wipe + office plans ═══ -->
 <section class="act">
   <div class="metric-row">
-    <div><div class="m-num">52.7 <span style="font-size:.4em">м²</span></div><div class="m-cap">minimum office area</div></div>
-    <div><div class="m-num">1610.5 <span style="font-size:.4em">м²</span></div><div class="m-cap">maximum full-floor area</div></div>
+    <div><div class="m-num">52.7 <span style="font-size:.4em">M²</span></div><div class="m-cap">minimum office area</div></div>
+    <div><div class="m-num">1610.5 <span style="font-size:.4em">M²</span></div><div class="m-cap">maximum full-floor area</div></div>
   </div>
   <p class="reveal-text" style="max-width:30ch;margin:8vh 0 0 auto;text-align:right;font-size:clamp(18px,2vw,30px);line-height:1.35">The well-considered structural design of the towers allows AIR to <strong>flexibly adapt</strong>. Units on a floor can be combined. Residents can purchase a single office, an entire floor, or even a whole building.</p>
 </section>
@@ -986,10 +1040,10 @@
   <div data-isw-layer>
     <div class="isw-row">
       <div data-isw-stage>
-        <figure data-isw-slide><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-2@xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-3@xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-1@xxxl.webp" alt=""></figure>
-        <figure data-isw-slide><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-4@xxxl.webp" alt=""></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-2@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-2@xxxl.webp" alt=""></picture></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-3@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-3@xxxl.webp" alt=""></picture></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-1@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-1@xxxl.webp" alt=""></picture></figure>
+        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-4@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-4@xxxl.webp" alt=""></picture></figure>
       </div>
       <div class="isw-card" data-isw-card style="background:rgba(17,17,16,.05);color:#111110">
         <div data-isw-ticks style="color:#111110"></div>
@@ -1013,40 +1067,53 @@
   <!-- живі office-tabs: 6 табів площ (md-up) / акордеон (sm), панель = план+число+опис -->
   <div class="ata" data-ata>
     <nav data-ata-tabs aria-label="Office areas"></nav>
-    <section data-ata-panel data-ata-label="79 м²">
-      <img class="ata-pane-img" loading="lazy" alt="office plan 79 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-1.webp">
-      <div class="ata-pane-body"><div class="pane-num">79 <span>м²</span></div><p>The regular geometry of the 79 m² office allows for efficient use of space and the creation of an ergonomic work environment.</p></div>
+    <section data-ata-panel data-ata-label="79 M²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 79 M²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-1.webp">
+      <div class="ata-pane-body"><div class="pane-num">79 <span>M²</span></div><p>The regular geometry of the 79 m² office allows for efficient use of space and the creation of an ergonomic work environment.</p></div>
     </section>
-    <section data-ata-panel data-ata-label="136.1 м²">
-      <img class="ata-pane-img" loading="lazy" alt="office plan 136.1 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-2.webp">
-      <div class="ata-pane-body"><div class="pane-num">136.1 <span>м²</span></div><p>An office of 136.1 m² enables workspaces with abundant natural daylight. An added benefit is impressive evening views of Khodynsky Park and the surrounding cityscape.</p></div>
+    <section data-ata-panel data-ata-label="136.1 M²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 136.1 M²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-2.webp">
+      <div class="ata-pane-body"><div class="pane-num">136.1 <span>M²</span></div><p>An office of 136.1 m² enables workspaces with abundant natural daylight. An added benefit is impressive evening views of Khodynsky Park and the surrounding cityscape.</p></div>
     </section>
-    <section data-ata-panel data-ata-label="220.4 м²">
-      <img class="ata-pane-img" loading="lazy" alt="office plan 220.4 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-3.webp">
-      <div class="ata-pane-body"><div class="pane-num">220.4 <span>м²</span></div><p>The generous 220.4 m² area and corner panoramic glazing allow for optimal zoning, opening picturesque views from almost any point in the office.</p></div>
+    <section data-ata-panel data-ata-label="220.4 M²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 220.4 M²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-3.webp">
+      <div class="ata-pane-body"><div class="pane-num">220.4 <span>M²</span></div><p>The generous 220.4 m² area and corner panoramic glazing allow for optimal zoning, opening picturesque views from almost any point in the office.</p></div>
     </section>
-    <section data-ata-panel data-ata-label="340 м²">
-      <img class="ata-pane-img" loading="lazy" alt="office plan 340 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-4.webp">
-      <div class="ata-pane-body"><div class="pane-num">340 <span>м²</span></div><p>Corner panoramic glazing in the 340 m² office provides maximum natural daylight during the day and refined views of the city in the evening.</p></div>
+    <section data-ata-panel data-ata-label="340 M²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 340 M²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-4.webp">
+      <div class="ata-pane-body"><div class="pane-num">340 <span>M²</span></div><p>Corner panoramic glazing in the 340 m² office provides maximum natural daylight during the day and refined views of the city in the evening.</p></div>
     </section>
-    <section data-ata-panel data-ata-label="763.4 м²">
-      <img class="ata-pane-img" loading="lazy" alt="office plan 763.4 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-5.webp">
-      <div class="ata-pane-body"><div class="pane-num">763.4 <span>м²</span></div><p>Thanks to the spacious 763.4 m² area, the office layout allows for easy zoning, while panoramic glazing fills the space with sunlight. Larger offices are primarily located on the upper floors, offering scenic views.</p></div>
+    <section data-ata-panel data-ata-label="763.4 M²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 763.4 M²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-5.webp">
+      <div class="ata-pane-body"><div class="pane-num">763.4 <span>M²</span></div><p>Thanks to the spacious 763.4 m² area, the office layout allows for easy zoning, while panoramic glazing fills the space with sunlight. Larger offices are primarily located on the upper floors, offering scenic views.</p></div>
     </section>
-    <section data-ata-panel data-ata-label="1566.7 м²">
-      <img class="ata-pane-img" loading="lazy" alt="office plan 1566.7 м²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-6.webp">
-      <div class="ata-pane-body"><div class="pane-num">1566.7 <span>м²</span></div><p>The 1566.7 m² full-floor layout enables efficient zoning into work and relaxation areas. Panoramic glazing on a high floor ensures excellent daylight exposure and offers the best views of the city.</p></div>
+    <section data-ata-panel data-ata-label="1566.7 M²">
+      <img class="ata-pane-img" loading="lazy" alt="office plan 1566.7 M²" src="https://aircenter.space/media/cache/about_solutions_office_plan/assets/images/media/about/11.solutions/office-6.webp">
+      <div class="ata-pane-body"><div class="pane-num">1566.7 <span>M²</span></div><p>The 1566.7 m² full-floor layout enables efficient zoning into work and relaxation areas. Panoramic glazing on a high floor ensures excellent daylight exposure and offers the best views of the city.</p></div>
     </section>
   </div>
   <div class="cta-split">
     <span class="lbl">Choose an office</span>
     <a class="cta-link" href="/combos/funnel-air/combo-lab.html">By parameters <span>›</span></a>
     <a class="cta-link" style="background:#ecebe6;color:#111110" href="/combos/funnel-air/combo-lab.html">On the master plan <span>›</span></a>
+    <!-- фікс п.9 аудиту: мобільний єдиний чорний CTA (desktop його не бачить) -->
+    <a class="cta-link cta-office-m" href="/combos/funnel-air/combo-lab.html">Choose an office <span>✛</span></a>
   </div>
 </section>
 
-<!-- ═══ 13 · FOOTER (DARK) ═══ -->
-<footer><span>Home / About the project</span><span>© 2026 Tekta group</span><span>Website by Vide Infra</span></footer>
+<!-- ═══ 13 · FOOTER (DARK) — живий: breadcrumb → гігант A I R → копірайти → дисклеймер ═══ -->
+<footer>
+  <div class="ft-bc">
+    <a href="/combos/home-air/combo-lab.html">Home</a><span class="sep">/</span><span class="cur">About the project</span>
+  </div>
+  <div class="ft-air" aria-hidden="true"><span>A</span><span>I</span><span>R</span></div>
+  <div class="ft-copy">
+    <span>© 2026 Tekta group</span>
+    <a href="https://videinfra.com/luxury-real-estate-website-design-agency" target="_blank" rel="noopener">Website by Vide Infra</a>
+  </div>
+  <!-- текст дослівно з живого aircenter.space/about (footer p.text-color-small) -->
+  <p class="ft-legal">Any information provided on&nbsp;this website is for&nbsp;informational purposes only and under&nbsp;no circumstances constitutes a&nbsp;public offer. The&nbsp;finished properties may differ from&nbsp;the&nbsp;3D visualisations presented. All materials presented are for&nbsp;guidance only and are subject to&nbsp;change. All photographs belong to&nbsp;their respective owners and are used for&nbsp;demonstration purposes. Please do not use the&nbsp;content posted here for&nbsp;commercial purposes.</p>
+</footer>
 
 
 <!-- МЕНЮ-ОВЕРЛЕЙ (home-air доведений) -->
@@ -1214,10 +1281,34 @@
       ents.forEach(function(e){ e.isIntersecting ? restart() : (timer && clearInterval(timer)); });
     }, { threshold: 0.3 });
     io.observe(root);
+    /* фікс п.7 аудиту: стрілки ←/→ під фото — рахують поточний індекс по .is-on
+       і клікають відповідний thumb (той самий механізм go/restart) */
+    function curIdx(){
+      var n = 0;
+      thumbs.forEach(function(t,k){ if (t.classList.contains('is-on')) n = k; });
+      return n;
+    }
+    var prevBtn = root.querySelector('[data-lobby-prev]');
+    var nextBtn = root.querySelector('[data-lobby-next]');
+    if (prevBtn) prevBtn.addEventListener('click', function(){
+      thumbs[(curIdx() + thumbs.length - 1) % thumbs.length].click(); });
+    if (nextBtn) nextBtn.addEventListener('click', function(){
+      thumbs[(curIdx() + 1) % thumbs.length].click(); });
   })();
 
   /* office-tabs accordion (площі 79…1566.7 м²) */
   if (window.AreaTabsAccordion) api.ata = window.AreaTabsAccordion.create('[data-ata]', {});
+  /* фікс п.9 аудиту: на мобілі перший пункт (79 M²) відкритий за замовчуванням.
+     toggleAcc робить auto-scroll через 320ms → на час init глушимо scrollIntoView
+     кнопки, щоб сторінка не стрибала (компонент НЕ редагуємо). */
+  if (api.ata && !api.ata.error && api.ata.mode() === 'accordion') {
+    var accHead0 = document.querySelector('[data-ata] .ata-acc-head');
+    if (accHead0) {
+      accHead0.scrollIntoView = function () {};
+      api.ata.open(0);
+      setTimeout(function () { delete accHead0.scrollIntoView; }, 450);
+    }
+  }
 
   window.__ABOUT = api;
 
