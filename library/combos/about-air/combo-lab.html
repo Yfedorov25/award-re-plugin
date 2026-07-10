@@ -145,7 +145,6 @@
     #isw-arch { min-height: calc(100svh + 120svh) !important; }
     .aplan-scroll { height: 105svh; }
     .a-ill { margin-top: 4vh; margin-bottom: 4vh; }
-    #stack-layout .stk + .stk { margin-top: 0; }  /* desktop-розтяжка стека не для static-моб */
     #comfort .reveal-text { margin-top: 4vh !important; margin-bottom: 4vh !important; }
     .cft { min-height: 310px; } }
   .act { padding: 10vh 3vw; max-width: 1200px; margin: 0 auto; }
@@ -435,11 +434,7 @@
     color: #8b8a86; }
   #stack-layout .stk picture { display: block; height: 100%; }
   #stack-layout .stk img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  @media (max-width: 768px) {
-    #stack-layout .stk { position: static; height: auto; grid-template-columns: 1fr; }
-    #stack-layout .stk picture { height: 44vh; }
-    .stk-title { position: static; margin-top: 6vh; }
-    .stk-desc { position: static; margin-top: 2vh; } }
+  /* моб-версія стека — у фінальному @768 блоці в кінці стилів (source-order!) */
 
   /* ═══════════ КОНТЕНТ-СЕКЦІЇ /about (13 актів живого) ═══════════ */
   .sec-dark { background: #000; color: #f2f1ee; }
@@ -824,6 +819,47 @@
     #space-splash, #layout-splash { height: 52vh; }
   }
 
+
+  /* ═══ MOBILE SYNC OVERRIDES (сесія 19) — ОСТАННІЙ блок стилів НАВМИСНО ═══
+     Урок: @media НЕ додає специфічності — моб-правило раніше в source програє
+     desktop-правилу нижче (так «зник» .stk margin-top:0). Усі моб-переваги — тут. */
+  @media (max-width: 768px) {
+    /* СТЕК ХВОСТА = живий моб-пін: картка рівно 100svh (фото-інсет зверху,
+       панель на решту екрана: прогрес-бар 4 сегм · титул ліворуч · номер ПРАВОРУЧ ·
+       опис притиснутий до низу), наступна наїжджає — sticky з desktop лишається.
+       Це ж дає живий бюджет хвоста (23.8%): 4×100svh замість 4×~660px. */
+    #stack-layout .stk + .stk { margin-top: 0; }
+    #stack-layout .stk, #stack-layout .stk:nth-child(even) { background: #fff; }
+    #stack-layout .stk { grid-template-columns: 1fr; grid-template-rows: 300px 1fr;
+      padding: 14px 14px 0; }
+    #stack-layout .stk picture { grid-row: 1; height: 100%; }
+    #stack-layout .stk img { border-radius: 4px; }
+    #stack-layout .stk-panel { grid-row: 2; margin-top: 14px; background: #efeeea;
+      border-radius: 4px 4px 0 0; padding: 18px 20px; }
+    /* прогрес-бар: підкладка 4 сегменти (::before) + активний темний сегмент (::after) */
+    .stk-panel::before { content: ''; display: block; height: 2px; margin-bottom: 24px;
+      background: linear-gradient(90deg,
+        #d8d6d1 0 23.5%, transparent 23.5% 25.5%,
+        #d8d6d1 25.5% 49%, transparent 49% 51%,
+        #d8d6d1 51% 74.5%, transparent 74.5% 76.5%,
+        #d8d6d1 76.5% 100%); }
+    .stk-panel::after { content: ''; position: absolute; top: 18px; height: 2px;
+      width: calc((100% - 40px) * .235); background: #111110; }
+    #stack-layout .stk:nth-child(1) .stk-panel::after { left: 20px; }
+    #stack-layout .stk:nth-child(2) .stk-panel::after { left: calc((100% - 40px) * .255 + 20px); }
+    #stack-layout .stk:nth-child(3) .stk-panel::after { left: calc((100% - 40px) * .51 + 20px); }
+    #stack-layout .stk:nth-child(4) .stk-panel::after { left: calc((100% - 40px) * .765 + 20px); }
+    .stk-num { position: absolute; top: 34px; right: 20px; font-size: 44px; }
+    .stk-title { position: static; margin: 0; font-size: 13px; max-width: 22ch; }
+    .stk-desc { position: absolute; left: 20px; right: 20px; bottom: 20px;
+      max-width: none; }
+
+    /* COMFORT-РЕГІОН: зріз ~300px (space→autonomy був +1.6pp; частки нуль-сумні —
+       зрізаємо повітря, не контент) */
+    #comfort { padding-top: 5vh; padding-bottom: 5vh; }
+    #comfort .metric-row { margin-top: 2vh; }
+    #comfort .cft-pin { margin-top: 4vh; }
+  }
 </style>
 </head>
 <body>
