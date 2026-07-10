@@ -469,15 +469,28 @@
   .svc-block-title { font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
     font-weight: 500; color: #8d8d8d; margin: 6vh 0 2vh; }
   .svc-large { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  /* живий card-team--service--large: НАЗВА зверху · декор-іконка ЦЕНТР велика ·
+     ✛ у нижньому куті · ОПИС ПРИХОВАНИЙ (hover-popup cardHover) — та сама помилка
+     що management (грід з видимим текстом) виправлена */
   .svc-lg { position: relative; min-height: 300px; border-radius: 5px;
     background: rgba(255,255,255,.07); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    padding: 20px; display: flex; flex-direction: column; justify-content: space-between;
-    overflow: clip; }
-  .svc-lg .svc-ic { font-size: 44px; font-weight: 200; color: rgba(242,241,238,.35);
-    line-height: 1; margin-bottom: auto; }
+    padding: 20px; overflow: clip; }
+  .svc-lg .svc-ic { position: absolute; inset: 0; display: grid; place-items: center;
+    font-size: 72px; font-weight: 200; color: rgba(242,241,238,.28); line-height: 1;
+    transition: opacity .35s; pointer-events: none; }
   .svc-lg h4 { font-size: clamp(15px, 1.5vw, 21px); font-weight: 400; text-transform: uppercase;
-    letter-spacing: -.01em; line-height: 1.1; color: #f2f1ee; }
-  .svc-lg p { font-size: 12.5px; line-height: 1.45; color: #8d8d8d; margin-top: 10px; }
+    letter-spacing: -.01em; line-height: 1.1; color: #f2f1ee; max-width: 18ch; }
+  .svc-lg .svc-desc { position: absolute; inset: 0; padding: 20px; display: flex;
+    align-items: flex-end; background: rgba(0,0,0,.6);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    opacity: 0; transition: opacity .35s cubic-bezier(.25,.74,.22,.99); }
+  .svc-lg:hover .svc-desc, .svc-lg.is-open .svc-desc { opacity: 1; }
+  .svc-lg:hover .svc-ic { opacity: .1; }
+  .svc-lg .svc-desc p { font-size: 13px; line-height: 1.5; color: #d9d8d4; margin: 0; }
+  .svc-plus { position: absolute; left: 16px; bottom: 16px; width: 30px; height: 30px;
+    border-radius: 7px; background: rgba(255,255,255,.12); display: grid; place-items: center;
+    font-size: 13px; color: #f2f1ee; z-index: 1; transition: transform .3s; }
+  .svc-lg:hover .svc-plus { transform: rotate(45deg); }
   .svc-small { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 10px; }
   .svc-sm { border-radius: 5px; background: rgba(255,255,255,.05);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
@@ -822,13 +835,13 @@
     <!-- живе: 7 великих glass-карток (Premium technologies) -->
     <p class="svc-block-title">Premium technologies</p>
     <div class="svc-large">
-      <div class="svc-lg"><div class="svc-ic">↑</div><div><h4>High-speed elevators</h4><p>Schindler elevators up to 5 m/s, max waiting 40 seconds.</p></div></div>
-      <div class="svc-lg"><div class="svc-ic">▤</div><div><h4>Spacious underground parking</h4><p>490 spaces, ceiling on level −1 = 3.1 m.</p></div></div>
-      <div class="svc-lg"><div class="svc-ic">▲</div><div><h4>VIP elevator for top management</h4></div></div>
-      <div class="svc-lg"><div class="svc-ic">◇</div><div><h4>Drop-off zone</h4></div></div>
-      <div class="svc-lg"><div class="svc-ic">╫</div><div><h4>Increased number of turnstiles</h4></div></div>
-      <div class="svc-lg"><div class="svc-ic">⌁</div><div><h4>Electric vehicle charging stations</h4></div></div>
-      <div class="svc-lg"><div class="svc-ic">◎</div><div><h4>Advanced security technologies</h4><p>24/7 · Face ID, BLE/NFC/QR turnstiles, license-plate + RFID.</p></div></div>
+      <div class="svc-lg"><h4>High-speed elevators</h4><div class="svc-ic">↑</div><div class="svc-desc"><p>Sword elevators with speeds of up to 5 m/s and a maximum waiting time of 40 seconds. Zoning of elevator groups in Buildings 1 and 2 reduces waiting times and minimizes stops.</p></div><span class="svc-plus">✛</span></div>
+      <div class="svc-lg"><h4>Spacious underground parking</h4><div class="svc-ic">▤</div><div class="svc-desc"><p>An underground parking facility with 490 spaces. Ceiling height in the main driveways on level −1 is 3.1 m, ensuring comfortable vehicle access.</p></div><span class="svc-plus">✛</span></div>
+      <div class="svc-lg"><h4>VIP elevator for top management</h4><div class="svc-ic">▲</div><div class="svc-desc"><p>Priority access for executives and top management of companies occupying large office blocks. Travel to the required floor is direct, without transit stops.</p></div><span class="svc-plus">✛</span></div>
+      <div class="svc-lg"><h4>Drop-off zone</h4><div class="svc-ic">◇</div><div class="svc-desc"><p>The project provides a convenient area for passenger pick-up and drop-off at the building entrance.</p></div><span class="svc-plus">✛</span></div>
+      <div class="svc-lg"><h4>Increased number of turnstiles</h4><div class="svc-ic">╫</div><div class="svc-desc"><p>Multiple elevator zones in each tower reduce waiting times, minimize stops, and enhance ride comfort.</p></div><span class="svc-plus">✛</span></div>
+      <div class="svc-lg"><h4>Electric vehicle charging stations</h4><div class="svc-ic">⌁</div><div class="svc-desc"><p>Dedicated spaces with charging stations or the option to install them are provided.</p></div><span class="svc-plus">✛</span></div>
+      <div class="svc-lg"><h4>Advanced security technologies</h4><div class="svc-ic">◎</div><div class="svc-desc"><p>24/7 · Face ID, BLE/NFC/QR turnstiles, license-plate + RFID.</p></div><span class="svc-plus">✛</span></div>
     </div>
     <!-- живе: 6 малих glass-карток (Innovative engineering) -->
     <p class="svc-block-title">Innovative engineering</p>
