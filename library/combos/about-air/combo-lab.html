@@ -379,9 +379,14 @@
 
   /* 7 COMFORT — живе: fullscreen карусель лоббі (4 слайди «1/4» + thumb-рейка)
      → 7 glass-карток фіч (card-team ui-background-alt blur, offset-грід). */
-  /* карусель лоббі */
-  .lobby { position: relative; margin-top: 7vh; border-radius: 8px; overflow: clip;
-    aspect-ratio: 16 / 9; background: #ecebe6; }
+  /* живе: метрики в правій половині, великі, caps на 2 рядки */
+  .metric-right { margin-left: 50%; gap: 8vw; }
+  .metric-right .m-num { font-size: clamp(48px, 6.5vw, 104px); }
+  @media (max-width: 768px) { .metric-right { margin-left: 0; } }
+  /* карусель лоббі — живе: fullbleed від краю до краю (вирив із .act-контейнера) */
+  .lobby { position: relative; margin-top: 7vh; border-radius: 0; overflow: clip;
+    aspect-ratio: 16 / 8; background: #ecebe6;
+    width: 100vw; margin-left: calc(50% - 50vw); }
   .lobby-track { position: absolute; inset: 0; }
   .lobby-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s cubic-bezier(.25,.74,.22,.99); }
   .lobby-slide.is-on { opacity: 1; }
@@ -501,22 +506,23 @@
   .cert { position: relative; height: 100svh; overflow: clip; color: #111110; }
   .cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     object-position: top center; display: block; z-index: 0; }
-  .cert-in { position: absolute; inset: 0; z-index: 1;
-    display: grid; grid-template-rows: auto auto 1fr; }
-  /* split-титул зверху на всю ширину */
-  .cert-title { display: flex; justify-content: space-between; padding: 12vh 30px 0;
-    font-size: clamp(30px, 6vw, 92px); font-weight: 300; line-height: .95; letter-spacing: -.02em; }
-  .cert-cap { padding: 2vh 30px 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  .cert-in { position: absolute; inset: 0; z-index: 1; }
+  /* split-титул зверху на всю ширину (живий — великий, майже до країв) */
+  .cert-title { display: flex; justify-content: space-between; padding: 4vh 24px 0;
+    font-size: clamp(34px, 7.2vw, 112px); font-weight: 300; line-height: .95; letter-spacing: -.02em; }
+  .cert-cap { padding: 1vh 30px 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
     color: #8b8a86; text-align: center; }  /* живе: caption по центру між CLEVER і CERTIFICATE */
-  /* заява внизу-праворуч (offset-md-6) */
-  .cert-claim { align-self: end; justify-self: end; max-width: 46ch; padding: 0 30px 10vh;
-    text-align: right; }
-  .cert-logo { height: 40px; margin: 0 0 3vh auto; display: block; }
-  .cert-claim p { font-size: clamp(15px, 1.5vw, 21px); font-weight: 300; line-height: 1.4; color: #3c3b39; }
+  /* живий розклад: заява СЕРЕДИНА-праворуч · лого зліва-центр-низ · 2-й абзац низ-праворуч */
+  .cert-claim { position: absolute; right: 30px; top: 34%; max-width: 46ch; text-align: left;
+    font-size: clamp(18px, 2.2vw, 33px); line-height: 1.2; color: #1c1b19; }
+  .cert-logo { position: absolute; left: 50.5%; bottom: 11%; height: 66px; display: block; }
+  .cert-para2 { position: absolute; right: 30px; bottom: 6%; max-width: 40ch;
+    font-size: 12.5px; line-height: 1.5; letter-spacing: .02em; }
   @media (max-width: 768px) {
-    .cert-title { flex-direction: column; gap: 2px; padding-top: 16vh; }
-    .cert-claim { text-align: left; justify-self: start; max-width: 100%; }
-    .cert-logo { margin-left: 0; } }
+    .cert-title { flex-direction: column; gap: 2px; padding-top: 12vh; }
+    .cert-claim { position: static; margin: 8vh 24px 0; max-width: 100%; }
+    .cert-logo { position: static; margin: 6vh 24px 0; }
+    .cert-para2 { position: static; margin: 3vh 24px 0; } }
 
   /* 12 LAYOUT-DETAIL office plans */
   /* office-tabs accordion (живий: md-up = таби площ, sm = акордеон; панель = план+число+опис) */
@@ -613,9 +619,11 @@
 </section>
 
 <!-- ═══ 3 · ARCHITECTURE (light) — image-slider-wipe ═══ -->
-<section class="act">
-  <h2 class="h1" style="margin-bottom:2vh">Architecture of efficiency</h2>
-  <p class="lead" style="max-width:60ch;margin-bottom:2vh">Aesthetics as the highest form of pragmatism. The architecture of AIR embodies the rhythm of the present. The distinctive style of AIR was created by <strong>ADM</strong>, a leading architectural studio.</p>
+<section class="act" id="architecture">
+  <!-- живе: split-титул spread на всю ширину + reveal-абзаци (інтро центр, заява праворуч) -->
+  <h2 class="h1 spread"><span>Architecture</span><span>of efficiency</span></h2>
+  <p class="reveal-text" style="max-width:52ch;margin:10vh auto 0;text-align:center;font-size:14px;line-height:1.55;letter-spacing:.02em">Aesthetics as the highest form of pragmatism. The architecture of AIR embodies the rhythm of the present, reflecting the social and business dynamics of the capital.</p>
+  <p class="reveal-text" style="max-width:32ch;margin:12vh 0 0 auto;text-align:right;font-size:clamp(18px,2.2vw,32px);color:#1c1b19">The distinctive style of AIR was created by <strong>ADM</strong>, a leading architectural studio specializing in contemporary urban design.</p>
 </section>
 <section id="isw-arch">
   <div data-isw-layer>
@@ -653,7 +661,7 @@
   </div>
   <div class="rvc-inner">
     <h2 class="rvc-head"><span>Everything</span><span>revolves</span><span>around</span><span>you</span></h2>
-    <p class="lead" style="max-width:62ch;margin-bottom:4vh;color:#c9c7c2">In typical office buildings, floor plans are utilitarian and centered around a core. At AIR, the core and the structural column grid <em>rotate</em> together with the building facade. All offices at AIR maintain <strong>correct geometry</strong> and commercial efficiency.</p>
+    <p class="reveal-text" style="max-width:60ch;margin:0 auto 4vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
     <div data-rvc id="rvc">
       <div data-rvc-stage>
         <figure data-rvc-slide><img src="https://aircenter.space/media/cache/about_resolves_carousel_img_xs/assets/images/media/about/5.revolves/image-1%40xs.webp" alt=""></figure>
@@ -671,7 +679,7 @@
 </section>
 
 <!-- ═══ 5 · HEADQUARTERS (light) — image-slider-wipe ═══ -->
-<section class="act">
+<section class="act" id="headquarters">
   <h2 class="h1" style="margin-bottom:2vh">Headquarters for visionaries</h2>
   <div class="callout" style="margin-top:0">
     <p>We designed the <strong>third building</strong> as the most advanced headquarters in the Leningradsky business district.</p>
@@ -707,19 +715,20 @@
 </section>
 
 <!-- ═══ 6 · SPACE (DARK) full-bleed ═══ -->
-<section class="fullbleed">
+<section class="fullbleed" id="space-splash">
   <img loading="lazy" alt="AIR space" src="https://aircenter.space/media/cache/about_space_bg_xxxl/assets/images/media/about/7.space/background-top%40xxxl.webp">
   <div class="fb-in"><h2 class="h1"><span>A space of</span><span>opportunities</span></h2></div>
 </section>
 
 <!-- ═══ 7 · COMFORT (light) ═══ -->
-<section class="act">
-  <div class="metric-row">
-    <div><div class="m-num">8 <span style="font-size:.4em">м</span></div><div class="m-cap">ceiling height above</div></div>
-    <div><div class="m-num">680 <span style="font-size:.4em">м²</span></div><div class="m-cap">maximum lobby area</div></div>
+<section class="act" id="comfort">
+  <!-- живе: метрики в ПРАВІЙ половині (зліва порожньо), великі -->
+  <div class="metric-row metric-right">
+    <div><div class="m-num">8 <span style="font-size:.4em">м</span></div><div class="m-cap">ceiling height<br>above</div></div>
+    <div><div class="m-num">680 <span style="font-size:.4em">м²</span></div><div class="m-cap">maximum<br>lobby area</div></div>
   </div>
-  <h3 class="h1" style="font-size:clamp(22px,2.6vw,40px);margin-top:6vh;margin-bottom:2vh">Everything for visitor comfort</h3>
-  <p class="lead" style="max-width:62ch">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
+  <!-- живе: заява UPPERCASE reveal праворуч (не lowercase lead зліва) -->
+  <p class="reveal-text" style="max-width:34ch;margin:14vh 0 8vh auto;text-align:right;font-size:clamp(16px,1.9vw,28px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
 
   <!-- живе: fullscreen карусель лоббі (4 слайди, thumb-рейка, лічильник 1/4) -->
   <div class="lobby" id="lobby-carousel" data-lobby>
@@ -740,6 +749,8 @@
     </div>
   </div>
 
+  <!-- живе: pin-титул «Everything for visitor comfort» НАД картками (не над каруселлю) -->
+  <h3 class="h1" style="font-size:clamp(22px,2.6vw,40px);margin-top:10vh;margin-bottom:2vh">Everything for visitor comfort</h3>
   <!-- живе: 7 glass-карток фіч (card-team ui-background-alt, offset-грід) -->
   <div class="comfort-cards">
     <div class="cft"><div class="cft-ic">◇</div><h4>Visitor lounge areas</h4></div>
@@ -753,7 +764,7 @@
 </section>
 
 <!-- ═══ 8 · AUTONOMY (light) → SERVICES(dark): fade-шов ═══ -->
-<section class="act fade-seam">
+<section class="act fade-seam" id="autonomy">
   <h2 class="h1" style="margin-bottom:2vh">Maximum autonomy</h2>
   <p class="lead" style="max-width:64ch">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Coffee points in the lobbies of Buildings 1 and 2. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
   <div class="metric-row"><div><div class="m-num">4000 <span style="font-size:.4em">м²</span></div><div class="m-cap">commercial ground floors</div></div></div>
@@ -803,7 +814,7 @@
 </section>
 
 <!-- ═══ 9 · SERVICES (DARK) ═══ -->
-<section class="sec-dark">
+<section class="sec-dark" id="services">
   <div class="act">
     <h2 class="h1" style="margin-bottom:2vh">Service excellence</h2>
     <p class="lead" style="max-width:64ch">Privileges define status. At AIR, exceptional attention to residents and care for their well-being and privacy. Wide parking driveways, silent VIP elevators, adaptive climate control, and high-speed Wi-Fi. From electric vehicle charging stations to advanced security technologies, premium service at AIR is elevated to a <strong>guiding principle</strong>.</p>
@@ -838,15 +849,14 @@
   <div class="cert-in">
     <h2 class="cert-title"><span>CLEVER</span><span>CERTIFICATE</span></h2>
     <p class="cert-cap">The ecology of successful business</p>
-    <div class="cert-claim">
-      <img class="cert-logo" loading="lazy" alt="CLEVER" src="https://aircenter.space/assets/images/media/about/10.certificate/logo-clever.webp">
-      <p>AIR meets the <strong>CLEVER eco-certification</strong> standards at the <strong>Gold level</strong>. The practices comply with <strong>ESG</strong> principles and create a comfortable, healthy working environment for every employee.</p>
-    </div>
+    <p class="cert-claim reveal-text" style="max-width:46ch;color:#1c1b19">AIR meets the <strong>CLEVER eco-certification</strong> standards at the <strong>Gold level</strong>. The practices applied in the design, construction, and operation of the towers comply with <strong>ESG</strong> principles.</p>
+    <img class="cert-logo" loading="lazy" alt="CLEVER" src="https://aircenter.space/assets/images/media/about/10.certificate/logo-clever.webp">
+    <p class="cert-para2 reveal-text" style="font-size:12.5px">The environmental performance of the premium business center aligns with the internal policies of progressive corporations, as well as the requirements of their regulators and industries. Most importantly, it creates a comfortable and healthy working environment for every employee.</p>
   </div>
 </section>
 
 <!-- ═══ 11 · LAYOUT-INTRO (DARK) full-bleed ═══ -->
-<section class="fullbleed">
+<section class="fullbleed" id="layout-splash">
   <img loading="lazy" alt="AIR layout" src="https://aircenter.space/media/cache/about_solutions_bg_xxxl/assets/images/media/about/11.solutions/background%40xxxl.webp">
   <div class="fb-in"><h2 class="h1"><span>Layout</span><span>solutions</span></h2></div>
 </section>
