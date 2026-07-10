@@ -112,6 +112,11 @@
       /* живий imageSliderImage ДОСЛІВНО: фото 120% висоти, дрейф
          −16.666%→0 на вході піна і 0→−16.666% на виході */
       driftPct: options.driftPct != null ? options.driftPct : 16.666,
+      /* живий .sticky--under-next: пін тримається ЩЕ underNextSvh скролу
+         ПІСЛЯ останнього свапу, а наступна секція заходить ПІД шар
+         (margin-bottom −underNextSvh + z-index:1 на секції). Свапи НЕ
+         зсуваються: хвіст виключений зі спану index-мапінгу. */
+      underNextSvh: options.underNextSvh != null ? options.underNextSvh : 0,
       mobile: options.mobile || 'tap',
       touchMq: options.touchMq || '(pointer: coarse), (max-width: 768px)'
     };
@@ -310,7 +315,12 @@
 
     /* ================= PIN-РЕЖИМ (десктоп + моб-головна) ================= */
     root.classList.add('isw-mode-pin');
-    root.style.minHeight = 'calc(100svh + ' + (N - 1) * opt.stepSvh + 'svh)';
+    root.style.minHeight = 'calc(100svh + ' +
+      ((N - 1) * opt.stepSvh + opt.underNextSvh) + 'svh)';
+    if (opt.underNextSvh > 0) {
+      root.classList.add('isw-under-next');
+      root.style.marginBottom = 'calc(' + -opt.underNextSvh + 'svh)';
+    }
 
     /* дрейф фото (T-510-сім'я, живий imageSliderImage): на вході піна фото
        їде з +drift до 0, на виході 0 → −drift; всередині піна стоїть.
@@ -336,10 +346,13 @@
         driftImgs[i].style.transform = 'translateY(' + ty + '%)';
     }
 
-    /* прогрес піна: 0 = шар прилип, 1 = шар відпускає (живий sticky-плагін) */
+    /* прогрес піна: 0 = шар прилип, 1 = шар відпускає (живий sticky-плагін).
+       under-next: хвіст холду ВИКЛЮЧЕНО зі спану — index сатурує на
+       останньому слайді, шар фізично пінить далі (живий contentAnimation). */
     function progress() {
       var r = root.getBoundingClientRect();
-      var span = r.height - global.innerHeight;
+      var span = r.height - global.innerHeight
+        - opt.underNextSvh / 100 * global.innerHeight;
       return span > 0 ? clamp01(-r.top / span) : 0;
     }
 
@@ -384,7 +397,9 @@
         global.removeEventListener('scroll', onScroll);
         killAnims();
         root.classList.remove('isw-mode-pin');
+        root.classList.remove('isw-under-next');
         root.style.minHeight = '';
+        root.style.marginBottom = '';
       }
     };
   }

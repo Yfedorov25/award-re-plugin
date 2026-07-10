@@ -60,6 +60,13 @@ const LIVE_STATE = () => {
   tf('#revolves picture, #revolves .image-slider-images picture', 'rv-fan');
   tf('#autonomy [data-plan-plans], #autonomy .about-automony-plan', 'aplan');
   tf('#certificate picture img, #certificate .background img', 'cert-bg');
+  /* с22 стекінг-зони (sticky--under-next): пін-шари (плато top = пін,
+     top<0 = реліз) + голови секцій, що заходять ПІД пін */
+  tf('.image-slider-sticky--bg:not(.image-slider-sticky--headquarters) .image-slider-sticky__layer', 'arch-layer');
+  tf('.image-slider-sticky--headquarters .image-slider-sticky__layer', 'hq-layer');
+  tf('#revolves h2', 'rv-head');
+  tf('#space .about-space-intro', 'splash');
+  tf('#service h2', 'svc-head');
   return out;
 };
 /* стан нашого: лічильники isw + rvc + ті ж transform-криві */
@@ -83,6 +90,12 @@ const OURS_STATE = () => {
   tf('#rvc [data-rvc-slide]', 'rv-fan');
   tf('.aplan', 'aplan');
   tf('.cert-bg', 'cert-bg');
+  /* с22 стекінг-зони — наші відповідники */
+  tf('#isw-arch [data-isw-layer]', 'arch-layer');
+  tf('#isw-hq [data-isw-layer]', 'hq-layer');
+  tf('#revolves .rvc-head', 'rv-head');
+  tf('#space-splash', 'splash');
+  tf('#services .h1', 'svc-head');
   return out;
 };
 
