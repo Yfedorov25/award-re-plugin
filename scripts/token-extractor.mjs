@@ -42,6 +42,13 @@ export const VIEWPORTS = {
 };
 export const MOBILE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1';
 
+/* модалки: детерміноване «відкрито» для секцій-у-модалках (однаково
+   на архіві й живому — порівняння лишається яблука-до-яблук) */
+export const MODAL_OPEN_CSS = `
+.js-modal{height:auto!important;}
+.js-modal .modal{display:block!important;}
+`;
+
 /* ---- КОНФІГИ САЙТІВ ---- */
 export const SITES = {
   'air-about': {
@@ -84,6 +91,9 @@ export const SITES = {
       proxyPrefixes: ['/assets/', '/media/'],
     },
     fontChecks: ['16px "Victor Serif"', '16px "TT Commons Pro"'],
+    /* S2: ВСІ блоки home. selector = рядок АБО {desktop, mobile} (коли
+       варіанти вʼюпортів мають РІЗНІ корені); viewports = обмеження,
+       якщо блок існує лише на одному вʼюпорті (див. sectionsForViewport). */
     sections: [
       { id: 'hero-gallery', selector: '.l-gallery',
         note: 'desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item',
@@ -94,9 +104,53 @@ export const SITES = {
         note: 'sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero' },
       { id: 'wellness', selector: '.l-wellness',
         note: 'контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ' },
+      { id: 'nature', selector: '.l-nature',
+        note: 'окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий' },
+      { id: 'place-bg', selector: '.l-nature-bg',
+        note: 'сценографія place: bg-item/gradient/caption (WebGL-підкладка living map)' },
+      { id: 'place', selector: { desktop: '.l-place', mobile: '.l-place-mobile' },
+        note: 'desktop: .l-place sticky__layer усередині l-nature-bg; mobile: окремий .l-place-mobile' },
+      { id: 'place-video', selector: { desktop: '.l-place-video-container', mobile: '.l-place-video' },
+        note: 'desktop: sticky-контейнер відео; mobile: перший ВИДИМИЙ .l-place-video (в l-place-mobile)' },
+      { id: 'map', selector: '.l-map',
+        note: 'два корені (is-hidden--md-down / is-hidden--lg-up) — перший видимий' },
+      { id: 'design-1', selector: '.l-design__slide--1', note: 'слайд design #1 (id="design"), desktop+mobile варіанти' },
+      { id: 'design-2', selector: '.l-design__slide--2', note: 'слайд design #2' },
+      { id: 'design-3', selector: '.l-design__slide--3', note: 'слайд design #3' },
+      { id: 'design-4', selector: '.l-design__slide--4', viewports: ['mobile'],
+        note: 'слайд design #4 існує ЛИШЕ mobile (is-hidden--lg-up, без desktop-варіанта)' },
+      { id: 'residences', selector: { desktop: '.l-residences', mobile: '.l-residences__webgl-container' },
+        note: 'desktop: єдиний .l-residences; mobile: webgl-контейнер (окремий корінь)' },
+      { id: 'residences-slider', selector: '.l-residences__slider-container', viewports: ['mobile'],
+        note: 'mobile-слайдер residences (на desktop цей контент всередині .l-residences)' },
+      { id: 'interiors', selector: { desktop: '.l-interiors', mobile: '.l-interiors__intro' },
+        note: 'desktop: єдиний .l-interiors; mobile: інтро-блок (окремий корінь is-hidden--lg-up)' },
+      { id: 'interiors-slider', selector: '.l-interiors__slider', viewports: ['mobile'],
+        note: 'mobile-слайдер interiors (на desktop цей контент всередині .l-interiors)' },
+      { id: 'header', selector: 'header.header', note: 'sticky-хедер ui-dark header--landing (2 ноди — перший видимий)' },
+      { id: 'footer', selector: 'footer.footer', note: 'футер section--no-overflow ui-dark' },
+      /* callback/favorites живуть у МОДАЛКАХ (.js-modal h=0 > .modal display:none) —
+         НЕ секції потоку (розкопка S2). Знімаємо в стані «модалка відкрита» через
+         preCss, ІДЕНТИЧНИЙ на архіві й живому. Ставити ПІСЛЯ всіх flow-секцій:
+         preCss лишається в документі до кінця прогону вʼюпорта. */
+      { id: 'callback', selector: '.l-callback', preCss: MODAL_OPEN_CSS,
+        note: 'форма callback У МОДАЛЦІ — знято з preCss(modal-open); одометр animation-map' },
+      { id: 'favorites', selector: '.l-favorites', preCss: MODAL_OPEN_CSS,
+        note: 'улюблені У МОДАЛЦІ — знято з preCss(modal-open)' },
     ],
   },
 };
+
+/* ---- секції конкретного вʼюпорта: фільтр viewports + резолв
+   per-viewport селектора у плоский рядок ---- */
+export function sectionsForViewport(site, vpName) {
+  return site.sections
+    .filter((s) => !s.viewports || s.viewports.includes(vpName))
+    .map((s) => ({
+      ...s,
+      selector: s.selector && typeof s.selector === 'object' ? s.selector[vpName] : s.selector,
+    }));
+}
 
 /* reveal/анімаційна нормалізація — ОДНАКОВА для архіву й живого.
    Метрики opacity/transform/filter після неї = «нормалізований кінцевий
@@ -141,6 +195,16 @@ export const SNAPSHOT_FN = (args) => {
   };
   const sec = findSection();
   if (!sec) return { error: `section not found: ${selector || headingRegex}` };
+
+  /* Нейтралізація INLINE-стилів JS-рантайму (параллакс тримає scale
+     1.1-1.2 і translate НАВІТЬ У СПОКОЇ — bbox забруднений; пастка №8).
+     Чіпаємо ЛИШЕ el.style.* (JS-set): в архіві JS off → no-op, отже
+     трансформація симетрична і порівняння лишається яблука-до-яблук. */
+  for (const el of [sec, ...sec.querySelectorAll('*')]) {
+    if (!el.style) continue;
+    if (el.style.transform) el.style.transform = 'none';
+    if (el.style.opacity) el.style.opacity = '';
+  }
 
   const STYLE_KEYS = [
     'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
@@ -289,8 +353,9 @@ export async function snapshotArchive(browser, site, vpName) {
   await page.addStyleTag({ content: NORMALIZE_CSS });
   await page.evaluate(() => document.fonts.ready);
   const sections = {};
-  for (const s of site.sections) {
+  for (const s of sectionsForViewport(site, vpName)) {
     const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks };
+    if (s.preCss) await page.addStyleTag({ content: s.preCss });
     await page.evaluate(FORCE_IMAGES_FN, args);
     await page.waitForTimeout(400);
     sections[s.id] = await page.evaluate(SNAPSHOT_FN, args);

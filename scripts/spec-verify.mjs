@@ -29,7 +29,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import {
   resolveChromium, SNAPSHOT_FN, FORCE_IMAGES_FN, NORMALIZE_CSS,
-  VIEWPORTS, MOBILE_UA, SITES,
+  VIEWPORTS, MOBILE_UA, SITES, sectionsForViewport,
 } from './token-extractor.mjs';
 
 const GATE_PCT = 95;
@@ -56,8 +56,9 @@ async function snapshotLive(browser, site, vpName) {
   });
   await page.evaluate(() => document.fonts.ready);
   const sections = {};
-  for (const s of site.sections) {
+  for (const s of sectionsForViewport(site, vpName)) {
     const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks };
+    if (s.preCss) await page.addStyleTag({ content: s.preCss });
     await page.evaluate(FORCE_IMAGES_FN, args);
     await page.waitForTimeout(400);
     sections[s.id] = await page.evaluate(SNAPSHOT_FN, args);
@@ -165,7 +166,7 @@ for (const vpName of Object.keys(VIEWPORTS)) {
   const liveSections = await snapshotLive(browser, site, vpName);
   const vpReport = { sections: {} };
   const vpDeltas = [];
-  for (const s of site.sections) {
+  for (const s of sectionsForViewport(site, vpName)) {
     const specSnap = spec.viewports[vpName].sections[s.id];
     const liveSnap = liveSections[s.id];
     if (!specSnap || specSnap.error || !liveSnap || liveSnap.error) {
