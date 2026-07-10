@@ -87,10 +87,24 @@ const OURS_STATE = () => {
 };
 
 function switches(rows) {
-  /* rows: [{f, st:{key:idx}}] → {key: [{idx, from, to}]} */
+  /* rows: [{f, st:{key:idx}}] → {key: [{idx, from, to}]};
+     ~ключі (криві transform) → масив точок {f,x,y,o,top}, епсилон-проріджений */
   const keys = [...new Set(rows.flatMap(r => Object.keys(r.st)))];
   const res = {};
   for (const k of keys) {
+    if (k.startsWith('~')) {
+      const pts = [];
+      for (const r of rows) {
+        const v = r.st[k];
+        if (v == null) continue;
+        const last = pts[pts.length - 1];
+        if (!last || Math.abs(last.x - v.x) > 0.5 || Math.abs(last.y - v.y) > 0.5
+          || Math.abs(last.o - v.o) > 0.015 || Math.abs(last.top - v.top) > 2)
+          pts.push({ f: r.f, ...v });
+      }
+      res[k] = pts;
+      continue;
+    }
     const seq = [];
     for (const r of rows) {
       const v = r.st[k];
@@ -104,12 +118,14 @@ function switches(rows) {
   return res;
 }
 
+const SKIP_LIVE = process.argv.includes('--skip-live');
+
 const chromium = await resolveChromium();
 const browser = await chromium.launch();
 
 /* ─── LIVE ─── */
 const liveRows = [];
-{
+if (!SKIP_LIVE) {
   const ctx = await browser.newContext({ viewport: { width: VW, height: VH },
     isMobile: MOBILE, hasTouch: MOBILE, userAgent: MOBILE ? UA_M : undefined });
   const p = await ctx.newPage();
@@ -139,7 +155,26 @@ const liveRows = [];
     }
     await p.mouse.up();
   } else {
-    /* mobile live: контейнерний скрол (scroll-scrub-mobile метод) */
+    /* mobile live: контейнерний скрол (scroll-scrub-mobile метод).
+       ⚠️ ПРОГРІВ ОБОВ'ЯЗКОВИЙ: scrollHeight росте від lazy-секцій — без
+       прогріву max занижений і всі live-фраки розтягнуті (пастка с21:
+       «hq-свапи @0.47/0.53» були артефактом саме цього). */
+    let prevH = 0;
+    for (let k = 0; k < 25; k++) {
+      const h = await p.evaluate(() => {
+        const c = document.querySelector('.page-content-wrapper__inner') || document.scrollingElement;
+        c.scrollTo(0, c.scrollHeight);
+        return c.scrollHeight;
+      });
+      await p.waitForTimeout(700);
+      if (h === prevH) break;
+      prevH = h;
+    }
+    await p.evaluate(() => {
+      const c = document.querySelector('.page-content-wrapper__inner') || document.scrollingElement;
+      c.scrollTo(0, 0);
+    });
+    await p.waitForTimeout(1500);
     const limit = await p.evaluate(() => {
       const c = document.querySelector('.page-content-wrapper__inner') || document.scrollingElement;
       return { sel: c === document.scrollingElement ? null : '.page-content-wrapper__inner',
@@ -184,13 +219,20 @@ const oursRows = [];
 }
 await browser.close();
 
-const liveSw = switches(liveRows), oursSw = switches(oursRows);
+let liveSw;
+if (SKIP_LIVE) {
+  /* live беремо з попереднього JSON (швидка ітерація по наших таймингах) */
+  const { readFileSync } = await import('fs');
+  liveSw = JSON.parse(readFileSync(JSON_OUT, 'utf8')).live;
+} else liveSw = switches(liveRows);
+const oursSw = switches(oursRows);
 const report = { viewport: `${VW}x${VH}`, steps: N, live: liveSw, ours: oursSw, at: new Date().toISOString() };
 writeFileSync(JSON_OUT, JSON.stringify(report, null, 1));
+const fmt = (k, seq) => k.startsWith('~')
+  ? `${seq.length}тчк f ${seq[0]?.f}→${seq[seq.length - 1]?.f}`
+  : seq.map(s => `[${s.idx}] ${s.from}→${s.to}`).join(' · ');
 console.log('\n=== LIVE switch-точки (frac діапазони індексів) ===');
-for (const [k, seq] of Object.entries(liveSw))
-  console.log(` ${k}: ` + seq.map(s => `[${s.idx}] ${s.from}→${s.to}`).join(' · '));
+for (const [k, seq] of Object.entries(liveSw)) console.log(` ${k}: ` + fmt(k, seq));
 console.log('=== OURS switch-точки ===');
-for (const [k, seq] of Object.entries(oursSw))
-  console.log(` ${k}: ` + seq.map(s => `[${s.idx}] ${s.from}→${s.to}`).join(' · '));
+for (const [k, seq] of Object.entries(oursSw)) console.log(` ${k}: ` + fmt(k, seq));
 console.log('\nJSON:', JSON_OUT);

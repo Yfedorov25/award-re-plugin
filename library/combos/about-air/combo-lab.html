@@ -500,12 +500,15 @@
   .ib-map { width: 100%; border-radius: 6px; margin-top: 2vw; display: block; }
 
 
-  /* 6 SPACE / 11 LAYOUT-INTRO — splash: 100svh fullbleed фото + ЦЕНТР заголовок spread
-     (живий about-space-intro: h1 group--between "A space of / opportunities") */
-  .fullbleed { position: relative; height: 100svh; display: flex; align-items: center;
+  /* 6 SPACE / 11 LAYOUT-INTRO — splash: 100svh fullbleed фото + заголовок spread
+     (живий about-space-intro: h1 group--between "A space of / opportunities").
+     с21 pin-curves: живий титул сидить ~45px від ВЕРХНЬОГО краю сплеша і їде разом
+     з ним (live-097/100 desktop + live-053 m390) — центрування ховало титул на весь
+     в'їзд сплеша (кластер #094-103). */
+  .fullbleed { position: relative; height: 100svh; display: flex; align-items: flex-start;
     background: #000; color: #f2f1ee; overflow: clip; }
   .fullbleed img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-  .fullbleed .fb-in { position: relative; z-index: 1; padding: 0 30px; max-width: none; margin: 0 auto; width: 100%; }
+  .fullbleed .fb-in { position: relative; z-index: 1; padding: 4.5vh 30px 0; max-width: none; margin: 0 auto; width: 100%; }
   .fullbleed h2 { color: #fff; display: flex; justify-content: space-between;
     font-size: clamp(30px, 4.9vw, 66px); line-height: 1; }  /* spread як hero */
   @media (max-width: 768px) { .fullbleed h2 { flex-direction: column; align-items: flex-start; gap: 2px; } }
@@ -864,7 +867,20 @@
     /* pin-curves: свапи живого пізніші за наші → старти пінів зсунуто вниз
        (arch +480px, hq +640px); span'и вкоротились через stepSvh 91/80 */
     #isw-arch { margin-top: 53vh; }
-    #isw-hq { margin-top: 71vh; }
+    #isw-hq { margin-top: 80vh; }  /* с21 проба v3: свапи 0.3707/0.3874 ≈ live 0.3703/0.3886 */
+    /* ── с21 rv-fan по живій кривій (pin-curves-1440): live вхід f.238 → cross0 .267 →
+       ПІН (низ фото ~237px видно, hold ~530px скролу) → природний вихід ≈ live .334.
+       Наш був: вхід .251, наскрізний прохід без піна, вихід .308. Нуль-сумно:
+       пре-зріз −306 (head/revpara) · пін +530 · хвіст −180 · isw-hq −45. ── */
+    #revolves .rvc-head { margin-top: 0; margin-bottom: 6vh; }
+    #revolves .m-revpara { margin-bottom: 4vh !important; }
+    #rvc { height: calc(50svh + 30px + 680px); }  /* v2: hold +150 → вихід ближче до live .334 */
+    #rvc [data-rvc-stage] { aspect-ratio: auto; height: calc(50svh + 30px);
+      position: sticky; top: calc(221px - 50svh - 30px); }
+    #revolves .rvc-inner > p.reveal-text:last-of-type { margin-top: 5vh !important; margin-bottom: 5vh !important; }
+    /* ── с21 aplan по живій кривій: live пін до f.662, наш відпускав на .635 —
+       тревел +324px рівно з #autonomy padding-bottom (36vh→0) → services-анкор на місці ── */
+    .aplan-scroll { height: 186svh; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
     /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
        (кластер #094-113); перекладаємо хвостовий padding у інтро, регіон незмінний */
@@ -878,7 +894,7 @@
     #certificate > picture { position: sticky; top: 0; height: 100svh; }
     #certificate .cert-in { position: sticky; inset: auto; top: 0;
       height: 100svh; margin-top: -100svh; }  /* оверлей поверх sticky-фону */
-    #autonomy { padding-bottom: 36vh; }
+    #autonomy { padding-bottom: 0; }  /* с21: 36vh → aplan-пін (нуль-сумно) */
     #stack-layout .stk + .stk { margin-top: 4svh; }
   }
 
@@ -886,6 +902,16 @@
      Урок: @media НЕ додає специфічності — моб-правило раніше в source програє
      desktop-правилу нижче (так «зник» .stk margin-top:0). Усі моб-переваги — тут. */
   @media (max-width: 768px) {
+    /* ── с21 rv-fan m390 по живій кривій (pin-curves-390 з прогрівом): live пінить
+       віяло (top≈−180, hold ~0.036f ≈1000px). Часткова репліка +500px — рівно
+       стільки, скільки дають нуль-сумні зрізи нижче (hq-свапи m390 0.368=live,
+       НЕ рухати). Sticky ок: #revolves overflow:clip НЕ скрол-контейнер. ── */
+    #rvc { height: calc(52svh + 500px); }  /* НЕ padding: sticky-хід живе лише в content box */
+    #rvc [data-rvc-stage] { position: sticky; top: calc(253px - 52svh); }
+    #revolves .rvc-inner > p.reveal-text:last-of-type { margin-top: 4vh !important; margin-bottom: 4vh !important; }
+    #headquarters { padding-top: 3vh; padding-bottom: 3vh; }
+    #headquarters .h1.spread { margin-top: 0 !important; }
+    #headquarters .m-hqpara { margin-top: 4vh !important; margin-bottom: 4vh !important; }
     /* СТЕК ХВОСТА = живий моб-пін: картка рівно 100svh (фото-інсет зверху,
        панель на решту екрана: прогрес-бар 4 сегм · титул ліворуч · номер ПРАВОРУЧ ·
        опис притиснутий до низу), наступна наїжджає — sticky з desktop лишається.
