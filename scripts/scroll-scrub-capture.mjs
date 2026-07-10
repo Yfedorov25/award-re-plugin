@@ -36,6 +36,7 @@ const N = +(arg('steps', 80)); const OUT = resolve(arg('out', 'library/boards/sc
 const VP = { width: +(arg('vw', 1440)), height: +(arg('vh', 820)) };
 const Q = +(arg('quality', 52));
 const FROM = +(arg('from', 0)); const TO = +(arg('to', 1));  /* діапазон прогресу (секційний скраб) */
+const MAP = JSON.parse(arg('map', '[]'));  /* [{liveIdx, ours:"#id"}] → секційна синхронізація кадрів */
 if (!LIVE || !OURS) { console.error('потрібні --live --ours'); process.exit(1); }
 mkdirSync(OUT, { recursive: true });
 
@@ -92,11 +93,29 @@ const fracs = []; let anchors = [];
   const p = await ctx.newPage();
   await p.goto(OURS, { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(1800);
+  /* секційна синхронізація: пари (live-якір frac → наш-якір frac) → кусково-лінійний ремап.
+     Без --map — тотожність (стара поведінка). */
+  let remap = (f) => f;
+  if (MAP.length) {
+    const oursFr = await p.evaluate((sels) => {
+      const limit = document.body.scrollHeight - window.innerHeight;
+      return sels.map(sel => { const el = document.querySelector(sel);
+        return el ? +( (el.getBoundingClientRect().top + window.scrollY) / limit ).toFixed(4) : null; });
+    }, MAP.map(m => m.ours));
+    const pairs = [[0, 0]];
+    MAP.forEach((m, k) => { const la = anchors[m.liveIdx]; if (la && oursFr[k] !== null) pairs.push([la.frac, oursFr[k]]); });
+    pairs.push([1, 1]);
+    pairs.sort((a, b) => a[0] - b[0]);
+    remap = (f) => { for (let k = 1; k < pairs.length; k++) { if (f <= pairs[k][0]) {
+      const [a0, b0] = pairs[k - 1], [a1, b1] = pairs[k];
+      return a1 === a0 ? b0 : b0 + (b1 - b0) * (f - a0) / (a1 - a0); } } return f; };
+    console.log('section-sync pairs:', JSON.stringify(pairs));
+  }
   for (let i = 0; i < N; i++) {
     await p.evaluate((fr) => {
       const limit = document.body.scrollHeight - window.innerHeight;
       window.scrollTo(0, Math.round(fr * limit));
-    }, fracs[i]);
+    }, remap(fracs[i]));
     await p.waitForTimeout(170);
     await p.screenshot({ path: `${OUT}/ours-${String(i).padStart(3, '0')}.jpg`, type: 'jpeg', quality: Q });
     if (i % 10 === 0) console.log(`ours ${i}/${N}`);
