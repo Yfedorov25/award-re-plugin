@@ -131,6 +131,23 @@
   /* живі split-титули секцій ідуть ВІД КРАЮ ДО КРАЮ (не в контейнері .act) */
   .h1.spread { width: 100vw; margin-left: calc(50% - 50vw); padding: 0 20px; box-sizing: border-box; }
   @media (max-width: 768px) { .h1.spread { flex-direction: column; gap: 2px; } }  /* живий mobile: титул стеком, без overflow */
+  /* мобільні скрол-бюджети (живі @390 анкори ІНШІ за desktop): revolves 5.5% (наш був 10),
+     services→cert 10.9%; фазові desktop-маржі тут зайві */
+  @media (max-width: 768px) {
+    #revolves .rvc-head { margin: 2vh 0 8vh !important; }
+    #revolves .reveal-text { margin-top: 2vh !important; margin-bottom: 6vh !important; }
+    #services-cards { padding-bottom: 16vh !important; }
+    .comfort-cards { margin-top: 3vh; margin-bottom: 5vh; }
+    #isw-hq .isw-card, #isw-arch .isw-card { top: auto; bottom: 0; transform: none;
+      height: auto; width: auto; left: 0; right: 0;
+      border-radius: 5px 5px 0 0; padding: 20px; }
+    /* моб бюджети: живий arch-пін коротший за desktop-крок 85svh; aplan без великого піна */
+    #isw-arch { min-height: calc(100svh + 120svh) !important; }
+    .aplan-scroll { height: 105svh; }
+    .a-ill { margin-top: 4vh; margin-bottom: 4vh; }
+    #stack-layout .stk + .stk { margin-top: 0; }  /* desktop-розтяжка стека не для static-моб */
+    #comfort .reveal-text { margin-top: 4vh !important; margin-bottom: 4vh !important; }
+    .cft { min-height: 310px; } }
   .act { padding: 10vh 3vw; max-width: 1200px; margin: 0 auto; }
   .lead { font-size: 14px; line-height: 1.55; color: #6b6b68; max-width: 44ch; }
 
@@ -1372,7 +1389,8 @@
     function (el) { return window.ImageSliderWipe.create('#' + el.id,
       /* hq: живий слайдер гортає ПОВІЛЬНІШЕ (на 0.340 живий ще слайд 1, наш був 2) —
          крок 85→110svh під живий бюджет hq→space 10.07% */
-      el.id === 'isw-hq' ? { mobile: 'tap', stepSvh: 110 } : { mobile: 'tap' }); }
+      el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 110 } :
+      el.id === 'isw-arch' ? { mobile: 'pin' } : { mobile: 'tap' }); }  /* моб arch+hq: живий пінить слайди вертикально і на 390 */
   );
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */
