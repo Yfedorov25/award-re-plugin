@@ -71,17 +71,27 @@ let anchors = { limit: 0, list: [] };
   await ctx.close();
 }
 
-/* ── OURS @390: нативний скрол ── */
+/* ── OURS @390: ЧЕСНА зйомка (сесія 19) — touch-контекст БЕЗ reducedMotion:
+   Lenis на touch не стартує (нативний скрол ок), а reveal-анімації ЛЕТЯТЬ
+   як у живого. Доїзд до цілі МІКРОКРОКАМИ (не стрибок) — IntersectionObserver
+   спрацьовує в польоті, кадр ловить ту саму blur-фазу що жива протяжка. ── */
 {
-  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1,
+    hasTouch: true, isMobile: true });
   const p = await ctx.newPage();
   await p.goto(OURS, { waitUntil: 'domcontentloaded' });
-  await p.waitForTimeout(2000);
+  await p.waitForTimeout(2500);
   for (let i = 0; i < N; i++) {
     const f = i / (N - 1);
-    await p.evaluate((fr) => { const limit = document.body.scrollHeight - innerHeight;
-      scrollTo(0, Math.round(fr * limit)); }, f);
-    await p.waitForTimeout(150);
+    await p.evaluate(async (fr) => {
+      const limit = document.body.scrollHeight - innerHeight;
+      const target = Math.round(fr * limit), from = scrollY, steps = 10;
+      for (let k = 1; k <= steps; k++) {
+        scrollTo(0, Math.round(from + (target - from) * k / steps));
+        await new Promise(r => setTimeout(r, 28));
+      }
+    }, f);
+    await p.waitForTimeout(140);
     await p.screenshot({ path: `${OUT}/ours-${String(i).padStart(3, '0')}.jpg`, type: 'jpeg', quality: Q });
     if (i % 20 === 0) console.log('ours', i, '/', N);
   }

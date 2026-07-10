@@ -63,7 +63,7 @@ const b = await chromium.launch();
 /* ── проба однієї сторінки: visual-start frac кожної section[id] ──
    scroller: 'window' (наше) | 'container' (живий mobile) */
 async function probe(page, scroller) {
-  const starts = {};
+  const starts = {}; const timeline = [];
   const steps = Math.round(1 / STEP) + 1;
   for (let i = 0; i < steps; i++) {
     const f = Math.min(1, i * STEP);
@@ -79,23 +79,35 @@ async function probe(page, scroller) {
     await page.waitForTimeout(scroller === 'container' ? 200 : 90);
     const hit = await page.evaluate(() => {
       /* elementsFromPoint: перший елемент у стеку, що належить section[id] /
-         [data-scroll-section] — ВІЗУАЛЬНО домінуюча секція в центрі екрана */
+         [data-scroll-section] — ВІЗУАЛЬНО домінуюча секція в центрі екрана.
+         + контент-сигнатура: ЩО саме в центрі (текст або ім'я асета) —
+         таймлайн сигнатур обох сторін показує внутрішньо-секційні фази. */
       const els = document.elementsFromPoint(innerWidth / 2, innerHeight / 2);
+      let secId = null, sig = '';
       for (const el of els) {
         const s = el.closest('section[id], [data-scroll-section][id]');
-        if (s && s.id) return s.id;
+        if (s && s.id) { secId = s.id; break; }
       }
-      return null;
+      for (const el of els) {
+        if (el.tagName === 'IMG') { sig = 'img:' + (el.currentSrc || el.src).split('/').pop().split('?')[0]; break; }
+        const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (t && t.length > 2 && el.childElementCount < 40 && el.offsetHeight < innerHeight * 1.5) {
+          sig = 'txt:' + t.slice(0, 46).toUpperCase(); break; }
+        const bg = getComputedStyle(el).backgroundImage;
+        if (bg && bg !== 'none') { sig = 'bg:' + bg.split('/').pop().split('?')[0].slice(0, 40); break; }
+      }
+      return { secId, sig };
     });
-    if (hit && !(hit in starts)) starts[hit] = +f.toFixed(4);
+    if (hit.secId && !(hit.secId in starts)) starts[hit.secId] = +f.toFixed(4);
+    timeline.push({ f: +f.toFixed(4), sec: hit.secId, sig: hit.sig });
     if (i % 40 === 0) process.stdout.write('.');
   }
   process.stdout.write('\n');
-  return starts;
+  return { starts, timeline };
 }
 
 /* ── LIVE-анкори: з meta.json або пере-проба живцем ── */
-let liveAnchors; let liveSource;
+let liveAnchors; let liveSource; let liveTimeline = null;
 if (LIVE) {
   const ctx = await b.newContext({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1,
     userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Version/16.0 Mobile/15E148 Safari/604.1',
@@ -105,8 +117,9 @@ if (LIVE) {
   await p.waitForTimeout(5000);
   try { await p.click('button:has-text("ACCEPT")', { timeout: 1500 }); } catch {}
   console.log('пробиваю LIVE elementFromPoint…');
-  const starts = await probe(p, 'container');
-  liveAnchors = Object.entries(starts).map(([id, frac]) => ({ id, frac }));
+  const lp = await probe(p, 'container');
+  liveTimeline = lp.timeline;
+  liveAnchors = Object.entries(lp.starts).map(([id, frac]) => ({ id, frac }));
   liveSource = 'live-probe:' + LIVE;
   await ctx.close();
 } else {
@@ -123,7 +136,8 @@ await p.goto(OURS, { waitUntil: 'domcontentloaded' });
 await p.waitForTimeout(2500);
 const oursLimit = await p.evaluate(() => document.body.scrollHeight - innerHeight);
 console.log('пробиваю OURS elementFromPoint… (limit', oursLimit + 'px)');
-const oursStarts = await probe(p, 'window');
+const op = await probe(p, 'window');
+const oursStarts = op.starts, oursTimeline = op.timeline;
 await ctx.close(); await b.close();
 
 /* ── звіт: анкори + регіонні бюджети (нуль-сумна математика) ── */
@@ -160,6 +174,18 @@ const sumAbs = regions.reduce((s, g) => s + Math.abs(g.ours - g.live), 0);
 console.log(`\nmax |Δ| регіону: ${worst.toFixed(2)}pp · сумарний |Δ|: ${sumAbs.toFixed(2)}pp` +
   ` · поріг закону: ≤2pp на регіон`);
 
+if (liveTimeline) {
+  console.log('\n=== КОНТЕНТ-ТАЙМЛАЙН (що в центрі екрана на тій самій частці) ===');
+  console.log('frac'.padEnd(7), 'LIVE'.padEnd(52), 'OURS');
+  for (let k = 0; k < Math.min(liveTimeline.length, oursTimeline.length); k++) {
+    const L = liveTimeline[k], O = oursTimeline[k];
+    const mark = (L.sig && O.sig && L.sig.slice(0, 18) === O.sig.slice(0, 18)) ? ' ' : '≠';
+    console.log(mark + String(L.f).padEnd(6), String(L.sig || L.sec || '').slice(0, 50).padEnd(52),
+      String(O.sig || O.sec || '').slice(0, 50));
+  }
+}
+
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify({ ours: OURS, liveSource,
+  liveTimeline, oursTimeline,
   viewport: `${VW}x${VH}`, step: STEP, oursLimit, anchors: rows, regions,
   worst: +worst.toFixed(2), sumAbs: +sumAbs.toFixed(2), at: new Date().toISOString() }, null, 1));

@@ -89,7 +89,10 @@ const fracs = []; let anchors = [];
 
 /* ─── 2. OURS: кадри на тих самих виміряних прогресах ─── */
 {
-  const ctx = await b.newContext({ viewport: VP, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+  /* ЧЕСНА зйомка (сесія 19): БЕЗ reducedMotion — reveal-анімації летять як у живого.
+     Скрол через __lenis.scrollTo(immediate) мікрокроками (Lenis без reduce перехоплює
+     нативний scrollTo). Fallback: нативний scrollTo якщо Lenis нема. */
+  const ctx = await b.newContext({ viewport: VP, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
   await p.goto(OURS, { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(1800);
@@ -112,11 +115,18 @@ const fracs = []; let anchors = [];
     console.log('section-sync pairs:', JSON.stringify(pairs));
   }
   for (let i = 0; i < N; i++) {
-    await p.evaluate((fr) => {
+    await p.evaluate(async (fr) => {
       const limit = document.body.scrollHeight - window.innerHeight;
-      window.scrollTo(0, Math.round(fr * limit));
+      const target = Math.round(fr * limit);
+      const cur = () => (window.__lenis && typeof window.__lenis.scroll === 'number') ? window.__lenis.scroll : window.scrollY;
+      const go = y => window.__lenis ? window.__lenis.scrollTo(y, { immediate: true }) : window.scrollTo(0, y);
+      const from = cur(), steps = 10;
+      for (let k = 1; k <= steps; k++) {
+        go(Math.round(from + (target - from) * k / steps));
+        await new Promise(r => setTimeout(r, 26));
+      }
     }, remap(fracs[i]));
-    await p.waitForTimeout(170);
+    await p.waitForTimeout(150);
     await p.screenshot({ path: `${OUT}/ours-${String(i).padStart(3, '0')}.jpg`, type: 'jpeg', quality: Q });
     if (i % 10 === 0) console.log(`ours ${i}/${N}`);
   }

@@ -68,8 +68,10 @@
     background: #111110; color: #f2f1ee; border: 0; border-radius: 8px;
     width: 60px; height: 40px; cursor: pointer; }
   /* над ТЕМНИМИ секціями — плашки світлі (інверсія), фон прозорий */
-  [data-amo-header].over-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
-  [data-amo-header].over-dark [data-amo-burger] i { background: #111110; }
+  /* живий бургер ЗАВЖДИ чорний піл + білі лінії (crop-виміри: desktop hero live-000
+     rgb~25, mobile hero + світлі секції теж) — over-dark інверту в живого НЕМА */
+  [data-amo-header].over-dark [data-amo-burger] { background: #111110; color: #f2f1ee; }
+  [data-amo-header].over-dark [data-amo-burger] i { background: #f2f1ee; }
   [data-amo-header].over-dark .hbtn { background: #f2f1ee; color: #111110; }
   [data-amo-header].over-dark .hfav { background: rgba(255,255,255,.14); color: #f2f1ee; }
   /* CHOOSE ✛ = registration mark з насічками (як меню-плюс сесії 15), не простий + */
@@ -101,6 +103,9 @@
      на y≈267 (THE PROJECT: зліва / CONFIDENCE центр / IN AIR справа), білий. */
   #top { position: relative; height: 100svh; background: #000; overflow: clip; color: #f2f1ee; }
   #top .hero-bg { position: absolute; inset: 0; }
+  /* picture МУСИТЬ мати height:100% — інакше img height:100% резолвиться проти
+     інтринсик-висоти picture (390×1320/780=660 → чорна смуга під фото @390) */
+  #top .hero-bg picture { height: 100%; }
   #top .hero-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
   #top .hero-line { position: absolute; left: 0; right: 0; top: 236px;
     display: flex; justify-content: space-between; padding: 0 30px;
@@ -859,9 +864,42 @@
     #comfort { padding-top: 5vh; padding-bottom: 5vh; }
     #comfort .metric-row { margin-top: 2vh; }
     #comfort .cft-pin { margin-top: 4vh; }
+
+    /* MOBILE HERO (родина B, скріншоти Єгора): живий @390 ПОКАЗУЄ лого AIR
+       зліва зверху на верхівці і ховає при скролі (live-000 є, live-002 нема) */
+    [data-amo-header].over-dark:not(.is-scrolled) .hlogo { opacity: 1; color: #f2f1ee; }
+    [data-amo-header].amo-menu-open .hlogo { color: #111110; }
     /* жива моб-карусель лоббі ЛАНДШАФТНА ~300px (кадр live-057), не портрет 4/5 —
        це й останні ~190px надлишку регіону */
     .lobby { aspect-ratio: 13 / 10; }
+
+    /* РОДИНА C — моб-типографіка = живі виміри @390 (проба live 2026-07-10):
+       h2-абзаци 21px/24 LEFT w350 · дрібні абзаци 13px/16 fw500 LEFT
+       (text-center у живого ЛИШЕ :md) · титули 42px/45 left природним переносом.
+       !important — у розмітці інлайн-стилі desktop-подачі. */
+    .m-intro { font-size: 21px !important; line-height: 24px !important;
+      max-width: 350px !important; text-align: left !important; }
+    .m-tekta { font-size: 13px !important; line-height: 16px !important;
+      font-weight: 500; max-width: 290px !important; }
+    .m-invest { font-size: 13px !important; line-height: 16px !important; font-weight: 500; }
+    .m-adm { font-size: 21px !important; line-height: 24px !important;
+      max-width: 350px !important; text-align: left !important;
+      margin: 8vh auto 6vh 0 !important; color: inherit !important; }
+    .m-revpara { font-size: 13px !important; line-height: 16px !important; font-weight: 500;
+      max-width: 350px !important; text-align: left !important; margin: 0 auto 14vh 0 !important; }
+    .m-hqpara { font-size: 13px !important; line-height: 16px !important; font-weight: 500;
+      max-width: 350px !important; text-align: left !important; margin: 6vh auto 8vh 0 !important; }
+    /* revolves титул: живий mobile = ОДИН h2 42px/45, природний перенос у 3 рядки
+       left — НЕ колонка з 4 спанів */
+    #revolves .rvc-head { display: block !important; font-size: 42px; line-height: 45px;
+      font-weight: 400; text-align: left; }
+    #revolves .rvc-head span { display: inline; font-size: inherit; letter-spacing: inherit; }
+    #revolves .rvc-head span::after { content: ' '; }
+    /* comfort титул: живий mobile = 2 рядки природним переносом ~30px, без форс-<br> */
+    #comfort .cft-left h3 br { display: none; }
+    #comfort .cft-left h3 { font-size: 30px; line-height: 1.12; max-width: 350px; }
+    /* усі h1-титули mobile = живі 42px/45 (виміряно live @390: revolves і hq однаково) */
+    .h1, .h1.spread, .h1.spread span { font-size: 42px !important; line-height: 45px !important; }
   }
 </style>
 </head>
@@ -898,7 +936,7 @@
 <!-- ═══ 1 · INFO-TOP (light) — живе: h2 UPPERCASE 28px зліва (col-6) + 3-tower фото
      (col 4-11) з callout-пінами B1/B2/B3 НА фото (h1-цифри + лінії-конектори stroke .12) ═══ -->
 <section class="act" id="a-intro">
-  <p class="reveal-text h2r">Business is built on choosing optimal solutions. The premium AIR business center comprises three buildings of varying heights — from 14 to 34 floors — and offers ultra-modern, next-generation office spaces.</p>
+  <p class="reveal-text h2r m-intro">Business is built on choosing optimal solutions. The premium AIR business center comprises three buildings of varying heights — from 14 to 34 floors — and offers ultra-modern, next-generation office spaces.</p>
   <div class="a-ill">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_top_img_xs/assets/images/media/about/2.info-top/image%40xs.webp"><img loading="lazy" alt="AIR three towers" src="https://aircenter.space/media/cache/about_info_top_img_xxxl/assets/images/media/about/2.info-top/image%40xxxl.webp"></picture>
     <p class="a-pin a-pin-1"><span class="a-pin-b">B1</span><span class="a-pin-t">20 floors</span><svg width="179" height="171" viewBox="0 0 179 171" fill="none"><path d="M0 0.5H100L178.089 170" stroke="black" stroke-opacity="0.12"/></svg></p>
@@ -909,12 +947,12 @@
 
 <!-- ═══ 2 · INFO-BOTTOM (light) — живе: 2 фото зверху → UPPERCASE reveal-текст під ними ═══ -->
 <section class="act">
-  <p class="reveal-text" style="max-width:442px;margin:6vh auto 8vh;text-align:center;font-size:12px;line-height:1.2;letter-spacing:.02em">Developed by TEKTA professionals and managed by Commonwealth Partnership experts, AIR becomes a solid foundation for businesses of any scale and ambition.</p>
+  <p class="reveal-text m-tekta" style="max-width:442px;margin:6vh auto 8vh;text-align:center;font-size:12px;line-height:1.2;letter-spacing:.02em">Developed by TEKTA professionals and managed by Commonwealth Partnership experts, AIR becomes a solid foundation for businesses of any scale and ambition.</p>
   <div class="ib-grid">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_bottom_img_xs/assets/images/media/about/3.info-bottom/image-1%40xs.webp"><img loading="lazy" alt="AIR interior" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-1%40xxxl.webp"></picture>
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_info_bottom_img_xs/assets/images/media/about/3.info-bottom/image-2%40xs.webp"><img loading="lazy" alt="AIR lobby" src="https://aircenter.space/media/cache/about_info_bottom_img_xxxl/assets/images/media/about/3.info-bottom/image-2%40xxxl.webp"></picture>
   </div>
-  <p class="reveal-text" style="margin-top:6vh;max-width:none">Here, private investors, IT startups, regional companies opening offices in the city, and many other forward-looking organizations will find space to strengthen their financial positions.</p>
+  <p class="reveal-text m-invest" style="margin-top:6vh;max-width:none">Here, private investors, IT startups, regional companies opening offices in the city, and many other forward-looking organizations will find space to strengthen their financial positions.</p>
   <div class="callout" style="margin-top:8vh">
     <p>A large corporation can reach a new level by establishing a representative headquarters in <strong>Building 3</strong>.</p>
     <a class="cta-link" href="/combos/funnel-air/combo-lab.html">Learn more <span>›</span></a>
@@ -927,7 +965,7 @@
   <!-- живе: split-титул spread на всю ширину + reveal-абзаци (інтро центр, заява праворуч) -->
   <h2 class="h1 spread"><span>Architecture</span><span>of efficiency</span></h2>
   <p class="reveal-text" style="max-width:52ch;margin:10vh auto 0;text-align:center;font-size:14px;line-height:1.55;letter-spacing:.02em">Aesthetics as the highest form of pragmatism. The architecture of AIR embodies the rhythm of the present, reflecting the social and business dynamics of the capital.</p>
-  <p class="reveal-text" style="max-width:32ch;margin:12vh 0 10vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The distinctive style of AIR was created by <strong>ADM</strong>, a leading architectural studio specializing in contemporary urban design.</p>
+  <p class="reveal-text m-adm" style="max-width:32ch;margin:12vh 0 10vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The distinctive style of AIR was created by <strong>ADM</strong>, a leading architectural studio specializing in contemporary urban design.</p>
 </section>
 <section id="isw-arch">
   <div data-isw-layer>
@@ -965,7 +1003,7 @@
   </div>
   <div class="rvc-inner">
     <h2 class="rvc-head"><span>Everything</span><span>revolves</span><span>around</span><span>you</span></h2>
-    <p class="reveal-text" style="max-width:60ch;margin:0 auto 20vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
+    <p class="reveal-text m-revpara" style="max-width:60ch;margin:0 auto 20vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
     <div data-rvc id="rvc">
       <div data-rvc-stage>
         <figure data-rvc-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xs.webp"><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xxxl.webp" alt=""></picture></figure>
@@ -987,7 +1025,7 @@
      + малий центрований UPPERCASE reveal-абзац col-4 (442px, 6 рядків) ═══ -->
 <section class="act" id="headquarters">
   <h2 class="h1 spread" style="margin-bottom:0;margin-top:6vh"><span>Headquarters</span><span>for&nbsp;visionaries</span></h2>
-  <p class="reveal-text" style="max-width:442px;margin:11vh auto 14vh;text-align:center;font-size:12px;line-height:1.15;letter-spacing:.02em">The distinctive architecture of AIR effectively communicates the image and values of any progressive corporation. Recognizing this PR and GR potential, we designed the third building as the most advanced headquarters in the Leningradsky business district.</p>
+  <p class="reveal-text m-hqpara" style="max-width:442px;margin:11vh auto 14vh;text-align:center;font-size:12px;line-height:1.15;letter-spacing:.02em">The distinctive architecture of AIR effectively communicates the image and values of any progressive corporation. Recognizing this PR and GR potential, we designed the third building as the most advanced headquarters in the Leningradsky business district.</p>
 </section>
 <!-- 5 HEADQUARTERS — живе: ui-light, ОДИН фон вежі B3 (не 3 фото-слайди),
      glass-панель справа міняє лише ТЕКСТ (14-story/autonomous/infrastructure) -->
