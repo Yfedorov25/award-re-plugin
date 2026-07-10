@@ -375,6 +375,27 @@
   #rvc [data-rvc-slide]:nth-child(3) { transform: rotate(3.5deg) translateY(10px); }
   #rvc .rvc-bar { display: none; }
 
+
+  /* 12 LAYOUT — живий stack-slider: нумеровані картки стекаються при скролі (sticky) */
+  #stack-layout .stk { position: sticky; top: 0; height: 100svh; display: grid;
+    grid-template-columns: 1fr 1fr; background: #ececea; overflow: clip; }
+  #stack-layout .stk:nth-child(even) { background: #e4e2de; }
+  .stk-panel { position: relative; padding: 5vh 3vw; }
+  .stk-num { font-size: clamp(56px, 6.5vw, 100px); font-weight: 200; line-height: 1; color: #111110; }
+  .stk-title { position: absolute; left: 3vw; bottom: 20vh; margin: 0;
+    font-size: clamp(17px, 1.7vw, 25px); font-weight: 400; text-transform: uppercase;
+    letter-spacing: -.01em; line-height: 1.15; max-width: 13ch; color: #111110; }
+  .stk-desc { position: absolute; right: 3vw; bottom: 6vh; margin: 0; max-width: 36ch;
+    font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; line-height: 1.5;
+    color: #8b8a86; }
+  #stack-layout .stk picture { display: block; height: 100%; }
+  #stack-layout .stk img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @media (max-width: 768px) {
+    #stack-layout .stk { position: static; height: auto; grid-template-columns: 1fr; }
+    #stack-layout .stk picture { height: 44vh; }
+    .stk-title { position: static; margin-top: 6vh; }
+    .stk-desc { position: static; margin-top: 2vh; } }
+
   /* ═══════════ КОНТЕНТ-СЕКЦІЇ /about (13 актів живого) ═══════════ */
   .sec-dark { background: #000; color: #f2f1ee; }
   .sec-dark .lead { color: #a7a6a2; }
@@ -1044,31 +1065,39 @@
   </div>
   <p class="reveal-text" style="max-width:30ch;margin:8vh 0 0 auto;text-align:right;font-size:clamp(18px,2vw,30px);line-height:1.35">The well-considered structural design of the towers allows AIR to <strong>flexibly adapt</strong>. Units on a floor can be combined. Residents can purchase a single office, an entire floor, or even a whole building.</p>
 </section>
-<section id="isw-layout">
-  <div data-isw-layer>
-    <div class="isw-row">
-      <div data-isw-stage>
-        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-2@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-2@xxxl.webp" alt=""></picture></figure>
-        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-3@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-3@xxxl.webp" alt=""></picture></figure>
-        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-1@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-1@xxxl.webp" alt=""></picture></figure>
-        <figure data-isw-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-4@xs.webp"><img src="https://aircenter.space/assets/images/media/about/11.solutions/image-4@xxxl.webp" alt=""></picture></figure>
-      </div>
-      <div class="isw-card" data-isw-card style="background:rgba(17,17,16,.05);color:#111110">
-        <div data-isw-ticks style="color:#111110"></div>
-        <p class="isw-counter" style="color:#111110"><span data-isw-count>1</span><span data-isw-total style="color:rgba(17,17,16,.4)">/ 4</span></p>
-        <div class="isw-texts">
-          <p data-isw-text style="color:#3c3b39"><strong>Functional space organization.</strong> Column grid 8.4 × 8.4 m, no second row of columns.</p>
-          <p data-isw-text class="is-off" style="color:#3c3b39"><strong>Impressive views.</strong> Corner units, curved panoramic glazing, 270-degree views, Khodynskoye Field Park.</p>
-          <p data-isw-text class="is-off" style="color:#3c3b39"><strong>Modern finishing options.</strong> Shell &amp; Core, in-floor convectors, raised floor.</p>
-          <p data-isw-text class="is-off" style="color:#3c3b39"><strong>Optimal floor height.</strong> Up to 3.96 m typical, up to 4.6 m top two floors.</p>
-        </div>
-        <div class="isw-nav">
-          <button data-isw-prev aria-label="previous" style="color:#111110;border-color:rgba(17,17,16,.3)">←</button>
-          <span class="nn" style="color:#111110"><span data-isw-count>1</span> / 4</span>
-          <button data-isw-next aria-label="next" style="color:#111110;border-color:rgba(17,17,16,.3)">→</button>
-        </div>
-      </div>
+<section id="stack-layout">
+  <!-- живий desktop stack-slider: 4 нумеровані картки стекаються (sticky), фото праворуч -->
+  <div class="stk">
+    <div class="stk-panel">
+      <div class="stk-num">1</div>
+      <h4 class="stk-title">Functional space organization</h4>
+      <p class="stk-desc">A consistent column grid of 8.4 × 8.4 m allows for efficient use of space. There is no second row of columns.</p>
     </div>
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-2@xs.webp"><img alt="" src="https://aircenter.space/assets/images/media/about/11.solutions/image-2@xxxl.webp"></picture>
+  </div>
+  <div class="stk">
+    <div class="stk-panel">
+      <div class="stk-num">2</div>
+      <h4 class="stk-title">Impressive views</h4>
+      <p class="stk-desc">Corner units feature curved panoramic glazing with 270-degree views of Khodynskoye Field Park and the city.</p>
+    </div>
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-3@xs.webp"><img alt="" src="https://aircenter.space/assets/images/media/about/11.solutions/image-3@xxxl.webp"></picture>
+  </div>
+  <div class="stk">
+    <div class="stk-panel">
+      <div class="stk-num">3</div>
+      <h4 class="stk-title">Modern finishing options</h4>
+      <p class="stk-desc">Shell &amp; Core, in-floor convectors, raised floor.</p>
+    </div>
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-1@xs.webp"><img alt="" src="https://aircenter.space/assets/images/media/about/11.solutions/image-1@xxxl.webp"></picture>
+  </div>
+  <div class="stk">
+    <div class="stk-panel">
+      <div class="stk-num">4</div>
+      <h4 class="stk-title">Optimal floor height</h4>
+      <p class="stk-desc">Up to 3.96 m typical, up to 4.6 m on the top two floors.</p>
+    </div>
+    <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/11.solutions/image-4@xs.webp"><img alt="" src="https://aircenter.space/assets/images/media/about/11.solutions/image-4@xxxl.webp"></picture>
   </div>
 </section>
 <section class="act">
