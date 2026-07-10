@@ -238,7 +238,7 @@
   #revolves .rvc-bg::after { content: ""; position: absolute; inset: 0;
     background: linear-gradient(#000 0%, rgba(0,0,0,.35) 40%, rgba(0,0,0,.55) 100%); }
   #revolves .rvc-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
-  #revolves .rvc-head { display: flex; justify-content: space-between; margin-bottom: 5vh;
+  #revolves .rvc-head { display: flex; justify-content: space-between; margin-bottom: 26vh;
     font-size: clamp(28px, 4.6vw, 66px); font-weight: 400; text-transform: uppercase;
     line-height: 1; letter-spacing: -.03em; color: #f2f1ee; }
   @media (max-width: 768px) { #revolves .rvc-head { flex-direction: column; gap: 2px; } }
@@ -909,7 +909,7 @@
   </div>
   <div class="rvc-inner">
     <h2 class="rvc-head"><span>Everything</span><span>revolves</span><span>around</span><span>you</span></h2>
-    <p class="reveal-text" style="max-width:60ch;margin:0 auto 4vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
+    <p class="reveal-text" style="max-width:60ch;margin:0 auto 14vh;text-align:center;font-size:13.5px;line-height:1.55;letter-spacing:.02em">In typical office buildings, floor plans are utilitarian and centered around a core that houses staircases, elevator shafts, and engineering systems. At AIR, this challenge is solved in an elegant, high-tech way: the core and the structural column grid <strong>"rotate"</strong> together with the building facade.</p>
     <div data-rvc id="rvc">
       <div data-rvc-stage>
         <figure data-rvc-slide><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xs.webp"><img src="https://aircenter.space/assets/images/media/about/5.revolves/image-1@xxxl.webp" alt=""></picture></figure>
@@ -923,7 +923,7 @@
         <div data-rvc-thumbs></div>
       </div>
     </div>
-    <p class="reveal-text" style="max-width:42ch;margin:10vh 0 12vh auto;text-align:left;font-size:clamp(15px,1.6vw,23px)">All offices at AIR maintain correct geometry and commercial efficiency. At the same time, each floor — with its staircases and utilities — is slightly rotated around the vertical axis relative to the previous one.</p>
+    <p class="reveal-text" style="max-width:42ch;margin:16vh 0 14vh auto;text-align:left;font-size:clamp(15px,1.6vw,23px)">All offices at AIR maintain correct geometry and commercial efficiency. At the same time, each floor — with its staircases and utilities — is slightly rotated around the vertical axis relative to the previous one.</p>
   </div>
 </section>
 
@@ -1369,7 +1369,10 @@
   api.rvc = window.RevolvesCarousel.create('#rvc', {});
   api.isw = Array.prototype.map.call(
     document.querySelectorAll('#isw-arch, #isw-hq, #isw-layout'),
-    function (el) { return window.ImageSliderWipe.create('#' + el.id, { mobile: 'tap' }); }
+    function (el) { return window.ImageSliderWipe.create('#' + el.id,
+      /* hq: живий слайдер гортає ПОВІЛЬНІШЕ (на 0.340 живий ще слайд 1, наш був 2) —
+         крок 85→110svh під живий бюджет hq→space 10.07% */
+      el.id === 'isw-hq' ? { mobile: 'tap', stepSvh: 110 } : { mobile: 'tap' }); }
   );
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */
