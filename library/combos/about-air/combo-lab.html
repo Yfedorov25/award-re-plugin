@@ -219,7 +219,8 @@
      не full-height градієнт; слайд-1 титул 21px, слайди 2-3 базові 13px;
      фон = ОДНЕ фото з pan (object-position по слайдах імітує живий parallax-пан) */
   #isw-hq .isw-card { top: 50%; bottom: auto; transform: translateY(-50%);
-    height: min(78svh, 640px); border-radius: 5px; padding: 30px; right: 30px; }
+    height: min(80svh, 720px); border-radius: 5px; padding: 30px; right: 20px;
+    background: rgba(240, 240, 240, 0.6); }  /* живий card-slider (архів): 453×720, СВІТЛА .6, blur40, right 20 */
   #isw-hq .isw-texts p.t-lg { font-size: 21px; line-height: 1.14; }
   #isw-hq .isw-texts p { font-size: 13px; line-height: 1.3; }
   #isw-hq [data-isw-slide]:nth-child(1) img { object-position: 50% 0%; }
@@ -520,7 +521,7 @@
      → 7 glass-карток фіч (card-team ui-background-alt blur, offset-грід). */
   /* живе: метрики в правій половині, великі, caps на 2 рядки */
   .metric-right { margin-left: 50%; gap: 8vw; }
-  .metric-right .m-num { font-size: clamp(48px, 6.5vw, 104px); }
+  .metric-right .m-num { font-size: clamp(40px, 4.93vw, 71px); }  /* живий вимір: 71px @1440 (був 94) */
   @media (max-width: 768px) { .metric-right { margin-left: 0; } }
   /* карусель лоббі — живе: fullbleed від краю до краю (вирив із .act-контейнера) */
   .lobby { position: relative; margin-top: 7vh; border-radius: 0; overflow: clip;
@@ -570,13 +571,22 @@
   /* 8 AUTONOMY — 2-кол інтро-грід (текст+3 фото) → інтерактивна PLAN-МАПА
      (живе: about-automony-plan = світлий фон+спіраль, титул «4000м²», ~7 POI plan-marker--pin
       з бейджами, вуличні мітки під кутом, compass rotate(-15°) внизу-справа). */
-  .aut-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 2vw; margin-top: 6vh; }
-  .aut-grid .col-stack { display: grid; gap: 2vw; }
-  .aut-card { background: rgba(0,0,0,.05); border-radius: 6px; padding: 20px;
-    display: grid; align-content: end; }  /* живий card-text ui-background-alt */
-  .aut-card p { font-size: 12.5px; line-height: 1.4; letter-spacing: .02em;
-    text-transform: uppercase; color: #111110; max-width: 30ch; }
-  .aut-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
+  /* живі числа (архів, JS-off, база 1400 внутр.): колонки 690|335|335 gap 20 →
+     49.3%|1fr|1fr gap 1.43%; офсети: image-2 +345 від image-1, image-3 +661 (частки
+     від ширини гріда: 24.6% і 47.2%) */
+  .aut-grid { display: grid; grid-template-columns: 49.3% minmax(0,1fr) minmax(0,1fr);
+    gap: 1.43vw; margin-top: 6vh; align-items: start; }  /* 1fr без minmax тягнув min-content картки → колонки 236/288 */
+  .aut-grid > picture img { aspect-ratio: 690 / 769; }
+  /* % маржі grid-item рахуються від ширини grid-area (колонки 335):
+     image-3 офсет 661px → 197% · image-2 офсет 345px → 103% */
+  .aut-mid { margin-top: 197%; }
+  .aut-right { margin-top: 103%; display: grid; gap: 20px; }
+  .aut-mid img, .aut-right img { aspect-ratio: 335 / 355; }
+  .aut-card { background: rgba(0,0,0,.05); border-radius: 5px; padding: 20px;
+    aspect-ratio: 335 / 298; display: grid; align-content: start; }  /* живий card-text 335×298 r5 */
+  .aut-card p { font-size: 14px; line-height: 18px; letter-spacing: .02em;
+    text-transform: uppercase; color: #111110; max-width: 26ch; }
+  .aut-grid img { width: 100%; height: auto; object-fit: cover; border-radius: 6px; display: block; }
 
   /* --- PLAN-МАПА (about-automony-plan) — живе: 3D-макет кварталу (плити B1/B2/B3 під кутом),
      чорні квадратні піни-іконки інфраструктури, зони-мітки навколо, титул «4000 M²»,
@@ -852,7 +862,12 @@
     #a-intro .a-ill { position: sticky; top: 15vh; }
     #headquarters { padding-top: 6vh; padding-bottom: 4vh; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
-    #comfort { padding-bottom: 40vh; }
+    /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
+       (кластер #094-113); перекладаємо хвостовий padding у інтро, регіон незмінний */
+    #comfort { padding-bottom: 12vh; }
+    #comfort .metric-right { margin-top: 10vh; }
+    #comfort > .reveal-text { margin-top: 10vh !important; margin-bottom: 12vh !important; }
+    #comfort .lobby-wrap { margin-top: 12vh; }
     /* живий cert ПІНИТЬ контент (наш був 100svh-блок з margin — контент їхав вище
        живого, кластер #192-200): секція вища, bg+контент sticky */
     #certificate { height: calc(100svh + 52vh); margin-bottom: 0; }
@@ -954,6 +969,16 @@
     .callout { margin-top: 4vh !important; }
     #isw-arch { min-height: calc(100svh + 160svh) !important; }  /* було 120svh */
     #isw-hq { min-height: calc(100svh + 190svh) !important; }    /* JS давав 220svh */
+    /* c20 desktop-виміри НЕ протікають на 390 */
+    .aut-mid, .aut-right { margin-top: 0; }
+    #comfort > .reveal-text { max-width: 350px !important; font-size: 21px !important;
+      line-height: 24px !important; }
+    /* живий m390 hq-card СВІТЛИЙ (кадр live-048), arch лишається темним glass */
+    #isw-hq .isw-card { background: rgba(240,240,240,.75); color: #000; }
+    #isw-hq .isw-texts p { color: rgba(0,0,0,.6); }
+    #isw-hq .isw-texts p strong { color: #000; }
+    #isw-hq .isw-card [data-isw-ticks] { color: #000; }
+    #isw-hq .isw-card .isw-tick { background: rgba(0,0,0,.2); }
     #services-cards { padding-bottom: 38vh !important; }         /* svc→cert був −190px */
     .cert { margin-bottom: 12vh; }                               /* cert→sol був +118px */
   }
@@ -1128,7 +1153,8 @@
     <div><div class="m-num">680 <span style="font-size:.4em">M²</span></div><div class="m-cap">maximum<br>lobby area</div></div>
   </div>
   <!-- живе: заява UPPERCASE reveal праворуч (не lowercase lead зліва) -->
-  <p class="reveal-text" style="max-width:34ch;margin:12vh 0 7vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
+  <!-- живий вимір (архів): h2 28px, w690 (49.3% контейнера), права половина, text-align LEFT -->
+  <p class="reveal-text" style="max-width:49.3%;margin:6vh 0 7vh auto;text-align:left;font-size:28px;line-height:1.07;color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
 
   <!-- живе: fullscreen карусель лоббі (4 слайди, thumb-рейка, лічильник 1/4) -->
   <!-- фікс п.7 аудиту: слайди БЕЗ lazy (приховані opacity:0 → lazy ніколи не вантажились),
@@ -1180,12 +1206,17 @@
   <!-- живе: центр-титул 2 рядки + UPPERCASE reveal-абзац ПРАВОРУЧ (4000 лише на план-мапі) -->
   <h2 class="h1" style="text-align:center;margin-bottom:2vh">Maximum<br>autonomy</h2>
   <p class="reveal-text" style="max-width:44ch;margin:5vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.7vw,24px)">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
+  <!-- живий грід (вимір з архіву, JS-off): 3 колонки 690|335|335 gap 20, СТУПІНЧАСТО:
+       image-1 x20 y536 690×769 · image-3 (середня) y1197 · image-2 (права) y881 ·
+       card-text y~1240 під image-2. DOM-порядок живого: 1 → 3 → 2 → card. -->
   <div class="aut-grid">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_1_image_xs/assets/images/media/about/8.automony/image-1%40xs.webp"><img loading="lazy" alt="AIR commercial space" src="https://aircenter.space/media/cache/about_autonomy_1_image_xxxl/assets/images/media/about/8.automony/image-1%40xxxl.webp"></picture>
-    <div class="col-stack">
-      <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-2%40xs.webp"><img loading="lazy" alt="AIR boutique" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-2%40xxxl.webp"></picture>
+    <div class="aut-mid">
       <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-3%40xs.webp"><img loading="lazy" alt="AIR cafe" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-3%40xxxl.webp"></picture>
-      <!-- живий card-text ui-background-alt (air-about.html:2382) — був відсутній (кластер #136-142) -->
+    </div>
+    <div class="aut-right">
+      <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-2%40xs.webp"><img loading="lazy" alt="AIR boutique" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-2%40xxxl.webp"></picture>
+      <!-- живий card-text ui-background-alt (air-about.html:2382) -->
       <div class="aut-card"><p>Coffee points integrated into the design concept will appear in the lobbies of Buildings 1 and 2.</p></div>
     </div>
   </div>
