@@ -207,13 +207,21 @@ export const SNAPSHOT_FN = (args) => {
   }
 
   const STYLE_KEYS = [
-    'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
+    'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing',
     'textTransform', 'textAlign', 'color', 'backgroundColor', 'backgroundImage',
     'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
     'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
     'display', 'position', 'flexDirection', 'justifyContent', 'alignItems',
     'gap', 'gridTemplateColumns', 'gridTemplateRows',
     'borderRadius', 'opacity', 'transform', 'objectFit', 'objectPosition', 'zIndex',
+    /* S2c: layout-повнота для каркаса ПО СПЕЦІ (генератор потребує
+       використаних значень, не лише box) */
+    'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
+    'top', 'right', 'bottom', 'left',
+    'flexGrow', 'flexShrink', 'flexBasis', 'overflowX', 'overflowY',
+    'boxSizing', 'whiteSpace', 'verticalAlign',
+    'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+    'borderTopColor', 'borderTopStyle',
   ];
   const sr = sec.getBoundingClientRect();
   let count = 0;
@@ -231,14 +239,17 @@ export const SNAPSHOT_FN = (args) => {
       box: { x: r1(r.left - sr.left), y: r1(r.top - sr.top), w: r1(r.width), h: r1(r.height) },
       styles: {},
     };
-    if (ownText) node.text = ownText.slice(0, 80);
+    if (ownText) node.text = ownText.slice(0, 400);
     for (const k of STYLE_KEYS) {
       const v = cs[k];
       if (v !== undefined && v !== '') node.styles[k] = v;
     }
     if (el.tagName === 'IMG') {
+      let srcPath = '';
+      try { srcPath = new URL(el.currentSrc || el.src, location.href).pathname; } catch {}
       node.img = {
         src: decodeURIComponent((el.currentSrc || el.src || '').split('/').pop().split('?')[0]),
+        srcPath, /* повний pathname — для генератора каркаса */
         naturalW: el.naturalWidth, naturalH: el.naturalHeight,
       };
     }

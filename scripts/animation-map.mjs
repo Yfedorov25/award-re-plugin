@@ -126,22 +126,37 @@ const SAMPLE_FN = () => {
   };
 };
 
-async function settle(page, maxMs = 2600) {
-  /* чекати, поки lerp осяде: ВСІ проби стабільні 3 заміри поспіль */
+/* v0.1 (S2): TRANSIENT-СЕМПЛІНГ — v0 чекав осідання мовчки і знімав лише
+   стани спокою, тож снап-зони «пролітали» проміжок. Тепер під час
+   lerp-травела кожен ~130мс знімається ПОВНИЙ кадр (SAMPLE_FN),
+   параметризований одометром (s) — крива заповнюється МІЖ снапами. */
+async function settleAndSample(page, transientFrames, gestureInput, maxMs = 2600) {
   let last = null, stable = 0;
   const t0 = Date.now();
   while (Date.now() - t0 < maxMs) {
-    await page.waitForTimeout(140);
-    const ys = await page.evaluate(READ_ODO_FN);
+    await page.waitForTimeout(130);
+    const frame = await page.evaluate(SAMPLE_FN);
+    const ys = frame.probes;
     if (last !== null && ys.every((y, i) => Math.abs(y - last[i]) < 0.5)) {
       stable++; if (stable >= 3) return { ys, settled: true };
-    } else stable = 0;
+    } else {
+      stable = 0;
+      /* одометр ще їде → це transient-кадр травела */
+      if (last !== null) transientFrames.push({ input: gestureInput, transient: true, ...frame });
+    }
     last = ys;
   }
   return { ys: last, settled: false };
 }
 
 async function runViewport(browser, vpName) {
+  /* per-viewport селектор (з S2 selector може бути {desktop, mobile}) +
+     фільтр viewports: секцій, яких нема на цьому вʼюпорті, не знімаємо */
+  if (sectionCfg.viewports && !sectionCfg.viewports.includes(vpName)) {
+    return { error: `секція ${sectionId} існує лише на: ${sectionCfg.viewports.join(', ')}` };
+  }
+  const secSelector = sectionCfg.selector && typeof sectionCfg.selector === 'object'
+    ? sectionCfg.selector[vpName] : sectionCfg.selector;
   const vp = VIEWPORTS[vpName];
   const ctx = await browser.newContext({
     viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1,
@@ -158,7 +173,7 @@ async function runViewport(browser, vpName) {
   await page.waitForTimeout(600);
 
   /* 1) цілі + одометр */
-  const picked = await page.evaluate(SETUP_FN, { selector: sectionCfg.selector, odometerSelector: site.odometerSelector });
+  const picked = await page.evaluate(SETUP_FN, { selector: secSelector, odometerSelector: site.odometerSelector });
   if (picked.error) { await ctx.close(); return { error: picked.error }; }
   console.log(`  одометр: [${picked.odometer}] · цілей: ${picked.targets.length}`);
 
@@ -184,7 +199,7 @@ async function runViewport(browser, vpName) {
     });
     gestureInput += dist;
     gestures++;
-    const st = await settle(page);
+    const st = await settleAndSample(page, frames, gestureInput);
     if (st.settled) settledCount++;
     const frame = { input: gestureInput, ...(await page.evaluate(SAMPLE_FN)) };
     frames.push(frame);
@@ -207,7 +222,7 @@ async function runViewport(browser, vpName) {
   /* 3) криві: транспонувати кадри → на ціль */
   const targets = picked.targets.map((t, ti) => {
     const samples = frames.map((f) => ({
-      input: f.input, s: f.scroll,
+      input: f.input, s: f.scroll, t: f.transient || undefined,
       transform: f.targets[ti].transform,
       opacity: f.targets[ti].opacity,
       clipPath: f.targets[ti].clipPath,
@@ -225,6 +240,7 @@ async function runViewport(browser, vpName) {
   const advanced = frames[frames.length - 1].scroll - frames[0].scroll;
   const movingCount = targets.filter((t) => t.moving.transform || t.moving.opacity || t.moving.clipPath).length;
   const bboxMoving = targets.filter((t) => t.moving.viewportTop).length;
+  const transientCount = frames.filter((f) => f.transient).length;
   const selfCheck = {
     odometerProbe: picked.odometer[odoIdx],
     gestureSourceType,
@@ -232,6 +248,7 @@ async function runViewport(browser, vpName) {
     gestureInputPx: gestureInput,
     settledSteps: `${settledCount}/${gestures}`,
     gestures,
+    transientFrames: transientCount,
     targetsTotal: targets.length,
     targetsWithAnimatedProps: movingCount,
     targetsWithBboxMotion: bboxMoving,
@@ -240,11 +257,14 @@ async function runViewport(browser, vpName) {
       /* на touch хореографія легітимно вимкнена — там достатньо bbox-руху */
       movingCount === 0 && gestureSourceType === 'mouse' ? 'ЖОДНА ціль не має анімованої кривої (mouse) — карта пуста' : null,
       movingCount === 0 && bboxMoving === 0 ? 'НІЧОГО не рухається взагалі' : null,
-      settledCount < gestures * 0.7 ? `осідання досягнуто лише в ${settledCount}/${gestures} жестів` : null,
+      /* v0.1: неосілий жест ОК, якщо його травел знято transient-кадрами;
+         провал лише коли і осідання мало, І травел не зафіксований */
+      settledCount < gestures * 0.7 && transientCount < gestures
+        ? `осідання ${settledCount}/${gestures} І transient-кадрів лише ${transientCount} — травел не знято` : null,
     ].filter(Boolean),
   };
-  console.log(`  одометр[${picked.odometer[odoIdx]}]: +${Math.round(advanced)}px (інпут ${gestureInput}px, жестів ${gestures}) · осіло ${settledCount}/${gestures} · цілей ${targets.length}, анім-props ${movingCount}, bbox-рух ${bboxMoving}`);
-  return { viewport: vpName, section: sectionId, selector: sectionCfg.selector, stepPx, frames: frames.length, targets, selfCheck };
+  console.log(`  одометр[${picked.odometer[odoIdx]}]: +${Math.round(advanced)}px (інпут ${gestureInput}px, жестів ${gestures}) · осіло ${settledCount}/${gestures} · transient-кадрів ${transientCount} · цілей ${targets.length}, анім-props ${movingCount}, bbox-рух ${bboxMoving}`);
+  return { viewport: vpName, section: sectionId, selector: secSelector, stepPx, frames: frames.length, targets, selfCheck };
 }
 
 /* ---- main ---- */
