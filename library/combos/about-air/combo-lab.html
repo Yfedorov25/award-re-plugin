@@ -400,6 +400,7 @@
 
 
   /* 12 LAYOUT — живий stack-slider: нумеровані картки стекаються при скролі (sticky) */
+  #stack-layout .stk + .stk { margin-top: 25svh; }  /* Batch D: живий хвіст 17.2% (наш був 14%) — більше скролу на картку стека */
   #stack-layout .stk { position: sticky; top: 0; height: 100svh; display: grid;
     grid-template-columns: 1fr 1fr; background: #ececea; overflow: clip; }
   #stack-layout .stk:nth-child(even) { background: #e4e2de; }
@@ -450,8 +451,8 @@
   .metric-row .m-cap { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #8b8a86; margin-top: 8px; }
 
   /* 2 INFO-BOTTOM */
+  picture { display: block; }  /* picture inline = нульовий grid/flex-item → фото випадали з сіток (ib-grid, aut-grid) */
   .ib-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; margin-top: 6vh; }
-  .ib-grid picture { display: block; }  /* picture inline → нульовий grid-item, фото випадали з сітки */
   .ib-grid img { width: 100%; border-radius: 6px; display: block; }
   .callout { margin-top: 6vh; padding: 4vh 3vw; background: #ecebe6; border-radius: 8px;
     display: flex; flex-direction: column; gap: 2.4vh; align-items: flex-start; }
@@ -545,7 +546,7 @@
   .aplan { position: relative; margin-top: 8vh; width: 100%; aspect-ratio: 1440 / 760;
     border-radius: 8px; overflow: clip; background: #f4f3f0; }
   /* desktop: живий stickyBottom тримає план ~повний екран поки скрол іде (оверрайд ПІСЛЯ бази) */
-  .aplan-scroll { height: 175svh; }
+  .aplan-scroll { height: 100svh; }  /* Batch D: живий бюджет autonomy 9.28% — 175svh роздував services/cert на +6..10% */
   .aplan { position: sticky; top: 12vh; }
   @media (max-width: 768px) { .aplan-scroll { height: auto; } .aplan { position: static; } }
   /* макет кварталу: діагональна смуга-«стрічка» плит (перспектива зліва-верх → право-низ) */
@@ -954,7 +955,7 @@
     <div><div class="m-num">680 <span style="font-size:.4em">M²</span></div><div class="m-cap">maximum<br>lobby area</div></div>
   </div>
   <!-- живе: заява UPPERCASE reveal праворуч (не lowercase lead зліва) -->
-  <p class="reveal-text" style="max-width:34ch;margin:14vh 0 8vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
+  <p class="reveal-text" style="max-width:34ch;margin:8vh 0 5vh auto;text-align:right;font-size:clamp(15px,1.6vw,23px);color:#1c1b19">The bespoke design by <strong>HAAST</strong> architectural bureau envisions spacious double-height lobbies with high ceilings and panoramic glazing in each tower.</p>
 
   <!-- живе: fullscreen карусель лоббі (4 слайди, thumb-рейка, лічильник 1/4) -->
   <!-- фікс п.7 аудиту: слайди БЕЗ lazy (приховані opacity:0 → lazy ніколи не вантажились),
@@ -1005,7 +1006,7 @@
 <section class="act fade-seam" id="autonomy">
   <!-- живе: центр-титул 2 рядки + UPPERCASE reveal-абзац ПРАВОРУЧ (4000 лише на план-мапі) -->
   <h2 class="h1" style="text-align:center;margin-bottom:2vh">Maximum<br>autonomy</h2>
-  <p class="reveal-text" style="max-width:44ch;margin:10vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.7vw,24px)">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
+  <p class="reveal-text" style="max-width:44ch;margin:5vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.7vw,24px)">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
   <div class="aut-grid">
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_1_image_xs/assets/images/media/about/8.automony/image-1%40xs.webp"><img loading="lazy" alt="AIR commercial space" src="https://aircenter.space/media/cache/about_autonomy_1_image_xxxl/assets/images/media/about/8.automony/image-1%40xxxl.webp"></picture>
     <div class="col-stack">
