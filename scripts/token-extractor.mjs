@@ -1,50 +1,102 @@
 /* ============================================================
-   TOKEN-EXTRACTOR v0 (сесія 20, МІКРО-2) — build-spec із АРХІВУ
+   TOKEN-EXTRACTOR v1 (трек springs, S1) — build-spec із АРХІВУ
    ------------------------------------------------------------
-   Валідація ставки конвеєра: чи екстракція специфікації з
-   архівного коду (HTML+CSS) дає точні числа для побудови секції
-   без ручної розвідки.
+   v0 (сесія 20) був заточений під air-about і валідований проти
+   живого: 96.5% desktop / 99.7% mobile точних метрик. v1 — той
+   самий метод, узагальнений у конфіг-драйв: САЙТИ × СЕКЦІЇ.
 
-   Секція v0: architecture-інтро на AIR /about
-   (h2 «Architecture of efficiency» + 2 абзаци + 3-фото sticky-слайдер).
+   Метод (незмінний з v0):
+   1. Піднімає архівний HTML у Playwright на фейковому origin через
+      route-інтерсепт: CSS → локальні файли, шрифти → локальні або
+      проксі з живого, JS → ПОРОЖНЄ (детермінований статичний лейаут
+      без Locomotive/reveal), інші асети → проксі з живого.
+   2. Нормалізує reveal-стан (NORMALIZE_CSS) — opacity/transform/filter
+      позначені як normalized-метрики.
+   3. Для КОЖНОГО значущого елемента секції: tag, класи, текст (80 симв.),
+      bbox відносно секції (0.1px), computed styles (STYLE_KEYS).
+   4. Два вʼюпорти: desktop 1440x900 + mobile 390x844 (touch UA).
+   5. Пише extraction/<site>/build-spec.json + самоперевірки
+      (елементи >0, шрифти завантажились, фото мають natural size).
 
-   Що робить:
-   1. Піднімає skills/teardowns/live-archive/air/air-about.html у
-      Playwright на фейковому origin через route-інтерсепт:
-      /assets/stylesheets/* → локальні air-global.css / air-about.css,
-      шрифти /assets/fonts/* → проксі з живого aircenter.space,
-      /assets/javascripts/* → ПОРОЖНЄ (JS вимкнено → детермінований
-      статичний лейаут без Locomotive/reveal).
-   2. Нормалізує reveal-стан (opacity:.005 → 1) інʼєкцією CSS —
-      opacity/transform/filter позначені як normalized-метрики.
-   3. Для КОЖНОГО значущого елемента секції знімає: tag, класи,
-      текст (80 симв.), bbox відносно секції (0.1px), computed styles
-      (typography/color/box/layout/misc — див. STYLE_KEYS).
-   4. Два вʼюпорти: desktop 1440x900 та mobile 390x844 (touch UA).
-   5. Пише extraction/air-about/build-spec.json + самоперевірки
-      (елементи >0, шрифт Onest завантажився, фото мають natural size).
+   Формат спеки v1: viewports.<vp>.sections.<sectionId> = снапшот.
+   Секція шукається або CSS-селектором (перший ВИДИМИЙ матч — бо
+   у springs desktop/mobile варіанти блоків є окремими DOM-нодами),
+   або регексом заголовка (спадок air-about).
 
    Запуск:
      PLAYWRIGHT_FROM=/Users/yehorfedorov/Downloads/eruhomist/apps/smarts/package.json \
-       node scripts/token-extractor.mjs
-   Верифікація проти живого: scripts/spec-verify.mjs (імпортує звідси).
+       node scripts/token-extractor.mjs <site>        # air-about | springs-home
+   Верифікація проти живого: scripts/spec-verify.mjs <site> (імпортує звідси).
    ============================================================ */
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { pathToFileURL, fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname, join, basename } from 'path';
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 export const REPO = join(__dir, '..');
-export const ARCHIVE_DIR = join(REPO, 'skills/teardowns/live-archive/air');
-export const OUT_DIR = join(REPO, 'extraction/air-about');
-export const LIVE_ORIGIN = 'https://aircenter.space';
-export const FAKE_ORIGIN = 'http://air-archive.test';
+export const FAKE_ORIGIN = 'http://replica-archive.test';
 
 export const VIEWPORTS = {
   desktop: { width: 1440, height: 900, mobile: false },
   mobile: { width: 390, height: 844, mobile: true },
 };
 export const MOBILE_UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1';
+
+/* ---- КОНФІГИ САЙТІВ ---- */
+export const SITES = {
+  'air-about': {
+    archiveDir: join(REPO, 'skills/teardowns/live-archive/air'),
+    outDir: join(REPO, 'extraction/air-about'),
+    liveOrigin: 'https://aircenter.space',
+    livePath: '/about',
+    archive: {
+      html: 'air-about.html',
+      css: [
+        { match: '/stylesheets/global.css', file: 'air-global.css' },
+        { match: '/stylesheets/about.css', file: 'air-about.css' },
+      ],
+      jsOffPrefix: '/assets/javascripts/',
+      fontsLocalPrefix: null, /* шрифти проксі з живого */
+      proxyPrefixes: ['/assets/', '/media/'],
+    },
+    fontChecks: ['16px Onest'],
+    sections: [
+      { id: 'architecture-intro', headingRegex: '^\\s*architecture',
+        note: 'h2 "Architecture of efficiency" + 2 абзаци + 3-фото sticky-слайдер' },
+    ],
+  },
+  'springs-home': {
+    archiveDir: join(REPO, 'skills/teardowns/live-archive/springs'),
+    outDir: join(REPO, 'extraction/springs-home'),
+    liveOrigin: 'https://springs.estate',
+    livePath: '/',
+    /* одометр animation-map: далекий блок, чий bbox.top = проксі скролу
+       (.page-content-wrapper__inner НЕ отримує transform на цьому сайті) */
+    odometerSelector: '.l-callback',
+    archive: {
+      html: 'springs-home.html',
+      css: [
+        { match: '/stylesheets/global.css', file: 'springs-global.css' },
+        { match: '/stylesheets/landing.css', file: 'springs-landing.css' },
+      ],
+      jsOffPrefix: '/assets/javascripts/',
+      fontsLocalPrefix: '/assets/fonts/', /* fonts/ у дзеркалі */
+      proxyPrefixes: ['/assets/', '/media/'],
+    },
+    fontChecks: ['16px "Victor Serif"', '16px "TT Commons Pro"'],
+    sections: [
+      { id: 'hero-gallery', selector: '.l-gallery',
+        note: 'desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item',
+        /* для animation-map: скрол заблоковано (stop=true), доки інтро-слайдер
+           hero не пройдено кліками next (відкриття S1) */
+        gate: { clickSelector: '.l-gallery-next', maxClicks: 8 } },
+      { id: 'intro', selector: '.l-intro',
+        note: 'sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero' },
+      { id: 'wellness', selector: '.l-wellness',
+        note: 'контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ' },
+    ],
+  },
+};
 
 /* reveal/анімаційна нормалізація — ОДНАКОВА для архіву й живого.
    Метрики opacity/transform/filter після неї = «нормалізований кінцевий
@@ -53,6 +105,7 @@ export const NORMALIZE_CSS = `
 *,*::before,*::after{animation:none!important;transition:none!important;}
 [data-reveal]:not([data-reveal-visible]){opacity:1!important;pointer-events:all!important;}
 [data-reveal],[data-reveal] *{filter:none!important;}
+.with-cookie-consent{--cookie-height:0px!important;}
 `;
 
 export async function resolveChromium() {
@@ -68,15 +121,26 @@ export async function resolveChromium() {
 }
 
 /* ---- знімок секції: ВИКОНУЄТЬСЯ В БРАУЗЕРІ, той самий код для
-   архіву і живого (передається як function у page.evaluate) ---- */
-export const SNAPSHOT_FN = () => {
+   архіву і живого. args = { selector?, headingRegex?, fontChecks } ---- */
+export const SNAPSHOT_FN = (args) => {
+  const { selector, headingRegex, fontChecks } = args;
   const r1 = (v) => Math.round(v * 10) / 10;
-  /* секція: перший <section>, чий h1/h2 починається з "Architecture" */
-  const sec = [...document.querySelectorAll('section')].find((s) => {
-    const h = s.querySelector('h1,h2');
-    return h && /^\s*architecture/i.test((h.textContent || '').replace(/ /g, ' ').trim());
-  });
-  if (!sec) return { error: 'architecture section not found' };
+  const findSection = () => {
+    if (selector) {
+      /* перший ВИДИМИЙ матч: desktop/mobile варіанти блоків = окремі ноди */
+      return [...document.querySelectorAll(selector)].find((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 1 && r.height > 1 && getComputedStyle(el).display !== 'none';
+      }) || null;
+    }
+    const re = new RegExp(headingRegex, 'i');
+    return [...document.querySelectorAll('section')].find((s) => {
+      const h = s.querySelector('h1,h2');
+      return h && re.test((h.textContent || '').replace(/ /g, ' ').trim());
+    }) || null;
+  };
+  const sec = findSection();
+  if (!sec) return { error: `section not found: ${selector || headingRegex}` };
 
   const STYLE_KEYS = [
     'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
@@ -90,9 +154,8 @@ export const SNAPSHOT_FN = () => {
   const sr = sec.getBoundingClientRect();
   let count = 0;
   const build = (el, depth) => {
-    if (count > 500 || depth > 12) return null;
+    if (count > 800 || depth > 14) return null;
     const r = el.getBoundingClientRect();
-    /* пропустити порожні нульові гілки */
     if (r.width < 0.5 && r.height < 0.5 && !el.children.length) return null;
     const cs = getComputedStyle(el);
     const ownText = [...el.childNodes].filter((n) => n.nodeType === 3)
@@ -100,7 +163,7 @@ export const SNAPSHOT_FN = () => {
     count++;
     const node = {
       tag: el.tagName.toLowerCase(),
-      cls: typeof el.className === 'string' ? el.className.trim().split(/\s+/).slice(0, 6).join(' ') : '',
+      cls: typeof el.className === 'string' ? el.className.trim().split(/\s+/).slice(0, 8).join(' ') : '',
       box: { x: r1(r.left - sr.left), y: r1(r.top - sr.top), w: r1(r.width), h: r1(r.height) },
       styles: {},
     };
@@ -132,7 +195,7 @@ export const SNAPSHOT_FN = () => {
     elementCount: count,
     selfCheck: {
       elements: count,
-      fontOnestLoaded: document.fonts.check('16px Onest'),
+      fonts: Object.fromEntries((fontChecks || []).map((f) => [f, document.fonts.check(f)])),
       images: imgs.length,
       imagesWithNaturalSize: imgs.filter((i) => i.naturalWidth > 0).length,
       docReadyClasses: document.documentElement.className,
@@ -142,17 +205,38 @@ export const SNAPSHOT_FN = () => {
 };
 
 /* ---- форс-довантаження lazy-картинок усередині секції ---- */
-export const FORCE_IMAGES_FN = async () => {
-  const sec = [...document.querySelectorAll('section')].find((s) => {
-    const h = s.querySelector('h1,h2');
-    return h && /^\s*architecture/i.test((h.textContent || '').replace(/ /g, ' ').trim());
-  });
+export const FORCE_IMAGES_FN = async (args) => {
+  const { selector, headingRegex } = args;
+  const findSection = () => {
+    if (selector) {
+      return [...document.querySelectorAll(selector)].find((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 1 && r.height > 1 && getComputedStyle(el).display !== 'none';
+      }) || null;
+    }
+    const re = new RegExp(headingRegex, 'i');
+    return [...document.querySelectorAll('section')].find((s) => {
+      const h = s.querySelector('h1,h2');
+      return h && re.test((h.textContent || '').replace(/ /g, ' ').trim());
+    }) || null;
+  };
+  const sec = findSection();
   if (!sec) return 0;
+  /* lazy-движок тримає справжні URL у data-src/data-srcset, а в src —
+     SVG-заглушку; активуємо і <source> всередині <picture> */
+  for (const src of sec.querySelectorAll('source[data-srcset]')) {
+    const cur = src.getAttribute('srcset') || '';
+    if (!cur || cur.startsWith('data:')) src.srcset = src.dataset.srcset;
+  }
   const imgs = [...sec.querySelectorAll('img')];
   await Promise.all(imgs.map((img) => {
     img.loading = 'eager';
+    const placeholder = !img.getAttribute('src') || img.src.startsWith('data:');
+    if (placeholder && img.dataset.src) img.src = img.dataset.src;
+    const curSet = img.getAttribute('srcset') || '';
+    if (img.dataset.srcset && (!curSet || curSet.startsWith('data:'))) img.srcset = img.dataset.srcset;
     if (!img.complete || !img.naturalWidth) {
-      const s = img.src; img.src = ''; img.src = s;
+      const s = img.src; if (s) { img.src = ''; img.src = s; }
     }
     return img.complete && img.naturalWidth ? null
       : new Promise((res) => { img.onload = img.onerror = res; setTimeout(res, 6000); });
@@ -160,36 +244,38 @@ export const FORCE_IMAGES_FN = async () => {
   return imgs.filter((i) => i.naturalWidth > 0).length;
 };
 
-/* ---- зняти секцію з АРХІВУ в одному вʼюпорті ---- */
-export async function snapshotArchive(browser, vpName) {
+/* ---- зняти ВСІ секції сайту з АРХІВУ в одному вʼюпорті ---- */
+export async function snapshotArchive(browser, site, vpName) {
   const vp = VIEWPORTS[vpName];
   const ctx = await browser.newContext({
     viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1,
     userAgent: vp.mobile ? MOBILE_UA : undefined,
     hasTouch: vp.mobile, isMobile: vp.mobile,
   });
-  const html = readFileSync(join(ARCHIVE_DIR, 'air-about.html'), 'utf8');
-  const cssGlobal = readFileSync(join(ARCHIVE_DIR, 'air-global.css'), 'utf8');
-  const cssAbout = readFileSync(join(ARCHIVE_DIR, 'air-about.css'), 'utf8');
+  const A = site.archive;
+  const html = readFileSync(join(site.archiveDir, A.html), 'utf8');
+  const cssBodies = A.css.map((c) => ({ ...c, body: readFileSync(join(site.archiveDir, c.file), 'utf8') }));
   await ctx.route(`${FAKE_ORIGIN}/**`, async (route) => {
     const u = new URL(route.request().url());
-    if (u.pathname === '/about') {
+    if (u.pathname === site.livePath) {
       return route.fulfill({ contentType: 'text/html; charset=utf-8', body: html });
     }
-    if (u.pathname.includes('/stylesheets/global.css')) {
-      return route.fulfill({ contentType: 'text/css', body: cssGlobal });
-    }
-    if (u.pathname.includes('/stylesheets/about.css')) {
-      return route.fulfill({ contentType: 'text/css', body: cssAbout });
-    }
-    if (u.pathname.startsWith('/assets/javascripts/')) {
+    const css = cssBodies.find((c) => u.pathname.includes(c.match));
+    if (css) return route.fulfill({ contentType: 'text/css', body: css.body });
+    if (A.jsOffPrefix && u.pathname.startsWith(A.jsOffPrefix)) {
       /* JS ВИМКНЕНО в архівному прогоні — статичний лейаут */
       return route.fulfill({ contentType: 'application/javascript', body: '' });
     }
-    if (u.pathname.startsWith('/assets/') || u.pathname.startsWith('/media/')) {
-      /* шрифти й дрібні асети — проксі з живого */
+    if (A.fontsLocalPrefix && u.pathname.startsWith(A.fontsLocalPrefix)) {
       try {
-        const resp = await ctx.request.get(LIVE_ORIGIN + u.pathname + u.search, { timeout: 15000 });
+        const body = readFileSync(join(site.archiveDir, 'fonts', basename(u.pathname)));
+        return route.fulfill({ contentType: 'font/woff2', body });
+      } catch { /* нема локально → впадемо в проксі нижче */ }
+    }
+    if (A.proxyPrefixes.some((p) => u.pathname.startsWith(p))) {
+      /* дрібні асети (картинки, іконки) — проксі з живого */
+      try {
+        const resp = await ctx.request.get(site.liveOrigin + u.pathname + u.search, { timeout: 15000 });
         return route.fulfill({
           status: resp.status(), body: await resp.body(),
           contentType: resp.headers()['content-type'] || 'application/octet-stream',
@@ -199,43 +285,56 @@ export async function snapshotArchive(browser, vpName) {
     return route.fulfill({ status: 404, body: '' });
   });
   const page = await ctx.newPage();
-  await page.goto(`${FAKE_ORIGIN}/about`, { waitUntil: 'load', timeout: 60000 });
+  await page.goto(FAKE_ORIGIN + site.livePath, { waitUntil: 'load', timeout: 60000 });
   await page.addStyleTag({ content: NORMALIZE_CSS });
   await page.evaluate(() => document.fonts.ready);
-  await page.evaluate(FORCE_IMAGES_FN);
-  await page.waitForTimeout(800);
-  const snap = await page.evaluate(SNAPSHOT_FN);
+  const sections = {};
+  for (const s of site.sections) {
+    const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks };
+    await page.evaluate(FORCE_IMAGES_FN, args);
+    await page.waitForTimeout(400);
+    sections[s.id] = await page.evaluate(SNAPSHOT_FN, args);
+  }
   await ctx.close();
-  return snap;
+  return sections;
 }
 
 /* ---- main: build-spec.json з архіву ---- */
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
+  const siteName = process.argv[2];
+  const site = SITES[siteName];
+  if (!site) { console.error(`вкажи сайт: node scripts/token-extractor.mjs <${Object.keys(SITES).join('|')}>`); process.exit(1); }
   const chromium = await resolveChromium();
   if (!chromium) { console.error('playwright не резолвиться (PLAYWRIGHT_FROM?)'); process.exit(1); }
   const browser = await chromium.launch();
   const spec = {
     at: new Date().toISOString(),
-    source: 'skills/teardowns/live-archive/air/air-about.html (+air-global.css, air-about.css; JS OFF; шрифти проксі з live)',
-    section: 'architecture-intro: <section> з h2 "Architecture of efficiency" (h2 + 2 абзаци + 3-фото sticky-слайдер)',
+    site: siteName,
+    source: `${site.archiveDir.replace(REPO + '/', '')}/${site.archive.html} (+${site.archive.css.map((c) => c.file).join(', ')}; JS OFF; шрифти ${site.archive.fontsLocalPrefix ? 'локальні' : 'проксі з live'})`,
+    sections: Object.fromEntries(site.sections.map((s) => [s.id, s.note || s.selector || s.headingRegex])),
     normalized: 'opacity/transform/filter приведені до кінцевого стану (NORMALIZE_CSS); НЕ сирий анімаційний стан',
     viewports: {},
   };
+  let failed = false;
   for (const vpName of Object.keys(VIEWPORTS)) {
     console.log(`архів → ${vpName} ${VIEWPORTS[vpName].width}x${VIEWPORTS[vpName].height}…`);
-    const snap = await snapshotArchive(browser, vpName);
-    if (snap.error) { console.error(`  ПОМИЛКА: ${snap.error}`); process.exit(1); }
-    const sc = snap.selfCheck;
-    console.log(`  елементів: ${sc.elements} · Onest: ${sc.fontOnestLoaded} · фото з natural size: ${sc.imagesWithNaturalSize}/${sc.images}`);
-    if (!sc.elements || !sc.fontOnestLoaded || sc.imagesWithNaturalSize === 0) {
-      console.error('  САМОПЕРЕВІРКА ПРОВАЛЕНА — спека недостовірна'); process.exit(1);
+    const sections = await snapshotArchive(browser, site, vpName);
+    for (const [id, snap] of Object.entries(sections)) {
+      if (snap.error) { console.error(`  [${id}] ПОМИЛКА: ${snap.error}`); failed = true; continue; }
+      const sc = snap.selfCheck;
+      const fontsOk = Object.values(sc.fonts).every(Boolean);
+      console.log(`  [${id}] елементів: ${sc.elements} · шрифти: ${fontsOk ? 'ok' : JSON.stringify(sc.fonts)} · фото з natural size: ${sc.imagesWithNaturalSize}/${sc.images}`);
+      if (!sc.elements || !fontsOk || (sc.images > 0 && sc.imagesWithNaturalSize === 0)) {
+        console.error(`  [${id}] САМОПЕРЕВІРКА ПРОВАЛЕНА — спека недостовірна`); failed = true;
+      }
     }
-    spec.viewports[vpName] = snap;
+    spec.viewports[vpName] = { sections };
   }
   await browser.close();
-  mkdirSync(OUT_DIR, { recursive: true });
-  const out = join(OUT_DIR, 'build-spec.json');
+  if (failed) process.exit(1);
+  mkdirSync(site.outDir, { recursive: true });
+  const out = join(site.outDir, 'build-spec.json');
   writeFileSync(out, JSON.stringify(spec));
   console.log(`OK → ${out} (${(JSON.stringify(spec).length / 1024).toFixed(0)} KB)`);
 }
