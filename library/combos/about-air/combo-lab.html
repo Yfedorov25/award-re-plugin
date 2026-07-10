@@ -416,34 +416,46 @@
   .aut-grid .col-stack { display: grid; gap: 2vw; }
   .aut-grid img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
 
-  /* --- PLAN-МАПА (about-automony-plan) --- */
-  .aplan { position: relative; margin-top: 8vh; width: 100%; aspect-ratio: 1440 / 720;
-    border-radius: 8px; overflow: clip; background: #fbfbfa; }
-  .aplan-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-    object-position: right center; display: block; opacity: .9; }
-  .aplan-title { position: absolute; left: 4%; top: 7%; z-index: 2; }
+  /* --- PLAN-МАПА (about-automony-plan) — живе: 3D-макет кварталу (плити B1/B2/B3 під кутом),
+     чорні квадратні піни-іконки інфраструктури, зони-мітки навколо, титул «4000 M²»,
+     compass rotate(-15°), примітка «positions are approximate». --- */
+  .aplan { position: relative; margin-top: 8vh; width: 100%; aspect-ratio: 1440 / 760;
+    border-radius: 8px; overflow: clip; background: #f4f3f0; }
+  /* макет кварталу: діагональна смуга-«стрічка» плит (перспектива зліва-верх → право-низ) */
+  .aplan-deck { position: absolute; left: 4%; right: 4%; top: 34%; height: 46%;
+    background: linear-gradient(158deg, #e9e8e4 0%, #dedcd6 48%, #cfcdc6 100%);
+    transform: skewY(-9deg); border-radius: 10px; z-index: 1;
+    box-shadow: 0 30px 60px -30px rgba(17,17,16,.25); }
+  .aplan-deck::before, .aplan-deck::after { content:""; position:absolute; border-radius:8px;
+    background: rgba(255,255,255,.5); }
+  .aplan-deck::before { left:14%; top:16%; width:20%; height:52%; }   /* плита B1 */
+  .aplan-deck::after  { left:44%; top:22%; width:16%; height:46%; }   /* плита B2 */
+  .aplan-title { position: absolute; right: 5%; top: 20%; z-index: 2; text-align: right; }
   .aplan-title .m-num { font-size: clamp(48px, 7vw, 120px); font-weight: 300; line-height: .92;
-    color: #111110; letter-spacing: -.02em; }
-  .aplan-title .m-num span { font-size: .32em; font-weight: 300; }
-  .aplan-title .m-cap { font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
-    color: #8b8a86; margin-top: 10px; }
-  /* POI-пін = кружок-бейдж + текст, з'являється лінія-леска */
-  .poi { position: absolute; z-index: 3; display: flex; align-items: center; gap: 9px;
-    transform: translate(-50%, -50%); cursor: default; }
-  .poi__dot { position: relative; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 50%;
-    background: rgba(255,255,255,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(17,17,16,.14); display: grid; place-items: center;
-    font-size: 13px; color: #111110; box-shadow: 0 2px 10px rgba(17,17,16,.08); }
-  .poi__txt { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: #3c3b39;
-    white-space: nowrap; opacity: .92; }
-  .poi--right { flex-direction: row-reverse; }
-  .poi--right .poi__txt { text-align: right; }
-  /* вуличні мітки (plan-marker--street) — дрібні під кутом */
-  .street { position: absolute; z-index: 2; font-size: 9px; letter-spacing: .18em;
-    text-transform: uppercase; color: rgba(17,17,16,.32); transform-origin: left center;
+    color: rgba(17,17,16,.16); letter-spacing: -.02em; }  /* живе: напівпрозорий parallax-титул */
+  .aplan-title .m-num span { font-size: .28em; font-weight: 300; }
+  /* POI-пін = ЧОРНИЙ квадрат з білою іконкою (живий plan-marker--pin) */
+  .poi { position: absolute; z-index: 4; width: 34px; height: 34px; border-radius: 8px;
+    background: #111110; color: #f2f1ee; display: grid; place-items: center;
+    font-size: 15px; transform: translate(-50%, -50%); cursor: default;
+    box-shadow: 0 4px 14px rgba(17,17,16,.28); transition: transform .25s; }
+  .poi:hover { transform: translate(-50%,-50%) scale(1.12); }
+  /* зони-мітки (DEPARTURE / DROP-OFF ZONE / MALL / ENTRANCE) */
+  .zone { position: absolute; z-index: 3; display: flex; flex-direction: column; align-items: center;
+    gap: 7px; transform: translate(-50%, -50%); }
+  .zone i { font-style: normal; width: 26px; height: 26px; border-radius: 50%;
+    border: 1px solid rgba(17,17,16,.4); display: grid; place-items: center; font-size: 13px;
+    color: #3c3b39; background: rgba(255,255,255,.6); }
+  .zone span { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #6b6a66;
     white-space: nowrap; }
+  /* примітка «positions are approximate» */
+  .aplan-note { position: absolute; left: 3%; bottom: 5%; z-index: 3; display: flex; align-items: center;
+    gap: 10px; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: #9b9a96;
+    max-width: 220px; line-height: 1.4; }
+  .aplan-note i { font-style: normal; width: 22px; height: 22px; border:1px solid rgba(17,17,16,.3);
+    border-radius: 4px; display: grid; place-items: center; flex: 0 0 22px; color:#6b6a66; }
   /* компас rotate(-15deg) внизу-справа */
-  .compass { position: absolute; right: 3.5%; bottom: 7%; z-index: 3; width: 54px; height: 54px;
+  .compass { position: absolute; right: 3.5%; bottom: 7%; z-index: 4; width: 54px; height: 54px;
     transform: rotate(-15deg); }
   .compass svg { width: 100%; height: 100%; display: block; }
 
@@ -495,7 +507,7 @@
   .cert-title { display: flex; justify-content: space-between; padding: 12vh 30px 0;
     font-size: clamp(30px, 6vw, 92px); font-weight: 300; line-height: .95; letter-spacing: -.02em; }
   .cert-cap { padding: 2vh 30px 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
-    color: #8b8a86; }
+    color: #8b8a86; text-align: center; }  /* живе: caption по центру між CLEVER і CERTIFICATE */
   /* заява внизу-праворуч (offset-md-6) */
   .cert-claim { align-self: end; justify-self: end; max-width: 46ch; padding: 0 30px 10vh;
     text-align: right; }
@@ -753,25 +765,31 @@
     </div>
   </div>
 
-  <!-- живий about-automony-plan: інтерактивна мапа генплану з POI-пінами інфраструктури -->
+  <!-- живий about-automony-plan: 3D-макет кварталу + чорні піни-іконки інфраструктури + зони -->
   <div class="aplan" id="autonomy-plan" aria-label="AIR ground-floor infrastructure plan">
-    <img class="aplan-bg" loading="lazy" alt="" src="assets/autonomy-plan-bg.webp">
-    <div class="aplan-title">
-      <div class="m-num">4000 <span>м²</span></div>
-      <div class="m-cap">commercial ground floors</div>
-    </div>
-    <!-- вуличні мітки (plan-marker--street) під кутом -->
-    <div class="street" style="left:6%; top:22%; transform:rotate(-15deg)">Khodynsky boulevard</div>
-    <div class="street" style="left:33%; top:82%; transform:rotate(-15deg)">Business quarter</div>
-    <div class="street" style="left:70%; top:14%; transform:rotate(-15deg)">Park promenade</div>
-    <!-- ~7 POI plan-marker--pin з бейджами -->
-    <div class="poi" style="left:24%; top:40%"><span class="poi__dot">☕</span><span class="poi__txt">Coffee point</span></div>
-    <div class="poi" style="left:30%; top:62%"><span class="poi__dot">✽</span><span class="poi__txt">Flower boutique</span></div>
-    <div class="poi poi--right" style="left:52%; top:35%"><span class="poi__dot">℞</span><span class="poi__txt">Pharmacy</span></div>
-    <div class="poi" style="left:46%; top:70%"><span class="poi__dot">◈</span><span class="poi__txt">Beauty salon</span></div>
-    <div class="poi poi--right" style="left:64%; top:52%"><span class="poi__dot">✦</span><span class="poi__txt">Wine boutique</span></div>
-    <div class="poi poi--right" style="left:76%; top:34%"><span class="poi__dot">▦</span><span class="poi__txt">Restaurant</span></div>
-    <div class="poi poi--right" style="left:82%; top:66%"><span class="poi__dot">◐</span><span class="poi__txt">Cafe</span></div>
+    <div class="aplan-deck" aria-hidden="true"></div>
+    <div class="aplan-title"><div class="m-num">4000 <span>M²</span></div></div>
+    <!-- зони навколо кварталу -->
+    <div class="zone" style="left:12%; top:34%"><i>↖</i><span>Departure</span></div>
+    <div class="zone" style="left:48%; top:63%"><i>⇄</i><span>Drop-off zone</span></div>
+    <div class="zone" style="left:27%; top:71%"><i>❀</i><span>Skyline fields</span></div>
+    <div class="zone" style="left:80%; top:50%"><i>▤</i><span>Mall</span></div>
+    <div class="zone" style="left:92%; top:73%"><i>⌂</i><span>Entrance</span></div>
+    <!-- чорні квадратні піни-іконки інфраструктури (plan-marker--pin) на плитах B1/B2/B3 -->
+    <div class="poi" style="left:31%; top:44%" title="Restaurant">☖</div>
+    <div class="poi" style="left:35%; top:41%" title="Beauty salon">◈</div>
+    <div class="poi" style="left:39%; top:45%" title="Everyday services">▤</div>
+    <div class="poi" style="left:48%; top:48%" title="Coffee point">✿</div>
+    <div class="poi" style="left:52%; top:44%" title="Pharmacy">✚</div>
+    <div class="poi" style="left:51%; top:51%" title="Wine boutique">♦</div>
+    <div class="poi" style="left:55%; top:52%" title="Cafe">◑</div>
+    <div class="poi" style="left:64%; top:56%" title="Everyday services">▦</div>
+    <div class="poi" style="left:68%; top:59%" title="Beauty salon">✂</div>
+    <div class="poi" style="left:66%; top:62%" title="Museum">⌂</div>
+    <div class="poi" style="left:72%; top:63%" title="Fitness">✦</div>
+    <div class="poi" style="left:89%; top:73%" title="Parking">P</div>
+    <!-- примітка (живе: «positions are approximate and may be revised») -->
+    <div class="aplan-note"><i>!</i><span>The positions of the elements are approximate and may be revised.</span></div>
     <!-- compass rotate(-15deg) group__right group__bottom -->
     <div class="compass" aria-hidden="true">
       <svg viewBox="0 0 54 54" fill="none">
@@ -818,7 +836,7 @@
 <section class="cert fade-seam" id="certificate">
   <img class="cert-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/10.certificate/background@xxxl.webp">
   <div class="cert-in">
-    <h2 class="cert-title"><span>CLEVER</span><span>certificate</span></h2>
+    <h2 class="cert-title"><span>CLEVER</span><span>CERTIFICATE</span></h2>
     <p class="cert-cap">The ecology of successful business</p>
     <div class="cert-claim">
       <img class="cert-logo" loading="lazy" alt="CLEVER" src="https://aircenter.space/assets/images/media/about/10.certificate/logo-clever.webp">
