@@ -55,7 +55,7 @@ const res = await p.evaluate((LIVE) => {
   /* семпл БЕЗ inline-кольору: живий патерн має і чорні h2-reveal (інтро),
      і сірі #8d8d8d — движковий чек кольору валідний лише на дефолтному */
   const rv = [...document.querySelectorAll('.reveal-text')]
-    .find(e => !(e.getAttribute('style') || '').includes('color')) ||
+    .find(e => !(e.getAttribute('style') || '').includes('color') && !e.classList.contains('h2r')) ||
     document.querySelector('.reveal-text');
   const w = rv && rv.querySelector('.rv-w');
   ok('reveal: word-split існує', !!w, w ? 'так' : 'нема .rv-w', 'слова обгорнуті');
