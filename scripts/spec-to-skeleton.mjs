@@ -117,6 +117,8 @@ writeFileSync(join(outDir, 'index.html'), `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>springs — статичний каркас ПО СПЕЦІ (S2c, генерат)</title>
 <link rel="stylesheet" href="/skeleton.css">
+<link rel="stylesheet" href="/scene.css">
+<script defer src="/springs-engine.js"></script>
 </head>
 <body>
 ${body}</body>

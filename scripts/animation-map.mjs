@@ -53,6 +53,8 @@ const vpArg = argOf('--vp', 'both');
 const origin = argOf('--origin', site.liveOrigin);
 const STEPS = parseInt(argOf('--steps', '36'), 10);
 const RANGE_VH = parseFloat(argOf('--range', '2.5'));
+/* --out: НЕ затирати живу карту, коли знімаємо нашу сторінку (--origin) */
+const outPath = argOf('--out', null);
 
 const chromium = await resolveChromium();
 if (!chromium) { console.error('playwright не резолвиться (PLAYWRIGHT_FROM?)'); process.exit(1); }
@@ -285,7 +287,7 @@ for (const vpName of vps) {
 }
 await browser.close();
 mkdirSync(site.outDir, { recursive: true });
-const out = join(site.outDir, `animation-map-${sectionId}.json`);
+const out = outPath || join(site.outDir, `animation-map-${sectionId}.json`);
 writeFileSync(out, JSON.stringify(result));
 console.log(`${failed ? 'НАПІВ-' : ''}OK → ${out} (${(JSON.stringify(result).length / 1024).toFixed(0)} KB)`);
 process.exit(failed ? 1 : 0);
