@@ -886,17 +886,14 @@
     #revolves .rvc-inner > p.reveal-text:last-of-type { margin-top: 5vh !important; margin-bottom: 5vh !important; }
     /* ── с21 aplan по живій кривій: live пін до f.662, наш відпускав на .635 —
        тревел +324px рівно з #autonomy padding-bottom (36vh→0) → services-анкор на місці ── */
-    /* ── с22 стекінг aplan-виходу (живий sticky--under-next about-automony-sticky-bottom):
-       pin-curves: live пін top≈250 реліз .665 · наш top 108 реліз .6428 →
-       top 250 (+реліз −142px) + тревел +850px; нуль-сумно margin-bottom −850px:
-       services заходить ПІД пінений план (svc-head enter .6421 НЕ рухається) ── */
+    /* ── с22 стекінг aplan-виходу (live-156: план пінить і темніє під fade-швом,
+       services з титулом їде ПОВЕРХ нього — НЕ під!): пін top 250 до релізу .665
+       (live 0-крос .665) + тревел +850px; нуль-сумно margin-bottom −850px
+       (svc-head enter .6421 НЕ рухається); services пізніший у DOM → малюється
+       зверху сам (z-index НЕ ставити — інверсія ламала порядок live) ── */
     .aplan { top: 250px; }
     .aplan-scroll { height: calc(186svh + 850px); }
-    #autonomy { position: relative; z-index: 1; background: #fff; margin-bottom: -850px; }
-    /* .act має max-width 1200 — фон під час під-заходу services мусить бути
-       фулблід, інакше титул services світиться по боках */
-    #autonomy::before { content: ""; position: absolute; top: 0; bottom: 0;
-      left: calc(50% - 50vw); right: calc(50% - 50vw); background: #fff; z-index: -1; }
+    #autonomy { margin-bottom: -850px; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
     /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
        (кластер #094-113); перекладаємо хвостовий padding у інтро, регіон незмінний */
@@ -1015,10 +1012,11 @@
     .callout { margin-top: 4vh !important; }
     /* с22 стекінг m390: +underNext-хвіст У ЦИХ ЖЕ правилах (CSS !important б'є
        inline JS — свапи рахуються від фактичної висоти мінус underNextSvh,
-       тому хвіст МУСИТЬ бути і тут, і в опції). pin-curves-390: arch реліз
-       ours .2241 → live .2676 (+117svh) · hq .4114 → .4448 (+90svh) */
-    #isw-arch { min-height: calc(100svh + 160svh + 117svh) !important; }  /* свап-спан 160 + хвіст 117 */
-    #isw-hq { min-height: calc(100svh + 190svh + 90svh) !important; }     /* свап-спан 190 + хвіст 90 */
+       тому хвіст МУСИТЬ бути і тут, і в опції). Модель «наш реліз = live
+       шов-старт»: arch шов-кінець = rv-head top0 .2676 → старт .2304 →
+       +17svh (реліз був .2241) · hq: наш .4114 вже ≈ live шов-старт .4076 → 0 */
+    #isw-arch { min-height: calc(100svh + 160svh + 17svh) !important; }  /* свап-спан 160 + хвіст 17 */
+    #isw-hq { min-height: calc(100svh + 190svh) !important; }            /* JS давав 220svh */
     /* c20 desktop-виміри НЕ протікають на 390 */
     .aut-mid, .aut-right { margin-top: 0; }
     #comfort > .reveal-text { max-width: 350px !important; font-size: 21px !important;
@@ -1038,7 +1036,7 @@
        margin-bottom −110px (svc-head enter .6154 НЕ рухається) ── */
     .aplan-pin-m { height: calc(105.5556vw + 110px); margin-top: 8vh; }  /* мапа 200vw·760/1440 + тревел; 8vh — маржа ПОЗА боксом (sticky-хід = лише content box) */
     .aplan-scroll { position: sticky; top: 229px; margin-top: 0; }
-    #autonomy { position: relative; z-index: 1; background: #fff; margin-bottom: -110px; }
+    #autonomy { margin-bottom: -110px; }  /* services поверх (як live), без z-index */
   }
 </style>
 </head>
@@ -1638,15 +1636,18 @@
          крок 85→110svh під живий бюджет hq→space 10.07% */
       /* pin-curves проба (свапи живого @1440): arch 0.198/0.216 → step 91svh,
          hq 0.371/0.385 → step 80svh (слайд-2 у живого ~480-490px, був 660) */
-      /* с22 стекінг (живий sticky--under-next, дистанція ~100svh): пін тримає
-         фулскрін ЩЕ underNextSvh після останнього свапу, наступна секція
-         заходить ПІД шар (нуль-сумно: спейсер +X / margin −X, свапи на місці).
-         Числа з pin-curves: arch реліз ours .2277 → live .2575 (+105svh) ·
-         hq .3950 → .4237 (+102svh). Поки desktop-only (m390 = крок (г)). */
+      /* с22 стекінг: НАШ реліз шару = live ШОВ-СТАРТ (борд-урок: живий шар
+         «пінить» до .2585 лише як контейнер — фото НЕ opaque-фулскрін; візуальний
+         шов їде 1:1 зі скролом від ~.233 і закінчується на rv-head top0 .2609.
+         Наш опаковий слайд при релізі дає такий самий 1:1 шов знизу-вгору →
+         реліз має збігатись зі стартом live-шва, НЕ з релізом live-шару).
+         Кадри-докази: live-055 фулскрін · live-058 шов на 245px · live-100
+         splash-лоббі під швом. arch: реліз .2277→.2333 (+19svh desktop, +17 m390) ·
+         hq: .3950→.4001 (+18svh desktop; m390 .4114 вже ≈ шов-старт .4076 → 0). */
       el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 80,
-        underNextSvh: window.innerWidth > 768 ? 102 : 90 } :
+        underNextSvh: window.innerWidth > 768 ? 18 : 0 } :
       el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91,
-        underNextSvh: window.innerWidth > 768 ? 105 : 117 } : { mobile: 'tap' }); }
+        underNextSvh: window.innerWidth > 768 ? 19 : 17 } : { mobile: 'tap' }); }
   );
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */
