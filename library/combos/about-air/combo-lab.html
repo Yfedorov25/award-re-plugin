@@ -1013,7 +1013,16 @@
        наростав 103→209px). Спейсер дає pin-хід, margin-bottom нуль-сумний;
        компенсовано в isw-arch mt (revolves @8323 недоторканий). */
     #a-intro + .act .ib-map-pin { position: sticky; top: 125px; }
-    #a-intro + .act .ib-map-spacer { height: 820px; }  /* сусід-спейсер дає pin-хід (карта липне 125 доки він прокручується); НЕ ::after карти — той робив sticky-елемент високим */
+    #a-intro + .act .ib-map-spacer { height: 820px; }
+    /* с26: dim map-зони під білою architecture (модель 0.5·coverage: #29
+       пікс 203 vs 204 модель, #30 182 vs 183) — fixed + clip по краю (титул−20) */
+    .ib-dim { position: fixed; inset: 0; background: #000; opacity: 0;
+      pointer-events: none; z-index: 4; }
+    /* с26 кадр #29: бейдж B3 на карті-макеті (live x790,y237 при піні 125) */
+    .ib-badge { position: absolute; left: 54.9%; top: 112px; z-index: 2;
+      background: #111110; color: #f2f1ee; font-size: 11px; letter-spacing: .04em;
+      padding: 3px 8px; border-radius: 5px; }
+    @media (max-width: 768px) { .ib-badge { display: none; } }  /* сусід-спейсер дає pin-хід (карта липне 125 доки він прокручується); НЕ ::after карти — той робив sticky-елемент високим */
     #a-intro + .act { margin-bottom: -656px; }  /* с25: спейсер 820 дає pin-хід; margin −656 = −(820−164), бо контент секції став на 164 коротший (фото 690 +126 / Here 14px −158 / map 690) → docH назад 33608, revolves недоторканий */
     /* с25 rt-проба живого DOM: info-bottom grid=1420, 2 фото по 690, gap20,
        ЛІВОРУЧ; map=690 (ширина ОДНОГО фото, не fullbleed); "Here..." 14px
@@ -1034,7 +1043,14 @@
        = артефакт нестабільного live). Цілі: doc-Y анкорів = live 1-в-1, тотал
        = live. Свапи слайдерів сідають на live doc-px САМІ (6456/7007 arch,
        12033/12652 hq) через ці ж зсуви — окремо НЕ чіпані. ── */
-    #isw-arch { margin-top: calc(53vh + 245px); }  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793) */
+    #isw-arch { margin-top: calc(53vh - 225px); }  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793); с26: −470 = компенсація титул-фази #architecture (+470) — doc слайдера ІНВАРІАНТНИЙ, свапи НЕ рухались (перевірено index-пробою) */
+    /* с26 кадр #29: live титул architecture на doc 4743 (наш був 4273) + live
+       gap титул→AESTHETICS 240 (наш 82) */
+    #architecture > .h1 { margin-top: 470px; }
+    #architecture > .h1 + .reveal-text { margin-top: calc(10vh + 158px) !important; }
+    #architecture .m-adm { margin-top: calc(12vh - 130px) !important; }  /* −130: +28 колапс-поправка (docH 33608) */
+    /* с26: карта-макет live ЦЕНТРОВАНА (x375, 690) — наша була зліва */
+    #a-intro + .act .ib-map { margin: 0 auto; display: block; }
     #revolves { margin-top: 15px; }  /* с23: колапс із isw-arch mb → revolves @8323 */
     #isw-hq { margin-top: calc(80vh - 418px); }  /* с23 solve: свапи hq на live doc 11840/12480 */
     #space-splash { margin-top: 89px; }  /* с23: колапс із isw-hq mb → splash @13769 */
@@ -1286,7 +1302,8 @@
   <!-- с25 motion-ib: жива карта (genplan) ПІНИТЬСЯ на top~125 на ~820px скролу
        (stickyDy 0→820) — live sticky--under-next. Спейсер дає pin-хід (sticky
        живе лише в content box, урок с21), нуль-сумний margin компенсує. -->
-  <div class="ib-map-pin"><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xs.webp"><img class="ib-map" loading="lazy" alt="AIR location map" src="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xxl.webp"></picture></div>
+  <div class="ib-dim" aria-hidden="true"></div>
+  <div class="ib-map-pin"><div class="ib-badge" aria-hidden="true">B3</div><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xs.webp"><img class="ib-map" loading="lazy" alt="AIR location map" src="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xxl.webp"></picture></div>
   <div class="ib-map-spacer" aria-hidden="true"></div>
 </section>
 
@@ -1943,6 +1960,8 @@
     if (window.innerWidth <= 768) return;
     var imgs = document.querySelectorAll('#a-intro + .act .ib-grid img');
     if (!imgs.length) return;
+    var dim = document.querySelector('.ib-dim');
+    var archT = document.querySelector('#architecture > .h1');
     var sY = function(){ return (window.__lenis && typeof window.__lenis.scroll === 'number')
       ? window.__lenis.scroll : window.scrollY; };
     var on = false, raf = null;
@@ -1951,12 +1970,19 @@
       var dy = Math.max(-99, Math.min(0, -(3430 - sY()) * 0.0714));
       for (var i = 0; i < imgs.length; i++)
         imgs[i].style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
+      /* dim map-зони: 0.5·покриття architecture (edge = титул −20, live #29/#30) */
+      if (dim && archT) {
+        var vh = window.innerHeight;
+        var edge = archT.getBoundingClientRect().top - 20;
+        dim.style.opacity = (0.5 * Math.min(1, Math.max(0, (vh - edge) / vh))).toFixed(3);
+        dim.style.clipPath = edge < vh ? 'inset(0 0 ' + Math.max(0, vh - edge).toFixed(1) + 'px 0)' : '';
+      }
       raf = requestAnimationFrame(tick);
     }
     new IntersectionObserver(function(es){
       on = es.some(function(e){ return e.isIntersecting; });
       if (on && !raf) raf = requestAnimationFrame(tick);
-    }, { rootMargin: '100% 0px' }).observe(imgs[0].closest('.ib-grid'));
+    }, { rootMargin: '250% 0px' }).observe(imgs[0].closest('.ib-grid'));  /* 250%: dim живе і в map-фазі (грід вище в'юпорта) */
   })();
 
   /* ═══ с26 CFT-PHASE (motion-zone comfort, motion-comfort-1440.json):
