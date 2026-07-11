@@ -404,9 +404,14 @@ function buildViewport(vpName) {
        bg-асет мобільного варіанта тієї ж секції (texture-map.json).
        ЛИШЕ секції з fit (texture-fit.mjs registration: scale/offset з
        кореляції з live-шотом — числа з даних; голий cover зумив 2×) */
-    /* ВИМКНЕНО: MAE-фіт на темному блюрі дає хибний оптимум (21.9 проти
-       15.5 бази піксель-гейтом) — S9: edge/gradient-метрика в texture-fit */
-    textures: null,
+    /* Увімкнені СЕКЦІЇ текстур — рішення піксель-гейтом per-секція:
+       nature ON (мертвий канвас оголює терасу-постер, листя лікує);
+       wellness OFF (MAE-фіт на темному блюрі хибний: 21.9 > 15.5 бази —
+       S9: edge-метрика). place-bg OFF (не діагностовано). */
+    textures: textureMap
+      ? Object.fromEntries(Object.entries(textureMap.textures)
+          .filter(([id, t]) => t.fit && [].includes(id)))
+      : null,
     introGate: iEnd ? { iEnd } : null,
     bindings,
     footerTop: footer ? footer.top0 : null,

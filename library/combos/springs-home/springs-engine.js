@@ -118,7 +118,12 @@
     for (const spec of tx.canvases || []) {
       const cls = (spec.canvasCls || '').split(/\s+/)[0];
       if (!cls) continue;
-      for (const c of w.querySelectorAll('canvas.' + CSS.escape(cls))) {
+      /* канвас може жити в ІНШІЙ обгортці, ніж live-секція (спека ріже
+         вкладені секції: js-nature-canvas у l-nature-bg = place-bg) —
+         фолбек: пошук по всіх обгортках вʼюпорта */
+      let cands = w.querySelectorAll('canvas.' + CSS.escape(cls));
+      if (!cands.length) cands = document.querySelectorAll(`.sk-vp-${vpName} canvas.` + CSS.escape(cls));
+      for (const c of cands) {
         const p = c.parentElement;
         if (!p || p.querySelector(':scope > .sk-canvas-tx')) continue;
         if (getComputedStyle(p).position === 'static') p.style.position = 'relative';
