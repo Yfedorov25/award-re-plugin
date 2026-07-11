@@ -112,8 +112,26 @@ function compareViewport(vpName) {
      по-цільовий greedy лишав останній live-цілі «недоїдок» (іт.16) */
   for (const [key, lts] of Object.entries(gL)) {
     const ots = gO[key] || [];
+    /* S12: КОНТЕНТ-FIRST — унікальні src паруються напряму. rest-bbox
+       каруселей РАН-ЗАЛЕЖНИЙ (наш інтро-стан тепер справжній зум-морф
+       introT, live-карта journey-контамінована) — bbox-пейринг хрестив
+       item'и: hero desktop 99.4→56.9, mobile 54.8. Розмірний суфікс
+       нормалізується (@xs/@xxl — те саме фото, пастка 38). */
+    const doneL = new Set();
+    const norm = (v) => (v || '').replace(/(%40|@)[a-z0-9-]+\./i, '.');
+    const bySrcL = {}, bySrcO = {};
+    for (const lt of lts) { const k = norm(lt.src); if (k && !/svg%3E/.test(k)) (bySrcL[k] = bySrcL[k] || []).push(lt); }
+    for (const ot of ots) { const k = norm(ot.src); if (k && !/svg%3E/.test(k)) (bySrcO[k] = bySrcO[k] || []).push(ot); }
+    for (const [k, ls] of Object.entries(bySrcL)) {
+      const os = (bySrcO[k] || []).filter((o) => !usedO.has(o.i));
+      if (ls.length === 1 && os.length === 1) {
+        pairs.push([ls[0], os[0]]);
+        doneL.add(ls[0]); usedO.add(os[0].i);
+      }
+    }
     const all = [];
     for (const lt of lts) {
+      if (doneL.has(lt)) continue;
       const lr = lt.samples[0];
       for (const ot of ots) {
         const or2 = ot.samples[0];
@@ -121,7 +139,6 @@ function compareViewport(vpName) {
       }
     }
     all.sort((a, b) => a.d - b.d);
-    const doneL = new Set();
     for (const { lt, ot } of all) {
       if (doneL.has(lt) || usedO.has(ot.i)) continue;
       doneL.add(lt); usedO.add(ot.i);

@@ -419,6 +419,15 @@
     if (b.sig.tag !== 'body') b.el.style.willChange = 'transform';
     b.hasM = (b.curve || []).some((x) => shapeM(x.m)) || (b.intro || []).some((x) => shapeM(x.m))
       || (b.introT || []).some((bl) => bl.frames.some((x) => shapeM(x.m)));
+    /* S12d: fixed-секція + МАТРИЧНА ціль зі змінною live-висотою
+       (header__left mobile 45→24 на буті): верхатим-гілка ігнорує
+       h-канал — реплеїмо height напряму з кривої */
+    {
+      const wEl = wrappers[b.section];
+      const hsAll = (b.curve || []).map((x) => x.h).filter((v) => v > 0);
+      b.setHM = !!wEl && getComputedStyle(wEl).position === 'fixed' && b.hasM
+        && hsAll.length > 1 && Math.max(...hsAll) - Math.min(...hsAll) > 5;
+    }
     const r = b.el.getBoundingClientRect();
     b.nat = { top: r.top + bootScroll2, left: r.left };
     b.fix = { x: 0, y: 0 };
@@ -531,6 +540,7 @@
         o: lerp(a.o ?? 1, c.o ?? 1, t),
         clip: lerpClip(a.clip, c.clip, t),
         bg: lerpColor(a.bg, c.bg, t),
+        h: a.h > 0 && c.h > 0 ? lerp(a.h, c.h, t) : undefined,
       });
       /* геометричний reveal-латч (виняток 6): потік + o-ступінь по
          входу у вʼюпорт; transform/clip не застосовуються */
@@ -577,6 +587,7 @@
       if (b.hasM || b.inShape) {
         const pre = (b.fix.x || b.fix.y) ? `translate(${b.fix.x.toFixed(2)}px, ${b.fix.y.toFixed(2)}px) ` : '';
         b.el.style.transform = d.m ? pre + fmtM(d.m) : (pre || (b.seedTransform ? 'translate(0px, 0px)' : ''));
+        if (b.setHM && d.h > 0) b.el.style.height = `${d.h.toFixed(1)}px`;
       } else {
         const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t), sw: lerp(a.sw ?? 1, c.sw ?? 1, t), sh: lerp(a.sh ?? 1, c.sh ?? 1, t), h: a.h != null && c.h != null ? lerp(a.h, c.h, t) : undefined });
         let dd = (introMode && b.ownIntroT)
@@ -710,6 +721,16 @@
     }
   }
 
+  /* дебаг біндінгів для ОБОХ вʼюпортів (S12d: mobile-розкопки) */
+  window.__ENGINE_B__ = (secFilter) => bound
+    .filter((b) => !secFilter || b.section === secFilter)
+    .map((b) => ({
+      sec: b.section, cls: (b.sig.cls || b.sig.tag).slice(0, 30),
+      fixedSpace: b.fixedSpace, setH: b.setH, hasM: b.hasM, inShape: b.inShape,
+      ownPts: (b.own || []).length, nat: b.nat ? { t: Math.round(b.nat.top), h: Math.round(b.nat.h || 0) } : null,
+      inlineH: b.el.style.height || '', inlineTr: (b.el.style.transform || '').slice(0, 30),
+    }));
+
   /* ---------- драйвер ---------- */
   if (!isDesktop) {
     /* mobile: нативний скрол, движок лише повторює криві */
@@ -765,6 +786,11 @@
           const overflow = introTarget - gate.iEnd;
           introTarget = gate.iEnd;
           mode = 'scroll';
+          /* S12: інтро-стан снапиться у фінал ОДРАЗУ — інтро-хвіст
+             (introShown < iEnd) з wall-time introT бився зі скрол-
+             кривими (hero desktop 99.4→56.9 на гейті) */
+          introShown = gate.iEnd;
+          applyBindings(0, gate.iEnd, true, Infinity);
           if (overflow > 30) { burstAcc = overflow; if (!burstTimer) burstTimer = setTimeout(commitBurst, 140); }
         }
       }
@@ -832,7 +858,7 @@
     lastT = now || performance.now();
     const k = 1 - Math.pow(0.9, dtMs / 16.67);
     let dirty = false;
-    if (!posed && (mode === 'intro' || introShown < gate?.iEnd - 0.5)) {
+    if (!posed && mode === 'intro') {
       if (Math.abs(introTarget - introShown) > 0.3) {
         introShown = lerp(introShown, introTarget, k);
         if (Math.abs(introTarget - introShown) < 0.3) introShown = introTarget;
