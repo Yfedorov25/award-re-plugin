@@ -599,6 +599,17 @@
     opacity: .5; transition: opacity .3s; border: 1px solid rgba(255,255,255,.4); }
   .lobby-thumb.is-on { opacity: 1; }
   .lobby-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* с26 (rt-проба live @.4458/.4554 + кадр #110): live лоббі = 1400×962 @x20
+     (наш був 1440×~720/610), doc≈14950 (наш 15189 → −239); мініатюри 72×46
+     ЦЕНТРОМ, bottom-pad 91, лічильника нема. Нуль-сумно: −239 перед / +352
+     висота / −113 після (cft-pin margin). Desktop-only. */
+  @media (min-width: 769px) {
+    .lobby { width: calc(100vw - 40px); margin-left: calc(50% - 50vw + 20px);
+      aspect-ratio: 1400 / 962; }
+    .lobby-ui { justify-content: center; padding: 0 0 91px; }
+    .lobby-count { display: none; }
+    .lobby-thumb { width: 72px; height: 46px; }
+  }
   /* фікс п.7 аудиту: живий патерн — стрілки ←/→ ПІД фото по краях + лічильник центр */
   .lobby-nav { display: flex; align-items: center; justify-content: space-between;
     width: 100vw; margin-left: calc(50% - 50vw); padding: 14px 20px 0; color: #111110; }
@@ -1045,9 +1056,10 @@
     /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
        (кластер #094-113); перекладаємо хвостовий padding у інтро, регіон незмінний */
     #comfort { padding-bottom: calc(12vh + 76px); }  /* с23: space→aut live 4534 */
+    .cft-pin { margin-top: calc(10vh - 3px); }  /* с26: компенсація lobby (−239 wrap +242 висота) — нуль-сумність */
     #comfort .metric-right { margin-top: 10vh; }
     #comfort > .reveal-text { margin-top: 10vh !important; margin-bottom: 12vh !important; }
-    #comfort .lobby-wrap { margin-top: 12vh; }
+    #comfort .lobby-wrap { margin-top: calc(12vh - 337px); }  /* с26: lobby-doc = live 14950 (−337: колапс негативного margin з сусіднім 10vh з'їдає ~98) */
     /* ── с23 cert-хореографія = живі кадри #186-198 + крива cert-bg (пін
        .795→.829, реліз ПІД solutions): титули/cap ідуть угору ПОТОКОМ,
        claim+лого+пара пінуються (claim ~19%), spiral-bg пін top 150,
