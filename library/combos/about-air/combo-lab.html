@@ -1056,12 +1056,12 @@
        = артефакт нестабільного live). Цілі: doc-Y анкорів = live 1-в-1, тотал
        = live. Свапи слайдерів сідають на live doc-px САМІ (6456/7007 arch,
        12033/12652 hq) через ці ж зсуви — окремо НЕ чіпані. ── */
-    #isw-arch { margin-top: calc(53vh + 15px); }  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793); с26: −470 = компенсація титул-фази #architecture (+470) — doc слайдера ІНВАРІАНТНИЙ, свапи НЕ рухались (перевірено index-пробою) */
+    #isw-arch { margin-top: calc(53vh - 20px); }  /* с26: −35 компенсація одностороннього гістерезису index-мапінгу (проба: межі +39..46 від live) */  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793); с26: −470 = компенсація титул-фази #architecture (+470) — doc слайдера ІНВАРІАНТНИЙ, свапи НЕ рухались (перевірено index-пробою) */
     /* с26 пере-solve свапів (index-свіп): isw-arch doc 5551 → 5791 (=с23 solve;
        дрейф −240 з c25 map-компенсації давав свапи 6250/6875 замість live
        6436/7079 = кластер #39-50). Компенсація в margin-bottom (!important
        б'є inline isw-JS): revolves @8321 НЕДОТОРКАНИЙ, span/реліз незмінні. */
-    #isw-arch { margin-bottom: calc(-105svh - 240px) !important; }
+    #isw-arch { margin-bottom: calc(-105svh - 205px) !important; }
     /* с26 кадр #29: live титул architecture на doc 4743 (наш був 4273) + live
        gap титул→AESTHETICS 240 (наш 82) */
     #architecture > .h1 { margin-top: 470px; }
@@ -2031,7 +2031,7 @@
     function tick(){
       if (!on) { raf = null; return; }
       if (S_PIN === null) measure();
-      var dy = -Math.min(240, Math.max(0, S_PIN - sY()));
+      var dy = -Math.min(205, Math.max(0, S_PIN - sY()));  /* 205: в'їзд лишається на live doc 5551 при T−35 */
       layer.style.transform = dy ? 'translateY(' + dy.toFixed(1) + 'px)' : '';
       raf = requestAnimationFrame(tick);
     }
