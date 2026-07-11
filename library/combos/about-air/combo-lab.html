@@ -992,13 +992,21 @@
     /* живий info-top = data-scroll-sticky (stickyBottom): вежі ДВОРЯТЬ на екрані
        поки скрол іде — сталий еквівалент: sticky + додатковий тревел секції */
     #a-intro { padding-bottom: 74vh; }
-    #a-intro .a-ill { position: sticky; top: 15vh; }
+    /* с26 motion-zone next: live фото ПІНИТЬ top=209 (наш був 15vh=123) до
+       s≈2307 (наш реліз 1846 → хід +547 через ::after; реліз-формула:
+       Δреліз = Δafter − Δtop = 547−86 = 461 ✓) */
+    #a-intro .a-ill { position: sticky; top: 209px; }
     /* с23 кадр live-012: інтро-фото тримається ПІД наступною секцією (живий
        sticky--under-next: спейсер + нуль-сумний margin; спейсер, БО sticky-хід
        живе лише в content box — падінг ходу не дає, урок с21) */
-    #a-intro::after { content: ''; display: block; height: 100svh; }
-    #a-intro { margin-bottom: -100svh; }
+    #a-intro::after { content: ''; display: block; height: calc(100svh + 547px); }
+    /* с26: −226 понад ::after — білий cover-край на 226 раніше (live edge 490
+       @#011 vs наш 716); tekta-компенсація +226 тримає вміст секції на місці */
+    #a-intro { margin-bottom: calc(-100svh - 682px); }
     #a-intro + .act { position: relative; z-index: 2; background: #fff; }
+    #a-intro + .act .m-tekta { margin-top: calc(6vh + 135px) !important;
+      margin-bottom: calc(8vh + 193px) !important; }  /* −110: live ib-фото ближче до tekta (natural 1114 vs наш 1224) */
+    #a-intro + .act .m-invest { margin-top: calc(6vh - 193px) !important; }  /* компенсація −110: m-invest/callout/map недоторкані */
     /* с25 motion-ib: карта ПІНИТЬСЯ на top 125px (жива крива: map.top завмирає
        на ~125 доки stickyDy 0→820, ~820px скролу) — сповільнює прохід info-bottom
        на 820px → фаза 2 фото наближається до live (наш був швидший, розрив
@@ -1926,6 +1934,29 @@
       on = es.some(function(e){ return e.isIntersecting; });
       if (on && !raf) raf = requestAnimationFrame(tick);
     }, { rootMargin: '100% 0px' }).observe(root);
+  })();
+
+  /* ═══ с26 IB-REVEAL (motion-zone next): live ib-фото в'їжджають з власним
+     reveal-параллаксом dy −99→0 (лінійно до s≈3430, жива крива ib1.dy).
+     transform-only, нуль-сумно. ═══ */
+  (function ibReveal(){
+    if (window.innerWidth <= 768) return;
+    var imgs = document.querySelectorAll('#a-intro + .act .ib-grid img');
+    if (!imgs.length) return;
+    var sY = function(){ return (window.__lenis && typeof window.__lenis.scroll === 'number')
+      ? window.__lenis.scroll : window.scrollY; };
+    var on = false, raf = null;
+    function tick(){
+      if (!on) { raf = null; return; }
+      var dy = Math.max(-99, Math.min(0, -(3430 - sY()) * 0.0714));
+      for (var i = 0; i < imgs.length; i++)
+        imgs[i].style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
+      raf = requestAnimationFrame(tick);
+    }
+    new IntersectionObserver(function(es){
+      on = es.some(function(e){ return e.isIntersecting; });
+      if (on && !raf) raf = requestAnimationFrame(tick);
+    }, { rootMargin: '100% 0px' }).observe(imgs[0].closest('.ib-grid'));
   })();
 
   /* ═══ с26 CFT-PHASE (motion-zone comfort, motion-comfort-1440.json):

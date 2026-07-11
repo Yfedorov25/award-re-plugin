@@ -61,6 +61,19 @@ const ZONES = {
       track: { bg: 'img[src*="7.space"]' }
     }
   },
+  next: {
+    /* інтро-фото веж (#011-018): live фото крупніше/раніше і накривається
+       білою наступною секцією; ib1 = маркер накриваючої секції */
+    from: 0.03, to: 0.14, steps: 24,
+    live: {
+      sec: 'body',
+      track: { photo: 'img[src*="2.info-top/image"]', ib1: 'img[src*="3.info-bottom/image-1"]' }
+    },
+    ours: {
+      sec: 'body',
+      track: { photo: '#a-intro .a-ill img', ib1: 'img[src*="3.info-bottom/image-1"]' }
+    }
+  },
   comfort: {
     /* хвіст comfort (кадри #115-132, fr ~.49-.56): live = sticky--under-next
        фон background-bottom (2044×1092 → 769 @1440) + пін-титул, картки
@@ -100,7 +113,7 @@ const snap = (cfg) => `(() => {
     const r = e.getBoundingClientRect();
     const tf = getComputedStyle(e).transform;
     const m = tf && tf !== 'none' ? new WebKitCSSMatrix(tf) : null;
-    out[name] = { top: Math.round(r.top), dy: m ? Math.round(m.m42) : 0, h: Math.round(r.height) };
+    out[name] = { top: Math.round(r.top), dy: m ? Math.round(m.m42) : 0, h: Math.round(r.height), w: Math.round(r.width), x: Math.round(r.x) };
   }
   return out;
 })()`;
