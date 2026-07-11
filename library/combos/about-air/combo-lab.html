@@ -521,17 +521,12 @@
      контекст і, пізніші в DOM, б'ють z1 пін-секції (position:relative
      БЕЗ z-index стекінг-контексту НЕ створює). Обидва в'юпорти. */
   #revolves, #space-splash, #services { isolation: isolate; }
-  /* splash їде ПОВЕРХ пінованого hq (live hit-test .4184: під швом
-     about-space-intro__layer-background) — z вище за .isw-under-next z1 */
-  #space-splash { z-index: 2; }
-  /* під arch-віпом live показує ЧОРНЕ (live-058/060), крізь яке ВИДНО
-     revolves-контент: чорнота = розширення revolves УГОРУ (::before),
-     видиме крізь спорожнілий прозорий шар. НЕ фон #isw-arch — той z1
-     і закривав би сам revolves до фізичного релізу. */
-  #revolves::before { content: ""; position: absolute; left: 0; right: 0;
-    bottom: 100%; height: 110svh; background: #111110; }
-  /* clip лише по X (нахили віяла) — Y visible, інакше ::before зрізається */
-  #revolves { overflow-x: clip; overflow-y: visible; }
+  /* НАСТУПНА СЕКЦІЯ ЇДЕ ПОВЕРХ ПІНОВАНОЇ (next-over) — загальний live-патерн,
+     доведений hit-test'ами: splash поверх hq (@.4184) · revolves поверх arch
+     (settled @.248: #revolves box top 168, шов = верх бокса, 1:1 зі скролом;
+     «швидкий шов» у бордах був артефактом лаг-зйомки 130ms) · services поверх
+     плану (live-156). z вище за .isw-under-next z1. */
+  #space-splash, #revolves { z-index: 2; }
   .fade-seam::after { content: ""; position: absolute; bottom: 0;
     left: calc(50% - 50vw); right: calc(50% - 50vw);  /* фулблід: .act вужчий за екран (с22) */
     height: 60svh; background: #000; pointer-events: none; z-index: 1;
@@ -1026,7 +1021,7 @@
        мінус underNextSvh, тому хвіст МУСИТЬ бути і тут, і в опції).
        Шар тримає до live-релізу (.2676/.4448), видимий вихід = exitWipe
        на офсеті шов-старту (.2304 / ~.41). */
-    #isw-arch { min-height: calc(100svh + 160svh + 117svh) !important; }  /* свап-спан 160 + хвіст 117 (exitWipe на +17) */
+    #isw-arch { min-height: calc(100svh + 160svh + 117svh) !important; }  /* свап-спан 160 + хвіст 117 (revolves z2 їде поверх) */
     #isw-hq { min-height: calc(100svh + 190svh + 90svh) !important; }     /* свап-спан 190 + хвіст 90 (splash z2 їде поверх) */
     /* c20 desktop-виміри НЕ протікають на 390 */
     .aut-mid, .aut-right { margin-top: 0; }
@@ -1647,21 +1642,15 @@
          крок 85→110svh під живий бюджет hq→space 10.07% */
       /* pin-curves проба (свапи живого @1440): arch 0.198/0.216 → step 91svh,
          hq 0.371/0.385 → step 80svh (слайд-2 у живого ~480-490px, був 660) */
-      /* с22 стекінг, ітерація 3 (борд-докази live-055/058/060/100): вихід
-         живого слайдера = кліп-віп АНІМАЦІЯ (1s ease-out, час-базована) у
-         порожнечу поверх ще пінованого прозорого шару. Наш еквівалент:
-         underNext тримає шар до live-РЕЛІЗУ (.2585/.4237 desktop), а видимий
-         вихід робить exitWipe на офсеті live ШОВ-СТАРТУ (.233/.400) після
-         кінця свап-спану. m390 дзеркально (.2676/.4448 і .2304/~.41). */
-      /* hq (ітерація 4, прямий доказ hit-test на live .4184): splash-секція
-         їде ПОВЕРХ пінованого hq (шов = верх бокса splash, наш splash уже
-         входить у тих самих фраках) — hq тримає пін до live-релізу
-         .4237/.4448, а #space-splash дістав z-index:2 > z1 шару. Без віпа. */
+      /* с22 стекінг, фінальна модель (ітерації 3-5): обидва слайдери тримають
+         пін до live-релізу (underNext ~100svh), а видимий вихід робить
+         НАСТУПНА СЕКЦІЯ, що їде ПОВЕРХ (z2): revolves поверх arch (settled
+         hit-test @.248) · splash поверх hq (@.4184). exitWipe НЕ потрібен —
+         «швидкий шов» у бордах був артефактом лаг-зйомки (a5cc7f1). */
       el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 80,
-        underNextSvh: window.innerWidth > 768 ? 102 : 90 } :
-      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91, exitWipe: true,
-        underNextSvh: window.innerWidth > 768 ? 105 : 117,
-        exitOffsetSvh: window.innerWidth > 768 ? 19 : 17 } : { mobile: 'tap' }); }
+        underNextSvh: window.innerWidth > 768 ? 117 : 90 } :  /* settled: live реліз .4281, було .4238 (+137px) */
+      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91,
+        underNextSvh: window.innerWidth > 768 ? 105 : 117 } : { mobile: 'tap' }); }
   );
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */

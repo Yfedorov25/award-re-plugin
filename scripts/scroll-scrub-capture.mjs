@@ -73,9 +73,21 @@ const fracs = []; let anchors = [];
   for (let i = 0; i < N; i++) {
     const ty = y0 + (y1 - y0) * (i / (N - 1));
     await p.mouse.move(g.thx, ty);
-    await p.waitForTimeout(800);  /* с22: 130ms ловило Locomotive у льоті — label/пікселі
-      розходились ~200px (settled-рекон @.4184 шов 355 vs борд-кадр 160) і роздували
-      ВСІ перехідні зони diff; 800ms = settled, обидві сторони пари в одній точці */
+    /* с22: фіксовані вейти (130/800ms) ловили Locomotive у льоті/по-різному —
+       label/пікселі розходились до ~200px і роздували перехідні зони diff.
+       Детерміновано: чекати СТАБІЛЬНОСТІ КОНТЕНТУ (Δ<0.5px 2 такти по 120ms;
+       НЕ повзунок — він липне до миші під час драгу) */
+    await p.evaluate(async () => {
+      const y = () => { const s = document.querySelector('[data-scroll-section]');
+        return s ? s.getBoundingClientRect().top : 0; };
+      let prev = y(), calm = 0;
+      for (let t = 0; t < 30 && calm < 2; t++) {
+        await new Promise(r => setTimeout(r, 120));
+        const cur = y();
+        if (Math.abs(cur - prev) < 0.5) calm++; else calm = 0;
+        prev = cur;
+      }
+    });
     const fr = await p.evaluate(() => {
       const th = document.querySelector('.c-scrollbar_thumb'); const tr = document.querySelector('.c-scrollbar');
       const m = new WebKitCSSMatrix(getComputedStyle(th).transform);

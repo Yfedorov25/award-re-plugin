@@ -157,8 +157,20 @@ if (!SKIP_LIVE) {
     await p.mouse.move(g.thx, g.thy); await p.mouse.down();
     for (let i = 0; i < N; i++) {
       await p.mouse.move(g.thx, yA + (yB - yA) * (i / (N - 1)));
-      await p.waitForTimeout(600);  /* с22: 90ms ловило Locomotive у льоті — live-криві
-        лагали ~150-200px проти settled-стану (звірено реконом @.4184) */
+      /* с22: фіксовані вейти (90/600/900ms) давали РІЗНІ live-позиції — Locomotive
+         доїжджає тривалісно. Детерміновано: чекати СТАБІЛЬНОСТІ КОНТЕНТУ
+         (rect першої секції, Δ<0.5px 2 такти; НЕ повзунок — він липне до миші) */
+      await p.evaluate(async () => {
+        const y = () => { const s = document.querySelector('[data-scroll-section]');
+          return s ? s.getBoundingClientRect().top : 0; };
+        let prev = y(), calm = 0;
+        for (let t = 0; t < 30 && calm < 2; t++) {
+          await new Promise(r => setTimeout(r, 120));
+          const cur = y();
+          if (Math.abs(cur - prev) < 0.5) calm++; else calm = 0;
+          prev = cur;
+        }
+      });
       const row = await p.evaluate((fn) => {
         const th = document.querySelector('.c-scrollbar_thumb'); const tr = document.querySelector('.c-scrollbar');
         const m = new WebKitCSSMatrix(getComputedStyle(th).transform);
