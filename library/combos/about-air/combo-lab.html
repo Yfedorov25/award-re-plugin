@@ -218,14 +218,20 @@
   /* hq (живий card-slider, anchor-вимір): КАРТКА обмежена (radius 5, центрована),
      не full-height градієнт; слайд-1 титул 21px, слайди 2-3 базові 13px;
      фон = ОДНЕ фото з pan (object-position по слайдах імітує живий parallax-пан) */
-  #isw-hq .isw-card { top: 50%; bottom: auto; transform: translateY(-50%);
-    height: min(80svh, 720px); border-radius: 5px; padding: 30px; right: 20px;
-    background: rgba(240, 240, 240, 0.6); }  /* живий card-slider (архів): 453×720, СВІТЛА .6, blur40, right 20 */
+  /* с23 кадри 090-094: картка НЕ центрована — top 160 (під хедером) / bottom 23,
+     текст ~центр картки (не низ), чіп право-низ */
+  #isw-hq .isw-card { top: 160px; bottom: 23px; transform: none;
+    height: auto; border-radius: 5px; padding: 14px 20px 20px; right: 20px;
+    background: rgba(240, 240, 240, 0.6); }  /* живий card-slider (архів): 453, СВІТЛА .6, blur40, right 20 */
+  #isw-hq .isw-texts { align-content: center; }
   #isw-hq .isw-texts p.t-lg { font-size: 21px; line-height: 1.14; }
   #isw-hq .isw-texts p { font-size: 13px; line-height: 1.3; }
-  #isw-hq [data-isw-slide]:nth-child(1) img { object-position: 50% 0%; }
-  #isw-hq [data-isw-slide]:nth-child(2) img { object-position: 50% 55%; }
-  #isw-hq [data-isw-slide]:nth-child(3) img { object-position: 50% 100%; }
+  #isw-hq .isw-card .cta-link { position: absolute; right: 20px; bottom: 20px;
+    max-width: 220px; white-space: normal; text-align: left; line-height: 1.25; }
+  /* с23: живий пан тримається в НИЖНІЙ третині фото (у нас 0% давав небо) */
+  #isw-hq [data-isw-slide]:nth-child(1) img { object-position: 50% 55%; }
+  #isw-hq [data-isw-slide]:nth-child(2) img { object-position: 50% 75%; }
+  #isw-hq [data-isw-slide]:nth-child(3) img { object-position: 50% 95%; }
   .hq-pin { position: absolute; left: 42%; top: 38%; width: 30px; height: 30px; z-index: 2;
     border-radius: 5px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     background: rgba(255,255,255,.1); }
@@ -635,6 +641,10 @@
   .aplan { position: sticky; top: 12vh; }
   @media (max-width: 768px) { .aplan-scroll { height: auto; } .aplan { position: static; } }
   /* макет кварталу: діагональна смуга-«стрічка» плит (перспектива зліва-верх → право-низ) */
+  /* с23: справжній рендер плану fullbleed (заглушка-deck лишалась бежевим боксом) */
+  .aplan-bg { position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: center; display: block; z-index: 0; border-radius: 0; }
+  .aplan-title img { width: clamp(220px, 24vw, 340px); display: block; opacity: .9; }
   .aplan-deck { position: absolute; left: 4%; right: 4%; top: 34%; height: 46%;
     background: linear-gradient(158deg, #e9e8e4 0%, #dedcd6 48%, #cfcdc6 100%);
     transform: skewY(-9deg); border-radius: 10px; z-index: 1;
@@ -643,7 +653,8 @@
     background: rgba(255,255,255,.5); }
   .aplan-deck::before { left:14%; top:16%; width:20%; height:52%; }   /* плита B1 */
   .aplan-deck::after  { left:44%; top:22%; width:16%; height:46%; }   /* плита B2 */
-  .aplan-title { position: absolute; left: 36%; top: 18%; z-index: 2; text-align: left; }  /* живе f372: центр-зліва над плитою */
+  .aplan-title { position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%);
+    z-index: 1; text-align: left; }  /* с23 live-154: сірий титул по центру, ЗА пінами */
   .aplan-title .m-num { font-size: clamp(48px, 7vw, 120px); font-weight: 300; line-height: .92;
     color: #fff; letter-spacing: -.02em; }  /* живе f372: БІЛИЙ на сірій плиті */
   .aplan-title .m-num span { font-size: .28em; font-weight: 300; }
@@ -903,6 +914,12 @@
        поки скрол іде — сталий еквівалент: sticky + додатковий тревел секції */
     #a-intro { padding-bottom: 74vh; }
     #a-intro .a-ill { position: sticky; top: 15vh; }
+    /* с23 кадр live-012: інтро-фото тримається ПІД наступною секцією (живий
+       sticky--under-next: спейсер + нуль-сумний margin; спейсер, БО sticky-хід
+       живе лише в content box — падінг ходу не дає, урок с21) */
+    #a-intro::after { content: ''; display: block; height: 100svh; }
+    #a-intro { margin-bottom: -100svh; }
+    #a-intro + .act { position: relative; z-index: 2; background: #fff; }
     #headquarters { padding-top: 6vh; margin-top: 84px; padding-bottom: 4vh; }  /* с23 px-solve: rev→hq +84 (margin — щоб їхав і бокс-анкор) */
     /* pin-curves: свапи живого пізніші за наші → старти пінів зсунуто вниз
        (arch +480px, hq +640px); span'и вкоротились через stepSvh 91/80 */
@@ -933,7 +950,8 @@
        (live 0-крос .665) + тревел +850px; нуль-сумно margin-bottom −850px
        (svc-head enter .6421 НЕ рухається); services пізніший у DOM → малюється
        зверху сам (z-index НЕ ставити — інверсія ламала порядок live) ── */
-    .aplan { top: 250px; }
+    .aplan { top: 250px; width: 100vw; margin-left: calc(50% - 50vw); }  /* с23 live-154: план fullbleed */
+    #autonomy > .reveal-text { margin-bottom: calc(4vh + 81px) !important; }  /* с23: компенсація spread-титулу (нижчий за стек) */
     .aplan-scroll { height: calc(186svh + 1192px); }  /* с23: +342 (aut→svc live 3226) — план під services довше, як live */
     #autonomy { margin-bottom: -850px; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
@@ -1320,7 +1338,8 @@
 <!-- ═══ 8 · AUTONOMY (light) → SERVICES(dark): fade-шов ═══ -->
 <section class="act fade-seam" id="autonomy">
   <!-- живе: центр-титул 2 рядки + UPPERCASE reveal-абзац ПРАВОРУЧ (4000 лише на план-мапі) -->
-  <h2 class="h1" style="text-align:center;margin-bottom:2vh">Maximum<br>autonomy</h2>
+  <!-- с23 кадр live-130: титул spread ВІД КРАЮ ДО КРАЮ (не центрований стек) -->
+  <h2 class="h1 spread" style="margin-bottom:2vh"><span>Maximum</span><span>autonomy</span></h2>
   <p class="reveal-text" style="max-width:44ch;margin:5vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.7vw,24px)">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
   <!-- живий грід (вимір з архіву, JS-off): 3 колонки 690|335|335 gap 20, СТУПІНЧАСТО:
        image-1 x20 y536 690×769 · image-3 (середня) y1197 · image-2 (права) y881 ·
@@ -1342,8 +1361,10 @@
        .aplan-pin-m: нейтральна обгортка для m390-піна (sticky в overflow-контейнері
        до в'юпорта не липне — пінимо САМ контейнер усередині цієї обгортки) -->
   <div class="aplan-pin-m"><div class="aplan-scroll"><div class="aplan" id="autonomy-plan" aria-label="AIR ground-floor infrastructure plan">
-    <div class="aplan-deck" aria-hidden="true"></div>
-    <div class="aplan-title"><div class="m-num">4000 <span>M²</span></div></div>
+    <!-- с23 кадр live-154: план = СПРАВЖНІЙ рендер (8.automony/background) fullbleed,
+         титул 4000 M² = живий map-title.svg сірий ЗА плитами -->
+    <img class="aplan-bg" aria-hidden="true" alt="" src="https://aircenter.space/assets/images/media/about/8.automony/background@xxxl.webp">
+    <div class="aplan-title"><img src="https://aircenter.space/assets/images/media/about/8.automony/map-title.svg" alt="4000 M²"></div>
     <!-- зони навколо кварталу -->
     <div class="zone" style="left:12%; top:34%"><i>↖</i><span>Departure</span></div>
     <div class="zone" style="left:48%; top:63%"><i>⇄</i><span>Drop-off zone</span></div>
