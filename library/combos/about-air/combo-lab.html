@@ -963,16 +963,18 @@
     .aplan-scroll::-webkit-scrollbar { display: none; }
     .aplan { width: 200vw; aspect-ratio: 1440 / 760; margin-top: 0; border-radius: 0; }
 
-    /* ── ФІКС 2 · #rvc: full-bleed свайп-слайдер замість стиснутого віяла.
-       Нахили геть, слайд 85vw, snap center, фото ~52svh. ── */
+    /* ── ФІКС 2 · #rvc: КОМПАКТНИЙ фан як live @390 (борд live-035: картки —
+       горизонтальний ряд у ВЕРХНІЙ третині ~225px, центр + бічні peek; НЕ
+       гігант 85vw×52svh що заповнював екран і виганяв текст = revolves 61%).
+       с27 composition-first: картки ~74vw × 225px, менша висота = ближче до live. ── */
     #rvc [data-rvc-stage] { display: flex !important; flex-wrap: nowrap;
       overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory;
       gap: 10px; height: auto !important; aspect-ratio: auto;
-      padding: 0 7.5vw; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      padding: 0 13vw; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     #rvc [data-rvc-stage]::-webkit-scrollbar { display: none; }
-    #rvc [data-rvc-slide] { flex: 0 0 85vw; width: 85vw; scroll-snap-align: center;
+    #rvc [data-rvc-slide] { flex: 0 0 74vw; width: 74vw; scroll-snap-align: center;
       transform: none !important; margin: 0; }
-    #rvc [data-rvc-slide] img { height: 52svh; }
+    #rvc [data-rvc-slide] img { height: 225px; object-fit: cover; }
 
     /* ── ФІКС 4 · #isw-arch / #isw-hq: слайд full-bleed 100vw, каптіон = glass-overlay
        ПОВЕРХ низу фото, без стрілок/лічильника, лишаються тонкі progress-ticks. ── */
