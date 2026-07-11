@@ -223,11 +223,11 @@
   #isw-hq .isw-card { top: 160px; bottom: 23px; transform: none;
     height: auto; border-radius: 5px; padding: 14px 20px 20px; right: 20px;
     background: rgba(240, 240, 240, 0.6); }  /* живий card-slider (архів): 453, СВІТЛА .6, blur40, right 20 */
-  #isw-hq .isw-texts { align-content: center; }
+  #isw-hq .isw-texts { align-content: center; position: relative; top: -30px; }  /* с26 #94: live текст на 460, наш був 490 */
   #isw-hq .isw-texts p.t-lg { font-size: 21px; line-height: 1.14; }
   #isw-hq .isw-texts p { font-size: 13px; line-height: 1.3; }
-  #isw-hq .isw-card .cta-link { position: absolute; right: 20px; bottom: 20px;
-    max-width: 220px; white-space: normal; text-align: left; line-height: 1.25; }
+  #isw-hq .isw-card .cta-link { position: absolute; right: 20px; bottom: 6px;
+    max-width: 220px; white-space: normal; text-align: left; line-height: 1.25; }  /* с26 #94: live чіп bottom 6 */
   /* ⚠️ с26: НЕ «освітлювати» чіп і НЕ звужувати текст hq-картки — пікселі
      live-088 кажуть чіп ЧОРНИЙ ((1250,752)=0,0,0), спроба дала 27.9→28.3 */
   /* с26 кадр live-039: текст картки arch ~ЦЕНТР (наш був flex-end) — дослівні
@@ -1985,8 +1985,10 @@
       var r = root.getBoundingClientRect();
       var vh = window.innerHeight;
       var dy;
-      if (r.top > 0) dy = Math.max(-125, 198 - 0.67 * r.top);
-      else dy = 198 - 293 * Math.min(1, -r.top / (r.height - vh));
+      /* с26 доїзд (#94 DOM-звірка): 198/293 давали середину піна на −25 нижче
+         live → 205/300 (реліз 205−300 = −95 незмінний, розкид ±13 замість −25) */
+      if (r.top > 0) dy = Math.max(-125, 205 - 0.67 * r.top);
+      else dy = 205 - 300 * Math.min(1, -r.top / (r.height - vh));
       for (var i = 0; i < imgs.length; i++)
         imgs[i].style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
       raf = requestAnimationFrame(tick);
