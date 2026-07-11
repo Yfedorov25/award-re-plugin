@@ -34,9 +34,23 @@ let poses = manifest.poses.filter((p) => !only || p.vp === only);
 if (limit > 0) poses = poses.slice(0, limit);
 
 const rows = [];
+/* S8b: кілька s-поз в одному бакеті (±120) = кроки слайдера на плато
+   (хронологія маніфеста) → ?step=K для timed-фіналів движка. K шлемо
+   явно для ВСІХ поз множинного бакета (дефолт движка = останній крок). */
+const bucketOf = (p) => p.vp + ':' + Math.round(p.value / 120);
+const bucketTotal = {};
+for (const p of poses) if (p.kind === 's') bucketTotal[bucketOf(p)] = (bucketTotal[bucketOf(p)] || 0) + 1;
+const bucketSeen = {};
 for (const p of poses) {
   const vp = VIEWPORTS[p.vp];
-  const url = p.kind === 'intro' ? `${origin}/?intro=${p.value}` : `${origin}/?s=${p.value}`;
+  let stepParam = '';
+  if (p.kind === 's') {
+    const key = bucketOf(p);
+    const k = bucketSeen[key] || 0;
+    bucketSeen[key] = k + 1;
+    if (bucketTotal[key] > 1) stepParam = `&step=${k}`;
+  }
+  const url = p.kind === 'intro' ? `${origin}/?intro=${p.value}` : `${origin}/?s=${p.value}${stepParam}`;
   const label = `${p.vp}-${p.kind}${p.value}`;
   const baseline = join(visualDir, 'live', p.file);
   if (!existsSync(baseline)) { console.log(`  ${label}: НЕМАЄ baseline ${p.file}`); continue; }

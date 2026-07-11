@@ -77,8 +77,20 @@ const SETUP_FN = (args) => {
     const cs = getComputedStyle(el);
     if (cs.transform !== 'none' || (cs.clipPath && cs.clipPath !== 'none')) set.add(el);
   }
-  for (const q of ['[data-parallax]', '[data-scroll-sticky]', '[data-reveal]', 'h1,h2,h3', 'img', '[class*="__title"]', '[class*="background"]', '[class*="gradient"]']) {
-    for (const el of sec.querySelectorAll(q)) { if (set.size < 48) set.add(el); }
+  /* КВОТИ per-query (S8, пастка 32): глобальний кап 48 з'їдався
+     img-фолбеками hero (19 gallery-item × picture) — gradient/background
+     НІКОЛИ не влазили в карту. Кожен query додає до N ВЛАСНИХ нових
+     цілей; шари фону стоять ПЕРЕД img. */
+  for (const [q, quota] of [
+    ['[data-parallax]', 12], ['[data-scroll-sticky]', 8], ['[data-reveal]', 12],
+    ['[class*="gradient"]', 6], ['[class*="background"]', 8],
+    ['h1,h2,h3', 8], ['[class*="__title"]', 6], ['img', 14],
+  ]) {
+    let added = 0;
+    for (const el of sec.querySelectorAll(q)) {
+      if (added >= quota || set.size >= 80) break;
+      if (!set.has(el)) { set.add(el); added++; }
+    }
   }
   /* BODY як псевдо-ціль (S7): тема сторінки (ui-dark/ui-light) живе
      на body.background і фліпається хореографією між секціями —
@@ -146,9 +158,13 @@ const SETUP_FN = (args) => {
     odometer: probes.map((el) => (el.className || '').toString().slice(0, 40)),
     targets: window.__AM_TARGETS__.map((el, i) => {
       /* src СЕБЕ або першого img-нащадка (S6, пастка 26): єдиний
-         надійний дискримінатор однакових picture-груп — вміст */
+         надійний дискримінатор однакових picture-груп — вміст.
+         data-URI заглушка (mobile lazy) = НЕ вміст: хвіст 'svg%3E'
+         різав групи резолва й давав off-by-one каруселі (S8) —
+         тоді справжній URL у data-src */
       const im = el.tagName === 'IMG' ? el : el.querySelector('img');
-      const rawSrc = im && (im.currentSrc || im.src || im.getAttribute('data-src') || '');
+      let rawSrc = im ? (im.currentSrc || im.src || '') : '';
+      if (rawSrc.startsWith('data:')) rawSrc = (im.getAttribute('data-src') || '');
       return {
         i,
         tag: el.tagName.toLowerCase(),
@@ -222,6 +238,9 @@ async function runViewport(browser, vpName) {
   const picked = await page.evaluate(SETUP_FN, { selector: secSelector, odometerSelector: site.odometerSelector, extraProbeSelectors });
   if (picked.error) { await ctx.close(); return { error: picked.error }; }
   console.log(`  одометр: [${picked.odometer}] · цілей: ${picked.targets.length}`);
+  /* самоперевірка квот (пастка 32): ціль МУСИТЬ реально бути в targets */
+  const gradTargets = picked.targets.filter((t) => /gradient/i.test(t.cls || ''));
+  console.log(`  gradient-цілей у карті: ${gradTargets.length}${gradTargets.length ? ' (' + gradTargets.map((t) => t.cls).join(' | ') + ')' : ''}`);
 
   /* 2) степ-цикл жестами. АДАПТИВНИЙ крок: снап-гейт інтро й снап-зони
      ковтають малі жести — при застої одометра дистанція жесту
@@ -251,7 +270,10 @@ async function runViewport(browser, vpName) {
     frames.push(frame);
     const moved = odoOf(frame) - odo;
     odo = odoOf(frame);
-    dist = Math.abs(moved) < 2 ? Math.min(dist * 2, 900) : stepPx;
+    /* застій = |рух| < 60 (S8: плато джитерить ±20-50px і скидав
+       подвоєння у базовий степ — 216 жестів не пробили плато, яке
+       знімалка проходила; реальні травели рухають >100px) */
+    dist = Math.abs(moved) < 60 ? Math.min(dist * 2, 1200) : stepPx;
   }
   await ctx.close();
 

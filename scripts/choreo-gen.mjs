@@ -32,6 +32,17 @@ const maps = Object.fromEntries(MAPPED.map((id) => [
   id, JSON.parse(readFileSync(join(site.outDir, `animation-map-${id}.json`), 'utf8')),
 ]));
 console.log(`карти секцій: ${MAPPED.join(', ')}`);
+const shellDataPath = join(site.outDir, 'shell-bg.json');
+const shellData = existsSync(shellDataPath) ? JSON.parse(readFileSync(shellDataPath, 'utf8')) : null;
+/* timing-карти (S8b): часові переходи при стоячому одометрі (вайпи
+   wellness-слайдера) — s-карти їх сліпі (рекордер пише лише при русі
+   одометра). Блоки з timing-map вливаються в біндінги як timed-кроки. */
+const TIMED = {};
+for (const id of site.sections.map((s) => s.id)) {
+  const p = join(site.outDir, `timing-map-${id}.json`);
+  if (existsSync(p)) TIMED[id] = JSON.parse(readFileSync(p, 'utf8'));
+}
+if (Object.keys(TIMED).length) console.log(`timing-карти: ${Object.keys(TIMED).join(', ')}`);
 
 const r1 = (v) => Math.round(v * 10) / 10;
 /* ПОВНА 2D-матриця [a,b,c,d,tx,ty] — у hero є РОТАЦІЯ (S3-розкопка:
@@ -155,13 +166,76 @@ function buildViewport(vpName) {
           }
         }
       }
+      /* WEBGL-ФАЗА + ВАЙП-ЕКСТРАПОЛЯЦІЯ (S8b-розкопка): вміст wellness
+         у live малює канвас, DOM-колонки (no-js фолбеки) стоять із
+         zero-area clip усю канвас-фазу; вайп у слайдер-фазу карта ловить
+         лише 2-3 mid-кадрами (межа плато, пастка 19) і НЕ бачить
+         відкритого фіналу — cLast = 99.9%-закритий, старий clipStep
+         степив у «майже закрите» (басейн зникав). Правда з даних:
+         свіп-парам монотонно тікає від closed-значення → ТЕРМІНАЛ = 0
+         або 100 (бік більшої площі), sOpen = лінійна екстраполяція
+         mid-тренду до терміналу (той самий клас генерату, що iEnd S3). */
+      let clipStep = null;
+      let surrogateClip = false;
+      {
+        const polyArea = (c) => {
+          const pts = ((c || '').match(/-?\d*\.?\d+/g) || []).map(Number);
+          if (pts.length < 6) return null;
+          let a = 0;
+          for (let i = 0; i < pts.length; i += 2) {
+            const x1 = pts[i], y1 = pts[i + 1];
+            const x2 = pts[(i + 2) % pts.length], y2 = pts[(i + 3) % pts.length];
+            a += x1 * y2 - x2 * y1;
+          }
+          return Math.abs(a / 2);
+        };
+        const clips = curve.map((x) => x.clip).filter(Boolean);
+        if (clips.length && clips.length >= curve.length * 0.9) {
+          const areas = clips.map(polyArea);
+          const zeroShare = areas.filter((a) => a !== null && a < 1).length / areas.length;
+          if (zeroShare >= 0.9 && areas.every((a) => a !== null)) {
+            const numsOf = (c) => ((c || '').match(/-?\d*\.?\d+/g) || []).map(Number);
+            const closedClip = clips[areas.findIndex((a) => a < 1)];
+            const closedNums = numsOf(closedClip);
+            const mids = curve.filter((x) => x.clip && polyArea(x.clip) >= 1)
+              .map((x) => ({ s: x.s, nums: numsOf(x.clip) }))
+              .sort((a, b) => a.s - b.s);
+            let si = -1;
+            if (mids.length >= 2) {
+              for (let i = 0; i < closedNums.length; i++) {
+                if (mids.some((m) => Math.abs((m.nums[i] ?? closedNums[i]) - closedNums[i]) > 1)) { si = i; break; }
+              }
+            }
+            if (si > -1) {
+              const c0 = closedNums[si];
+              const dir = mids[mids.length - 1].nums[si] < c0 ? -1 : 1;
+              const terminal = dir < 0 ? 0 : 100;
+              const a = mids[0], b = mids[mids.length - 1];
+              const rate = (b.nums[si] - a.nums[si]) / (b.s - a.s || 1);
+              const sOpen = Math.abs(rate) > 1e-4
+                ? r1(b.s + (terminal - b.nums[si]) / rate) : r1(b.s);
+              /* термінал ЛИШЕ для координат, що реально варіюються в mids
+                 (структурні X=100 закритого полігона не чіпати — інакше
+                 «відкритий» полігон дегенерує в нульову площу) */
+              const varies = closedNums.map((v, i) =>
+                mids.some((m) => Math.abs((m.nums[i] ?? v) - v) > 1));
+              const openNums = closedNums.map((v, i) => (varies[i] ? terminal : v));
+              let k = 0;
+              const openClip = closedClip.replace(/-?\d*\.?\d+/g, () => String(openNums[k++]));
+              clipStep = { closed: closedClip, open: openClip, sOpen };
+              console.log(`  [${vpName}/${secId}] webgl-вайп: sOpen=${sOpen} термінал=${terminal} (${(t.cls || t.tag).slice(0, 30)})`);
+            }
+            for (const x of curve) x.clip = null;
+            surrogateClip = true;
+          }
+        }
+      }
       /* CLIP-ВАЙП (one-shot розкриття, transients ловлять весь сввіп
          полігона): closed→open один раз, монотонно — латч у СТЕП з
          ГЕОМЕТРИЧНИМ тригером (map-тригер journey-зсунутий): движок
          відкриє на вході у вʼюпорт. Немонотонні вайпи (wellness-слайди
          туди-сюди) не чіпаємо. */
-      let clipStep = null;
-      if (curve.length > 2) {
+      if (!surrogateClip && curve.length > 2) {
         const cFirst = curve[0].clip || 'none', cLast = curve[curve.length - 1].clip || 'none';
         if (cFirst !== cLast) {
           const numsPer = curve.map((x) => {
@@ -233,10 +307,56 @@ function buildViewport(vpName) {
         moving: t.moving,
         seedTransform: restT && restT !== 'none' ? restT : null,
         restOpacity: t.samples[0] ? +t.samples[0].opacity : null,
-        restClip: t.samples[0]?.clipPath || null,
+        restClip: surrogateClip ? null : (t.samples[0]?.clipPath || null),
         intro: intro.length > 1 ? intro : undefined,
         curve,
       });
+    }
+    /* TIMED-КРОКИ (S8b, timing-map): часові переходи при стоячому
+       одометрі (вайпи/свапи слайдера) — s-криві їх не бачать. Блок
+       timing-map = один жест: цілі, чиї пропи ЗМІНИЛИСЬ у блоці,
+       отримують timed-крок {s, step, final{o,clip,disp}}. Движок на
+       позі застосовує фінал ПІСЛЯ s-кривих (перекриває контамінацію).
+       Кадри переходу зберігаються в timing-map (реплей за часом —
+       наступний шар; піксельний гейт міряє осілі фінали). */
+    const tm = TIMED[secId]?.viewports?.[vpName];
+    if (tm && !tm.error && tm.blocks && tm.targets) {
+      for (let ti = 0; ti < tm.targets.length; ti++) {
+        const steps = [];
+        for (const blk of tm.blocks) {
+          if (!blk.frames || blk.frames.length < 2) continue;
+          const first = blk.frames[0].targets[ti];
+          const last = blk.frames[blk.frames.length - 1].targets[ti];
+          if (!first || !last) continue;
+          /* фліп РОЗМІРУ = display-свап БАТЬКА (слайд-обгортка може не
+             бути ціллю): у дитини disp лишається block, але bbox 0↔N */
+          const sizeFlip = (first.w < 2 || first.h < 2) !== (last.w < 2 || last.h < 2);
+          const changed = first.opacity !== last.opacity
+            || (first.clipPath || '') !== (last.clipPath || '')
+            || (first.disp || '') !== (last.disp || '')
+            || sizeFlip;
+          if (!changed) continue;
+          const gone = last.disp === 'none' || last.w < 2 || last.h < 2;
+          const was = first.disp === 'none' || first.w < 2 || first.h < 2;
+          steps.push({
+            s: r1(blk.sSettled), step: blk.step, durMs: blk.durMs,
+            final: {
+              o: +last.opacity,
+              clip: last.clipPath || null,
+              disp: gone ? 'none' : (was ? 'visible' : null),
+            },
+          });
+        }
+        if (!steps.length) continue;
+        const t = tm.targets[ti];
+        const sig = { tag: t.tag, cls: t.cls, text: t.text, attrs: [], src: t.src };
+        const existing = bindings.find((b) => b.section === secId
+          && b.sig.tag === sig.tag && b.sig.cls === sig.cls && (b.sig.src || '') === (sig.src || ''));
+        if (existing) existing.timed = steps;
+        else bindings.push({ section: secId, sig, moving: {}, seedTransform: null, restOpacity: null, restClip: null, curve: [], timed: steps });
+      }
+      const timedCount = bindings.filter((b) => b.section === secId && b.timed).length;
+      console.log(`  [${vpName}/${secId}] timed-біндінгів: ${timedCount}`);
     }
     /* iEnd: екстраполяція насичення інтро-каруселі hero */
     if (secId === 'hero-gallery' && iEnd === null) {
@@ -261,11 +381,23 @@ function buildViewport(vpName) {
 
   const footer = sections.footer;
   const bodyHeight = Math.max(...Object.values(sections).map((s) => s.top0 + s.h));
+  /* фарба оболонок (shell-bg.json, S8a): слаби-підкладки створює движок —
+     першою дитиною обгортки (успадковують травел), top у doc-координатах
+     ПІСЛЯ бут-корекції обгортки, h = bbox предка на live-споку */
+  const shellSections = {};
+  if (shellData) {
+    const sh = shellData.viewports?.[vpName];
+    for (const [id, p] of Object.entries(sh?.sections || {})) {
+      if (!p || p.own || id === 'header' || !sections[id]) continue;
+      shellSections[id] = { bgc: p.bgc, bgi: p.bgi !== 'none' ? p.bgi : null, h: p.h };
+    }
+  }
   return {
     ladder: sc.ladder,
     bodyHeight: Math.round(bodyHeight),
     maxScroll: sc.ladder[sc.ladder.length - 1],
     sections, travels,
+    shell: Object.keys(shellSections).length ? shellSections : null,
     introGate: iEnd ? { iEnd } : null,
     bindings,
     footerTop: footer ? footer.top0 : null,
@@ -291,13 +423,21 @@ else {
 }
 if (!choreo.viewports.mobile) fail.push('немає mobile у scene-map');
 
-/* scene.css: документна геометрія — absolute офсети секцій обох вʼюпортів */
-let css = '/* ГЕНЕРАТ choreo-gen.mjs зі scene-map.json — не редагувати руками */\n';
+/* scene.css: документна геометрія — absolute офсети секцій обох вʼюпортів.
+   + базовий фон body (S8a, shell-bg.json). Фарба ОБОЛОНОК секцій — НЕ тут:
+   вона мусить їхати з травелами обгорток і знати бут-корекції, тому
+   слаби-підкладки створює ДВИЖОК з choreo.shell (S8a-розкопка: статична
+   фарба на обгортці накрила s900 суцільною плитою — обгортка не travel-ить). */
+const shellPath = join(site.outDir, 'shell-bg.json');
+const shell = existsSync(shellPath) ? JSON.parse(readFileSync(shellPath, 'utf8')) : null;
+let css = '/* ГЕНЕРАТ choreo-gen.mjs зі scene-map.json + shell-bg.json — не редагувати руками */\n';
 for (const [vp, mq] of [['desktop', '@media (min-width:1024px)'], ['mobile', '@media (max-width:1023px)']]) {
   const v = choreo.viewports[vp];
   if (!v) continue;
+  const sh = shell?.viewports?.[vp];
   css += `${mq}{\n`;
-  css += `body{height:${v.bodyHeight}px;position:relative;margin:0;}\n`;
+  const bodyBg = sh?.body?.bgc ? `background:${sh.body.bgc};` : '';
+  css += `body{height:${v.bodyHeight}px;position:relative;margin:0;${bodyBg}}\n`;
   for (const [id, s] of Object.entries(v.sections)) {
     if (id === 'header') { css += `.sk-vp-${vp}[data-sk-section="header"]{position:fixed;top:0;left:0;right:0;z-index:50;}\n`; continue; }
     css += `.sk-vp-${vp}[data-sk-section="${id}"]{position:absolute;top:${s.top0}px;left:0;right:0;}\n`;

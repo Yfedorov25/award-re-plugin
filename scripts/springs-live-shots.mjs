@@ -56,7 +56,13 @@ async function openLive(vpName) {
   for (const sel of ['.js-cookie-consent-accept', 'button:has-text("ACCEPT")']) {
     try { await page.click(sel, { timeout: 1200 }); break; } catch {}
   }
-  await page.waitForTimeout(800);
+  /* ПРЕЛОАДЕР ховається на ~7с (S8-розкопка): кадри до того — його
+     хвіст (зум-око), НЕ інтро-стан; гонка забруднила intro0/150 S5a */
+  await page.waitForFunction(() => {
+    const p = document.querySelector('.js-preloader');
+    return !p || getComputedStyle(p).display === 'none' || parseFloat(getComputedStyle(p).opacity) < 0.05;
+  }, { timeout: 25000 }).catch(() => console.log('  УВАГА: прелоадер не зник за 25с'));
+  await page.waitForTimeout(1200);
   await page.evaluate(PAGE_S_FN); /* ініціалізує __T0__ */
   return { ctx, page, cdp, vp };
 }
@@ -74,13 +80,20 @@ async function settle(page, maxMs = 3000) {
   return last;
 }
 
+/* скріншот, який НЕ вбиває прогін: на wellness-плато канвас-джанк живого
+   підвішує screenshot >30с (S8) — пропускаємо позу, їдемо далі */
+async function shot(page, path) {
+  try { await page.screenshot({ path, timeout: 45000 }); return true; }
+  catch (e) { console.log(`  СКРІНШОТ ПРОПУЩЕНО (${path.split('/').pop()}): ${String(e.message).split('\n')[0]}`); return false; }
+}
+
 async function shootDesktop() {
   const { ctx, page, cdp, vp } = await openLive('desktop');
   const seen = new Set();
   let input = 0, dist = 150, introShots = 0, stall = 0;
   /* стартовий кадр (інтро-стан 0) */
-  await page.screenshot({ path: join(outDir, 'desktop-intro0.png') });
-  manifest.poses.push({ vp: 'desktop', kind: 'intro', value: 0, file: 'desktop-intro0.png' });
+  if (await shot(page, join(outDir, 'desktop-intro0.png')))
+    manifest.poses.push({ vp: 'desktop', kind: 'intro', value: 0, file: 'desktop-intro0.png' });
   for (let g = 0; g < MAX_D; g++) {
     await cdp.send('Input.synthesizeScrollGesture', {
       x: Math.round(vp.width / 2), y: Math.round(vp.height / 2),
@@ -93,9 +106,10 @@ async function shootDesktop() {
       /* інтро-фаза: кадр на кожному осілому input (до 4) */
       if (introShots < 4) {
         const f = `desktop-intro${input}.png`;
-        await page.screenshot({ path: join(outDir, f) });
-        manifest.poses.push({ vp: 'desktop', kind: 'intro', value: input, file: f });
-        introShots++;
+        if (await shot(page, join(outDir, f))) {
+          manifest.poses.push({ vp: 'desktop', kind: 'intro', value: input, file: f });
+          introShots++;
+        }
       }
       dist = Math.min(dist * 2, 600);
       continue;
@@ -104,9 +118,10 @@ async function shootDesktop() {
     if (!seen.has(key)) {
       seen.add(key);
       const f = `desktop-s${Math.round(s)}.png`;
-      await page.screenshot({ path: join(outDir, f) });
-      manifest.poses.push({ vp: 'desktop', kind: 's', value: Math.round(s), file: f });
-      console.log(`  desktop s=${Math.round(s)} → ${f}`);
+      if (await shot(page, join(outDir, f))) {
+        manifest.poses.push({ vp: 'desktop', kind: 's', value: Math.round(s), file: f });
+        console.log(`  desktop s=${Math.round(s)} → ${f}`);
+      }
       stall = 0;
       dist = 150;
     } else {
@@ -123,8 +138,8 @@ async function shootMobile() {
      тільки touch-жести, кадр на кожній осілій позі ~кожні vh */
   const { ctx, page, cdp, vp } = await openLive('mobile');
   const f0 = 'mobile-s0.png';
-  await page.screenshot({ path: join(outDir, f0) });
-  manifest.poses.push({ vp: 'mobile', kind: 's', value: 0, file: f0 });
+  if (await shot(page, join(outDir, f0)))
+    manifest.poses.push({ vp: 'mobile', kind: 's', value: 0, file: f0 });
   let lastShot = 0;
   for (let g = 0; g < 60; g++) {
     await cdp.send('Input.synthesizeScrollGesture', {
@@ -136,9 +151,10 @@ async function shootMobile() {
     if (s - lastShot >= vp.height * 0.7) {
       lastShot = s;
       const f = `mobile-s${Math.round(s)}.png`;
-      await page.screenshot({ path: join(outDir, f) });
-      manifest.poses.push({ vp: 'mobile', kind: 's', value: Math.round(s), file: f });
-      console.log(`  mobile s=${Math.round(s)} → ${f}`);
+      if (await shot(page, join(outDir, f))) {
+        manifest.poses.push({ vp: 'mobile', kind: 's', value: Math.round(s), file: f });
+        console.log(`  mobile s=${Math.round(s)} → ${f}`);
+      }
     }
   }
   await ctx.close();

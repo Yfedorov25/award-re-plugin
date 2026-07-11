@@ -89,6 +89,25 @@
       w.style.top = `${(parseFloat(getComputedStyle(w).top) || 0) + delta}px`;
     }
   }
+  /* слаби-підкладки фарби оболонок (S8a, choreo.shell зі shell-bg.json):
+     фон секцій живе на предках ПОЗА коренем спеки (l-gallery-container
+     ui-dark #162d24) — каркас білий. Слаб = ПЕРША дитина обгортки
+     (успадковує травел обгортки, контент секції малюється поверх),
+     top у doc-координатах ПІСЛЯ бут-корекції, h = bbox предка live. */
+  for (const [id, sh] of Object.entries(cfg.shell || {})) {
+    const w = wrappers[id];
+    const sec = (cfg.sections || {})[id];
+    if (!w || !sec || !sh) continue;
+    const wTop = w.getBoundingClientRect().top + (window.scrollY || 0);
+    const slab = document.createElement('div');
+    slab.className = 'sk-shell-bg';
+    /* z:-1 = шар ФОНУ (як у live: фарба на static-предку малюється під
+       усім трансформованим контентом незалежно від DOM-порядку — інакше
+       слаб wellness накривав хвіст intro на s2969) */
+    slab.style.cssText = `position:absolute;left:0;right:0;top:${(sec.top0 - wTop).toFixed(1)}px;`
+      + `height:${sh.h}px;background:${sh.bgc};${sh.bgi ? `background-image:${sh.bgi};` : ''}pointer-events:none;z-index:-1;`;
+    w.insertBefore(slab, w.firstChild);
+  }
 
   /* живий движок на ініті: знімає нативний sticky (веде піни transform'ами)
      і ЗНІМАЄ is-invisible--js (пастка 2 — каркас = стан архіву JS-off, де
@@ -128,11 +147,14 @@
       if (el.querySelector('img')) score += 1;
     }
     /* img src із live-карти (S6, пастка 26): єдиний надійний
-       дискримінатор однакових picture-груп — вміст, не bbox */
+       дискримінатор однакових picture-груп — вміст, не bbox.
+       S8: розмірний суфікс НОРМАЛІЗУЄТЬСЯ (@xs/@xxl/%40xxxl → база):
+       live mobile віддає @xs, скелет пече @xxl — те саме фото */
     if (sig.src) {
+      const normSrc = (v) => (v || '').replace(/(%40|@)[a-z0-9-]+\./i, '.');
       const im = el.tagName.toLowerCase() === 'img' ? el : el.querySelector('img');
       const s = im && (im.currentSrc || im.src || im.getAttribute('data-src') || '');
-      if (s && s.split('?')[0].split('/').pop() === sig.src) score += 4;
+      if (s && normSrc(s.split('?')[0].split('/').pop()) === normSrc(sig.src)) score += 4;
     }
     return score;
   }
@@ -268,7 +290,9 @@
        батька не подвоювався в дитині). */
   const shapeM = (m) => m && (Math.abs(m[0] - 1) > 0.02 || Math.abs(m[3] - 1) > 0.02 || Math.abs(m[1]) > 0.02 || Math.abs(m[2]) > 0.02);
   for (const b of bound) {
-    b.el.style.willChange = 'transform';
+    /* body: willChange:transform зробив би body containing block'ом
+       для fixed (хедер їхав зі сторінкою) — body поза геометрією */
+    if (b.sig.tag !== 'body') b.el.style.willChange = 'transform';
     b.hasM = (b.curve || []).some((x) => shapeM(x.m)) || (b.intro || []).some((x) => shapeM(x.m));
     const r = b.el.getBoundingClientRect();
     b.nat = { top: r.top + bootScroll2, left: r.left };
@@ -278,7 +302,11 @@
     b.anc = null;
     let p = b.el.parentElement;
     while (p && !b.anc) {
-      const hit = bound.find((x) => x !== b && x.el === p);
+      /* body — bg-псевдоціль (S7) ПОЗА геометрією: у live body стоїть
+         (top=0 завжди, віртуальний скрол), тож формула dt=top+s−nat−dev
+         фабрикує йому фіктивний рух s−dev(s) — як ancOwn він труїв
+         ВСІ корені −(s−dev) (S8-розкопка: s2969 2.08%→77%) */
+      const hit = bound.find((x) => x !== b && x.el === p && x.sig.tag !== 'body');
       if (hit) b.anc = hit;
       p = p.parentElement;
     }
@@ -289,7 +317,8 @@
   function buildOwn() {
     const sc = window.scrollY || 0;
     for (const b of bound) {
-      if (b.hasM || b.inShape) continue;
+      /* body: жодної own-геометрії (bg-only, див. коментар в anc-скані) */
+      if (b.hasM || b.inShape || b.sig.tag === 'body') continue;
       /* fixed-обгортка (header у scene.css): елементи живуть у
          VIEWPORT-просторі — без +x.s і без scrollY у nat (S6) */
       const wrapEl = wrappers[b.section];
@@ -301,6 +330,13 @@
       {
         const hs = (b.curve || []).map((x) => x.h).filter((v) => v > 0);
         b.setH = b.fixedSpace && hs.length > 1 && Math.max(...hs) - Math.min(...hs) > 5;
+        /* КОНСТАНТНА live-висота ≠ каркасній (S8: header__left 24 vs 44 —
+           рантайм live стискає лого одразу на буті, архів цього не знає):
+           steady-h один раз; nat переміряється після — умова гасне сама */
+        if (b.fixedSpace && !b.setH && hs.length > 1
+          && Math.abs(hs[0] - b.nat.h) > 5) {
+          b.el.style.height = `${hs[0].toFixed(1)}px`;
+        }
       }
       const dev = travelOf[b.section] || (() => 0);
       /* дельти ПО ЦЕНТРУ (для sw=1 тотожно top-left): дозволяє scale
@@ -415,6 +451,42 @@
       } else if (d.clip && b.moving.clipPath) b.el.style.clipPath = d.clip;
       else if (b.restClip && !b.moving.clipPath && !b.el.style.clipPath) b.el.style.clipPath = b.restClip;
     }
+    /* TIMED-кроки (S8b): фінальні стани часових переходів (вайпи/свапи
+       слайдера при стоячому одометрі) — ПІСЛЯ s-кривих, бо s-криві цих
+       цілей контаміновані (пастка 23-стиль). Крок у бакеті: ?step=K
+       (пікс-гейт) або останній прибулий (реальний скрол). */
+    for (const b of bound) {
+      if (!b.timed || introMode) continue;
+      const arrived = b.timed.filter((x) => x.s <= P + 60);
+      if (!arrived.length) {
+        /* до першого приходу: якщо ціль існує лише в timed (curve
+           порожня), лишаємо каркасний стан — нічого не робимо */
+        continue;
+      }
+      const last = arrived[arrived.length - 1];
+      const bucket = arrived.filter((x) => Math.abs(x.s - last.s) <= 120);
+      let pick = last;
+      const poseStep = window.__POSE_STEP__ ?? null;
+      if (poseStep !== null && Number.isFinite(poseStep)) {
+        const want = Math.min(poseStep, bucket.length - 1);
+        pick = bucket.find((x) => x.step === want) || bucket[Math.min(want, bucket.length - 1)] || last;
+      }
+      const f = pick.final;
+      if (f.disp === 'none') b.el.style.display = 'none';
+      else if (f.disp === 'visible') {
+        b.el.style.display = 'block';
+        /* каркас ховає слайд через display:none на ПРЕДКУ (is-hidden
+           обгортка слайда) — розховуємо ланцюг у межах обгортки секції */
+        let p = b.el.parentElement, hops = 0;
+        while (p && hops < 4 && !p.dataset?.skSection) {
+          if (getComputedStyle(p).display === 'none') p.style.display = 'block';
+          p = p.parentElement; hops++;
+        }
+      }
+      if (Number.isFinite(f.o)) b.el.style.opacity = String(f.o);
+      if (f.clip) b.el.style.clipPath = f.clip;
+      else if (f.clip === null && f.disp) b.el.style.clipPath = '';
+    }
     /* травели секцій (hero-пін, place-bg, footer-пін) — на обгортках */
     for (const [id, f] of Object.entries(travelOf)) {
       const w = wrappers[id];
@@ -458,6 +530,7 @@
     })();
     bootFix(false);
     const qm = new URLSearchParams(location.search);
+    if (qm.has('step')) window.__POSE_STEP__ = parseInt(qm.get('step'), 10);
     if (qm.has('s')) window.scrollTo(0, parseFloat(qm.get('s')) || 0);
     return;
   }
@@ -476,6 +549,8 @@
   let introTarget = 0, introShown = 0;
   let idx = 0, target = ladder[0], s = ladder[0];
   let travelling = false;
+  /* S8b: крок timed-бакета для пікс-поз (?step=K); null = останній прибулий */
+  window.__POSE_STEP__ = null;
 
   /* снап-крок комітиться ПІСЛЯ КІНЦЯ wheel-burst (140мс тиші) — так
      працює живий Lethargy: травел стартує по завершенню жесту
@@ -525,6 +600,21 @@
       sAt: b.sAt, sAtGeom: b.sAtGeom, clipStep: b.clipStep || null,
       revealGeom: b.revealGeom || false,
     }));
+  /* розкопка S8: розкладка dd на компоненти на довільному P */
+  window.__ENGINE_OWN__ = (P) => bound.map((b) => {
+    const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t) });
+    const dd = b.own && b.own.length ? interp(b.own, 's', P, dpick) : null;
+    const anc = b.ancOwn;
+    const ad = anc && anc.own && anc.own.length ? interp(anc.own, 's', P, dpick) : null;
+    return {
+      sec: b.section, cls: (b.sig.cls || b.sig.tag).slice(0, 40),
+      nat: b.nat ? { t: Math.round(b.nat.top), l: Math.round(b.nat.left) } : null,
+      dd: dd ? Math.round(dd.dt * 10) / 10 : null,
+      ancCls: anc ? (anc.sig.cls || anc.sig.tag).slice(0, 25) : null,
+      ad: ad ? Math.round(ad.dt * 10) / 10 : null,
+      hasM: b.hasM, inShape: b.inShape,
+    };
+  });
   /* диф по всіх прив'язках (розкопки фікс-циклів) */
   window.__ENGINE_DIFF__ = () => bound.map((b) => {
     const r = b.el.getBoundingClientRect();
@@ -572,6 +662,7 @@
     const q = new URLSearchParams(location.search);
     if (q.has('s')) {
       const S = parseFloat(q.get('s')) || 0;
+      if (q.has('step')) window.__POSE_STEP__ = parseInt(q.get('step'), 10);
       mode = 'scroll';
       introTarget = introShown = gate ? gate.iEnd : 0;
       idx = ladder.reduce((bi, v, i2) => (Math.abs(v - S) < Math.abs(ladder[bi] - S) ? i2 : bi), 0);
