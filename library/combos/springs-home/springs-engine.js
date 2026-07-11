@@ -89,6 +89,25 @@
       w.style.top = `${(parseFloat(getComputedStyle(w).top) || 0) + delta}px`;
     }
   }
+  /* ancestor-clip'и секцій (S9, choreo.sections[id].ancClip зі спеки):
+     статичний CSS-clip живого (.sticky--under-next + .sticky--under-previous
+     → inset(100svh 0 0)) ховає перші 100svh секції; корінь ТЕЧЕ з
+     документом (clip-лінія статична в док-координатах), а шар піниться
+     transform'ами повз неї — це і є вайп under-previous. На обгортці з
+     травелом clip їде разом із transform → віднімаємо власний травел. */
+  /* клип — ШИРОКИМ полігоном, не inset: бокс обгортки МЕНШИЙ за корінь
+     (від'ємні маргіни тягнуть корінь вище top обгортки) — polygon приймає
+     координати поза боксом і ріже ЛИШЕ над лінією */
+  const ancClipPoly = (y) =>
+    `polygon(-100000px ${y.toFixed(1)}px, 100000px ${y.toFixed(1)}px, 100000px 1000000px, -100000px 1000000px)`;
+  const ancClipLocal = {};
+  for (const [id, sec] of Object.entries(cfg.sections || {})) {
+    const w = wrappers[id];
+    if (!sec.ancClip || !w) continue;
+    const wTop = w.getBoundingClientRect().top + (window.scrollY || 0);
+    ancClipLocal[id] = sec.top0 + sec.ancClip.top - wTop;
+    w.style.clipPath = ancClipPoly(ancClipLocal[id]);
+  }
   /* слаби-підкладки фарби оболонок (S8a, choreo.shell зі shell-bg.json):
      фон секцій живе на предках ПОЗА коренем спеки (l-gallery-container
      ui-dark #162d24) — каркас білий. Слаб = ПЕРША дитина обгортки
@@ -217,7 +236,11 @@
           resolved[grp[0].i] = document.body;
           continue;
         }
-        const cands = [wrap, ...wrap.querySelectorAll(sig.tag)]
+        /* обгортка sk-vp — інфраструктура сцени, НЕ кандидат резолва:
+           безіменна сигнатура (без cls/text) проходила фільтр і сідала
+           вербатим-матрицею на обгортку (nature стискався scale 0.1438,
+           clip-лінія ancClip скейлилась — розкопка S9) */
+        const cands = [...wrap.querySelectorAll(sig.tag)]
           .filter((el) => el.tagName.toLowerCase() === sig.tag && !used.has(el))
           .map((el) => ({ el, score: candScore(el, sig) }))
           .filter((x) => x.score > 0.5 || (!sig.cls && !sig.text));
@@ -522,7 +545,13 @@
     /* травели секцій (hero-пін, place-bg, footer-пін) — на обгортках */
     for (const [id, f] of Object.entries(travelOf)) {
       const w = wrappers[id];
-      if (w) w.style.transform = `translateY(${f(P).toFixed(2)}px)`;
+      if (!w) continue;
+      const T = f(P);
+      w.style.transform = `translateY(${T.toFixed(2)}px)`;
+      /* ancClip: клип-лінія статична в доці, transform тягне її з собою */
+      if (ancClipLocal[id] !== undefined) {
+        w.style.clipPath = ancClipPoly(ancClipLocal[id] - T);
+      }
     }
   }
   /* boot-fix: у стані спокою міряємо фактичний bbox матричних цілей проти

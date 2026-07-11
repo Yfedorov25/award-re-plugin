@@ -36,6 +36,19 @@ const textureMapPath = join(site.outDir, 'texture-map.json');
 const textureMap = existsSync(textureMapPath) ? JSON.parse(readFileSync(textureMapPath, 'utf8')) : null;
 const shellDataPath = join(site.outDir, 'shell-bg.json');
 const shellData = existsSync(shellDataPath) ? JSON.parse(readFileSync(shellDataPath, 'utf8')) : null;
+/* ancestor-clip'и секцій (S9): статичний CSS-clip живого на корені або
+   предку (.sticky--under-next + .sticky--under-previous → inset(100svh))
+   ховає секцію до вайпа under-previous; знято SNAPSHOT_FN у build-spec */
+const buildSpecPath = join(site.outDir, 'build-spec.json');
+const buildSpec = existsSync(buildSpecPath) ? JSON.parse(readFileSync(buildSpecPath, 'utf8')) : null;
+/* дві серіалізовані форми одного «низ прямокутника від A»: inset(Apx …)
+   (topPx уже резолвлений темп-дивом) і polygon(0 A, 100% A, 100% 100%, 0 100%) */
+const clipTopPx = (entry) => {
+  if (Number.isFinite(entry.topPx)) return entry.topPx;
+  const m = (entry.clip || '').match(
+    /^polygon\(0(?:px)? ([\d.]+)px,\s*100% \1px,\s*100% 100%,\s*0(?:px)? 100%\)$/);
+  return m ? parseFloat(m[1]) : null;
+};
 /* timing-карти (S8b): часові переходи при стоячому одометрі (вайпи
    wellness-слайдера) — s-карти їх сліпі (рекордер пише лише при русі
    одометра). Блоки з timing-map вливаються в біндінги як timed-кроки. */
@@ -60,7 +73,19 @@ function buildViewport(vpName) {
   const sc = scene.viewports[vpName];
   if (!sc) return null;
   const sections = {};
-  for (const s of sc.sections) sections[s.id] = { top0: s.top0, h: s.h };
+  for (const s of sc.sections) {
+    sections[s.id] = { top0: s.top0, h: s.h };
+    /* ancClip.top = офсет clip-лінії відносно кореня секції (topPx предка
+       + dTop предок↔корінь, обидва з екстракції). Кілька clip-предків =
+       перетин → max. Движок: clip обгортки inset(max(0, top − травел)) */
+    const acs = buildSpec?.viewports?.[vpName]?.sections?.[s.id]?.ancestorClips || [];
+    const tops = acs.map((e) => {
+      const t = clipTopPx(e);
+      if (t === null) { console.log(`  ⚠ ancClip ${vpName}/${s.id}: непідтримна форма "${(e.clip || '').slice(0, 60)}" — пропущено`); return null; }
+      return r1(t + (e.dTop || 0));
+    }).filter((t) => t !== null && t > 0.5);
+    if (tops.length) sections[s.id].ancClip = { top: Math.max(...tops) };
+  }
   /* per-section травел-криві з ВІДХИЛЕННЯМ від чистого потоку (hero-пін,
      place-bg параллакс): пишемо dev(s) там, де він ненульовий */
   const travels = {};

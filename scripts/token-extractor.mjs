@@ -206,6 +206,48 @@ export const SNAPSHOT_FN = (args) => {
     if (el.style.opacity) el.style.opacity = '';
   }
 
+  /* ANCESTOR-CLIP (S9): статичний CSS-clip живого на корені секції чи її
+     предках (.sticky--under-next + .sticky--under-previous →
+     inset(100svh 0 0)) ховає секцію до вайпа under-previous. Прунінг
+     вкладених секцій (S9c-0) відриває піддерево від цієї механіки —
+     знімаємо clip'и ДАНИМИ: computed clipPath від кореня вгору до body,
+     перша inset-компонента резолвиться у px темп-дивом (браузер сам
+     рахує calc/var/svh). ancClip у choreo → контр-тревел clip обгортки. */
+  const ancestorClips = [];
+  {
+    const secR = sec.getBoundingClientRect();
+    let el = sec;
+    while (el && el !== document.documentElement) {
+      const cp = getComputedStyle(el).clipPath;
+      if (cp && cp !== 'none') {
+        const r = el.getBoundingClientRect();
+        let topPx = null;
+        const m = cp.match(/^inset\((.*)\)$/);
+        if (m) {
+          let depth = 0, cut = m[1].length;
+          for (let i = 0; i < m[1].length; i++) {
+            const ch = m[1][i];
+            if (ch === '(') depth++;
+            else if (ch === ')') depth--;
+            else if (ch === ' ' && depth === 0) { cut = i; break; }
+          }
+          const probe = document.createElement('div');
+          probe.style.cssText = `position:absolute;visibility:hidden;height:${m[1].slice(0, cut)};`;
+          el.appendChild(probe);
+          topPx = r1(probe.getBoundingClientRect().height);
+          probe.remove();
+        }
+        ancestorClips.push({
+          cls: typeof el.className === 'string' ? el.className.trim().split(/\s+/).slice(0, 4).join(' ') : '',
+          clip: cp.slice(0, 120),
+          topPx,
+          dTop: r1(r.top - secR.top),
+        });
+      }
+      el = el.parentElement;
+    }
+  }
+
   const STYLE_KEYS = [
     'fontFamily', 'fontSize', 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing',
     'textTransform', 'textAlign', 'color', 'backgroundColor', 'backgroundImage',
@@ -278,6 +320,7 @@ export const SNAPSHOT_FN = (args) => {
   const imgs = [...sec.querySelectorAll('img')];
   return {
     sectionBox: { x: r1(sr.left + scrollX), y: r1(sr.top + scrollY), w: r1(sr.width), h: r1(sr.height) },
+    ancestorClips,
     elementCount: count,
     selfCheck: {
       elements: count,
