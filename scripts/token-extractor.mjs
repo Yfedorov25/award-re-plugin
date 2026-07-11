@@ -104,6 +104,8 @@ export const SITES = {
         note: 'sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero' },
       { id: 'wellness', selector: '.l-wellness',
         note: 'контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ' },
+      { id: 'wellness-slider', selector: '.l-wellness__slider-container', viewports: ['mobile'],
+        note: 'mobile-слайдер wellness (сиблінг .l-wellness, як residences/interiors-slider; дірка покриття S2 — знайдено в S10: mobile s3844 показував жінку замість слайдера)' },
       { id: 'nature', selector: '.l-nature',
         note: 'окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий' },
       { id: 'place-bg', selector: '.l-nature-bg',

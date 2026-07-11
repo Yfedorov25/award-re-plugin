@@ -438,8 +438,11 @@ function buildViewport(vpName) {
        xs-фіт (registration) для секцій без них. Рішення піксель-гейтом
        per-секція: nature ON через фіт (листя лікує терасу-постер);
        wellness ON через шари bg+color×alpha; place-bg OFF (не діагностовано,
-       ділить js-nature-canvas з nature). */
-    textures: textureMap
+       ділить js-nature-canvas з nature).
+       ТІЛЬКИ DESKTOP: live-канвасні патерни enableMq:"md-up" (бандл) —
+       mobile канвас мертвий і в live, mobile показує DOM-картинки
+       (underlay на mobile малював жінку поверх слайдера: s3844 55.5). */
+    textures: textureMap && vpName === 'desktop'
       ? Object.fromEntries(Object.entries(textureMap.textures).flatMap(([id, t]) => {
           const wt = webglTex?.sections?.[id];
           if (wt && wt.bg && wt.color && wt.alpha) {

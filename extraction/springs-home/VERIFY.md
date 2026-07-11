@@ -1,7 +1,7 @@
 # VERIFY — build-spec (архів) vs живий https://springs.estate/
 
-- Дата: 2026-07-11T18:36:36.249Z
-- Секції: **hero-gallery** (desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item) · **intro** (sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero) · **wellness** (контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ) · **nature** (окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий) · **place-bg** (сценографія place: bg-item/gradient/caption (WebGL-підкладка living map)) · **place** (desktop: .l-place sticky__layer усередині l-nature-bg; mobile: окремий .l-place-mobile) · **place-video** (desktop: sticky-контейнер відео; mobile: перший ВИДИМИЙ .l-place-video (в l-place-mobile)) · **map** (два корені (is-hidden--md-down / is-hidden--lg-up) — перший видимий) · **design-1** (слайд design #1 (id="design"), desktop+mobile варіанти) · **design-2** (слайд design #2) · **design-3** (слайд design #3) · **design-4** (слайд design #4 існує ЛИШЕ mobile (is-hidden--lg-up, без desktop-варіанта)) · **residences** (desktop: єдиний .l-residences; mobile: webgl-контейнер (окремий корінь)) · **residences-slider** (mobile-слайдер residences (на desktop цей контент всередині .l-residences)) · **interiors** (desktop: єдиний .l-interiors; mobile: інтро-блок (окремий корінь is-hidden--lg-up)) · **interiors-slider** (mobile-слайдер interiors (на desktop цей контент всередині .l-interiors)) · **header** (sticky-хедер ui-dark header--landing (2 ноди — перший видимий)) · **footer** (футер section--no-overflow ui-dark) · **callback** (форма callback У МОДАЛЦІ — знято з preCss(modal-open); одометр animation-map) · **favorites** (улюблені У МОДАЛЦІ — знято з preCss(modal-open))
+- Дата: 2026-07-11T19:28:00.788Z
+- Секції: **hero-gallery** (desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item) · **intro** (sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero) · **wellness** (контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ) · **wellness-slider** (mobile-слайдер wellness (сиблінг .l-wellness, як residences/interiors-slider; дірка покриття S2 — знайдено в S10: mobile s3844 показував жінку замість слайдера)) · **nature** (окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий) · **place-bg** (сценографія place: bg-item/gradient/caption (WebGL-підкладка living map)) · **place** (desktop: .l-place sticky__layer усередині l-nature-bg; mobile: окремий .l-place-mobile) · **place-video** (desktop: sticky-контейнер відео; mobile: перший ВИДИМИЙ .l-place-video (в l-place-mobile)) · **map** (два корені (is-hidden--md-down / is-hidden--lg-up) — перший видимий) · **design-1** (слайд design #1 (id="design"), desktop+mobile варіанти) · **design-2** (слайд design #2) · **design-3** (слайд design #3) · **design-4** (слайд design #4 існує ЛИШЕ mobile (is-hidden--lg-up, без desktop-варіанта)) · **residences** (desktop: єдиний .l-residences; mobile: webgl-контейнер (окремий корінь)) · **residences-slider** (mobile-слайдер residences (на desktop цей контент всередині .l-residences)) · **interiors** (desktop: єдиний .l-interiors; mobile: інтро-блок (окремий корінь is-hidden--lg-up)) · **interiors-slider** (mobile-слайдер interiors (на desktop цей контент всередині .l-interiors)) · **header** (sticky-хедер ui-dark header--landing (2 ноди — перший видимий)) · **footer** (футер section--no-overflow ui-dark) · **callback** (форма callback У МОДАЛЦІ — знято з preCss(modal-open); одометр animation-map) · **favorites** (улюблені У МОДАЛЦІ — знято з preCss(modal-open))
 - Метод: той самий SNAPSHOT_FN на обох; без скролу живого; reveal нормалізовано NORMALIZE_CSS + WAAPI finish(); lazy-фото форс-довантажені; класи фільтруються через ПЕРЕТИН множин класів архіву й живого.
 - ⚠️ Метрики «забруднені» анімацією (порівнюються в нормалізованому стані): opacity, transform.
 - ЧИСЛОВИЙ ГЕЙТ: ≥95% (точно ≤0.1px або ≤1px) на кожному вʼюпорті.
@@ -297,7 +297,7 @@
 
 ## mobile (390x844) — **99.5%** ✅ PASS
 
-Метрик всього: 36625 · точно (≤0.1): 36459 · в межах 1px: 0 · розійшлося числом (>1px): 80 · розійшлося рядком: 86
+Метрик всього: 39010 · точно (≤0.1): 38820 · в межах 1px: 0 · розійшлося числом (>1px): 95 · розійшлося рядком: 95
 
 ### hero-gallery — 99.6%
 
@@ -340,6 +340,31 @@
 |---|---|---|---|---|
 | wellness>div>div>div>div>picture is-invisible… | opacity ⚠️anim | 0 | 1 | ≠ |
 
+
+### wellness-slider — 99%
+
+Зматчено: 39 (архів 42 / живе 42) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 2385 · розійшлося 24
+
+| елемент | метрика | архів | живе | Δ |
+|---|---|---|---|---|
+| wellness-slider>div>div[1]>ul>li mobile-scrol… | box.x | 20 | 370 | -350 |
+| wellness-slider>div>div[1]>ul>li>picture is-i… | box.x | 20 | 370 | -350 |
+| wellness-slider>div>div[1]>ul>li>picture>img  | box.x | 20 | 370 | -350 |
+| wellness-slider>div>div[1]>ul>li[1] mobile-sc… | box.x | 370 | 720 | -350 |
+| wellness-slider>div>div[1]>ul>li[1]>picture i… | box.x | 370 | 720 | -350 |
+| wellness-slider>div>div[1]>ul>li[1]>picture>img  | box.x | 370 | 720 | -350 |
+| wellness-slider>div>div[1]>ul>li[2] mobile-sc… | box.x | 720 | 1070 | -350 |
+| wellness-slider>div>div[1]>ul>li[2]>picture i… | box.x | 720 | 1070 | -350 |
+| wellness-slider>div>div[1]>ul>li[2]>picture>img  | box.x | 720 | 1070 | -350 |
+| wellness-slider>div>div[2]>div>div>div[1] is-… | box.y | -3630.1 | -3652.9 | 22.8 |
+| wellness-slider>div>div[2]>div>div>div[1]>div… | box.y | -3630.1 | -3652.9 | 22.8 |
+| wellness-slider>div>div[2]>div>div>div[2] is-… | box.y | -3630.1 | -3652.9 | 22.8 |
+| wellness-slider>div>div[2]>div>div>div[2]>div… | box.y | -3630.1 | -3652.9 | 22.8 |
+| wellness-slider>div>div[2]>div>div>div[3] is-… | box.y | -3630.1 | -3652.9 | 22.8 |
+| wellness-slider>div>div[2]>div>div>div[3]>div… | box.y | -3630.1 | -3652.9 | 22.8 |
+
+Лише в архіві: `obile-scrollable__item carousel__list__item--gradient-large·`
+Лише в живому: `llable__item carousel__list__item--gradient-large is-active·`
 
 ### nature — 100%
 
