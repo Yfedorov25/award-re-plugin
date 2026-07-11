@@ -1,11 +1,11 @@
 # VISUAL.md — піксельна звірка (VISUAL-GATE ≤2% @ erode 5)
 
-Прогін: 2026-07-11T20:09:49.160Z · origin http://localhost:8873
+Прогін: 2026-07-11T20:51:27.925Z · origin http://localhost:8873
 
 | поза | diff% | вердикт |
 |---|---|---|
-| desktop-intro0 | 50.88 | ❌ FAIL |
-| desktop-intro150 | 32.2 | ❌ FAIL |
+| desktop-intro0 | 32.02 | ❌ FAIL |
+| desktop-intro150 | 45.58 | ❌ FAIL |
 | desktop-intro450 | 26.13 | ❌ FAIL |
 | desktop-s900 | 1.57 | ✅ PASS |
 | desktop-s2070 | 1.6 | ✅ PASS |
@@ -23,8 +23,8 @@
 | desktop-s5580 | 1.83 | ✅ PASS |
 | desktop-s7194 | 12.08 | ❌ FAIL |
 | desktop-s8242 | 16.12 | ❌ FAIL |
-| desktop-s8292 | 15.34 | ❌ FAIL |
-| desktop-s8281 | 14.51 | ❌ FAIL |
+| desktop-s8292 | 15.03 | ❌ FAIL |
+| desktop-s8281 | 14.52 | ❌ FAIL |
 | desktop-s9180 | 26.92 | ❌ FAIL |
 | mobile-s0 | 32.38 | ❌ FAIL |
 | mobile-s796 | 1.33 | ✅ PASS |

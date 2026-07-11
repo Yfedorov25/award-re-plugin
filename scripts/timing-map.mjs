@@ -203,7 +203,9 @@ async function runViewport(browser, vpName) {
       });
       console.log(`  жест ${gestures}: s ${Math.round(odoNow - moved)}→${Math.round(odoNow)} · кадрів ${frames.length} · перехід ${Math.round(frames[frames.length - 1].tMs - tFirst)}мс`);
     }
-    dist = Math.abs(moved) < 2 ? Math.min(dist * 2, 900) : Math.round(vp.height * 0.18);
+    /* застій = |рух|<60 (пастка 37: джитер плато ±20-50px маскує стоячий
+       одометр, подвоєння не спрацьовувало і прогін висів на 4500) */
+    dist = Math.abs(moved) < 60 ? Math.min(dist * 2, 1200) : Math.round(vp.height * 0.18);
   }
   await ctx.close();
 

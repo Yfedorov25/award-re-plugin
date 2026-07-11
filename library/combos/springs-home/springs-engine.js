@@ -89,6 +89,28 @@
       w.style.top = `${(parseFloat(getComputedStyle(w).top) || 0) + delta}px`;
     }
   }
+  /* z-БАБЛІНГ коренів (S11): travel-transform на обгортці створює
+     stacking context і вбиває явний z кореня (split z:44 лишався ПІД
+     hero, хоча в live вони сиблінги в одному шарі і split малюється
+     поверх сітки на інтро). ТІЛЬКИ в introMode: на скрол-позах live
+     тримає split ПОЗА кадром (top -911 на s900), а наш травел-пін
+     з'їжджає на коліні релізу — глобальний z ламав s900 (1.57→89).
+     Скрол-фаза split = S12 (травел-коліно релізу шару). */
+  const introZ = {};
+  for (const [id, w] of Object.entries(wrappers)) {
+    const root = w.firstElementChild;
+    if (!root) continue;
+    const z = getComputedStyle(root).zIndex;
+    if (z !== 'auto' && z !== '0') introZ[id] = z;
+  }
+  let introZApplied = null;
+  const applyIntroZ = (on) => {
+    if (introZApplied === on) return;
+    introZApplied = on;
+    for (const [id, z] of Object.entries(introZ)) {
+      if (wrappers[id]) wrappers[id].style.zIndex = on ? z : '';
+    }
+  };
   /* ancestor-clip'и секцій (S9, choreo.sections[id].ancClip зі спеки):
      статичний CSS-clip живого (.sticky--under-next + .sticky--under-previous
      → inset(100svh 0 0)) ховає перші 100svh секції; корінь ТЕЧЕ з
@@ -450,6 +472,7 @@
   }
   const fmtM = (m) => `matrix(${m.map((v) => Math.round(v * 10000) / 10000).join(',')})`;
   function applyBindings(P, introInput, introMode) {
+    applyIntroZ(!!introMode);
     for (const b of bound) {
       let d;
       /* m=null у кривій = transform:'none' живого = ІДЕНТИЧНІСТЬ —
