@@ -1259,6 +1259,27 @@
     #isw-hq { min-height: calc(100svh + 190svh + 90svh) !important; }     /* свап-спан 190 + хвіст 90 (splash z2 їде поверх) */
     /* c20 desktop-виміри НЕ протікають на 390 */
     .aut-mid, .aut-right { margin-top: 0; }
+    /* ── с27 m390 AUTONOMY-GRID = живий @390 (проба live secH 2045, зараз наш 2783
+       = +738 задовгий, ФОТО full-width стосом замість компактних; live: lead-текст
+       зверху → image-1 350×170 ландшафт full-width → image-3+image-2 170×170 квадрати
+       ПОРУЧ + card). Компактизуємо: наш стос ~3×500px = корінь autonomy 70% diff. ── */
+    .aut-grid { display: grid !important; grid-template-columns: 1fr 1fr !important;
+      column-gap: 10px; row-gap: 14px; width: auto; margin-left: 0; padding: 0; }
+    .aut-lead { grid-column: 1 / 3 !important; grid-row: 1 !important;
+      margin: 0 0 2vh 0 !important; align-self: start; max-width: none !important;
+      font-size: 21px !important; line-height: 24px !important; text-align: left; }
+    .aut-lead::before { display: none !important; }
+    .aut-grid > picture { grid-column: 1 / 3 !important; grid-row: 2 !important; }
+    .aut-grid > picture img { aspect-ratio: 350 / 170 !important; }  /* image-1 ландшафт full-width */
+    .aut-mid { grid-column: 1 !important; grid-row: 3 !important; margin: 0 !important; }
+    .aut-right { grid-column: 2 !important; grid-row: 3 !important; margin: 0 !important;
+      display: grid; gap: 12px; }
+    .aut-mid img, .aut-right img { aspect-ratio: 1 / 1 !important; }  /* image-3/image-2 170×170 квадрати */
+    /* нуль-сумність: aut-grid компактизація зрізала 733px → docH 23941→23208, а
+       frac-шкала борда зсунула ВСІ ранні зони (space/revolves регрес +10/+6).
+       Повертаємо 733px у footer (frac ~0.98, живе там теж footer) → ранні фраки
+       відновлюються, autonomy-win (−17) лишається. Тимчасово до повного m390 px-solve. */
+    footer { padding-bottom: 733px; }
     #comfort > .reveal-text { max-width: 350px !important; font-size: 21px !important;
       line-height: 24px !important; }
     /* живий m390 hq-card СВІТЛИЙ (кадр live-048), arch лишається темним glass */
