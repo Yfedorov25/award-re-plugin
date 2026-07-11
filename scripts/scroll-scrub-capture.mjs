@@ -69,7 +69,12 @@ const fracs = []; let anchors = [];
   if (!g) { console.error('нема .c-scrollbar_thumb'); process.exit(1); }
   const yA = g.tTop + g.thH / 2, yB = g.tTop + (g.tH - g.thH) + g.thH / 2;
   const y0 = yA + (yB - yA) * FROM, y1 = yA + (yB - yA) * TO;
+  /* с22 ПРОГРІВ (як у mobile-знімалки): без нього live-тотал росте від lazy
+     ПІД ЧАС проходу — фраки початку/кінця живуть у різних масштабах і зони
+     плавають між прогонами (борд-розкид mean 27.95↔29.2 на одному коді) */
   await p.mouse.move(g.thx, g.thy); await p.mouse.down();
+  await p.mouse.move(g.thx, yA + (yB - yA) * 1); await p.waitForTimeout(2500);
+  await p.mouse.move(g.thx, yA); await p.waitForTimeout(2500);
   for (let i = 0; i < N; i++) {
     const ty = y0 + (y1 - y0) * (i / (N - 1));
     await p.mouse.move(g.thx, ty);

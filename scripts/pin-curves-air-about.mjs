@@ -155,6 +155,9 @@ if (!SKIP_LIVE) {
     if (!g) { console.error('нема .c-scrollbar_thumb'); process.exit(1); }
     const yA = g.tTop + g.thH / 2, yB = g.tTop + (g.tH - g.thH) + g.thH / 2;
     await p.mouse.move(g.thx, g.thy); await p.mouse.down();
+    /* с22 прогрів: lazy ростить тотал під час проходу (див. scroll-scrub-capture) */
+    await p.mouse.move(g.thx, yB); await p.waitForTimeout(2500);
+    await p.mouse.move(g.thx, yA); await p.waitForTimeout(2500);
     for (let i = 0; i < N; i++) {
       await p.mouse.move(g.thx, yA + (yB - yA) * (i / (N - 1)));
       /* с22: фіксовані вейти (90/600/900ms) давали РІЗНІ live-позиції — Locomotive
