@@ -620,6 +620,21 @@
     border: 1px solid rgba(17,17,16,.06); overflow: clip; }
   .cft .cft-ic { position: absolute; inset: 0; display: grid; place-items: center;
     font-size: 72px; font-weight: 100; color: rgba(17,17,16,.24); line-height: 1; pointer-events: none; }
+  /* с26 (motion-zone comfort): live bg = 1440×769 (2044×1092 xxl), гальмує і
+     ПІНИТЬСЯ top=51 на ~1960px скролу (fr .494-.554), титул = ТОЙ САМИЙ шар
+     (bg+609 по всій кривій); картки течуть 1:1 зверху; накриття знизу = біла
+     секція autonomy (next-over) → реплікуємо clip-ом у cftPhase (z-index на
+     #autonomy НЕ ставити — інверсія, урок с22). Desktop-only. */
+  .cft-dim { display: none; }
+  @media (min-width: 769px) {
+    .cft-pin { overflow: visible; padding-bottom: calc(8vh + 70px); }
+    .cft-bg { inset: auto; top: 0; left: 0; width: 100%; height: auto;
+      object-fit: unset; will-change: transform; }
+    .cft-dim { display: block; position: fixed; inset: 0; background: #000;
+      opacity: 0; pointer-events: none; z-index: 3; }
+    .cft-left h3 { position: static; }
+    .comfort-cards { margin-top: calc(10vh - 70px); }  /* фаза карток: наші були +70 пізніше live */
+  }
   .cft h4 { font-size: 13.5px; font-weight: 400; text-transform: uppercase; letter-spacing: -.01em;
     line-height: 1.2; color: #111110; max-width: 20ch; }
   /* offset: правий стовпець наїжджає вниз (живий stickyBottom-наїзд) */
@@ -644,10 +659,11 @@
      (архівні 345/661 — до-JS; рантайм = закон). Текст «THE GROUND FLOOR…» =
      grid-item колонок 2-3, rel +131 від верху гріда. Desktop-only. */
   @media (min-width: 769px) {
-    #autonomy > .h1 { margin-top: 97px; }  /* с26 кадр #130: титул live 585 (база мала ~170 → 97) */
-    .aut-center { text-align: center; font-size: 16px; line-height: 1.25; margin: 136px auto 0 !important; }
+    #autonomy > .h1 { margin-top: -65px; }  /* с26: live титул-doc 18340 (кадр #130 @.5415, НЕ .5455 — пастка: fracs кадрів ≠ рівний крок) */
+    .aut-center { text-align: center; font-size: 16px; line-height: 1.25; margin: 161px auto 0 !important;
+      max-width: none !important; }  /* с26: рядки веде <br> (live 3 рядки); базовий max-width ламав на 5 */
     .aut-grid { width: 100vw; margin-left: calc(50% - 50vw); padding: 0 20px;
-      margin-top: -88px; }  /* с26 фаза-солв: woman-doc = live (проба @.5735 → −101) */
+      margin-top: 99px; }  /* с26 фаза-солв: woman-doc = live 18703 (проба @.5735 → −101); +135 компенсація титул-фікса */
     .aut-lead { grid-column: 2 / 4; grid-row: 1; margin: 131px 0 0 !important; align-self: start;
       font-size: 26px !important; line-height: 1.27; max-width: 660px !important; }
     /* живий text-offset--2: індент ЛИШЕ першого рядка (reveal-спани ламають
@@ -1023,7 +1039,7 @@
     .aplan { top: 250px; width: 100vw; margin-left: calc(50% - 50vw); }  /* с23 live-154: план fullbleed */
     /* с26: старе правило #autonomy > .reveal-text (компенсація видаленого
        злитого абзаца) знято — тексти тепер живі: .aut-center + .aut-lead */
-    .aplan-scroll { height: calc(186svh + 927px); }  /* с23: +342 (aut→svc live 3226); с26: −265 сумарна компенсація aut-інтро (full-bleed грід + два живі тексти + титул-фаза) — нуль-сумність 33608; реліз-фазу веде aplanPhase-transform, тревел піна некритичний */
+    .aplan-scroll { height: calc(186svh + 937px); }  /* с23: +342 (aut→svc live 3226); с26: −265 сумарна компенсація aut-інтро (full-bleed грід + два живі тексти + титул-фаза) — нуль-сумність 33608; реліз-фазу веде aplanPhase-transform, тревел піна некритичний */
     #autonomy { margin-bottom: -850px; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
     /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
@@ -1398,6 +1414,9 @@
 
   <!-- живий comfort-pin: fullbleed фон + sticky-титул зліва-внизу + картки справа -->
   <div class="cft-pin">
+    <!-- с26: live "сірість" хвоста = НЕ фон, а dim-оверлей (0.5·покриття autonomy,
+         зразки: #130 → 212 vs 213 модель, #131 → 192 vs 191) -->
+    <div class="cft-dim" aria-hidden="true"></div>
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xs.webp"><img class="cft-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/7.space/background-bottom@xxxl.webp"></picture>
     <div class="cft-grid">
       <div class="cft-left"><h3 class="h1">Everything<br>for&nbsp;visitor<br>comfort</h3></div>
@@ -1895,6 +1914,66 @@
       on = es.some(function(e){ return e.isIntersecting; });
       if (on && !raf) raf = requestAnimationFrame(tick);
     }, { rootMargin: '100% 0px' }).observe(root);
+  })();
+
+  /* ═══ с26 CFT-PHASE (motion-zone comfort, motion-comfort-1440.json):
+     живий bg (769px) гальмує → пін top=51 (~1960px скролу) → реліз у потік;
+     титул = ТОЙ САМИЙ шар (bg+609 константно). Драйвер = lookup-таблиця
+     живої кривої (lerp між пробами, за краями — потік 1:1). Накриття знизу
+     білою autonomy реплікується clip-path'ом (стекінг не чіпаємо). ═══ */
+  (function cftPhase(){
+    if (window.innerWidth <= 768) return;
+    var pin = document.querySelector('.cft-pin');
+    var bg = pin && pin.querySelector('.cft-bg');
+    var dim = pin && pin.querySelector('.cft-dim');
+    var title = pin && pin.querySelector('.cft-left h3');
+    var aut = document.getElementById('autonomy');
+    if (!pin || !bg || !title) return;
+    /* жива крива bg.top по s=scrollY (motion-comfort-1440.json, docH 33608) */
+    var TBL = [[15434,363],[15532,280],[15667,193],[15821,116],[15926,82],
+               [16066,55],[16210,51],[18168,51],[18351,5],[18459,-111],[18577,-223]];
+    function target(s){
+      if (s <= TBL[0][0]) return TBL[0][1] + (TBL[0][0] - s);
+      var L = TBL[TBL.length - 1];
+      if (s >= L[0]) return L[1] - (s - L[0]);
+      for (var k = 1; k < TBL.length; k++) if (s <= TBL[k][0]) {
+        var a = TBL[k - 1], c = TBL[k];
+        return a[1] + (c[1] - a[1]) * (s - a[0]) / (c[0] - a[0]);
+      }
+      return L[1];
+    }
+    var sY = function(){ return (window.__lenis && typeof window.__lenis.scroll === 'number')
+      ? window.__lenis.scroll : window.scrollY; };
+    var prevT = 0, on = false, raf = null;
+    function tick(){
+      if (!on) { raf = null; return; }
+      var s = sY();
+      var tgt = target(s);
+      var pinTop = pin.getBoundingClientRect().top;      /* pin без transform */
+      var dyB = tgt - pinTop;                            /* bg static top:0 у піні */
+      var tUn = title.getBoundingClientRect().top - prevT;
+      var dyT = (tgt + 609) - tUn;
+      /* накриття autonomy (біла секція їде поверх): ріжемо bg/титул по її краю */
+      var edge = aut ? aut.getBoundingClientRect().top : 1e9;
+      var bgClip = Math.max(0, (tgt + bg.offsetHeight) - edge);
+      bg.style.transform = 'translateY(' + dyB.toFixed(1) + 'px)';
+      bg.style.clipPath = bgClip > 0 ? 'inset(0 0 ' + bgClip.toFixed(1) + 'px 0)' : '';
+      /* live dim: весь в'юпорт НАД краєм autonomy, op 0.5·покриття (як план) */
+      if (dim) {
+        var vh = window.innerHeight;
+        dim.style.opacity = (0.5 * Math.min(1, Math.max(0, (vh - edge) / vh))).toFixed(3);
+        dim.style.clipPath = edge < vh ? 'inset(0 0 ' + Math.max(0, vh - edge).toFixed(1) + 'px 0)' : '';
+      }
+      var tClip = Math.max(0, (tgt + 609 + title.offsetHeight) - edge);
+      title.style.transform = 'translateY(' + dyT.toFixed(1) + 'px)';
+      title.style.clipPath = tClip > 0 ? 'inset(0 0 ' + tClip.toFixed(1) + 'px 0)' : '';
+      prevT = dyT;
+      raf = requestAnimationFrame(tick);
+    }
+    new IntersectionObserver(function(es){
+      on = es.some(function(e){ return e.isIntersecting; });
+      if (on && !raf) raf = requestAnimationFrame(tick);
+    }, { rootMargin: '150% 0px' }).observe(pin);
   })();
 
   /* ═══ с26 APLAN-PHASE (motion-zone autonomy, motion-autonomy-1440.json):

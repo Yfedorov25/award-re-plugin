@@ -60,6 +60,23 @@ const ZONES = {
       sec: '#space-splash',
       track: { bg: 'img[src*="7.space"]' }
     }
+  },
+  comfort: {
+    /* хвіст comfort (кадри #115-132, fr ~.49-.56): live = sticky--under-next
+       фон background-bottom (2044×1092 → 769 @1440) + пін-титул, картки
+       окремим шаром зверху */
+    from: 0.47, to: 0.57, steps: 24,
+    live: {
+      /* ⚠️ рантайм-секції ≠ архів (comfort = БЕЗІМЕННА секція, не #space/#headquarters,
+         і чужі секції поза в'юпортом мають ЗАМОРОЖЕНІ rect) — скоуп body, глобальні track */
+      sec: 'body',
+      track: { bg: 'img[src*="background-bottom"]', title: '.about-space-sticky__title',
+        cards: '.about-space-sticky__content' }
+    },
+    ours: {
+      sec: '#comfort',
+      track: { bg: '.cft-bg', title: '.cft-left h3', cards: '.comfort-cards' }
+    }
   }
 };
 const Z = ZONES[ZONE];
