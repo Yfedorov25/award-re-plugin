@@ -42,6 +42,7 @@ mkdirSync(OUT, { recursive: true });
 
 const b = await chromium.launch();
 const fracs = []; let anchors = [];
+let liveTotals = [], liveDocH = 0, liveDocHAfter = 0, oursDocH = 0;
 
 /* ─── 1. LIVE: одна безперервна протяжка повзунка, кадр на кожному кроці ─── */
 {
@@ -52,14 +53,6 @@ const fracs = []; let anchors = [];
   await p.waitForTimeout(4000);
   try { await p.click('button:has-text("ACCEPT")', { timeout: 1500 }); } catch (e) {}
   await p.waitForTimeout(400);
-  anchors = await p.evaluate(() => {
-    const secs = [...document.querySelectorAll('[data-scroll-section]')];
-    const cont = document.querySelector('[data-scroll-container]') || document.body;
-    const contentH = Math.max(cont.getBoundingClientRect().height, document.body.scrollHeight);
-    const limit = contentH - window.innerHeight;
-    return secs.map((s, i) => ({ i, id: s.id || ('sec' + i), frac: +((s.getBoundingClientRect().top) / limit).toFixed(4) }))
-      .filter(a => a.frac >= 0 && a.frac <= 1);
-  });
   const g = await p.evaluate(() => {
     const th = document.querySelector('.c-scrollbar_thumb'); const tr = document.querySelector('.c-scrollbar');
     if (!th || !tr) return null;
@@ -69,12 +62,39 @@ const fracs = []; let anchors = [];
   if (!g) { console.error('нема .c-scrollbar_thumb'); process.exit(1); }
   const yA = g.tTop + g.thH / 2, yB = g.tTop + (g.tH - g.thH) + g.thH / 2;
   const y0 = yA + (yB - yA) * FROM, y1 = yA + (yB - yA) * TO;
-  /* с22 ПРОГРІВ (як у mobile-знімалки): без нього live-тотал росте від lazy
-     ПІД ЧАС проходу — фраки початку/кінця живуть у різних масштабах і зони
-     плавають між прогонами (борд-розкид mean 27.95↔29.2 на одному коді) */
+  /* с23 ПРОГРІВ ДО НЕЗМІННОГО ТОТАЛУ: один драг вниз-вгору (с22) НЕ добивав
+     глибокий lazy — live-тотал плавав 33977↔34954 між прогонами і px-цілі
+     ставали піском (відкат ребалансу кінця с22). Тепер: степові проходи
+     (кожна секція проходить в'юпорт) ПОКИ тотал не стане НЕЗМІННИМ у 3
+     послідовних замірах; тотал пишеться в meta (до і після проходу). */
+  const total = () => p.evaluate(() => {
+    const cont = document.querySelector('[data-scroll-container]') || document.body;
+    return Math.round(Math.max(cont.getBoundingClientRect().height, document.body.scrollHeight));
+  });
   await p.mouse.move(g.thx, g.thy); await p.mouse.down();
-  await p.mouse.move(g.thx, yA + (yB - yA) * 1); await p.waitForTimeout(2500);
-  await p.mouse.move(g.thx, yA); await p.waitForTimeout(2500);
+  for (let pass = 0; pass < 8; pass++) {
+    for (let k = 0; k <= 20; k++) { await p.mouse.move(g.thx, yA + (yB - yA) * k / 20); await p.waitForTimeout(160); }
+    await p.waitForTimeout(1500);
+    liveTotals.push(await total());
+    for (let k = 20; k >= 0; k--) { await p.mouse.move(g.thx, yA + (yB - yA) * k / 20); await p.waitForTimeout(70); }
+    await p.waitForTimeout(1000);
+    const L = liveTotals.length;
+    if (L >= 3 && liveTotals[L - 1] === liveTotals[L - 2] && liveTotals[L - 2] === liveTotals[L - 3]) break;
+  }
+  liveDocH = liveTotals[liveTotals.length - 1];
+  console.log('live прогрів, тотали:', liveTotals.join('→'));
+  const L0 = liveTotals.length;
+  if (!(L0 >= 3 && liveTotals[L0 - 1] === liveTotals[L0 - 2] && liveTotals[L0 - 2] === liveTotals[L0 - 3]))
+    console.warn('⚠️ live-тотал НЕ зійшовся за 8 проходів — фраки підозрілі');
+  /* анкори ЛИШЕ ПІСЛЯ прогріву — інакше frac проти непрогрітого limit */
+  anchors = await p.evaluate(() => {
+    const secs = [...document.querySelectorAll('[data-scroll-section]')];
+    const cont = document.querySelector('[data-scroll-container]') || document.body;
+    const contentH = Math.max(cont.getBoundingClientRect().height, document.body.scrollHeight);
+    const limit = contentH - window.innerHeight;
+    return secs.map((s, i) => ({ i, id: s.id || ('sec' + i), frac: +((s.getBoundingClientRect().top) / limit).toFixed(4) }))
+      .filter(a => a.frac >= 0 && a.frac <= 1);
+  });
   for (let i = 0; i < N; i++) {
     const ty = y0 + (y1 - y0) * (i / (N - 1));
     await p.mouse.move(g.thx, ty);
@@ -103,6 +123,9 @@ const fracs = []; let anchors = [];
     if (i % 10 === 0) console.log(`live ${i}/${N} @${fr}`);
   }
   await p.mouse.up();
+  liveDocHAfter = await total();
+  if (liveDocHAfter !== liveDocH)
+    console.warn(`⚠️ live-тотал зріс ПІД ЧАС проходу: ${liveDocH}→${liveDocHAfter} — фраки в різних масштабах, перезняти`);
   await ctx.close();
 }
 
@@ -115,6 +138,8 @@ const fracs = []; let anchors = [];
   const p = await ctx.newPage();
   await p.goto(OURS, { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(1800);
+  oursDocH = await p.evaluate(() => document.body.scrollHeight);
+  console.log(`тотали: live ${liveDocH} vs ours ${oursDocH} (Δ ${oursDocH - liveDocH})`);
   /* секційна синхронізація: пари (live-якір frac → наш-якір frac) → кусково-лінійний ремап.
      Без --map — тотожність (стара поведінка). */
   let remap = (f) => f;
@@ -154,7 +179,8 @@ const fracs = []; let anchors = [];
 await b.close();
 
 /* ─── 3. Борд: скрол = синхронний скраб обох сторін ─── */
-writeFileSync(`${OUT}/meta.json`, JSON.stringify({ n: N, fracs, anchors, live: LIVE, ours: OURS, at: new Date().toISOString() }, null, 1));
+writeFileSync(`${OUT}/meta.json`, JSON.stringify({ n: N, fracs, anchors, live: LIVE, ours: OURS,
+  liveDocH, liveDocHAfter, liveTotals, oursDocH, at: new Date().toISOString() }, null, 1));
 writeFileSync(`${OUT}/board.html`, `<!doctype html><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>scrub: ${basename(OUT)}</title>

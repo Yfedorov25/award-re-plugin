@@ -138,6 +138,7 @@ const browser = await chromium.launch();
 
 /* ─── LIVE ─── */
 const liveRows = [];
+let liveTotals = [], liveDocH = 0, liveDocHAfter = 0, oursDocH = 0;
 if (!SKIP_LIVE) {
   const ctx = await browser.newContext({ viewport: { width: VW, height: VH },
     isMobile: MOBILE, hasTouch: MOBILE, userAgent: MOBILE ? UA_M : undefined });
@@ -154,10 +155,25 @@ if (!SKIP_LIVE) {
     });
     if (!g) { console.error('нема .c-scrollbar_thumb'); process.exit(1); }
     const yA = g.tTop + g.thH / 2, yB = g.tTop + (g.tH - g.thH) + g.thH / 2;
+    /* с23 прогрів ДО НЕЗМІННОГО ТОТАЛУ (див. scroll-scrub-capture): один драг
+       вниз-вгору не добивав глибокий lazy — тотал плавав 33977↔34954 і фраки
+       жили в різних масштабах. Степові проходи, стоп = 3 однакові заміри. */
+    const total = () => p.evaluate(() => {
+      const cont = document.querySelector('[data-scroll-container]') || document.body;
+      return Math.round(Math.max(cont.getBoundingClientRect().height, document.body.scrollHeight));
+    });
     await p.mouse.move(g.thx, g.thy); await p.mouse.down();
-    /* с22 прогрів: lazy ростить тотал під час проходу (див. scroll-scrub-capture) */
-    await p.mouse.move(g.thx, yB); await p.waitForTimeout(2500);
-    await p.mouse.move(g.thx, yA); await p.waitForTimeout(2500);
+    for (let pass = 0; pass < 8; pass++) {
+      for (let k = 0; k <= 20; k++) { await p.mouse.move(g.thx, yA + (yB - yA) * k / 20); await p.waitForTimeout(160); }
+      await p.waitForTimeout(1500);
+      liveTotals.push(await total());
+      for (let k = 20; k >= 0; k--) { await p.mouse.move(g.thx, yA + (yB - yA) * k / 20); await p.waitForTimeout(70); }
+      await p.waitForTimeout(1000);
+      const L = liveTotals.length;
+      if (L >= 3 && liveTotals[L - 1] === liveTotals[L - 2] && liveTotals[L - 2] === liveTotals[L - 3]) break;
+    }
+    liveDocH = liveTotals[liveTotals.length - 1];
+    console.log('live прогрів, тотали:', liveTotals.join('→'));
     for (let i = 0; i < N; i++) {
       await p.mouse.move(g.thx, yA + (yB - yA) * (i / (N - 1)));
       /* с22: фіксовані вейти (90/600/900ms) давали РІЗНІ live-позиції — Locomotive
@@ -183,12 +199,14 @@ if (!SKIP_LIVE) {
       if (i % 50 === 0) console.log(`live ${i}/${N} @${row.f}`);
     }
     await p.mouse.up();
+    liveDocHAfter = await total();
+    if (liveDocHAfter !== liveDocH)
+      console.warn(`⚠️ live-тотал зріс ПІД ЧАС проби: ${liveDocH}→${liveDocHAfter} — фраки підозрілі, перезняти`);
   } else {
     /* mobile live: контейнерний скрол (scroll-scrub-mobile метод).
        ⚠️ ПРОГРІВ ОБОВ'ЯЗКОВИЙ: scrollHeight росте від lazy-секцій — без
        прогріву max занижений і всі live-фраки розтягнуті (пастка с21:
        «hq-свапи @0.47/0.53» були артефактом саме цього). */
-    let prevH = 0;
     for (let k = 0; k < 25; k++) {
       const h = await p.evaluate(() => {
         const c = document.querySelector('.page-content-wrapper__inner') || document.scrollingElement;
@@ -196,9 +214,13 @@ if (!SKIP_LIVE) {
         return c.scrollHeight;
       });
       await p.waitForTimeout(700);
-      if (h === prevH) break;
-      prevH = h;
+      liveTotals.push(h);
+      const L = liveTotals.length;
+      /* с23: стоп лише на 3 однакових послідовних замірах (1 збіг ловив недогрів) */
+      if (L >= 3 && liveTotals[L - 1] === liveTotals[L - 2] && liveTotals[L - 2] === liveTotals[L - 3]) break;
     }
+    liveDocH = liveTotals[liveTotals.length - 1];
+    console.log('live-m прогрів, тотали:', liveTotals.join('→'));
     await p.evaluate(() => {
       const c = document.querySelector('.page-content-wrapper__inner') || document.scrollingElement;
       c.scrollTo(0, 0);
@@ -220,6 +242,12 @@ if (!SKIP_LIVE) {
       liveRows.push(row);
       if (i % 50 === 0) console.log(`live-m ${i}/${N}`);
     }
+    liveDocHAfter = await p.evaluate(() => {
+      const c = document.querySelector('.page-content-wrapper__inner') || document.scrollingElement;
+      return c.scrollHeight;
+    });
+    if (liveDocHAfter !== liveDocH)
+      console.warn(`⚠️ live-m тотал зріс ПІД ЧАС проби: ${liveDocH}→${liveDocHAfter} — фраки підозрілі, перезняти`);
   }
   await ctx.close();
 }
@@ -233,6 +261,7 @@ const oursRows = [];
   await p.goto(OURS, { waitUntil: 'networkidle', timeout: 60000 });
   await p.waitForTimeout(1500);
   const max = await p.evaluate(() => document.documentElement.scrollHeight - innerHeight);
+  oursDocH = max + VH;
   for (let i = 0; i < N; i++) {
     const f = i / (N - 1);
     const row = await p.evaluate(({ f, max, fn }) => {
@@ -252,11 +281,16 @@ let liveSw;
 if (SKIP_LIVE) {
   /* live беремо з попереднього JSON (швидка ітерація по наших таймингах) */
   const { readFileSync } = await import('fs');
-  liveSw = JSON.parse(readFileSync(JSON_OUT, 'utf8')).live;
+  const prev = JSON.parse(readFileSync(JSON_OUT, 'utf8'));
+  liveSw = prev.live;
+  liveDocH = prev.liveDocH || 0; liveDocHAfter = prev.liveDocHAfter || 0; liveTotals = prev.liveTotals || [];
 } else liveSw = switches(liveRows);
 const oursSw = switches(oursRows);
-const report = { viewport: `${VW}x${VH}`, steps: N, live: liveSw, ours: oursSw, at: new Date().toISOString() };
+const report = { viewport: `${VW}x${VH}`, steps: N,
+  liveDocH, liveDocHAfter, liveTotals, oursDocH,
+  live: liveSw, ours: oursSw, at: new Date().toISOString() };
 writeFileSync(JSON_OUT, JSON.stringify(report, null, 1));
+console.log(`тотали: live ${liveDocH}${liveDocHAfter && liveDocHAfter !== liveDocH ? '→' + liveDocHAfter + ' ⚠️' : ''} vs ours ${oursDocH} (Δ ${oursDocH - liveDocH})`);
 const fmt = (k, seq) => k.startsWith('~')
   ? `${seq.length}тчк f ${seq[0]?.f}→${seq[seq.length - 1]?.f}`
   : seq.map(s => `[${s.idx}] ${s.from}→${s.to}`).join(' · ');
