@@ -260,6 +260,13 @@ export const SNAPSHOT_FN = (args) => {
     const kids = [];
     for (const ch of el.children) {
       if (/^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE|LINK|SOURCE|BR)$/.test(ch.tagName)) continue;
+      /* ПРУНІНГ ВКЛАДЕНИХ СЕКЦІЙ (S9c-0): корінь іншої секції всередині
+         цієї = ДУБЛЬ у скелеті (l-nature-bg жив і в nature-обгортці, і
+         своєю секцією; пізніша копія малюється поверх, біндінги чіпляли
+         невидиму — red-тест). Піддерево належить СВОЇЙ секції. */
+      if (args.pruneSelectors && args.pruneSelectors.some((ps) => {
+        try { return ch.matches(ps); } catch { return false; }
+      })) continue;
       const k = build(ch, depth + 1);
       if (k) kids.push(k);
     }
@@ -369,7 +376,8 @@ export async function snapshotArchive(browser, site, vpName) {
   await page.evaluate(() => document.fonts.ready);
   const sections = {};
   for (const s of sectionsForViewport(site, vpName)) {
-    const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks };
+    const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks,
+      pruneSelectors: pruneSelectorsFor(site, vpName, s.id) };
     if (s.preCss) await page.addStyleTag({ content: s.preCss });
     await page.evaluate(FORCE_IMAGES_FN, args);
     await page.waitForTimeout(400);
@@ -378,6 +386,13 @@ export async function snapshotArchive(browser, site, vpName) {
   await ctx.close();
   return sections;
 }
+
+/* селектори ІНШИХ секцій вʼюпорта — для прунінгу вкладених дублів */
+export const pruneSelectorsFor = (site, vpName, selfId) =>
+  sectionsForViewport(site, vpName)
+    .filter((x) => x.id !== selfId && !x.preCss)
+    .map((x) => (x.selector && typeof x.selector === 'object' ? x.selector[vpName] : x.selector))
+    .filter(Boolean);
 
 /* ---- main: build-spec.json з архіву ---- */
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];

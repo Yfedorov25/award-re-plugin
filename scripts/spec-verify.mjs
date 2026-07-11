@@ -29,6 +29,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import {
   resolveChromium, SNAPSHOT_FN, FORCE_IMAGES_FN, NORMALIZE_CSS,
+  pruneSelectorsFor,
   VIEWPORTS, MOBILE_UA, SITES, sectionsForViewport,
 } from './token-extractor.mjs';
 import { makeSig, matchTrees, compareNode, summarize } from './spec-compare-lib.mjs';
@@ -57,7 +58,8 @@ async function snapshotLive(browser, site, vpName) {
   await page.evaluate(() => document.fonts.ready);
   const sections = {};
   for (const s of sectionsForViewport(site, vpName)) {
-    const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks };
+    const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks,
+      pruneSelectors: pruneSelectorsFor(site, vpName, s.id) };
     if (s.preCss) await page.addStyleTag({ content: s.preCss });
     await page.evaluate(FORCE_IMAGES_FN, args);
     await page.waitForTimeout(400);

@@ -18,6 +18,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join, basename } from 'path';
 import {
   resolveChromium, SNAPSHOT_FN, NORMALIZE_CSS, FAKE_ORIGIN, REPO,
+  pruneSelectorsFor,
   VIEWPORTS, MOBILE_UA, SITES, sectionsForViewport,
 } from './token-extractor.mjs';
 import { makeSig, matchTrees, compareNode, summarize } from './spec-compare-lib.mjs';
@@ -72,7 +73,8 @@ async function snapshotSkeleton(vpName) {
   await page.waitForTimeout(1500);
   const sections = {};
   for (const s of sectionsForViewport(site, vpName)) {
-    const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks };
+    const args = { selector: s.selector, headingRegex: s.headingRegex, fontChecks: site.fontChecks,
+      pruneSelectors: pruneSelectorsFor(site, vpName, s.id) };
     if (s.preCss) await page.addStyleTag({ content: s.preCss });
     sections[s.id] = await page.evaluate(SNAPSHOT_FN, args);
   }

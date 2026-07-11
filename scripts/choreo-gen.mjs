@@ -410,7 +410,7 @@ function buildViewport(vpName) {
        S9: edge-метрика). place-bg OFF (не діагностовано). */
     textures: textureMap
       ? Object.fromEntries(Object.entries(textureMap.textures)
-          .filter(([id, t]) => t.fit && [].includes(id)))
+          .filter(([id, t]) => t.fit && ['nature'].includes(id)))
       : null,
     introGate: iEnd ? { iEnd } : null,
     bindings,
