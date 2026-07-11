@@ -1967,6 +1967,35 @@
     }, { rootMargin: '100% 0px' }).observe(rvc);
   })();
 
+  /* ═══ с27 REV-TAIL: живий опис-абзац revolves ("all offices... correct
+     geometry") РЕВІЛИТЬСЯ ще у ХОДІ фан-піна (борд live #65 .2752: текст
+     центрований ~top450), а наш входив ~2 кадри пізніше (#67, natural top
+     1093 @.2756). Підтягуємо transform'ом (нуль-сумно — docH недоторканий):
+     ставимо текст НЕ ВИЩЕ target=450, поки він природно не підніметься сам,
+     тоді dy→0 (self-anchor, як archEntry). Пробний вимір: ours natural top
+     1769@.255 → 642@.2894 (крок ~113px/.0034). ═══ */
+  (function revTailPull(){
+    if (window.innerWidth <= 768) return;
+    var rev = document.getElementById('revolves');
+    var txt = rev && rev.querySelector('.rvc-inner > p.reveal-text:last-of-type');
+    if (!txt) return;
+    var TARGET = 450, MAXPULL = 643;
+    var on = false, raf = null, cur = 0;
+    function tick(){
+      if (!on) { raf = null; return; }
+      /* natural top = поточний rect мінус уже застосований transform */
+      var natural = txt.getBoundingClientRect().top - cur;
+      var dy = -Math.max(0, Math.min(MAXPULL, natural - TARGET));
+      cur = dy;
+      txt.style.transform = dy ? 'translateY(' + dy.toFixed(1) + 'px)' : '';
+      raf = requestAnimationFrame(tick);
+    }
+    new IntersectionObserver(function(es){
+      on = es.some(function(e){ return e.isIntersecting; });
+      if (on && !raf) raf = requestAnimationFrame(tick);
+    }, { rootMargin: '150% 0px' }).observe(rev);
+  })();
+
   /* ═══ с26 HQ-PARALLAX (motion-zone проба live, motion-hq-1440.json):
      живе фото 1185px bottom-aligned (−365) дрейфує ВСЕРЕДИНІ піна:
      dy = 198 − 293·sp (top −167→−460), після релізу застигає на −95
