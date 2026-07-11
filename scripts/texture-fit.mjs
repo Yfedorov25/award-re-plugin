@@ -54,36 +54,48 @@ const result = await page.evaluate(async ({ shotB64, assetB64, assetMime }) => {
   const shot = await loadImg('data:image/png;base64,' + shotB64);
   const asset = await loadImg('data:' + assetMime + ';base64,' + assetB64);
   const VW = shot.naturalWidth, VH = shot.naturalHeight;
-  /* даунсемпл-сітка */
-  const GW = 180, GH = Math.round(GW * VH / VW);
+  /* даунсемпл-сітка (256: градієнтам треба більше деталі, ніж MAE) */
+  const GW = 256, GH = Math.round(GW * VH / VW);
   const gray = (ctx) => {
     const d = ctx.getImageData(0, 0, GW, GH).data;
     const g = new Float32Array(GW * GH);
     for (let i = 0; i < GW * GH; i++) g[i] = (d[i * 4] * 0.3 + d[i * 4 + 1] * 0.6 + d[i * 4 + 2] * 0.1);
     return g;
   };
+  /* ГРАДІЄНТНА метрика (S9a): MAE по сірому на темному блюрі давала
+     хибний оптимум (scale≈cover зумив обличчя 2×) — форма живе у КРАЯХ.
+     |dx|+|dy| і нормована кореляція: стійко до глобальної яскравості/
+     тінту; «нічого не намалювати» = нуль країв проти країв шота = кара. */
+  const gradMag = (g) => {
+    const m = new Float32Array(GW * GH);
+    for (let y = 1; y < GH - 1; y++) {
+      for (let x = 1; x < GW - 1; x++) {
+        const i = y * GW + x;
+        m[i] = Math.abs(g[i + 1] - g[i - 1]) + Math.abs(g[i + GW] - g[i - GW]);
+      }
+    }
+    return m;
+  };
   const cnvS = new OffscreenCanvas(GW, GH);
   const cS = cnvS.getContext('2d', { willReadFrequently: true });
   cS.drawImage(shot, 0, 0, GW, GH);
-  const gShot = gray(cS);
+  const mShot = gradMag(gray(cS));
   const cnvA = new OffscreenCanvas(GW, GH);
   const cA = cnvA.getContext('2d', { willReadFrequently: true });
   const aw = asset.naturalWidth, ah = asset.naturalHeight;
   const evalFit = (scale, ox, oy) => {
     /* scale: px асета → px вʼюпорта; (ox,oy) — зсув лівого верху асета
-       у вʼюпорт-px. Малюємо в даунсемплі. */
+       у вʼюпорт-px. Малюємо в даунсемплі. err = 100·(1 − NCC градієнтів). */
     cA.fillStyle = '#000'; cA.fillRect(0, 0, GW, GH);
     const k = GW / VW;
     cA.drawImage(asset, ox * k, oy * k, aw * scale * k, ah * scale * k);
-    const gA = gray(cA);
-    let sum = 0, n = 0;
+    const mA = gradMag(gray(cA));
+    let ab = 0, aa = 0, bb = 0;
     for (let i = 0; i < GW * GH; i++) {
-      /* поза намальованим асетом обидва чорні не рахуємо — інакше
-         виграє «нічого не малювати» */
-      if (gA[i] < 2 && gShot[i] > 8) { sum += 60; n++; continue; }
-      sum += Math.abs(gA[i] - gShot[i]); n++;
+      ab += mA[i] * mShot[i]; aa += mA[i] * mA[i]; bb += mShot[i] * mShot[i];
     }
-    return sum / n;
+    const ncc = ab / (Math.sqrt(aa * bb) || 1);
+    return 100 * (1 - ncc);
   };
   /* грубий свіп: scale так, щоб асет покривав від 60% висоти до 2.4× */
   let best = { err: 1e9 };

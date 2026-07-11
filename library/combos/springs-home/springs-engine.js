@@ -146,6 +146,22 @@
         const p = c.parentElement;
         if (!p || p.querySelector(':scope > .sk-canvas-tx')) continue;
         if (getComputedStyle(p).position === 'static') p.style.position = 'relative';
+        if (tx.layers) {
+          /* справжні webgl-шари live (S9a): простір текстур = бокс канваса
+             1:1 (bg 2880×1800 = 2× канваса 1440×900) → 100%/100%, без
+             реєстрації; color-шар ріжеться alpha-маскою live */
+          for (const L of tx.layers) {
+            const u = document.createElement('div');
+            u.className = 'sk-canvas-tx';
+            u.style.cssText = 'position:absolute;inset:0;pointer-events:none;'
+              + 'background-image:url("' + L.src + '");background-repeat:no-repeat;'
+              + 'background-size:100% 100%;'
+              + (L.mask ? 'mask-image:url("' + L.mask + '");mask-size:100% 100%;mask-repeat:no-repeat;'
+                + '-webkit-mask-image:url("' + L.mask + '");-webkit-mask-size:100% 100%;-webkit-mask-repeat:no-repeat;' : '');
+            p.insertBefore(u, c);
+          }
+          continue;
+        }
         const u = document.createElement('div');
         u.className = 'sk-canvas-tx';
         /* фреймінг з texture-fit (registration до live-шота): px відносно

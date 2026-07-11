@@ -41,6 +41,11 @@ const shellData = existsSync(shellDataPath) ? JSON.parse(readFileSync(shellDataP
    ховає секцію до вайпа under-previous; знято SNAPSHOT_FN у build-spec */
 const buildSpecPath = join(site.outDir, 'build-spec.json');
 const buildSpec = existsSync(buildSpecPath) ? JSON.parse(readFileSync(buildSpecPath, 'utf8')) : null;
+/* справжні webgl-текстури live (S9a, webgl-textures.mjs сніфер): шари в
+   просторі канваса 1:1 (bg-задник + color через alpha-маску) — реєстрація
+   не потрібна, xs-фіт лишається фолбеком для секцій без них */
+const webglTexPath = join(site.outDir, 'webgl-textures.json');
+const webglTex = existsSync(webglTexPath) ? JSON.parse(readFileSync(webglTexPath, 'utf8')) : null;
 /* дві серіалізовані форми одного «низ прямокутника від A»: inset(Apx …)
    (topPx уже резолвлений темп-дивом) і polygon(0 A, 100% A, 100% 100%, 0 100%) */
 const clipTopPx = (entry) => {
@@ -429,13 +434,20 @@ function buildViewport(vpName) {
        bg-асет мобільного варіанта тієї ж секції (texture-map.json).
        ЛИШЕ секції з fit (texture-fit.mjs registration: scale/offset з
        кореляції з live-шотом — числа з даних; голий cover зумив 2×) */
-    /* Увімкнені СЕКЦІЇ текстур — рішення піксель-гейтом per-секція:
-       nature ON (мертвий канвас оголює терасу-постер, листя лікує);
-       wellness OFF (MAE-фіт на темному блюрі хибний: 21.9 > 15.5 бази —
-       S9: edge-метрика). place-bg OFF (не діагностовано). */
+    /* Пріоритет: справжні webgl-шари live (простір канваса 1:1, S9a) →
+       xs-фіт (registration) для секцій без них. Рішення піксель-гейтом
+       per-секція: nature ON через фіт (листя лікує терасу-постер);
+       wellness ON через шари bg+color×alpha; place-bg OFF (не діагностовано,
+       ділить js-nature-canvas з nature). */
     textures: textureMap
-      ? Object.fromEntries(Object.entries(textureMap.textures)
-          .filter(([id, t]) => t.fit && ['nature'].includes(id)))
+      ? Object.fromEntries(Object.entries(textureMap.textures).flatMap(([id, t]) => {
+          const wt = webglTex?.sections?.[id];
+          if (wt && wt.bg && wt.color && wt.alpha) {
+            return [[id, { canvases: t.canvases, asset: wt.bg,
+              layers: [{ src: wt.bg }, { src: wt.color, mask: wt.alpha }] }]];
+          }
+          return t.fit && ['nature'].includes(id) ? [[id, t]] : [];
+        }))
       : null,
     introGate: iEnd ? { iEnd } : null,
     bindings,
