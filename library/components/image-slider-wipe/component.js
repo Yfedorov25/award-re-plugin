@@ -117,6 +117,9 @@
          (margin-bottom −underNextSvh + z-index:1 на секції). Свапи НЕ
          зсуваються: хвіст виключений зі спану index-мапінгу. */
       underNextSvh: options.underNextSvh != null ? options.underNextSvh : 0,
+      /* с26: живі межі свапів бувають НЕрівнокроковими (AIR arch: .3333/.6284
+         спану, а не k/N) — масив часток спану; default = рівні k/N */
+      boundaries: options.boundaries || null,
       /* живий ВИХІД слайдера (борд-доказ с22, live-058/060): НЕ зісковзування —
          кліп-віп АНІМАЦІЯ (imageClipOutVertical 1s ease-out) останнього слайда
          у ПОРОЖНЕЧУ поверх ще пінованого прозорого шару + фейд картки; реверс
@@ -369,12 +372,25 @@
       if (q === lastQ) return;
       lastQ = q;
       gate.renders++;
-      /* index = min(floor(p·N), N−1) — живий мапінг */
-      var want = Math.min(Math.floor(p * N), N - 1);
-      if (want !== idx) {
-        /* гістерезис 1.5% спану: lerp-коливання довкола порога не дриґає свап */
-        var boundary = (want > idx ? idx + 1 : idx) / N;
-        if (Math.abs(p - boundary) > 0.015) goTo(want, want > idx ? 1 : -1);
+      /* index = min(floor(p·N), N−1) — живий мапінг; boundaries-опція:
+         want = кількість пройдених часток спану */
+      var want, boundary;
+      if (opt.boundaries) {
+        want = 0;
+        for (var bi = 0; bi < opt.boundaries.length; bi++)
+          if (p > opt.boundaries[bi]) want = bi + 1;
+        want = Math.min(want, N - 1);
+        if (want !== idx) {
+          boundary = opt.boundaries[want > idx ? idx : idx - 1];
+          if (Math.abs(p - boundary) > 0.015) goTo(want, want > idx ? 1 : -1);
+        }
+      } else {
+        want = Math.min(Math.floor(p * N), N - 1);
+        if (want !== idx) {
+          /* гістерезис 1.5% спану: lerp-коливання довкола порога не дриґає свап */
+          boundary = (want > idx ? idx + 1 : idx) / N;
+          if (Math.abs(p - boundary) > 0.015) goTo(want, want > idx ? 1 : -1);
+        }
       }
       /* ticks: безперервний fill скролом (transform-only, без transition) */
       for (var i = 0; i < tickFills.length; i++)

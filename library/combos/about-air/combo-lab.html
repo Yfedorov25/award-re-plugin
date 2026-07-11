@@ -228,6 +228,9 @@
   #isw-hq .isw-texts p { font-size: 13px; line-height: 1.3; }
   #isw-hq .isw-card .cta-link { position: absolute; right: 20px; bottom: 20px;
     max-width: 220px; white-space: normal; text-align: left; line-height: 1.25; }
+  /* с26 кадр live-039: текст картки arch ~ЦЕНТР (наш був flex-end) — дослівні
+     live-тексти слайдів (закон «тексти дослівно») */
+  #isw-arch .isw-texts { align-content: center; }
   /* с26 (motion-zone проба live): фото hq = НЕ cover-кроп, а живий full-size
      1185px (fill @1440), статично bottom-aligned (top −365 від шару = 820−1185),
      рух = parallax translateY по скролу (hqParallax JS, крива dy 198→−95 у піні).
@@ -495,6 +498,13 @@
     color: #8b8a86; }
   #stack-layout .stk picture { display: block; height: 100%; }
   #stack-layout .stk img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* с26 кадр #226: live stack-картки з боковими полями 20px + радіуси,
+     фони світліші (картка-3 #f8f8f8, картка-4 #efefef); desktop-only */
+  @media (min-width: 769px) {
+    #stack-layout .stk { width: calc(100vw - 40px); margin-left: 20px;
+      border-radius: 8px; background: #f8f8f8; }
+    #stack-layout .stk:nth-child(even) { background: #efefef; }
+  }
   /* моб-версія стека — у фінальному @768 блоці в кінці стилів (source-order!) */
 
   /* ═══════════ КОНТЕНТ-СЕКЦІЇ /about (13 актів живого) ═══════════ */
@@ -1056,12 +1066,12 @@
        = артефакт нестабільного live). Цілі: doc-Y анкорів = live 1-в-1, тотал
        = live. Свапи слайдерів сідають на live doc-px САМІ (6456/7007 arch,
        12033/12652 hq) через ці ж зсуви — окремо НЕ чіпані. ── */
-    #isw-arch { margin-top: calc(53vh - 20px); }  /* с26: −35 компенсація одностороннього гістерезису index-мапінгу (проба: межі +39..46 від live) */  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793); с26: −470 = компенсація титул-фази #architecture (+470) — doc слайдера ІНВАРІАНТНИЙ, свапи НЕ рухались (перевірено index-пробою) */
+    #isw-arch { margin-top: calc(53vh + 15px); }  /* с26: T=5791 (компромісний −35 знято — межі тепер точні через boundaries-опцію) */  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793); с26: −470 = компенсація титул-фази #architecture (+470) — doc слайдера ІНВАРІАНТНИЙ, свапи НЕ рухались (перевірено index-пробою) */
     /* с26 пере-solve свапів (index-свіп): isw-arch doc 5551 → 5791 (=с23 solve;
        дрейф −240 з c25 map-компенсації давав свапи 6250/6875 замість live
        6436/7079 = кластер #39-50). Компенсація в margin-bottom (!important
        б'є inline isw-JS): revolves @8321 НЕДОТОРКАНИЙ, span/реліз незмінні. */
-    #isw-arch { margin-bottom: calc(-105svh - 205px) !important; }
+    #isw-arch { margin-bottom: calc(-105svh - 240px) !important; }
     /* с26 кадр #29: live титул architecture на doc 4743 (наш був 4273) + live
        gap титул→AESTHETICS 240 (наш 82) */
     #architecture > .h1 { margin-top: 470px; }
@@ -1345,9 +1355,9 @@
         <div data-isw-ticks></div>
         <p class="isw-counter"><span data-isw-count>1</span><span data-isw-total>/ 3</span></p>
         <div class="isw-texts">
-          <p data-isw-text>Panoramic curved glazing. Energy-efficient windows with <strong>Schüco</strong> profiles.</p>
-          <p data-isw-text class="is-off">A column grid of <strong>8.4 × 8.4 meters</strong> in a single span.</p>
-          <p data-isw-text class="is-off">Panoramic vistas of city towers and Khodynskoye Field Park.</p>
+          <p data-isw-text>Panoramic curved glazing supports natural daylight and visually expands the space. Energy-efficient windows with Sch&uuml;co profiles and special glass coatings retain heat and protect interiors from excessive sunlight.</p>
+          <p data-isw-text class="is-off">At a structural level, AIR supports flexible layouts and unconventional ideas. A column grid of 8.4 &times; 8.4 meters in a single span enables efficient planning solutions.</p>
+          <p data-isw-text class="is-off">From the windows of the view offices, panoramic vistas of city towers and Khodynskoye Field Park unfold.</p>
         </div>
         <div class="isw-nav">
           <button data-isw-prev aria-label="previous">←</button>
@@ -1905,7 +1915,11 @@
            кривій (у live рух ВСЕРЕДИНІ піна, не на вході/виході); m390 дрейф живе */
         driftPct: window.innerWidth > 768 ? 0 : 16.666 } :   /* с23 solve @820: span 1920, реліз на splash-приході; m390 без змін */
       el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: window.innerWidth > 768 ? 118 : 91,
-        underNextSvh: window.innerWidth > 768 ? 105 : 117 } : { mobile: 'tap' }); }
+        underNextSvh: window.innerWidth > 768 ? 105 : 117,
+        /* с26: живі межі свапів arch НЕрівнокрокові — doc 6436/7007 (кадр live-050:
+           вайп-3 уже летить на .2152; c22-таблиця .1963/.2137) → частки спану
+           з T=5791, span=1935: 645/1935 і 1216/1935 */
+        boundaries: window.innerWidth > 768 ? [0.3333, 0.6284] : null } : { mobile: 'tap' }); }
   );
 
   /* ═══ с23 RVC-ПАН (кадри live-062/064/067): ряд карток фану панить ВЛІВО
@@ -2031,8 +2045,10 @@
     function tick(){
       if (!on) { raf = null; return; }
       if (S_PIN === null) measure();
-      var dy = -Math.min(205, Math.max(0, S_PIN - sY()));  /* 205: в'їзд лишається на live doc 5551 при T−35 */
+      var dy = -Math.min(240, Math.max(0, S_PIN - sY()));  /* 240: в'їзд на live doc 5551 при T=5791 */
       layer.style.transform = dy ? 'translateY(' + dy.toFixed(1) + 'px)' : '';
+      /* ⚠️ drift НЕ чіпати (спроба с26 driftPct:0 зняла .isw-drift → фото 100%
+         замість 120% і весь пін роз'їхався 15→26%; відкочено) */
       raf = requestAnimationFrame(tick);
     }
     new IntersectionObserver(function(es){

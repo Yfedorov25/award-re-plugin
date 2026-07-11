@@ -197,7 +197,18 @@ if (!OURS_ONLY) {
         await new Promise(r => setTimeout(r, 26));
       }
     }, remap(fracs[i]));
+    /* с26: 150ms ловив 1s-вайпи слайдерів у льоті (кадри #39/#50/#51 —
+       фантомний diff 48-53%). Фіксована пауза 1100ms НЕ годиться: лоббі-автоплей
+       за неї тикає слайди вперед (#109-112 регрес 75%). Чесно: базові 150ms +
+       дочекатись ЛИШЕ біжучих clip-path анімацій (вайпи), кап 1200ms */
     await p.waitForTimeout(150);
+    await p.evaluate(() => Promise.race([
+      Promise.all(document.getAnimations()
+        .filter(a => a.playState === 'running' && a.effect && a.effect.getKeyframes &&
+          a.effect.getKeyframes().some(k => k.clipPath))
+        .map(a => a.finished.catch(() => {}))),
+      new Promise(r => setTimeout(r, 1200))
+    ]));
     await p.screenshot({ path: `${OUT}/ours-${String(i).padStart(3, '0')}.jpg`, type: 'jpeg', quality: Q });
     if (i % 10 === 0) console.log(`ours ${i}/${N}`);
   }
