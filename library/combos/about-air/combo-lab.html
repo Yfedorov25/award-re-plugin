@@ -1134,6 +1134,15 @@
     #layout-splash { position: relative; z-index: 2; }  /* накриває cert-пін (next-over) */
     #autonomy { padding-bottom: 0; }  /* с21: 36vh → aplan-пін (нуль-сумно) */
     #stack-layout .stk + .stk { margin-top: 4svh; }
+    /* с26 кадри #222/#226 (пікс-вимір): live-фаза стека — картка-3 приходить
+       на 50 раніше, картка-4 на 252 (гепи НЕРІВНІ, як boundaries слайдера);
+       компенсація +252 у padding-bottom (хвіст тримає остання sticky-картка) */
+    #stack-layout .stk:nth-child(3) { margin-top: calc(4svh - 50px); }
+    #stack-layout .stk:nth-child(4) { margin-top: calc(4svh - 202px); }
+    #stack-layout { padding-bottom: 252px; }
+    /* live-позиції в панелі (кадр #222: титул 43% висоти, деск 73% з x52%) */
+    .stk-title { bottom: auto; top: 43%; }
+    .stk-desc { bottom: auto; top: 73%; right: auto; left: 52%; text-align: left; }
     /* ── с23 px-solve: svc→cert live 4261 (наш був 3744) — глибина темної зони
        з відео-фоном; cert-бокс live 1394; хвіст metrics→footer live 4943;
        футер live 664 ── */
