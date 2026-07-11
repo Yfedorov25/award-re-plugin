@@ -428,6 +428,18 @@
   #rvc { width: 100vw; margin-left: calc(50% - 50vw); }  /* живе: фото від краю до краю */
   #rvc [data-rvc-stage] { display: grid !important; grid-template-columns: repeat(3, 1fr);
     gap: 24px; height: auto !important; padding: 0 10px; }
+  /* с22 масштаб фану = live (борд-пара #62): центральне фото 673px (46.7vw),
+     бічні ВИХОДЯТЬ за краї екрана (віяло ~161vw по центру); наш був 3×~430 у
+     контейнері. Висоти не міняються — пін/бюджети на місці. Desktop-only. */
+  @media (min-width: 769px) {
+    #rvc [data-rvc-stage] { grid-template-columns: repeat(3, 46.7vw);
+      justify-content: center; column-gap: 10.8vw; padding: 0;
+      /* live фан стоїть НИЖЧЕ: перед canvas-фаном у потоці спіраль-блок
+         (placeholder 1065×1065) — трекер проби ловив СПІРАЛЬ, не фан, тому
+         наш фан жив на її місці (борд-пара #05 .2627: наш фан y100 vs live 390).
+         +330px усередині пін-контейнера: анкори нижче НЕ рухаються */
+      margin-top: 330px; }
+  }
   #rvc [data-rvc-slide] { position: static !important; opacity: 1 !important;
     visibility: visible !important; }
   #rvc [data-rvc-slide] img { width: 100%; height: 50svh; object-fit: cover;
