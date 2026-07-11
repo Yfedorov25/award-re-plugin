@@ -35,7 +35,7 @@
    ============================================================ */
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { resolveChromium, SITES, VIEWPORTS, MOBILE_UA } from './token-extractor.mjs';
+import { resolveChromium, SITES, VIEWPORTS, MOBILE_UA, sectionsForViewport } from './token-extractor.mjs';
 
 const siteName = process.argv[2];
 const sectionId = process.argv[3];
@@ -64,7 +64,7 @@ if (!chromium) { console.error('playwright не резолвиться (PLAYWRIG
 /* цілі всередині секції: анімаційно-значущі елементи, кап 48;
    одометр: останній «великий» блок сторінки або odometerSelector */
 const SETUP_FN = (args) => {
-  const { selector, odometerSelector } = args;
+  const { selector, odometerSelector, extraProbeSelectors } = args;
   const sec = [...document.querySelectorAll(selector)].find((el) => {
     const r = el.getBoundingClientRect();
     return r.width > 1 && r.height > 1 && getComputedStyle(el).display !== 'none';
@@ -87,9 +87,20 @@ const SETUP_FN = (args) => {
   const probes = [sec];
   const cfgOdo = odometerSelector && document.querySelector(odometerSelector);
   if (cfgOdo && !probes.includes(cfgOdo)) probes.push(cfgOdo);
+  /* корені ІНШИХ секцій конфігу (S6): для fixed-секцій (header) власний
+     корінь і far-блоки мертві на desktop (пастка 6) — травелять лише
+     sticky-корені контентних секцій */
+  for (const s of extraProbeSelectors || []) {
+    if (probes.length >= 8) break;
+    const el = [...document.querySelectorAll(s)].find((e) => {
+      const r = e.getBoundingClientRect();
+      return r.height > 300 && getComputedStyle(e).display !== 'none';
+    });
+    if (el && !probes.includes(el)) probes.push(el);
+  }
   const root = document.querySelector('[data-barba="container"]') || document.body;
   for (const el of root.querySelectorAll(':scope > *, :scope > * > *')) {
-    if (probes.length >= 6) break;
+    if (probes.length >= 8) break;
     const r = el.getBoundingClientRect();
     if (r.height > 300 && !probes.includes(el)) probes.push(el);
   }
@@ -128,14 +139,21 @@ const SETUP_FN = (args) => {
   })();
   return {
     odometer: probes.map((el) => (el.className || '').toString().slice(0, 40)),
-    targets: window.__AM_TARGETS__.map((el, i) => ({
-      i,
-      tag: el.tagName.toLowerCase(),
-      cls: typeof el.className === 'string' ? el.className.trim().split(/\s+/).slice(0, 5).join(' ') : '',
-      text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40),
-      attrs: [...el.attributes].map((a) => a.name)
-        .filter((n) => /^data-(parallax|scroll-sticky|reveal|scroll-snap)/.test(n)).slice(0, 6),
-    })),
+    targets: window.__AM_TARGETS__.map((el, i) => {
+      /* src СЕБЕ або першого img-нащадка (S6, пастка 26): єдиний
+         надійний дискримінатор однакових picture-груп — вміст */
+      const im = el.tagName === 'IMG' ? el : el.querySelector('img');
+      const rawSrc = im && (im.currentSrc || im.src || im.getAttribute('data-src') || '');
+      return {
+        i,
+        tag: el.tagName.toLowerCase(),
+        cls: typeof el.className === 'string' ? el.className.trim().split(/\s+/).slice(0, 5).join(' ') : '',
+        text: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40),
+        attrs: [...el.attributes].map((a) => a.name)
+          .filter((n) => /^data-(parallax|scroll-sticky|reveal|scroll-snap)/.test(n)).slice(0, 6),
+        src: rawSrc ? rawSrc.split('?')[0].split('/').pop() : undefined,
+      };
+    }),
   };
 };
 
@@ -193,7 +211,10 @@ async function runViewport(browser, vpName) {
   await page.waitForTimeout(600);
 
   /* 1) цілі + одометр */
-  const picked = await page.evaluate(SETUP_FN, { selector: secSelector, odometerSelector: site.odometerSelector });
+  const extraProbeSelectors = sectionsForViewport(site, vpName)
+    .filter((s) => s.id !== sectionId && !s.preCss)
+    .map((s) => s.selector).slice(0, 6);
+  const picked = await page.evaluate(SETUP_FN, { selector: secSelector, odometerSelector: site.odometerSelector, extraProbeSelectors });
   if (picked.error) { await ctx.close(); return { error: picked.error }; }
   console.log(`  одометр: [${picked.odometer}] · цілей: ${picked.targets.length}`);
 

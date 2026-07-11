@@ -230,8 +230,12 @@ export const SNAPSHOT_FN = (args) => {
     const r = el.getBoundingClientRect();
     if (r.width < 0.5 && r.height < 0.5 && !el.children.length) return null;
     const cs = getComputedStyle(el);
+    /* NBSP зберігаємо (S6): \s матчить і \u00A0, а nbsp керує
+       переносами live-заголовків ("Open the doors of Springs…") —
+       колапсуємо лише звичайний whitespace */
     const ownText = [...el.childNodes].filter((n) => n.nodeType === 3)
-      .map((n) => n.textContent).join(' ').replace(/\s+/g, ' ').trim();
+      .map((n) => n.textContent).join(' ')
+      .replace(/[^\S\u00A0]+/g, ' ').replace(/\u00A0+/g, '\u00A0').trim();
     count++;
     const node = {
       tag: el.tagName.toLowerCase(),

@@ -114,9 +114,26 @@
     let score = 0;
     for (const c of want) if (have.has(c)) score += 2;
     score -= Math.max(0, have.size - want.length) * 0.1;
+    /* text-сигнатура '<img …' = вміст noscript на живому (текст при
+       увімкненому JS); в архіві JS-off noscript РОЗПАРСЕНИЙ → text
+       порожній. Такий text не матчимо — скоримо по data-атрибутах. */
+    const markupText = sig.text && sig.text.startsWith('<');
     const txt = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40);
-    if (sig.text && txt === sig.text) score += 3;
-    else if (sig.text && txt.startsWith(sig.text.slice(0, 15))) score += 1;
+    if (sig.text && !markupText && txt === sig.text) score += 3;
+    else if (sig.text && !markupText && txt.startsWith(sig.text.slice(0, 15))) score += 1;
+    if (markupText) {
+      for (const a of sig.attrs || []) if (el.hasAttribute(a)) score += 1;
+      /* скелет стріпає data-атрибути — структурний мінімум: усередині
+         є img (решту вирішує rest-bbox метрика групи) */
+      if (el.querySelector('img')) score += 1;
+    }
+    /* img src із live-карти (S6, пастка 26): єдиний надійний
+       дискримінатор однакових picture-груп — вміст, не bbox */
+    if (sig.src) {
+      const im = el.tagName.toLowerCase() === 'img' ? el : el.querySelector('img');
+      const s = im && (im.currentSrc || im.src || im.getAttribute('data-src') || '');
+      if (s && s.split('?')[0].split('/').pop() === sig.src) score += 4;
+    }
     return score;
   }
   const bound = [];
@@ -132,7 +149,11 @@
       /* групи однакових сигнатур */
       const groups = {};
       for (const it of list) {
-        const key = it.b.sig.tag + '|' + it.b.sig.cls + '|' + it.b.sig.text;
+        /* src у ключі (S6): пул кандидатів групи скориться сигнатурою
+           ПЕРШОГО біндінга — без src у ключі два однакові picture з
+           різним вмістом падають в одну групу і другий лишається
+           без кандидата (його img відфільтровано чужим src) */
+        const key = it.b.sig.tag + '|' + it.b.sig.cls + '|' + it.b.sig.text + '|' + (it.b.sig.src || '');
         (groups[key] = groups[key] || []).push(it);
       }
       for (const grp of Object.values(groups)) {
@@ -194,6 +215,9 @@
         }
       }
     }
+    window.__ENGINE_UNRESOLVED__ = (cfg.bindings || [])
+      .map((b, i) => (!resolved[i] ? { sec: b.section, sig: b.sig } : null))
+      .filter(Boolean);
     (cfg.bindings || []).forEach((b, i) => {
       const el = resolved[i];
       if (!el) { unresolved++; return; }
@@ -261,8 +285,18 @@
     const sc = window.scrollY || 0;
     for (const b of bound) {
       if (b.hasM || b.inShape) continue;
+      /* fixed-обгортка (header у scene.css): елементи живуть у
+         VIEWPORT-просторі — без +x.s і без scrollY у nat (S6) */
+      const wrapEl = wrappers[b.section];
+      b.fixedSpace = !!wrapEl && getComputedStyle(wrapEl).position === 'fixed';
       const r = b.el.getBoundingClientRect();
-      b.nat = { top: r.top + sc, left: r.left, w: r.width, h: r.height };
+      b.nat = { top: r.top + (b.fixedSpace ? 0 : sc), left: r.left, w: r.width, h: r.height };
+      /* fixed-контейнер зі змінною live-висотою (компакт-хедер 100→70):
+         height реплеїться напряму, scale тут зіпсував би дітей */
+      {
+        const hs = (b.curve || []).map((x) => x.h).filter((v) => v > 0);
+        b.setH = b.fixedSpace && hs.length > 1 && Math.max(...hs) - Math.min(...hs) > 5;
+      }
       const dev = travelOf[b.section] || (() => 0);
       /* дельти ПО ЦЕНТРУ (для sw=1 тотожно top-left): дозволяє scale
          з дефолтним origin 50% 50% (спани-кружечки wellness пульсують
@@ -271,12 +305,14 @@
       const mk = (x, sKey) => {
         const sw = b.nat.w > 1 && x.w > 0 ? x.w / b.nat.w : 1;
         const sh = b.nat.h > 1 && x.h > 0 ? x.h / b.nat.h : 1;
-        const scaled = Math.abs(sw - 1) > 0.05 || Math.abs(sh - 1) > 0.05;
+        const scaled = !b.setH && (Math.abs(sw - 1) > 0.05 || Math.abs(sh - 1) > 0.05);
+        const addS = sKey === 's' && !b.fixedSpace ? x.s : 0;
+        const devS = sKey === 's' && !b.fixedSpace ? dev(x.s) : 0;
         /* центр-анкер ЛИШЕ при реальному scale (спани-кружечки):
            при статичній різниці розмірів центр ≠ top-left і зсуває */
         return scaled
-          ? { [sKey]: x[sKey], dt: (x.top + x.h / 2) + (sKey === 's' ? x.s : 0) - cy - (sKey === 's' ? dev(x.s) : 0), dl: (x.left + x.w / 2) - cx, sw, sh }
-          : { [sKey]: x[sKey], dt: x.top + (sKey === 's' ? x.s : 0) - b.nat.top - (sKey === 's' ? dev(x.s) : 0), dl: x.left - b.nat.left, sw: 1, sh: 1 };
+          ? { [sKey]: x[sKey], dt: (x.top + x.h / 2) + addS - cy - devS, dl: (x.left + x.w / 2) - cx, sw, sh }
+          : { [sKey]: x[sKey], dt: x.top + addS - b.nat.top - devS, dl: x.left - b.nat.left, sw: 1, sh: 1, h: b.setH ? x.h : undefined };
       };
       b.own = (b.curve || []).map((x) => mk(x, 's'));
       if (b.intro && b.intro.length > 1) {
@@ -316,7 +352,7 @@
         const pre = (b.fix.x || b.fix.y) ? `translate(${b.fix.x.toFixed(2)}px, ${b.fix.y.toFixed(2)}px) ` : '';
         b.el.style.transform = d.m ? pre + fmtM(d.m) : (pre || (b.seedTransform ? 'translate(0px, 0px)' : ''));
       } else {
-        const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t), sw: lerp(a.sw ?? 1, c.sw ?? 1, t), sh: lerp(a.sh ?? 1, c.sh ?? 1, t) });
+        const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t), sw: lerp(a.sw ?? 1, c.sw ?? 1, t), sh: lerp(a.sh ?? 1, c.sh ?? 1, t), h: a.h != null && c.h != null ? lerp(a.h, c.h, t) : undefined });
         let dd = (introMode && b.ownIntro)
           ? interp(b.ownIntro, 'input', introInput, dpick)
           : (b.own && b.own.length ? interp(b.own, 's', introMode ? 0 : P, dpick) : null);
@@ -329,6 +365,7 @@
         if (dd && (Math.abs(dd.dt) > 0.05 || Math.abs(dd.dl) > 0.05 || hasScale)) {
           b.el.style.transform = `translate(${dd.dl.toFixed(2)}px, ${dd.dt.toFixed(2)}px)` + (hasScale ? ` scale(${dd.sw.toFixed(4)}, ${dd.sh.toFixed(4)})` : '');
         } else b.el.style.transform = b.seedTransform ? 'translate(0px, 0px)' : '';
+        if (b.setH && dd && dd.h > 0) b.el.style.height = `${dd.h.toFixed(1)}px`;
       }
       /* inline opacity ЗАВЖДИ, де є live-значення: каркас (архів JS-off)
          має запечені o:0 у місцях, де живий рантайм показує (hero-галерея) */

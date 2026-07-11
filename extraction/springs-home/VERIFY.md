@@ -1,6 +1,6 @@
 # VERIFY — build-spec (архів) vs живий https://springs.estate/
 
-- Дата: 2026-07-10T20:34:43.753Z
+- Дата: 2026-07-11T10:20:53.657Z
 - Секції: **hero-gallery** (desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item) · **intro** (sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero) · **wellness** (контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ) · **nature** (окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий) · **place-bg** (сценографія place: bg-item/gradient/caption (WebGL-підкладка living map)) · **place** (desktop: .l-place sticky__layer усередині l-nature-bg; mobile: окремий .l-place-mobile) · **place-video** (desktop: sticky-контейнер відео; mobile: перший ВИДИМИЙ .l-place-video (в l-place-mobile)) · **map** (два корені (is-hidden--md-down / is-hidden--lg-up) — перший видимий) · **design-1** (слайд design #1 (id="design"), desktop+mobile варіанти) · **design-2** (слайд design #2) · **design-3** (слайд design #3) · **design-4** (слайд design #4 існує ЛИШЕ mobile (is-hidden--lg-up, без desktop-варіанта)) · **residences** (desktop: єдиний .l-residences; mobile: webgl-контейнер (окремий корінь)) · **residences-slider** (mobile-слайдер residences (на desktop цей контент всередині .l-residences)) · **interiors** (desktop: єдиний .l-interiors; mobile: інтро-блок (окремий корінь is-hidden--lg-up)) · **interiors-slider** (mobile-слайдер interiors (на desktop цей контент всередині .l-interiors)) · **header** (sticky-хедер ui-dark header--landing (2 ноди — перший видимий)) · **footer** (футер section--no-overflow ui-dark) · **callback** (форма callback У МОДАЛЦІ — знято з preCss(modal-open); одометр animation-map) · **favorites** (улюблені У МОДАЛЦІ — знято з preCss(modal-open))
 - Метод: той самий SNAPSHOT_FN на обох; без скролу живого; reveal нормалізовано NORMALIZE_CSS + WAAPI finish(); lazy-фото форс-довантажені; класи фільтруються через ПЕРЕТИН множин класів архіву й живого.
 - ⚠️ Метрики «забруднені» анімацією (порівнюються в нормалізованому стані): opacity, transform.
@@ -312,9 +312,9 @@
 | hero-gallery>div[1]>div[1] l-gallery__title | box.w | 217.8 | 226.8 | -9 |
 | hero-gallery>div[1]>div[1] l-gallery__title | width | 217.812px | 226.844px | -9 |
 | hero-gallery>div[1]>div[1] l-gallery__title | left | 152.188px | 143.156px | 9 |
-| hero-gallery>div[1]>div[1]>h1 "Splendor of Re… | box.x | 152.2 | 143.2 | 9 |
-| hero-gallery>div[1]>div[1]>h1 "Splendor of Re… | box.w | 217.8 | 226.8 | -9 |
-| hero-gallery>div[1]>div[1]>h1 "Splendor of Re… | width | 217.812px | 226.844px | -9 |
+| hero-gallery>div[1]>div[1]>h1 "Splendor of Re… | box.x | 152.2 | 143.2 | 9 |
+| hero-gallery>div[1]>div[1]>h1 "Splendor of Re… | box.w | 217.8 | 226.8 | -9 |
+| hero-gallery>div[1]>div[1]>h1 "Splendor of Re… | width | 217.812px | 226.844px | -9 |
 | hero-gallery>div>div>div[1]>picture is-invisi… | opacity ⚠️anim | 0 | 1 | ≠ |
 | hero-gallery>div>div[1]>div[1]>picture is-inv… | opacity ⚠️anim | 0 | 1 | ≠ |
 | hero-gallery>div>div[2]>div[1]>picture is-inv… | opacity ⚠️anim | 0 | 1 | ≠ |

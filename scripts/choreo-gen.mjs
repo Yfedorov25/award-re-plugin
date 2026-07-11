@@ -15,7 +15,7 @@
      кривої (два останні s=0-семпли → інпут, де крива досягає
      фінального значення першого пост-інтро кадру).
    ============================================================ */
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { SITES, REPO } from './token-extractor.mjs';
 
@@ -24,10 +24,14 @@ const site = SITES[siteName];
 if (!site) { console.error(`вкажи: node scripts/choreo-gen.mjs <${Object.keys(SITES).join('|')}>`); process.exit(1); }
 const outDir = join(REPO, 'library/combos', siteName);
 const scene = JSON.parse(readFileSync(join(site.outDir, 'scene-map.json'), 'utf8'));
-const MAPPED = ['hero-gallery', 'intro', 'wellness'];
+/* усі секції конфігу, для яких існує знята карта (S6: динамічно —
+   header та майбутні секції підхоплюються без правки коду) */
+const MAPPED = site.sections.map((s) => s.id)
+  .filter((id) => existsSync(join(site.outDir, `animation-map-${id}.json`)));
 const maps = Object.fromEntries(MAPPED.map((id) => [
   id, JSON.parse(readFileSync(join(site.outDir, `animation-map-${id}.json`), 'utf8')),
 ]));
+console.log(`карти секцій: ${MAPPED.join(', ')}`);
 
 const r1 = (v) => Math.round(v * 10) / 10;
 /* ПОВНА 2D-матриця [a,b,c,d,tx,ty] — у hero є РОТАЦІЯ (S3-розкопка:
@@ -160,21 +164,43 @@ function buildViewport(vpName) {
       if (curve.length > 2) {
         const cFirst = curve[0].clip || 'none', cLast = curve[curve.length - 1].clip || 'none';
         if (cFirst !== cLast) {
-          const firstNums = curve.map((x) => {
+          const numsPer = curve.map((x) => {
             const n = ((x.clip || '').match(/-?\d*\.?\d+/g) || []).map(Number);
             return n.length > 1 ? n[1] : null;
-          }).filter((v) => v !== null);
+          });
+          const firstNums = numsPer.filter((v) => v !== null);
           const mono = firstNums.every((v, i) => i === 0 || v <= firstNums[i - 1] + 0.5)
             || firstNums.every((v, i) => i === 0 || v >= firstNums[i - 1] - 0.5);
-          if (mono) {
+          /* S6 (rAF-щільні карти): монотонний вайп може бути S-СКРАБОМ
+             (закритість = функція s на травелі, не час) — тоді латч
+             ШКОДИТЬ (тригер-подія залежить від ритму прогону, пастка 14),
+             а крива відтворює live точно і ран-інваріантно. Скраб =
+             багато проміжних значень, розтягнутих по s. */
+          const f0 = firstNums[0], fN = firstNums[firstNums.length - 1];
+          const lo = Math.min(f0, fN), hi = Math.max(f0, fN);
+          const mids = curve.filter((x, i) => numsPer[i] !== null
+            && numsPer[i] > lo + 2 && numsPer[i] < hi - 2);
+          const midSpan = mids.length
+            ? Math.max(...mids.map((x) => x.s)) - Math.min(...mids.map((x) => x.s)) : 0;
+          const scrub = mids.length >= 6 && midSpan >= 200;
+          if (mono && !scrub) {
             /* тригер степу — З ДАНИХ live (S6-розкопка): DOM-геометрія
                нашого каркаса бреше для фулскрін-слайдів у пінованому
                шарі (nat.top=0 → «відкрито з s=0»). Правда = перший
                ОСІЛИЙ live-семпл, де clip уже у фінальному стані. */
+            /* толерантний матч фіналу (числа полігона ±1): float-шум
+               рендера ламав точну string-рівність і зсував sOpen на
+               наступний снап */
+            const numsOf = (c) => ((c || '').match(/-?\d*\.?\d+/g) || []).map(Number);
+            const lastN = numsOf(cLast);
+            const isOpen = (c) => {
+              const n = numsOf(c);
+              return n.length === lastN.length && n.every((v, i) => Math.abs(v - lastN[i]) <= 1);
+            };
             const settledOpen = [...raw]
               .filter((x) => !x.t && x.s > 2)
               .sort((a, b) => a.s - b.s)
-              .find((x) => (x.clipPath || 'none') === cLast);
+              .find((x) => isOpen(x.clipPath));
             const sOpen = settledOpen ? r1(toPage(settledOpen.s)) : null;
             clipStep = { closed: cFirst === 'none' ? null : cFirst, open: cLast === 'none' ? null : cLast, sOpen };
             for (const x of curve) x.clip = null;
@@ -203,7 +229,7 @@ function buildViewport(vpName) {
         revealGeom: revealGeom || undefined,
         clipStep: clipStep || undefined,
         section: secId,
-        sig: { tag: t.tag, cls: t.cls, text: t.text, attrs: t.attrs || [] },
+        sig: { tag: t.tag, cls: t.cls, text: t.text, attrs: t.attrs || [], src: t.src },
         moving: t.moving,
         seedTransform: restT && restT !== 'none' ? restT : null,
         restOpacity: t.samples[0] ? +t.samples[0].opacity : null,
