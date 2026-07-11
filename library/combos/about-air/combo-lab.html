@@ -272,6 +272,16 @@
     border: 0; opacity: .55; }
   #revolves .rvc-bg::after { content: ""; position: absolute; inset: 0;
     background: linear-gradient(#000 0%, rgba(0,0,0,.35) 40%, rgba(0,0,0,.55) 100%); }
+  /* с23: відео-фон services-cards (живий l-life-cards-background--fade) —
+     спіраль читається ВНИЗУ зони, верх пригашений у чорний секції */
+  #services-cards { position: relative; }
+  #services-cards .svc-bg { position: absolute; inset: 0; z-index: 0; overflow: clip; }
+  #services-cards .svc-bg iframe { position: absolute; left: 50%; bottom: 0;
+    width: max(100%, 178svh); aspect-ratio: 16 / 9; transform: translateX(-50%);
+    border: 0; opacity: .8; }
+  #services-cards .svc-bg::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(#0d0d0c 0%, rgba(13,13,12,.55) 45%, rgba(13,13,12,0) 78%); }
+  #services-cards .act { position: relative; z-index: 1; }
   #revolves .rvc-inner { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
   #revolves .rvc-head { display: flex; justify-content: space-between; margin-top: 4vh; margin-bottom: 28vh;  /* вступ був задовгий: live 0.26-0.27, ми 0.26-0.31 (таймлайн с20) */
     font-size: clamp(28px, 4.6vw, 66px); font-weight: 400; text-transform: uppercase;
@@ -758,6 +768,7 @@
   .cert-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     object-position: top center; display: block; z-index: 0; }
   .cert-in { position: absolute; inset: 0; z-index: 1; }
+  .cert-head { position: relative; z-index: 1; }  /* с23: титул-ряд у потоці (cap absolute відносно нього) */
   /* split-титул зверху на всю ширину (живий — великий, майже до країв) */
   .cert-title { display: flex; justify-content: space-between; padding: 1vh 24px 0;
     font-size: clamp(34px, 4.95vw, 71px); font-weight: 400; line-height: .95; letter-spacing: -.02em; }
@@ -887,11 +898,19 @@
        поки скрол іде — сталий еквівалент: sticky + додатковий тревел секції */
     #a-intro { padding-bottom: 74vh; }
     #a-intro .a-ill { position: sticky; top: 15vh; }
-    #headquarters { padding-top: 6vh; padding-bottom: 4vh; }
+    #headquarters { padding-top: 6vh; margin-top: 84px; padding-bottom: 4vh; }  /* с23 px-solve: rev→hq +84 (margin — щоб їхав і бокс-анкор) */
     /* pin-curves: свапи живого пізніші за наші → старти пінів зсунуто вниз
        (arch +480px, hq +640px); span'и вкоротились через stepSvh 91/80 */
-    #isw-arch { margin-top: 53vh; }
-    #isw-hq { margin-top: 80vh; }  /* с21 проба v3: свапи 0.3707/0.3874 ≈ live 0.3703/0.3886 */
+    /* ── с23 PX-SOLVE РЕБАЛАНС (library/boards/px-solve-1440.json): live-тотал
+       СТАБІЛІЗОВАНО (33608 @820, 3 однакові заміри ×2 прогони) — наш був 31075,
+       дефіцит РОЗМАЗАНИЙ по всіх зонах (стара гіпотеза «хвіст довший на 1269»
+       = артефакт нестабільного live). Цілі: doc-Y анкорів = live 1-в-1, тотал
+       = live. Свапи слайдерів сідають на live doc-px САМІ (6456/7007 arch,
+       12033/12652 hq) через ці ж зсуви — окремо НЕ чіпані. ── */
+    #isw-arch { margin-top: calc(53vh + 245px); }  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793) */
+    #revolves { margin-top: 15px; }  /* с23: колапс із isw-arch mb → revolves @8323 */
+    #isw-hq { margin-top: calc(80vh - 418px); }  /* с23 solve: свапи hq на live doc 11840/12480 */
+    #space-splash { margin-top: 89px; }  /* с23: колапс із isw-hq mb → splash @13769 */
     /* ── с21 rv-fan по живій кривій (pin-curves-1440): live вхід f.238 → cross0 .267 →
        ПІН (низ фото ~237px видно, hold ~530px скролу) → природний вихід ≈ live .334.
        Наш був: вхід .251, наскрізний прохід без піна, вихід .308. Нуль-сумно:
@@ -910,23 +929,36 @@
        (svc-head enter .6421 НЕ рухається); services пізніший у DOM → малюється
        зверху сам (z-index НЕ ставити — інверсія ламала порядок live) ── */
     .aplan { top: 250px; }
-    .aplan-scroll { height: calc(186svh + 850px); }
+    .aplan-scroll { height: calc(186svh + 1192px); }  /* с23: +342 (aut→svc live 3226) — план під services довше, як live */
     #autonomy { margin-bottom: -850px; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
     /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
        (кластер #094-113); перекладаємо хвостовий padding у інтро, регіон незмінний */
-    #comfort { padding-bottom: 12vh; }
+    #comfort { padding-bottom: calc(12vh + 76px); }  /* с23: space→aut live 4534 */
     #comfort .metric-right { margin-top: 10vh; }
     #comfort > .reveal-text { margin-top: 10vh !important; margin-bottom: 12vh !important; }
     #comfort .lobby-wrap { margin-top: 12vh; }
-    /* живий cert ПІНИТЬ контент (наш був 100svh-блок з margin — контент їхав вище
-       живого, кластер #192-200): секція вища, bg+контент sticky */
-    #certificate { height: calc(100svh + 52vh); margin-bottom: 0; }
-    #certificate > picture { position: sticky; top: 0; height: 100svh; }
+    /* ── с23 cert-хореографія = живі кадри #186-198 + крива cert-bg (пін
+       .795→.829, реліз ПІД solutions): титули/cap ідуть угору ПОТОКОМ,
+       claim+лого+пара пінуються (claim ~19%), spiral-bg пін top 150,
+       секція тримає під solutions (+100svh нуль-сумно, solutions z2 накриває).
+       Бокс-висота ≠ live-бокс НАВМИСНО (анкери й тотал = live, Δ2) ── */
+    #certificate { height: calc(100svh + 52vh + 146px + 100svh);
+      margin-bottom: -100svh; isolation: isolate; }
+    #certificate > picture { position: sticky; top: 150px; height: 100svh; display: block; }
+    .cert-head { margin-top: -100svh; min-height: 250px; }
     #certificate .cert-in { position: sticky; inset: auto; top: 0;
-      height: 100svh; margin-top: -100svh; }  /* оверлей поверх sticky-фону */
+      height: 100svh; margin-top: 0; }
+    #certificate .cert-claim { top: 19%; }
+    #layout-splash { position: relative; z-index: 2; }  /* накриває cert-пін (next-over) */
     #autonomy { padding-bottom: 0; }  /* с21: 36vh → aplan-пін (нуль-сумно) */
     #stack-layout .stk + .stk { margin-top: 4svh; }
+    /* ── с23 px-solve: svc→cert live 4261 (наш був 3744) — глибина темної зони
+       з відео-фоном; cert-бокс live 1394; хвіст metrics→footer live 4943;
+       футер live 664 ── */
+    #services-cards { padding-bottom: calc(42vh + 517px) !important; }
+    #stack-layout + section.act { padding-top: calc(10vh + 169px); padding-bottom: calc(10vh + 169px); }
+    footer { padding-bottom: calc(4vh + 213px); }
   }
 
   /* ═══ MOBILE SYNC OVERRIDES (сесія 19) — ОСТАННІЙ блок стилів НАВМИСНО ═══
@@ -1351,6 +1383,12 @@
   </div>
 </section>
 <section class="sec-dark" id="services-cards" style="padding-bottom:42vh">
+  <!-- с23: живий l-life-cards-background--fade — Vimeo-фон під картками
+       (чорна 3D-спіраль, видима внизу зони перед білим cert; кадр live-186) -->
+  <div class="svc-bg" aria-hidden="true">
+    <iframe src="https://player.vimeo.com/video/1145257803?loop=1&amp;muted=1&amp;autoplay=1&amp;autopause=0&amp;background=1"
+      allow="autoplay; encrypted-media" title="services background loop" loading="lazy"></iframe>
+  </div>
   <div class="act">
     <!-- живе: 7 великих glass-карток (Premium technologies) -->
     <p class="svc-block-title">Premium <br>technologies</p>
@@ -1379,9 +1417,13 @@
 <!-- ═══ 10 · CERTIFICATE (light) → LAYOUT-INTRO(dark): fade-шов ═══ -->
 <section class="cert fade-seam" id="certificate">
   <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/10.certificate/background@xs.webp"><img class="cert-bg" loading="lazy" alt="" src="https://aircenter.space/assets/images/media/about/10.certificate/background@xxxl.webp"></picture>
-  <div class="cert-in">
+  <!-- с23 живa хореографія (кадри #186-198): титул-ряд+cap = ПОТІК (ідуть угору),
+       claim+лого+пара ПІНУЮТЬСЯ (claim ~19% в'юпорта), solutions накриває поверх -->
+  <div class="cert-head">
     <h2 class="cert-title"><span>CLEVER</span><span>CERTIFICATE</span></h2>
     <p class="cert-cap">The&nbsp;ecology <br>of&nbsp;successful<br>business</p>
+  </div>
+  <div class="cert-in">
     <p class="cert-claim reveal-text">AIR meets the CLEVER eco-certification standards at the Gold level. The practices applied in the design, construction, and operation of the towers comply with ESG principles.</p>
     <img class="cert-logo" loading="lazy" alt="CLEVER" src="https://aircenter.space/assets/images/media/about/10.certificate/logo-clever.webp">
     <p class="cert-para2 reveal-text" style="font-size:12.5px">The environmental performance of the premium business center aligns with the internal policies of progressive corporations, as well as the requirements of their regulators and industries. Most importantly, it creates a comfortable and healthy working environment for every employee.</p>
@@ -1659,9 +1701,9 @@
          НАСТУПНА СЕКЦІЯ, що їде ПОВЕРХ (z2): revolves поверх arch (settled
          hit-test @.248) · splash поверх hq (@.4184). exitWipe НЕ потрібен —
          «швидкий шов» у бордах був артефактом лаг-зйомки (a5cc7f1). */
-      el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 80,
-        underNextSvh: window.innerWidth > 768 ? 117 : 90 } :  /* settled: live реліз .4281, було .4238 (+137px) */
-      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91,
+      el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: window.innerWidth > 768 ? 107 : 80,
+        underNextSvh: window.innerWidth > 768 ? 82 : 90 } :   /* с23 solve @820: span 1920, реліз на splash-приході; m390 без змін */
+      el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: window.innerWidth > 768 ? 118 : 91,
         underNextSvh: window.innerWidth > 768 ? 105 : 117 } : { mobile: 'tap' }); }
   );
 
