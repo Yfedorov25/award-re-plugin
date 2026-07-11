@@ -518,6 +518,15 @@
   .a-pin-2 { top: -9%; left: 36%; }   /* B2 над фото, лінія вниз-вліво до вежі */
   .a-pin-2 svg, .a-pin-3 svg { margin-left: -60px; }
   .a-pin-3 { right: -6%; top: 30%; }
+  /* с26 live-проба лейблів у піні (фото 493,209,808): B1 (−77,217) · B2 (452,−216) ·
+     B3 (696,90); літера h70, floors-підпис на +95 від літери */
+  @media (min-width: 769px) {
+    .a-pin-1 { left: -77px; top: 217px; }
+    .a-pin-2 { left: 452px; top: -216px; }
+    .a-pin-3 { left: 696px; right: auto; top: 90px; }
+    .a-pin-b { font-size: 70px; }
+    .a-pin-t { margin-top: 24px; }
+  }
   @media (max-width: 768px) {
     .a-ill { margin-left: 0; width: 100%; }
     .a-pin-b { font-size: 34px; }
@@ -1018,6 +1027,10 @@
        пікс 203 vs 204 модель, #30 182 vs 183) — fixed + clip по краю (титул−20) */
     .ib-dim { position: fixed; inset: 0; background: #000; opacity: 0;
       pointer-events: none; z-index: 4; }
+    /* с26 diff-011: live ІНТРО теж дімиться під накриттям (перша з 5 dim-зон
+       c23-списку; пікс: #11 205 vs 204 модель) — edge = #a-intro + .act top */
+    .intro-dim { position: fixed; inset: 0; background: #000; opacity: 0;
+      pointer-events: none; z-index: 4; }
     /* с26 кадр #29: бейдж B3 на карті-макеті (live x790,y237 при піні 125) */
     .ib-badge { position: absolute; left: 54.9%; top: 112px; z-index: 2;
       background: #111110; color: #f2f1ee; font-size: 11px; letter-spacing: .04em;
@@ -1303,6 +1316,7 @@
        (stickyDy 0→820) — live sticky--under-next. Спейсер дає pin-хід (sticky
        живе лише в content box, урок с21), нуль-сумний margin компенсує. -->
   <div class="ib-dim" aria-hidden="true"></div>
+  <div class="intro-dim" aria-hidden="true"></div>
   <div class="ib-map-pin"><div class="ib-badge" aria-hidden="true">B3</div><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xs.webp"><img class="ib-map" loading="lazy" alt="AIR location map" src="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xxl.webp"></picture></div>
   <div class="ib-map-spacer" aria-hidden="true"></div>
 </section>
@@ -1961,6 +1975,8 @@
     var imgs = document.querySelectorAll('#a-intro + .act .ib-grid img');
     if (!imgs.length) return;
     var dim = document.querySelector('.ib-dim');
+    var introDim = document.querySelector('.intro-dim');
+    var act = document.querySelector('#a-intro + .act');
     var archT = document.querySelector('#architecture > .h1');
     var sY = function(){ return (window.__lenis && typeof window.__lenis.scroll === 'number')
       ? window.__lenis.scroll : window.scrollY; };
@@ -1970,6 +1986,13 @@
       var dy = Math.max(-99, Math.min(0, -(3430 - sY()) * 0.0714));
       for (var i = 0; i < imgs.length; i++)
         imgs[i].style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
+      /* dim інтро: 0.5·покриття наступною секцією (edge = act top) */
+      if (introDim && act) {
+        var vh2 = window.innerHeight;
+        var e2 = act.getBoundingClientRect().top;
+        introDim.style.opacity = (0.5 * Math.min(1, Math.max(0, (vh2 - e2) / vh2))).toFixed(3);
+        introDim.style.clipPath = e2 < vh2 ? 'inset(0 0 ' + Math.max(0, vh2 - e2).toFixed(1) + 'px 0)' : '';
+      }
       /* dim map-зони: 0.5·покриття architecture (edge = титул −20, live #29/#30) */
       if (dim && archT) {
         var vh = window.innerHeight;
