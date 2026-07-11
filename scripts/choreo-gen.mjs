@@ -63,6 +63,14 @@ for (const id of site.sections.map((s) => s.id)) {
   if (existsSync(p)) TIMED[id] = JSON.parse(readFileSync(p, 'utf8'));
 }
 if (Object.keys(TIMED).length) console.log(`timing-карти: ${Object.keys(TIMED).join(', ')}`);
+/* intro-timing (S12a): інтро-морф = ЧАСОВІ переходи (жест → ~7.5с морф,
+   авто-фаза ~9.7с після прелоадера, ambient-дрейф не осідає ніколи) —
+   інтро-криві animation-map по input journey-контаміновані. Блоки
+   intro-timing (кадри за час на осілих input 0/150/450) стають
+   introT-каналом біндінгів: движок інтерпить кадри по dt wall-time. */
+const introTimingPath = join(site.outDir, 'intro-timing.json');
+const INTRO_T = existsSync(introTimingPath) ? JSON.parse(readFileSync(introTimingPath, 'utf8')) : null;
+if (INTRO_T) console.log('intro-timing: є (блоків desktop ' + (INTRO_T.viewports?.desktop?.blocks?.length ?? 0) + ')');
 
 const r1 = (v) => Math.round(v * 10) / 10;
 /* ПОВНА 2D-матриця [a,b,c,d,tx,ty] — у hero є РОТАЦІЯ (S3-розкопка:
@@ -447,6 +455,98 @@ function buildViewport(vpName) {
     }
   }
 
+  /* INTRO-T (S12a): часові кадри інтро-морфа → биндінги гейтованих секцій.
+     Матчинг СОФТ (пастка 2: рантайм додає/знімає класи — точна рівність
+     cls ламається на splitting/is-inited) і ГЛОБАЛЬНО-ЖАДІБНИЙ (пастка 22):
+     tag обов'язково, src-хвіст вирішальний, далі перетин класових токенів. */
+  if (INTRO_T && INTRO_T.viewports?.[vpName] && !INTRO_T.viewports[vpName].error) {
+    const itv = INTRO_T.viewports[vpName];
+    const gatedIds = new Set(site.sections.filter((x) => x.gate).map((x) => x.id));
+    const gatedBindings = bindings.filter((b) => gatedIds.has(b.section) && b.sig.tag !== 'body');
+    const score = (b, t) => {
+      if (b.sig.tag !== t.tag) return -1;
+      let sc = 0;
+      const junk = (s) => !s || s === 'svg%3E';
+      if (!junk(b.sig.src) && !junk(t.src)) {
+        if (b.sig.src === t.src) sc += 4; else return -1; /* різні справжні src = різні цілі */
+      }
+      const bt = new Set((b.sig.cls || '').split(/\s+/).filter(Boolean));
+      const tt = (t.cls || '').split(/\s+/).filter(Boolean);
+      const inter = tt.filter((x) => bt.has(x)).length;
+      sc += 2 * inter / Math.max(bt.size, tt.length, 1);
+      if (b.sig.text && t.text && b.sig.text.slice(0, 20) === t.text.slice(0, 20)) sc += 1;
+      return sc;
+    };
+    /* per-target кадри блоків: тільки зміни ЦІЄЇ цілі, gap ≥200мс
+       (ambient-дрейф ~2px/с → лінійна інтерп між кадрами суб-піксельна) */
+    const introTof = (ti) => {
+      const introT = [];
+      for (const blk of itv.blocks) {
+        if (blk.kind === 'exit') continue;
+        const frames = [];
+        let lastKept = null;
+        const mk = (fr, st) => ({
+          dt: fr.dt, top: st.top, left: st.left, w: st.w, h: st.h,
+          o: +st.opacity, m: parseMatrix(st.transform), clip: st.clipPath || null,
+          bg: st.bg || undefined, disp: st.disp || undefined,
+        });
+        for (const fr of blk.frames) {
+          const st = fr.targets[ti];
+          if (!st) continue;
+          const cur = mk(fr, st);
+          const changed = !lastKept
+            || Math.abs(cur.top - lastKept.top) > 1 || Math.abs(cur.left - lastKept.left) > 1
+            || Math.abs(cur.o - lastKept.o) > 0.02 || (cur.clip || '') !== (lastKept.clip || '')
+            || (cur.disp || '') !== (lastKept.disp || '')
+            || JSON.stringify(cur.m) !== JSON.stringify(lastKept.m);
+          if (!lastKept || (changed && fr.dt - lastKept.dt >= 200)) { frames.push(cur); lastKept = cur; }
+        }
+        const lastFr = blk.frames[blk.frames.length - 1];
+        const lastSt = lastFr?.targets[ti];
+        if (lastSt && lastKept && lastFr.dt !== lastKept.dt) frames.push(mk(lastFr, lastSt));
+        if (frames.length) introT.push({ input: blk.input, frames });
+      }
+      return introT;
+    };
+    /* глобально-жадібний пейринг ціль↔біндінг */
+    const pairs = [];
+    itv.targets.forEach((t, ti) => {
+      for (const b of gatedBindings) {
+        const sc = score(b, t);
+        if (sc >= 1.0) pairs.push({ ti, b, sc });
+      }
+    });
+    pairs.sort((a, c) => c.sc - a.sc);
+    const tiDone = new Set(), bDone = new Set();
+    let matched = 0, created = 0;
+    for (const p of pairs) {
+      if (tiDone.has(p.ti) || bDone.has(p.b)) continue;
+      const introT = introTof(p.ti);
+      if (!introT.length) continue;
+      p.b.introT = introT;
+      tiDone.add(p.ti); bDone.add(p.b);
+      matched++;
+    }
+    itv.targets.forEach((t, ti) => {
+      if (tiDone.has(ti)) return;
+      /* АНОНІМНІ цілі (без cls) НЕ породжують нових біндінгів (S12a:
+         резолв по одному src каскадно зсувався зі старими junk-групами
+         'svg%3E' — вони тримають ті самі img'и по proximity); їхню
+         анімацію несуть класові предки/діти */
+      if (!t.cls) return;
+      const introT = introTof(ti);
+      if (!introT.length) return;
+      bindings.push({
+        section: t.sec, sig: { tag: t.tag, cls: t.cls, text: t.text, attrs: [], src: t.src },
+        moving: {}, seedTransform: null,
+        restOpacity: introT[0].frames[0].o,
+        restClip: null, curve: [], introT,
+      });
+      created++;
+    });
+    console.log(`  [${vpName}] introT: матчів ${matched} · нових біндінгів ${created} · без покриття інтро-біндінгів ${gatedBindings.filter((b) => b.intro && !b.introT).length}`);
+  }
+
   const footer = sections.footer;
   const bodyHeight = Math.max(...Object.values(sections).map((s) => s.top0 + s.h));
   /* фарба оболонок (shell-bg.json, S8a; S10 — статичний док-шар):
@@ -489,7 +589,13 @@ function buildViewport(vpName) {
           return t.fit && ['nature'].includes(id) ? [[id, t]] : [];
         }))
       : null,
-    introGate: iEnd ? { iEnd } : null,
+    introGate: iEnd ? {
+      iEnd,
+      /* S12a: осілі input-кроки інтро-морфа (межі introT-блоків) +
+         реальний input виходу з інтро — з intro-timing.json */
+      steps: INTRO_T?.viewports?.[vpName]?.blocks?.filter((b) => b.kind !== 'exit').map((b) => b.input) || undefined,
+      exitInput: INTRO_T?.viewports?.[vpName]?.selfCheck?.exitInput ?? undefined,
+    } : null,
     bindings,
     footerTop: footer ? footer.top0 : null,
   };

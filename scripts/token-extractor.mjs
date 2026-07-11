@@ -295,6 +295,15 @@ export const SNAPSHOT_FN = (args) => {
       const v = cs[k];
       if (v !== undefined && v !== '') node.styles[k] = v;
     }
+    /* svg use: href на спрайт (S12a — без нього іконки нульові:
+       MENU/логотип/серце/стрілка невидимі на всіх позах) */
+    if (el.tagName.toLowerCase() === 'use') {
+      const uh = el.getAttribute('href') || el.getAttribute('xlink:href') || '';
+      if (uh) {
+        try { const u = new URL(uh, location.href); node.useHref = u.pathname + u.hash; }
+        catch { node.useHref = uh; }
+      }
+    }
     if (el.tagName === 'IMG') {
       let srcPath = '';
       try { srcPath = new URL(el.currentSrc || el.src, location.href).pathname; } catch {}

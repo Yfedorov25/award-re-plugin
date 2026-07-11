@@ -24,6 +24,13 @@ if (!site) { console.error(`вкажи: node scripts/springs-live-shots.mjs <${O
 const argOf = (n, d) => { const i = process.argv.indexOf(n); return i > -1 ? process.argv[i + 1] : d; };
 const vpArg = argOf('--vp', 'both');
 const MAX_D = parseInt(argOf('--max-desktop', '40'), 10);
+/* S12a: інтро-морф — часовий (~9.5с авто, ~7.5с+ на жест) і НЕ осідає
+   миттєво: старі інтро-шоти ловили СЕРЕДИНУ швидкого вайпа (±100мс =
+   ±10% покриття картки — невідтворювано між прогонами). Інтро-пози
+   знімаються на ПІЗНІЙ стабільній фазі: фіксовані INTRO_SETTLE_MS після
+   тригера (прелоадер-hide / жест); у маніфест пишеться idt для движка. */
+const INTRO_ONLY = process.argv.includes('--intro-only');
+const INTRO_SETTLE_MS = 12000;
 const outDir = join(site.outDir, 'visual', 'live');
 mkdirSync(outDir, { recursive: true });
 
@@ -91,9 +98,10 @@ async function shootDesktop() {
   const { ctx, page, cdp, vp } = await openLive('desktop');
   const seen = new Set();
   let input = 0, dist = 150, introShots = 0, stall = 0;
-  /* стартовий кадр (інтро-стан 0) */
+  /* стартовий кадр (інтро-стан 0) — на пізній стабільній фазі авто-морфа */
+  await page.waitForTimeout(INTRO_SETTLE_MS);
   if (await shot(page, join(outDir, 'desktop-intro0.png')))
-    manifest.poses.push({ vp: 'desktop', kind: 'intro', value: 0, file: 'desktop-intro0.png' });
+    manifest.poses.push({ vp: 'desktop', kind: 'intro', value: 0, file: 'desktop-intro0.png', idt: INTRO_SETTLE_MS });
   for (let g = 0; g < MAX_D; g++) {
     await cdp.send('Input.synthesizeScrollGesture', {
       x: Math.round(vp.width / 2), y: Math.round(vp.height / 2),
@@ -103,17 +111,20 @@ async function shootDesktop() {
     const s = await settle(page);
     if (s === null) break;
     if (Math.abs(s) < 2) {
-      /* інтро-фаза: кадр на кожному осілому input (до 4) */
+      /* інтро-фаза: кадр на кожному осілому input (до 4), на пізній
+         стабільній фазі часового переходу жесту */
       if (introShots < 4) {
+        await page.waitForTimeout(INTRO_SETTLE_MS);
         const f = `desktop-intro${input}.png`;
         if (await shot(page, join(outDir, f))) {
-          manifest.poses.push({ vp: 'desktop', kind: 'intro', value: input, file: f });
+          manifest.poses.push({ vp: 'desktop', kind: 'intro', value: input, file: f, idt: INTRO_SETTLE_MS });
           introShots++;
         }
       }
       dist = Math.min(dist * 2, 600);
       continue;
     }
+    if (INTRO_ONLY) { console.log('  intro-only: вихід з інтро (s=' + Math.round(s) + ') — стоп'); break; }
     const key = Math.round(s / 15);
     if (!seen.has(key)) {
       seen.add(key);
@@ -163,12 +174,18 @@ async function shootMobile() {
 if (vpArg === 'both' || vpArg === 'desktop') { console.log('live-shots desktop…'); await shootDesktop(); }
 if (vpArg === 'both' || vpArg === 'mobile') { console.log('live-shots mobile…'); await shootMobile(); }
 await browser.close();
-/* merge: прогін одного вʼюпорта не стирає пози іншого */
+/* merge: прогін одного вʼюпорта не стирає пози іншого; --intro-only
+   заміняє ЛИШЕ інтро-пози (s-пози маніфеста лишаються) */
 try {
   const prev = JSON.parse((await import('fs')).readFileSync(join(outDir, 'shots-manifest.json'), 'utf8'));
   const shotVps = new Set(manifest.poses.map((p) => p.vp));
-  for (const p of prev.poses || []) if (!shotVps.has(p.vp)) manifest.poses.push(p);
+  const shotFiles = new Set(manifest.poses.map((p) => p.file));
+  for (const p of prev.poses || []) {
+    if (INTRO_ONLY) { if (!shotFiles.has(p.file)) manifest.poses.push(p); }
+    else if (!shotVps.has(p.vp)) manifest.poses.push(p);
+  }
 } catch {}
+manifest.poses.sort((a, b) => a.vp.localeCompare(b.vp) || (a.kind === b.kind ? a.value - b.value : a.kind === 'intro' ? -1 : 1));
 writeFileSync(join(outDir, 'shots-manifest.json'), JSON.stringify(manifest, null, 1));
 const fail = manifest.poses.filter((p) => p.vp === 'desktop' && p.kind === 's').length < 4
   ? 'замало desktop-станів (<4)' : null;

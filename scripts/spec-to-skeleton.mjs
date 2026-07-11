@@ -63,6 +63,8 @@ function renderNode(node, vpTag, indent) {
     const src = node.img?.srcPath || '';
     attrs += ` src="${escAttr(src)}" alt=""`;
   }
+  /* svg use → спрайт через проксі каркаса (S12a: іконки/лого хедера) */
+  if (node.tag === 'use' && node.useHref) attrs += ` href="${escAttr(node.useHref)}"`;
   if (VOID_TAGS.has(node.tag)) return `${pad}<${node.tag}${attrs}>\n`;
   let inner = '';
   if (node.text) inner += esc(node.text);

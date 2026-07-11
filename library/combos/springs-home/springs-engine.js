@@ -279,7 +279,23 @@
         const key = it.b.sig.tag + '|' + it.b.sig.cls + '|' + it.b.sig.text + '|' + (it.b.sig.src || '');
         (groups[key] = groups[key] || []).push(it);
       }
-      for (const grp of Object.values(groups)) {
+      /* порядок груп (S12a, клас пастки 22): СТАРІ групи (мають curve/
+         intro — їх порядок вставки відлагоджений усіма гейтами) ідуть
+         першими як були; НОВІ introT-only групи — У ХВОСТІ, специфічні
+         (cls+src) перед анонімними (no-cls біндінг у порядку вставки
+         жер el gallery-2 і каскадно зсував item-групи 2→17→18→19) */
+      const grpSpec = (grp) => {
+        const s = grp[0].b.sig;
+        return (s.cls ? s.cls.split(/\s+/).length * 2 : 0)
+          + (s.src && s.src !== 'svg%3E' ? 4 : 0)
+          + (s.text && !s.text.startsWith('<') ? 1 : 0);
+      };
+      const isOldGrp = (grp) => grp.some((it) => (it.b.curve && it.b.curve.length) || it.b.intro);
+      const ordered = [
+        ...Object.values(groups).filter(isOldGrp),
+        ...Object.values(groups).filter((g) => !isOldGrp(g)).sort((a, c) => grpSpec(c) - grpSpec(a)),
+      ];
+      for (const grp of ordered) {
         const sig = grp[0].b.sig;
         /* body-псевдо-ціль (S7): тема сторінки — поза секційною обгорткою */
         if (sig.tag === 'body') {
@@ -328,7 +344,7 @@
           });
           const freeIdx = new Set(good.map((_, i) => i));
           for (const it of grp) {
-            const raw = (it.b.intro && it.b.intro[0]) || (it.b.curve && it.b.curve[0]);
+            const raw = (it.b.intro && it.b.intro[0]) || (it.b.introT && it.b.introT[0].frames[0]) || (it.b.curve && it.b.curve[0]);
             const rest = raw && neut(raw.top, raw.left, raw.w, raw.h, raw.m);
             let pick = null, best = Infinity;
             for (const i of freeIdx) {
@@ -398,10 +414,20 @@
     /* body: willChange:transform зробив би body containing block'ом
        для fixed (хедер їхав зі сторінкою) — body поза геометрією */
     if (b.sig.tag !== 'body') b.el.style.willChange = 'transform';
-    b.hasM = (b.curve || []).some((x) => shapeM(x.m)) || (b.intro || []).some((x) => shapeM(x.m));
+    b.hasM = (b.curve || []).some((x) => shapeM(x.m)) || (b.intro || []).some((x) => shapeM(x.m))
+      || (b.introT || []).some((bl) => bl.frames.some((x) => shapeM(x.m)));
     const r = b.el.getBoundingClientRect();
     b.nat = { top: r.top + bootScroll2, left: r.left };
     b.fix = { x: 0, y: 0 };
+    /* pristine-стан ДО інтро-апплаїв (S12a): introT-цілі без curve на
+       скрол-позах мусять повернутись до каркасного стану (бут завжди
+       робить один інтро-апплай, і його стилі інакше протікають у ?s=) */
+    if (b.introT && !(b.curve || []).length) {
+      b.preIntro = {
+        tr: b.el.style.transform || '', o: b.el.style.opacity || '',
+        clip: b.el.style.clipPath || '', disp: b.el.style.display || '',
+      };
+    }
   }
   for (const b of bound) {
     b.anc = null;
@@ -464,6 +490,10 @@
       if (b.intro && b.intro.length > 1) {
         b.ownIntro = b.intro.map((x) => mk(x, 'input'));
       }
+      /* S12a: часові інтро-блоки — та сама bbox-математика, вісь dt */
+      if (b.introT) {
+        b.ownIntroT = b.introT.map((bl) => ({ input: bl.input, frames: bl.frames.map((x) => mk(x, 'dt')) }));
+      }
       /* найближчий власний (own) предок — його динаміка віднімається */
       b.ancOwn = null;
       let a = b.anc;
@@ -471,7 +501,14 @@
     }
   }
   const fmtM = (m) => `matrix(${m.map((v) => Math.round(v * 10000) / 10000).join(',')})`;
-  function applyBindings(P, introInput, introMode) {
+  /* introT-блок за поточним інтро-інпутом (останній з input ≤ I) */
+  const introBlockOf = (arr, I) => {
+    let bl = arr[0];
+    for (const x of arr) { if (x.input <= I + 0.5) bl = x; else break; }
+    return bl;
+  };
+  function applyBindings(P, introInput, introMode, introDt) {
+    if (introDt === undefined) introDt = Infinity;
     applyIntroZ(!!introMode);
     for (const b of bound) {
       let d;
@@ -503,10 +540,31 @@
         b.el.style.opacity = (introMode ? 0 : P) >= b.sAt ? '1' : '0';
         continue;
       }
-      if (introMode && b.intro && b.intro.length > 1) d = interp(b.intro, 'input', introInput, pick);
+      /* S12a: часова інтро-вісь (introT) пріоритетніша за контаміновану
+         input-криву; блок = осілий крок морфа, кадри інтерпляться по dt */
+      let introFr = null;
+      if (introMode && b.introT && b.introT.length) {
+        const bl = introBlockOf(b.introT, introInput);
+        d = interp(bl.frames, 'dt', introDt, pick);
+        for (const x of bl.frames) { if (x.dt <= introDt) introFr = x; else break; }
+        if (!introFr) introFr = bl.frames[0];
+      } else if (introMode && b.intro && b.intro.length > 1) d = interp(b.intro, 'input', introInput, pick);
       else if (b.curve && b.curve.length) d = interp(b.curve, 's', P, pick);
-      else continue;
+      else if (!introMode && b.preIntro && b.introApplied) {
+        /* скрол-стан introT-only цілі = pristine каркас (жодної кривої) */
+        b.el.style.transform = b.preIntro.tr; b.el.style.opacity = b.preIntro.o;
+        b.el.style.clipPath = b.preIntro.clip; b.el.style.display = b.preIntro.disp;
+        b.introApplied = false;
+        continue;
+      } else continue;
       if (!d) continue;
+      /* display-свап кадрів морфа (прелоадер-картки сплита): степ-функція
+         по dt, інтерп неможлива */
+      if (introMode && introFr) {
+        b.introApplied = true;
+        if (introFr.disp === 'none') { b.el.style.display = 'none'; continue; }
+        else if (b.el.style.display === 'none') b.el.style.display = '';
+      }
       /* body: ЛИШЕ фон (тема ui-dark/ui-light) — transform на body
          зсунув би всю сторінку */
       if (b.sig.tag === 'body') {
@@ -518,9 +576,11 @@
         b.el.style.transform = d.m ? pre + fmtM(d.m) : (pre || (b.seedTransform ? 'translate(0px, 0px)' : ''));
       } else {
         const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t), sw: lerp(a.sw ?? 1, c.sw ?? 1, t), sh: lerp(a.sh ?? 1, c.sh ?? 1, t), h: a.h != null && c.h != null ? lerp(a.h, c.h, t) : undefined });
-        let dd = (introMode && b.ownIntro)
-          ? interp(b.ownIntro, 'input', introInput, dpick)
-          : (b.own && b.own.length ? interp(b.own, 's', introMode ? 0 : P, dpick) : null);
+        let dd = (introMode && b.ownIntroT)
+          ? interp(introBlockOf(b.ownIntroT, introInput).frames, 'dt', introDt, dpick)
+          : (introMode && b.ownIntro)
+            ? interp(b.ownIntro, 'input', introInput, dpick)
+            : (b.own && b.own.length ? interp(b.own, 's', introMode ? 0 : P, dpick) : null);
         /* мінус динаміка власного предка (пін батька вже рухає дитину).
            S7: у ТОМУ Ж режимі, що й dd — раніше introMode пропускав
            віднімання, тож boot-стан (introMode=true) мав ПОДВІЙНИЙ зсув
@@ -528,9 +588,11 @@
            матриць (opening-2 їхав на +3600 на скрол-позах) */
         if (dd && b.ancOwn) {
           const anc = b.ancOwn;
-          const ad = (introMode && anc.ownIntro)
-            ? interp(anc.ownIntro, 'input', introInput, dpick)
-            : (anc.own && anc.own.length ? interp(anc.own, 's', introMode ? 0 : P, dpick) : null);
+          const ad = (introMode && anc.ownIntroT)
+            ? interp(introBlockOf(anc.ownIntroT, introInput).frames, 'dt', introDt, dpick)
+            : (introMode && anc.ownIntro)
+              ? interp(anc.ownIntro, 'input', introInput, dpick)
+              : (anc.own && anc.own.length ? interp(anc.own, 's', introMode ? 0 : P, dpick) : null);
           if (ad) dd = { ...dd, dt: dd.dt - ad.dt, dl: dd.dl - ad.dl };
         }
         const hasScale = dd && (Math.abs(dd.sw - 1) > 0.03 || Math.abs(dd.sh - 1) > 0.03);
@@ -543,7 +605,11 @@
          має запечені o:0 у місцях, де живий рантайм показує (hero-галерея) */
       if (b.restOpacity !== null && Number.isFinite(d.o)) b.el.style.opacity = String(Math.round(d.o * 1000) / 1000);
       if (d.bg && b.moving && b.moving.bg) b.el.style.backgroundColor = d.bg;
-      if (b.clipStep && !(introMode && d.clip)) {
+      if (introMode && b.introT) {
+        /* S12a: клип інтро-морфа вербатим із introT-кадрів (маск-листи
+           сплита); moving-прапори тут не авторитет (нові біндінги без карт) */
+        b.el.style.clipPath = d.clip || '';
+      } else if (b.clipStep && !(introMode && d.clip)) {
         /* clip-вайп: степ по live-тригеру sOpen (перший осілий семпл
            з фінальним clip — S6; DOM-геометрія бреше для фулскрін-
            слайдів пінованого шару: nat.top=0 → «відкрито з s=0»).
@@ -554,7 +620,11 @@
           b.sAtGeom = r.top + document.documentElement.scrollTop - innerHeight + 40;
         }
         const trig = b.clipStep.sOpen != null ? b.clipStep.sOpen - 1 : b.sAtGeom;
-        const open = (introMode ? 0 : P) >= trig;
+        /* S12a: sOpen≈0 (перший осілий семпл уже відкритий) = вайп боту
+           живого (header-entry btn__text/logo) — відкрито і в introMode
+           (live intro0 показує хедер повністю) */
+        const open = (introMode ? 0 : P) >= trig
+          || (b.clipStep.sOpen != null && b.clipStep.sOpen <= 2);
         b.el.style.clipPath = (open ? b.clipStep.open : b.clipStep.closed) || '';
       } else if (d.clip && b.moving.clipPath) b.el.style.clipPath = d.clip;
       else if (b.restClip && !b.moving.clipPath && !b.el.style.clipPath) b.el.style.clipPath = b.restClip;
@@ -612,7 +682,9 @@
      заміри між фіксами — зсув батька рухає дітей) */
   function bootFix(introMode) {
     buildOwn();
-    applyBindings(0, 0, introMode);
+    /* introDt=0: rest інтро-морфа = ПЕРШИЙ кадр auto-блоку (зум-стан);
+       апплай і rest мусять бути ОДНИМ станом, інакше fix запікає морф */
+    applyBindings(0, 0, introMode, 0);
     const withM = bound.filter((b) => b.hasM);
     withM.forEach((b) => {
       b.depth = 0;
@@ -621,7 +693,9 @@
     });
     withM.sort((a, c) => a.depth - c.depth);
     for (const b of withM) {
-      const rest = introMode && b.intro && b.intro.length > 1 ? b.intro[0] : (b.curve && b.curve[0]);
+      const rest = introMode && b.introT ? b.introT[0].frames[0]
+        : introMode && b.intro && b.intro.length > 1 ? b.intro[0]
+        : (b.curve && b.curve[0]);
       if (!rest) continue;
       const r = b.el.getBoundingClientRect();
       const dy = rest.top - r.top, dx = rest.left - r.left;
@@ -706,6 +780,8 @@
     .filter((b) => !secFilter || b.section === secFilter)
     .map((b) => ({
       sec: b.section, cls: (b.sig.cls || '').slice(0, 44), src: b.sig.src,
+      elSrc: (() => { const im = b.el.tagName === 'IMG' ? b.el : b.el.querySelector('img'); return im ? (im.currentSrc || im.src || '').split('/').pop().split('?')[0] : null; })(),
+      inlineTr: (b.el.style.transform || '').slice(0, 60),
       nat: b.nat, hasM: b.hasM, inShape: b.inShape, fix: b.fix,
       ancOwn: b.ancOwn ? (b.ancOwn.sig.cls || '').slice(0, 30) : null,
       scaledPts: (b.own || []).filter((p) => p.sw !== 1 || p.sh !== 1).length,
@@ -742,18 +818,26 @@
   /* лерп У WALL-TIME (0.1 на кадр 60fps): rAF без тротлінга (headless,
      120Hz-екрани) інакше пролітає травел миттєво — розкопка іт.11 */
   let lastT = performance.now();
+  /* S12a: інтро-морф часовий — wall-time відтворення поточного introT-блоку
+     (границі блоків = осілі input-кроки з intro-timing); поза (?intro/?s)
+     вимикає ambient-програвання, інакше воно затирає детермінований стан */
+  let posed = false;
+  let introBlkInput = -1, introBlkT0 = performance.now();
+  const introSteps = (gate && gate.steps) || [0];
   (function raf(now) {
     const dtMs = Math.min(100, (now || performance.now()) - lastT);
     lastT = now || performance.now();
     const k = 1 - Math.pow(0.9, dtMs / 16.67);
     let dirty = false;
-    if (mode === 'intro' || introShown < gate?.iEnd - 0.5) {
+    if (!posed && (mode === 'intro' || introShown < gate?.iEnd - 0.5)) {
       if (Math.abs(introTarget - introShown) > 0.3) {
         introShown = lerp(introShown, introTarget, k);
         if (Math.abs(introTarget - introShown) < 0.3) introShown = introTarget;
-        applyBindings(0, introShown, true);
-        dirty = true;
       }
+      let blk = 0;
+      for (const st of introSteps) if (st <= introShown + 0.5) blk = st;
+      if (blk !== introBlkInput) { introBlkInput = blk; introBlkT0 = performance.now(); }
+      applyBindings(0, introShown, true, performance.now() - introBlkT0);
     }
     if (mode === 'scroll') {
       if (Math.abs(target - s) > 0.3) {
@@ -778,6 +862,7 @@
       const S = parseFloat(q.get('s')) || 0;
       if (q.has('step')) window.__POSE_STEP__ = parseInt(q.get('step'), 10);
       mode = 'scroll';
+      posed = true;
       introTarget = introShown = gate ? gate.iEnd : 0;
       idx = ladder.reduce((bi, v, i2) => (Math.abs(v - S) < Math.abs(ladder[bi] - S) ? i2 : bi), 0);
       s = target = S;
@@ -786,7 +871,11 @@
     } else if (q.has('intro') && gate) {
       const I = Math.min(parseFloat(q.get('intro')) || 0, gate.iEnd);
       introTarget = introShown = I;
-      applyBindings(0, I, true);
+      posed = true;
+      /* ?idt=MS — час усередині introT-блоку (реєстрація фази шотів);
+         без idt = фінал блоку */
+      const idt = q.has('idt') ? (parseFloat(q.get('idt')) || 0) : Infinity;
+      applyBindings(0, I, true, idt);
     }
   }
   console.log(`[engine] desktop: драбина ${ladder.length} снапів, iEnd=${gate ? gate.iEnd : '—'}`);

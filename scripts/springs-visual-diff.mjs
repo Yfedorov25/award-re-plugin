@@ -50,7 +50,9 @@ for (const p of poses) {
     bucketSeen[key] = k + 1;
     if (bucketTotal[key] > 1) stepParam = `&step=${k}`;
   }
-  const url = p.kind === 'intro' ? `${origin}/?intro=${p.value}` : `${origin}/?s=${p.value}${stepParam}`;
+  const url = p.kind === 'intro'
+    ? `${origin}/?intro=${p.value}${p.idt ? `&idt=${p.idt}` : ''}`
+    : `${origin}/?s=${p.value}${stepParam}`;
   const label = `${p.vp}-${p.kind}${p.value}`;
   const baseline = join(visualDir, 'live', p.file);
   if (!existsSync(baseline)) { console.log(`  ${label}: НЕМАЄ baseline ${p.file}`); continue; }
