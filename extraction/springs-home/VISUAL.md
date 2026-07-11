@@ -1,6 +1,6 @@
 # VISUAL.md — піксельна звірка (VISUAL-GATE ≤2% @ erode 5)
 
-Прогін: 2026-07-11T15:41:05.391Z · origin http://localhost:8873
+Прогін: 2026-07-11T19:14:41.495Z · origin http://localhost:8873
 
 | поза | diff% | вердикт |
 |---|---|---|
@@ -10,28 +10,28 @@
 | desktop-s900 | 1.57 | ✅ PASS |
 | desktop-s2070 | 1.6 | ✅ PASS |
 | desktop-s2969 | 2.08 | ❌ FAIL |
-| desktop-s3888 | 39.69 | ❌ FAIL |
-| desktop-s4539 | 15.41 | ❌ FAIL |
-| desktop-s4553 | 15.41 | ❌ FAIL |
-| desktop-s4585 | 15.41 | ❌ FAIL |
-| desktop-s4634 | 15.41 | ❌ FAIL |
-| desktop-s4568 | 15.41 | ❌ FAIL |
-| desktop-s4536 | 15.47 | ❌ FAIL |
-| desktop-s4615 | 15.45 | ❌ FAIL |
-| desktop-s4610 | 15.45 | ❌ FAIL |
-| desktop-s5288 | 12.1 | ❌ FAIL |
-| desktop-s5580 | 11.09 | ❌ FAIL |
-| desktop-s7194 | 45.85 | ❌ FAIL |
-| desktop-s8242 | 36.77 | ❌ FAIL |
-| desktop-s8292 | 35.04 | ❌ FAIL |
-| desktop-s8281 | 34.24 | ❌ FAIL |
-| desktop-s9180 | 40.36 | ❌ FAIL |
+| desktop-s3888 | 38.12 | ❌ FAIL |
+| desktop-s4539 | 3.58 | ❌ FAIL |
+| desktop-s4553 | 3.58 | ❌ FAIL |
+| desktop-s4585 | 3.58 | ❌ FAIL |
+| desktop-s4634 | 3.6 | ❌ FAIL |
+| desktop-s4568 | 3.58 | ❌ FAIL |
+| desktop-s4536 | 3.58 | ❌ FAIL |
+| desktop-s4615 | 3.58 | ❌ FAIL |
+| desktop-s4610 | 3.58 | ❌ FAIL |
+| desktop-s5288 | 24.25 | ❌ FAIL |
+| desktop-s5580 | 1.83 | ✅ PASS |
+| desktop-s7194 | 12.08 | ❌ FAIL |
+| desktop-s8242 | 16.12 | ❌ FAIL |
+| desktop-s8292 | 15.02 | ❌ FAIL |
+| desktop-s8281 | 14.51 | ❌ FAIL |
+| desktop-s9180 | 26.92 | ❌ FAIL |
 | mobile-s0 | 32.38 | ❌ FAIL |
 | mobile-s796 | 1.33 | ✅ PASS |
 | mobile-s1558 | 19.38 | ❌ FAIL |
 | mobile-s2319 | 31.86 | ❌ FAIL |
-| mobile-s3081 | 20.55 | ❌ FAIL |
-| mobile-s3844 | 30.87 | ❌ FAIL |
-| mobile-s4604 | 10.08 | ❌ FAIL |
+| mobile-s3081 | 29.6 | ❌ FAIL |
+| mobile-s3844 | 55.52 | ❌ FAIL |
+| mobile-s4604 | 12.6 | ❌ FAIL |
 
-**РАЗОМ: 3/29 PASS** · борд: visual/parity/parity-board.html
+**РАЗОМ: 4/29 PASS** · борд: visual/parity/parity-board.html
