@@ -1111,6 +1111,10 @@
     #isw-hq .isw-card .isw-tick { background: rgba(0,0,0,.2); }
     #services-cards { padding-bottom: 38vh !important; }         /* svc→cert був −190px */
     .cert { margin-bottom: 12vh; }                               /* cert→sol був +118px */
+    /* с23: cert-head тепер у потоці — .cert-in absolute-overlay накладав
+       клейм на титули; на моб все у потік, індент-спейсер не потрібен */
+    #certificate .cert-in { position: static; inset: auto; }
+    .cert-claim::before { display: none; }
 
     /* ── с22 aplan-пін m390 (live пінить план top 229 f.5853→cross0 .6295; наш
        пропливав наскрізь). Пінимо .aplan-scroll (сам overflow-x контейнер)
