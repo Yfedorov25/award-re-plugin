@@ -108,6 +108,23 @@ const ctx = await browser.newContext({ viewport: { width: VW, height: VH }, devi
 const p = await ctx.newPage();
 await p.goto(OURS, { waitUntil: 'networkidle', timeout: 60000 });
 await p.waitForTimeout(1500);
+/* с23: НАШ тотал теж ріс після проскролу (lazy svc-img +411 зловлено цим
+   прогрівом) — міряти можна лише warmed-стан, як live */
+const oursTotals = [];
+for (let pass = 0; pass < 6; pass++) {
+  await p.evaluate(async () => {
+    const go = y => window.__lenis ? window.__lenis.scrollTo(y, { immediate: true }) : window.scrollTo(0, y);
+    const max = () => document.body.scrollHeight - innerHeight;
+    for (let k = 0; k <= 30; k++) { go(Math.round(max() * k / 30)); await new Promise(r => setTimeout(r, 60)); }
+    go(0); await new Promise(r => setTimeout(r, 400));
+  });
+  oursTotals.push(await p.evaluate(() => document.body.scrollHeight));
+  const L = oursTotals.length;
+  if (L >= 2 && oursTotals[L - 1] === oursTotals[L - 2]) break;
+}
+console.log('ours прогрів, тотали:', oursTotals.join('→'));
+if (oursTotals.length > 1 && oursTotals[0] !== oursTotals[oursTotals.length - 1])
+  console.warn('⚠️ ours-тотал РІС при прогріві — lazy-контент без резерву місця, знайти й зафіксувати висоту');
 const ours = await p.evaluate((sels) => {
   const docH = document.body.scrollHeight;
   const out = {};

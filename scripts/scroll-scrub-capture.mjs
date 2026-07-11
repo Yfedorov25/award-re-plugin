@@ -138,6 +138,19 @@ let liveTotals = [], liveDocH = 0, liveDocHAfter = 0, oursDocH = 0;
   const p = await ctx.newPage();
   await p.goto(OURS, { waitUntil: 'domcontentloaded' });
   await p.waitForTimeout(1800);
+  /* с23: прогрів ОБОХ сторін — наш тотал теж ріс (lazy svc-img +411): без
+     прогріву limit пливе між кадрами і всі ours-кадри зсунуті ∝ frac */
+  for (let pass = 0; pass < 6; pass++) {
+    const h0 = await p.evaluate(() => document.body.scrollHeight);
+    await p.evaluate(async () => {
+      const go = y => window.__lenis ? window.__lenis.scrollTo(y, { immediate: true }) : window.scrollTo(0, y);
+      const max = () => document.body.scrollHeight - innerHeight;
+      for (let k = 0; k <= 30; k++) { go(Math.round(max() * k / 30)); await new Promise(r => setTimeout(r, 60)); }
+      go(0); await new Promise(r => setTimeout(r, 400));
+    });
+    const h1 = await p.evaluate(() => document.body.scrollHeight);
+    if (h1 === h0) break;
+  }
   oursDocH = await p.evaluate(() => document.body.scrollHeight);
   console.log(`тотали: live ${liveDocH} vs ours ${oursDocH} (Δ ${oursDocH - liveDocH})`);
   /* секційна синхронізація: пари (live-якір frac → наш-якір frac) → кусково-лінійний ремап.
@@ -174,6 +187,9 @@ let liveTotals = [], liveDocH = 0, liveDocHAfter = 0, oursDocH = 0;
     await p.screenshot({ path: `${OUT}/ours-${String(i).padStart(3, '0')}.jpg`, type: 'jpeg', quality: Q });
     if (i % 10 === 0) console.log(`ours ${i}/${N}`);
   }
+  const oursAfter = await p.evaluate(() => document.body.scrollHeight);
+  if (oursAfter !== oursDocH)
+    console.warn(`⚠️ ours-тотал зріс ПІД ЧАС проходу: ${oursDocH}→${oursAfter} — lazy без резерву, кадри зсунуті`);
   await ctx.close();
 }
 await b.close();

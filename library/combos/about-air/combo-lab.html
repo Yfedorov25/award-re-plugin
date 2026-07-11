@@ -728,7 +728,8 @@
   .svc-introw { display: grid; grid-template-columns: 2fr 1fr; gap: 2vw; align-items: end; margin-top: 2vh; }
   .svc-introw .svc-img { margin-top: 0; }
   @media (max-width: 768px) { .svc-introw { grid-template-columns: 1fr; } }
-  .svc-img { width: 100%; border-radius: 6px; margin-top: 4vh; display: block; }
+  .svc-img { width: 100%; border-radius: 6px; margin-top: 4vh; display: block;
+    aspect-ratio: 1673 / 1067; object-fit: cover; }  /* с23: lazy-фото РОСТИЛО тотал +411 після довантаження — резерв місця інтринсик-рейшо */
   @media (max-width: 1024px) { .svc-large { grid-template-columns: repeat(2, 1fr); }
     .svc-small { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 1024px) { .comfort-cards { grid-template-columns: repeat(2, 1fr); } }
@@ -778,8 +779,12 @@
     color: #8b8a86; text-align: left; padding: 0; }
   /* живий розклад (anchor-вимір): заява h2 28px offset-6 з text-indent 2 колонки ·
      лого 100px на col-6 краю · 2-й абзацправа колонка cols 9-12 */
+  /* с23: text-indent на P з reveal-спанами індентив КОЖЕН рядок (колонка
+     звужувалась на 235 → 7 рядків замість живих 5) — індент першого рядка
+     робить ::before-спейсер, він переживає reveal-розбивку */
   .cert-claim { position: absolute; left: 50.76%; right: 30px; top: 52%; text-align: left;
-    font-size: 28px; line-height: 1.0714; letter-spacing: -.02em; color: #111110; text-indent: 235px; }
+    font-size: 28px; line-height: 1.0714; letter-spacing: -.02em; color: #111110; text-indent: 0; }
+  .cert-claim::before { content: ''; display: inline-block; width: 235px; }
   .cert-logo { position: absolute; left: 50.76%; bottom: 6%; height: 100px; display: block; }  /* живий: рядок ПІД claim (не поверх) */
   .cert-para2 { position: absolute; right: 25px; bottom: 6%; max-width: 332px;
     font-size: 12.5px; line-height: 1.4; letter-spacing: .02em; }
@@ -946,17 +951,22 @@
     #certificate { height: calc(100svh + 52vh + 146px + 100svh);
       margin-bottom: -100svh; isolation: isolate; }
     #certificate > picture { position: sticky; top: 150px; height: 100svh; display: block; }
+    /* с23: живий bg = 1560×2100 top-anchored (background--top) з паралаксом
+       −30svh→0 (JS certScroll), НЕ cover — спіраль живого менша/вища */
+    #certificate .cert-bg { position: static; height: auto; object-fit: unset; will-change: transform; }
     .cert-head { margin-top: -100svh; min-height: 250px; }
     #certificate .cert-in { position: sticky; inset: auto; top: 0;
       height: 100svh; margin-top: 0; }
     #certificate .cert-claim { top: 19%; }
+    #certificate .cert-dim { position: sticky; top: 0; height: 100svh; margin-top: -100svh;
+      z-index: 2; pointer-events: none; background: #0d0d0c; opacity: 0; }
     #layout-splash { position: relative; z-index: 2; }  /* накриває cert-пін (next-over) */
     #autonomy { padding-bottom: 0; }  /* с21: 36vh → aplan-пін (нуль-сумно) */
     #stack-layout .stk + .stk { margin-top: 4svh; }
     /* ── с23 px-solve: svc→cert live 4261 (наш був 3744) — глибина темної зони
        з відео-фоном; cert-бокс live 1394; хвіст metrics→footer live 4943;
        футер live 664 ── */
-    #services-cards { padding-bottom: calc(42vh + 517px) !important; }
+    #services-cards { padding-bottom: calc(42vh + 106px) !important; }  /* с23: 517−411 (частина «дефіциту» була непідвантаженим svc-img) */
     #stack-layout + section.act { padding-top: calc(10vh + 169px); padding-bottom: calc(10vh + 169px); }
     footer { padding-bottom: calc(4vh + 213px); }
   }
@@ -1428,6 +1438,8 @@
     <img class="cert-logo" loading="lazy" alt="CLEVER" src="https://aircenter.space/assets/images/media/about/10.certificate/logo-clever.webp">
     <p class="cert-para2 reveal-text" style="font-size:12.5px">The environmental performance of the premium business center aligns with the internal policies of progressive corporations, as well as the requirements of their regulators and industries. Most importantly, it creates a comfortable and healthy working environment for every employee.</p>
   </div>
+  <!-- с23: live пригашує накриту cert-зону поки solutions їде поверх (кадр 197-198) -->
+  <div class="cert-dim" aria-hidden="true"></div>
 </section>
 
 <!-- ═══ 11 · LAYOUT-INTRO (DARK) full-bleed ═══ -->
@@ -1706,6 +1718,35 @@
       el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: window.innerWidth > 768 ? 118 : 91,
         underNextSvh: window.innerWidth > 768 ? 105 : 117 } : { mobile: 'tap' }); }
   );
+
+  /* ═══ с23 CERT-СКРОЛ: паралакс bg (живий sectionToSticky −30svh→0) +
+     dim накритої зони (живий кадр 197-198: сірішає поки solutions їде поверх).
+     rAF гейтнутий IO (перф-закон: без вічного циклу) ═══ */
+  (function certScroll(){
+    var sec = document.getElementById('certificate');
+    if (!sec || window.innerWidth <= 768) return;
+    var img = sec.querySelector('.cert-bg');
+    var dim = sec.querySelector('.cert-dim');
+    var splash = document.getElementById('layout-splash');
+    var on = false, raf = null;
+    function tick(){
+      if (!on) { raf = null; return; }
+      var vh = window.innerHeight;
+      var r = sec.getBoundingClientRect();
+      var p = Math.min(1, Math.max(0, -r.top / (r.height - vh)));
+      if (img) img.style.transform = 'translateY(' + (-30 * (1 - p)) + 'svh)';
+      if (dim && splash) {
+        var st = splash.getBoundingClientRect().top;
+        var c = Math.min(1, Math.max(0, (vh - st) / (vh * 0.6)));
+        dim.style.opacity = (0.16 * c).toFixed(3);
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    new IntersectionObserver(function(ents){
+      on = ents.some(function(e){ return e.isIntersecting; });
+      if (on && !raf) raf = requestAnimationFrame(tick);
+    }, { rootMargin: '50% 0px' }).observe(sec);
+  })();
 
   /* ═══ LOBBY-КАРУСЕЛЬ (comfort): 4 слайди, thumb-рейка, лічильник 1/4, автоцикл ═══ */
   (function initLobby(){
