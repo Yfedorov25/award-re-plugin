@@ -33,7 +33,7 @@
        node scripts/animation-map.mjs springs-home hero-gallery [--vp desktop|mobile|both] \
          [--origin URL] [--steps 36] [--range 2.5]   # range у висотах вʼюпорта
    ============================================================ */
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { resolveChromium, SITES, VIEWPORTS, MOBILE_UA } from './token-extractor.mjs';
 
@@ -94,6 +94,38 @@ const SETUP_FN = (args) => {
     if (r.height > 300 && !probes.includes(el)) probes.push(el);
   }
   window.__AM_PROBES__ = probes.map((el) => ({ el, t0: el.getBoundingClientRect().top }));
+  /* спільна вимірювалка кадру (використовують і evaluate-семпли,
+     і page-rAF рекордер) */
+  window.__AM_SAMPLE__ = () => {
+    const r1v = (v) => Math.round(v * 10) / 10;
+    return {
+      probes: window.__AM_PROBES__.map(({ el, t0 }) => r1v(t0 - el.getBoundingClientRect().top)),
+      targets: window.__AM_TARGETS__.map((t) => {
+        const cs = getComputedStyle(t);
+        const r = t.getBoundingClientRect();
+        return {
+          transform: cs.transform,
+          opacity: cs.opacity,
+          clipPath: cs.clipPath !== 'none' ? cs.clipPath : undefined,
+          top: r1v(r.top), left: r1v(r.left), w: r1v(r.width), h: r1v(r.height),
+        };
+      }),
+    };
+  };
+  /* page-rAF РЕКОРДЕР (S6): evaluate-цикл (~130мс раунд-тріп) лишає
+     діри 100-200px на швидких фазах лерпа — коліно піна інтерполюється
+     через діру і бреше на ~15px. Пишемо КОЖЕН кадр, де одометр
+     зрушив ≥0.5px, у буфер; драйвер дренує після кожного жесту. */
+  window.__AM_REC__ = { buf: [], lastS: null };
+  (function recLoop() {
+    const rec = window.__AM_REC__;
+    if (rec.buf.length < 4000) {
+      const f = window.__AM_SAMPLE__();
+      const s = Math.max(...f.probes);
+      if (rec.lastS === null || Math.abs(s - rec.lastS) >= 0.5) { rec.buf.push(f); rec.lastS = s; }
+    }
+    requestAnimationFrame(recLoop);
+  })();
   return {
     odometer: probes.map((el) => (el.className || '').toString().slice(0, 40)),
     targets: window.__AM_TARGETS__.map((el, i) => ({
@@ -110,45 +142,31 @@ const SETUP_FN = (args) => {
 const READ_ODO_FN = () => window.__AM_PROBES__.map(({ el, t0 }) =>
   Math.round((t0 - el.getBoundingClientRect().top) * 10) / 10);
 
-/* знімок кадру: проби одометра + метрики цілей */
-const SAMPLE_FN = () => {
-  const r1 = (v) => Math.round(v * 10) / 10;
-  return {
-    probes: window.__AM_PROBES__.map(({ el, t0 }) => r1(t0 - el.getBoundingClientRect().top)),
-    targets: window.__AM_TARGETS__.map((t) => {
-      const cs = getComputedStyle(t);
-      const r = t.getBoundingClientRect();
-      return {
-        transform: cs.transform,
-        opacity: cs.opacity,
-        clipPath: cs.clipPath !== 'none' ? cs.clipPath : undefined,
-        top: r1(r.top), left: r1(r.left), w: r1(r.width), h: r1(r.height),
-      };
-    }),
-  };
-};
+/* знімок кадру: проби одометра + метрики цілей (вимірювалка — в SETUP_FN) */
+const SAMPLE_FN = () => window.__AM_SAMPLE__();
+/* дрейн буфера page-rAF рекордера (S6) */
+const DRAIN_REC_FN = () => { const b = window.__AM_REC__.buf; window.__AM_REC__.buf = []; return b; };
 
 /* v0.1 (S2): TRANSIENT-СЕМПЛІНГ — v0 чекав осідання мовчки і знімав лише
    стани спокою, тож снап-зони «пролітали» проміжок. Тепер під час
    lerp-травела кожен ~130мс знімається ПОВНИЙ кадр (SAMPLE_FN),
    параметризований одометром (s) — крива заповнюється МІЖ снапами. */
 async function settleAndSample(page, transientFrames, gestureInput, maxMs = 2600) {
-  let last = null, stable = 0;
+  /* transient-кадри тепер несе page-rAF рекордер (кожен кадр, без дір
+     раунд-тріпа) — цикл лише детектить осідання по пробах одометра */
+  let last = null, stable = 0, settled = false;
   const t0 = Date.now();
   while (Date.now() - t0 < maxMs) {
     await page.waitForTimeout(130);
-    const frame = await page.evaluate(SAMPLE_FN);
-    const ys = frame.probes;
+    const ys = await page.evaluate(READ_ODO_FN);
     if (last !== null && ys.every((y, i) => Math.abs(y - last[i]) < 0.5)) {
-      stable++; if (stable >= 3) return { ys, settled: true };
-    } else {
-      stable = 0;
-      /* одометр ще їде → це transient-кадр травела */
-      if (last !== null) transientFrames.push({ input: gestureInput, transient: true, ...frame });
-    }
+      stable++; if (stable >= 3) { settled = true; last = ys; break; }
+    } else stable = 0;
     last = ys;
   }
-  return { ys: last, settled: false };
+  const drained = await page.evaluate(DRAIN_REC_FN);
+  for (const f of drained) transientFrames.push({ input: gestureInput, transient: true, ...f });
+  return { ys: last, settled };
 }
 
 async function runViewport(browser, vpName) {
@@ -288,6 +306,16 @@ for (const vpName of vps) {
 await browser.close();
 mkdirSync(site.outDir, { recursive: true });
 const out = outPath || join(site.outDir, `animation-map-${sectionId}.json`);
+/* MERGE вʼюпортів (S6): частковий прогін (--vp desktop) не сміє
+   затирати раніше зняті вʼюпорти того ж файлу */
+if (existsSync(out)) {
+  try {
+    const prev = JSON.parse(readFileSync(out, 'utf8'));
+    for (const [vp, data] of Object.entries(prev.viewports || {})) {
+      if (!result.viewports[vp]) result.viewports[vp] = data;
+    }
+  } catch {}
+}
 writeFileSync(out, JSON.stringify(result));
 console.log(`${failed ? 'НАПІВ-' : ''}OK → ${out} (${(JSON.stringify(result).length / 1024).toFixed(0)} KB)`);
 process.exit(failed ? 1 : 0);

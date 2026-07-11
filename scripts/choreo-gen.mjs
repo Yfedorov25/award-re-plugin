@@ -167,7 +167,16 @@ function buildViewport(vpName) {
           const mono = firstNums.every((v, i) => i === 0 || v <= firstNums[i - 1] + 0.5)
             || firstNums.every((v, i) => i === 0 || v >= firstNums[i - 1] - 0.5);
           if (mono) {
-            clipStep = { closed: cFirst === 'none' ? null : cFirst, open: cLast === 'none' ? null : cLast };
+            /* тригер степу — З ДАНИХ live (S6-розкопка): DOM-геометрія
+               нашого каркаса бреше для фулскрін-слайдів у пінованому
+               шарі (nat.top=0 → «відкрито з s=0»). Правда = перший
+               ОСІЛИЙ live-семпл, де clip уже у фінальному стані. */
+            const settledOpen = [...raw]
+              .filter((x) => !x.t && x.s > 2)
+              .sort((a, b) => a.s - b.s)
+              .find((x) => (x.clipPath || 'none') === cLast);
+            const sOpen = settledOpen ? r1(toPage(settledOpen.s)) : null;
+            clipStep = { closed: cFirst === 'none' ? null : cFirst, open: cLast === 'none' ? null : cLast, sOpen };
             for (const x of curve) x.clip = null;
           }
         }

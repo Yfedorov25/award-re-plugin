@@ -151,17 +151,42 @@
            тому щільним групам proximity бреше — розкопки іт.13-15) */
         {
           const sc0 = window.scrollY || 0;
-          const rects = good.map((x) => { const r = x.el.getBoundingClientRect(); return { top: r.top + sc0, left: r.left }; });
+          /* нейтралізація повної матриці (S6, пастка 26): scale навколо
+             центру + translate (раніше лише translate — два однакові
+             parallax-img з rest scale 1.2 не розрізнялись, і криву
+             отримував чужий кандидат). Ротації (b,c≠0) — лише translate,
+             без розмірного терму (bbox ротації не інвертується так). */
+          const neut = (top, left, w, h, m) => {
+            if (!m) return { top, left, w, h, sized: true };
+            const rot = Math.abs(m[1]) > 0.02 || Math.abs(m[2]) > 0.02;
+            if (rot) return { top: top - m[5], left: left - m[4], w, h, sized: false };
+            const w0 = m[0] ? w / m[0] : w, h0 = m[3] ? h / m[3] : h;
+            const cx0 = left + w / 2 - m[4], cy0 = top + h / 2 - m[5];
+            return { top: cy0 - h0 / 2, left: cx0 - w0 / 2, w: w0, h: h0, sized: true };
+          };
+          const parseM = (tr) => {
+            const nums = tr && tr !== 'none' && tr.startsWith('matrix(')
+              ? tr.slice(7, -1).split(',').map(Number) : null;
+            return nums && nums.length === 6 ? nums : null;
+          };
+          const rects = good.map((x) => {
+            const r = x.el.getBoundingClientRect();
+            return neut(r.top + sc0, r.left, r.width, r.height, parseM(getComputedStyle(x.el).transform));
+          });
           const freeIdx = new Set(good.map((_, i) => i));
           for (const it of grp) {
             const raw = (it.b.intro && it.b.intro[0]) || (it.b.curve && it.b.curve[0]);
-            const rest = raw && {
-              top: raw.top - (raw.m ? raw.m[5] : 0),
-              left: raw.left - (raw.m ? raw.m[4] : 0),
-            };
+            const rest = raw && neut(raw.top, raw.left, raw.w, raw.h, raw.m);
             let pick = null, best = Infinity;
             for (const i of freeIdx) {
-              const d = rest ? Math.abs(rects[i].top - rest.top) + Math.abs(rects[i].left - rest.left) : i;
+              let d;
+              if (!rest) d = i;
+              else {
+                d = Math.abs(rects[i].top - rest.top) + Math.abs(rects[i].left - rest.left);
+                if (rest.sized && rects[i].sized && rest.w > 0 && rects[i].w > 0) {
+                  d += Math.abs(rects[i].w - rest.w) + Math.abs(rects[i].h - rest.h);
+                }
+              }
               if (d < best) { best = d; pick = i; }
             }
             if (pick !== null) { resolved[it.i] = good[pick].el; used.add(good[pick].el); freeIdx.delete(pick); }
@@ -309,12 +334,15 @@
          має запечені o:0 у місцях, де живий рантайм показує (hero-галерея) */
       if (b.restOpacity !== null && Number.isFinite(d.o)) b.el.style.opacity = String(Math.round(d.o * 1000) / 1000);
       if (b.clipStep) {
-        /* clip-вайп: геометричний степ (закритий до входу у вʼюпорт) */
+        /* clip-вайп: степ по live-тригеру sOpen (перший осілий семпл
+           з фінальним clip — S6; DOM-геометрія бреше для фулскрін-
+           слайдів пінованого шару: nat.top=0 → «відкрито з s=0») */
         if (b.sAtGeom === undefined) {
           const r = b.el.getBoundingClientRect();
           b.sAtGeom = r.top + document.documentElement.scrollTop - innerHeight + 40;
         }
-        const open = (introMode ? 0 : P) >= b.sAtGeom;
+        const trig = b.clipStep.sOpen != null ? b.clipStep.sOpen - 1 : b.sAtGeom;
+        const open = (introMode ? 0 : P) >= trig;
         b.el.style.clipPath = (open ? b.clipStep.open : b.clipStep.closed) || '';
       } else if (d.clip && b.moving.clipPath) b.el.style.clipPath = d.clip;
       else if (b.restClip && !b.moving.clipPath && !b.el.style.clipPath) b.el.style.clipPath = b.restClip;
@@ -416,6 +444,19 @@
 
   /* дебаг-стан для проб (visual-sync/розкопки) */
   window.__ENGINE__ = () => ({ mode, s, target, idx, introTarget, introShown, scrollTop: document.documentElement.scrollTop, bodyH: document.body.scrollHeight });
+  /* стан біндінгів для розкопок (nat, scale-точки, латчі) */
+  window.__ENGINE_BINDINGS__ = (secFilter) => bound
+    .filter((b) => !secFilter || b.section === secFilter)
+    .map((b) => ({
+      sec: b.section, cls: (b.sig.cls || '').slice(0, 44),
+      nat: b.nat, hasM: b.hasM, inShape: b.inShape,
+      ancOwn: b.ancOwn ? (b.ancOwn.sig.cls || '').slice(0, 30) : null,
+      scaledPts: (b.own || []).filter((p) => p.sw !== 1 || p.sh !== 1).length,
+      ownPts: (b.own || []).length,
+      ownHi: (b.own || []).filter((p) => p.s > 4300 && p.s < 4600).slice(0, 3),
+      sAt: b.sAt, sAtGeom: b.sAtGeom, clipStep: b.clipStep || null,
+      revealGeom: b.revealGeom || false,
+    }));
   /* диф по всіх прив'язках (розкопки фікс-циклів) */
   window.__ENGINE_DIFF__ = () => bound.map((b) => {
     const r = b.el.getBoundingClientRect();
