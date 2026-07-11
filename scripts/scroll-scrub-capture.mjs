@@ -73,7 +73,9 @@ const fracs = []; let anchors = [];
   for (let i = 0; i < N; i++) {
     const ty = y0 + (y1 - y0) * (i / (N - 1));
     await p.mouse.move(g.thx, ty);
-    await p.waitForTimeout(130);  /* дати Locomotive догнати */
+    await p.waitForTimeout(800);  /* с22: 130ms ловило Locomotive у льоті — label/пікселі
+      розходились ~200px (settled-рекон @.4184 шов 355 vs борд-кадр 160) і роздували
+      ВСІ перехідні зони diff; 800ms = settled, обидві сторони пари в одній точці */
     const fr = await p.evaluate(() => {
       const th = document.querySelector('.c-scrollbar_thumb'); const tr = document.querySelector('.c-scrollbar');
       const m = new WebKitCSSMatrix(getComputedStyle(th).transform);

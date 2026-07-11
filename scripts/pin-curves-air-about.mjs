@@ -157,7 +157,8 @@ if (!SKIP_LIVE) {
     await p.mouse.move(g.thx, g.thy); await p.mouse.down();
     for (let i = 0; i < N; i++) {
       await p.mouse.move(g.thx, yA + (yB - yA) * (i / (N - 1)));
-      await p.waitForTimeout(90);
+      await p.waitForTimeout(600);  /* с22: 90ms ловило Locomotive у льоті — live-криві
+        лагали ~150-200px проти settled-стану (звірено реконом @.4184) */
       const row = await p.evaluate((fn) => {
         const th = document.querySelector('.c-scrollbar_thumb'); const tr = document.querySelector('.c-scrollbar');
         const m = new WebKitCSSMatrix(getComputedStyle(th).transform);
