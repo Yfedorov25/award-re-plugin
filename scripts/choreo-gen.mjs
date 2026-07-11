@@ -244,8 +244,17 @@ function buildViewport(vpName) {
               const terminal = dir < 0 ? 0 : 100;
               const a = mids[0], b = mids[mids.length - 1];
               const rate = (b.nums[si] - a.nums[si]) / (b.s - a.s || 1);
-              const sOpen = Math.abs(rate) > 1e-4
-                ? r1(b.s + (terminal - b.nums[si]) / rate) : r1(b.s);
+              /* S10: у секції зі standing-timed переходами вайп грає
+                 ЧАСОМ (екстраполяція до терміналу journey-контамінована:
+                 live-шот s5288 = слайдер завершений) → sOpen = ПОЧАТОК
+                 спану вайпа (перший ненульовий семпл) */
+              const timedVpS = TIMED[secId]?.viewports?.[vpName];
+              const standingTimedS = !!timedVpS && (timedVpS.blocks || []).some((bl) =>
+                Math.abs(bl.movedPx) < 80 && bl.durMs > 3000);
+              const sOpen = standingTimedS
+                ? r1(a.s)
+                : (Math.abs(rate) > 1e-4
+                  ? r1(b.s + (terminal - b.nums[si]) / rate) : r1(b.s));
               /* термінал ЛИШЕ для координат, що реально варіюються в mids
                  (структурні X=100 закритого полігона не чіпати — інакше
                  «відкритий» полігон дегенерує в нульову площу) */
@@ -270,10 +279,18 @@ function buildViewport(vpName) {
       if (!surrogateClip && curve.length > 2) {
         const cFirst = curve[0].clip || 'none', cLast = curve[curve.length - 1].clip || 'none';
         if (cFirst !== cLast) {
-          const numsPer = curve.map((x) => {
-            const n = ((x.clip || '').match(/-?\d*\.?\d+/g) || []).map(Number);
-            return n.length > 1 ? n[1] : null;
-          });
+          /* S10: вісь детекту = ПЕРША реально варійована координата
+             полігона (жорсткий n[1] сліпнув на polygon(0 0,100% 0,
+             100% X, 0 X) — варіюється 6-та: каптион слайдера падав у
+             one-shot латч з sOpen=null) */
+          const numsAll = curve.map((x) => ((x.clip || '').match(/-?\d*\.?\d+/g) || []).map(Number));
+          const maxLen = Math.max(...numsAll.map((n) => n.length), 0);
+          let vi = 1;
+          for (let i = 0; i < maxLen; i++) {
+            const vals = numsAll.filter((n) => n.length > i).map((n) => n[i]);
+            if (vals.length && Math.max(...vals) - Math.min(...vals) > 1) { vi = i; break; }
+          }
+          const numsPer = numsAll.map((n) => (n.length > vi ? n[vi] : null));
           const firstNums = numsPer.filter((v) => v !== null);
           const mono = firstNums.every((v, i) => i === 0 || v <= firstNums[i - 1] + 0.5)
             || firstNums.every((v, i) => i === 0 || v >= firstNums[i - 1] - 0.5);
@@ -289,7 +306,21 @@ function buildViewport(vpName) {
           const midSpan = mids.length
             ? Math.max(...mids.map((x) => x.s)) - Math.min(...mids.map((x) => x.s)) : 0;
           const scrub = mids.length >= 6 && midSpan >= 200;
-          if (mono && !scrub) {
+          /* S10: «скраб» у секції з timing-переходами при СТОЯЧОМУ
+             одометрі = journey-контамінація (вайп грає ЧАСОМ, s їхав
+             паралельно у deep-run; live-шот s5288 показує ЗАВЕРШЕНИЙ
+             слайдер посеред «скраба 4700-5580») → степ по ПОЧАТКУ спану:
+             на осілих позах live завжди у фіналі часового переходу. */
+          const timedVp = TIMED[secId]?.viewports?.[vpName];
+          const standingTimed = !!timedVp && (timedVp.blocks || []).some((bl) =>
+            Math.abs(bl.movedPx) < 80 && bl.durMs > 3000);
+          if (mono && scrub && standingTimed) {
+            const spanStart = r1(Math.min(...mids.map((x) => x.s)));
+            clipStep = { closed: cFirst === 'none' ? null : cFirst,
+              open: cLast === 'none' ? null : cLast, sOpen: spanStart };
+            for (const x of curve) x.clip = null;
+            console.log(`  [${vpName}/${secId}] timed-скраб → степ sOpen=${spanStart} (${(t.cls || t.tag).slice(0, 30)})`);
+          } else if (mono && !scrub) {
             /* тригер степу — З ДАНИХ live (S6-розкопка): DOM-геометрія
                нашого каркаса бреше для фулскрін-слайдів у пінованому
                шарі (nat.top=0 → «відкрито з s=0»). Правда = перший
