@@ -1056,7 +1056,12 @@
        = артефакт нестабільного live). Цілі: doc-Y анкорів = live 1-в-1, тотал
        = live. Свапи слайдерів сідають на live doc-px САМІ (6456/7007 arch,
        12033/12652 hq) через ці ж зсуви — окремо НЕ чіпані. ── */
-    #isw-arch { margin-top: calc(53vh - 225px); }  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793); с26: −470 = компенсація титул-фази #architecture (+470) — doc слайдера ІНВАРІАНТНИЙ, свапи НЕ рухались (перевірено index-пробою) */
+    #isw-arch { margin-top: calc(53vh + 15px); }  /* с23 solve: свапи arch на live doc 6436/7079 (span 1929, T 5793); с26: −470 = компенсація титул-фази #architecture (+470) — doc слайдера ІНВАРІАНТНИЙ, свапи НЕ рухались (перевірено index-пробою) */
+    /* с26 пере-solve свапів (index-свіп): isw-arch doc 5551 → 5791 (=с23 solve;
+       дрейф −240 з c25 map-компенсації давав свапи 6250/6875 замість live
+       6436/7079 = кластер #39-50). Компенсація в margin-bottom (!important
+       б'є inline isw-JS): revolves @8321 НЕДОТОРКАНИЙ, span/реліз незмінні. */
+    #isw-arch { margin-bottom: calc(-105svh - 240px) !important; }
     /* с26 кадр #29: live титул architecture на doc 4743 (наш був 4273) + live
        gap титул→AESTHETICS 240 (наш 82) */
     #architecture > .h1 { margin-top: 470px; }
@@ -2006,6 +2011,34 @@
       on = es.some(function(e){ return e.isIntersecting; });
       if (on && !raf) raf = requestAnimationFrame(tick);
     }, { rootMargin: '250% 0px' }).observe(imgs[0].closest('.ib-grid'));  /* 250%: dim живе і в map-фазі (грід вище в'юпорта) */
+  })();
+
+  /* ═══ с26 ARCH-ENTRY: live слайдер-СЕКЦІЯ в'їжджає з doc 5551, а
+     index-простір свапів стартує з 5793 (офсет 242 у live content-animation;
+     наш ISW рахує p від секції → секцію поставлено на 5791 для свапів,
+     а ВІЗУАЛЬНИЙ в'їзд повертає ця крива: dy = −min(240, max(0, S_PIN−s)) —
+     плавно зникає до піна, у піні 0). transform на шар, нуль-сумно. ═══ */
+  (function archEntry(){
+    if (window.innerWidth <= 768) return;
+    var root = document.getElementById('isw-arch');
+    var layer = root && root.querySelector('[data-isw-layer]');
+    if (!layer) return;
+    var sY = function(){ return (window.__lenis && typeof window.__lenis.scroll === 'number')
+      ? window.__lenis.scroll : window.scrollY; };
+    var S_PIN = null;
+    function measure(){ S_PIN = Math.round(root.getBoundingClientRect().top + sY()); }
+    var on = false, raf = null;
+    function tick(){
+      if (!on) { raf = null; return; }
+      if (S_PIN === null) measure();
+      var dy = -Math.min(240, Math.max(0, S_PIN - sY()));
+      layer.style.transform = dy ? 'translateY(' + dy.toFixed(1) + 'px)' : '';
+      raf = requestAnimationFrame(tick);
+    }
+    new IntersectionObserver(function(es){
+      on = es.some(function(e){ return e.isIntersecting; });
+      if (on && !raf) raf = requestAnimationFrame(tick);
+    }, { rootMargin: '60% 0px' }).observe(root);
   })();
 
   /* ═══ с26 CFT-PHASE (motion-zone comfort, motion-comfort-1440.json):
