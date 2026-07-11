@@ -80,8 +80,75 @@ for (let i = 0; i < N; i++) {
       }
     }
     const px = w * h;
-    return { pct: +(100 * bad / px).toFixed(2),
-      bands: bands.map(v => +(100 * v / (px / 6)).toFixed(1)), w, h };
+
+    /* ── с27 SSIM (перцептивна метрика, толерує ~2px текстурну фазу) ──
+       grayscale → 8×8 блочний SSIM з shift-search ±SHIFT: для кожного
+       ours-блока беремо НАЙКРАЩИЙ SSIM серед зсувів live у вікні ±SHIFT.
+       Це і є просторова толерантність, якої нема у 40/255-порозі: 2px-фаза
+       по фасаду/фото більше не флудить. ssimPct = 100·(1 − mean_SSIM). */
+    const gray = (d) => { const g = new Float64Array(w * h);
+      for (let p = 0, q = 0; p < d.length; p += 4, q++) g[q] = 0.299 * d[p] + 0.587 * d[p + 1] + 0.114 * d[p + 2];
+      return g; };
+    /* 3×3 box-blur — гасить суб-піксельний/JPEG-шум ПЕРЕД SSIM (перцептивні
+       метрики завжди згладжують; без цього текстура-фаза домінує) */
+    const blur = (g) => { const o = new Float64Array(w * h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        let s = 0, n = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const yy = y + dy, xx = x + dx;
+          if (yy >= 0 && yy < h && xx >= 0 && xx < w) { s += g[yy * w + xx]; n++; }
+        }
+        o[y * w + x] = s / n;
+      }
+      return o; };
+    const g1 = blur(gray(d1)), g2 = blur(gray(d2));
+    /* SHIFT±8 калібровано на еталонах: hq#94 (композиція ІДЕНТИЧНА, чиста фаза)
+       33%→18.7 (фаза толерується) vs fan#63 (РІЗНИЙ контент карток) лишається 37%
+       (справжня різниця). Це і є розділення текстура-фаза ↔ реальний дефект,
+       якого 40/255-поріг не давав. BS=8, крок 12 (розрідження = швидше). */
+    const BS = 8, STEP = 12, SHIFT = 8, C1 = 6.5025, C2 = 58.5225;
+    /* статистики блока ours на (bx,by) проти live-блока зсунутого на (sx,sy) */
+    const ssimBlock = (bx, by, sx, sy) => {
+      let mA = 0, mB = 0, n = 0;
+      for (let yy = 0; yy < BS; yy++) for (let xx = 0; xx < BS; xx++) {
+        const ax = bx + xx, ay = by + yy, lx = ax + sx, ly = ay + sy;
+        if (lx < 0 || ly < 0 || lx >= w || ly >= h) return -1;
+        mA += g1[ly * w + lx]; mB += g2[ay * w + ax]; n++;
+      }
+      mA /= n; mB /= n;
+      let vA = 0, vB = 0, cov = 0;
+      for (let yy = 0; yy < BS; yy++) for (let xx = 0; xx < BS; xx++) {
+        const ax = bx + xx, ay = by + yy, lx = ax + sx, ly = ay + sy;
+        const A = g1[ly * w + lx] - mA, B = g2[ay * w + ax] - mB;
+        vA += A * A; vB += B * B; cov += A * B;
+      }
+      vA /= n; vB /= n; cov /= n;
+      return ((2 * mA * mB + C1) * (2 * cov + C2)) / ((mA * mA + mB * mB + C1) * (vA + vB + C2));
+    };
+    let ssimSum = 0, ssimN = 0;
+    const ssimBands = [0, 0, 0, 0, 0, 0], ssimBandN = [0, 0, 0, 0, 0, 0];
+    for (let by = SHIFT; by + BS <= h - SHIFT; by += STEP) {
+      const band = Math.min(5, Math.floor(by / h * 6));
+      for (let bx = SHIFT; bx + BS <= w - SHIFT; bx += STEP) {
+        /* coarse-to-fine: крок 2 по зсуву, потім уточнення ±1 навколо найкращого */
+        let best = -1, bsx = 0, bsy = 0;
+        for (let sy = -SHIFT; sy <= SHIFT; sy += 2) for (let sx = -SHIFT; sx <= SHIFT; sx += 2) {
+          const s = ssimBlock(bx, by, sx, sy);
+          if (s > best) { best = s; bsx = sx; bsy = sy; }
+        }
+        for (let sy = bsy - 1; sy <= bsy + 1; sy++) for (let sx = bsx - 1; sx <= bsx + 1; sx++) {
+          const s = ssimBlock(bx, by, sx, sy);
+          if (s > best) best = s;
+        }
+        ssimSum += best; ssimN++;
+        ssimBands[band] += (1 - best); ssimBandN[band]++;
+      }
+    }
+    const ssimPct = ssimN ? +(100 * (1 - ssimSum / ssimN)).toFixed(2) : 0;
+
+    return { pct: +(100 * bad / px).toFixed(2), ssimPct,
+      bands: bands.map(v => +(100 * v / (px / 6)).toFixed(1)),
+      ssimBands: ssimBands.map((v, i) => ssimBandN[i] ? +(100 * v / ssimBandN[i]).toFixed(1) : 0), w, h };
   }, { boardUrl, id, THRESH });
   if (r) rows.push({ i, frac: fracs[i], sec: secOf(fracs[i]), ...r });
   if (i % 24 === 0) process.stdout.write('.');
@@ -92,6 +159,7 @@ const sorted = [...rows].sort((x, y) => y.pct - x.pct);
 const worst = sorted.slice(0, TOP);
 const mean = +(rows.reduce((s, r) => s + r.pct, 0) / rows.length).toFixed(2);
 const median = sorted[Math.floor(sorted.length / 2)].pct;
+const ssimMean = +(rows.reduce((s, r) => s + (r.ssimPct || 0), 0) / rows.length).toFixed(2);
 
 /* теплокарти для top-кадрів */
 for (const w of worst) {
@@ -121,9 +189,9 @@ for (const w of worst) {
 await b.close();
 
 writeFileSync(`${BOARD}/diff-report.json`, JSON.stringify({ board: basename(BOARD), n: N,
-  threshold: THRESH, mean, median, at: new Date().toISOString(),
-  worst: worst.map(w => ({ i: w.i, frac: w.frac, sec: w.sec, pct: w.pct, bands: w.bands })),
-  all: rows.map(r => ({ i: r.i, frac: r.frac, pct: r.pct })) }, null, 1));
+  threshold: THRESH, mean, median, ssimMean, at: new Date().toISOString(),
+  worst: worst.map(w => ({ i: w.i, frac: w.frac, sec: w.sec, pct: w.pct, ssimPct: w.ssimPct, bands: w.bands, ssimBands: w.ssimBands })),
+  all: rows.map(r => ({ i: r.i, frac: r.frac, pct: r.pct, ssimPct: r.ssimPct })) }, null, 1));
 
 /* findings.html — топ-кадри: live | ours | diff */
 writeFileSync(`${BOARD}/findings.html`, `<!doctype html><meta charset="utf-8">
@@ -139,7 +207,7 @@ ${worst.map(w => { const id = String(w.i).padStart(3, '0');
   <div><div class="lbl">наше</div><img loading="lazy" src="ours-${id}.jpg"></div>
   <div><div class="lbl">diff</div><img loading="lazy" src="diff-${id}.png"></div></div>`; }).join('\n')}`);
 
-console.log(`\nБОРД: ${basename(BOARD)} · mean ${mean}% · median ${median}%`);
+console.log(`\nБОРД: ${basename(BOARD)} · mean ${mean}% · median ${median}% · SSIM-mean ${ssimMean}% (перцептивна, толерує ~2px текстуру)`);
 console.log('ТОП-' + Math.min(TOP, worst.length) + ' найгірших кадрів:');
 for (const w of worst) console.log(
   `#${String(w.i).padStart(3,'0')}  ${(w.frac*100).toFixed(1).padStart(5)}%  ${String(w.sec).padEnd(14)} diff ${String(w.pct).padStart(6)}%  смуги [${w.bands.join(' ')}]`);
