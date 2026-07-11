@@ -228,10 +228,17 @@
   #isw-hq .isw-texts p { font-size: 13px; line-height: 1.3; }
   #isw-hq .isw-card .cta-link { position: absolute; right: 20px; bottom: 20px;
     max-width: 220px; white-space: normal; text-align: left; line-height: 1.25; }
-  /* с23: живий пан тримається в НИЖНІЙ третині фото (у нас 0% давав небо) */
-  #isw-hq [data-isw-slide]:nth-child(1) img { object-position: 50% 55%; }
-  #isw-hq [data-isw-slide]:nth-child(2) img { object-position: 50% 75%; }
-  #isw-hq [data-isw-slide]:nth-child(3) img { object-position: 50% 95%; }
+  /* с26 (motion-zone проба live): фото hq = НЕ cover-кроп, а живий full-size
+     1185px (fill @1440), статично bottom-aligned (top −365 від шару = 820−1185),
+     рух = parallax translateY по скролу (hqParallax JS, крива dy 198→−95 у піні).
+     ⚠️ object-position/height-кроп — глухий кут (с25): з явною height фото стає
+     фіксованим блоком і object-position ігнорується. Desktop-only: m390 стрічка
+     лишається на базовому cover. */
+  @media (min-width: 769px) {
+    #isw-hq [data-isw-slide] picture { position: relative; }
+    #isw-hq [data-isw-slide] img { position: absolute; left: 0; bottom: 0;
+      height: auto; object-fit: unset; will-change: transform; }
+  }
   .hq-pin { position: absolute; left: 42%; top: 38%; width: 30px; height: 30px; z-index: 2;
     border-radius: 5px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     background: rgba(255,255,255,.1); }
@@ -1775,7 +1782,10 @@
          hit-test @.248) · splash поверх hq (@.4184). exitWipe НЕ потрібен —
          «швидкий шов» у бордах був артефактом лаг-зйомки (a5cc7f1). */
       el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: window.innerWidth > 768 ? 107 : 80,
-        underNextSvh: window.innerWidth > 768 ? 82 : 90 } :   /* с23 solve @820: span 1920, реліз на splash-приході; m390 без змін */
+        underNextSvh: window.innerWidth > 768 ? 82 : 90,
+        /* с26: дрейф-режим вимкнено на desktop — фото веде hqParallax по живій
+           кривій (у live рух ВСЕРЕДИНІ піна, не на вході/виході); m390 дрейф живе */
+        driftPct: window.innerWidth > 768 ? 0 : 16.666 } :   /* с23 solve @820: span 1920, реліз на splash-приході; m390 без змін */
       el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: window.innerWidth > 768 ? 118 : 91,
         underNextSvh: window.innerWidth > 768 ? 105 : 117 } : { mobile: 'tap' }); }
   );
@@ -1812,6 +1822,36 @@
       on = es.some(function(e){ return e.isIntersecting; });
       if (on && !raf) raf = requestAnimationFrame(tick);
     }, { rootMargin: '100% 0px' }).observe(rvc);
+  })();
+
+  /* ═══ с26 HQ-PARALLAX (motion-zone проба live, motion-hq-1440.json):
+     живе фото 1185px bottom-aligned (−365) дрейфує ВСЕРЕДИНІ піна:
+     dy = 198 − 293·sp (top −167→−460), після релізу застигає на −95
+     (198−293 = −95 = виміряний пост-пін dy live). Вхід: dy росте до 198
+     з нахилом ~0.67px/px секційного top, кламп −125 (live дип-мінімум).
+     transform-only (нуль-сумно); rAF гейтнутий IO. ═══ */
+  (function hqParallax(){
+    if (window.innerWidth <= 768) return;
+    var root = document.getElementById('isw-hq');
+    if (!root) return;
+    var imgs = Array.prototype.slice.call(root.querySelectorAll('[data-isw-slide] img'));
+    if (!imgs.length) return;
+    var on = false, raf = null;
+    function tick(){
+      if (!on) { raf = null; return; }
+      var r = root.getBoundingClientRect();
+      var vh = window.innerHeight;
+      var dy;
+      if (r.top > 0) dy = Math.max(-125, 198 - 0.67 * r.top);
+      else dy = 198 - 293 * Math.min(1, -r.top / (r.height - vh));
+      for (var i = 0; i < imgs.length; i++)
+        imgs[i].style.transform = 'translateY(' + dy.toFixed(1) + 'px)';
+      raf = requestAnimationFrame(tick);
+    }
+    new IntersectionObserver(function(es){
+      on = es.some(function(e){ return e.isIntersecting; });
+      if (on && !raf) raf = requestAnimationFrame(tick);
+    }, { rootMargin: '100% 0px' }).observe(root);
   })();
 
   /* ═══ с23 CERT-СКРОЛ: паралакс bg (живий sectionToSticky −30svh→0) +

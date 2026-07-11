@@ -12,7 +12,7 @@
      --steps 80 --out library/boards/about-scrub
    Борд: <out>/board.html (сервер 8820 віддає library/).
    ============================================================ */
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { resolve, basename } from 'path';
 import { pathToFileURL } from 'url';
 
@@ -37,15 +37,29 @@ const VP = { width: +(arg('vw', 1440)), height: +(arg('vh', 820)) };
 const Q = +(arg('quality', 52));
 const FROM = +(arg('from', 0)); const TO = +(arg('to', 1));  /* діапазон прогресу (секційний скраб) */
 const MAP = JSON.parse(arg('map', '[]'));  /* [{liveIdx, ours:"#id"}] → секційна синхронізація кадрів */
-if (!LIVE || !OURS) { console.error('потрібні --live --ours'); process.exit(1); }
+/* с26 --ours-only: live-кадри/fracs беруться з наявного meta.json борда —
+   перезнімаються ЛИШЕ ours (зональна перевірка фіксу проти НЕЗМІННОЇ
+   live-бази = нуль live-шуму) */
+const OURS_ONLY = process.argv.includes('--ours-only');
+if (!OURS || (!LIVE && !OURS_ONLY)) { console.error('потрібні --live --ours (або --ours --ours-only)'); process.exit(1); }
 mkdirSync(OUT, { recursive: true });
 
 const b = await chromium.launch();
-const fracs = []; let anchors = [];
+let fracs = []; let anchors = [];
 let liveTotals = [], liveDocH = 0, liveDocHAfter = 0, oursDocH = 0;
+let LIVE_URL = LIVE;
+
+if (OURS_ONLY) {
+  const meta = JSON.parse(readFileSync(`${OUT}/meta.json`, 'utf8'));
+  if (meta.n !== N) { console.error(`--steps ${N} ≠ meta.n ${meta.n} (задай --steps ${meta.n})`); process.exit(1); }
+  fracs = meta.fracs; anchors = meta.anchors || [];
+  liveTotals = meta.liveTotals || []; liveDocH = meta.liveDocH; liveDocHAfter = meta.liveDocHAfter;
+  LIVE_URL = meta.live;
+  console.log(`ours-only: fracs з meta.json (n=${meta.n}, liveDocH=${liveDocH})`);
+}
 
 /* ─── 1. LIVE: одна безперервна протяжка повзунка, кадр на кожному кроці ─── */
-{
+if (!OURS_ONLY) {
   const ctx = await b.newContext({ viewport: VP, deviceScaleFactor: 1 });
   const p = await ctx.newPage();
   await p.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
@@ -195,7 +209,7 @@ let liveTotals = [], liveDocH = 0, liveDocHAfter = 0, oursDocH = 0;
 await b.close();
 
 /* ─── 3. Борд: скрол = синхронний скраб обох сторін ─── */
-writeFileSync(`${OUT}/meta.json`, JSON.stringify({ n: N, fracs, anchors, live: LIVE, ours: OURS,
+writeFileSync(`${OUT}/meta.json`, JSON.stringify({ n: N, fracs, anchors, live: LIVE_URL, ours: OURS,
   liveDocH, liveDocHAfter, liveTotals, oursDocH, at: new Date().toISOString() }, null, 1));
 writeFileSync(`${OUT}/board.html`, `<!doctype html><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
