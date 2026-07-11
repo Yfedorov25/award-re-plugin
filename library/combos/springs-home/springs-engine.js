@@ -158,6 +158,11 @@
       }
       for (const grp of Object.values(groups)) {
         const sig = grp[0].b.sig;
+        /* body-псевдо-ціль (S7): тема сторінки — поза секційною обгорткою */
+        if (sig.tag === 'body') {
+          resolved[grp[0].i] = document.body;
+          continue;
+        }
         const cands = [wrap, ...wrap.querySelectorAll(sig.tag)]
           .filter((el) => el.tagName.toLowerCase() === sig.tag && !used.has(el))
           .map((el) => ({ el, score: candScore(el, sig) }))
@@ -328,10 +333,22 @@
   function applyBindings(P, introInput, introMode) {
     for (const b of bound) {
       let d;
+      /* m=null у кривій = transform:'none' живого = ІДЕНТИЧНІСТЬ —
+         інтерполюємо крізь неї (паралакс scale 1.1 з дірами 'none'
+         інакше випадав і губив скейл на half-точках) */
+      const IDM = [1, 0, 0, 1, 0, 0];
+      const lerpColor = (a, c, t) => {
+        if (!a) return c; if (!c || a === c) return a;
+        const na = numsOf(a), nc = numsOf(c);
+        if (na.length !== nc.length) return t < 0.5 ? a : c;
+        let i = 0;
+        return a.replace(/-?\d*\.?\d+/g, () => String(Math.round(lerp(na[i], nc[i++], t) * 100) / 100));
+      };
       const pick = (a, c, t) => ({
-        m: a.m && c.m ? a.m.map((v, i) => lerp(v, c.m[i], t)) : (t < 0.5 ? a.m : c.m),
+        m: (a.m || c.m) ? (a.m || IDM).map((v, i) => lerp(v, (c.m || IDM)[i], t)) : null,
         o: lerp(a.o ?? 1, c.o ?? 1, t),
         clip: lerpClip(a.clip, c.clip, t),
+        bg: lerpColor(a.bg, c.bg, t),
       });
       /* геометричний reveal-латч (виняток 6): потік + o-ступінь по
          входу у вʼюпорт; transform/clip не застосовуються */
@@ -348,6 +365,12 @@
       else if (b.curve && b.curve.length) d = interp(b.curve, 's', P, pick);
       else continue;
       if (!d) continue;
+      /* body: ЛИШЕ фон (тема ui-dark/ui-light) — transform на body
+         зсунув би всю сторінку */
+      if (b.sig.tag === 'body') {
+        if (d.bg && b.moving.bg) b.el.style.backgroundColor = d.bg;
+        continue;
+      }
       if (b.hasM || b.inShape) {
         const pre = (b.fix.x || b.fix.y) ? `translate(${b.fix.x.toFixed(2)}px, ${b.fix.y.toFixed(2)}px) ` : '';
         b.el.style.transform = d.m ? pre + fmtM(d.m) : (pre || (b.seedTransform ? 'translate(0px, 0px)' : ''));
@@ -356,9 +379,16 @@
         let dd = (introMode && b.ownIntro)
           ? interp(b.ownIntro, 'input', introInput, dpick)
           : (b.own && b.own.length ? interp(b.own, 's', introMode ? 0 : P, dpick) : null);
-        /* мінус динаміка власного предка (пін батька вже рухає дитину) */
-        if (dd && b.ancOwn && !introMode && b.ancOwn.own && b.ancOwn.own.length) {
-          const ad = interp(b.ancOwn.own, 's', P, dpick);
+        /* мінус динаміка власного предка (пін батька вже рухає дитину).
+           S7: у ТОМУ Ж режимі, що й dd — раніше introMode пропускав
+           віднімання, тож boot-стан (introMode=true) мав ПОДВІЙНИЙ зсув
+           (layer + div по -3600), bootFix запікав хибний fix у дітей-
+           матриць (opening-2 їхав на +3600 на скрол-позах) */
+        if (dd && b.ancOwn) {
+          const anc = b.ancOwn;
+          const ad = (introMode && anc.ownIntro)
+            ? interp(anc.ownIntro, 'input', introInput, dpick)
+            : (anc.own && anc.own.length ? interp(anc.own, 's', introMode ? 0 : P, dpick) : null);
           if (ad) dd = { ...dd, dt: dd.dt - ad.dt, dl: dd.dl - ad.dl };
         }
         const hasScale = dd && (Math.abs(dd.sw - 1) > 0.03 || Math.abs(dd.sh - 1) > 0.03);
@@ -370,6 +400,7 @@
       /* inline opacity ЗАВЖДИ, де є live-значення: каркас (архів JS-off)
          має запечені o:0 у місцях, де живий рантайм показує (hero-галерея) */
       if (b.restOpacity !== null && Number.isFinite(d.o)) b.el.style.opacity = String(Math.round(d.o * 1000) / 1000);
+      if (d.bg && b.moving && b.moving.bg) b.el.style.backgroundColor = d.bg;
       if (b.clipStep) {
         /* clip-вайп: степ по live-тригеру sOpen (перший осілий семпл
            з фінальним clip — S6; DOM-геометрія бреше для фулскрін-
@@ -485,8 +516,8 @@
   window.__ENGINE_BINDINGS__ = (secFilter) => bound
     .filter((b) => !secFilter || b.section === secFilter)
     .map((b) => ({
-      sec: b.section, cls: (b.sig.cls || '').slice(0, 44),
-      nat: b.nat, hasM: b.hasM, inShape: b.inShape,
+      sec: b.section, cls: (b.sig.cls || '').slice(0, 44), src: b.sig.src,
+      nat: b.nat, hasM: b.hasM, inShape: b.inShape, fix: b.fix,
       ancOwn: b.ancOwn ? (b.ancOwn.sig.cls || '').slice(0, 30) : null,
       scaledPts: (b.own || []).filter((p) => p.sw !== 1 || p.sh !== 1).length,
       ownPts: (b.own || []).length,

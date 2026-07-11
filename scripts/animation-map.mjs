@@ -77,9 +77,13 @@ const SETUP_FN = (args) => {
     const cs = getComputedStyle(el);
     if (cs.transform !== 'none' || (cs.clipPath && cs.clipPath !== 'none')) set.add(el);
   }
-  for (const q of ['[data-parallax]', '[data-scroll-sticky]', '[data-reveal]', 'h1,h2,h3', 'img', '[class*="__title"]', '[class*="background"]']) {
+  for (const q of ['[data-parallax]', '[data-scroll-sticky]', '[data-reveal]', 'h1,h2,h3', 'img', '[class*="__title"]', '[class*="background"]', '[class*="gradient"]']) {
     for (const el of sec.querySelectorAll(q)) { if (set.size < 48) set.add(el); }
   }
+  /* BODY як псевдо-ціль (S7): тема сторінки (ui-dark/ui-light) живе
+     на body.background і фліпається хореографією між секціями —
+     фон = така сама крива, як transform/opacity */
+  set.add(document.body);
   window.__AM_TARGETS__ = [...set];
   /* ПРОБИ одометра: секція + сконфігурований блок + великі блоки сторінки.
      Хто з них реально їде — вирішується ПОСТ-ФАКТУМ (max range),
@@ -118,6 +122,7 @@ const SETUP_FN = (args) => {
           transform: cs.transform,
           opacity: cs.opacity,
           clipPath: cs.clipPath !== 'none' ? cs.clipPath : undefined,
+          bg: cs.backgroundColor !== 'rgba(0, 0, 0, 0)' ? cs.backgroundColor : undefined,
           top: r1v(r.top), left: r1v(r.left), w: r1v(r.width), h: r1v(r.height),
         };
       }),
@@ -252,12 +257,20 @@ async function runViewport(browser, vpName) {
 
   /* одометр пост-фактум: проба з найбільшим пройденим діапазоном */
   const nProbes = frames[0].probes.length;
-  let odoIdx = 0, bestRange = -1;
+  /* вибір проби (S7): НЕ чистий max-range — extras-проби (корені інших
+     секцій) можуть мати більший рейндж, але їхня вісь ламає інтро-фазу
+     (гейт hero: корінь intro рушає раніше за l-gallery → s>2 зарано,
+     iEnd екстраполюється зі сміття). Пріоритет за ПОРЯДКОМ (секція →
+     конфіг → extras): перша проба з рейнджем ≥60% максимуму. */
+  const ranges = [];
   for (let i = 0; i < nProbes; i++) {
     const vals = frames.map((f) => f.probes[i]);
-    const range = Math.max(...vals) - Math.min(...vals);
-    if (range > bestRange) { bestRange = range; odoIdx = i; }
+    ranges.push(Math.max(...vals) - Math.min(...vals));
   }
+  const maxRange = Math.max(...ranges);
+  /* пріоритет ЛИШЕ власному кореню секції (проба 0): його вісь тримає
+     інтро-фазу гейта; якщо він мертвий/малий (fixed-хедер) — max-range */
+  const odoIdx = ranges[0] >= maxRange * 0.6 ? 0 : ranges.indexOf(maxRange);
   for (const f of frames) f.scroll = f.probes[odoIdx];
 
   /* 3) криві: транспонувати кадри → на ціль */
@@ -267,12 +280,14 @@ async function runViewport(browser, vpName) {
       transform: f.targets[ti].transform,
       opacity: f.targets[ti].opacity,
       clipPath: f.targets[ti].clipPath,
+      bg: f.targets[ti].bg,
       top: f.targets[ti].top, left: f.targets[ti].left, w: f.targets[ti].w, h: f.targets[ti].h,
     }));
     const moving = {
       transform: new Set(samples.map((x) => x.transform)).size > 1,
       opacity: new Set(samples.map((x) => x.opacity)).size > 1,
       clipPath: new Set(samples.map((x) => x.clipPath)).size > 1,
+      bg: new Set(samples.map((x) => x.bg)).size > 1,
       viewportTop: new Set(samples.map((x) => Math.round(x.top))).size > 1,
     };
     return { ...t, moving, samples };

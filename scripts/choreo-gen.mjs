@@ -92,7 +92,7 @@ function buildViewport(vpName) {
     const devFinal = tr && probeIsRoot ? tr[tr.length - 1].dev : 0;
     const toPage = (mapS) => (mapS > 2 ? mapS + devFinal : mapS);
     for (const t of vpMap.targets) {
-      const anim = t.moving.transform || t.moving.opacity || t.moving.clipPath;
+      const anim = t.moving.transform || t.moving.opacity || t.moving.clipPath || t.moving.bg;
       const firstMove = t.samples.findIndex((x) => Math.abs(x.s) > 2);
       const introSamples = t.samples.filter((x, i) => Math.abs(x.s) <= 2 && (firstMove < 0 || i < firstMove));
       const intro = [];
@@ -121,7 +121,7 @@ function buildViewport(vpName) {
         .filter((x) => !noisy.has(String(Math.round(x.s / 2))))
         .sort((a, b) => a.s - b.s)
         .filter((x) => { const k = Math.round(x.s); if (seen.has(k)) return false; seen.add(k); return true; })
-        .map((x) => ({ s: r1(toPage(x.s)), top: x.top, left: x.left, w: x.w, h: x.h, o: +x.opacity, clip: x.clipPath, m: parseMatrix(x.transform) }));
+        .map((x) => ({ s: r1(toPage(x.s)), top: x.top, left: x.left, w: x.w, h: x.h, o: +x.opacity, clip: x.clipPath, bg: x.bg, m: parseMatrix(x.transform) }));
       /* REVEAL-ЛАТЧ (S5-розкопка): one-shot ревіл (opacity 0→1 і стоїть) —
          подія тригера + часовий перехід, НЕ функція s: карта ловить
          transient-середину і «заморожує» її. Латчимо ВЛАСТИВОСТІ по

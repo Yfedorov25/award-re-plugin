@@ -1,6 +1,6 @@
 # VISUAL.md — піксельна звірка (VISUAL-GATE ≤2% @ erode 5)
 
-Прогін: 2026-07-11T11:13:37.070Z · origin http://localhost:8873
+Прогін: 2026-07-11T12:59:11.625Z · origin http://localhost:8873
 
 | поза | diff% | вердикт |
 |---|---|---|
@@ -8,8 +8,8 @@
 | desktop-intro150 | 89.48 | ❌ FAIL |
 | desktop-intro450 | 89.22 | ❌ FAIL |
 | desktop-s900 | 1.57 | ✅ PASS |
-| desktop-s2070 | 2.82 | ❌ FAIL |
-| desktop-s2969 | 4.11 | ❌ FAIL |
+| desktop-s2070 | 1.69 | ✅ PASS |
+| desktop-s2969 | 2.08 | ❌ FAIL |
 | desktop-s3760 | 38.44 | ❌ FAIL |
 | desktop-s4520 | 17.95 | ❌ FAIL |
 | desktop-s4528 | 17.95 | ❌ FAIL |
@@ -25,4 +25,4 @@
 | desktop-s10077 | 29.53 | ❌ FAIL |
 | desktop-s11248 | 43.29 | ❌ FAIL |
 
-**РАЗОМ: 1/20 PASS** · борд: visual/parity/parity-board.html
+**РАЗОМ: 2/20 PASS** · борд: visual/parity/parity-board.html
