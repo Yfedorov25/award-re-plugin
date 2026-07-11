@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>visual-parity board — desktop-s11248</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+         margin: 0; padding: 24px; background: #f6f8fa; color: #1f2328; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .top { margin-bottom: 20px; }
+  .top .status { font-weight: 700; color: #cf222e; }
+  .run { background: #fff; border: 1px solid #d0d7de; border-radius: 10px;
+         padding: 16px; margin-bottom: 20px; }
+  .run.bad { border-color: #cf222e; }
+  .run header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .run h2 { font-size: 16px; margin: 0; }
+  .vp { font-weight: 400; color: #656d76; font-size: 13px; }
+  .badge { font-weight: 700; padding: 4px 10px; border-radius: 999px; font-size: 13px; white-space: nowrap; }
+  .meta { color: #656d76; font-size: 12px; margin-top: 4px; }
+  .meta.url a { color: #0969da; text-decoration: none; word-break: break-all; }
+  .warn { color: #9a6700; background: #fff8c5; padding: 6px 10px; border-radius: 6px; margin-top: 8px; font-size: 12px; }
+  .err { color: #cf222e; background: #ffebe9; padding: 6px 10px; border-radius: 6px; margin-top: 8px; font-size: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  figure { margin: 0; }
+  figcaption { font-size: 12px; font-weight: 600; color: #656d76; margin-bottom: 6px; }
+  figure img { width: 100%; height: auto; border: 1px solid #d0d7de; border-radius: 6px;
+               background: repeating-conic-gradient(#eee 0% 25%, #fff 0% 50%) 50% / 16px 16px; display: block; }
+  .missing { padding: 24px; text-align: center; color: #999; border: 1px dashed #d0d7de; border-radius: 6px; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>visual-parity board</h1>
+    <div>28 run(s) · <span class="status">FAIL</span> · generated 2026-07-11T08:52:58.500Z</div>
+  </div>
+  
+    <section class="run bad">
+      <header>
+        <h2>test-intro0 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          100% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 1295980/1296000 px · 2026-07-11T08:25:27.999Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?intro=0" target="_blank">http://localhost:8873/?intro=0</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="test-intro0-ours-1440x900.png" target="_blank"><img src="test-intro0-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="extraction/springs-home/visual/live/desktop-intro0.png" target="_blank"><img src="extraction/springs-home/visual/live/desktop-intro0.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="test-intro0-diff-1440x900.png" target="_blank"><img src="test-intro0-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>mobile-s0 <span class="vp">390x844</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          98.87% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 325425/329160 px · 2026-07-11T08:51:28.819Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=0" target="_blank">http://localhost:8873/?s=0</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="mobile-s0-ours-390x844.png" target="_blank"><img src="mobile-s0-ours-390x844.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s0.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s0.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="mobile-s0-diff-390x844.png" target="_blank"><img src="mobile-s0-diff-390x844.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>mobile-s796 <span class="vp">390x844</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          6.79% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 22361/329160 px · 2026-07-11T08:51:32.505Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=796" target="_blank">http://localhost:8873/?s=796</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="mobile-s796-ours-390x844.png" target="_blank"><img src="mobile-s796-ours-390x844.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s796.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s796.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="mobile-s796-diff-390x844.png" target="_blank"><img src="mobile-s796-diff-390x844.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>mobile-s1562 <span class="vp">390x844</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          87.13% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 286797/329160 px · 2026-07-11T08:51:35.648Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=1562" target="_blank">http://localhost:8873/?s=1562</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="mobile-s1562-ours-390x844.png" target="_blank"><img src="mobile-s1562-ours-390x844.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s1562.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s1562.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="mobile-s1562-diff-390x844.png" target="_blank"><img src="mobile-s1562-diff-390x844.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>mobile-s2324 <span class="vp">390x844</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          58.49% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 192524/329160 px · 2026-07-11T08:51:38.732Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=2324" target="_blank">http://localhost:8873/?s=2324</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="mobile-s2324-ours-390x844.png" target="_blank"><img src="mobile-s2324-ours-390x844.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s2324.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s2324.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="mobile-s2324-diff-390x844.png" target="_blank"><img src="mobile-s2324-diff-390x844.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>mobile-s3086 <span class="vp">390x844</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          21.08% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 69381/329160 px · 2026-07-11T08:51:41.928Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=3086" target="_blank">http://localhost:8873/?s=3086</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="mobile-s3086-ours-390x844.png" target="_blank"><img src="mobile-s3086-ours-390x844.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s3086.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s3086.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="mobile-s3086-diff-390x844.png" target="_blank"><img src="mobile-s3086-diff-390x844.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>mobile-s3849 <span class="vp">390x844</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          30.49% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 100374/329160 px · 2026-07-11T08:51:45.092Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=3849" target="_blank">http://localhost:8873/?s=3849</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="mobile-s3849-ours-390x844.png" target="_blank"><img src="mobile-s3849-ours-390x844.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s3849.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s3849.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="mobile-s3849-diff-390x844.png" target="_blank"><img src="mobile-s3849-diff-390x844.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>mobile-s4611 <span class="vp">390x844</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          10.06% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 33099/329160 px · 2026-07-11T08:51:48.201Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=4611" target="_blank">http://localhost:8873/?s=4611</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="mobile-s4611-ours-390x844.png" target="_blank"><img src="mobile-s4611-ours-390x844.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s4611.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/mobile-s4611.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="mobile-s4611-diff-390x844.png" target="_blank"><img src="mobile-s4611-diff-390x844.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-intro0 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          95.62% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 1239251/1296000 px · 2026-07-11T08:51:51.249Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?intro=0" target="_blank">http://localhost:8873/?intro=0</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-intro0-ours-1440x900.png" target="_blank"><img src="desktop-intro0-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-intro0.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-intro0.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-intro0-diff-1440x900.png" target="_blank"><img src="desktop-intro0-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-intro150 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          89.58% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 1160990/1296000 px · 2026-07-11T08:51:54.893Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?intro=150" target="_blank">http://localhost:8873/?intro=150</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-intro150-ours-1440x900.png" target="_blank"><img src="desktop-intro150-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-intro150.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-intro150.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-intro150-diff-1440x900.png" target="_blank"><img src="desktop-intro150-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-intro450 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          89.28% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 1157113/1296000 px · 2026-07-11T08:51:58.408Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?intro=450" target="_blank">http://localhost:8873/?intro=450</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-intro450-ours-1440x900.png" target="_blank"><img src="desktop-intro450-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-intro450.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-intro450.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-intro450-diff-1440x900.png" target="_blank"><img src="desktop-intro450-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s900 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          84.97% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 1101212/1296000 px · 2026-07-11T08:52:01.961Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=900" target="_blank">http://localhost:8873/?s=900</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s900-ours-1440x900.png" target="_blank"><img src="desktop-s900-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s900.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s900-diff-1440x900.png" target="_blank"><img src="desktop-s900-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s2070 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          36.91% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 478306/1296000 px · 2026-07-11T08:52:05.557Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=2070" target="_blank">http://localhost:8873/?s=2070</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s2070-ours-1440x900.png" target="_blank"><img src="desktop-s2070-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s2070.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s2070.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s2070-diff-1440x900.png" target="_blank"><img src="desktop-s2070-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s2969 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          2.12% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 27416/1296000 px · 2026-07-11T08:52:09.149Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=2969" target="_blank">http://localhost:8873/?s=2969</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s2969-ours-1440x900.png" target="_blank"><img src="desktop-s2969-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s2969.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s2969.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s2969-diff-1440x900.png" target="_blank"><img src="desktop-s2969-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s3760 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          38.45% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 498347/1296000 px · 2026-07-11T08:52:12.820Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=3760" target="_blank">http://localhost:8873/?s=3760</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s3760-ours-1440x900.png" target="_blank"><img src="desktop-s3760-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s3760.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s3760.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s3760-diff-1440x900.png" target="_blank"><img src="desktop-s3760-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s4520 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          17.98% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 232963/1296000 px · 2026-07-11T08:52:16.362Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=4520" target="_blank">http://localhost:8873/?s=4520</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s4520-ours-1440x900.png" target="_blank"><img src="desktop-s4520-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4520.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4520.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s4520-diff-1440x900.png" target="_blank"><img src="desktop-s4520-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s4528 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          17.98% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 232983/1296000 px · 2026-07-11T08:52:19.683Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=4528" target="_blank">http://localhost:8873/?s=4528</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s4528-ours-1440x900.png" target="_blank"><img src="desktop-s4528-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4528.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4528.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s4528-diff-1440x900.png" target="_blank"><img src="desktop-s4528-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s4634 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          17.97% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 232937/1296000 px · 2026-07-11T08:52:23.018Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=4634" target="_blank">http://localhost:8873/?s=4634</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s4634-ours-1440x900.png" target="_blank"><img src="desktop-s4634-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4634.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4634.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s4634-diff-1440x900.png" target="_blank"><img src="desktop-s4634-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s4586 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          17.97% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 232935/1296000 px · 2026-07-11T08:52:26.323Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=4586" target="_blank">http://localhost:8873/?s=4586</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s4586-ours-1440x900.png" target="_blank"><img src="desktop-s4586-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4586.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4586.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s4586-diff-1440x900.png" target="_blank"><img src="desktop-s4586-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s4567 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          17.97% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 232947/1296000 px · 2026-07-11T08:52:29.685Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=4567" target="_blank">http://localhost:8873/?s=4567</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s4567-ours-1440x900.png" target="_blank"><img src="desktop-s4567-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4567.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s4567.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s4567-diff-1440x900.png" target="_blank"><img src="desktop-s4567-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s5157 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          68.6% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 888994/1296000 px · 2026-07-11T08:52:33.041Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=5157" target="_blank">http://localhost:8873/?s=5157</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s5157-ours-1440x900.png" target="_blank"><img src="desktop-s5157-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s5157.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s5157.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s5157-diff-1440x900.png" target="_blank"><img src="desktop-s5157-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s5580 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          85.96% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 1114034/1296000 px · 2026-07-11T08:52:36.373Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=5580" target="_blank">http://localhost:8873/?s=5580</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s5580-ours-1440x900.png" target="_blank"><img src="desktop-s5580-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s5580.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s5580.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s5580-diff-1440x900.png" target="_blank"><img src="desktop-s5580-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s7175 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          44.73% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 579722/1296000 px · 2026-07-11T08:52:39.532Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=7175" target="_blank">http://localhost:8873/?s=7175</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s7175-ours-1440x900.png" target="_blank"><img src="desktop-s7175-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s7175.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s7175.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s7175-diff-1440x900.png" target="_blank"><img src="desktop-s7175-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s7200 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          45.86% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 594390/1296000 px · 2026-07-11T08:52:42.784Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=7200" target="_blank">http://localhost:8873/?s=7200</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s7200-ours-1440x900.png" target="_blank"><img src="desktop-s7200-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s7200.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s7200.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s7200-diff-1440x900.png" target="_blank"><img src="desktop-s7200-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s8273 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          33.83% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 438415/1296000 px · 2026-07-11T08:52:46.034Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=8273" target="_blank">http://localhost:8873/?s=8273</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s8273-ours-1440x900.png" target="_blank"><img src="desktop-s8273-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s8273.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s8273.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s8273-diff-1440x900.png" target="_blank"><img src="desktop-s8273-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s9179 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          40.36% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 523032/1296000 px · 2026-07-11T08:52:49.255Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=9179" target="_blank">http://localhost:8873/?s=9179</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s9179-ours-1440x900.png" target="_blank"><img src="desktop-s9179-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s9179.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s9179.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s9179-diff-1440x900.png" target="_blank"><img src="desktop-s9179-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s10077 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          29.54% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 382852/1296000 px · 2026-07-11T08:52:52.485Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=10077" target="_blank">http://localhost:8873/?s=10077</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s10077-ours-1440x900.png" target="_blank"><img src="desktop-s10077-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s10077.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s10077.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s10077-diff-1440x900.png" target="_blank"><img src="desktop-s10077-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+
+    <section class="run bad">
+      <header>
+        <h2>desktop-s11248 <span class="vp">1440x900</span></h2>
+        <span class="badge" style="color:#cf222e;background:#ffebe9">
+          43.29% · FAIL
+        </span>
+      </header>
+      <div class="meta">threshold 2% · 561099/1296000 px · 2026-07-11T08:52:55.663Z</div>
+      <div class="meta url"><a href="http://localhost:8873/?s=11248" target="_blank">http://localhost:8873/?s=11248</a></div>
+      
+      <div class="grid">
+        
+        <figure>
+          <figcaption>OURS (prototype)</figcaption>
+          <a href="desktop-s11248-ours-1440x900.png" target="_blank"><img src="desktop-s11248-ours-1440x900.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>BASELINE (live · truth)</figcaption>
+          <a href="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s11248.png" target="_blank"><img src="file:///Users/yehorfedorov/Downloads/award-re-springs/extraction/springs-home/visual/live/desktop-s11248.png" loading="lazy"></a>
+        </figure>
+        
+        <figure>
+          <figcaption>DIFF (red = divergence)</figcaption>
+          <a href="desktop-s11248-diff-1440x900.png" target="_blank"><img src="desktop-s11248-diff-1440x900.png" loading="lazy"></a>
+        </figure>
+      </div>
+    </section>
+</body>
+</html>

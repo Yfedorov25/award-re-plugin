@@ -169,8 +169,11 @@ function compareViewport(vpName) {
     const introL = lSettled.filter((x) => Math.abs(x.s) <= 2);
     const scrollL = lSettled.filter((x) => Math.abs(x.s) > 2);
     const props = ['top', 'left', 'w', 'h'];
-    if (lt.moving.opacity) props.push('opacity');
-    if (lt.moving.clipPath) props.push('clipPath');
+    /* виняток 6 CURVES-GATE: data-reveal — o/clip journey-контаміновані,
+       їх steady-правду верифікує піксельний гейт */
+    const isReveal = (lt.attrs || []).some((a) => a === 'data-reveal' || a === 'data-reveal-delay');
+    if (lt.moving.opacity && !isReveal) props.push('opacity');
+    if (lt.moving.clipPath && !isReveal) props.push('clipPath');
     const doCheck = (lx, key) => {
       /* виняток 4 CURVES-GATE: нульовий bbox живого (прихований no-js
          fallback під WebGL) — bbox-чеки пропускаються */

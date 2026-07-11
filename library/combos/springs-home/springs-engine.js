@@ -99,6 +99,11 @@
   for (const el of document.querySelectorAll('*')) {
     if (getComputedStyle(el).position === 'sticky') el.style.position = 'relative';
   }
+  /* shell-фікс: хедер живого видимий у ВСІХ позах (live-shots), а каркас
+     несе запечену o:0 (клас видимості додає рантайм живого) */
+  for (const hdr of document.querySelectorAll('[data-sk-section="header"] > *')) {
+    if (parseFloat(getComputedStyle(hdr).opacity) < 1) hdr.style.opacity = '1';
+  }
 
   /* ---------- резолв прив'язок по сигнатурі ----------
      однакові сигнатури в межах секції роздаються В ПОРЯДКУ ДОКУМЕНТА
@@ -173,6 +178,23 @@
   }
   console.log(`[engine] ${vpName}: прив'язано ${bound.length}/${(cfg.bindings || []).length} (нерозв'язано ${unresolved})`);
 
+  /* steady-нормалізація незабіндьованих (та сама філософія, що
+     NORMALIZE_CSS гейтів): [data-reveal]-заглушки o≈0 запечені з
+     архіву, а живий у спокої показує контент; анімовані елементи
+     мають біндінги і керуються кривими — решту з o≈0 піднімаємо */
+  {
+    const boundEls = new Set(bound.map((b) => b.el));
+    const secIds = new Set(bound.map((b) => b.section));
+    for (const id of secIds) {
+      const w = wrappers[id];
+      if (!w) continue;
+      for (const el of w.querySelectorAll('picture, img, h1, h2, h3, p, [class*="__title"], [class*="caption"]')) {
+        if (boundEls.has(el)) continue;
+        if (parseFloat(getComputedStyle(el).opacity) <= 0.05) el.style.opacity = '1';
+      }
+    }
+  }
+
   /* ---------- кадр: ГІБРИД (S3, ітерація 7) ----------
      1) Цілі З live-матрицями: ВЕРБАТИМ-повтор матриці (hero content —
         ротація ~28°, тільки так відтворюється) + одноразовий boot-fix
@@ -215,15 +237,25 @@
     for (const b of bound) {
       if (b.hasM || b.inShape) continue;
       const r = b.el.getBoundingClientRect();
-      b.nat = { top: r.top + sc, left: r.left };
+      b.nat = { top: r.top + sc, left: r.left, w: r.width, h: r.height };
       const dev = travelOf[b.section] || (() => 0);
-      b.own = (b.curve || []).map((x) => ({
-        s: x.s, dt: x.top + x.s - b.nat.top - dev(x.s), dl: x.left - b.nat.left,
-      }));
+      /* дельти ПО ЦЕНТРУ (для sw=1 тотожно top-left): дозволяє scale
+         з дефолтним origin 50% 50% (спани-кружечки wellness пульсують
+         розміром без матриці — w/h кривої) */
+      const cx = b.nat.left + b.nat.w / 2, cy = b.nat.top + b.nat.h / 2;
+      const mk = (x, sKey) => {
+        const sw = b.nat.w > 1 && x.w > 0 ? x.w / b.nat.w : 1;
+        const sh = b.nat.h > 1 && x.h > 0 ? x.h / b.nat.h : 1;
+        const scaled = Math.abs(sw - 1) > 0.05 || Math.abs(sh - 1) > 0.05;
+        /* центр-анкер ЛИШЕ при реальному scale (спани-кружечки):
+           при статичній різниці розмірів центр ≠ top-left і зсуває */
+        return scaled
+          ? { [sKey]: x[sKey], dt: (x.top + x.h / 2) + (sKey === 's' ? x.s : 0) - cy - (sKey === 's' ? dev(x.s) : 0), dl: (x.left + x.w / 2) - cx, sw, sh }
+          : { [sKey]: x[sKey], dt: x.top + (sKey === 's' ? x.s : 0) - b.nat.top - (sKey === 's' ? dev(x.s) : 0), dl: x.left - b.nat.left, sw: 1, sh: 1 };
+      };
+      b.own = (b.curve || []).map((x) => mk(x, 's'));
       if (b.intro && b.intro.length > 1) {
-        b.ownIntro = b.intro.map((x) => ({
-          input: x.input, dt: x.top - b.nat.top, dl: x.left - b.nat.left,
-        }));
+        b.ownIntro = b.intro.map((x) => mk(x, 'input'));
       }
       /* найближчий власний (own) предок — його динаміка віднімається */
       b.ancOwn = null;
@@ -240,6 +272,17 @@
         o: lerp(a.o ?? 1, c.o ?? 1, t),
         clip: lerpClip(a.clip, c.clip, t),
       });
+      /* геометричний reveal-латч (виняток 6): потік + o-ступінь по
+         входу у вʼюпорт; transform/clip не застосовуються */
+      if (b.revealGeom) {
+        if (b.sAt === undefined) {
+          const r = b.el.getBoundingClientRect();
+          b.sAt = r.top + document.documentElement.scrollTop - innerHeight + 40;
+        }
+        b.el.style.transform = '';
+        b.el.style.opacity = (introMode ? 0 : P) >= b.sAt ? '1' : '0';
+        continue;
+      }
       if (introMode && b.intro && b.intro.length > 1) d = interp(b.intro, 'input', introInput, pick);
       else if (b.curve && b.curve.length) d = interp(b.curve, 's', P, pick);
       else continue;
@@ -248,21 +291,32 @@
         const pre = (b.fix.x || b.fix.y) ? `translate(${b.fix.x.toFixed(2)}px, ${b.fix.y.toFixed(2)}px) ` : '';
         b.el.style.transform = d.m ? pre + fmtM(d.m) : (pre || (b.seedTransform ? 'translate(0px, 0px)' : ''));
       } else {
-        const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t) });
+        const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t), sw: lerp(a.sw ?? 1, c.sw ?? 1, t), sh: lerp(a.sh ?? 1, c.sh ?? 1, t) });
         let dd = (introMode && b.ownIntro)
           ? interp(b.ownIntro, 'input', introInput, dpick)
           : (b.own && b.own.length ? interp(b.own, 's', introMode ? 0 : P, dpick) : null);
         /* мінус динаміка власного предка (пін батька вже рухає дитину) */
         if (dd && b.ancOwn && !introMode && b.ancOwn.own && b.ancOwn.own.length) {
           const ad = interp(b.ancOwn.own, 's', P, dpick);
-          if (ad) dd = { dt: dd.dt - ad.dt, dl: dd.dl - ad.dl };
+          if (ad) dd = { ...dd, dt: dd.dt - ad.dt, dl: dd.dl - ad.dl };
         }
-        if (dd && (Math.abs(dd.dt) > 0.05 || Math.abs(dd.dl) > 0.05)) {
-          b.el.style.transform = `translate(${dd.dl.toFixed(2)}px, ${dd.dt.toFixed(2)}px)`;
+        const hasScale = dd && (Math.abs(dd.sw - 1) > 0.03 || Math.abs(dd.sh - 1) > 0.03);
+        if (dd && (Math.abs(dd.dt) > 0.05 || Math.abs(dd.dl) > 0.05 || hasScale)) {
+          b.el.style.transform = `translate(${dd.dl.toFixed(2)}px, ${dd.dt.toFixed(2)}px)` + (hasScale ? ` scale(${dd.sw.toFixed(4)}, ${dd.sh.toFixed(4)})` : '');
         } else b.el.style.transform = b.seedTransform ? 'translate(0px, 0px)' : '';
       }
-      if (b.moving.opacity || (b.restOpacity !== null && b.restOpacity !== 1)) b.el.style.opacity = String(Math.round(d.o * 1000) / 1000);
-      if (d.clip && b.moving.clipPath) b.el.style.clipPath = d.clip;
+      /* inline opacity ЗАВЖДИ, де є live-значення: каркас (архів JS-off)
+         має запечені o:0 у місцях, де живий рантайм показує (hero-галерея) */
+      if (b.restOpacity !== null && Number.isFinite(d.o)) b.el.style.opacity = String(Math.round(d.o * 1000) / 1000);
+      if (b.clipStep) {
+        /* clip-вайп: геометричний степ (закритий до входу у вʼюпорт) */
+        if (b.sAtGeom === undefined) {
+          const r = b.el.getBoundingClientRect();
+          b.sAtGeom = r.top + document.documentElement.scrollTop - innerHeight + 40;
+        }
+        const open = (introMode ? 0 : P) >= b.sAtGeom;
+        b.el.style.clipPath = (open ? b.clipStep.open : b.clipStep.closed) || '';
+      } else if (d.clip && b.moving.clipPath) b.el.style.clipPath = d.clip;
       else if (b.restClip && !b.moving.clipPath && !b.el.style.clipPath) b.el.style.clipPath = b.restClip;
     }
     /* травели секцій (hero-пін, place-bg, footer-пін) — на обгортках */
@@ -307,6 +361,8 @@
       requestAnimationFrame(raf);
     })();
     bootFix(false);
+    const qm = new URLSearchParams(location.search);
+    if (qm.has('s')) window.scrollTo(0, parseFloat(qm.get('s')) || 0);
     return;
   }
 
@@ -400,5 +456,24 @@
     requestAnimationFrame(raf);
   })();
   bootFix(!!gate);
+  /* детермінована ПОЗА для піксельної звірки (VISUAL-GATE):
+     ?s=N — скрол-стан (та сама поза, що дає движок на цьому s),
+     ?intro=I — інтро-стан hero по cumulative input */
+  {
+    const q = new URLSearchParams(location.search);
+    if (q.has('s')) {
+      const S = parseFloat(q.get('s')) || 0;
+      mode = 'scroll';
+      introTarget = introShown = gate ? gate.iEnd : 0;
+      idx = ladder.reduce((bi, v, i2) => (Math.abs(v - S) < Math.abs(ladder[bi] - S) ? i2 : bi), 0);
+      s = target = S;
+      setScroll(S);
+      applyBindings(S, gate ? gate.iEnd : 0, false);
+    } else if (q.has('intro') && gate) {
+      const I = Math.min(parseFloat(q.get('intro')) || 0, gate.iEnd);
+      introTarget = introShown = I;
+      applyBindings(0, I, true);
+    }
+  }
   console.log(`[engine] desktop: драбина ${ladder.length} снапів, iEnd=${gate ? gate.iEnd : '—'}`);
 })();

@@ -118,9 +118,81 @@ function buildViewport(vpName) {
         .sort((a, b) => a.s - b.s)
         .filter((x) => { const k = Math.round(x.s); if (seen.has(k)) return false; seen.add(k); return true; })
         .map((x) => ({ s: r1(toPage(x.s)), top: x.top, left: x.left, w: x.w, h: x.h, o: +x.opacity, clip: x.clipPath, m: parseMatrix(x.transform) }));
+      /* REVEAL-ЛАТЧ (S5-розкопка): one-shot ревіл (opacity 0→1 і стоїть) —
+         подія тригера + часовий перехід, НЕ функція s: карта ловить
+         transient-середину і «заморожує» її. Латчимо ВЛАСТИВОСТІ по
+         ступеню (до s_reveal = стартові, після = фінальні), НЕ криву:
+         bbox-динаміка (піни/потік) лишається. m латчиться лише якщо
+         він анімується ТІЛЬКИ у вікні ревілу (інакше це паралакс). */
+      if (curve.length > 2) {
+        const os = curve.map((x) => x.o);
+        const isRevealIn = os[0] <= 0.15 && os[os.length - 1] >= 0.9;
+        if (isRevealIn) {
+          /* точка тригера — з СИРИХ семплів (перший, де o>0.05: момент
+             старту переходу; dedupe лишає ранні transient-середини і
+             зсуває поріг на сусідній снап) */
+          const rawSorted = [...raw].sort((a, b) => a.s - b.s);
+          const trig = rawSorted.find((x) => +x.opacity > 0.05 && x.s > 2);
+          const at = trig ? { s: r1(toPage(trig.s)) } : null;
+          if (at) {
+            const first = curve[0], last = curve[curve.length - 1];
+            const post = curve.filter((x) => x.o >= 0.95);
+            const tySpread = (arr) => {
+              const tys = arr.map((x) => (x.m ? x.m[5] : 0));
+              return tys.length ? Math.max(...tys) - Math.min(...tys) : 0;
+            };
+            const mOnlyReveal = tySpread(post) < 5;
+            for (const x of curve) {
+              const after = x.s >= at.s;
+              x.o = after ? last.o : first.o;
+              x.clip = after ? last.clip : first.clip;
+              if (mOnlyReveal) x.m = after ? last.m : first.m;
+            }
+          }
+        }
+      }
+      /* CLIP-ВАЙП (one-shot розкриття, transients ловлять весь сввіп
+         полігона): closed→open один раз, монотонно — латч у СТЕП з
+         ГЕОМЕТРИЧНИМ тригером (map-тригер journey-зсунутий): движок
+         відкриє на вході у вʼюпорт. Немонотонні вайпи (wellness-слайди
+         туди-сюди) не чіпаємо. */
+      let clipStep = null;
+      if (curve.length > 2) {
+        const cFirst = curve[0].clip || 'none', cLast = curve[curve.length - 1].clip || 'none';
+        if (cFirst !== cLast) {
+          const firstNums = curve.map((x) => {
+            const n = ((x.clip || '').match(/-?\d*\.?\d+/g) || []).map(Number);
+            return n.length > 1 ? n[1] : null;
+          }).filter((v) => v !== null);
+          const mono = firstNums.every((v, i) => i === 0 || v <= firstNums[i - 1] + 0.5)
+            || firstNums.every((v, i) => i === 0 || v >= firstNums[i - 1] - 0.5);
+          if (mono) {
+            clipStep = { closed: cFirst === 'none' ? null : cFirst, open: cLast === 'none' ? null : cLast };
+            for (const x of curve) x.clip = null;
+          }
+        }
+      }
+      /* SPLITTING-обгортки: живий анімує дочірні спани, обгортку гасить —
+         у репліці спліта немає, тримаємо видимий фінал */
+      if ((t.cls || '').match(/\bsplitting\b/)) {
+        const lastM = curve.length ? curve[curve.length - 1].m : null;
+        for (const x of curve) { x.o = 1; x.clip = null; x.m = lastM; }
+      }
+      /* БІНАРНИЙ ФЛІП o (1→0 без проміжних): «підготовка до ревілу»
+         рантаймом — steady-правда живого = видимий потік; геометричний
+         латч у движку (виняток 6 CURVES-GATE). Скраб-фейди (плавні
+         проміжні значення, напр. l-intro__opening) НЕ чіпаємо. */
+      const hasRevealAttr = (t.attrs || []).some((a) => a === 'data-reveal' || a === 'data-reveal-delay');
+      const oLast = curve.length ? curve[curve.length - 1].o : 1;
+      const oDistinct = new Set(curve.map((x) => Math.round((x.o ?? 1) * 10) / 10));
+      const revealGeom = oLast <= 0.15 && oDistinct.size <= 2
+        && (hasRevealAttr || (t.text || '').length > 2);
+      if (revealGeom) for (const x of curve) { x.o = null; x.clip = null; x.m = null; }
       const restT = t.samples[0]?.transform;
       if (!anim && intro.length < 2 && !t.moving.viewportTop) continue;
       bindings.push({
+        revealGeom: revealGeom || undefined,
+        clipStep: clipStep || undefined,
         section: secId,
         sig: { tag: t.tag, cls: t.cls, text: t.text, attrs: t.attrs || [] },
         moving: t.moving,
