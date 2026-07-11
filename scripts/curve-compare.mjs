@@ -92,7 +92,12 @@ function compareViewport(vpName) {
   /* матчинг цілей: групи ОДНАКОВИХ сигнатур паруються k↔k у порядку
      списку (SETUP_FN обходить документ детерміновано на обох сторонах);
      безкласові img/span матчаться в межах své tag-групи */
-  const sigKey = (t) => `${t.tag}|${(t.cls || '').trim()}|${(t.text || '').slice(0, 25)}`;
+  /* ключ = tag + перший ЗМІСТОВНИЙ клас: генеровані (gd-/gm-) — наш
+     артефакт каркаса, splitting/words/chars/is-inview/is-inited — додає
+     рантайм живого (пастка 2), noscript-текст різниться — без тексту;
+     близнюків розводить nearest-bbox пейринг */
+  const RUNTIME_CLS = /^(g[dm]-\d+|is-inview|is-inited|splitting|words|chars|is-visible)$/;
+  const sigKey = (t) => `${t.tag}|${((t.cls || '').trim().split(/\s+/).find((c) => c && !RUNTIME_CLS.test(c))) || ''}`;
   const groupBy = (targets) => {
     const g = {};
     targets.forEach((t) => (g[sigKey(t)] = g[sigKey(t)] || []).push(t));
@@ -101,11 +106,26 @@ function compareViewport(vpName) {
   const gL = groupBy(L.targets), gO = groupBy(O.targets);
   const pairs = [];
   const usedO = new Set();
+  /* у межах sig-групи паруємо по НАЙБЛИЖЧОМУ rest-bbox (індексне k↔k
+     хрестило близнюків, коли списки різної довжини — розкопка іт.7) */
+  /* глобально-жадібний пейринг (всі пари групи за зростанням відстані):
+     по-цільовий greedy лишав останній live-цілі «недоїдок» (іт.16) */
   for (const [key, lts] of Object.entries(gL)) {
     const ots = gO[key] || [];
-    for (let k = 0; k < lts.length && k < ots.length; k++) {
-      pairs.push([lts[k], ots[k]]);
-      usedO.add(ots[k].i);
+    const all = [];
+    for (const lt of lts) {
+      const lr = lt.samples[0];
+      for (const ot of ots) {
+        const or2 = ot.samples[0];
+        all.push({ lt, ot, d: Math.abs(lr.top - or2.top) + Math.abs(lr.left - or2.left) });
+      }
+    }
+    all.sort((a, b) => a.d - b.d);
+    const doneL = new Set();
+    for (const { lt, ot } of all) {
+      if (doneL.has(lt) || usedO.has(ot.i)) continue;
+      doneL.add(lt); usedO.add(ot.i);
+      pairs.push([lt, ot]);
     }
   }
   /* решта — колишній greedy по скору (сигнатури, що розійшлись класами) */
@@ -121,18 +141,30 @@ function compareViewport(vpName) {
   }
   const matchRatio = pairs.length / L.targets.length;
 
-  let checks = 0, ok = 0;
+  let checks = 0, ok = 0, skipped = 0;
   const worst = [];
   for (const [lt, ot] of pairs) {
     /* точки порівняння: осілі семпли живої; ПЛАТО-ШУМ (wellness-зона: одна
        й та сама поза сторінки, знята ~100 разів із джитером одометра ±50)
-       кластеризуємо по s — одна перевірка на кластер, не сто */
-    const seenS = new Set();
-    const lSettled = lt.samples.filter((x) => !x.t).filter((x) => {
-      const k = Math.round(x.s / 12);
-      if (seenS.has(k)) return false;
-      seenS.add(k); return true;
-    });
+       кластеризуємо по s — одна перевірка на кластер, не сто.
+       Виняток 5 CURVES-GATE: кластер, де live САМ собі суперечить
+       (розкид top > поріг) — незмірюваний, пропускається. */
+    const allSettled = lt.samples.filter((x) => !x.t);
+    /* виняток 5: самонеузгодженість міряється на МАЙЖЕ ОДНАКОВИХ s
+       (2px бакети — 12px хибно ловив крутий схил); дедуп чеків — 12px */
+    const fine = {};
+    for (const x of allSettled) (fine[Math.round(x.s / 2)] = fine[Math.round(x.s / 2)] || []).push(x);
+    const noisyFine = new Set();
+    for (const [k, arr] of Object.entries(fine)) {
+      const tops = arr.map((x) => x.top);
+      if (Math.max(...tops) - Math.min(...tops) > TOL.pos) noisyFine.add(k);
+    }
+    const clusters = {};
+    for (const x of allSettled) {
+      if (noisyFine.has(String(Math.round(x.s / 2)))) { skipped++; continue; }
+      (clusters[Math.round(x.s / 12)] = clusters[Math.round(x.s / 12)] || []).push(x);
+    }
+    const lSettled = Object.values(clusters).map((arr) => arr[0]);
     const oSamples = ot.samples;
     const introL = lSettled.filter((x) => Math.abs(x.s) <= 2);
     const scrollL = lSettled.filter((x) => Math.abs(x.s) > 2);
@@ -140,7 +172,11 @@ function compareViewport(vpName) {
     if (lt.moving.opacity) props.push('opacity');
     if (lt.moving.clipPath) props.push('clipPath');
     const doCheck = (lx, key) => {
+      /* виняток 4 CURVES-GATE: нульовий bbox живого (прихований no-js
+         fallback під WebGL) — bbox-чеки пропускаються */
+      const liveHidden = lx.w === 0 && lx.h === 0;
       for (const p of props) {
+        if (liveHidden && p !== 'opacity' && p !== 'clipPath') continue;
         const lv = p === 'opacity' ? +lx.opacity : lx[p];
         let ov = interpVal(oSamples, key, lx[key], p === 'opacity' ? 'opacity' : p);
         if (p === 'opacity' && ov !== undefined) ov = +ov;
@@ -166,7 +202,7 @@ function compareViewport(vpName) {
   return {
     matchRatio: Math.round(matchRatio * 1000) / 10,
     curveScore: Math.round(score * 1000) / 10,
-    checks, matched: pairs.length, liveTargets: L.targets.length,
+    checks, skipped, matched: pairs.length, liveTargets: L.targets.length,
     pass, worst: worst.slice(0, 12),
   };
 }
@@ -178,7 +214,7 @@ for (const vp of (vpArg === 'both' ? ['desktop', 'mobile'] : [vpArg])) {
   report.viewports[vp] = r;
   if (r.skip) { console.log(`${secId} ${vp}: SKIP (${r.skip})`); continue; }
   if (r.fail) { console.log(`${secId} ${vp}: FAIL (${r.fail})`); failed = true; continue; }
-  console.log(`${secId} ${vp}: match ${r.matchRatio}% (${r.matched}/${r.liveTargets}) · криві ${r.curveScore}% з ${r.checks} перевірок → ${r.pass ? 'PASS' : 'FAIL'}`);
+  console.log(`${secId} ${vp}: match ${r.matchRatio}% (${r.matched}/${r.liveTargets}) · криві ${r.curveScore}% з ${r.checks} перевірок${r.skipped ? ` (${r.skipped} семплів пропущено — виняток 5)` : ''} → ${r.pass ? 'PASS' : 'FAIL'}`);
   if (!r.pass) {
     failed = true;
     for (const w of r.worst) console.log(`    ✗ ${w.t} ${w.p}@${w.at}: live=${w.live} ours=${w.ours}`);

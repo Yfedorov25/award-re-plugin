@@ -97,10 +97,24 @@ function buildViewport(vpName) {
           intro.push({ input: x.input, top: x.top, left: x.left, w: x.w, h: x.h, o: +x.opacity, m: parseMatrix(x.transform) });
         }
       }
-      /* скрол-фаза: семпли по s (осілі + transient), унікальні по s */
+      /* скрол-фаза: семпли по s (осілі + transient), унікальні по s.
+         ЧИСТКА самонеузгоджених кластерів (принцип = виняток 5 CURVES-GATE):
+         на слайдер-плато джитер одометра ±50 змішує temporal- і s-порядок —
+         суперечливі точки (розкид top >10px в межах ±12px s) не визначають
+         криву і псують інтерп коліна піна. Викидаємо ВЕСЬ такий кластер. */
+      const raw = t.samples.slice(firstMove < 0 ? t.samples.length : Math.max(0, firstMove - 1));
+      /* кластер 2px: лише МАЙЖЕ ОДНАКОВІ s — крутий схил (12px кластер
+         давав хибний «шум» і дірку в кривій, розкопка іт.10) */
+      const clusters = {};
+      for (const x of raw) (clusters[Math.round(x.s / 2)] = clusters[Math.round(x.s / 2)] || []).push(x);
+      const noisy = new Set();
+      for (const [k, arr] of Object.entries(clusters)) {
+        const tops = arr.map((x) => x.top);
+        if (Math.max(...tops) - Math.min(...tops) > 10) noisy.add(k);
+      }
       const seen = new Set();
-      const curve = t.samples
-        .slice(firstMove < 0 ? t.samples.length : Math.max(0, firstMove - 1))
+      const curve = raw
+        .filter((x) => !noisy.has(String(Math.round(x.s / 2))))
         .sort((a, b) => a.s - b.s)
         .filter((x) => { const k = Math.round(x.s); if (seen.has(k)) return false; seen.add(k); return true; })
         .map((x) => ({ s: r1(toPage(x.s)), top: x.top, left: x.left, w: x.w, h: x.h, o: +x.opacity, clip: x.clipPath, m: parseMatrix(x.transform) }));

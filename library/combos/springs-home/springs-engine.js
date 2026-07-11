@@ -136,12 +136,31 @@
           .filter((el) => el.tagName.toLowerCase() === sig.tag && !used.has(el))
           .map((el) => ({ el, score: candScore(el, sig) }))
           .filter((x) => x.score > 0.5 || (!sig.cls && !sig.text));
-        /* док-порядок збережено querySelectorAll; беремо перших N з найкращих:
-           відсікаємо слабкі, лишаємо у док-порядку */
         const maxScore = Math.max(...cands.map((x) => x.score), 0);
         const good = cands.filter((x) => x.score >= maxScore - 0.3);
-        for (let k = 0; k < grp.length; k++) {
-          if (k < good.length) { resolved[grp[k].i] = good[k].el; used.add(good[k].el); }
+        /* щільна група (біндінгів ≥ половини кандидатів — набори майже
+           збігаються): ДОК-ПОРЯДОК структурно правильний. Розріджена
+           (live взяв кілька з багатьох, напр. 3 parallax-img з 20 lazy):
+           найближчий НЕЙТРАЛІЗОВАНИЙ rest-bbox (мінус власний transform;
+           без transform нейтралізація неможлива — зсув у матриці батька,
+           тому щільним групам proximity бреше — розкопки іт.13-15) */
+        {
+          const sc0 = window.scrollY || 0;
+          const rects = good.map((x) => { const r = x.el.getBoundingClientRect(); return { top: r.top + sc0, left: r.left }; });
+          const freeIdx = new Set(good.map((_, i) => i));
+          for (const it of grp) {
+            const raw = (it.b.intro && it.b.intro[0]) || (it.b.curve && it.b.curve[0]);
+            const rest = raw && {
+              top: raw.top - (raw.m ? raw.m[5] : 0),
+              left: raw.left - (raw.m ? raw.m[4] : 0),
+            };
+            let pick = null, best = Infinity;
+            for (const i of freeIdx) {
+              const d = rest ? Math.abs(rects[i].top - rest.top) + Math.abs(rects[i].left - rest.left) : i;
+              if (d < best) { best = d; pick = i; }
+            }
+            if (pick !== null) { resolved[it.i] = good[pick].el; used.add(good[pick].el); freeIdx.delete(pick); }
+          }
         }
       }
     }
@@ -162,17 +181,54 @@
         background): bbox-delta translate від naturals.
      transform-origin не чіпаємо (запечений зі спеки = live). */
   const bootScroll2 = window.scrollY || 0;
+  /* Класифікація (розкопки іт.6-8):
+     - shape-матриця (ротація/скейл — лінійна частина не одинична):
+       ВЕРБАТИМ повтор + boot-fix статики каркаса.
+     - чистий translate УСЕРЕДИНІ shape-предка (елементи каруселі в
+       ротованому content): вербатим у ЛОКАЛЬНИХ координатах (екранна
+       bbox-дельта в ротованому базисі бреше).
+     - решта муверів: bbox-delta translate (сам поглинає статику каркаса),
+       з відніманням динаміки найближчого власного предка (щоб пін
+       батька не подвоювався в дитині). */
+  const shapeM = (m) => m && (Math.abs(m[0] - 1) > 0.02 || Math.abs(m[3] - 1) > 0.02 || Math.abs(m[1]) > 0.02 || Math.abs(m[2]) > 0.02);
   for (const b of bound) {
     b.el.style.willChange = 'transform';
-    b.hasM = (b.curve || []).some((x) => x.m) || (b.intro || []).some((x) => x.m);
+    b.hasM = (b.curve || []).some((x) => shapeM(x.m)) || (b.intro || []).some((x) => shapeM(x.m));
     const r = b.el.getBoundingClientRect();
     b.nat = { top: r.top + bootScroll2, left: r.left };
     b.fix = { x: 0, y: 0 };
-    if (!b.hasM) {
+  }
+  for (const b of bound) {
+    b.anc = null;
+    let p = b.el.parentElement;
+    while (p && !b.anc) {
+      const hit = bound.find((x) => x !== b && x.el === p);
+      if (hit) b.anc = hit;
+      p = p.parentElement;
+    }
+    b.inShape = false;
+    let a = b.anc;
+    while (a) { if (a.hasM) { b.inShape = true; break; } a = a.anc; }
+  }
+  function buildOwn() {
+    const sc = window.scrollY || 0;
+    for (const b of bound) {
+      if (b.hasM || b.inShape) continue;
+      const r = b.el.getBoundingClientRect();
+      b.nat = { top: r.top + sc, left: r.left };
       const dev = travelOf[b.section] || (() => 0);
       b.own = (b.curve || []).map((x) => ({
         s: x.s, dt: x.top + x.s - b.nat.top - dev(x.s), dl: x.left - b.nat.left,
       }));
+      if (b.intro && b.intro.length > 1) {
+        b.ownIntro = b.intro.map((x) => ({
+          input: x.input, dt: x.top - b.nat.top, dl: x.left - b.nat.left,
+        }));
+      }
+      /* найближчий власний (own) предок — його динаміка віднімається */
+      b.ancOwn = null;
+      let a = b.anc;
+      while (a) { if (!a.hasM && !a.inShape) { b.ancOwn = a; break; } a = a.anc; }
     }
   }
   const fmtM = (m) => `matrix(${m.map((v) => Math.round(v * 10000) / 10000).join(',')})`;
@@ -188,11 +244,19 @@
       else if (b.curve && b.curve.length) d = interp(b.curve, 's', P, pick);
       else continue;
       if (!d) continue;
-      if (b.hasM) {
+      if (b.hasM || b.inShape) {
         const pre = (b.fix.x || b.fix.y) ? `translate(${b.fix.x.toFixed(2)}px, ${b.fix.y.toFixed(2)}px) ` : '';
         b.el.style.transform = d.m ? pre + fmtM(d.m) : (pre || (b.seedTransform ? 'translate(0px, 0px)' : ''));
       } else {
-        const dd = interp(b.own, 's', introMode ? 0 : P, (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t) }));
+        const dpick = (a, c, t) => ({ dt: lerp(a.dt, c.dt, t), dl: lerp(a.dl, c.dl, t) });
+        let dd = (introMode && b.ownIntro)
+          ? interp(b.ownIntro, 'input', introInput, dpick)
+          : (b.own && b.own.length ? interp(b.own, 's', introMode ? 0 : P, dpick) : null);
+        /* мінус динаміка власного предка (пін батька вже рухає дитину) */
+        if (dd && b.ancOwn && !introMode && b.ancOwn.own && b.ancOwn.own.length) {
+          const ad = interp(b.ancOwn.own, 's', P, dpick);
+          if (ad) dd = { dt: dd.dt - ad.dt, dl: dd.dl - ad.dl };
+        }
         if (dd && (Math.abs(dd.dt) > 0.05 || Math.abs(dd.dl) > 0.05)) {
           b.el.style.transform = `translate(${dd.dl.toFixed(2)}px, ${dd.dt.toFixed(2)}px)`;
         } else b.el.style.transform = b.seedTransform ? 'translate(0px, 0px)' : '';
@@ -211,6 +275,7 @@
      rest-семпла live і компенсуємо статичний зсув каркаса (батьки перші,
      заміри між фіксами — зсув батька рухає дітей) */
   function bootFix(introMode) {
+    buildOwn();
     applyBindings(0, 0, introMode);
     const withM = bound.filter((b) => b.hasM);
     withM.forEach((b) => {
@@ -260,6 +325,18 @@
   let idx = 0, target = ladder[0], s = ladder[0];
   let travelling = false;
 
+  /* снап-крок комітиться ПІСЛЯ КІНЦЯ wheel-burst (140мс тиші) — так
+     працює живий Lethargy: травел стартує по завершенню жесту
+     (розкопка іт.12: старт з першої події з'їдав середину кривої) */
+  let burstAcc = 0, burstTimer = null;
+  const commitBurst = () => {
+    burstTimer = null;
+    const dy = burstAcc;
+    burstAcc = 0;
+    if (travelling || Math.abs(dy) < 4) return;
+    if (dy > 0 && idx < ladder.length - 1) { idx++; target = ladder[idx]; travelling = true; }
+    else if (dy < 0 && idx > 0) { idx--; target = ladder[idx]; travelling = true; }
+  };
   addEventListener('wheel', (e) => {
     e.preventDefault();
     const dy = e.deltaY;
@@ -270,15 +347,15 @@
           const overflow = introTarget - gate.iEnd;
           introTarget = gate.iEnd;
           mode = 'scroll';
-          if (overflow > 30 && idx < ladder.length - 1) { idx++; target = ladder[idx]; travelling = true; }
+          if (overflow > 30) { burstAcc = overflow; if (!burstTimer) burstTimer = setTimeout(commitBurst, 140); }
         }
       }
       return;
     }
     if (travelling) return;
-    if (Math.abs(dy) < 4) return;
-    if (dy > 0 && idx < ladder.length - 1) { idx++; target = ladder[idx]; travelling = true; }
-    else if (dy < 0 && idx > 0) { idx--; target = ladder[idx]; travelling = true; }
+    burstAcc += dy;
+    clearTimeout(burstTimer);
+    burstTimer = setTimeout(commitBurst, 140);
   }, { passive: false });
 
   /* дебаг-стан для проб (visual-sync/розкопки) */
@@ -293,11 +370,17 @@
     };
   });
 
-  (function raf() {
+  /* лерп У WALL-TIME (0.1 на кадр 60fps): rAF без тротлінга (headless,
+     120Hz-екрани) інакше пролітає травел миттєво — розкопка іт.11 */
+  let lastT = performance.now();
+  (function raf(now) {
+    const dtMs = Math.min(100, (now || performance.now()) - lastT);
+    lastT = now || performance.now();
+    const k = 1 - Math.pow(0.9, dtMs / 16.67);
     let dirty = false;
     if (mode === 'intro' || introShown < gate?.iEnd - 0.5) {
       if (Math.abs(introTarget - introShown) > 0.3) {
-        introShown = lerp(introShown, introTarget, 0.1);
+        introShown = lerp(introShown, introTarget, k);
         if (Math.abs(introTarget - introShown) < 0.3) introShown = introTarget;
         applyBindings(0, introShown, true);
         dirty = true;
@@ -305,7 +388,7 @@
     }
     if (mode === 'scroll') {
       if (Math.abs(target - s) > 0.3) {
-        s = lerp(s, target, 0.1);
+        s = lerp(s, target, k);
         if (Math.abs(target - s) < 0.3) s = target;
         dirty = true;
       } else if (travelling) travelling = false;
