@@ -931,6 +931,24 @@
     #a-intro::after { content: ''; display: block; height: 100svh; }
     #a-intro { margin-bottom: -100svh; }
     #a-intro + .act { position: relative; z-index: 2; background: #fff; }
+    /* с25 motion-ib: карта ПІНИТЬСЯ на top 125px (жива крива: map.top завмирає
+       на ~125 доки stickyDy 0→820, ~820px скролу) — сповільнює прохід info-bottom
+       на 820px → фаза 2 фото наближається до live (наш був швидший, розрив
+       наростав 103→209px). Спейсер дає pin-хід, margin-bottom нуль-сумний;
+       компенсовано в isw-arch mt (revolves @8323 недоторканий). */
+    #a-intro + .act .ib-map-pin { position: sticky; top: 125px; }
+    #a-intro + .act .ib-map-spacer { height: 820px; }  /* сусід-спейсер дає pin-хід (карта липне 125 доки він прокручується); НЕ ::after карти — той робив sticky-елемент високим */
+    #a-intro + .act { margin-bottom: -656px; }  /* с25: спейсер 820 дає pin-хід; margin −656 = −(820−164), бо контент секції став на 164 коротший (фото 690 +126 / Here 14px −158 / map 690) → docH назад 33608, revolves недоторканий */
+    /* с25 rt-проба живого DOM: info-bottom grid=1420, 2 фото по 690, gap20,
+       ЛІВОРУЧ; map=690 (ширина ОДНОГО фото, не fullbleed); "Here..." 14px
+       UPPERCASE ліворуч w453. Наш був: фото 542, map 1114, Here 37px центр. */
+    #a-intro + .act .ib-grid { width: min(1420px, 97vw); margin-left: calc(50% - min(710px, 48.5vw));
+      grid-template-columns: 690px 690px; gap: 20px; justify-content: start; }
+    #a-intro + .act .ib-grid img { border-radius: 6px; }
+    #a-intro + .act .ib-map-pin { width: min(1420px, 97vw); margin-left: calc(50% - min(710px, 48.5vw)); }
+    #a-intro + .act .ib-map { width: 690px; }
+    #a-intro + .act .m-invest { font-size: 14px !important; line-height: 1.35; font-weight: 500;
+      text-transform: uppercase; text-align: left; max-width: 453px; margin-left: calc(50% - min(710px, 48.5vw)); letter-spacing: .01em; }
     #headquarters { padding-top: 6vh; margin-top: 84px; padding-bottom: 4vh; }  /* с23 px-solve: rev→hq +84 (margin — щоб їхав і бокс-анкор) */
     /* pin-curves: свапи живого пізніші за наші → старти пінів зсунуто вниз
        (arch +480px, hq +640px); span'и вкоротились через stepSvh 91/80 */
@@ -1187,7 +1205,11 @@
     <p>A large corporation can reach a new level by establishing a representative headquarters in <strong>Building 3</strong>.</p>
     <a class="cta-link" href="/combos/funnel-air/combo-lab.html">Learn more <span>›</span></a>
   </div>
-  <picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xs.webp"><img class="ib-map" loading="lazy" alt="AIR location map" src="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xxl.webp"></picture>
+  <!-- с25 motion-ib: жива карта (genplan) ПІНИТЬСЯ на top~125 на ~820px скролу
+       (stickyDy 0→820) — live sticky--under-next. Спейсер дає pin-хід (sticky
+       живе лише в content box, урок с21), нуль-сумний margin компенсує. -->
+  <div class="ib-map-pin"><picture><source media="(max-width:576px)" srcset="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xs.webp"><img class="ib-map" loading="lazy" alt="AIR location map" src="https://aircenter.space/assets/images/media/about/3.info-bottom/map@xxl.webp"></picture></div>
+  <div class="ib-map-spacer" aria-hidden="true"></div>
 </section>
 
 <!-- ═══ 3 · ARCHITECTURE (light) — image-slider-wipe ═══ -->
