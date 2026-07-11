@@ -32,6 +32,8 @@ const maps = Object.fromEntries(MAPPED.map((id) => [
   id, JSON.parse(readFileSync(join(site.outDir, `animation-map-${id}.json`), 'utf8')),
 ]));
 console.log(`карти секцій: ${MAPPED.join(', ')}`);
+const textureMapPath = join(site.outDir, 'texture-map.json');
+const textureMap = existsSync(textureMapPath) ? JSON.parse(readFileSync(textureMapPath, 'utf8')) : null;
 const shellDataPath = join(site.outDir, 'shell-bg.json');
 const shellData = existsSync(shellDataPath) ? JSON.parse(readFileSync(shellDataPath, 'utf8')) : null;
 /* timing-карти (S8b): часові переходи при стоячому одометрі (вайпи
@@ -398,6 +400,13 @@ function buildViewport(vpName) {
     maxScroll: sc.ladder[sc.ladder.length - 1],
     sections, travels,
     shell: Object.keys(shellSections).length ? shellSections : null,
+    /* канвас-текстури (S9a): вміст мертвого WebGL-канваса репліки =
+       bg-асет мобільного варіанта тієї ж секції (texture-map.json).
+       ЛИШЕ секції з fit (texture-fit.mjs registration: scale/offset з
+       кореляції з live-шотом — числа з даних; голий cover зумив 2×) */
+    /* ВИМКНЕНО: MAE-фіт на темному блюрі дає хибний оптимум (21.9 проти
+       15.5 бази піксель-гейтом) — S9: edge/gradient-метрика в texture-fit */
+    textures: null,
     introGate: iEnd ? { iEnd } : null,
     bindings,
     footerTop: footer ? footer.top0 : null,

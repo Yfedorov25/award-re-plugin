@@ -109,6 +109,33 @@
     w.insertBefore(slab, w.firstChild);
   }
 
+  /* канвас-текстури (S9a, texture-map → choreo.textures): у live вміст
+     малює WebGL-канвас (жінка wellness), наш канвас мертвий/прозорий —
+     underlay-див з bg-асетом мобільного варіанта секції (закон 4) */
+  for (const [id, tx] of Object.entries(cfg.textures || {})) {
+    const w = wrappers[id];
+    if (!w || !tx || !tx.asset) continue;
+    for (const spec of tx.canvases || []) {
+      const cls = (spec.canvasCls || '').split(/\s+/)[0];
+      if (!cls) continue;
+      for (const c of w.querySelectorAll('canvas.' + CSS.escape(cls))) {
+        const p = c.parentElement;
+        if (!p || p.querySelector(':scope > .sk-canvas-tx')) continue;
+        if (getComputedStyle(p).position === 'static') p.style.position = 'relative';
+        const u = document.createElement('div');
+        u.className = 'sk-canvas-tx';
+        /* фреймінг з texture-fit (registration до live-шота): px відносно
+           бокса канваса; без fit underlay не створюється (choreo фільтрує) */
+        const f = tx.fit;
+        const bgGeom = f
+          ? 'background-size:' + f.sizePx[0] + 'px ' + f.sizePx[1] + 'px;background-position:' + f.posPx[0] + 'px ' + f.posPx[1] + 'px;'
+          : 'background-size:cover;background-position:center;';
+        u.style.cssText = 'position:absolute;inset:0;background-image:url("' + tx.asset + '");background-repeat:no-repeat;' + bgGeom + 'pointer-events:none;';
+        p.insertBefore(u, c);
+      }
+    }
+  }
+
   /* живий движок на ініті: знімає нативний sticky (веде піни transform'ами)
      і ЗНІМАЄ is-invisible--js (пастка 2 — каркас = стан архіву JS-off, де
      клас ще стоїть і ховає картинки). Робимо ті ж два кроки на ОБОХ
