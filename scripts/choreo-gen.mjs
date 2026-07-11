@@ -73,6 +73,35 @@ const INTRO_T = existsSync(introTimingPath) ? JSON.parse(readFileSync(introTimin
 if (INTRO_T) console.log('intro-timing: є (блоків desktop ' + (INTRO_T.viewports?.desktop?.blocks?.length ?? 0) + ')');
 
 const r1 = (v) => Math.round(v * 10) / 10;
+/* СОФТ-СКОРИНГ сигнатур (S12, пастки 2+48): точна рівність cls ламається
+   (рантайм додає/знімає класи), тому tag обов'язково, справжній src
+   вирішальний, далі перетин класових токенів + префікс тексту */
+const sigSoftScore = (sig, t) => {
+  if (sig.tag !== t.tag) return -1;
+  let sc = 0;
+  const junk = (s) => !s || s === 'svg%3E';
+  if (!junk(sig.src) && !junk(t.src)) {
+    if (sig.src === t.src) sc += 4; else return -1;
+  }
+  const bt = new Set((sig.cls || '').split(/\s+/).filter(Boolean));
+  const tt = (t.cls || '').split(/\s+/).filter(Boolean);
+  const inter = tt.filter((x) => bt.has(x)).length;
+  sc += 2 * inter / Math.max(bt.size, tt.length, 1);
+  if (sig.text && t.text && sig.text.slice(0, 20) === t.text.slice(0, 20)) sc += 1;
+  return sc;
+};
+/* площа полігона clip (спільна для вайп-логіки) */
+const polyAreaOf = (c) => {
+  const pts = ((c || '').match(/-?\d*\.?\d+/g) || []).map(Number);
+  if (pts.length < 6) return null;
+  let a = 0;
+  for (let i = 0; i < pts.length; i += 2) {
+    const x1 = pts[i], y1 = pts[i + 1];
+    const x2 = pts[(i + 2) % pts.length], y2 = pts[(i + 3) % pts.length];
+    a += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(a / 2);
+};
 /* ПОВНА 2D-матриця [a,b,c,d,tx,ty] — у hero є РОТАЦІЯ (S3-розкопка:
    content matrix(.883,-.469,.469,.883) = поворот ~28°, не scale) */
 const parseMatrix = (t) => {
@@ -357,6 +386,44 @@ function buildViewport(vpName) {
           }
         }
       }
+      /* S12b (пастка 48): sOpen ПО ЦІЛІ з timing-map — вайпи грають НА
+         ПРИБУТТІ у снап (реальний перехід ui-dark на 8280, span карти
+         казав 7400; nature-bg-item відкритий уже з 7200, span казав
+         8299). Осілі стани цілі по settled-блоках → sOpen = sSettled
+         першого ВІДКРИТОГО блоку − 60 (півбакета снап-джитера). */
+      if (clipStep && TIMED[secId]?.viewports?.[vpName]?.targets) {
+        const tmv = TIMED[secId].viewports[vpName];
+        let best = null, bestSc = 1.0, secondSc = -1;
+        tmv.targets.forEach((tt2, ti2) => {
+          const sc = sigSoftScore({ tag: t.tag, cls: t.cls, text: t.text, src: t.src }, tt2);
+          if (sc > bestSc) { secondSc = bestSc; bestSc = sc; best = ti2; }
+          else if (sc > secondSc) secondSc = sc;
+        });
+        /* матч мусить бути УНІКАЛЬНИМ: кілька timing-цілей з тим самим
+           cls без src → неоднозначно → не рефайнити (840-регрес: чужий
+           перший слайд відкрив вайп на всю зону, s7194 12→66%) */
+        if (best !== null && bestSc - secondSc < 0.5) best = null;
+        if (best !== null) {
+          const states = tmv.blocks
+            .filter((bl) => bl.frames.length && bl.sSettled > 2)
+            .map((bl) => {
+              const st = bl.frames[bl.frames.length - 1].targets[best];
+              if (!st) return null;
+              const ar = polyAreaOf(st.clipPath);
+              return { s: bl.sSettled, open: st.clipPath === undefined || ar === null ? null : ar > 1 };
+            })
+            .filter((x) => x && x.open !== null)
+            .sort((a, c) => a.s - c.s);
+          const firstOpen = states.find((x) => x.open);
+          if (firstOpen) {
+            const refined = r1(Math.max(0, firstOpen.s - 60));
+            if (clipStep.sOpen === null || Math.abs(refined - clipStep.sOpen) > 30) {
+              console.log(`  [${vpName}/${secId}] sOpen по цілі: ${clipStep.sOpen}→${refined} (${(t.cls || t.tag).slice(0, 30)})`);
+              clipStep.sOpen = refined;
+            }
+          }
+        }
+      }
       /* SPLITTING-обгортки: живий анімує дочірні спани, обгортку гасить —
          у репліці спліта немає, тримаємо видимий фінал */
       if ((t.cls || '').match(/\bsplitting\b/)) {
@@ -426,10 +493,17 @@ function buildViewport(vpName) {
         if (!steps.length) continue;
         const t = tm.targets[ti];
         const sig = { tag: t.tag, cls: t.cls, text: t.text, attrs: [], src: t.src };
-        const existing = bindings.find((b) => b.section === secId
-          && b.sig.tag === sig.tag && b.sig.cls === sig.cls && (b.sig.src || '') === (sig.src || ''));
+        /* S12b (пастка 48): матчинг СОФТ (cls-токени+src) — точна
+           рівність cls не збігалась між картами, timed-фінали падали
+           в нові біндінги, які програвали резолв старим */
+        let existing = null, exSc = 1.0;
+        for (const b of bindings) {
+          if (b.section !== secId || b.timed) continue;
+          const sc = sigSoftScore(b.sig, sig);
+          if (sc > exSc) { exSc = sc; existing = b; }
+        }
         if (existing) existing.timed = steps;
-        else bindings.push({ section: secId, sig, moving: {}, seedTransform: null, restOpacity: null, restClip: null, curve: [], timed: steps });
+        else if (sig.cls) bindings.push({ section: secId, sig, moving: {}, seedTransform: null, restOpacity: null, restClip: null, curve: [], timed: steps });
       }
       const timedCount = bindings.filter((b) => b.section === secId && b.timed).length;
       console.log(`  [${vpName}/${secId}] timed-біндінгів: ${timedCount}`);
