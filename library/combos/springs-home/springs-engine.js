@@ -291,6 +291,9 @@
           + (s.text && !s.text.startsWith('<') ? 1 : 0);
       };
       const isOldGrp = (grp) => grp.some((it) => (it.b.curve && it.b.curve.length) || it.b.intro);
+      /* junk-src У ХВІСТ старих пробувано (S12a) — intro0 3.61→12.7
+         РЕГРЕС: junk-криві пересідають на інші img'и; порядок старих
+         груп лишається недоторканим */
       const ordered = [
         ...Object.values(groups).filter(isOldGrp),
         ...Object.values(groups).filter((g) => !isOldGrp(g)).sort((a, c) => grpSpec(c) - grpSpec(a)),

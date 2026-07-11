@@ -544,7 +544,14 @@ function buildViewport(vpName) {
       });
       created++;
     });
-    console.log(`  [${vpName}] introT: матчів ${matched} · нових біндінгів ${created} · без покриття інтро-біндінгів ${gatedBindings.filter((b) => b.intro && !b.introT).length}`);
+    /* junk-сиг біндінги (без cls, src-заглушка) БЕЗ introT: їхня інтро-
+       крива journey-контамінована і в introMode шкодить (паралакс-стани
+       чужої фази) — знімаємо інтро-канал, фолбек = curve@s0 (rest) */
+    let stripped = 0;
+    for (const b of gatedBindings) {
+      if (b.intro && !b.introT && !b.sig.cls) { delete b.intro; stripped++; }
+    }
+    console.log(`  [${vpName}] introT: матчів ${matched} · нових біндінгів ${created} · junk-інтро знято ${stripped} · без покриття інтро-біндінгів ${gatedBindings.filter((b) => b.intro && !b.introT).length}`);
   }
 
   const footer = sections.footer;
