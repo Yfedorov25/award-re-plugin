@@ -638,6 +638,25 @@
      image-3 офсет 661px → 197% · image-2 офсет 345px → 103% */
   .aut-mid { margin-top: 197%; }
   .aut-right { margin-top: 103%; display: grid; gap: 20px; }
+  /* с26 (борд #137-141 + rt-проба live): грід у live = FULL-BLEED база 1400
+     (x20..1420, жінка 690 від x20) — наш сидів у контент-паддінгу (базис 1114,
+     все ×0.796 і фаза рання). Рантайм-офсети фото: coffee +476, barber +791
+     (архівні 345/661 — до-JS; рантайм = закон). Текст «THE GROUND FLOOR…» =
+     grid-item колонок 2-3, rel +131 від верху гріда. Desktop-only. */
+  @media (min-width: 769px) {
+    #autonomy > .h1 { margin-top: 97px; }  /* с26 кадр #130: титул live 585 (база мала ~170 → 97) */
+    .aut-center { text-align: center; font-size: 16px; line-height: 1.25; margin: 136px auto 0 !important; }
+    .aut-grid { width: 100vw; margin-left: calc(50% - 50vw); padding: 0 20px;
+      margin-top: -88px; }  /* с26 фаза-солв: woman-doc = live (проба @.5735 → −101) */
+    .aut-lead { grid-column: 2 / 4; grid-row: 1; margin: 131px 0 0 !important; align-self: start;
+      font-size: 26px !important; line-height: 1.27; max-width: 660px !important; }
+    /* живий text-offset--2: індент ЛИШЕ першого рядка (reveal-спани ламають
+       text-indent — урок cert-клейму) */
+    .aut-lead::before { content: ""; display: inline-block; width: 237px; }
+    .aut-grid > picture { grid-column: 1; grid-row: 1; }
+    .aut-mid { grid-column: 2; grid-row: 1; margin-top: 791px; }
+    .aut-right { grid-column: 3; grid-row: 1; margin-top: 476px; }
+  }
   .aut-mid img, .aut-right img { aspect-ratio: 335 / 355; }
   .aut-card { background: rgba(0,0,0,.05); border-radius: 5px; padding: 20px;
     aspect-ratio: 335 / 298; display: grid; align-content: start; }  /* живий card-text 335×298 r5 */
@@ -660,6 +679,9 @@
   .aplan-bg { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
     width: 100%; height: auto; object-fit: unset; display: block; z-index: 0; border-radius: 0; }
   .aplan-title img { width: clamp(220px, 24vw, 340px); display: block; opacity: .9; }
+  /* с26 (motion-zone autonomy): живий титул «4000 M²» h140 @1440 (наш був 92) —
+     ширина 35.9vw ≈ 517px; desktop-only (m390 плаваючий 200vw-план не чіпаємо) */
+  @media (min-width: 769px) { .aplan-title img { width: clamp(340px, 35.9vw, 520px); } }
   /* с23: плита-мапа (map@xxl 1440×402) по центру, НАД титулом і ПІД пінами */
   .aplan-map { position: absolute; left: 0; width: 100%; height: auto; top: 45%;
     transform: translateY(-50%); z-index: 2; display: block; }
@@ -676,30 +698,42 @@
   .aplan-title .m-num { font-size: clamp(48px, 7vw, 120px); font-weight: 300; line-height: .92;
     color: #fff; letter-spacing: -.02em; }  /* живе f372: БІЛИЙ на сірій плиті */
   .aplan-title .m-num span { font-size: .28em; font-weight: 300; }
-  /* POI-пін = ЧОРНИЙ квадрат з білою іконкою (живий plan-marker--pin) */
-  .poi { position: absolute; z-index: 4; width: 34px; height: 34px; border-radius: 8px;
+  /* с26 live-проба: pin 30×30 (top-left координати, БЕЗ center-translate —
+     transform-слот потрібен шар-драйверу aplanPhase). ui-dark чорний,
+     ui-light світлий з лейблом ЗНИЗУ по центру (gap 15). Street = дрібний
+     UPPERCASE-текст. Усі маркери їдуть шаром титула (dyT). */
+  .poi { position: absolute; z-index: 4; width: 30px; height: 30px; border-radius: 7px;
     background: #111110; color: #f2f1ee; display: grid; place-items: center;
-    font-size: 15px; transform: translate(-50%, -50%); cursor: default;
-    box-shadow: 0 4px 14px rgba(17,17,16,.28); transition: transform .25s; }
-  .poi:hover { transform: translate(-50%,-50%) scale(1.12); }
-  /* зони-мітки (DEPARTURE / DROP-OFF ZONE / MALL / ENTRANCE) */
-  .zone { position: absolute; z-index: 3; display: flex; flex-direction: column; align-items: center;
-    gap: 7px; transform: translate(-50%, -50%); }
-  .zone i { font-style: normal; width: 26px; height: 26px; border-radius: 50%;
-    border: 1px solid rgba(17,17,16,.4); display: grid; place-items: center; font-size: 13px;
-    color: #3c3b39; background: rgba(255,255,255,.6); }
-  .zone span { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: #6b6a66;
-    white-space: nowrap; }
+    font-size: 13px; cursor: default; box-shadow: 0 3px 10px rgba(17,17,16,.22); }
+  .poi-light { position: absolute; z-index: 4; width: 30px; height: 30px; }
+  .poi-light i { font-style: normal; width: 30px; height: 30px; border-radius: 7px;
+    background: rgba(242,241,238,.92); color: #111110; display: grid; place-items: center;
+    font-size: 13px; box-shadow: 0 3px 10px rgba(17,17,16,.18); }
+  .poi-light span { position: absolute; top: calc(100% + 15px); left: 50%;
+    transform: translateX(-50%); font-size: 10px; letter-spacing: .08em;
+    text-transform: uppercase; color: #3c3b39; white-space: nowrap; }
+  .street { position: absolute; z-index: 3; font-size: 10px; letter-spacing: .1em;
+    text-transform: uppercase; color: #55544f; white-space: nowrap; }
+  /* dim накритого плану (живий section-fade-overlay ui-dark: opacity
+     0→0.5 ∝ покриттю services; драйвер = aplanPhase) */
+  .aplan-dim { position: absolute; left: 0; right: 0; top: -250px;
+    height: calc(100% + 330px); background: #000; opacity: 0;
+    pointer-events: none; z-index: 6; }
   /* примітка «positions are approximate» */
   .aplan-note { position: absolute; left: 3%; bottom: 5%; z-index: 3; display: flex; align-items: center;
     gap: 10px; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; color: #9b9a96;
     max-width: 220px; line-height: 1.4; }
   .aplan-note i { font-style: normal; width: 22px; height: 22px; border:1px solid rgba(17,17,16,.3);
     border-radius: 4px; display: grid; place-items: center; flex: 0 0 22px; color:#6b6a66; }
-  /* компас rotate(-15deg) внизу-справа */
-  .compass { position: absolute; right: 3.5%; bottom: 7%; z-index: 4; width: 54px; height: 54px;
-    transform: rotate(-15deg); }
-  .compass svg { width: 100%; height: 100%; display: block; }
+  /* компас rotate(-15deg) — с26: live 37×37 @(1387,767) у піні, їде шаром
+     титула → rotate на svg (transform-слот кореня вільний для dyT) */
+  .compass { position: absolute; right: 3.5%; bottom: 7%; z-index: 4; width: 54px; height: 54px; }
+  .compass svg { width: 100%; height: 100%; display: block; transform: rotate(-15deg); }
+  @media (min-width: 769px) {
+    .compass { width: 37px; height: 37px; left: 96.32%; top: 109.6%; right: auto; bottom: auto; }
+    .aplan-note { display: none; }  /* live-проба маркерів у піні: ноти НЕМАЄ */
+    .aplan-title { left: 70.55%; }  /* live титул x759 w515 → центр 1016 (не 720!) */
+  }
 
   /* 9 SERVICES — живе: 7 великих glass-карток (card-team--service--large, col-4)
      + 6 малих (col-2). glass blur, велика декор-іконка, назва + опис. */
@@ -987,8 +1021,9 @@
        (svc-head enter .6421 НЕ рухається); services пізніший у DOM → малюється
        зверху сам (z-index НЕ ставити — інверсія ламала порядок live) ── */
     .aplan { top: 250px; width: 100vw; margin-left: calc(50% - 50vw); }  /* с23 live-154: план fullbleed */
-    #autonomy > .reveal-text { margin-bottom: calc(4vh + 81px) !important; }  /* с23: компенсація spread-титулу (нижчий за стек) */
-    .aplan-scroll { height: calc(186svh + 1192px); }  /* с23: +342 (aut→svc live 3226) — план під services довше, як live */
+    /* с26: старе правило #autonomy > .reveal-text (компенсація видаленого
+       злитого абзаца) знято — тексти тепер живі: .aut-center + .aut-lead */
+    .aplan-scroll { height: calc(186svh + 927px); }  /* с23: +342 (aut→svc live 3226); с26: −265 сумарна компенсація aut-інтро (full-bleed грід + два живі тексти + титул-фаза) — нуль-сумність 33608; реліз-фазу веде aplanPhase-transform, тревел піна некритичний */
     #autonomy { margin-bottom: -850px; }
     #headquarters .m-hqpara { margin: 6vh auto 8vh !important; }
     /* live about-space-top = 1583px: наш інтро був ~700 → все приходило зарано
@@ -1384,11 +1419,13 @@
   <!-- живе: центр-титул 2 рядки + UPPERCASE reveal-абзац ПРАВОРУЧ (4000 лише на план-мапі) -->
   <!-- с23 кадр live-130: титул spread ВІД КРАЮ ДО КРАЮ (не центрований стек) -->
   <h2 class="h1 spread" style="margin-bottom:2vh"><span>Maximum</span><span>autonomy</span></h2>
-  <p class="reveal-text" style="max-width:44ch;margin:5vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.7vw,24px)">The infrastructure of each AIR tower is fully self-sufficient. The ground floors feature commercial spaces with floor-to-ceiling display windows and <strong>4.71 m</strong> ceiling heights — restaurants, cafes, pharmacies, luxury beauty salons, flower and wine boutiques. Towers are designed according to the <strong>Dry Step</strong> principle.</p>
-  <!-- живий грід (вимір з архіву, JS-off): 3 колонки 690|335|335 gap 20, СТУПІНЧАСТО:
-       image-1 x20 y536 690×769 · image-3 (середня) y1197 · image-2 (права) y881 ·
-       card-text y~1240 під image-2. DOM-порядок живого: 1 → 3 → 2 → card. -->
+  <!-- с26 архів (дослівно, рядок 112898): ДВА тексти — центрований col-12
+       з <br>-розбивкою + великий h2 у гріді (col-md-6 order-last, text-offset--2) -->
+  <p class="aut-center reveal-text">The&nbsp;infrastructure of&nbsp;each AIR tower <br>is fully self-sufficient and does not require<br> visits to&nbsp;neighboring buildings.</p>
+  <!-- живий грід: 3 колонки 690|335|335 gap 20, СТУПІНЧАСТО; с26: текст —
+       grid-item колонок 2-3 (rel +131), офсети фото = рантайм +476/+791 -->
   <div class="aut-grid">
+    <p class="aut-lead reveal-text" style="max-width:44ch;margin:5vh 0 4vh auto;text-align:left;font-size:clamp(15px,1.7vw,24px)">The&nbsp;ground floors feature commercial spaces with&nbsp;floor-to-ceiling display windows and 4.71 m ceiling heights. These will host restaurants, caf&eacute;s, everyday services, pharmacies, luxury beauty salons, as&nbsp;well as&nbsp;flower and wine boutiques.</p>
     <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_1_image_xs/assets/images/media/about/8.automony/image-1%40xs.webp"><img loading="lazy" alt="AIR commercial space" src="https://aircenter.space/media/cache/about_autonomy_1_image_xxxl/assets/images/media/about/8.automony/image-1%40xxxl.webp"></picture>
     <div class="aut-mid">
       <picture><source media="(max-width:576px)" srcset="https://aircenter.space/media/cache/about_autonomy_2-3_image_xs/assets/images/media/about/8.automony/image-3%40xs.webp"><img loading="lazy" alt="AIR cafe" src="https://aircenter.space/media/cache/about_autonomy_2-3_image_xxxl/assets/images/media/about/8.automony/image-3%40xxxl.webp"></picture>
@@ -1411,26 +1448,30 @@
     <div class="aplan-title"><img src="https://aircenter.space/assets/images/media/about/8.automony/map-title.svg" alt="4000 M²"></div>
     <!-- с23 live-рантайм (plan-плагін інжектить): бетонна плита-мапа над титулом, під пінами -->
     <img class="aplan-map" aria-hidden="true" alt="" src="https://aircenter.space/assets/images/media/about/8.automony/map@xxl.webp">
-    <!-- зони навколо кварталу -->
-    <div class="zone" style="left:12%; top:34%"><i>↖</i><span>Departure</span></div>
-    <div class="zone" style="left:48%; top:63%"><i>⇄</i><span>Drop-off zone</span></div>
-    <div class="zone" style="left:27%; top:71%"><i>❀</i><span>Skyline fields</span></div>
-    <div class="zone" style="left:80%; top:50%"><i>▤</i><span>Mall</span></div>
-    <div class="zone" style="left:92%; top:73%"><i>⌂</i><span>Entrance</span></div>
-    <!-- чорні квадратні піни-іконки інфраструктури (plan-marker--pin) на плитах B1/B2/B3 -->
-    <!-- с23: X-координати сіли на плити map@xxl (B1 ліва · B2 центр · B3 права) -->
-    <div class="poi" style="left:30%; top:57%" title="Restaurant">☖</div>
-    <div class="poi" style="left:34%; top:53%" title="Beauty salon">◈</div>
-    <div class="poi" style="left:37%; top:60%" title="Everyday services">▤</div>
-    <div class="poi" style="left:49%; top:56%" title="Coffee point">✿</div>
-    <div class="poi" style="left:53%; top:52%" title="Pharmacy">✚</div>
-    <div class="poi" style="left:56%; top:60%" title="Wine boutique">♦</div>
-    <div class="poi" style="left:59%; top:64%" title="Cafe">◑</div>
-    <div class="poi" style="left:66%; top:64%" title="Everyday services">▦</div>
-    <div class="poi" style="left:69%; top:69%" title="Beauty salon">✂</div>
-    <div class="poi" style="left:72%; top:65%" title="Museum">⌂</div>
-    <div class="poi" style="left:75%; top:72%" title="Fitness">✦</div>
-    <div class="poi" style="left:89%; top:78%" title="Parking">P</div>
+    <!-- с26 live-проба маркерів У ПІНІ (frac .6367, плита 0,248 1440×402):
+         15 чорних pin ui-dark + 3 світлих з лейблом + 2 street-мітки + compass.
+         Маркери ЖОРСТКО їдуть з шаром ТИТУЛА (+82 flow→pin, як title), НЕ з
+         плитою → base top% = (live_y + 66)/760 (dyT ставить 1-в-1 у піні). -->
+    <div class="street" style="left:9.72%; top:38.95%">departure</div>
+    <div class="poi" style="left:38.54%; top:46.18%" title="Coffee point">✿</div>
+    <div class="poi" style="left:34.10%; top:48.95%" title="Beauty salon">◈</div>
+    <div class="poi" style="left:53.13%; top:50.92%" title="Pharmacy">✚</div>
+    <div class="poi" style="left:29.65%; top:51.32%" title="Restaurant">☖</div>
+    <div class="poi" style="left:38.13%; top:51.97%" title="Everyday services">▤</div>
+    <div class="poi" style="left:56.46%; top:52.24%" title="Wine boutique">♦</div>
+    <div class="poi-light" style="left:78.40%; top:54.21%"><i>▤</i><span>Mall</span></div>
+    <div class="poi" style="left:47.36%; top:55.92%" title="Cafe">◑</div>
+    <div class="poi" style="left:50.97%; top:56.71%" title="Everyday services">▦</div>
+    <div class="poi" style="left:54.31%; top:59.21%" title="Beauty salon">✂</div>
+    <div class="poi" style="left:63.54%; top:65.39%" title="Museum">⌂</div>
+    <div class="poi" style="left:70.35%; top:66.05%" title="Fitness">✦</div>
+    <div class="poi-light" style="left:47.43%; top:67.89%"><i>⇄</i><span>Drop-off zone</span></div>
+    <div class="poi" style="left:73.75%; top:68.82%" title="Restaurant">◧</div>
+    <div class="poi" style="left:67.01%; top:69.47%" title="Coffee point">◍</div>
+    <div class="poi" style="left:70.42%; top:73.42%" title="Parking">P</div>
+    <div class="poi-light" style="left:26.04%; top:75.00%"><i>❀</i><span>Skyline Fields</span></div>
+    <div class="poi" style="left:88.33%; top:83.16%" title="Everyday services">▣</div>
+    <div class="street" style="left:91.81%; top:83.42%">entrance</div>
     <!-- примітка (живе: «positions are approximate and may be revised») -->
     <div class="aplan-note"><i>!</i><span>The positions of the elements are approximate and may be revised.</span></div>
     <!-- compass rotate(-15deg) group__right group__bottom -->
@@ -1442,6 +1483,8 @@
         <text x="27" y="16" font-size="7" text-anchor="middle" fill="#111110" font-family="Onest">N</text>
       </svg>
     </div>
+    <!-- с26: dim накритого плану (живий section-fade-overlay ui-dark) -->
+    <div class="aplan-dim" aria-hidden="true"></div>
   </div></div></div>
 </section>
 
@@ -1852,6 +1895,81 @@
       on = es.some(function(e){ return e.isIntersecting; });
       if (on && !raf) raf = requestAnimationFrame(tick);
     }, { rootMargin: '100% 0px' }).observe(root);
+  })();
+
+  /* ═══ с26 APLAN-PHASE (motion-zone autonomy, motion-autonomy-1440.json):
+     живий план: плита тече 1:1 (doc 20548) до Δ845 від піна, далі квадратичне
+     гальмування top = 248 + Δ²/1690 (sectionToSticky), пін top 248 у вікні
+     s 20722→21532, реліз у потік. Титул «4000 M²» — ВЛАСНА крива (шари плану
+     гальмують по-різному): 168 + Δ²/1975, пін top 168. Наш sticky пінив на
+     1233px раніше і на 391/508 — формула dy = live-target(s) − untransformed
+     закриває всі фази (ранній наш пін, флоу, гальмування, реліз) transform-only
+     (нуль-сумно). Слайдер-механіку .aplan НЕ чіпаємо. rAF гейтнутий IO. ═══ */
+  (function aplanPhase(){
+    if (window.innerWidth <= 768) return;
+    var sec = document.getElementById('autonomy');
+    var aplan = sec && sec.querySelector('.aplan');
+    if (!aplan) return;
+    var plate = aplan.querySelector('.aplan-map');
+    var title = aplan.querySelector('.aplan-title');
+    if (!plate || !title) return;
+    /* ДВА шари (проба flow-vs-pin: маркери зсуваються рівно на title-дельту
+       +82, НЕ на плитову): плита+деки = dyP · маркери+компас = dyT */
+    var plateGrp = Array.prototype.slice.call(
+      aplan.querySelectorAll('.aplan-map, .aplan-deck'));
+    var markGrp = Array.prototype.slice.call(
+      aplan.querySelectorAll('.poi, .poi-light, .street, .compass'));
+    var dim = aplan.querySelector('.aplan-dim');
+    var svc = document.getElementById('services');
+    var sY = function(){ return (window.__lenis && typeof window.__lenis.scroll === 'number')
+      ? window.__lenis.scroll : window.scrollY; };
+    /* ⚠️ база через offsetTop/offsetHeight (НЕ rect): rect ловить transform,
+       а -50% плити резолвиться в 0 поки map@xxl не завантажилась — замір
+       на init давав системний зсув −201. offset-геометрія стабільна. */
+    var S_PIN = 20722, S_REL = 21532;  /* live-вікно піна (docH=33608 — ЗАКОН) */
+    function tPlate(s){
+      if (s > S_REL) return 248 - (s - S_REL);
+      if (s >= S_PIN) return 248;
+      var d = S_PIN - s;
+      return d >= 845 ? 20548 - s : 248 + d * d / 1690;
+    }
+    function tTitle(s){
+      if (s > S_REL) return 168 - (s - S_REL);
+      if (s >= S_PIN) return 168;
+      var d = S_PIN - s;
+      return d >= 987 ? 20386 - s : 168 + d * d / 1975;
+    }
+    var on = false, raf = null;
+    function tick(){
+      if (!on) { raf = null; return; }
+      var s = sY();
+      var aTop = aplan.getBoundingClientRect().top;  /* sticky-стан враховано; .aplan без transform */
+      /* спокійна візуальна позиція (offset-геометрія + власний -50%) */
+      var plate0 = aTop + plate.offsetTop - plate.offsetHeight / 2;
+      var title0 = aTop + title.offsetTop - title.offsetHeight / 2;
+      var dyP = tPlate(s) - plate0;
+      var dyT = tTitle(s) - title0;
+      var i;
+      for (i = 0; i < plateGrp.length; i++)
+        plateGrp[i].style.transform = plateGrp[i] === plate
+          ? 'translateY(calc(-50% + ' + dyP.toFixed(1) + 'px))'   /* базовий -50% плити */
+          : 'translateY(' + dyP.toFixed(1) + 'px)';
+      for (i = 0; i < markGrp.length; i++)
+        markGrp[i].style.transform = 'translateY(' + dyT.toFixed(1) + 'px)';
+      title.style.transform = 'translate(-50%, calc(-50% + ' + dyT.toFixed(1) + 'px))';
+      /* dim (живий fade-overlay): 0→0.5 ∝ покриттю services (виміряно:
+         op .1021 @ svcTop 650 → 0.5·(820−650)/820 = .104 ✓) */
+      if (dim && svc) {
+        var vh = window.innerHeight;
+        var st = svc.getBoundingClientRect().top;
+        dim.style.opacity = (0.5 * Math.min(1, Math.max(0, (vh - st) / vh))).toFixed(3);
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    new IntersectionObserver(function(es){
+      on = es.some(function(e){ return e.isIntersecting; });
+      if (on && !raf) raf = requestAnimationFrame(tick);
+    }, { rootMargin: '100% 0px' }).observe(sec);
   })();
 
   /* ═══ с23 CERT-СКРОЛ: паралакс bg (живий sectionToSticky −30svh→0) +
