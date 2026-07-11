@@ -635,16 +635,20 @@
      чорні квадратні піни-іконки інфраструктури, зони-мітки навколо, титул «4000 M²»,
      compass rotate(-15°), примітка «positions are approximate». --- */
   .aplan { position: relative; margin-top: 8vh; width: 100%; aspect-ratio: 1440 / 760;
-    border-radius: 8px; overflow: clip; background: #f4f3f0; }
+    border-radius: 8px; overflow: clip; background: #f2f2f2; }  /* с23: живий about-automony-plan-bg */
   /* desktop: живий stickyBottom тримає план ~повний екран поки скрол іде (оверрайд ПІСЛЯ бази) */
   .aplan-scroll { height: 150svh; }  /* Batch D: живий бюджет autonomy 9.28% — 175svh роздував services/cert на +6..10% */
   .aplan { position: sticky; top: 12vh; }
   @media (max-width: 768px) { .aplan-scroll { height: auto; } .aplan { position: static; } }
   /* макет кварталу: діагональна смуга-«стрічка» плит (перспектива зліва-верх → право-низ) */
-  /* с23: справжній рендер плану fullbleed (заглушка-deck лишалась бежевим боксом) */
-  .aplan-bg { position: absolute; inset: 0; width: 100%; height: 100%;
-    object-fit: cover; object-position: center; display: block; z-index: 0; border-radius: 0; }
+  /* с23: справжній рендер плану (2599×712 ультра-широкий!) — живий патерн:
+     контейнер #f2f2f2 + фото width 100% height AUTO по центру (cover різав до кута) */
+  .aplan-bg { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+    width: 100%; height: auto; object-fit: unset; display: block; z-index: 0; border-radius: 0; }
   .aplan-title img { width: clamp(220px, 24vw, 340px); display: block; opacity: .9; }
+  /* с23: плита-мапа (map@xxl 1440×402) по центру, НАД титулом і ПІД пінами */
+  .aplan-map { position: absolute; left: 0; width: 100%; height: auto; top: 45%;
+    transform: translateY(-50%); z-index: 2; display: block; }
   .aplan-deck { position: absolute; left: 4%; right: 4%; top: 34%; height: 46%;
     background: linear-gradient(158deg, #e9e8e4 0%, #dedcd6 48%, #cfcdc6 100%);
     transform: skewY(-9deg); border-radius: 10px; z-index: 1;
@@ -1365,6 +1369,8 @@
          титул 4000 M² = живий map-title.svg сірий ЗА плитами -->
     <img class="aplan-bg" aria-hidden="true" alt="" src="https://aircenter.space/assets/images/media/about/8.automony/background@xxxl.webp">
     <div class="aplan-title"><img src="https://aircenter.space/assets/images/media/about/8.automony/map-title.svg" alt="4000 M²"></div>
+    <!-- с23 live-рантайм (plan-плагін інжектить): бетонна плита-мапа над титулом, під пінами -->
+    <img class="aplan-map" aria-hidden="true" alt="" src="https://aircenter.space/assets/images/media/about/8.automony/map@xxl.webp">
     <!-- зони навколо кварталу -->
     <div class="zone" style="left:12%; top:34%"><i>↖</i><span>Departure</span></div>
     <div class="zone" style="left:48%; top:63%"><i>⇄</i><span>Drop-off zone</span></div>
@@ -1372,18 +1378,19 @@
     <div class="zone" style="left:80%; top:50%"><i>▤</i><span>Mall</span></div>
     <div class="zone" style="left:92%; top:73%"><i>⌂</i><span>Entrance</span></div>
     <!-- чорні квадратні піни-іконки інфраструктури (plan-marker--pin) на плитах B1/B2/B3 -->
-    <div class="poi" style="left:21%; top:46%" title="Restaurant">☖</div>
-    <div class="poi" style="left:25%; top:42%" title="Beauty salon">◈</div>
-    <div class="poi" style="left:28%; top:49%" title="Everyday services">▤</div>
-    <div class="poi" style="left:42%; top:47%" title="Coffee point">✿</div>
-    <div class="poi" style="left:46%; top:43%" title="Pharmacy">✚</div>
-    <div class="poi" style="left:49%; top:51%" title="Wine boutique">♦</div>
-    <div class="poi" style="left:52%; top:55%" title="Cafe">◑</div>
-    <div class="poi" style="left:63%; top:56%" title="Everyday services">▦</div>
-    <div class="poi" style="left:67%; top:61%" title="Beauty salon">✂</div>
-    <div class="poi" style="left:70%; top:57%" title="Museum">⌂</div>
-    <div class="poi" style="left:73%; top:64%" title="Fitness">✦</div>
-    <div class="poi" style="left:89%; top:73%" title="Parking">P</div>
+    <!-- с23: X-координати сіли на плити map@xxl (B1 ліва · B2 центр · B3 права) -->
+    <div class="poi" style="left:30%; top:57%" title="Restaurant">☖</div>
+    <div class="poi" style="left:34%; top:53%" title="Beauty salon">◈</div>
+    <div class="poi" style="left:37%; top:60%" title="Everyday services">▤</div>
+    <div class="poi" style="left:49%; top:56%" title="Coffee point">✿</div>
+    <div class="poi" style="left:53%; top:52%" title="Pharmacy">✚</div>
+    <div class="poi" style="left:56%; top:60%" title="Wine boutique">♦</div>
+    <div class="poi" style="left:59%; top:64%" title="Cafe">◑</div>
+    <div class="poi" style="left:66%; top:64%" title="Everyday services">▦</div>
+    <div class="poi" style="left:69%; top:69%" title="Beauty salon">✂</div>
+    <div class="poi" style="left:72%; top:65%" title="Museum">⌂</div>
+    <div class="poi" style="left:75%; top:72%" title="Fitness">✦</div>
+    <div class="poi" style="left:89%; top:78%" title="Parking">P</div>
     <!-- примітка (живе: «positions are approximate and may be revised») -->
     <div class="aplan-note"><i>!</i><span>The positions of the elements are approximate and may be revised.</span></div>
     <!-- compass rotate(-15deg) group__right group__bottom -->
