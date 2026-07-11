@@ -521,6 +521,9 @@
      контекст і, пізніші в DOM, б'ють z1 пін-секції (position:relative
      БЕЗ z-index стекінг-контексту НЕ створює). Обидва в'юпорти. */
   #revolves, #space-splash, #services { isolation: isolate; }
+  /* splash їде ПОВЕРХ пінованого hq (live hit-test .4184: під швом
+     about-space-intro__layer-background) — z вище за .isw-under-next z1 */
+  #space-splash { z-index: 2; }
   /* під arch-віпом live показує ЧОРНЕ (live-058/060), крізь яке ВИДНО
      revolves-контент: чорнота = розширення revolves УГОРУ (::before),
      видиме крізь спорожнілий прозорий шар. НЕ фон #isw-arch — той z1
@@ -1024,7 +1027,7 @@
        Шар тримає до live-релізу (.2676/.4448), видимий вихід = exitWipe
        на офсеті шов-старту (.2304 / ~.41). */
     #isw-arch { min-height: calc(100svh + 160svh + 117svh) !important; }  /* свап-спан 160 + хвіст 117 (exitWipe на +17) */
-    #isw-hq { min-height: calc(100svh + 190svh) !important; }             /* hq без віпа: реліз = шов-старт */
+    #isw-hq { min-height: calc(100svh + 190svh + 90svh) !important; }     /* свап-спан 190 + хвіст 90 (splash z2 їде поверх) */
     /* c20 desktop-виміри НЕ протікають на 390 */
     .aut-mid, .aut-right { margin-top: 0; }
     #comfort > .reveal-text { max-width: 350px !important; font-size: 21px !important;
@@ -1650,11 +1653,12 @@
          underNext тримає шар до live-РЕЛІЗУ (.2585/.4237 desktop), а видимий
          вихід робить exitWipe на офсеті live ШОВ-СТАРТУ (.233/.400) після
          кінця свап-спану. m390 дзеркально (.2676/.4448 і .2304/~.41). */
-      /* hq БЕЗ віпа (ітерація 2: реліз = шов-старт .4001/.4109) — під live-швом
-         там towers-СМУГА і лоббі, не чорнота; віп-у-порожнечу лишав білу дірку.
-         arch З віпом: під live-швом чорне (#isw-arch дістав темний фон). */
+      /* hq (ітерація 4, прямий доказ hit-test на live .4184): splash-секція
+         їде ПОВЕРХ пінованого hq (шов = верх бокса splash, наш splash уже
+         входить у тих самих фраках) — hq тримає пін до live-релізу
+         .4237/.4448, а #space-splash дістав z-index:2 > z1 шару. Без віпа. */
       el.id === 'isw-hq' ? { mobile: 'pin', stepSvh: 80,
-        underNextSvh: window.innerWidth > 768 ? 18 : 0 } :
+        underNextSvh: window.innerWidth > 768 ? 102 : 90 } :
       el.id === 'isw-arch' ? { mobile: 'pin', stepSvh: 91, exitWipe: true,
         underNextSvh: window.innerWidth > 768 ? 105 : 117,
         exitOffsetSvh: window.innerWidth > 768 ? 19 : 17 } : { mobile: 'tap' }); }
