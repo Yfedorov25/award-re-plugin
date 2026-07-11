@@ -139,9 +139,14 @@ function buildViewport(vpName) {
       const firstMove = t.samples.findIndex((x) => Math.abs(x.s) > 2);
       const introSamples = t.samples.filter((x, i) => Math.abs(x.s) <= 2 && (firstMove < 0 || i < firstMove));
       const intro = [];
-      if (secId === 'hero-gallery' && introSamples.length > 1) {
+      /* S10: інтро-криві для ВСІХ gated-секцій (не лише hero-gallery —
+         gallery-split морфить по тому ж інтро-інпуту) + clip-канал
+         (mask-list'и сплита вайпляться clip'ом між картками) */
+      const gatedIds = site.sections.filter((x) => x.gate).map((x) => x.id);
+      if (gatedIds.includes(secId) && introSamples.length > 1) {
         for (const x of introSamples) {
-          intro.push({ input: x.input, top: x.top, left: x.left, w: x.w, h: x.h, o: +x.opacity, m: parseMatrix(x.transform) });
+          intro.push({ input: x.input, top: x.top, left: x.left, w: x.w, h: x.h, o: +x.opacity, m: parseMatrix(x.transform),
+            clip: x.clipPath && x.clipPath !== 'none' ? x.clipPath : null });
         }
       }
       /* скрол-фаза: семпли по s (осілі + transient), унікальні по s.
@@ -444,15 +449,16 @@ function buildViewport(vpName) {
 
   const footer = sections.footer;
   const bodyHeight = Math.max(...Object.values(sections).map((s) => s.top0 + s.h));
-  /* фарба оболонок (shell-bg.json, S8a): слаби-підкладки створює движок —
-     першою дитиною обгортки (успадковують травел), top у doc-координатах
-     ПІСЛЯ бут-корекції обгортки, h = bbox предка на live-споку */
+  /* фарба оболонок (shell-bg.json, S8a; S10 — статичний док-шар):
+     слаби створює движок у sk-shell-layer ПІД обгортками, дедуп по
+     (docTop,h,bg); topRel = top предка відносно кореня секції (з
+     екстракції) → docTop = top0 + topRel */
   const shellSections = {};
   if (shellData) {
     const sh = shellData.viewports?.[vpName];
     for (const [id, p] of Object.entries(sh?.sections || {})) {
       if (!p || p.own || id === 'header' || !sections[id]) continue;
-      shellSections[id] = { bgc: p.bgc, bgi: p.bgi !== 'none' ? p.bgi : null, h: p.h };
+      shellSections[id] = { bgc: p.bgc, bgi: p.bgi !== 'none' ? p.bgi : null, h: p.h, topRel: p.topRel || 0 };
     }
   }
   return {

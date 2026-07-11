@@ -100,6 +100,9 @@ export const SITES = {
         /* для animation-map: скрол заблоковано (stop=true), доки інтро-слайдер
            hero не пройдено кліками next (відкриття S1) */
         gate: { clickSelector: '.l-gallery-next', maxClicks: 8 } },
+      { id: 'gallery-split', selector: '.l-gallery__split', viewports: ['desktop'],
+        note: 'інтро-морф: 2 mask-list × 3 preloader-картки у l-gallery-container, СИБЛІНГ .l-gallery (S10-розкопка: зум-стан intro0 = ці картки; секційний селектор hero їх різав)',
+        gate: { clickSelector: '.l-gallery-next', maxClicks: 8 } },
       { id: 'intro', selector: '.l-intro',
         note: 'sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero' },
       { id: 'wellness', selector: '.l-wellness',

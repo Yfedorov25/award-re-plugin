@@ -1,14 +1,14 @@
 # VERIFY — build-spec (архів) vs живий https://springs.estate/
 
-- Дата: 2026-07-11T19:28:00.788Z
-- Секції: **hero-gallery** (desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item) · **intro** (sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero) · **wellness** (контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ) · **wellness-slider** (mobile-слайдер wellness (сиблінг .l-wellness, як residences/interiors-slider; дірка покриття S2 — знайдено в S10: mobile s3844 показував жінку замість слайдера)) · **nature** (окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий) · **place-bg** (сценографія place: bg-item/gradient/caption (WebGL-підкладка living map)) · **place** (desktop: .l-place sticky__layer усередині l-nature-bg; mobile: окремий .l-place-mobile) · **place-video** (desktop: sticky-контейнер відео; mobile: перший ВИДИМИЙ .l-place-video (в l-place-mobile)) · **map** (два корені (is-hidden--md-down / is-hidden--lg-up) — перший видимий) · **design-1** (слайд design #1 (id="design"), desktop+mobile варіанти) · **design-2** (слайд design #2) · **design-3** (слайд design #3) · **design-4** (слайд design #4 існує ЛИШЕ mobile (is-hidden--lg-up, без desktop-варіанта)) · **residences** (desktop: єдиний .l-residences; mobile: webgl-контейнер (окремий корінь)) · **residences-slider** (mobile-слайдер residences (на desktop цей контент всередині .l-residences)) · **interiors** (desktop: єдиний .l-interiors; mobile: інтро-блок (окремий корінь is-hidden--lg-up)) · **interiors-slider** (mobile-слайдер interiors (на desktop цей контент всередині .l-interiors)) · **header** (sticky-хедер ui-dark header--landing (2 ноди — перший видимий)) · **footer** (футер section--no-overflow ui-dark) · **callback** (форма callback У МОДАЛЦІ — знято з preCss(modal-open); одометр animation-map) · **favorites** (улюблені У МОДАЛЦІ — знято з preCss(modal-open))
+- Дата: 2026-07-11T19:44:12.532Z
+- Секції: **hero-gallery** (desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item) · **gallery-split** (інтро-морф: 2 mask-list × 3 preloader-картки у l-gallery-container, СИБЛІНГ .l-gallery (S10-розкопка: зум-стан intro0 = ці картки; секційний селектор hero їх різав)) · **intro** (sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero) · **wellness** (контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ) · **wellness-slider** (mobile-слайдер wellness (сиблінг .l-wellness, як residences/interiors-slider; дірка покриття S2 — знайдено в S10: mobile s3844 показував жінку замість слайдера)) · **nature** (окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий) · **place-bg** (сценографія place: bg-item/gradient/caption (WebGL-підкладка living map)) · **place** (desktop: .l-place sticky__layer усередині l-nature-bg; mobile: окремий .l-place-mobile) · **place-video** (desktop: sticky-контейнер відео; mobile: перший ВИДИМИЙ .l-place-video (в l-place-mobile)) · **map** (два корені (is-hidden--md-down / is-hidden--lg-up) — перший видимий) · **design-1** (слайд design #1 (id="design"), desktop+mobile варіанти) · **design-2** (слайд design #2) · **design-3** (слайд design #3) · **design-4** (слайд design #4 існує ЛИШЕ mobile (is-hidden--lg-up, без desktop-варіанта)) · **residences** (desktop: єдиний .l-residences; mobile: webgl-контейнер (окремий корінь)) · **residences-slider** (mobile-слайдер residences (на desktop цей контент всередині .l-residences)) · **interiors** (desktop: єдиний .l-interiors; mobile: інтро-блок (окремий корінь is-hidden--lg-up)) · **interiors-slider** (mobile-слайдер interiors (на desktop цей контент всередині .l-interiors)) · **header** (sticky-хедер ui-dark header--landing (2 ноди — перший видимий)) · **footer** (футер section--no-overflow ui-dark) · **callback** (форма callback У МОДАЛЦІ — знято з preCss(modal-open); одометр animation-map) · **favorites** (улюблені У МОДАЛЦІ — знято з preCss(modal-open))
 - Метод: той самий SNAPSHOT_FN на обох; без скролу живого; reveal нормалізовано NORMALIZE_CSS + WAAPI finish(); lazy-фото форс-довантажені; класи фільтруються через ПЕРЕТИН множин класів архіву й живого.
 - ⚠️ Метрики «забруднені» анімацією (порівнюються в нормалізованому стані): opacity, transform.
 - ЧИСЛОВИЙ ГЕЙТ: ≥95% (точно ≤0.1px або ≤1px) на кожному вʼюпорті.
 
 ## desktop (1440x900) — **99.5%** ✅ PASS
 
-Метрик всього: 42564 · точно (≤0.1): 42365 · в межах 1px: 0 · розійшлося числом (>1px): 36 · розійшлося рядком: 163
+Метрик всього: 43979 · точно (≤0.1): 43780 · в межах 1px: 0 · розійшлося числом (>1px): 36 · розійшлося рядком: 163
 
 ### hero-gallery — 99.7%
 
@@ -33,6 +33,11 @@
 | hero-gallery>div>div[14]>div>picture is-invis… | opacity ⚠️anim | 0 | 1 | ≠ |
 
 Лише в живому: `hero-gallery>div[1]>div>p>span··`, `hero-gallery>div[1]>div>p>span··`, `hero-gallery>div[1]>div>p>span··`, `hero-gallery>div[1]>div>p>span··`, `hero-gallery>div[1]>div>p>span··`, `hero-gallery>div[1]>div>p>span··`, `hero-gallery>div[1]>div>p>span··`, `hero-gallery>div[1]>div>p>span··`
+
+### gallery-split — 100%
+
+Зматчено: 23 (архів 23 / живе 23) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 1415 · розійшлося 0
+
 
 ### intro — 99.6%
 

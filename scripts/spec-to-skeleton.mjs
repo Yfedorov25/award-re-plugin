@@ -35,7 +35,7 @@ const spec = JSON.parse(readFileSync(join(site.outDir, 'build-spec.json'), 'utf8
 const outDir = join(REPO, 'library/combos', siteName);
 
 /* порядок потоку сторінки (гейт порядку не вимагає — це для людини) */
-const ORDER = ['header', 'hero-gallery', 'intro', 'wellness', 'wellness-slider', 'nature', 'place-bg',
+const ORDER = ['header', 'gallery-split', 'hero-gallery', 'intro', 'wellness', 'wellness-slider', 'nature', 'place-bg',
   'place', 'place-video', 'map', 'design-1', 'design-2', 'design-3', 'design-4',
   'residences', 'residences-slider', 'interiors', 'interiors-slider', 'footer'];
 const MODALS = ['callback', 'favorites'];

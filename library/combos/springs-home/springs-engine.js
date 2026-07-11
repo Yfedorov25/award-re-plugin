@@ -113,19 +113,31 @@
      ui-dark #162d24) — каркас білий. Слаб = ПЕРША дитина обгортки
      (успадковує травел обгортки, контент секції малюється поверх),
      top у doc-координатах ПІСЛЯ бут-корекції, h = bbox предка live. */
-  for (const [id, sh] of Object.entries(cfg.shell || {})) {
-    const w = wrappers[id];
-    const sec = (cfg.sections || {})[id];
-    if (!w || !sec || !sh) continue;
-    const wTop = w.getBoundingClientRect().top + (window.scrollY || 0);
-    const slab = document.createElement('div');
-    slab.className = 'sk-shell-bg';
-    /* z:-1 = шар ФОНУ (як у live: фарба на static-предку малюється під
-       усім трансформованим контентом незалежно від DOM-порядку — інакше
-       слаб wellness накривав хвіст intro на s2969) */
-    slab.style.cssText = `position:absolute;left:0;right:0;top:${(sec.top0 - wTop).toFixed(1)}px;`
-      + `height:${sh.h}px;background:${sh.bgc};${sh.bgi ? `background-image:${sh.bgi};` : ''}pointer-events:none;z-index:-1;`;
-    w.insertBefore(slab, w.firstChild);
+  /* S10: слаби — СТАТИЧНІ діви в док-координатах ПІД усіма обгортками
+     (live: фарба на static-предках, ті не травелять і не кліпляться
+     ancClip'ом секцій). Дедуп по (docTop,h,bg): спільний предок
+     `section ui-dark` (h 28170, topRel -top0) = фон усієї сторінки,
+     який per-wrapper слаби дублювали зі зсунутим top і НАКРИВАЛИ
+     контент ранніх обгорток (слаб hero ховав gallery-split). */
+  {
+    const shellLayer = document.createElement('div');
+    shellLayer.className = 'sk-shell-layer sk-vp-' + vpName;
+    shellLayer.style.cssText = 'position:absolute;top:0;left:0;right:0;height:0;z-index:-1;pointer-events:none;';
+    document.body.insertBefore(shellLayer, document.body.firstChild);
+    const seen = new Set();
+    for (const [id, sh] of Object.entries(cfg.shell || {})) {
+      const sec = (cfg.sections || {})[id];
+      if (!sec || !sh || sh.own) continue;
+      const docTop = sec.top0 + (sh.topRel || 0);
+      const key = `${Math.round(docTop)}|${sh.h}|${sh.bgc}|${sh.bgi || ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const slab = document.createElement('div');
+      slab.className = 'sk-shell-bg';
+      slab.style.cssText = `position:absolute;left:0;right:0;top:${docTop.toFixed(1)}px;`
+        + `height:${sh.h}px;background:${sh.bgc};${sh.bgi ? `background-image:${sh.bgi};` : ''}pointer-events:none;`;
+      shellLayer.appendChild(slab);
+    }
   }
 
   /* канвас-текстури (S9a, texture-map → choreo.textures): у live вміст
@@ -508,10 +520,12 @@
          має запечені o:0 у місцях, де живий рантайм показує (hero-галерея) */
       if (b.restOpacity !== null && Number.isFinite(d.o)) b.el.style.opacity = String(Math.round(d.o * 1000) / 1000);
       if (d.bg && b.moving && b.moving.bg) b.el.style.backgroundColor = d.bg;
-      if (b.clipStep) {
+      if (b.clipStep && !(introMode && d.clip)) {
         /* clip-вайп: степ по live-тригеру sOpen (перший осілий семпл
            з фінальним clip — S6; DOM-геометрія бреше для фулскрін-
-           слайдів пінованого шару: nat.top=0 → «відкрито з s=0») */
+           слайдів пінованого шару: nat.top=0 → «відкрито з s=0»).
+           S10: в introMode інтро-clip-крива (морф сплита) пріоритетніша
+           за скрол-фазовий степ */
         if (b.sAtGeom === undefined) {
           const r = b.el.getBoundingClientRect();
           b.sAtGeom = r.top + document.documentElement.scrollTop - innerHeight + 40;
