@@ -911,14 +911,35 @@
   /* ---------- драйвер ---------- */
   if (!isDesktop) {
     /* mobile: нативний скрол, движок лише повторює криві */
+    const mGate = cfg.introGate; /* S18-F: mobile hero-колаж auto-play */
+    const qm = new URLSearchParams(location.search);
+    /* S18-F(d2): mobile hero-колаж = AUTO-PLAY (розвідка F(a): item дрейфує за
+       час при s=0). Каркас статичний → рендеримо фазу дрейфу через introT.
+       ?intro=0&idt=MS — детермінована поза (пікс-звірка same-run, п.49).
+       БЕЗ ?intro — на буті програємо auto-block AMBIENT-дрейф (як live UX):
+       програвання по wall-time на s=0, доки не почався скрол. */
+    window.__ENGINE__ = () => ({ mode: 'mobile', s: window.scrollY || 0, introShown: mGate ? mGate.autoMs : 0 });
+    if (qm.has('intro') && mGate && mGate.auto) {
+      /* детермінована інтро-поза колажу на dt=idt (пікс-звірка) */
+      const idt = qm.has('idt') ? (parseFloat(qm.get('idt')) || 0) : (mGate.autoMs || Infinity);
+      bootFix(false);
+      applyBindings(0, 0, true, idt);
+      window.scrollTo(0, 0);
+      return;
+    }
     let lastP = -1;
+    /* ambient auto-дрейф колажу на буті (s=0), поки скрол не зрушив */
+    let autoT0 = mGate && mGate.auto ? performance.now() : null;
     (function raf() {
       const P = window.scrollY || 0;
-      if (Math.abs(P - lastP) > 0.3) { lastP = P; applyBindings(P, 0, false); }
+      if (P > 2) autoT0 = null; /* скрол почався → стоп ambient, звичайні криві */
+      if (autoT0 !== null) {
+        const dt = Math.min(performance.now() - autoT0, mGate.autoMs || 0);
+        applyBindings(0, 0, true, dt); /* introMode: програємо auto-block по dt */
+      } else if (Math.abs(P - lastP) > 0.3) { lastP = P; applyBindings(P, 0, false); }
       requestAnimationFrame(raf);
     })();
     bootFix(false);
-    const qm = new URLSearchParams(location.search);
     if (qm.has('step')) window.__POSE_STEP__ = parseInt(qm.get('step'), 10);
     if (qm.has('s')) window.scrollTo(0, parseFloat(qm.get('s')) || 0);
     return;
