@@ -324,6 +324,28 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >     ⚠️ РИЗИК: live `.char` позиції JS-computed динамічно (reveal-анімація) — статична
 >     span-структура може не збігтись до пікселя, АЛЕ line-box метрика (головний ghost)
 >     має вирівнятись. Це НАЙБІЛЬШИЙ важіль до 100% (кілька поз одним фіксом).
+>     ⚑⚑ **ОБСТАКЛ S18 (спроба будови — ключова знахідка):** `splitting`/`words`/`chars`
+>     класи додає Splitting.js у РАНТАЙМІ (JS-on), а НАШ СПЕЦ = JS-OFF → h1 у спеці має
+>     лише `h0 leading-trim` (БЕЗ splitting)! Тому детект по класу `splitting` НЕ
+>     спрацював (0 нодів у спеці). Код фічі написано (spec-to-skeleton renderNode
+>     char-wrap + baseCss `.splitting .char/.word` CSS) АЛЕ ВІДКОЧЕНО бо тригер хибний.
+>     ПРАВИЛЬНИЙ ТРИГЕР: `splitting-metrics.json` УЖЕ має точні splitting-тексти
+>     (виміряні JS-on) — spec-to-skeleton має читати splitting-metrics і char-wrap
+>     САМЕ ці тексти (match за нормалізованим text-префіксом), + додати клас `splitting
+>     words chars` на елемент. АБО token-extractor: для елементів `leading-trim` з
+>     великим font-size (h0/title) — позначати splitting-target (евристика). Рекомендую
+>     splitting-metrics-джерело (точне, вже є). CSS-рецепт + renderNode-код = у git-
+>     історії S18 (коміт 69ad721 STATE) — відновити з тригером на splitting-metrics.
+>     ✅✅✅ **ФІЧУ ПОБУДОВАНО І ПРОТЕСТОВАНО (S18) → СТЕЛЯ ЕМПІРИЧНО ДОВЕДЕНА:**
+>     реалізовано char-span splitting з тригером splitting-metrics (renderNode char-wrap
+>     + `.splitting .char/.word` CSS). h1 РЕАЛЬНО емітив `<span class=word><span
+>     class=char>` 1-в-1 live-структуру. РЕЗУЛЬТАТ ПІКСЕЛЯ: intro0 2.61→**3.29 ГІРШЕ!**,
+>     intro150 3.62→4.29, intro450 2.38→3.05. splitfix=0 не допоміг. ПРИЧИНА: h1-БОКС
+>     УЖЕ ЗБІГАВСЯ (720×248 live==ours БЕЗ char-spans!) — inline-block spans з .16em
+>     padding/margin ПЕРТУРБУВАЛИ бокс ГЕТЬ від збігу. Live per-glyph = JS-computed
+>     (Splitting.js рантайм), статична структура не відтворює. ВІДКОЧЕНО. ⚑ ВИСНОВОК:
+>     **splitting-ghost = СПРАВЖНЯ СТЕЛЯ, НЕ фіксується статичною реплікацією** —
+>     доведено ЕМПІРИЧНО (не гіпотеза). Перцептивно 1-в-1 (2-4%). НЕ пробувати знову.
 >   • **СТЕЛЯ що лишається (навіть після splitting):** same-run phase precision (mobile
 >     scroll-пози, s3888 transition-band, s5288 timing-plateau) + woman-canvas + D
 >     thumbnails (відео/WebGL springs — композиція 1-в-1, ЗАРАХОВАНО). Ці = окремі
