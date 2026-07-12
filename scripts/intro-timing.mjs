@@ -30,7 +30,7 @@
    ============================================================ */
 import { writeFileSync, mkdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { resolveChromium, SITES, VIEWPORTS } from './token-extractor.mjs';
+import { resolveChromium, SITES, VIEWPORTS, MOBILE_UA } from './token-extractor.mjs';
 
 const siteName = process.argv[2];
 const site = SITES[siteName];
@@ -41,6 +41,14 @@ const MAX_GESTURES = parseInt(argOf('--gestures', '8'), 10);
 const TAKE_SHOTS = !process.argv.includes('--no-shots');
 const SHOT_AT_MS = 12000; /* пізня стабільна фаза (вайпи завершені, лишається ambient-дрейф) */
 const liveDir = join(site.outDir, 'visual', 'live');
+/* S18-F: --vp mobile — mobile-колаж hero (.l-gallery) АВТО-ГРАЄ так само, як
+   desktop intro-морф (rotated-matrix п.17 + continuous drift, доведено розвідкою:
+   item tx 825→952 за час при стоячому скролі). Рекордер ідентичний; різниця =
+   вьюпорт + touch-жести + shot-префікс. Desktop лишається дефолтом. */
+const VP_NAME = argOf('--vp', 'desktop');
+const IS_MOBILE = VP_NAME === 'mobile';
+const SHOT_PREFIX = IS_MOBILE ? 'mobile' : 'desktop';
+const GEST_SRC = IS_MOBILE ? 'touch' : 'mouse';
 
 const chromium = await resolveChromium();
 if (!chromium) { console.error('playwright не резолвиться (PLAYWRIGHT_FROM?)'); process.exit(1); }
@@ -136,8 +144,11 @@ async function waitQuiet(page, maxMs = 7000, quietMs = 700) {
 }
 
 const browser = await chromium.launch();
-const vp = VIEWPORTS.desktop;
-const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
+const vp = VIEWPORTS[VP_NAME];
+const ctx = await browser.newContext({
+  viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1,
+  userAgent: IS_MOBILE ? MOBILE_UA : undefined, hasTouch: IS_MOBILE, isMobile: IS_MOBILE,
+});
 const page = await ctx.newPage();
 const cdp = await ctx.newCDPSession(page);
 await page.goto(origin + site.livePath, { waitUntil: 'domcontentloaded', timeout: 60000 });
@@ -170,7 +181,7 @@ const takeShot = async (name) => {
   return { file: name, tShot: t };
 };
 await page.waitForTimeout(SHOT_AT_MS);
-const shot0 = await takeShot('desktop-intro0.png');
+const shot0 = await takeShot(`${SHOT_PREFIX}-intro0.png`);
 if (shot0) shots.push({ ...shot0, input: 0 });
 await page.waitForTimeout(1500);
 const autoFramesAll = await page.evaluate(DRAIN_FN);
@@ -199,13 +210,13 @@ for (let g = 1; g <= MAX_GESTURES && !exited; g++) {
   const tG = await page.evaluate(NOW_FN);
   await cdp.send('Input.synthesizeScrollGesture', {
     x: Math.round(vp.width / 2), y: Math.round(vp.height / 2),
-    yDistance: -dist, speed: 1200, gestureSourceType: 'mouse',
+    yDistance: -dist, speed: 1200, gestureSourceType: GEST_SRC,
   });
   input += dist;
   await page.waitForTimeout(SHOT_AT_MS);
   const sMid = await page.evaluate(() => window.__IT_S__());
   if (sMid !== null && Math.abs(sMid) <= 2 && introShots < 3) {
-    const sh = await takeShot(`desktop-intro${input}.png`);
+    const sh = await takeShot(`${SHOT_PREFIX}-intro${input}.png`);
     if (sh) { shots.push({ ...sh, input }); introShots++; }
   }
   await page.waitForTimeout(1500);
@@ -240,10 +251,10 @@ if (TAKE_SHOTS && shots.length) {
     const blk = blockByInput[sh.input];
     if (!blk || !blk.frames.length) continue;
     const dtShot = Math.round(sh.tShot - blk.t0Ms);
-    newPoses.push({ vp: 'desktop', kind: 'intro', value: sh.input, file: sh.file, idt: dtShot });
+    newPoses.push({ vp: VP_NAME, kind: 'intro', value: sh.input, file: sh.file, idt: dtShot });
     console.log(`шот ${sh.file}: idt=${dtShot}`);
   }
-  man.poses = (man.poses || []).filter((p) => !(p.vp === 'desktop' && p.kind === 'intro')).concat(newPoses);
+  man.poses = (man.poses || []).filter((p) => !(p.vp === VP_NAME && p.kind === 'intro')).concat(newPoses);
   writeFileSync(manPath, JSON.stringify(man, null, 1));
   console.log(`shots-manifest оновлено (${newPoses.length} інтро-поз)`);
 }
@@ -261,13 +272,12 @@ const fail = [
   st0 && st150 && stateKey(st0) === stateKey(st150) ? 'стан(150) == стан(0) — морф не зафіксовано' : null,
   !exited ? 'інтро не вийшло за ' + MAX_GESTURES + ' жестів — iEnd не підтверджено' : null,
 ].filter(Boolean);
-const result = {
-  at: new Date().toISOString(), site: siteName, origin,
-  method: 'rAF-рекордер ЗМІН від domcontentloaded; блок auto після прелоадера; жести каденсом live-shots (150→подвоєння до 600); блок на жест; exit = вихід з інтро',
-  viewports: { desktop: { targets: picked.targets, blocks, selfCheck: { gestures: blocks.length - 1, exited, exitInput: exited ? input : null, fail } } },
-};
-mkdirSync(site.outDir, { recursive: true });
+/* S18-F: merge у наявний intro-timing.json (desktop + mobile вьюпорти окремо) */
 const out = join(site.outDir, 'intro-timing.json');
+let result = { at: new Date().toISOString(), site: siteName, origin, method: 'rAF-рекордер ЗМІН; блок auto після прелоадера; жести каденсом live-shots; exit = вихід з інтро', viewports: {} };
+try { result = { ...JSON.parse(readFileSync(out, 'utf8')), at: new Date().toISOString() }; result.viewports = result.viewports || {}; } catch {}
+result.viewports[VP_NAME] = { targets: picked.targets, blocks, selfCheck: { gestures: blocks.length - 1, exited, exitInput: exited ? input : null, fail } };
+mkdirSync(site.outDir, { recursive: true });
 writeFileSync(out, JSON.stringify(result));
 console.log(`OK → ${out}${fail.length ? ' · САМОПЕРЕВІРКА: ' + fail.join(' · ') : ''}`);
 process.exit(fail.length ? 1 : 0);
