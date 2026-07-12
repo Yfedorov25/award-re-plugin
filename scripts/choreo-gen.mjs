@@ -71,6 +71,13 @@ if (Object.keys(TIMED).length) console.log(`timing-карти: ${Object.keys(TIM
 const introTimingPath = join(site.outDir, 'intro-timing.json');
 const INTRO_T = existsSync(introTimingPath) ? JSON.parse(readFileSync(introTimingPath, 'utf8')) : null;
 if (INTRO_T) console.log('intro-timing: є (блоків desktop ' + (INTRO_T.viewports?.desktop?.blocks?.length ?? 0) + ')');
+/* splitting-metrics (S13b): live рендерить великі тексти span-чарами
+   splitting (інша лінійна метрика) — гліфи зсунуті всередині
+   вербатим-точного боксу (h1 dy −10.6 dx −23). Виміряно Range API
+   на пізній фазі (чари осіли до ty=0). Движок: style.translate. */
+const splitMetricsPath = join(site.outDir, 'splitting-metrics.json');
+const SPLIT_M = existsSync(splitMetricsPath) ? JSON.parse(readFileSync(splitMetricsPath, 'utf8')) : null;
+if (SPLIT_M) console.log('splitting-metrics: є');
 
 const r1 = (v) => Math.round(v * 10) / 10;
 /* СОФТ-СКОРИНГ сигнатур (S12, пастки 2+48): точна рівність cls ламається
@@ -670,6 +677,10 @@ function buildViewport(vpName) {
           return t.fit && ['nature'].includes(id) ? [[id, t]] : [];
         }))
       : null,
+    /* поправки splitting-текстів (S13b): матчинг рушієм за текст-префіксом */
+    splitFix: SPLIT_M?.viewports?.[vpName]?.entries
+      ?.filter((e) => Math.abs(e.dy) > 1 || Math.abs(e.dx) > 1)
+      .map((e) => ({ text: e.text.slice(0, 24), dy: e.dy, dx: e.dx })) || null,
     introGate: iEnd ? {
       iEnd,
       /* S12a: осілі input-кроки інтро-морфа (межі introT-блоків) +

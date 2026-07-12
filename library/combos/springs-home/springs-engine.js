@@ -395,6 +395,41 @@
     }
   }
 
+  /* SPLITTING-FIX (S13b): live рендерить великі тексти span-чарами
+     splitting (інша лінійна метрика line-box'ів inline-block) —
+     гліфи зсунуті всередині ВЕРБАТИМ-ТОЧНОГО боксу (h1: dy −10.6,
+     dx −23; виміряно Range API, splitting-metrics.mjs). Канал
+     style.translate КОМПОЗИТНИЙ — не бʼється зі style.transform
+     біндінгів. Матчинг за текст-префіксом, найглибший елемент. */
+  if (cfg.splitFix && cfg.splitFix.length) {
+    /* ?splitfix=0 — обгортки створюються з НУЛЬОВИМ translate:
+       так splitting-metrics міряє наш бік у ФІНАЛЬНІЙ структурі
+       (inline-block обгортка сама впливає на метрику рядка) */
+    const zeroFix = new URLSearchParams(location.search).get('splitfix') === '0';
+    const normT = (s) => (s || '').replace(/\s+/g, ' ').trim();
+    /* скоуп = СЕКЦІЙНІ обгортки вʼюпорта (перший .sk-vp-* — це
+       sk-shell-layer слабів, там тексту немає) */
+    const sel = `.sk-vp-${vpName}[data-sk-section] :is(h1,h2,h3,p,div,span)`;
+    for (const sf of cfg.splitFix) {
+      let best = null;
+      for (const el of document.querySelectorAll(sel)) {
+        if (!normT(el.textContent).startsWith(sf.text)) continue;
+        if (!best || best.contains(el)) best = el;
+      }
+      /* рухаємо ВНУТРІШНІЙ спан, не сам елемент — бокс елемента мусить
+         лишитись live-точним (криві-гейт міряє бокси; live-чари теж
+         рухаються всередині незмінного боксу) */
+      if (best && !best.querySelector('.sk-splitfix')) {
+        const span = document.createElement('span');
+        span.className = 'sk-splitfix';
+        span.style.display = 'inline-block';
+        span.style.translate = zeroFix ? '0px 0px' : `${sf.dx || 0}px ${sf.dy || 0}px`;
+        while (best.firstChild) span.appendChild(best.firstChild);
+        best.appendChild(span);
+      }
+    }
+  }
+
   /* ---------- кадр: ГІБРИД (S3, ітерація 7) ----------
      1) Цілі З live-матрицями: ВЕРБАТИМ-повтор матриці (hero content —
         ротація ~28°, тільки так відтворюється) + одноразовий boot-fix
