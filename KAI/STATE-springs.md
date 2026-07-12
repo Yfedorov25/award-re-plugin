@@ -791,6 +791,21 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
     РЕГРЕС: підняв wellness/spa над nature-leaf на s7194 12→53 (net-negative по зоні).
     Точковий nature-over-place-bg: s9180 26.9→3.69, s7194 недоторканий, анкери 0
     регресу. Залишок s9180 3.69 = splitting-ghost каптіон-тексту (стеля, пастка 54).
+65. **(S17b) COLLAPSED-REVEAL: елемент 0×0 у каркасі, крива дає розмір на слайді.**
+    gallery title-texts Infrastructure/Residencies: box 0×0 у спеці (live колапсує на
+    s=0), reveal дає 1320×117.5 на своєму слайді (curve це ЗНАЄ). Translate безглуздий
+    (0×0 нема куди рухати). Движок: `revealSize` (nat 0×0 + crvew/h>2) → applyBindings
+    ставить explicit w/h/left/top з кривої + керує display безпосереднього `is-hidden`
+    wrapper'а (per-title, пастка 24) + neutralize position СПІЛЬНИХ проміжних предків
+    (content-animation) до пінного __title-слота → offsetParent=__title, curve.top
+    (viewport-слот) лягає точно. pick розширено (top/left/w). ⚠️ ТРИ підпастки: (i)
+    revealSize МУСИТЬ бути ПЕРЕД revealGeom (0×0-елемент має брехливий sAt-тригер →
+    зависав o=0); (ii) is-hidden wrapper (display:none, пастка 24) БЛОКУЄ рендер попри
+    правильні inline-стилі (offsetParent=NULL) — треба вмик/вимик display; (iii)
+    detection СТРОГО nat 0×0 — ширший «крива має w=0-фазу» ловив home-елементи зі
+    змінним w і РЕГРЕСИВ s2969 1.64→2.27 (доведено, відкинуто). Swap коректний
+    покадрово; aggregate піксель НЕ зрушив (зображення слайдера домінують). Capability
+    служить home slider-каптіонам (майбутнє).
 
 ## 📓 ЖУРНАЛ СЕСІЙ
 - **S17 (2026-07-12, Opus 4.8 1M, розширений контекст; коміт → цей)** — ОБИДВА
@@ -820,8 +835,26 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
      0×0-класовий лист, engine scale-gate варіативності, live-shots odometer per-site.
      Це поліпшення КОНВЕЄРА (не point-фікси) — служать усім майбутнім сторінкам.
   7) **Робочі посилання видані Єгору** (home 8873 + gallery 8874, nohup persistent).
-  Гейти S17-фіналу: home свіп 4/22 + mobile 1/7 (анкери PASS), s9180 3.69, інтро
-  2.61/3.62/2.38; gallery spec 99.6/99.9 + skeleton 99.5 + піксель s=0 0.91 PASS.
+  8) **S17b (продовження, глибокі residuals):** (а) **collapsed-reveal capability**
+     (пастка 65): gallery title-texts Infrastructure/Residencies рендеряться 0×0 у
+     каркасі (live колапсує на s=0), реально ревіляться 1320×117.5 на своєму слайді.
+     Движок тепер керує ними (revealSize: explicit w/h/pos з кривої + display
+     wrapper'а is-hidden + neutralize offsetParent → пінний слот). ДОВЕДЕНО
+     покадрово: swap коректний (s0 Architecture / s989 Infrastructure / s1980
+     Residencies, усі @x60 y391 — 1-в-1 механіка live). Aggregate піксель НЕ зрушив
+     (зображення слайдера домінують у diff), АЛЕ це реальна capability (служить home
+     slider-каптіонам). Строго collapsed-only (nat 0×0): ширший детект регресив
+     s2969 1.64→2.27 → відкинуто, 0 регресу анкерів. (б) **s3888/gallery-images —
+     ФАЗОВИЙ LABEL-артефакт (не rendering-баг):** наш ?s=4500 = live-«s3888» контент
+     (wellness-жінка), доведено скануванням (?s=4500 best-match до live-s3888). Причина:
+     live-shots міряє s зі зсуву `.l-intro` (ПІНИться → top-delta лагає page-scroll),
+     наш engine ?s = page-scroll → у пін-зоні intro розбіжність ~600px. Це пастка
+     14/15/49-клас (пін-одометр). Engine рендерить сцену КОРЕКТНО, просто на іншому
+     лейблі. Чесний фікс = same-run pose-capture для пін-зони (як інтро idt) —
+     багатосесійне; НЕ «фіксити» перезйомкою одного лейбла (=гейт-геймінг).
+  Гейти S17-фіналу: home свіп 4/22 + mobile 1/7 (анкери 1.63/1.16/1.64/1.89 PASS),
+  s9180 3.69, інтро 2.61/3.62/2.38; gallery spec 99.6/99.9 + skeleton 99.5 +
+  піксель s=0 0.91 PASS + title-swap коректний.
 - **S16 (2026-07-12, Opus 4.8 1M; коміт → цей)** — ФІКС #1 nature caption-резолв
   + ЕСКАЛАЦІЯ до форку B (s9180 = багатошаровий вузол):
   1) **КОРЕКЦІЯ НОМЕНКЛАТУРИ** (пастка 59-i): kickoff посилався на неіснуючу гілку

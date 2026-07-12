@@ -1,6 +1,6 @@
 # VISUAL.md — піксельна звірка (VISUAL-GATE ≤2% @ erode 5)
 
-Прогін: 2026-07-12T11:02:23.017Z · origin http://localhost:8873
+Прогін: 2026-07-12T11:42:46.749Z · origin http://localhost:8873
 
 | поза | diff% | вердикт |
 |---|---|---|

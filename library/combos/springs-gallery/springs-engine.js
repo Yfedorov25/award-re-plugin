@@ -569,6 +569,17 @@
         const ws = (b.curve || []).map((x) => x.w).filter((v) => v > 0);
         b.wVaries = ws.length > 1 && Math.max(...ws) - Math.min(...ws) > 2;
         b.hVaries = hs.length > 1 && Math.max(...hs) - Math.min(...hs) > 2;
+        /* COLLAPSED-REVEAL (S17b): елемент 0×0 у каркасі, АЛЕ крива дає розмір
+           на своєму слайді (gallery title-texts Infrastructure/Residencies:
+           box 0×0 у спеці — live колапсує їх на s=0, reveal дає 1320×117.5 на
+           СВОЄМУ слайді). applyBindings керує display wrapper'а + explicit
+           w/h/pos. СТРОГО collapsed-only (nat 0×0): ширший «wZeroPhase»-детект
+           ловив home-елементи зі змінним w і регресив s2969 1.64→2.27 (S17b,
+           доведено) → відкинуто. Architecture (nat має бокс) лишається у flow
+           видимим — часткова реплікація свапу, але 0 регресу анкерів. */
+        const wMax = ws.length ? Math.max(...ws) : 0;
+        b.revealSize = wMax > 2 && (hs.length ? Math.max(...hs) : 0) > 2
+          && (b.nat.w < 2 || b.nat.h < 2);
       }
       const dev = travelOf[b.section] || (() => 0);
       /* дельти ПО ЦЕНТРУ (для sw=1 тотожно top-left): дозволяє scale
@@ -633,10 +644,18 @@
         clip: lerpClip(a.clip, c.clip, t),
         bg: lerpColor(a.bg, c.bg, t),
         h: a.h > 0 && c.h > 0 ? lerp(a.h, c.h, t) : undefined,
+        /* S17b: абсолютні top/left/w для collapsed-reveal (title-texts) —
+           лерп лише коли обидва семпли мають значення */
+        top: a.top != null && c.top != null ? lerp(a.top, c.top, t) : (a.top ?? c.top),
+        left: a.left != null && c.left != null ? lerp(a.left, c.left, t) : (a.left ?? c.left),
+        w: a.w > 0 && c.w > 0 ? lerp(a.w, c.w, t) : (a.w ?? c.w),
       });
       /* геометричний reveal-латч (виняток 6): потік + o-ступінь по
-         входу у вʼюпорт; transform/clip не застосовуються */
-      if (b.revealGeom) {
+         входу у вʼюпорт; transform/clip не застосовуються.
+         S17b: collapsed-reveal (revealSize) НЕ через нього — 0×0-елемент
+         має нульову геометрію, тож sAt-тригер брехливий (title-texts
+         Infrastructure/Residencies зависали o=0); їм потрібен size-шлях. */
+      if (b.revealGeom && !b.revealSize) {
         if (b.sAt === undefined) {
           const r = b.el.getBoundingClientRect();
           b.sAt = r.top + document.documentElement.scrollTop - innerHeight + 40;
@@ -676,7 +695,48 @@
         if (d.bg && b.moving.bg) b.el.style.backgroundColor = d.bg;
         continue;
       }
-      if (b.hasM || b.inShape) {
+      if (b.revealSize) {
+        /* COLLAPSED-REVEAL (S17b): елемент 0×0 у каркасі, крива дає розмір на
+           своєму слайді. Позиціонуємо АБСОЛЮТНО в offsetParent (щоб не ламати
+           flex-flow сиблінгів: gallery __title має 3 title-texts, лише активний
+           у слоті) координатами кривої, розмір — explicit w/h. Крива top/left
+           = section-відносні; offsetParent (__title/slider-wrap) сидить на
+           top0 секції → близько section-відносних. На фазах w/h≈0 — ховаємо. */
+        if (!b.revealInit) {
+          b.el.style.position = 'absolute'; b.el.style.margin = '0';
+          /* Проміжні wrapper'и між title-text і ПІННИМ слот-контейнером:
+             (а) `is-hidden` (display:none, запечений reveal-стан, пастка 24)
+             — ЖИВИЙ JS знімає з активного; (б) content-animation/is-hidden
+             (position:relative) — стають offsetParent і зсувають curve.top.
+             Кешуємо всі до першого __title-контейнера (пінний слот, y=0) і
+             при reveal нейтралізуємо (display:contents + position:static) →
+             offsetParent = __title, curve.top (viewport-слот) лягає точно. */
+          b.hideAnc = b.el.parentElement; /* безпосередній is-hidden (per-title): вмик/вимик */
+          /* СПІЛЬНІ проміжні предки (content-animation тощо) до пінного
+             слота: position:static ОДНОРАЗОВО (щоб offsetParent = __title),
+             display НЕ чіпаємо (спільний — конфлікт між title-ами). */
+          let p = b.el.parentElement;
+          const wrap = wrappers[b.section];
+          while (p && p !== wrap && p !== document.body) {
+            const isSlot = /__title(?:-inner)?(?:\s|$)/.test(' ' + p.className + ' ') && !/__title-text/.test(p.className);
+            if (isSlot) break;
+            if (p !== b.hideAnc && getComputedStyle(p).position === 'relative') p.style.position = 'static';
+            p = p.parentElement;
+          }
+          b.revealInit = true;
+        }
+        if (d.w > 1 && d.h > 1) {
+          if (b.hideAnc) { b.hideAnc.style.display = 'contents'; }
+          b.el.style.width = `${d.w.toFixed(1)}px`;
+          b.el.style.height = `${d.h.toFixed(1)}px`;
+          b.el.style.left = `${(d.left ?? 0).toFixed(1)}px`;
+          b.el.style.top = `${(d.top ?? 0).toFixed(1)}px`;
+          b.el.style.transform = '';
+        } else {
+          if (b.hideAnc) b.hideAnc.style.display = 'none';
+          b.el.style.width = '0px'; b.el.style.height = '0px';
+        }
+      } else if (b.hasM || b.inShape) {
         const pre = (b.fix.x || b.fix.y) ? `translate(${b.fix.x.toFixed(2)}px, ${b.fix.y.toFixed(2)}px) ` : '';
         b.el.style.transform = d.m ? pre + fmtM(d.m) : (pre || (b.seedTransform ? 'translate(0px, 0px)' : ''));
         if (b.setHM && d.h > 0) b.el.style.height = `${d.h.toFixed(1)}px`;
