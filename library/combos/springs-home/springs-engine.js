@@ -251,11 +251,17 @@
        дискримінатор однакових picture-груп — вміст, не bbox.
        S8: розмірний суфікс НОРМАЛІЗУЄТЬСЯ (@xs/@xxl/%40xxxl → база):
        live mobile віддає @xs, скелет пече @xxl — те саме фото */
-    if (sig.src) {
+    if (sig.src && sig.src !== 'svg%3E') {
       const normSrc = (v) => (v || '').replace(/(%40|@)[a-z0-9-]+\./i, '.');
       const im = el.tagName.toLowerCase() === 'img' ? el : el.querySelector('img');
       const s = im && (im.currentSrc || im.src || im.getAttribute('data-src') || '');
-      if (s && normSrc(s.split('?')[0].split('/').pop()) === normSrc(sig.src)) score += 4;
+      const elSrc = s ? normSrc(s.split('?')[0].split('/').pop()) : '';
+      if (elSrc && elSrc === normSrc(sig.src)) score += 4;
+      /* S13: РОЗБІЖНІ справжні src = штраф (контент відштовхує) —
+         анонімний біндінг sig=gallery-7 сідав на el gallery-2 по
+         proximity і каскадно зсував item'и 2→17→18→19 (морська
+         картка intro150 зникала) */
+      else if (elSrc && !/svg%3E/.test(elSrc)) score -= 4;
     }
     return score;
   }
