@@ -39,9 +39,14 @@ if (!chromium) { console.error('playwright не резолвиться'); proces
 const browser = await chromium.launch();
 const manifest = { at: new Date().toISOString(), site: siteName, poses: [] };
 
-/* сторінковий s: зсув кореня intro (чистий потік) */
-const PAGE_S_FN = () => {
-  const el = [...document.querySelectorAll('.l-intro')].find((e) => {
+/* сторінковий s: зсув кореня-одометра (bbox.top при virtual-scroll).
+   Селектор — з SITES[site].sOdoSelector (home: .l-intro; gallery:
+   пінна slider-секція). БУВ хардкод '.l-intro' → на gallery повертав
+   null (нема .l-intro) → settle=null → desktop-цикл ламався на 1 кадрі
+   (S17). Тепер селектор передається аргументом у page.evaluate. */
+const S_ODO_SEL = site.sOdoSelector || '.l-intro';
+const PAGE_S_FN = (SEL) => {
+  const el = [...document.querySelectorAll(SEL)].find((e) => {
     const r = e.getBoundingClientRect();
     return r.width > 1 && getComputedStyle(e).display !== 'none';
   });
@@ -70,7 +75,7 @@ async function openLive(vpName) {
     return !p || getComputedStyle(p).display === 'none' || parseFloat(getComputedStyle(p).opacity) < 0.05;
   }, { timeout: 25000 }).catch(() => console.log('  УВАГА: прелоадер не зник за 25с'));
   await page.waitForTimeout(1200);
-  await page.evaluate(PAGE_S_FN); /* ініціалізує __T0__ */
+  await page.evaluate(PAGE_S_FN, S_ODO_SEL); /* ініціалізує __T0__ */
   return { ctx, page, cdp, vp };
 }
 
@@ -79,7 +84,7 @@ async function settle(page, maxMs = 3000) {
   const t0 = Date.now();
   while (Date.now() - t0 < maxMs) {
     await page.waitForTimeout(150);
-    const s = await page.evaluate(PAGE_S_FN);
+    const s = await page.evaluate(PAGE_S_FN, S_ODO_SEL);
     if (last !== null && Math.abs(s - last) < 0.5) { stable++; if (stable >= 3) return s; }
     else stable = 0;
     last = s;

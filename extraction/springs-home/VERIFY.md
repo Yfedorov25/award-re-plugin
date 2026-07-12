@@ -1,6 +1,6 @@
 # VERIFY — build-spec (архів) vs живий https://springs.estate/
 
-- Дата: 2026-07-12T09:52:13.817Z
+- Дата: 2026-07-12T10:16:00.893Z
 - Секції: **hero-gallery** (desktop-hero: h1 "Splendor of Renewal" + сітка js-gallery-item) · **gallery-split** (інтро-морф: 2 mask-list × 3 preloader-картки у l-gallery-container, СИБЛІНГ .l-gallery (S10-розкопка: зум-стан intro0 = ці картки; секційний селектор hero їх різав)) · **intro** (sticky-інтро (на desktop видимий варіант без is-hidden--lg-up... якщо є); mobile-hero) · **wellness** (контентна: окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) DOM-варіанти — беремо ВИДИМИЙ) · **wellness-slider** (mobile-слайдер wellness (сиблінг .l-wellness, як residences/interiors-slider; дірка покриття S2 — знайдено в S10: mobile s3844 показував жінку замість слайдера)) · **nature** (окремі desktop (is-hidden--md-down) і mobile (is-hidden--lg-up) корені — перший видимий) · **place-bg** (сценографія place: bg-item/gradient/caption (WebGL-підкладка living map)) · **place** (desktop: .l-place sticky__layer усередині l-nature-bg; mobile: окремий .l-place-mobile) · **place-video** (desktop: sticky-контейнер відео; mobile: перший ВИДИМИЙ .l-place-video (в l-place-mobile)) · **map** (два корені (is-hidden--md-down / is-hidden--lg-up) — перший видимий) · **design-1** (слайд design #1 (id="design"), desktop+mobile варіанти) · **design-2** (слайд design #2) · **design-3** (слайд design #3) · **design-4** (слайд design #4 існує ЛИШЕ mobile (is-hidden--lg-up, без desktop-варіанта)) · **residences** (desktop: єдиний .l-residences; mobile: webgl-контейнер (окремий корінь)) · **residences-slider** (mobile-слайдер residences (на desktop цей контент всередині .l-residences)) · **interiors** (desktop: єдиний .l-interiors; mobile: інтро-блок (окремий корінь is-hidden--lg-up)) · **interiors-slider** (mobile-слайдер interiors (на desktop цей контент всередині .l-interiors)) · **header** (sticky-хедер ui-dark header--landing (2 ноди — перший видимий)) · **footer** (футер section--no-overflow ui-dark) · **callback** (форма callback У МОДАЛЦІ — знято з preCss(modal-open); одометр animation-map) · **favorites** (улюблені У МОДАЛЦІ — знято з preCss(modal-open))
 - Метод: той самий SNAPSHOT_FN на обох; без скролу живого; reveal нормалізовано NORMALIZE_CSS + WAAPI finish(); lazy-фото форс-довантажені; класи фільтруються через ПЕРЕТИН множин класів архіву й живого.
 - ⚠️ Метрики «забруднені» анімацією (порівнюються в нормалізованому стані): opacity, transform.
@@ -8,7 +8,7 @@
 
 ## desktop (1440x900) — **99.5%** ✅ PASS
 
-Метрик всього: 43979 · точно (≤0.1): 43781 · в межах 1px: 0 · розійшлося числом (>1px): 36 · розійшлося рядком: 162
+Метрик всього: 47090 · точно (≤0.1): 46875 · в межах 1px: 0 · розійшлося числом (>1px): 42 · розійшлося рядком: 173
 
 ### hero-gallery — 99.7%
 
@@ -41,7 +41,7 @@
 
 ### intro — 99.6%
 
-Зматчено: 28 (архів 28 / живе 28) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 1716 · розійшлося 7
+Зматчено: 29 (архів 29 / живе 29) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 1777 · розійшлося 7
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -54,9 +54,9 @@
 | intro>div>div[5]>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
 
 
-### wellness — 99.5%
+### wellness — 99.6%
 
-Зматчено: 52 (архів 52 / живе 52) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 3176 · розійшлося 15
+Зматчено: 55 (архів 55 / живе 55) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 3359 · розійшлося 15
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -79,7 +79,7 @@
 
 ### nature — 99.6%
 
-Зматчено: 44 (архів 44 / живе 44) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 2688 · розійшлося 12
+Зматчено: 46 (архів 46 / живе 46) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 2810 · розійшлося 12
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -194,9 +194,9 @@
 | design-3>div[1]>div>div>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
 
 
-### residences — 99.6%
+### residences — 99.7%
 
-Зматчено: 71 (архів 71 / живе 71) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 4339 · розійшлося 17
+Зматчено: 83 (архів 83 / живе 83) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 5071 · розійшлося 17
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -217,12 +217,13 @@
 | residences>div[1] sticky__layer | left | auto | 0px | ≠ |
 
 
-### interiors — 99.3%
+### interiors — 99.2%
 
-Зматчено: 42 (архів 42 / живе 42) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 2576 · розійшлося 19
+Зматчено: 43 (архів 43 / живе 43) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 2637 · розійшлося 20
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
+| interiors l-interiors | gridTemplateRows | 3150px | 900px 2250px | ≠ |
 | interiors>div sticky__layer | position | sticky | relative | ≠ |
 | interiors>div sticky__layer | right | auto | 0px | ≠ |
 | interiors>div sticky__layer | bottom | auto | 0px | ≠ |
@@ -237,12 +238,11 @@
 | interiors>div>div[1]>div>div[3]>picture is-in… | opacity ⚠️anim | 0 | 1 | ≠ |
 | interiors>div>div[1]>div>div[4] col | position | relative | absolute | ≠ |
 | interiors>div>div[1]>div>div[4]>picture is-in… | opacity ⚠️anim | 0 | 1 | ≠ |
-| interiors>div>div[1]>div[1]>div>div>img img-full | opacity ⚠️anim | 0 | 1 | ≠ |
 
 
 ### header — 99.9%
 
-Зматчено: 51 (архів 51 / живе 54) · лише-в-архіві: 0 · лише-в-живому: 3 · метрик 3111 · розійшлося 4
+Зматчено: 55 (архів 55 / живе 58) · лише-в-архіві: 0 · лише-в-живому: 3 · метрик 3355 · розійшлося 4
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -264,7 +264,7 @@
 
 ### callback — 99.9%
 
-Зматчено: 90 (архів 90 / живе 93) · лише-в-архіві: 0 · лише-в-живому: 3 · метрик 5492 · розійшлося 4
+Зматчено: 112 (архів 112 / живе 115) · лише-в-архіві: 0 · лише-в-живому: 3 · метрик 6834 · розійшлося 4
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -275,34 +275,34 @@
 
 Лише в живому: `callback>div[1]>div>a>span>span·btn__text·request`, `callback>div[1]>div>a[1]>span>span·btn__text·callback`, `>form>div>div[2]>button>span>span·btn__text·submit a request`
 
-### favorites — 97.5%
+### favorites — 97.3%
 
-Зматчено: 34 (архів 45 / живе 36) · лише-в-архіві: 1 · лише-в-живому: 2 · метрик 2076 · розійшлося 51
+Зматчено: 40 (архів 52 / живе 41) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 2442 · розійшлося 67
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
 | favorites>div[1]>div[2]>div flats__empty | box.w | 0 | 780 | -780 |
 | favorites>div>div[2]>div>p leading-trim | box.y | 752.9 | 0 | 752.9 |
+| favorites>div>div[2]>div>p>span js-favourite-… | box.y | 749.1 | 0 | 749.1 |
 | favorites>div[1]>div[2]>div>a[1]>span btn__co… | box.x | 0 | 616 | -616 |
+| favorites>div[1]>div[2]>div>a[1]>span>span "s… | box.x | 0 | 616 | -616 |
 | favorites>div[1]>div[2]>div flats__empty | box.x | 0 | 600 | -600 |
 | favorites>div[1]>div[2]>div>div col | box.x | 0 | 600 | -600 |
 | favorites>div[1]>div[2]>div>a[1] btn | box.x | 0 | 600 | -600 |
 | favorites>div[1]>div[2]>div>div col | box.w | 0 | 480 | -480 |
 | favorites>div>div[2]>div>p leading-trim | box.w | 360 | 0 | 360 |
+| favorites>div[1]>div[2]>div>a[1]>span>span "s… | box.y | 0 | 202.4 | -202.4 |
 | favorites>div[1]>div[2]>div>a[1] btn | box.y | 0 | 191.6 | -191.6 |
 | favorites>div[1]>div[2]>div>a[1]>span btn__co… | box.y | 0 | 191.6 | -191.6 |
 | favorites>div[1]>div[2]>div flats__empty | box.h | 0 | 161.6 | -161.6 |
 | favorites>div[1]>div[2]>div>a[1] btn | box.w | 0 | 154.7 | -154.7 |
-| favorites>div[1]>div[2]>div>div col | box.h | 0 | 131.6 | -131.6 |
-| favorites>div[1]>div[2]>div>a[1]>span btn__co… | box.w | 0 | 122.7 | -122.7 |
-| favorites>div>div[2]>div>p leading-trim | box.x | 60 | 0 | 60 |
 
-Лише в архіві: `favorites>div[1]>div[2]>div[1]>ul·is-hidden·`
-Лише в живому: `favorites>div[1]>div[2]>div>div>p··Here you can save your f`, `favorites>div[1]>div[2]>div>a[1]>span>span··select residence`
+Лише в архіві: `favorites>div[1]>div[2]>div[1]>ul[2]>div··`
+Лише в живому: `favorites>div[1]>div[2]>div>div>p··Here you can save your f`
 
 ## mobile (390x844) — **99.5%** ✅ PASS
 
-Метрик всього: 39010 · точно (≤0.1): 38820 · в межах 1px: 0 · розійшлося числом (>1px): 95 · розійшлося рядком: 95
+Метрик всього: 42609 · точно (≤0.1): 42388 · в межах 1px: 0 · розійшлося числом (>1px): 119 · розійшлося рядком: 102
 
 ### hero-gallery — 99.6%
 
@@ -346,9 +346,9 @@
 | wellness>div>div>div>div>picture is-invisible… | opacity ⚠️anim | 0 | 1 | ≠ |
 
 
-### wellness-slider — 99%
+### wellness-slider — 98.9%
 
-Зматчено: 39 (архів 42 / живе 42) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 2385 · розійшлося 24
+Зматчено: 45 (архів 48 / живе 48) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 2751 · розійшлося 30
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -363,10 +363,10 @@
 | wellness-slider>div>div[1]>ul>li[2]>picture>img  | box.x | 720 | 1070 | -350 |
 | wellness-slider>div>div[2]>div>div>div[1] is-… | box.y | -3630.1 | -3652.9 | 22.8 |
 | wellness-slider>div>div[2]>div>div>div[1]>div… | box.y | -3630.1 | -3652.9 | 22.8 |
+| wellness-slider>div>div[2]>div>div>div[1]>div… | box.y | -3630.1 | -3652.9 | 22.8 |
+| wellness-slider>div>div[2]>div>div>div[1]>p[1… | box.y | -3630.1 | -3652.9 | 22.8 |
 | wellness-slider>div>div[2]>div>div>div[2] is-… | box.y | -3630.1 | -3652.9 | 22.8 |
 | wellness-slider>div>div[2]>div>div>div[2]>div… | box.y | -3630.1 | -3652.9 | 22.8 |
-| wellness-slider>div>div[2]>div>div>div[3] is-… | box.y | -3630.1 | -3652.9 | 22.8 |
-| wellness-slider>div>div[2]>div>div>div[3]>div… | box.y | -3630.1 | -3652.9 | 22.8 |
 
 Лише в архіві: `obile-scrollable__item carousel__list__item--gradient-large·`
 Лише в живому: `llable__item carousel__list__item--gradient-large is-active·`
@@ -386,9 +386,9 @@
 | place-bg>div[1]>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
 
 
-### place — 99.4%
+### place — 99.3%
 
-Зматчено: 35 (архів 37 / живе 37) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 2141 · розійшлося 13
+Зматчено: 37 (архів 39 / живе 39) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 2263 · розійшлося 15
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -397,7 +397,9 @@
 | place>div>div[1]>ul>li[1] mobile-scrollable__… | box.x | 370 | 720 | -350 |
 | place>div>div[1]>ul>li[1]>img img-cover | box.x | 370 | 720 | -350 |
 | place>div>div>div>div>div[1] is-hidden | box.y | -7174.9 | -7197.7 | 22.8 |
+| place>div>div>div>div>div[1]>p "Shady leafy-c… | box.y | -7174.9 | -7197.7 | 22.8 |
 | place>div>div>div>div>div[2] is-hidden | box.y | -7174.9 | -7197.7 | 22.8 |
+| place>div>div>div>div>div[2]>p "Artfully desi… | box.y | -7174.9 | -7197.7 | 22.8 |
 | place>div>div>div>div>div[1] is-hidden | position | relative | absolute | ≠ |
 | place>div>div>div>div>div[2] is-hidden | position | relative | absolute | ≠ |
 | place>div>div[1]>ul>li>img img-cover | opacity ⚠️anim | 0 | 1 | ≠ |
@@ -466,20 +468,20 @@
 
 ### design-3 — 99.7%
 
-Зматчено: 5 (архів 5 / живе 5) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 307 · розійшлося 1
-
-| елемент | метрика | архів | живе | Δ |
-|---|---|---|---|---|
-| design-3>div>div>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
-
-
-### design-4 — 99.7%
-
 Зматчено: 6 (архів 6 / живе 6) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 368 · розійшлося 1
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
-| design-4>div[1]>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
+| design-3>div[1]>div>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
+
+
+### design-4 — 99.8%
+
+Зматчено: 7 (архів 7 / живе 7) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 429 · розійшлося 1
+
+| елемент | метрика | архів | живе | Δ |
+|---|---|---|---|---|
+| design-4>div[2]>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
 
 
 ### residences — 99.9%
@@ -491,9 +493,9 @@
 | residences>div>div>div>picture is-invisible--js | opacity ⚠️anim | 0 | 1 | ≠ |
 
 
-### residences-slider — 99.1%
+### residences-slider — 99%
 
-Зматчено: 61 (архів 64 / живе 64) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 3725 · розійшлося 32
+Зматчено: 73 (архів 76 / живе 76) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 4457 · розійшлося 44
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
@@ -550,15 +552,13 @@
 Лише в архіві: `interiors-slider>div>div>ul>li·mobile-scrollable__item·`
 Лише в живому: `iors-slider>div>div>ul>li·mobile-scrollable__item is-active·`
 
-### header — 99.9%
+### header — 100%
 
-Зматчено: 48 (архів 48 / живе 48) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 2928 · розійшлося 3
+Зматчено: 54 (архів 54 / живе 54) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 3294 · розійшлося 1
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
 | header header | opacity ⚠️anim | 0 | 1 | ≠ |
-| header>div[1]>div[1]>a[1] btn | display | inline-flex | none | ≠ |
-| header>div[1]>div[1]>a[2] btn | display | none | inline-flex | ≠ |
 
 
 ### footer — 100%
@@ -568,33 +568,33 @@
 
 ### callback — 100%
 
-Зматчено: 88 (архів 88 / живе 88) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 5368 · розійшлося 0
+Зматчено: 111 (архів 111 / живе 111) · лише-в-архіві: 0 · лише-в-живому: 0 · метрик 6771 · розійшлося 0
 
 
-### favorites — 98.1%
+### favorites — 98%
 
-Зматчено: 33 (архів 44 / живе 35) · лише-в-архіві: 1 · лише-в-живому: 2 · метрик 2013 · розійшлося 38
+Зматчено: 41 (архів 53 / живе 42) · лише-в-архіві: 1 · лише-в-живому: 1 · метрик 2501 · розійшлося 51
 
 | елемент | метрика | архів | живе | Δ |
 |---|---|---|---|---|
 | favorites>div[1]>div[2]>div flats__empty | box.w | 0 | 350 | -350 |
 | favorites>div[1]>div[2]>div>div col | box.w | 0 | 350 | -350 |
 | favorites>div[1]>div[2]>div>a[1] btn | box.w | 0 | 134.2 | -134.2 |
+| favorites>div[1]>div[2]>div>a[1]>span>span "s… | box.y | 0 | 105.8 | -105.8 |
 | favorites>div[1]>div[2]>div flats__empty | box.h | 0 | 104.3 | -104.3 |
 | favorites>div[1]>div[2]>div>a[1]>span btn__co… | box.w | 0 | 102.2 | -102.2 |
+| favorites>div[1]>div[2]>div>a[1]>span>span "s… | box.w | 0 | 102.2 | -102.2 |
 | favorites>div[1]>div[2]>div>a[1] btn | box.y | 0 | 94.3 | -94.3 |
 | favorites>div[1]>div[2]>div>a[1]>span btn__co… | box.y | 0 | 94.3 | -94.3 |
 | favorites>div[1]>div[2]>div>div col | box.h | 0 | 74.3 | -74.3 |
 | favorites>div[1]>div[2]>div>a[1]>span btn__co… | box.x | 0 | 36 | -36 |
+| favorites>div[1]>div[2]>div>a[1]>span>span "s… | box.x | 0 | 36 | -36 |
 | favorites>div[1]>div[2]>div>a[1] btn | box.h | 0 | 30 | -30 |
 | favorites>div[1]>div[2]>div>a[1]>span btn__co… | box.h | 0 | 30 | -30 |
 | favorites>div[1]>div[2]>div flats__empty | box.x | 0 | 20 | -20 |
-| favorites>div[1]>div[2]>div flats__empty | box.y | 0 | 20 | -20 |
-| favorites>div[1]>div[2]>div>div col | box.x | 0 | 20 | -20 |
-| favorites>div[1]>div[2]>div>div col | box.y | 0 | 20 | -20 |
 
-Лише в архіві: `favorites>div[1]>div[2]>div[1]>ul·is-hidden·`
-Лише в живому: `favorites>div[1]>div[2]>div>div>p··Here you can save your f`, `favorites>div[1]>div[2]>div>a[1]>span>span··select residence`
+Лише в архіві: `favorites>div[1]>div[2]>div[1]>ul[2]>div··`
+Лише в живому: `favorites>div[1]>div[2]>div>div>p··Here you can save your f`
 
 ## Вердикт
 

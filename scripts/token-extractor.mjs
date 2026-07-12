@@ -80,6 +80,8 @@ export const SITES = {
     /* одометр animation-map: далекий блок, чий bbox.top = проксі скролу
        (.page-content-wrapper__inner НЕ отримує transform на цьому сайті) */
     odometerSelector: '.l-callback',
+    /* одометр live-shots: зсув кореня intro (чистий потік home) */
+    sOdoSelector: '.l-intro',
     archive: {
       html: 'springs-home.html',
       css: [
@@ -156,7 +158,12 @@ export const SITES = {
     outDir: join(REPO, 'extraction/springs-gallery'),
     liveOrigin: 'https://springs.estate',
     livePath: '/gallery',
-    odometerSelector: '.section.ui-dark',
+    /* одометр: пінна slider-секція (її bbox.top їде з травелом слайдера —
+       scrollY лишається 0, virtual-scroll). БУЛО `.section.ui-dark` (не
+       матчить: тег=section, не клас) → live-shots/animation-map діставали
+       s=0 і зупинялись на 1 кадрі (S17). sOdoSelector — для live-shots. */
+    odometerSelector: 'section.ui-dark.ui-background',
+    sOdoSelector: 'section.ui-dark.ui-background',
     archive: {
       html: 'springs-gallery.html',
       css: [
@@ -305,7 +312,17 @@ export const SNAPSHOT_FN = (args) => {
   const build = (el, depth) => {
     if (count > 800 || depth > 14) return null;
     const r = el.getBoundingClientRect();
-    if (r.width < 0.5 && r.height < 0.5 && !el.children.length) return null;
+    /* Шумовий фільтр: 0×0-лист без класу викидаємо. АЛЕ 0×0-лист з КЛАСОМ
+       лишаємо — інакше АСИМЕТРІЯ спека↔каркас (S17, форк B): на живому вузол
+       `.is-hidden--no-hover` (display:none на mobile) знімається зі СПРАВЖНІМИ
+       DOM-дітьми (умова !children = false → лишається), а його діти-листи
+       пруняться цим же фільтром → у спеці він серіалізується як 0×0-лист.
+       Каркас емітить його ПОРОЖНІМ; при повторному захопленні каркаса він уже
+       0×0 БЕЗ дітей → викидався → зсув дерева на 1 → matchTrees дерейлив
+       (gallery mobile 90.5). Клас — детермінований ідентифікатор на ОБОХ
+       боках, тож збереження класового листа робить фільтр симетричним. */
+    const elCls = typeof el.className === 'string' ? el.className.trim() : '';
+    if (r.width < 0.5 && r.height < 0.5 && !el.children.length && !elCls) return null;
     const cs = getComputedStyle(el);
     /* NBSP зберігаємо (S6): \s матчить і \u00A0, а nbsp керує
        переносами live-заголовків ("Open the doors of Springs…") —
