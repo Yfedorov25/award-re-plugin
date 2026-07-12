@@ -187,9 +187,16 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >     блоці ЛИШЕ `wellness-bg-xs.webp` @-67 (жінка) + BODY/HTML з `preloader-left-1`
 >     bg (прелоадер-залишок просвічує) — building/residences img ВІДСУТНІЙ у DOM
 >     топ-регіону. Тобто mobile residences-slider building-слайд взагалі не в рендері.
->     НАСТУПНИЙ КРОК: зонд — чи building-img є в mobile-каркасі взагалі (grep skeleton),
->     чи це біндінг-reveal (op=0 / display:none), чи mobile residences секція-структура
->     не покриває building-слайд (як пастка 46 — сиблінг-секція без власника в SITES).
+>     ⚑ РОЗВІДКА-2 S18 (звужено): residences-img Є в каркасі (residence-1/2@xxxl.webp),
+>     АЛЕ `l-residences ... is-hidden--md-down` (desktop-residences схований на mobile;
+>     mobile = окремий `l-residences__webgl-container`, п.11). s2319 = у секції WELLNESS
+>     (mobile top0=1964.9 h=2532 → 1965..4497; s2319 = 354px у wellness). Building-фото
+>     на ТОПІ live@s2319 = НЕ residences (та далеко, top0=15786) — це intro/wellness
+>     transition-слайд (кінець intro top0=844 h=844 вже проскролено). НАСТУПНИЙ КРОК:
+>     зонд які mobile-біндінги wellness-секції несуть building-img на топі s2319 vs
+>     що в нас (у нас лише wellness-bg-xs жінка + preloader-bg). Ймовірно wellness має
+>     mobile intro-слайд (building) який не забіндьовано/не reveal'иться — розкопати
+>     mobile wellness структуру (як desktop s3888 building = крива виїзду intro-слайда).
 >   • **E · pin-zone ×2 (s3888 38%, s5288 12.9%):** same-run pose-capture (як F): наш ?s
 >     розходиться з live ~600px бо .l-intro одометр лагає (п.67). live-shots знімає пін-
 >     зону тим самим клоком що s. Аналог F, але desktop.
