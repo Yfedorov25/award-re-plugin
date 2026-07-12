@@ -51,6 +51,14 @@ async function snapshotLive(browser, site, vpName) {
     try { await page.click(sel, { timeout: 1200 }); break; } catch {}
   }
   await page.addStyleTag({ content: NORMALIZE_CSS });
+  /* S16 (форк B): той самий hover-capability клас, що архів (симетрія) —
+     desktop=has-hover, mobile=no-hover. Живий JS зазвичай сам ставить його
+     по matchMedia, але явний форс гарантує ідентичність із архівом. */
+  await page.evaluate((isMobile) => {
+    const cl = document.documentElement.classList;
+    cl.remove('has-hover', 'no-hover');
+    cl.add(isMobile ? 'no-hover' : 'has-hover');
+  }, !!vp.mobile);
   /* WAAPI: докрутити всі анімації в кінець — reveal не тримає стан */
   await page.evaluate(() => {
     try { document.getAnimations().forEach((a) => { try { a.finish(); } catch { a.cancel(); } }); } catch {}

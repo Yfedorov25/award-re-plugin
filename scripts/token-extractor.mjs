@@ -144,6 +144,36 @@ export const SITES = {
         note: 'улюблені У МОДАЛЦІ — знято з preCss(modal-open)' },
     ],
   },
+
+  /* S16 (форк B): ДРУГА сторінка springs — доказ переносимості конвеєра.
+     Спільний archiveDir (дзеркало home+gallery в одній теці), спільні
+     global.css + шрифти; специфічні gallery.css + gallery.html. Проста
+     сторінка: header (той самий компонент, що home) + одна flow-секція
+     `section ui-dark ui-background` (desktop sticky-slider + mobile-layout,
+     6+6 картинок). Немає footer. Розвідка S16: 830 вузлів, scrollH 2880. */
+  'springs-gallery': {
+    archiveDir: join(REPO, 'skills/teardowns/live-archive/springs'),
+    outDir: join(REPO, 'extraction/springs-gallery'),
+    liveOrigin: 'https://springs.estate',
+    livePath: '/gallery',
+    odometerSelector: '.section.ui-dark',
+    archive: {
+      html: 'springs-gallery.html',
+      css: [
+        { match: '/stylesheets/global.css', file: 'springs-global.css' },
+        { match: '/stylesheets/gallery.css', file: 'springs-gallery.css' },
+      ],
+      jsOffPrefix: '/assets/javascripts/',
+      fontsLocalPrefix: '/assets/fonts/',
+      proxyPrefixes: ['/assets/', '/media/'],
+    },
+    fontChecks: ['16px "Victor Serif"', '16px "TT Commons Pro"'],
+    sections: [
+      { id: 'header', selector: 'header.header', note: 'sticky-хедер ui-dark header--sticky (той самий компонент, що home)' },
+      { id: 'gallery', selector: 'section.ui-dark.ui-background',
+        note: 'єдина flow-секція (унікальна, count=1): desktop gallery-desktop-fixed + sticky-slider--full-screen (6 img), mobile gallery-mobile-layout (6 img); h1.sr-only + btn--outline. БЕЗ main-префікса — каркас-генерат не відтворює main-обгортку (skeleton section not found)' },
+    ],
+  },
 };
 
 /* ---- секції конкретного вʼюпорта: фільтр viewports + резолв
@@ -430,6 +460,18 @@ export async function snapshotArchive(browser, site, vpName) {
   const page = await ctx.newPage();
   await page.goto(FAKE_ORIGIN + site.livePath, { waitUntil: 'load', timeout: 60000 });
   await page.addStyleTag({ content: NORMALIZE_CSS });
+  /* S16 (форк B): hover-capability клас. springs global.css розводить
+     desktop/mobile варіанти через `.has-hover .is-hidden--hover` (ховає
+     hover-only на mouse-девайсі) і `.no-hover .is-hidden--no-hover` (ховає
+     на touch). Живий JS ставить клас по matchMedia('(hover)'), архів JS-off
+     — ні → обидва варіанти видимі, mobile-layout плутає метрики (h=0 архів
+     vs 1495 live). Симетрична симуляція: desktop=has-hover, mobile=no-hover
+     (те саме робить spec-verify для живого). No-op для сайтів без цих класів. */
+  await page.evaluate((isMobile) => {
+    const cl = document.documentElement.classList;
+    cl.remove('has-hover', 'no-hover');
+    cl.add(isMobile ? 'no-hover' : 'has-hover');
+  }, !!vp.mobile);
   await page.evaluate(() => document.fonts.ready);
   const sections = {};
   for (const s of sectionsForViewport(site, vpName)) {
