@@ -77,7 +77,14 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
   DISPROOF: hero mobile 88.3 = систематичний rate-мисматч каруселі, НЕ
   авто-дрейф → виняток ВІДХИЛЕНО (пастка 56). Інтро: 5 hero-img нерозв'язані
   уточнено. ~92% (без руху — integrity: не форсував неперевірений фікс).
-- **S15 — план (порядок): (в) контент-стани слайдера nature — ДІАГНОЗ ГОТОВИЙ +
+- 🟡 **S15 (2026-07-12, Opus 4.8, контейнер)** — ОФЛАЙН-ВЕРИФІКАЦІЯ (live
+  заблокований egress-політикою, пастка 59; БЕЗ змін движка): криві-гейт 7/8
+  офлайн = S14 бітово; перцептивний зонд закомічених diff-PNG (медіа піксель-
+  чисте на всіх позах, residual = text/texture-ghost, крім slider-панелі s9180
+  = реальний дефект); вердикт «движок доведено на русі+медіа, перцептивно ~1:1
+  крім nature-слайдера» (`OFFLINE-VERDICT-S15.md`). Форки A/B стоять без live.
+  Setup-обхід: chromium 1194 + playwright 1.56.0 (`package.json`). ~92% (без руху).
+- **S15-ПЛАН (АРХІВ, потребує live — заблокований): (в) контент-стани слайдера nature — ДІАГНОЗ ГОТОВИЙ +
   1/4 ЗРОБЛЕНО (пастка 58; degenerate-clip ЛАНДНУТО S14 `f5e4023`). Залишок
   s9180 = 3 СКООРДИНОВАНІ частини (ефект лише разом): (1) sOpen-таймінг
   (114=10020, live на 9180 — timing-map матч цілі за сигнатурою, пастка 48/51);
@@ -88,7 +95,28 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
   НЕ реордер (пастка 50); (г) hero mobile — екстрактор фази/швидкості
   каруселі (пастка 56), НЕ виняток CURVES-GATE.**
 
-## 🚀 ЯК ПОЧАТИ СЕСІЮ S15 — читати ПЕРШИМ
+## 🚀 ЯК ПОЧАТИ СЕСІЮ S16 — читати ПЕРШИМ
+> 🔴🔴 **БЛОКЕР СЕРЕДОВИЩА (S15 виявив) — ПЕРЕВІР ПЕРШИМ ДІЛОМ:** у контейнері
+> S15 egress-політика **ЗАБЛОКУВАЛА `springs.estate`** (проксі: `connect_rejected,
+> policy denial`). Без live НЕ ПРАЦЮЄ: свіжий піксель-рендер ours (тягне
+> `/assets/`+`/media/` через проксі-кеш — ефемерний і порожній у новому контейнері),
+> spec/skeleton-verify, scene/animation/timing-map, live-shots, екстракція нових
+> сторінок. **Обидва форки (A піксель, B генералізація) стоять без live.**
+> ПЕРШИЙ КРОК S16: `node -e "fetch('https://springs.estate/',{signal:AbortSignal.timeout(12000)}).then(r=>console.log('LIVE',r.status)).catch(e=>console.log('BLOCKED',e.message))"`
+> + `curl -sS "$HTTPS_PROXY/__agentproxy/status"` (шукай springs.estate у
+> recentRelayFailures). ЯКЩО BLOCKED → потрібна ДІЯ ВЛАСНИКА: додати
+> `springs.estate` в egress-allowlist середовища (self-service проксі НЕМАЄ,
+> cache долити НЕ можна — chicken-and-egg). ЯКЩО й далі blocked → офлайн-режим
+> (криві-гейт + перцептивний Read закомічених PNG — див. `extraction/springs-home/
+> OFFLINE-VERDICT-S15.md`), нового екстрактора не буде.
+> 🐳 **SETUP КОНТЕЙНЕРА (S15, працює):** pre-installed chromium = build **1194**
+> (`/opt/pw-browsers/chromium-1194`); `npx playwright install` заблокований
+> (`cdn.playwright.dev` denied) → НЕ ретрай. Замість: `npm i playwright@1.56.0
+> playwright-core@1.56.0` (npmjs дозволений; **1.56.0 == chromium 1194 РІВНО**,
+> каретка `^` НЕБЕЗПЕЧНА бо 1.57=1200 ≠ pre-installed). `package.json` уже пінить
+> точну версію → просто `npm i`. `resolveChromium` фолбек на `import('playwright')`
+> працює. Сервер каркаса: `node scripts/serve-skeleton.mjs springs-home --port 8873 &`.
+>
 > 🐳 **СЕСІЯ В КОНТЕЙНЕРІ (без Claude Browser pane) — це НОРМА, нічого не
 > втрачаєш** (вердикт S14, пастка 55/57 + browser-pane-capability пам'ять):
 > pane давав лише зручні ad-hoc зонди; його скріншоти НЕНАДІЙНІ на глибоких
@@ -681,8 +709,50 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
     методу (при цьому перцептивно ~1:1: 3.66% = крайова фаза текстур + кілька
     px зсуву тексту, око майже не бачить). S15c: nature-слайдер = позиційна
     ре-деривація біндінга 111 (+ thumbnail'и), НЕ таймінг.
+59. **(S15) EGRESS-ПОЛІТИКА КОНТЕЙНЕРА може блокувати live** — не припускай, що
+    live доступний (кікофф S15 казав «має бути доступний, перевір curl» — а він
+    НІ). `springs.estate:443` → проксі `connect_rejected, "403 to CONNECT (policy
+    denial)"`. Діагноз: `curl -sS "$HTTPS_PROXY/__agentproxy/status"` → шукай хост
+    у `recentRelayFailures`. README (`/root/.ccr/README.md`): 403 policy-denial —
+    РЕПОРТИТИ, НЕ обходити (не IP-трюки, не route-around — закон). Наслідок для
+    треку: наш `?s=N` рендер тягне `/assets/`+`/media/` через `serve-skeleton`
+    проксі-кеш, який ЕФЕМЕРНИЙ (не в git, gitignore) і порожній у свіжому
+    контейнері → БЕЗ live свіжий піксель-рендер ours неможливий; уся live-
+    екстракція (spec/skeleton-verify, scene/animation/timing/intro-map, live-shots,
+    нові сторінки) мертва. Що ПРАЦЮЄ офлайн: curve-compare (закомічені JSON-карти)
+    + Read закомічених `visual/parity/*-diff-*.png`. Розблокування: власник додає
+    хост в egress-allowlist (self-service проксі-API немає; cache не долити —
+    chicken-and-egg). Той самий проксі блокує `cdn.playwright.dev` → `npx playwright
+    install` мертвий (обхід: pre-installed chromium 1194 + `npm i playwright@1.56.0`,
+    npmjs у noProxy). Обидва форки треку стоять без live.
 
 ## 📓 ЖУРНАЛ СЕСІЙ
+- **S15 (2026-07-12, Opus 4.8, контейнер; коміт → цей)** — ОФЛАЙН-ВЕРИФІКАЦІЯ
+  (live заблокований egress-політикою → форки A/B стоять; БЕЗ змін движка):
+  1) **БЛОКЕР СЕРЕДОВИЩА:** `springs.estate:443` policy-denied проксі
+     (`__agentproxy/status` recentRelayFailures). Наш `?s=N` рендер тягне асети
+     з live → кеш ефемерний/порожній → свіжий піксель НЕМОЖЛИВИЙ; уся live-
+     екстракція мертва. Обидва форки потребують live. Allowlist self-service
+     нема, cache долити нема звідки (chicken-and-egg). Репортовано власнику
+     (пастка 59, § ЯК ПОЧАТИ S16, `extraction/springs-home/OFFLINE-VERDICT-S15.md`).
+  2) **SETUP ОБХІД (працює):** pre-installed chromium build 1194; `npx playwright
+     install` заблокований (cdn.playwright.dev) → `npm i playwright@1.56.0` (==rev
+     1194 рівно). `package.json` пінить точну версію. Launch/DOM OK.
+  3) **ОФЛАЙН-СМОУК КРИВИХ = S14 БІТОВО:** curve-compare (лише закомічений JSON)
+     → **7/8 PASS** (hero desktop 99.4, intro 99.2/100, wellness 96.3/100, header
+     94.8/92.3; hero mobile 88.3 FAIL — пастка 56). Движок не бітрознув.
+  4) **ПЕРЦЕПТИВНИЙ ЗОНД** (Read на закомічені diff-PNG, 3 класи): якорі s900/s2969/
+     s5580/s2070 — медіа піксель-чисте, residual = text-splitting-ghost;
+     woman s4539 3.66 — фон/обличчя вирівняні, residual суб-перцептивний
+     (texture-крайка + text-зсув) = СТЕЛЯ; slider s9180 26.9 — права ½ медіа 1:1,
+     весь дифф = ліва caption-panel журні-контамінована (РЕАЛЬНИЙ дефект, НЕ стеля,
+     пастка 58, потребує live).
+  5) **ВЕРДИКТ:** движок доведено на русі (криві 7/8) + медіа-рендері (усі пози
+     піксель-чисті на фото); «перцептивно ~1:1» ТОЧНО на якорях+wellness; ВИНЯТОК —
+     nature-слайдер caption-панелі (12-27%) = реальний видимий дефект, не стеля.
+     Форк B валідний ПІСЛЯ розблокування live. Без live — стоп.
+  6) Гейти S15-фіналу: криві 7/8 (офлайн, = S14), піксель НЕ перезнятий (немає
+     live), спека/скелет НЕ перезняті (немає live). Артефакти S14 незмінні.
 - **S14 (2026-07-12, Opus 4.8; коміт → цей)** — ЕКСПЕРИМЕНТ Browser pane +
   розвідка даними (БЕЗ змін движка — свідомо, integrity > форсований фікс):
   1) **BROWSER PANE ВЕРДИКТ** (пастки 55, закон 9): протестував вбудований
