@@ -327,6 +327,20 @@ function buildViewport(vpName) {
          туди-сюди) не чіпаємо. */
       if (!surrogateClip && curve.length > 2) {
         const cFirst = curve[0].clip || 'none', cLast = curve[curve.length - 1].clip || 'none';
+        /* S14 (пастка 58): captions що роблять reveal→conceal (closed→open→
+           колапс виходу) мають cLast = ВИРОДЖЕНИЙ полігон нульової площі →
+           «open» невидимий, панель не показується на осілій позі, де live її
+           тримає (nature caption s9180). Якщо cLast вироджений — «open» =
+           клип МАКСИМАЛЬНОЇ площі у кривій (повністю розкритий стан). Webgl-
+           гілка вже має цей гард (терм. лише для варійованих коорд); тут
+           mono-гілка його НЕ мала. */
+        const openOf = (c) => {
+          if (c === 'none') return null;
+          if ((polyAreaOf(c) ?? 1) >= 1) return c;
+          let best = c, bestA = polyAreaOf(c) ?? 0;
+          for (const x of curve) { const a = x.clip ? (polyAreaOf(x.clip) ?? 0) : 0; if (a > bestA) { bestA = a; best = x.clip; } }
+          return bestA >= 1 ? best : c;
+        };
         if (cFirst !== cLast) {
           /* S10: вісь детекту = ПЕРША реально варійована координата
              полігона (жорсткий n[1] сліпнув на polygon(0 0,100% 0,
@@ -366,7 +380,7 @@ function buildViewport(vpName) {
           if (mono && scrub && standingTimed) {
             const spanStart = r1(Math.min(...mids.map((x) => x.s)));
             clipStep = { closed: cFirst === 'none' ? null : cFirst,
-              open: cLast === 'none' ? null : cLast, sOpen: spanStart };
+              open: openOf(cLast), sOpen: spanStart };
             for (const x of curve) x.clip = null;
             console.log(`  [${vpName}/${secId}] timed-скраб → степ sOpen=${spanStart} (${(t.cls || t.tag).slice(0, 30)})`);
           } else if (mono && !scrub) {
@@ -388,7 +402,7 @@ function buildViewport(vpName) {
               .sort((a, b) => a.s - b.s)
               .find((x) => isOpen(x.clipPath));
             const sOpen = settledOpen ? r1(toPage(settledOpen.s)) : null;
-            clipStep = { closed: cFirst === 'none' ? null : cFirst, open: cLast === 'none' ? null : cLast, sOpen };
+            clipStep = { closed: cFirst === 'none' ? null : cFirst, open: openOf(cLast), sOpen };
             for (const x of curve) x.clip = null;
           }
         }
