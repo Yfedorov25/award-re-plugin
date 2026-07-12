@@ -197,6 +197,11 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >     що в нас (у нас лише wellness-bg-xs жінка + preloader-bg). Ймовірно wellness має
 >     mobile intro-слайд (building) який не забіндьовано/не reveal'иться — розкопати
 >     mobile wellness структуру (як desktop s3888 building = крива виїзду intro-слайда).
+>     ⚑ ІНСТРУМЕНТ-ПАСТКА S18: ЖИВИЙ mobile-драйв у ручному зонді ФЛАКУЄ (touch-жести
+>     не рухають одометр, s лишається 0 — той самий virtual-scroll, п.5/25). Для live-
+>     mobile поз ВИКОРИСТОВУЙ ГОТОВИЙ `springs-live-shots.mjs` shootMobile (він має
+>     правильний touch-драйвер + PAGE_S_FN), а не свій зонд. АБО зчитуй наявні
+>     `visual/live/mobile-s2319.png` (вже зняті) + `*-ours.png` порівнянням оком/пікселем.
 >   • **E · pin-zone ×2 (s3888 38%, s5288 12.9%):** same-run pose-capture (як F): наш ?s
 >     розходиться з live ~600px бо .l-intro одометр лагає (п.67). live-shots знімає пін-
 >     зону тим самим клоком що s. Аналог F, але desktop.
