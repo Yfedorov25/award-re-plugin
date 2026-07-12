@@ -299,9 +299,35 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >     + timing-map wellness-slider). Розслідування ВИЧЕРПАНО — кожен клас має остаточний
 >     діагноз. Прийоми ДОВЕДЕНО (gallery 7/7, mobile hero 1.99%); піксель кожної фази
 >     до ≤2% = окремі багатосесійні проекти, НЕ в цій сесії.
->   • **СТЕЛЯ (не доробляється):** intro splitting ×3 + s9180 3.69 + mobile-intro0 3%
->     (шрифт per-glyph splitting, перцептивно ~1:1) + woman-canvas + D thumbnails
->     (відео/WebGL-контент springs, композиція вже 1-в-1 — ЗАРАХОВАНО).
+>   • **CHAR-SPAN SPLITTING-ФІЧА (рішення Єгора: будувати до 100%) — ПОВНИЙ РЕЦЕПТ
+>     (розвідка S18 дала точну структуру live):** splitting-стеля закриє intro
+>     (2.38-3.62) + s9180-каптіон + woman-каптіони + s3888-текст РАЗОМ. КОРІНЬ: h1/
+>     капшени з класом `splitting words chars` — live обгортає у span-структуру, наш
+>     каркас = плейн-текст → інша line-box метрика (~15px ghost). БОКС ЗБІГАЄТЬСЯ (h1
+>     720×248 live==ours), residual = per-char inline-block padding/margin.
+>     LIVE-СТРУКТУРА (знято): `<h1 class="...splitting words chars" style="--word-total:3;
+>     --char-total:17;"><span class="word" data-word="Splendor" style="--word-index:0">
+>     <span class="char" data-char="S" style="--char-index:0">S</span>...`
+>     CSS (з дзеркала global.css, ВЖЕ в skeleton.css бо копіюється? ПЕРЕВІРИТИ):
+>     `.splitting .char,.splitting .word{display:inline-block;vertical-align:top}`
+>     `.splitting .word{margin:-.16em -.16em -.32em;overflow:hidden;padding:.16em .16em
+>     .32em;position:relative}` `.char{opacity:0;transform:translateY(110%)}` (reveal-
+>     hidden дефолт!). КРОКИ БУДОВИ: (1) token-extractor SNAPSHOT_FN — для елементів з
+>     класом `splitting`, ЗБЕРІГАТИ факт splitting + текст (word/char розбивка проста:
+>     split(' ') на слова, [...word] на чари); (2) spec-to-skeleton renderNode — якщо
+>     node.cls містить `splitting`, емітити `<span class=word data-word=..><span
+>     class=char data-char=..>X</span>...` замість node.text; (3) skeleton.css — додати
+>     `.splitting .char/.word` правила (з global.css) + ПЕРЕВИЗНАЧИТИ `.splitting .char
+>     {opacity:1;transform:none}` (settled-стан, не reveal-hidden); (4) splitFix стає
+>     НЕПОТРІБНИМ для splitting-елементів (структура сама дає метрику) — АБО лишити
+>     як fine-tune. ГЕЙТ: intro0/150/450 + s9180 піксель ДО/ПІСЛЯ, 0 регресу анкерів.
+>     ⚠️ РИЗИК: live `.char` позиції JS-computed динамічно (reveal-анімація) — статична
+>     span-структура може не збігтись до пікселя, АЛЕ line-box метрика (головний ghost)
+>     має вирівнятись. Це НАЙБІЛЬШИЙ важіль до 100% (кілька поз одним фіксом).
+>   • **СТЕЛЯ що лишається (навіть після splitting):** same-run phase precision (mobile
+>     scroll-пози, s3888 transition-band, s5288 timing-plateau) + woman-canvas + D
+>     thumbnails (відео/WebGL springs — композиція 1-в-1, ЗАРАХОВАНО). Ці = окремі
+>     багатосесійні (same-run per-pose + timing-map).
 >
 > **ЯК ПРАЦЮВАТИ (незмінне):** гілка `springs-pipeline-v0`; PLAYWRIGHT_FROM вище;
 > ручна розвідка ЗАБОРОНЕНА (зонди в `scripts/`, не scratchpad — import playwright
