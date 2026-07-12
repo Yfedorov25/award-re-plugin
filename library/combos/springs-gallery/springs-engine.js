@@ -576,6 +576,21 @@
            sh=3.2 РОЗТЯГУВАВ секцію ×3.2, item 630→2016, все за екран).
            Гейт варіативності: якщо dim не міняється — scale не застосовуємо
            (елемент лише ТРАНСЛЮЄТЬСЯ; overflow видимий = live-поведінка). */
+        /* BG-ПОКРИТТЯ ПІННОЇ СЕКЦІЇ (S17c): section-root, чия curve.h СТАЛА і
+           НАБАГАТО більша за каркасний бокс (gallery section: curve.h=2880,
+           nat.h=900 — live-секція пінна, контент 2880). scale-gate правильно
+           НЕ скейлить (діти лишаються 1×), АЛЕ тоді ФОН секції (ui-dark) покриває
+           лише 900 → при скролі 989 секція off-screen, viewport бачить беж body
+           замість темно-зеленого (s989 33% = верх/низ беж). Фікс: min-height =
+           curve.h → бокс (і його bg) тягнеться на весь контент, БЕЗ scale дітей
+           (translate/overflow незмінні). Лише для великої СТАЛОЇ різниці на
+           КОРЕНІ секції (є у wrappers як firstChild). */
+        const hMax = hs.length ? Math.max(...hs) : 0;
+        const hConst = hs.length && (hMax - Math.min(...hs) < 5);
+        const isSecRoot = wrapEl && wrapEl.firstElementChild === b.el;
+        if (isSecRoot && hConst && hMax > b.nat.h + 50) {
+          b.el.style.minHeight = `${hMax.toFixed(0)}px`;
+        }
         const ws = (b.curve || []).map((x) => x.w).filter((v) => v > 0);
         b.wVaries = ws.length > 1 && Math.max(...ws) - Math.min(...ws) > 2;
         b.hVaries = hs.length > 1 && Math.max(...hs) - Math.min(...hs) > 2;

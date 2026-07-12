@@ -295,7 +295,7 @@ export const SNAPSHOT_FN = (args) => {
     'textTransform', 'textAlign', 'color', 'backgroundColor', 'backgroundImage',
     'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
     'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
-    'display', 'position', 'flexDirection', 'justifyContent', 'alignItems',
+    'display', 'position', 'flexDirection', 'flexWrap', 'justifyContent', 'alignItems',
     'gap', 'gridTemplateColumns', 'gridTemplateRows',
     'borderRadius', 'opacity', 'transform', 'objectFit', 'objectPosition', 'zIndex',
     /* S2c: layout-повнота для каркаса ПО СПЕЦІ (генератор потребує
