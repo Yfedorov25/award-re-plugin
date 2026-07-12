@@ -164,19 +164,34 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >   ⚑ **E+F спільне = same-run capture авто-анімації** (як desktop intro-timing).
 >   Це РЕАЛЬНІ прийоми (не asset-обмеження) → доробляються, ~3-6 циклів на F, ~2-3 на E.
 >
-> **📋 ВИКОНУВАНИЙ ПЛАН S18 (порядок за важелем):**
->   **ЦИКЛ 1-3 · F (mobile carousel, 6 поз):** (a) РОЗВІДКА: чи mobile-колаж auto-play
->   (як desktop intro) — зонд у scripts/ семпл l-intro item-матриць за ЧАС при
->   стоячому touch; (b) якщо auto-play → БУДУВАТИ mobile-варіант intro-timing.mjs
->   (рекордер rAF-змін матриць колажу; існуючий intro-timing.mjs = ШАБЛОН, він уже
->   робить це для desktop); (c) choreo mintroT-канал (як introT); (d) движок: пози
->   ?mintro=I&idt=MS, mobile same-run baseline (як пастка 49); (e) live-shots mobile
->   same-run (springs-live-shots.mjs shootMobile — додати timing-гілку). ГЕЙТ: піксель
->   mobile 6 поз ДО/ПІСЛЯ, 0 регресу m-s796. ⚠️ desktop hero 100% через rotated-matrix
->   (п.17) — mobile carousel має ту саму ротацію, вербатим-матриці не axis-aligned.
->   **ЦИКЛ 4-5 · E (pin-zone s3888/s5288):** same-run pose-capture: live-shots знімає
->   пін-зону тим самим клоком, що вимірює s (не через .l-intro top-delta що лагає) —
->   АБО перезняти ці 2 пози з page-scroll одометром. Піксель s3888/s5288, 0 регресу.
+> **📋 ВИКОНУВАНИЙ ПЛАН S18 — F (mobile carousel, 6 поз). ПРОГРЕС S18-F:**
+>   ✅ **F(a) РОЗВІДКА (готово):** mobile hero-колаж = `.l-gallery` (НЕ .l-intro!)
+>   АВТО-ГРАЄ безперервно (item tx 825→952 за 3.2с при СТОЯЧОМУ скролі, rotated-
+>   matrix `0.88,-0.47,0.47,0.88` = п.17). Наш движок рендерить СТАТИЧНО (item
+>   tx=174.95 не міняється) → 32% diff = різні фази auto-play. Той самий клас, що
+>   desktop intro-морф. `.l-intro` на mobile = y=844 (під фолдом, все одно годиться
+>   як одометр — top-delta трекає скрол).
+>   ✅ **F(b) ЕКСТРАКТОР (готово, коміт 404d614):** intro-timing.mjs +`--vp mobile`
+>   (MOBILE_UA/touch/shot-префікс, merge desktop+mobile у json). Mobile захопив
+>   **817 auto-frames за 13.6с** — pure auto-play, НЕМА input-gate (перший жест
+>   одразу виходить s=194) → структура = 1 auto-block + exit (простіша за desktop).
+>   Desktop 0 регресу. ⚠️ Я НЕ закомітив mobile intro-timing.json (--gestures 3
+>   перезняв desktop-частину; відкотив, щоб не зачепити робочі desktop intro-пози).
+>   ⬜ **F(c) НАСТУПНИЙ КРОК:** повний mobile-прогін БЕЗ --no-shots →
+>   `node scripts/intro-timing.mjs springs-home --vp mobile --gestures 2` → пише
+>   mobile-intro0.png baseline з ТОЧНИМ idt у shots-manifest (same-run, п.49). ⚠️
+>   спершу зберегти поточний desktop intro-timing.json, бо mobile-прогін його
+>   ре-мержить (desktop-частина перезнімається — зроби --gestures ≥3 щоб desktop
+>   лишився повним, АБО окремо desktop-прогін після).
+>   ⬜ **F(d):** choreo-gen — додати mintroT-канал (читає intro-timing.viewports.mobile,
+>   як робить для desktop introT); движок — mobile-collage drift playback: на буті
+>   mobile програвати auto-block матриці по dt (як ownIntroT desktop), поза
+>   ?mintro=I&idt=MS. Вербатим-матриці (rotated, п.17 — axis-aligned НЕ вийде).
+>   ⬜ **F(e) ГЕЙТ:** піксель mobile 6 поз ДО/ПІСЛЯ (visual-parity --viewport 390x844!),
+>   0 регресу m-s796 1.39. Baseline mobile-s0 перезняти same-run (F(c)).
+>   **ЦИКЛ E (pin-zone s3888/s5288, 2 пози):** same-run pose-capture: live-shots знімає
+>   пін-зону тим самим клоком, що вимірює s (не через .l-intro top-delta що лагає, п.67)
+>   — АБО перезняти ці 2 пози з page-scroll одометром. Піксель s3888/s5288, 0 регресу.
 >   **СТЕЛЯ:** intro splitting (перцептивно ~1:1) + s9180 3.69 — лишити, задокументовано.
 >
 > **ЯК ПРАЦЮВАТИ (незмінне):** гілка `springs-pipeline-v0`; PLAYWRIGHT_FROM вище;
