@@ -182,9 +182,14 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >   • **mobile section-content ×5 (s1558 19% / s2319 32% / s3081 20% / s3844 34% /
 >     s4604 15%):** НОВИЙ клас (НЕ колаж, розкопано S18): на цих скрол-позах ВЕРХНІЙ
 >     блок (residences building intro-slide) НЕ РЕНДЕРИТЬСЯ (порожньо замість фото) —
->     той самий клас, що desktop s3888/s2319 «intro-слайд building не рендериться»
->     (STATE-старе). Це mobile-секція-контент (не auto-play). Розвідка: чому building-
->     слайд порожній (біндінг? reveal? mobile-структура residences/wellness slider).
+>     той самий клас, що desktop s3888/s2319 «intro-слайд building не рендериться».
+>     ⚑ РОЗВІДКА S18 (зонд elementsFromPoint @195,250 на mobile s2319): у верхньому
+>     блоці ЛИШЕ `wellness-bg-xs.webp` @-67 (жінка) + BODY/HTML з `preloader-left-1`
+>     bg (прелоадер-залишок просвічує) — building/residences img ВІДСУТНІЙ у DOM
+>     топ-регіону. Тобто mobile residences-slider building-слайд взагалі не в рендері.
+>     НАСТУПНИЙ КРОК: зонд — чи building-img є в mobile-каркасі взагалі (grep skeleton),
+>     чи це біндінг-reveal (op=0 / display:none), чи mobile residences секція-структура
+>     не покриває building-слайд (як пастка 46 — сиблінг-секція без власника в SITES).
 >   • **E · pin-zone ×2 (s3888 38%, s5288 12.9%):** same-run pose-capture (як F): наш ?s
 >     розходиться з live ~600px бо .l-intro одометр лагає (п.67). live-shots знімає пін-
 >     зону тим самим клоком що s. Аналог F, але desktop.
