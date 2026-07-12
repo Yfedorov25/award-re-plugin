@@ -701,7 +701,18 @@ function buildViewport(vpName) {
          реальний input виходу з інтро — з intro-timing.json */
       steps: INTRO_T?.viewports?.[vpName]?.blocks?.filter((b) => b.kind !== 'exit').map((b) => b.input) || undefined,
       exitInput: INTRO_T?.viewports?.[vpName]?.selfCheck?.exitInput ?? undefined,
-    } : null,
+    } : (() => {
+      /* S18-F: mobile hero-колаж = PURE AUTO-PLAY (нема input-gate: перший жест
+         одразу виходить, розвідка F(a)) → iEnd null, АЛЕ є auto-block з дрейфом.
+         Емітимо ЧАСОВИЙ introGate {iEnd:0, autoMs} → движок грає auto-block
+         ambient-дрейф при s=0; пози ?intro=0&idt=MS рендерять фазу колажу.
+         Desktop не зачеплено (у нього iEnd є). */
+      const autoBlk = INTRO_T?.viewports?.[vpName]?.blocks?.find((b) => b.kind === 'auto');
+      if (autoBlk && autoBlk.frames && autoBlk.frames.length > 1) {
+        return { iEnd: 0, auto: true, autoMs: autoBlk.durMs, steps: [0] };
+      }
+      return null;
+    })(),
     bindings,
     footerTop: footer ? footer.top0 : null,
   };
