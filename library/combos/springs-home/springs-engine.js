@@ -234,8 +234,18 @@
      вʼюпортах — на mobile bbox-піни теж веде движок (нативний sticky
      в absolute-обгортці сцени не відтворює живі травели). */
   for (const el of document.querySelectorAll('.is-invisible--js')) el.classList.remove('is-invisible--js');
+  /* sticky→relative ЛИШЕ в секціях, які движок РЕАЛЬНО веде (мають біндінги
+     чи травел у цьому вʼюпорті). БУВ глобальний → на mobile gallery (0 mobile-
+     біндінгів, нема чим замінити пін) конвертив нативний
+     `gallery-mobile-layout__sticky` → тайтл «Architecture» падав з y=422 (пін
+     над картинкою) на y=1898 (flow під картинками). S17b: секції БЕЗ хореографії
+     лишають нативний sticky (браузер сам пінить). */
+  const drivenSecs = new Set([...(cfg.bindings || []).map((b) => b.section), ...Object.keys(cfg.travels || {})]);
   for (const el of document.querySelectorAll('*')) {
-    if (getComputedStyle(el).position === 'sticky') el.style.position = 'relative';
+    if (getComputedStyle(el).position !== 'sticky') continue;
+    const secEl = el.closest('[data-sk-section]');
+    const secId = secEl ? secEl.dataset.skSection : null;
+    if (!secId || drivenSecs.has(secId)) el.style.position = 'relative';
   }
   /* shell-фікс: хедер живого видимий у ВСІХ позах (live-shots), а каркас
      несе запечену o:0 (клас видимості додає рантайм живого) */
