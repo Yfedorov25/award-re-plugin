@@ -217,6 +217,21 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >     як residences-slider/wellness-slider); (d) re-extract spec+skeleton+scene-map+
 >     choreo; (e) піксель. Це закриє s1558/s2319/s3081/s3844/s4604 разом (усі = ця
 >     відсутня mobile building-слайдер-секція). desktop-s3888-клас (intro-слайд building).
+>     ⚑⚑ **УТОЧНЕННЯ КОРЕНЯ (S18 фінальна розвідка — shootMobile-драйвер спрацював,
+>     live осіло s=2322):** building-картки @s2319 топ = `opening-1@xs.webp` /
+>     `opening-3@xs.webp`, chain=`l-intro`. АЛЕ це слайди HERO-КОЛАЖУ (opening-* =
+>     карти колажу `.l-gallery`, F-клас)! Тобто НЕ окрема секція (пастка 46 хибна) —
+>     це ХВІСТ hero-колажу що на LIVE ще ВИДНИЙ на s2319 (y=-27, h=438), а в нашому
+>     рендері колаж-карти зникли (hero root y=-1475). Mobile spec: intro секція має
+>     лише intro-image-xs (1 img), hero-gallery колаж окремо. ПРАВИЛЬНИЙ ДІАГНОЗ:
+>     на mobile hero-колаж (`.l-gallery`) секція КОРОТША ніж треба (h=844, кінець
+>     1688) — а live тримає opening-карти видимими до ~s2400 (колаж високий/скролить
+>     повільно). ЗВ'ЯЗОК з F: колаж auto-drift (F) грає на s=0, АЛЕ на скрол-позах
+>     s>194 карти мають ЛИШАТИСЬ видимими (хвіст колажу) — наш движок їх ховає бо
+>     hero-секція h=844. ФІКС (наступний цикл): mobile hero-gallery/scene-map висота
+>     — колаж-секція має тягнутись довше (opening-карти видимі до s~2400); ПЕРЕВІРИТИ
+>     mobile scene-map travel hero-gallery + чи карти мають клип/overflow що їх ріже
+>     на 844. Це НЕ пастка 46 (секція є), а section-extent/travel колажу на mobile.
 >   • **E · pin-zone ×2 (s3888 38%, s5288 12.9%):** same-run pose-capture (як F): наш ?s
 >     розходиться з live ~600px бо .l-intro одометр лагає (п.67). live-shots знімає пін-
 >     зону тим самим клоком що s. Аналог F, але desktop.
