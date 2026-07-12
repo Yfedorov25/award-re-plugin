@@ -111,11 +111,12 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 ## 🚀 ЯК ПОЧАТИ СЕСІЮ S18 — читати ПЕРШИМ
 
 > ═══════════════════════════════════════════════════════════════════════
-> 🎯 **СТАН ПІСЛЯ S17d: GALLERY 1-в-1 ОБИДВА ВЬЮПОРТИ (7/7 PASS) + КРИТЕРІЙ
-> «100%» УТОЧНЕНО (прийоми/композиція 1-в-1; відео/WebGL-контент НЕ тягнемо).
-> Під цим критерієм D-thumbnails + woman-canvas ВИВЕДЕНО (композиція доведена).
-> РЕАЛЬНИЙ ЗАЛИШОК = прийоми F (mobile колаж ×6) + E (pin-zone ×2) = same-run
-> timing-екстрактор. ВИКОНУВАНИЙ ПЛАН S18 нижче. s9180 26.9→3.69.**
+> 🎯 **СТАН ПІСЛЯ S18-F: GALLERY 7/7 PASS + MOBILE HERO-КОЛАЖ ЗАКРИТО
+> (mobile-intro0 32%→1.99% PASS через mobile timing-екстрактор + движок auto-
+> drift). Критерій «100%» = прийоми/композиція 1-в-1; відео/WebGL springs НЕ
+> тягнемо (D-thumbnails+woman ВИВЕДЕНО). Desktop 0 регресу через УСІ S18-фікси.
+> ЗАЛИШОК: mobile section-content ×5 (building-слайд) + E pin-zone ×2 + шрифт-
+> стеля. HEAD bee18f1. s9180 26.9→3.69.**
 > ═══════════════════════════════════════════════════════════════════════
 > **Робочі посилання (сервери S17, можуть бути мертві — перезапустити):**
 >   ```
@@ -164,35 +165,32 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >   ⚑ **E+F спільне = same-run capture авто-анімації** (як desktop intro-timing).
 >   Це РЕАЛЬНІ прийоми (не asset-обмеження) → доробляються, ~3-6 циклів на F, ~2-3 на E.
 >
-> **📋 ВИКОНУВАНИЙ ПЛАН S18 — F (mobile carousel, 6 поз). ПРОГРЕС S18-F:**
->   ✅ **F(a) РОЗВІДКА (готово):** mobile hero-колаж = `.l-gallery` (НЕ .l-intro!)
->   АВТО-ГРАЄ безперервно (item tx 825→952 за 3.2с при СТОЯЧОМУ скролі, rotated-
->   matrix `0.88,-0.47,0.47,0.88` = п.17). Наш движок рендерить СТАТИЧНО (item
->   tx=174.95 не міняється) → 32% diff = різні фази auto-play. Той самий клас, що
->   desktop intro-морф. `.l-intro` на mobile = y=844 (під фолдом, все одно годиться
->   як одометр — top-delta трекає скрол).
->   ✅ **F(b) ЕКСТРАКТОР (готово, коміт 404d614):** intro-timing.mjs +`--vp mobile`
->   (MOBILE_UA/touch/shot-префікс, merge desktop+mobile у json). Mobile захопив
->   **817 auto-frames за 13.6с** — pure auto-play, НЕМА input-gate (перший жест
->   одразу виходить s=194) → структура = 1 auto-block + exit (простіша за desktop).
->   Desktop 0 регресу. ⚠️ Я НЕ закомітив mobile intro-timing.json (--gestures 3
->   перезняв desktop-частину; відкотив, щоб не зачепити робочі desktop intro-пози).
->   ⬜ **F(c) НАСТУПНИЙ КРОК:** повний mobile-прогін БЕЗ --no-shots →
->   `node scripts/intro-timing.mjs springs-home --vp mobile --gestures 2` → пише
->   mobile-intro0.png baseline з ТОЧНИМ idt у shots-manifest (same-run, п.49). ⚠️
->   спершу зберегти поточний desktop intro-timing.json, бо mobile-прогін його
->   ре-мержить (desktop-частина перезнімається — зроби --gestures ≥3 щоб desktop
->   лишився повним, АБО окремо desktop-прогін після).
->   ⬜ **F(d):** choreo-gen — додати mintroT-канал (читає intro-timing.viewports.mobile,
->   як робить для desktop introT); движок — mobile-collage drift playback: на буті
->   mobile програвати auto-block матриці по dt (як ownIntroT desktop), поза
->   ?mintro=I&idt=MS. Вербатим-матриці (rotated, п.17 — axis-aligned НЕ вийде).
->   ⬜ **F(e) ГЕЙТ:** піксель mobile 6 поз ДО/ПІСЛЯ (visual-parity --viewport 390x844!),
->   0 регресу m-s796 1.39. Baseline mobile-s0 перезняти same-run (F(c)).
->   **ЦИКЛ E (pin-zone s3888/s5288, 2 пози):** same-run pose-capture: live-shots знімає
->   пін-зону тим самим клоком, що вимірює s (не через .l-intro top-delta що лагає, п.67)
->   — АБО перезняти ці 2 пози з page-scroll одометром. Піксель s3888/s5288, 0 регресу.
->   **СТЕЛЯ:** intro splitting (перцептивно ~1:1) + s9180 3.69 — лишити, задокументовано.
+> **📋 S18 ПРОГРЕС — ✅ F (mobile hero-колаж) ЗАКРИТО (коміти 404d614→bee18f1):**
+>   Mobile hero-колаж = `.l-gallery` АВТО-ГРАЄ (item tx дрейфує за час, rotated-matrix
+>   п.17). Наш движок був СТАТИЧНИЙ (tx=174.95) → 32%. ФІКС (3 шари):
+>   (b) intro-timing.mjs +`--vp mobile` (817 auto-frames, pure auto-play нема gate);
+>   (c) same-run baseline mobile-intro0.png idt=12140; (d1) choreo-gen емітить mobile
+>   `introGate:{iEnd:0,auto:true,autoMs}` (коли нема iEnd-input-gate але є auto-block);
+>   choreo-gen авто-побудував mobile introT-канал (48 матчів, 71 біндінг) БЕЗ змін;
+>   (d2) движок mobile-гілка (`if !isDesktop`): `?intro=0&idt=MS`→applyBindings(0,0,
+>   true,idt) рендерить фазу дрейфу + ambient auto-drift на буті по wall-time до скролу.
+>   **РЕЗУЛЬТАТ: mobile-intro0 = 1.99% PASS (з 32%)** — колаж-дрейф 1-в-1 (item tx
+>   531→766→1005 по idt як live). Desktop 0 регресу (гілка суто mobile). Залишок 3% =
+>   splitting-ghost тайтла/лого (шрифт-стеля). Стара mobile-s0 поза прибрана (замінена).
+>
+> **⬜ ЗАЛИШОК S18 (наступні цикли):**
+>   • **mobile section-content ×5 (s1558 19% / s2319 32% / s3081 20% / s3844 34% /
+>     s4604 15%):** НОВИЙ клас (НЕ колаж, розкопано S18): на цих скрол-позах ВЕРХНІЙ
+>     блок (residences building intro-slide) НЕ РЕНДЕРИТЬСЯ (порожньо замість фото) —
+>     той самий клас, що desktop s3888/s2319 «intro-слайд building не рендериться»
+>     (STATE-старе). Це mobile-секція-контент (не auto-play). Розвідка: чому building-
+>     слайд порожній (біндінг? reveal? mobile-структура residences/wellness slider).
+>   • **E · pin-zone ×2 (s3888 38%, s5288 12.9%):** same-run pose-capture (як F): наш ?s
+>     розходиться з live ~600px бо .l-intro одометр лагає (п.67). live-shots знімає пін-
+>     зону тим самим клоком що s. Аналог F, але desktop.
+>   • **СТЕЛЯ (не доробляється):** intro splitting ×3 + s9180 3.69 + mobile-intro0 3%
+>     (шрифт per-glyph splitting, перцептивно ~1:1) + woman-canvas + D thumbnails
+>     (відео/WebGL-контент springs, композиція вже 1-в-1 — ЗАРАХОВАНО).
 >
 > **ЯК ПРАЦЮВАТИ (незмінне):** гілка `springs-pipeline-v0`; PLAYWRIGHT_FROM вище;
 > ручна розвідка ЗАБОРОНЕНА (зонди в `scripts/`, не scratchpad — import playwright
@@ -896,6 +894,24 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
     PASS обидва вьюпорти → движок ДОВЕДЕНО генералізованим НАСКРІЗЬ.**
 
 ## 📓 ЖУРНАЛ СЕСІЙ
+- **S18-F (2026-07-12, Opus 4.8 1M, та сама сесія; коміти 404d614→bee18f1)** —
+  ✅ MOBILE HERO-КОЛАЖ ЗАКРИТО (32%→1.99% PASS). Єгор: «продовжуй поки не буде
+  компакту, зберігай прогрес». Реалізовано ПРИЙОМ mobile-колаж auto-drift:
+  1) F(a) розвідка: mobile-колаж `.l-gallery` АВТО-ГРАЄ (item tx 825→952 за час при
+     s=0), наш движок статичний → 32%. Той самий клас, що desktop intro-morph.
+  2) F(b) intro-timing.mjs генералізовано `--vp mobile` (817 auto-frames; pure
+     auto-play, нема input-gate). Desktop 0 регресу.
+  3) F(c) same-run baseline mobile-intro0.png на idt=12140 (п.49 — фаза між прогонами
+     не відтворюється, baseline+timing ділять клок).
+  4) F(d1) choreo-gen: коли нема iEnd-input-gate але є auto-block → емітити
+     `introGate:{iEnd:0,auto:true,autoMs}`; introT-канал авто-побудувався (48 матчів).
+  5) F(d2) движок mobile-гілка: `?intro=0&idt=MS`→applyBindings(0,0,true,idt) грає
+     фазу дрейфу; ambient auto-drift на буті по wall-time до скролу.
+  ДОВЕДЕНО: item tx дрейфує 531→766→1005 по idt (як live); mobile-intro0 1.99% PASS.
+  Desktop 0 регресу (анкери 1.63/1.16/1.64/1.89, інтро 2.61/2.38). Залишок 3% =
+  splitting-ghost (шрифт-стеля). Метод переносний — це прийом для десятків сайтів.
+  ⚑ Виявлено: інші mobile-пози (s1558/s2319/s3081/s3844/s4604) = НОВИЙ клас (mobile
+  section-content: building intro-slide не рендериться, як desktop s3888). НЕ колаж.
 - **S17d (2026-07-12, Opus 4.8 1M, та сама сесія; БЕЗ комітів коду — розвідка)** —
   ОЦІНКА ОБСЯГУ + ВИРІШАЛЬНА розвідка 3 тракт. класів (за проханням Єгора «всі цикли
   до 100%»). Результат: класифіковано home-залишок (§ ЯК ПОЧАТИ — карта класів):
