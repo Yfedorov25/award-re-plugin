@@ -202,6 +202,15 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >     mobile поз ВИКОРИСТОВУЙ ГОТОВИЙ `springs-live-shots.mjs` shootMobile (він має
 >     правильний touch-драйвер + PAGE_S_FN), а не свій зонд. АБО зчитуй наявні
 >     `visual/live/mobile-s2319.png` (вже зняті) + `*-ours.png` порівнянням оком/пікселем.
+>     ⚑ РОЗВІДКА-3 S18 (наш рендер @s2319): mobile wellness секція має ЛИШЕ 1 img
+>     (`wellness-bg-xs.webp` жінка @-67) — building-img НЕМА в нашій wellness. Селектор
+>     `[data-sk-section="wellness"]` дав wellnessY=null (wellness-контент у ІНШІЙ
+>     обгортці на цьому s, або секція проскролена). Тобто live building-топ@s2319 —
+>     контент ІНШОЇ секції (intro-хвіст? окремий mobile wellness-slider?), якого наш
+>     рендер не показує. ГІПОТЕЗА для наступного циклу: mobile має wellness-slider
+>     (top0=3652.9, окрема секція п.13/46) АБО intro-слайд building тягнеться довше
+>     на mobile — треба зняти live mobile-s2319 через shootMobile + звірити секції
+>     scene-map з тим, що ВИДНО в live-PNG. Це desktop-s3888-клас (intro-слайд building).
 >   • **E · pin-zone ×2 (s3888 38%, s5288 12.9%):** same-run pose-capture (як F): наш ?s
 >     розходиться з live ~600px бо .l-intro одометр лагає (п.67). live-shots знімає пін-
 >     зону тим самим клоком що s. Аналог F, але desktop.
