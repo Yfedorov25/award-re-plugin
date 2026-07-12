@@ -96,41 +96,54 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
   каруселі (пастка 56), НЕ виняток CURVES-GATE.**
 
 ## 🚀 ЯК ПОЧАТИ СЕСІЮ S16 — читати ПЕРШИМ
-> 🔴🔴 **БЛОКЕР СЕРЕДОВИЩА (S15 виявив) — ПЕРЕВІР ПЕРШИМ ДІЛОМ:** у контейнері
-> S15 egress-політика **ЗАБЛОКУВАЛА `springs.estate`** (проксі: `connect_rejected,
-> policy denial`). Без live НЕ ПРАЦЮЄ: свіжий піксель-рендер ours (тягне
-> `/assets/`+`/media/` через проксі-кеш — ефемерний і порожній у новому контейнері),
-> spec/skeleton-verify, scene/animation/timing-map, live-shots, екстракція нових
-> сторінок. **Обидва форки (A піксель, B генералізація) стоять без live.**
-> ПЕРШИЙ КРОК S16: `node -e "fetch('https://springs.estate/',{signal:AbortSignal.timeout(12000)}).then(r=>console.log('LIVE',r.status)).catch(e=>console.log('BLOCKED',e.message))"`
-> + `curl -sS "$HTTPS_PROXY/__agentproxy/status"` (шукай springs.estate у
-> recentRelayFailures). ЯКЩО BLOCKED → потрібна ДІЯ ВЛАСНИКА: додати
-> `springs.estate` в egress-allowlist середовища (self-service проксі НЕМАЄ,
-> cache долити НЕ можна — chicken-and-egg). ЯКЩО й далі blocked → офлайн-режим
-> (криві-гейт + перцептивний Read закомічених PNG — див. `extraction/springs-home/
-> OFFLINE-VERDICT-S15.md`), нового екстрактора не буде.
-> 🐳 **SETUP КОНТЕЙНЕРА (S15, працює):** pre-installed chromium = build **1194**
-> (`/opt/pw-browsers/chromium-1194`); `npx playwright install` заблокований
-> (`cdn.playwright.dev` denied) → НЕ ретрай. Замість: `npm i playwright@1.56.0
-> playwright-core@1.56.0` (npmjs дозволений; **1.56.0 == chromium 1194 РІВНО**,
-> каретка `^` НЕБЕЗПЕЧНА бо 1.57=1200 ≠ pre-installed). `package.json` уже пінить
-> точну версію → просто `npm i`. `resolveChromium` фолбек на `import('playwright')`
-> працює. Сервер каркаса: `node scripts/serve-skeleton.mjs springs-home --port 8873 &`.
+> 💻 **ЦЕ ЛОКАЛЬНА СЕСІЯ (Мак Єгора) — ЦІЛЬ: ДОБИТИ home до 100%.** Локально
+> мережа ціла, `springs.estate` доступний → конвеєр працює точно як S1-S14
+> (піксель, live-екстракція, все). Хмарний контейнер S15 мав відрізаний
+> egress (springs.estate policy-denied) → там форки стояли; ЛОКАЛЬНО цього
+> блоку НЕМАЄ, ігноруй. (Деталь для майбутніх хмарних сесій — пастка 59.)
 >
-> 🐳 **СЕСІЯ В КОНТЕЙНЕРІ (без Claude Browser pane) — це НОРМА, нічого не
-> втрачаєш** (вердикт S14, пастка 55/57 + browser-pane-capability пам'ять):
-> pane давав лише зручні ad-hoc зонди; його скріншоти НЕНАДІЙНІ на глибоких
-> позах. У контейнері:
->   • візуал — через `Read` на PNG (`extraction/springs-home/visual/parity/
->     *-ours.png` = наш рендер, `visual/live/*.png` = ціль, `*-diff-*.png` =
->     хітмап). Це і є як робили візуальний аналіз — працює 1:1.
->   • зонди движка/DOM — крихітний `page.evaluate` у playwright-скрипті
->     (замість javascript_tool pane).
->   • ГЕЙТИ/ЕКСТРАКТОРИ/ФІКСИ — усі скриптові, container-native.
-> Setup: `npm i playwright && npx playwright install chromium`, прибрати
-> `PLAYWRIGHT_FROM` з команд (resolveChromium має фолбек). Гілка
-> **`springs-pipeline-v0`**, працюй від кореня репо. Сервер каркаса:
-> `node scripts/serve-skeleton.mjs springs-home --port 8873 &`.
+> **SETUP ЛОКАЛЬНО (як завжди):**
+> - Робоче дерево: `/Users/yehorfedorov/Downloads/award-re-springs`.
+> - Гілка: **`claude/springs-pipeline-s15-4dbrbw`** (сюди S15 запушив доки;
+>   містить весь трек від `springs-pipeline-v0`). `git fetch origin && git
+>   checkout claude/springs-pipeline-s15-4dbrbw`. Движок = S14 (`6fd7319`),
+>   S15 коду НЕ міняв (тільки доки/вердикт/package.json).
+> - Playwright: `PLAYWRIGHT_FROM=/Users/yehorfedorov/Downloads/eruhomist/apps/
+>   smarts/package.json` (локально існує). Сервер каркаса:
+>   `node scripts/serve-skeleton.mjs springs-home --port 8873 &`.
+> - `package.json` (S15) пінить pw 1.56.0 для КОНТЕЙНЕРА — локально не заважає
+>   (resolveChromium пробує PLAYWRIGHT_FROM першим). Live доступний → asset-proxy
+>   наповнюється сам.
+>
+> **СВІЖИЙ СМОУК НА СТАРТІ (локально повний):**
+> - криві: `for s in hero-gallery intro wellness header; do node scripts/
+>   curve-compare.mjs springs-home $s --vp both; done` → очікування **7/8**
+>   (hero mobile 88.3 FAIL — пастка 56);
+> - піксель: `node scripts/springs-visual-diff.mjs springs-home --only desktop`
+>   → якорі 1.63/1.16/1.64/1.89, зона слайдера 12-27, woman 3.66 (= S14-бейзлайн).
+>
+> 🎯 **ПЛАН «ДО 100%» (форк A, порядок = найбільший піксель-виграш першим):**
+> 1. **s9180 nature-слайдер** (12-27% на s7194-s9180 — НАЙБІЛЬШИЙ залишок,
+>    пастка 58). 3 СКООРДИНОВАНІ частини (ефект лише РАЗОМ, тому 2 сесії не
+>    зрушили): (1) ПЕРЕЗНЯТИ nature timing-map щоб зловити reveal капшена
+>    `col--md-6 ui-background` (зараз sSettled:undefined → choreo фолбек 10020;
+>    закон 1 — не ручний sOpen); (2) o=0 контамінація сусідньої панелі gd-558
+>    (parallax-крива з паркованих nature-карт); (3) x=855→x=0 + біндінги правих
+>    thumbnail'ів. degenerate-clip уже ланднуто S14 (`f5e4023`, панелі МОЖУТЬ
+>    рендеритись). Докази: `visual/parity/desktop-s9180-{ours,diff}.png`.
+> 2. **hero mobile 88.3** (8-й криву-гейт): екстрактор фази/швидкості mobile-
+>    каруселі (систематичний rate-мисматч, зсув росте з s 13.5→18.4px + wrap
+>    @971; пастка 56 — НЕ виняток CURVES-GATE = гейт-геймінг; ризик desktop
+>    100% через rotated-matrix пастка 17 — обережно).
+> 3. **mobile-пози 12-32** (s0/s2319/s3844/s1558/s3081): same-run підхід як
+>    інтро (пастка 49); s2319 intro-слайд building (спорідн. desktop s3888).
+> 4. **інтро останній міліметр** (2.61/3.62/2.38, поріг 2): 5 hero-img
+>    семантика/геометрія, НЕ реордер (пастка 50/53).
+> 5. woman 3.66 — ймовірна СТЕЛЯ (суб-перцептивна texture-крайка + text-зсув,
+>    пастка 42/58); чіпати ОСТАННІМ або лишити задокументованою стелею.
+> **Після КОЖНОЇ зміни движка/choreo:** криві-гейт (`--steps 72 --range 12`,
+> пастка 43) + skeleton-verify + точковий піксель-диф ДО/ПІСЛЯ (s900/2070/2969/
+> 5580 + s4539) — keep лише при 0 регресу якорів (закон treku).
 >
 > 🔴 **S14 ЛАНДНУВ 1 ФІКС + СПРОСТУВАВ 3 ГІПОТЕЗИ** (движок торкнуто ОДИН раз,
 > верифіковано 0 регресу). Стан:
@@ -145,24 +158,30 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 > - ⚑ **hero mobile 88.3** = систематичний rate-мисматч mobile-каруселі, НЕ
 >   авто-дрейф; виняток CURVES-GATE = гейт-геймінг, ВІДХИЛЕНО (пастка 56).
 >
-> 🔷 **СТРАТЕГІЧНА РОЗВИЛКА (рішення Єгора, спитати ЯКЩО не задано):** залишок
-> 8% = БАГАТОКОМПОНЕНТНІ residual'и (позиція+текстура+текст-зсув на позу),
-> жоден компонент поодинці НЕ дає ≤2%; на canvas/texture-позах ≤2% = ймовірна
-> СТЕЛЯ методу (перцептивно вже ~1:1). Опції:
+> 🔷 **РОЗВИЛКА ВИРІШЕНА (Єгор, S15): ФОРК A — ДОБИТИ home до 100%** (не B/
+> генералізація). План вище. Контекст залишку: 8% = БАГАТОКОМПОНЕНТНІ residual'и
+> (позиція+текстура+текст-зсув на позу), жоден компонент поодинці НЕ дає ≤2%;
+> woman/texture-пози ≤3.66 = ймовірна СТЕЛЯ (перцептивно ~1:1), але slider-панелі
+> s9180 (12-27%) — РЕАЛЬНИЙ дефект, не стеля → головна ціль. (Форк B —
+> генералізація на нові сторінки — відкладено ДО закриття home.)
+> (Архів опції — якщо колись зміниш курс:)
 >   • **A — гризти піксель-гейт** далі (спадна віддача, ~4-6 сесій, асимптота);
 >   • **B — визнати движок доведеним + перцептивно 1:1 і йти на ГЕНЕРАЛІЗАЦІЮ**
 >     движка на нові сторінки (макро-ціль треку). Рекомендація S14 = B.
 > Якщо A: найтвердіший приз — s9180 (позиція 111). Найлегший тонкий — інтро
 > 2.4-3.6 (5 hero-img семантика/геометрія, НЕ реордер, пастка 50/53).
-> ☁️ **ЯКЩО СЕСІЯ В ХМАРІ (Claude Code cloud, не локальний мак):**
-> цей файл живе В РЕПО як `KAI/STATE-springs.md`; локальні абсолютні
-> шляхи (/Users/yehorfedorov/…) НЕ існують — працюй від кореня репо
-> на гілці `springs-pipeline-v0` (worktree не потрібен). Playwright:
-> `PLAYWRIGHT_FROM` не діє — постав `npm i playwright && npx playwright
-> install chromium` і прибери PLAYWRIGHT_FROM з команд (resolveChromium
-> має фолбек на звичайний require) або постав змінну на локальний
-> node_modules. Live springs.estate доступний з хмари. Сервер каркаса:
-> `node scripts/serve-skeleton.mjs springs-home --port 8873 &` як завжди.
+> ☁️ **ЯКЩО СЕСІЯ В ХМАРІ (Claude Code cloud, не локальний мак):** цей файл
+> живе В РЕПО; локальні шляхи /Users/… НЕ існують — працюй від кореня репо.
+> ⚠️ ПЕРЕВІР LIVE ПЕРШИМ (пастка 59): S15 хмара мала `springs.estate`
+> egress-DENIED → форки стоять. `node -e "fetch('https://springs.estate/',
+> {signal:AbortSignal.timeout(12000)}).then(r=>console.log('LIVE',r.status)).
+> catch(e=>console.log('BLOCKED',e.message))"`. ЯКЩО BLOCKED → потрібна дія
+> власника (allowlist springs.estate) або офлайн-режим (тільки H15-темплейт +
+> криві-гейт, `OFFLINE-VERDICT-S15.md`). Setup хмари (S15 довів): pre-installed
+> chromium 1194, `npx playwright install` DENIED → `npm i` (package.json пінить
+> pw 1.56.0 == rev 1194; НЕ каретка). PLAYWRIGHT_FROM не діє (resolveChromium
+> фолбек на import). Сервер каркаса: `node scripts/serve-skeleton.mjs
+> springs-home --port 8873 &`.
 0. **Гейти S14-фіналу (= S13, движок не чіпали):** криві **7/8** (hero mobile
    88.3 — систематичний rate-мисматч каруселі, НЕ авто-дрейф, пастка 56);
    свіп desktop **4/22** (повний свіп 5/29 з mobile s796);
@@ -172,13 +191,11 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
    для метрики), src-штраф candScore (пастка 53), sigSoftScore у
    choreo-gen, intro-timing зі same-run шотами.
 1. **Робоче дерево:** `/Users/yehorfedorov/Downloads/award-re-springs`, гілка
-   `springs-pipeline-v0`, **HEAD трека = `ea323c9`** (S13-фінал; історія:
-   `a766a93` S3 → `cdb6843` S4a → `b5cae75` S5a → `607b762` S6a →
-   `55b2ae1` S6b → `494b040` S7a → `8900795` S8 → `35d04ad` S9 →
-   `aabc856` S10 → `25dff83` S11 → `21dafc7` S12a (інтро-морф) →
-   `9069f31` S12b → `cacecf3` S12c → `229ebce` S12d (криві 7/8) →
-   `1343d4e` S12-фінал → S13 (splitFix + src-штраф) → `ea323c9`
-   S13-фінал).
+   **`claude/springs-pipeline-s15-4dbrbw`** (S15 запушив сюди; надмножина
+   `springs-pipeline-v0`). **Движок = S14 (`6fd7319`)**; S15 (`699164a` HEAD)
+   коду НЕ міняв — лише доки (OFFLINE-VERDICT, STATE, KICKOFF-S16, package.json).
+   Історія движка: `ea323c9` S13-фінал → S14 (`f5e4023` degenerate-clip фікс +
+   розвідка) → `6fd7319`. S15 = офлайн-верифікація в хмарі (криві 7/8 = S14).
    Працюй ТІЛЬКИ там. (HEAD основного чекаута award-re-plugin належить
    ПАРАЛЕЛЬНОМУ треку AIR — його гілку і головний STATE.md НЕ чіпати.)
 2. **Playwright:** `PLAYWRIGHT_FROM=/Users/yehorfedorov/Downloads/eruhomist/apps/smarts/package.json`.
@@ -753,6 +770,10 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
      Форк B валідний ПІСЛЯ розблокування live. Без live — стоп.
   6) Гейти S15-фіналу: криві 7/8 (офлайн, = S14), піксель НЕ перезнятий (немає
      live), спека/скелет НЕ перезняті (немає live). Артефакти S14 незмінні.
+  7) РІШЕННЯ ЄГОРА (кінець S15): хмарний egress-блок НЕ розблоковуємо — трек
+     продовжуємо ЛОКАЛЬНО (Мак, live доступний), ФОРК A = добити home до 100%.
+     § ЯК ПОЧАТИ S16 переорієнтовано на локальну сесію; kickoff = `KAI/
+     KICKOFF-S16-LOCAL.md`. Хмарний блокер лишено як пастку 59 (для майбутнього).
 - **S14 (2026-07-12, Opus 4.8; коміт → цей)** — ЕКСПЕРИМЕНТ Browser pane +
   розвідка даними (БЕЗ змін движка — свідомо, integrity > форсований фікс):
   1) **BROWSER PANE ВЕРДИКТ** (пастки 55, закон 9): протестував вбудований
