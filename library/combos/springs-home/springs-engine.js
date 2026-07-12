@@ -315,8 +315,27 @@
            безіменна сигнатура (без cls/text) проходила фільтр і сідала
            вербатим-матрицею на обгортку (nature стискався scale 0.1438,
            clip-лінія ancClip скейлилась — розкопка S9) */
+        /* S16: структурні layout-обгортки слайдера (sticky__layer,
+           *__caption, *__caption__inner, *__slider) — теж інфраструктура,
+           НЕ контент-цілі. Анонімні/безконтентні nature-video-біндінги
+           фону (div cls="" src="", vimeo/background--cover) сідали на них
+           по proximity → каскад scale 0.25×0.27 стискав caption-панель
+           720→59px (s9180 26.9%, зона слайдера). Виключати ЛИШЕ для сигнатур
+           без надійного дискримінатора (нема cls І нема справжнього src) —
+           легітимні контентні матчі (col--md-6 з src) не зачеплені. */
+        const isSliderWrap = (el) => {
+          const cn = typeof el.className === 'string' ? el.className : '';
+          return /(?:^|\s)sticky__layer|__caption(?:__inner)?(?:\s|$)|__slider(?:-container|__images)?(?:\s|$)/.test(cn);
+        };
+        /* слабка сигнатура (анонім) АБО фоновий біндінг (vimeo/background--
+           cover): їх справжня ціль — окремий фоновий div, а caption-обгортки
+           містять успадковане nature-video-фото → src-збіг +4 обманює
+           candScore (S16). Обидва класи НЕ сідають на layout-обгортки. */
+        const bgSig = /vimeo-background|background--cover/.test(sig.cls || '');
+        const weakSig = (!sig.cls && (!sig.src || sig.src === 'svg%3E')) || bgSig;
         const cands = [...wrap.querySelectorAll(sig.tag)]
-          .filter((el) => el.tagName.toLowerCase() === sig.tag && !used.has(el))
+          .filter((el) => el.tagName.toLowerCase() === sig.tag && !used.has(el)
+            && !(weakSig && isSliderWrap(el)))
           .map((el) => ({ el, score: candScore(el, sig) }))
           .filter((x) => x.score > 0.5 || (!sig.cls && !sig.text));
         const maxScore = Math.max(...cands.map((x) => x.score), 0);
