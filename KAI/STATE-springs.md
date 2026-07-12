@@ -243,6 +243,15 @@ Springs — чистий тест: про нього НЕМАЄ наших пе�
 >     (3) choreo-gen + движок: колаж-карти лишаються видимими на скрол-позах (травел
 >     тягне їх, не ховає); (4) піксель s1558/s2319/s3081/s3844. ⚠️ НЕ зламати F
 >     (mobile-intro0 1.99% на s=0 — колаж auto-drift) + m-s796 1.39.
+>     ✅ **КРОК (1) ВИКОНАНО (S18): scene-map --vp mobile ПЕРЕЗНЯТО** (11313px, 19/19
+>     коренів, desktop збережено) — hero-gallery ВСЕ ОДНО h=844 (top range -10469..0).
+>     Тобто section-extent ВИКЛЮЧЕНО. Scene-map ВІДКОЧЕНО (h не змінилась, щоб не
+>     дрейфити наступний choreo-gen). → КОРІНЬ = гіпотеза (2): **КЛИП/OVERFLOW колаж-
+>     карт на mobile скрол-позах** (карти в 844-секції, АЛЕ мають overflow-persist як
+>     live). НАСТУПНИЙ КРОК ТОЧНО: зонд ancestorClips hero-gallery mobile + overflow
+>     `.l-gallery`/`.l-gallery-container`/`.l-gallery__content` (ротований, п.17) —
+>     чому наші opening-карти зникають на s>844 а live тримає. Це clip-механіка колажу,
+>     не extent, не F-auto-drift, не пастка 46.
 >   • **E · pin-zone ×2 (s3888 38%, s5288 12.9%):** same-run pose-capture (як F): наш ?s
 >     розходиться з live ~600px бо .l-intro одометр лагає (п.67). live-shots знімає пін-
 >     зону тим самим клоком що s. Аналог F, але desktop.
