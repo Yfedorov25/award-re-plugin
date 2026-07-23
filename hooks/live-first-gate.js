@@ -41,22 +41,56 @@ try {
   const ma = filePath.match(/\/library\/techniques\/atoms\/([^/]+)\/variants\/[^/]+\.html$/i);
   if (ma) {
     const atomName = ma[1];
-    const refDir = path.join(path.dirname(path.dirname(filePath)), 'reference');
+    const atomDir = path.dirname(path.dirname(filePath));
+    const refDir = path.join(atomDir, 'reference');
     let hasRef = false, hasTimeline = false, hasChoreo = false;
+    let hasZones = false, hasZonetrack = false, claimsOk = false, claimsWhy = '';
+    let tzOk = false, tzWhy = '';
     try {
       const rf = fs.existsSync(refDir) ? fs.readdirSync(refDir) : [];
       hasRef = rf.some((f) => /\.(mp4|mov|webm)$/i.test(f) || f === 'manifest.json');
       hasTimeline = rf.some((f) => f.endsWith('.timeline.json'));
-      hasChoreo = fs.existsSync(path.join(path.dirname(path.dirname(filePath)), 'CHOREO.md'));
+      hasChoreo = fs.existsSync(path.join(atomDir, 'CHOREO.md'));
+      // ── v2 (рада S47, кроки 1-4): zone-track ДО CHOREO + CLAIMS-таблиця + TZ-VERDICT ──
+      hasZones = rf.includes('zones.json');
+      hasZonetrack = rf.some((f) => f.endsWith('.zonetrack.json'));
+      if (hasChoreo) {
+        const cho = fs.readFileSync(path.join(atomDir, 'CHOREO.md'), 'utf8');
+        const cb = cho.match(/```claims\n([\s\S]*?)```/);
+        if (!cb) claimsWhy = 'CHOREO.md без ```claims-блоку (формат: atoms/_scaffold/CLAIMS-template.md)';
+        else {
+          const cls = (cb[1].match(/mechanic-class:\s*(\S+)/) || [])[1];
+          const rows = cb[1].split('\n').filter((l) => /^\s*\|/.test(l) && !/^[\s|:\-]+$/.test(l) && !/зона/.test(l));
+          const rowsWithNum = rows.filter((l) => /\d/.test(l.split('|').slice(-2)[0] || ''));
+          if (!cls) claimsWhy = 'claims-блок без mechanic-class';
+          else if (cls === 'OTHER' || /UNMEASURABLE/i.test(cb[1])) claimsWhy = 'mechanic-class=OTHER або UNMEASURABLE у claims = АВТОМАТИЧНИЙ борд-блокер Єгору (код не пишеться до вердикту ока)';
+          else if (!rows.length) claimsWhy = 'claims-таблиця порожня';
+          else if (rowsWithNum.length < rows.length) claimsWhy = 'у claims є клітинки без src=число («бачу на montage» = НЕ доказ)';
+          else claimsOk = true;
+        }
+      }
+      const tzPath = path.join(atomDir, 'TZ-VERDICT.json');
+      if (fs.existsSync(tzPath)) {
+        const tz = JSON.parse(fs.readFileSync(tzPath, 'utf8'));
+        if (tz.pass !== true) tzWhy = 'TZ-VERDICT.json має diffs (pass!=true) — борд-блокер Єгору, розбіжність вирішує око';
+        else if (!tz.authorSession || !tz.verifierSession || tz.authorSession === tz.verifierSession)
+          tzWhy = 'TZ-VERDICT.json без карантину: authorSession і verifierSession мусять бути РІЗНІ сесії (1a ≠ 1b)';
+        else tzOk = true;
+      } else tzWhy = 'TZ-VERDICT.json відсутній — незалежний верифікатор (ПРОБНИЙ статус) не пройдений: atoms/_scaffold/TZ-VERIFIER-PROCEDURE.md → scripts/claims-diff.mjs';
     } catch (_) {}
-    // S46-c ПРОТОКОЛ (мандат Єгора): код атома ПИШЕТЬСЯ лише після ПОВНОГО live-розбору.
-    // Обов'язкові артефакти: (1) live-запис; (2) machine-timeline (live-timeline.mjs);
-    // (3) CHOREO.md — покадровий розбір ФАЗ з числами (full-res кадри, не клітинки монтажу).
-    if (hasRef && hasTimeline && hasChoreo) process.exit(0);
-    if (hasRef && (!hasTimeline || !hasChoreo)) {
+    // S46-c + S48-v2 ПРОТОКОЛ: код атома ПИШЕТЬСЯ лише після ПОВНОГО live-розбору:
+    // (1) live-запис; (2) timeline; (3) zones.json (ручні зони З LIVE-КАДРУ);
+    // (4) *.zonetrack.json (вердикти З LIVE лежать у файлі ДО CHOREO); (5) CHOREO.md з
+    // валідною CLAIMS-таблицею (закритий словник, src=число); (6) TZ-VERDICT.json (1a≠1b, 0 diffs).
+    if (hasRef && hasTimeline && hasChoreo && hasZones && hasZonetrack && claimsOk && tzOk) process.exit(0);
+    if (hasRef && !(hasTimeline && hasChoreo && hasZones && hasZonetrack && claimsOk && tzOk)) {
       const missing = [];
       if (!hasTimeline) missing.push('reference/<name>.timeline.json — згенеруй: node scripts/live-timeline.mjs --video atoms/' + atomName + '/reference/<відео>');
       if (!hasChoreo) missing.push('CHOREO.md поруч зі SPEC.md — покадровий розбір фаз за ATOM-PROTOCOL.md (full-res кадри, числа подій, поверхні)');
+      if (!hasZones) missing.push('reference/zones.json — РУЧНІ зони-прямокутники З LIVE-КАДРУ (крок 2 плану ради S47)');
+      if (!hasZonetrack) missing.push('reference/*.zonetrack.json — запусти: node scripts/zone-track.mjs --atom ' + atomName + ' (вердикти-кандидати З LIVE ДО написання CHOREO)');
+      if (hasChoreo && !claimsOk) missing.push('валідна CLAIMS-таблиця: ' + claimsWhy);
+      if (!tzOk) missing.push(tzWhy);
       const reason2 =
         'G-LIVE live-first-gate (ПРОТОКОЛ S46-c): писати ' + path.basename(filePath) + ' для «' + atomName + '» ' +
         'ЗАБЛОКОВАНО — live-запис Є, але розбір НЕ завершений. Бракує:\n  - ' + missing.join('\n  - ') + '\n' +

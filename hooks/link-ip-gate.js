@@ -132,6 +132,11 @@ function checkSelfReport(atomId) {
     const refDir2 = path.join(dir, 'reference');
     const hasRefVideo = fs.existsSync(refDir2) && fs.readdirSync(refDir2).some((f) => /\.(mp4|mov|webm)$/i.test(f));
     if (hasRefVideo && !ran.has('surface-parity')) missing.push('surface-parity (є reference-відео — композиційна звірка з live обов\'язкова)');
+    // S48 (рада S47 кроки 3+5): є reference-відео → structure-parity (механіка live↔наш у
+    // EVENT-домені) і mechanic-class (клас визначає live, config лише додає) ОБОВ'ЯЗКОВІ.
+    // Анти-обхід: «загубити» zones.json/zonetrack = FAIL стадії, а не тихий пропуск виміру.
+    if (hasRefVideo && !ran.has('structure-parity')) missing.push('structure-parity (є reference-відео — механіка live↔наш у EVENT-домені обов\'язкова, рада S47)');
+    if (hasRefVideo && !ran.has('mechanic-class')) missing.push('mechanic-class (клас механіки визначає LIVE zone-track, config мусить збігатись)');
   } catch (_) {}
   if (missing.length) {
     return { ok: false, why: `DOWNGRADE: звіт не містить обов'язкових вимірів: ${missing.join(', ')} — харнес урізано?` };
