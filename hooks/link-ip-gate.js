@@ -121,6 +121,9 @@ function checkSelfReport(atomId) {
       const tgts = Array.isArray(scfg.targets) ? scfg.targets : [];
       if (tgts.some((t) => t.wipe) && !ran.has('motion-direction')) missing.push('motion-direction (є wipe-таргети в config)');
       if (tgts.some((t) => t.mechanism) && !ran.has('channel-identity')) missing.push('channel-identity (є mechanism-таргети в config)');
+      // S47: swipe-strip обов'язковий якщо config декларує swipeStrip (хвіст-плитки = свайп-стрічка).
+      // Анти-downgrade: не можна «забути» вимір коли трек є (баг ітерації-1 promenade: статичні плитки).
+      if (scfg.swipeStrip && !ran.has('swipe-strip')) missing.push('swipe-strip (є swipeStrip в config — хвіст-плитки мусять бути свайп-стрічкою)');
     } catch (_) { return { ok: false, why: 'self-check.config.json битий — полагодь' }; }
   }
   // S46-c (мандат Єгора «неможливо обійти»): є reference-відео → surface-parity ОБОВ'ЯЗКОВИЙ
