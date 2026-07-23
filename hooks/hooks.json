@@ -1,5 +1,5 @@
 {
-  "description": "award-re v1 hooks: state inject · design-grounding gate · section-gates (prototype-gate + ban AskUserQuestion-копі) · deploy-gate (verify-report обовʼязковий)",
+  "description": "award-re v1 hooks: state inject · design-grounding gate · live-first-gate (suborganism seam/index потребує свіжого live-ref) · section-gates (prototype-gate + ban AskUserQuestion-копі) · deploy-gate (verify-report обовʼязковий)",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -20,6 +20,16 @@
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/design-grounding.js",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/live-first-gate.js",
+            "timeout": 8
           }
         ]
       },
