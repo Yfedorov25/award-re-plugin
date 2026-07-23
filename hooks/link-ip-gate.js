@@ -44,7 +44,9 @@ const sha256 = (b) => crypto.createHash('sha256').update(b).digest('hex');
 // Завжди-обчислювані виміри: звіт без будь-якого з них = downgrade-атака → блок.
 // Expectation-виміри (timing/ordering/parallelism/plateau/composition/typography/channel)
 // вимагаються ЯКЩО expectations.json атома декларує відповідну секцію.
-const REQUIRED_ALWAYS = ['render-api', 'purity', 'census', 'geometry', 'motion-direction', 'channel-identity', 'console-errors', 'http-status'];
+const REQUIRED_ALWAYS = ['render-api', 'purity', 'census', 'geometry', 'console-errors', 'http-status'];
+// умовні виміри від CONFIG: motion-direction якщо є wipe-таргети; channel-identity якщо є mechanism-таргети
+// (S46: не кожен атом має wipe/mechanism — parallax-fade атоми як hero/promenade легітимно без них)
 const EXPECT_DIMS = { events: 'timing', ordering: 'ordering', overlap: 'parallelism', composition: 'composition-overlap', typography: 'typography-reveal' };
 
 // inputsHash: ТА САМА формула що в self-check.mjs (variants/*.html sorted + configSha + expectationsSha)
@@ -110,6 +112,24 @@ function checkSelfReport(atomId) {
       }
     } catch (_) { return { ok: false, why: 'expectations.json битий — полагодь' }; }
   }
+  // config-залежні обов'язкові виміри (S46): motion-direction лише при wipe-таргетах,
+  // channel-identity лише при mechanism-таргетах (parallax-fade атоми їх не мають)
+  const cfgP2 = path.join(dir, 'self-check.config.json');
+  if (fs.existsSync(cfgP2)) {
+    try {
+      const scfg = JSON.parse(fs.readFileSync(cfgP2, 'utf8'));
+      const tgts = Array.isArray(scfg.targets) ? scfg.targets : [];
+      if (tgts.some((t) => t.wipe) && !ran.has('motion-direction')) missing.push('motion-direction (є wipe-таргети в config)');
+      if (tgts.some((t) => t.mechanism) && !ran.has('channel-identity')) missing.push('channel-identity (є mechanism-таргети в config)');
+    } catch (_) { return { ok: false, why: 'self-check.config.json битий — полагодь' }; }
+  }
+  // S46-c (мандат Єгора «неможливо обійти»): є reference-відео → surface-parity ОБОВ'ЯЗКОВИЙ
+  // у звіті (модель не може «забути» liveAnchors — стадія безумовна, а хук це страхує)
+  try {
+    const refDir2 = path.join(dir, 'reference');
+    const hasRefVideo = fs.existsSync(refDir2) && fs.readdirSync(refDir2).some((f) => /\.(mp4|mov|webm)$/i.test(f));
+    if (hasRefVideo && !ran.has('surface-parity')) missing.push('surface-parity (є reference-відео — композиційна звірка з live обов\'язкова)');
+  } catch (_) {}
   if (missing.length) {
     return { ok: false, why: `DOWNGRADE: звіт не містить обов'язкових вимірів: ${missing.join(', ')} — харнес урізано?` };
   }

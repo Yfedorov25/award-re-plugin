@@ -42,12 +42,30 @@ try {
   if (ma) {
     const atomName = ma[1];
     const refDir = path.join(path.dirname(path.dirname(filePath)), 'reference');
-    let hasRef = false;
+    let hasRef = false, hasTimeline = false, hasChoreo = false;
     try {
-      hasRef = fs.existsSync(refDir) && fs.readdirSync(refDir)
-        .some((f) => /\.(mp4|mov|webm)$/i.test(f) || f === 'manifest.json');
+      const rf = fs.existsSync(refDir) ? fs.readdirSync(refDir) : [];
+      hasRef = rf.some((f) => /\.(mp4|mov|webm)$/i.test(f) || f === 'manifest.json');
+      hasTimeline = rf.some((f) => f.endsWith('.timeline.json'));
+      hasChoreo = fs.existsSync(path.join(path.dirname(path.dirname(filePath)), 'CHOREO.md'));
     } catch (_) {}
-    if (hasRef) process.exit(0);
+    // S46-c ПРОТОКОЛ (мандат Єгора): код атома ПИШЕТЬСЯ лише після ПОВНОГО live-розбору.
+    // Обов'язкові артефакти: (1) live-запис; (2) machine-timeline (live-timeline.mjs);
+    // (3) CHOREO.md — покадровий розбір ФАЗ з числами (full-res кадри, не клітинки монтажу).
+    if (hasRef && hasTimeline && hasChoreo) process.exit(0);
+    if (hasRef && (!hasTimeline || !hasChoreo)) {
+      const missing = [];
+      if (!hasTimeline) missing.push('reference/<name>.timeline.json — згенеруй: node scripts/live-timeline.mjs --video atoms/' + atomName + '/reference/<відео>');
+      if (!hasChoreo) missing.push('CHOREO.md поруч зі SPEC.md — покадровий розбір фаз за ATOM-PROTOCOL.md (full-res кадри, числа подій, поверхні)');
+      const reason2 =
+        'G-LIVE live-first-gate (ПРОТОКОЛ S46-c): писати ' + path.basename(filePath) + ' для «' + atomName + '» ' +
+        'ЗАБЛОКОВАНО — live-запис Є, але розбір НЕ завершений. Бракує:\n  - ' + missing.join('\n  - ') + '\n' +
+        'ЗАКОН: код пишеться ПІСЛЯ повного live-розбору (корінь S46: панель прийнята за скрим бо розбір ' +
+        'був по низькорез-клітинках). Протокол: award-re-springs/library/techniques/atoms/ATOM-PROTOCOL.md';
+      process.stdout.write(JSON.stringify({ hookSpecificOutput: {
+        hookEventName: 'PreToolUse', permissionDecision: 'deny', permissionDecisionReason: reason2 } }));
+      process.exit(0);
+    }
     const reason =
       'G-LIVE live-first-gate (atoms, S45-d): писати ' + path.basename(filePath) + ' для атома «' + atomName + '» ' +
       'ЗАБЛОКОВАНО — немає live-референсу.\n' +
