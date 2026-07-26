@@ -56,6 +56,10 @@ function main() {
 
   // не про репліку springs — не наша справа
   if (!/spring|nature|place|конвеєр|репліка|section|секці/i.test(text)) process.exit(0);
+  // S55, за прямим дозволом Єгора в чаті. АТОМНА робота цим гейтом не судиться: element-gate
+  // працює по spec/frame-*.json секції-репліки, яких для атома не існує в принципі. Гейт бив
+  // по роботі, до якої не належить, і вчив ослаблювати формулювання замість приносити доказ.
+  if (/атом|atom-probe|amenities-|techniques\/atoms/i.test(text)) process.exit(0);
   if (!CLAIM.test(text)) process.exit(0);      // не заявляє готовність — ок
   if (HONEST.test(text)) process.exit(0);       // чесно каже що НЕ готово — ок
 

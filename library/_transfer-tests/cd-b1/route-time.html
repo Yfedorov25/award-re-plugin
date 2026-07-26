@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DELTA · Route time</title>
+<style>
+  :root{--bg:#10161d;--street:#2a3542;--ink:#e8e4dc;--dim:#67727f;--accent:#d9a066;--hair:#1b242e}
+  *{box-sizing:border-box;margin:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;overflow:hidden}
+  .wrap{display:flex;height:100vh}
+  .map{flex:1;position:relative;min-width:0}
+  .map svg{position:absolute;inset:0;width:100%;height:100%}
+  .hint{position:absolute;left:40px;bottom:34px;font-size:10px;letter-spacing:.32em;color:var(--dim)}
+  .side{width:420px;padding:52px 46px 40px;display:flex;flex-direction:column;border-left:1px solid var(--hair);overflow-y:auto}
+  .brand{font-size:11px;letter-spacing:.38em;color:var(--dim)}
+  .minutes{font-family:Georgia,"Times New Roman",serif;font-size:168px;line-height:.92;font-weight:400;margin-top:26px;font-variant-numeric:tabular-nums;transition:color .3s linear}
+  .minutes.idle{color:#3a4552}
+  .under{font-size:11px;letter-spacing:.26em;color:var(--dim);margin-top:14px;min-height:14px;white-space:nowrap}
+  .list{margin-top:auto;padding-top:36px}
+  .poi{display:flex;align-items:baseline;gap:16px;padding:16px 0;border-top:1px solid var(--hair);cursor:pointer;transition:color .25s ease;user-select:none}
+  .poi .n{font-size:10px;color:var(--dim);width:18px}
+  .poi .name{font-size:13px;letter-spacing:.2em}
+  .poi .m{margin-left:auto;font-size:11px;color:var(--dim);letter-spacing:.1em;transition:color .25s ease}
+  .poi:hover{color:#ffffff}
+  .poi.active,.poi.active .m{color:var(--accent)}
+  .marker rect{fill:#f2f1ee}
+  .marker text{fill:#10161d;font-size:12px;letter-spacing:.22em;font-family:Helvetica,Arial,sans-serif}
+  .route{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .route.fading{transition:opacity .3s linear;opacity:0}
+  .dot{fill:#3d4a59;transition:fill .3s linear}
+  .dot.active{fill:var(--accent)}
+  .dotlab{fill:#4a5766;font-size:10px;letter-spacing:.18em;font-family:Helvetica,Arial,sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="map">
+    <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <path d="M -20 880 C 220 840 300 900 520 860 C 740 820 860 880 1020 840" fill="none" stroke="#18212b" stroke-width="58"/>
+      <g stroke="#2a3542" stroke-width="1.5" fill="none">
+        <line x1="100" y1="0" x2="100" y2="1000"/><line x1="300" y1="0" x2="300" y2="1000"/>
+        <line x1="500" y1="0" x2="500" y2="1000"/><line x1="620" y1="0" x2="620" y2="1000"/>
+        <line x1="700" y1="0" x2="700" y2="1000"/><line x1="900" y1="0" x2="900" y2="1000"/>
+        <line x1="0" y1="130" x2="1000" y2="130"/><line x1="0" y1="220" x2="1000" y2="220"/>
+        <line x1="0" y1="300" x2="1000" y2="300"/><line x1="0" y1="500" x2="1000" y2="500"/>
+        <line x1="0" y1="700" x2="1000" y2="700"/><line x1="0" y1="780" x2="1000" y2="780"/>
+        <line x1="0" y1="900" x2="1000" y2="900"/>
+        <line x1="100" y1="1000" x2="420" y2="620"/><line x1="700" y1="0" x2="980" y2="260"/>
+      </g>
+      <g id="routes"></g>
+      <g id="dots"></g>
+      <g class="marker">
+        <rect x="461" y="481" width="78" height="36" rx="2"/>
+        <text x="500" y="504" text-anchor="middle">DELTA</text>
+      </g>
+    </svg>
+    <div class="hint">RIVERSIDE CAMPUS · DELTA</div>
+  </div>
+  <aside class="side">
+    <div class="brand">DELTA — TIME ON FOOT</div>
+    <div class="minutes idle" id="num">0</div>
+    <div class="under" id="under">SELECT A DESTINATION</div>
+    <div class="list" id="list"></div>
+  </aside>
+</div>
+<script>
+(function(){
+  'use strict';
+  var RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NS = 'http://www.w3.org/2000/svg';
+  var POIS = [
+    {name:'FERRY PIER', min:12, km:0.9, x:150, y:780, pts:'500,500 500,700 300,700 300,780 150,780'},
+    {name:'MARKET HALL',min:8,  km:0.6, x:760, y:300, pts:'500,500 700,500 700,300 760,300'},
+    {name:'FOREST GYM', min:15, km:1.2, x:230, y:220, pts:'500,500 500,300 300,300 300,220 230,220'},
+    {name:'SCHOOL',     min:10, km:0.8, x:820, y:720, pts:'500,500 700,500 700,720 820,720'},
+    {name:'CLINIC',     min:6,  km:0.5, x:620, y:130, pts:'500,500 620,500 620,130'}
+  ];
+  // cubic-bezier(0.25, 0.74, 0.22, 0.99) applied to t
+  function bezier(p1x,p1y,p2x,p2y){
+    var cx=3*p1x, bx=3*(p2x-p1x)-cx, ax=1-cx-bx;
+    var cy=3*p1y, by=3*(p2y-p1y)-cy, ay=1-cy-by;
+    function sx(t){return ((ax*t+bx)*t+cx)*t}
+    function sy(t){return ((ay*t+by)*t+cy)*t}
+    function dx(t){return (3*ax*t+2*bx)*t+cx}
+    return function(x){
+      var t=x,i,e,d;
+      for(i=0;i<8;i++){e=sx(t)-x;if(Math.abs(e)<1e-5)break;d=dx(t);if(Math.abs(d)<1e-6)break;t-=e/d}
+      if(t<0)t=0; if(t>1)t=1;
+      return sy(t);
+    };
+  }
+  var ease = bezier(0.25,0.74,0.22,0.99);
+  var DUR = 1400;
+
+  var numEl=document.getElementById('num'), underEl=document.getElementById('under');
+  var listEl=document.getElementById('list');
+  var routesG=document.getElementById('routes'), dotsG=document.getElementById('dots');
+  var svg=document.querySelector('svg');
+  var items=[], dots=[];
+  var activeIdx=null, prog=0, raf=null, curRoute=null;
+
+  POIS.forEach(function(p,i){
+    var row=document.createElement('div'); row.className='poi';
+    row.innerHTML='<span class="n">0'+(i+1)+'</span><span class="name">'+p.name+'</span><span class="m">'+p.min+' MIN</span>';
+    row.addEventListener('click',function(){select(i)});
+    listEl.appendChild(row); items.push(row);
+    var d=document.createElementNS(NS,'circle');
+    d.setAttribute('cx',p.x); d.setAttribute('cy',p.y); d.setAttribute('r',6); d.setAttribute('class','dot');
+    dotsG.appendChild(d); dots.push(d);
+    var t=document.createElementNS(NS,'text');
+    t.setAttribute('x',p.x+(p.x>500?-14:14)); t.setAttribute('y',p.y-14);
+    t.setAttribute('text-anchor',p.x>500?'end':'start'); t.setAttribute('class','dotlab');
+    t.textContent=p.name; dotsG.appendChild(t);
+  });
+
+  function select(i){
+    if(i===activeIdx) return;
+    activeIdx=i;
+    items.forEach(function(el,k){el.classList.toggle('active',k===i)});
+    dots.forEach(function(el,k){el.classList.toggle('active',k===i)});
+    numEl.classList.remove('idle');
+    var p=POIS[i];
+    underEl.textContent='MIN ON FOOT · '+p.km.toFixed(1)+' KM';
+    if(curRoute){
+      var old=curRoute;
+      old.classList.add('fading');
+      setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); },340);
+    }
+    var pl=document.createElementNS(NS,'polyline');
+    pl.setAttribute('points',p.pts); pl.setAttribute('class','route');
+    routesG.appendChild(pl); curRoute=pl;
+    var len=pl.getTotalLength();
+    if(raf){cancelAnimationFrame(raf);raf=null}
+    if(RM){
+      prog=1; numEl.textContent=p.min;
+      return;
+    }
+    pl.style.strokeDasharray=len;
+    pl.style.strokeDashoffset=len;
+    prog=0; numEl.textContent='0';
+    var t0=performance.now();
+    function frame(now){
+      var t=Math.min(1,(now-t0)/DUR);
+      var e=ease(t);
+      prog=e;
+      pl.style.strokeDashoffset=String(len*(1-e));
+      numEl.textContent=String(Math.round(e*p.min));
+      if(t<1) raf=requestAnimationFrame(frame); else raf=null;
+    }
+    raf=requestAnimationFrame(frame);
+  }
+
+  window.__ROUTE={ active:function(){return activeIdx}, progress:function(){return prog} };
+})();
+</script>
+</body>
+</html>

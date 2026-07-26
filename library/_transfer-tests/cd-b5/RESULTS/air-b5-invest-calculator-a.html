@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LEDGER — Investment calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#f2efe8;color:#16130e;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:#8a5a34;color:#f2efe8}
+  .ser{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif}
+  .atmos{position:fixed;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 12% 0%, rgba(138,90,52,0.1), transparent 55%),radial-gradient(90% 80% at 100% 100%, rgba(22,19,14,0.05), transparent 60%)}
+  .grain{position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(rgba(22,19,14,0.05) 1px, transparent 1px);background-size:4px 4px;opacity:.55;}
+  .ghost{position:fixed;top:44px;left:-14px;font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-size:min(46vw,600px);line-height:.7;color:rgba(22,19,14,0.05);pointer-events:none;user-select:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:1520px;margin:0 auto;padding:30px 52px 46px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:20px}
+  .brandbox{display:flex;align-items:center;gap:14px}
+  .burger{width:54px;height:40px;border-radius:12px;background:#16130e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+  .burger span{width:22px;height:2px;background:#f2efe8;border-radius:2px}.burger span:last-child{width:14px}
+  .heart{width:40px;height:40px;border-radius:11px;border:1px solid rgba(22,19,14,0.14);display:flex;align-items:center;justify-content:center;color:#16130e}
+  .bword{font-size:12px;letter-spacing:.34em;color:#16130e;margin-left:4px}
+  .chip{display:inline-flex;align-items:center;gap:14px;background:#16130e;color:#f2efe8;border:0;border-radius:11px;padding:12px 18px;font-size:11px;letter-spacing:.22em;cursor:pointer;text-transform:uppercase}
+  .chip svg path{stroke:#f2efe8}
+  .layout{display:grid;grid-template-columns:minmax(260px,25%) 1fr;gap:52px;margin-top:40px;align-items:start}
+  .mlabel{font-size:11px;letter-spacing:.28em;color:rgba(22,19,14,0.34);text-transform:uppercase}
+  .mrule{height:1px;background:rgba(22,19,14,0.14);margin:14px 0 16px}
+  .model{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-weight:500;font-size:clamp(30px,3.4vw,44px);line-height:1;letter-spacing:.01em;text-transform:uppercase;display:inline-block;padding-bottom:8px;background-image:linear-gradient(#8a5a34,#8a5a34);background-repeat:no-repeat;background-position:0 100%;transition:color .3s ease,background-size .38s cubic-bezier(.25,.74,.22,.99)}
+  .model.on{color:#16130e;background-size:100% 2px}
+  .model.off{color:rgba(22,19,14,0.32);background-size:0% 2px;cursor:pointer}
+  .model.off:hover{color:#16130e;background-size:100% 2px}
+  aside p{margin:40px 0 0;max-width:33ch;font-size:14px;line-height:1.75;color:rgba(22,19,14,0.5)}
+  .panel{position:relative;background:#f8f5ef;border:1px solid rgba(22,19,14,0.14);border-radius:4px;box-shadow:0 50px 90px -60px rgba(0,0,0,.28);display:flex;flex-direction:column}
+  .casetabs{position:relative;display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(22,19,14,0.14)}
+  .casetabs .div{position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(22,19,14,0.14)}
+  .casetab{text-align:left;background:none;border:0;padding:24px 30px;font-size:12px;letter-spacing:.22em;color:#16130e;cursor:pointer;text-transform:uppercase}
+  .caseunder{position:absolute;bottom:-1px;left:0;width:50%;height:2px;background:#16130e;transition:transform .3s cubic-bezier(.25,.74,.22,.99)}
+  .body{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;padding:40px 34px 26px}
+  .band{font-size:10px;letter-spacing:.28em;color:#8a5a34;text-transform:uppercase;margin-bottom:16px}
+  .office{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-weight:500;font-size:clamp(36px,4.4vw,62px);line-height:.98;letter-spacing:-.01em;color:#16130e;white-space:nowrap}
+  .odesc{margin-top:24px;max-width:32ch;font-size:13px;line-height:1.75;color:rgba(22,19,14,0.5)}
+  .row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:18px;padding:16px 0;border-bottom:1px solid rgba(22,19,14,0.14)}
+  .rlabel{font-size:11px;letter-spacing:.16em;color:rgba(22,19,14,0.5);text-transform:uppercase}
+  .rval{display:inline-flex;align-items:baseline;gap:9px;cursor:pointer}
+  .steppers{display:inline-flex;flex-direction:column;gap:3px;align-self:center;opacity:.32;transition:opacity .25s ease;color:#8a5a34}
+  .rval:hover .steppers{opacity:1}
+  .steppers button{background:none;border:0;padding:0;margin:0;cursor:pointer;color:inherit;line-height:0;display:block}
+  .steppers button svg path{stroke:currentColor}
+  .rnum{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-size:21px;font-variant-numeric:tabular-nums;color:#16130e;white-space:nowrap}
+  .rnum .unit{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;color:rgba(22,19,14,0.5)}
+  .foot{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:end;padding:14px 34px 36px}
+  .disc{margin:0;max-width:42ch;font-size:11px;line-height:1.65;color:rgba(22,19,14,0.34)}.disc b{color:#8a5a34;font-weight:400}
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+  .rlab2{font-size:11px;letter-spacing:.16em;color:rgba(22,19,14,0.34);text-transform:uppercase}
+  .big{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-size:clamp(28px,3.4vw,44px);line-height:1;margin-top:12px;color:#16130e;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .big .yr{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:.34em;letter-spacing:.14em;margin-left:.5em;color:rgba(22,19,14,0.5)}
+  .swapv{display:inline-block;will-change:transform,opacity}
+  .choose{margin-top:46px}
+  .choosehd{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(22,19,14,0.14);padding-top:24px;gap:20px}
+  .choosehd h2{margin:0;font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-weight:500;font-size:clamp(26px,3vw,38px);color:#16130e;white-space:nowrap}
+  .choosehd .sub{font-size:11px;letter-spacing:.22em;color:rgba(22,19,14,0.34);text-transform:uppercase}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px}
+  .tile{position:relative;overflow:hidden;text-align:left;background:#f8f5ef;border:1px solid rgba(22,19,14,0.14);border-radius:3px;padding:22px 22px 20px;cursor:pointer;transition:transform .25s cubic-bezier(.25,.74,.22,.99),box-shadow .25s ease,border-color .25s ease;box-shadow:0 20px 40px -34px rgba(0,0,0,.2)}
+  .tile:hover{transform:translateY(-3px);box-shadow:0 34px 60px -34px rgba(0,0,0,.2);border-color:#8a5a34}
+  .tile .act{position:absolute;left:0;top:0;bottom:0;width:3px;background:#8a5a34;opacity:0;transition:opacity .25s ease}
+  .tile.on .act{opacity:1}
+  .tile .top{display:flex;justify-content:space-between;align-items:flex-start}
+  .tile .no{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-size:40px;line-height:1;color:rgba(22,19,14,0.14)}
+  .tile .plus{color:#8a5a34;display:inline-flex;margin-top:6px}.tile .plus svg path{stroke:#8a5a34}
+  .tile .tl{margin-top:34px;font-size:15px;letter-spacing:.06em;color:#16130e}
+  .tile .ts{margin-top:8px;font-size:11px;letter-spacing:.16em;color:rgba(22,19,14,0.5);text-transform:uppercase}
+  footer.f{margin-top:44px;border-top:1px solid rgba(22,19,14,0.14);padding-top:18px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:11px;letter-spacing:.18em;color:rgba(22,19,14,0.34);text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head>
+<body>
+<div class="atmos"></div><div class="grain"></div><div class="ghost">1</div>
+<div class="wrap">
+  <header>
+    <div class="brandbox">
+      <div class="burger"><span></span><span></span></div>
+      <div class="heart"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#16130e" stroke-width="1.6" stroke-linejoin="round"><path d="M12 20.5S3.8 15 3.8 9.2A4.3 4.3 0 0 1 12 6.9a4.3 4.3 0 0 1 8.2 2.3c0 5.8-8.2 11.3-8.2 11.3z"/></svg></div>
+      <span class="bword">LEDGER</span>
+    </div>
+    <button class="chip">Choose an office <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 0v13M0 6.5h13" stroke-width="1"/></svg></button>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div><div class="mlabel">Model 1</div><div class="mrule"></div><div class="model on" id="m1">Rental Income</div></div>
+      <div style="margin-top:38px"><div class="mlabel">Model 2</div><div class="mrule"></div><div class="model off" id="m2">Asset Resale</div></div>
+      <p>Regular rental payments create a predictable cash flow. The management company selects tenants and provides legal support for the transaction. Ongoing lease management can be fully delegated, allowing the investment to generate income without your direct involvement.</p>
+    </aside>
+
+    <section class="panel">
+      <div class="casetabs">
+        <span class="div"></span>
+        <button class="casetab" data-case="0">CASE 1</button>
+        <button class="casetab" data-case="1">CASE 2</button>
+        <span class="caseunder" id="caseunder"></span>
+      </div>
+      <div class="body">
+        <div>
+          <div class="band" id="band">UP TO 50 MILLION</div>
+          <div class="office">OFFICE&nbsp;<span class="swapv" id="area">84.7</span>&nbsp;M&sup2;</div>
+          <div class="odesc">Floor-through layout with panoramic glazing and a dedicated lobby. Adjust the parameters to model your position — every figure recalculates the payback and monthly income in real time.</div>
+        </div>
+        <div id="rows"></div>
+      </div>
+      <div class="foot">
+        <p class="disc"><b>*</b> All calculations and information presented on this website are for informational purposes only and do not constitute a public offer under applicable law.</p>
+        <div class="readouts">
+          <div><div class="rlab2">Payback period *</div><div class="big">~&thinsp;<span class="swapv" id="payback">8.3</span><span class="yr">YEARS</span></div></div>
+          <div><div class="rlab2">Monthly rental income *</div><div class="big">~&thinsp;<span class="swapv" id="monthly">423 500</span></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="choose">
+    <div class="choosehd"><h2>Choose an office</h2><span class="sub">Select an investment band</span></div>
+    <div class="tiles" id="tiles"></div>
+  </div>
+
+  <footer class="f"><span>LEDGER — Investment Desk</span><span>Model 1 · Rental Income</span><span>© 2026 · Informational only</span></footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduced=false; try{ reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+  var OFFICES={
+    a:{no:'01',label:'UP TO 50 MILLION',sub:'Compact suite',area:84.7,prices:[46577900,49900000,52400000]},
+    b:{no:'02',label:'50–150 MILLION',sub:'Mid-floor unit',area:110.6,prices:[62480000,66900000,71200000]},
+    c:{no:'03',label:'150+ MILLION',sub:'Whole-floor asset',area:240.0,prices:[168400000,178500000,189900000]}
+  };
+  var CASES=[{rate:60000,idx:7,op:7000,tax:6},{rate:72000,idx:9,op:8500,tax:15}];
+  var PRESETS={rate:[60000,66000,72000],idx:[7,9,11],op:[7000,8500,10000],tax:[6,15,20]};
+  var state={activeCase:0,officeId:'a',priceI:0,rate:60000,idx:7,op:7000,tax:6};
+
+  function grp(n){ return Math.round(n).toLocaleString('en-US').replace(/,/g,'\u2005'); }
+  function one(n){ return (Math.round(n*10)/10).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+  function intf(n){ return String(Math.round(n)); }
+  function clamp(v,a,b){ return v<a?a:v>b?b:v; }
+
+  function compute(o){ o=o||{};
+    var officeId=o.officeId!=null?o.officeId:state.officeId, priceI=o.priceI!=null?o.priceI:state.priceI;
+    var office=OFFICES[officeId], area=office.area, P=office.prices[priceI%office.prices.length];
+    var rate=o.rate!=null?o.rate:state.rate, idx=o.idx!=null?o.idx:state.idx, op=o.op!=null?o.op:state.op, tax=o.tax!=null?o.tax:state.tax;
+    var gross=rate*area; var net=gross*(1+idx/100)-op*area-gross*(tax/100)+P*0.023; if(net<=0)net=1;
+    return {area:area,price:P,payback:Math.round((P/net)*10)/10,monthly:Math.round(gross/12)};
+  }
+
+  // clean swap animation on a value node: old fades/slides out fully, then new fades/counts in
+  function swap(el,toText,countupFrom,toNum,fmt){
+    if(reduced){ el.textContent=toText; return; }
+    var t0=performance.now();
+    function frame(now){
+      var t=now-t0, o,ty,txt;
+      if(t<200){ var po=t/200; o=1-po; ty=-9*po; txt=el.textContent; }
+      else if(t<720){ var pi=(t-200)/520, e=1-Math.pow(1-pi,3); o=e; ty=9*(1-e);
+        txt = (countupFrom!=null) ? fmt(countupFrom + (toNum-countupFrom)*e) : toText; }
+      else { o=1; ty=0; txt=toText; }
+      el.style.opacity=o; el.style.transform='translateY('+ty+'px)'; el.textContent=txt;
+      if(t<720) requestAnimationFrame(frame); else { el.style.opacity=1; el.style.transform='translateY(0)'; el.textContent=toText; }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  var areaEl=document.getElementById('area'), paybackEl=document.getElementById('payback'),
+      monthlyEl=document.getElementById('monthly'), bandEl=document.getElementById('band'),
+      rowsEl=document.getElementById('rows'), tilesEl=document.getElementById('tiles'),
+      caseunder=document.getElementById('caseunder');
+
+  var ROWS=[
+    {key:'price',label:'UNIT PRICE',star:'',unit:'',fmt:grp,param:false},
+    {key:'rate',label:'ANNUAL RENTAL RATE',star:' *',unit:' / M²',fmt:grp,param:true},
+    {key:'idx',label:'ANNUAL RENTAL INDEXATION',star:' *',unit:'%',fmt:intf,param:true},
+    {key:'op',label:'ANNUAL OPERATING COSTS',star:' *',unit:' / M²',fmt:grp,param:true},
+    {key:'tax',label:'TAX REGIME',star:'',unit:'%',fmt:intf,param:true}
+  ];
+  var valEls={};
+  ROWS.forEach(function(r){
+    var row=document.createElement('div'); row.className='row';
+    row.innerHTML='<span class="rlabel">'+r.label+r.star+'</span>'+
+      '<span class="rval"><span class="steppers">'+
+      '<button aria-label="increase"><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5l4-4 4 4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '<button aria-label="decrease"><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '</span><span class="rnum"><span class="swapv"></span><span class="unit">'+r.unit+'</span></span></span>';
+    var val=row.querySelector('.rnum .swapv'); valEls[r.key]=val;
+    var btns=row.querySelectorAll('.steppers button');
+    var up=btns[0], down=btns[1];
+    if(r.key==='price'){ up.addEventListener('click',function(e){e.stopPropagation();cyclePrice(1);}); down.addEventListener('click',function(e){e.stopPropagation();cyclePrice(-1);}); }
+    else { up.addEventListener('click',function(e){e.stopPropagation();cycleParam(r.key,1);}); down.addEventListener('click',function(e){e.stopPropagation();cycleParam(r.key,-1);}); }
+    rowsEl.appendChild(row);
+  });
+
+  ['a','b','c'].forEach(function(id){
+    var o=OFFICES[id];
+    var t=document.createElement('button'); t.className='tile'+(id==='a'?' on':''); t.dataset.id=id;
+    t.innerHTML='<span class="act"></span><div class="top"><span class="no">'+o.no+'</span><span class="plus"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 0v13M0 6.5h13" stroke-width="1"/></svg></span></div>'+
+      '<div class="tl">'+o.label+'</div><div class="ts">'+o.sub+'</div>';
+    t.addEventListener('click',function(){ setOffice(id); });
+    tilesEl.appendChild(t);
+  });
+
+  function paint(nc,animate){
+    if(animate){
+      swap(areaEl, one(nc.area), state._prevArea, nc.area, one);
+      swap(paybackEl, one(nc.payback), state._prevPay, nc.payback, one);
+      swap(monthlyEl, grp(nc.monthly), state._prevMon, nc.monthly, grp);
+    } else { areaEl.textContent=one(nc.area); paybackEl.textContent=one(nc.payback); monthlyEl.textContent=grp(nc.monthly); }
+    state._prevArea=nc.area; state._prevPay=nc.payback; state._prevMon=nc.monthly;
+  }
+  function paintRow(key,val,fmt){ if(!valEls[key])return; swap(valEls[key],fmt(val),null,null,fmt); }
+  function paintAllRows(animate){
+    var office=OFFICES[state.officeId], P=office.prices[state.priceI%office.prices.length];
+    var map={price:P,rate:state.rate,idx:state.idx,op:state.op,tax:state.tax};
+    ROWS.forEach(function(r){ var f=r.fmt; if(animate) paintRow(r.key,map[r.key],f); else valEls[r.key].textContent=f(map[r.key]); });
+  }
+
+  function setCase(i){ var c=CASES[i]; state.activeCase=i; state.rate=c.rate; state.idx=c.idx; state.op=c.op; state.tax=c.tax;
+    caseunder.style.transform='translateX('+(i*100)+'%)';
+    paintAllRows(true); paint(compute(),true); }
+  function setOffice(id){ state.officeId=id; state.priceI=0;
+    [].forEach.call(tilesEl.children,function(t){ t.classList.toggle('on',t.dataset.id===id); });
+    bandEl.textContent=OFFICES[id].label;
+    paintRow('price',OFFICES[id].prices[0],grp); paint(compute(),true); }
+  function cyclePrice(dir){ var o=OFFICES[state.officeId],n=o.prices.length; state.priceI=(state.priceI+dir+n)%n;
+    paintRow('price',o.prices[state.priceI],grp); paint(compute(),true); }
+  function ROWSfmt(key){ for(var i=0;i<ROWS.length;i++) if(ROWS[i].key===key) return ROWS[i].fmt; return grp; }
+  function cycleParam(key,dir){ var arr=PRESETS[key],cur=state[key],i=arr.indexOf(cur); if(i<0)i=0; state[key]=arr[(i+dir+arr.length)%arr.length];
+    paintRow(key,state[key],ROWSfmt(key)); paint(compute(),true); }
+
+  document.querySelectorAll('.casetab').forEach(function(b){ b.addEventListener('click',function(){ setCase(+b.dataset.case); }); });
+  document.getElementById('m2').addEventListener('mouseenter',function(){}); // hover handled by CSS
+
+  // init (no anim)
+  var init=compute(); state._prevArea=init.area; state._prevPay=init.payback; state._prevMon=init.monthly;
+  paintAllRows(false); paint(init,false);
+
+  window.__CALC={ model:function(){return 1;}, case:function(){return state.activeCase+1;}, office:function(){return state.officeId;},
+    payback:function(){return compute().payback;}, monthly:function(){return compute().monthly;} };
+})();
+</script>
+</body></html>

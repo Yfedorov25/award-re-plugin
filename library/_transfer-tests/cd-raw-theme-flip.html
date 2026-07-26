@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAGUNA — air theme flip</title>
+<style>
+  :root{
+    /* defaults = section 0 (dawn sand) so first paint is correct, no flash */
+    --bg:#e8d5b7;
+    --ink:#3a2f24;
+    --accent:#c96f4a;
+    --ease:cubic-bezier(0.25,0.74,0.22,0.99);
+    --dur:1.2s;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    background-color:var(--bg);
+    color:var(--ink);
+    transition:background-color var(--dur) var(--ease), color var(--dur) var(--ease);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- chrome ---------- */
+  header#chrome{
+    position:fixed;top:0;left:0;right:0;z-index:40;
+    height:72px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 40px;
+    background-color:var(--bg);
+    color:var(--ink);
+    border-bottom:1px solid var(--accent);
+    transition:background-color var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  .wordmark{
+    font-family:Didot,"Bodoni MT","Playfair Display",Georgia,serif;
+    font-size:22px;letter-spacing:0.42em;font-weight:400;
+    text-indent:0.42em; /* optical balance for tracking */
+    color:var(--ink);
+    transition:color var(--dur) var(--ease);
+  }
+  #menuBtn{
+    width:64px;height:64px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font:600 10px/1 "Helvetica Neue",Helvetica,Arial,sans-serif;
+    letter-spacing:0.18em;text-transform:uppercase;
+    cursor:pointer;
+    background-color:transparent;
+    color:var(--ink);
+    border:1px solid var(--ink);
+    transition:background-color var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+  #menuBtn:hover{background-color:var(--ink);color:var(--bg);}
+  #chip{
+    position:fixed;right:40px;bottom:36px;z-index:40;
+    padding:16px 28px;border-radius:999px;
+    font:600 11px/1 "Helvetica Neue",Helvetica,Arial,sans-serif;
+    letter-spacing:0.2em;text-transform:uppercase;
+    cursor:pointer;
+    background-color:var(--accent);
+    color:var(--bg);
+    border:1px solid var(--accent);
+    transition:background-color var(--dur) var(--ease), color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+  }
+
+  /* ---------- sections ---------- */
+  section.room{
+    position:relative;
+    min-height:100vh;
+    display:grid;
+    grid-template-rows:1fr auto;
+    padding:120px 40px 64px;
+  }
+  .room .label{
+    position:absolute;top:104px;left:40px;
+    font-size:11px;letter-spacing:0.32em;text-transform:uppercase;
+    color:var(--accent);
+    transition:color var(--dur) var(--ease);
+  }
+  .room .index{
+    position:absolute;top:104px;right:40px;
+    font-family:Didot,"Bodoni MT",Georgia,serif;
+    font-size:13px;letter-spacing:0.18em;
+    color:var(--ink);opacity:0.55;
+    transition:color var(--dur) var(--ease);
+  }
+  .room .row{
+    align-self:end;
+    display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:40px;
+  }
+  .room h2{
+    font-family:Didot,"Bodoni MT","Playfair Display",Georgia,serif;
+    font-weight:400;
+    font-size:clamp(56px,9vw,124px);
+    line-height:0.98;
+    letter-spacing:-0.01em;
+    max-width:9em;
+    color:var(--ink);
+    transition:color var(--dur) var(--ease);
+  }
+  .room p{
+    max-width:340px;
+    font-size:14px;line-height:1.75;letter-spacing:0.01em;
+    color:var(--ink);
+    transition:color var(--dur) var(--ease);
+    padding-bottom:10px;
+    border-bottom:1px solid var(--accent);
+  }
+
+  /* ---------- overlay ---------- */
+  #overlay{
+    position:fixed;inset:0;z-index:60;
+    background-color:#101418;color:#f2ede4;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:0 40px;
+    opacity:0;visibility:hidden;
+    transition:opacity var(--dur) var(--ease), visibility 0s linear var(--dur);
+  }
+  #overlay.open{
+    opacity:1;visibility:visible;
+    transition:opacity var(--dur) var(--ease), visibility 0s;
+  }
+  #overlay .ohead{
+    position:absolute;top:0;left:0;right:0;height:72px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 40px;
+    border-bottom:1px solid #d9a066;
+  }
+  #overlay .ohead .wordmark{color:#f2ede4;transition:none;}
+  #closeBtn{
+    width:64px;height:64px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font:600 10px/1 "Helvetica Neue",Helvetica,Arial,sans-serif;
+    letter-spacing:0.18em;text-transform:uppercase;
+    cursor:pointer;
+    background-color:transparent;color:#f2ede4;border:1px solid #f2ede4;
+    transition:background-color .3s var(--ease), color .3s var(--ease);
+  }
+  #closeBtn:hover{background-color:#f2ede4;color:#101418;}
+  #overlay nav{display:flex;flex-direction:column;gap:6px;max-width:900px;}
+  #overlay nav a{
+    font-family:Didot,"Bodoni MT","Playfair Display",Georgia,serif;
+    font-size:clamp(30px,5vw,58px);line-height:1.22;
+    color:#f2ede4;text-decoration:none;
+    display:flex;align-items:baseline;gap:22px;
+    transition:color .35s var(--ease);
+  }
+  #overlay nav a span.num{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:11px;letter-spacing:0.28em;color:#d9a066;
+  }
+  #overlay nav a:hover{color:#d9a066;}
+  #overlay .ofoot{
+    position:absolute;left:40px;right:40px;bottom:36px;
+    display:flex;justify-content:space-between;
+    font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:#d9a066;
+  }
+
+  /* ---------- reduced motion: snap ---------- */
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *, *::before, *::after{transition-duration:0s !important;transition-delay:0s !important;}
+  }
+</style>
+</head>
+<body>
+
+<header id="chrome">
+  <div class="wordmark">LAGUNA</div>
+  <button id="menuBtn" type="button" aria-haspopup="dialog" aria-expanded="false">Menu</button>
+</header>
+
+<main id="rooms">
+  <section class="room" data-theme-bg="#e8d5b7" data-theme-ink="#3a2f24" data-theme-accent="#c96f4a"
+    style="background-image:linear-gradient(168deg,#e8d5b7 0%,#e3c9a3 42%,#d8b184 78%,#cf9f6d 100%);">
+    <span class="label">Room One — East Wing</span><span class="index">01 / 06</span>
+    <div class="row">
+      <h2>Dawn Sand</h2>
+      <p>First light through linen curtains. A low bed on warm terracotta tile, the shoreline a two‑minute walk past the dune grass. Mornings here begin slowly, with coffee and salt air.</p>
+    </div>
+  </section>
+
+  <section class="room" data-theme-bg="#2e4a56" data-theme-ink="#e6f0ef" data-theme-accent="#7fc7bd"
+    style="background-image:linear-gradient(160deg,#2e4a56 0%,#31525f 38%,#27414d 72%,#1f3641 100%);">
+    <span class="label">Room Two — Sea Terrace</span><span class="index">02 / 06</span>
+    <div class="row">
+      <h2>Sea Slate</h2>
+      <p>Deep blue‑green walls the exact colour of the bay before a storm. A private terrace hangs over the water; at high tide you can hear it moving beneath the floorboards.</p>
+    </div>
+  </section>
+
+  <section class="room" data-theme-bg="#1e3327" data-theme-ink="#e9e2d4" data-theme-accent="#9db08a"
+    style="background-image:linear-gradient(155deg,#24402f 0%,#1e3327 45%,#182a20 80%,#132218 100%);">
+    <span class="label">Room Three — Garden Side</span><span class="index">03 / 06</span>
+    <div class="row">
+      <h2>Pine</h2>
+      <p>Shaded by the old coastal pines, this room smells faintly of resin and rain. Green‑lacquered shutters, a writing desk, and nothing on the walls but afternoon shadow.</p>
+    </div>
+  </section>
+
+  <section class="room" data-theme-bg="#8f4a3e" data-theme-ink="#f6e3d5" data-theme-accent="#f0b98a"
+    style="background-image:linear-gradient(165deg,#9a5346 0%,#8f4a3e 40%,#7e3f35 75%,#6f372e 100%);">
+    <span class="label">Room Four — West Balcony</span><span class="index">04 / 06</span>
+    <div class="row">
+      <h2>Coral Evening</h2>
+      <p>Built to face the sunset. The plaster holds the day's heat until midnight, and the balcony rail is worn smooth by forty summers of elbows and aperitifs.</p>
+    </div>
+  </section>
+
+  <section class="room" data-theme-bg="#141e2c" data-theme-ink="#dfe6f0" data-theme-accent="#8fb0d9"
+    style="background-image:linear-gradient(170deg,#1a2635 0%,#141e2c 45%,#101827 80%,#0c1220 100%);">
+    <span class="label">Room Five — Upper Floor</span><span class="index">05 / 06</span>
+    <div class="row">
+      <h2>Night Navy</h2>
+      <p>The quietest room in the house. Skylight over the bed, no curtains needed — only the harbour beacons and, on clear nights, more stars than seems reasonable.</p>
+    </div>
+  </section>
+
+  <section class="room" data-theme-bg="#f4efe6" data-theme-ink="#2a2019" data-theme-accent="#a58c74"
+    style="background-image:linear-gradient(162deg,#f8f4ec 0%,#f4efe6 42%,#ece4d5 78%,#e2d6c2 100%);">
+    <span class="label">Room Six — Ground Floor</span><span class="index">06 / 06</span>
+    <div class="row">
+      <h2>Fog Cream</h2>
+      <p>Pale walls, pale stone, a fireplace for the misted‑over mornings when the sea disappears entirely. The kind of room people extend their stay for.</p>
+    </div>
+  </section>
+</main>
+
+<button id="chip" type="button">Book Now</button>
+
+<div id="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="ohead">
+    <div class="wordmark">LAGUNA</div>
+    <button id="closeBtn" type="button">Close</button>
+  </div>
+  <nav id="onav">
+    <a href="#" data-goto="0"><span class="num">01</span>Dawn Sand</a>
+    <a href="#" data-goto="1"><span class="num">02</span>Sea Slate</a>
+    <a href="#" data-goto="2"><span class="num">03</span>Pine</a>
+    <a href="#" data-goto="3"><span class="num">04</span>Coral Evening</a>
+    <a href="#" data-goto="4"><span class="num">05</span>Night Navy</a>
+    <a href="#" data-goto="5"><span class="num">06</span>Fog Cream</a>
+  </nav>
+  <div class="ofoot"><span>Hotel Laguna — Coastal Rooms</span><span>Reservations open year‑round</span></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var docEl = document.documentElement;
+  var header = document.getElementById('chrome');
+  var overlay = document.getElementById('overlay');
+  var menuBtn = document.getElementById('menuBtn');
+  var closeBtn = document.getElementById('closeBtn');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('section.room'));
+
+  var OVERLAY_THEME = { bg:'#101418', ink:'#f2ede4', accent:'#d9a066' };
+
+  var activeIndex = 0;      // section under the header line (always tracked)
+  var overlayOpen = false;
+  var ticking = false;
+
+  function applyTheme(t){
+    docEl.style.setProperty('--bg', t.bg);
+    docEl.style.setProperty('--ink', t.ink);
+    docEl.style.setProperty('--accent', t.accent);
+  }
+
+  function themeOf(i){
+    var s = sections[i];
+    return {
+      bg: s.getAttribute('data-theme-bg'),
+      ink: s.getAttribute('data-theme-ink'),
+      accent: s.getAttribute('data-theme-accent')
+    };
+  }
+
+  // LAW 1: active = the section whose bounds contain the HEADER LINE
+  // (the bottom edge of the fixed header), tested via rAF on scroll.
+  function detect(){
+    ticking = false;
+    var headerLine = header.getBoundingClientRect().bottom;
+    var idx = activeIndex;
+    for (var i = 0; i < sections.length; i++){
+      var r = sections[i].getBoundingClientRect();
+      if (r.top <= headerLine && r.bottom > headerLine){ idx = i; break; }
+    }
+    if (idx !== activeIndex){
+      activeIndex = idx;
+      if (!overlayOpen) applyTheme(themeOf(activeIndex));
+    }
+  }
+
+  function requestDetect(){
+    if (!ticking){
+      ticking = true;
+      window.requestAnimationFrame(detect);
+    }
+  }
+
+  window.addEventListener('scroll', requestDetect, { passive:true });
+  window.addEventListener('resize', requestDetect, { passive:true });
+
+  // LAW 3: overlay carries its own fixed theme, overrides while open.
+  function openOverlay(){
+    overlayOpen = true;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden','false');
+    menuBtn.setAttribute('aria-expanded','true');
+    applyTheme(OVERLAY_THEME);
+  }
+  function closeOverlay(){
+    overlayOpen = false;
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+    menuBtn.setAttribute('aria-expanded','false');
+    applyTheme(themeOf(activeIndex));
+  }
+
+  menuBtn.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
+  window.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && overlayOpen) closeOverlay();
+  });
+
+  document.getElementById('onav').addEventListener('click', function(e){
+    var a = e.target.closest('a[data-goto]');
+    if (!a) return;
+    e.preventDefault();
+    var i = parseInt(a.getAttribute('data-goto'), 10);
+    closeOverlay();
+    var top = sections[i].getBoundingClientRect().top + window.pageYOffset - 0;
+    window.scrollTo({ top: top, behavior: 'smooth' });
+  });
+
+  // Init: apply the theme of whichever section is under the header line now.
+  detect();
+  applyTheme(overlayOpen ? OVERLAY_THEME : themeOf(activeIndex));
+
+  // LAW 5: debug hooks.
+  window.__THEME = {
+    active: function(){ return activeIndex; },
+    open: function(){ return overlayOpen; }
+  };
+  window.__PAGE_OK__ = true;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DELTA — Route-time kinetics</title>
+<style>
+  :root{
+    --bg:#10161d; --bg2:#131a22; --ink:#e8e4dc; --ink-dim:rgba(232,228,220,.55);
+    --ink-faint:rgba(232,228,220,.32); --accent:#d9a066; --hair:rgba(232,228,220,.08);
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(1200px 800px at 85% -10%, rgba(217,160,102,.06), transparent 60%),
+      radial-gradient(900px 700px at -10% 90%, rgba(46,66,88,.25), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:var(--grot); font-size:15px; line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--ink); text-decoration:none; transition:color .3s cubic-bezier(.25,.74,.22,.99)}
+  a:hover{color:var(--accent)}
+  .label{font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:var(--ink-dim)}
+  .wrap{max-width:1560px; margin:0 auto; padding:0 56px}
+  /* ---------- intro ---------- */
+  header.intro{padding:64px 0 44px; border-bottom:1px solid var(--hair); position:relative}
+  header.intro .grid{display:grid; grid-template-columns:minmax(0,7fr) minmax(0,4fr); gap:64px; align-items:end}
+  header.intro h1{
+    font-family:var(--serif); font-weight:400; font-size:clamp(40px,4.6vw,72px);
+    line-height:.98; letter-spacing:-.01em; margin-top:22px; text-wrap:balance;
+  }
+  header.intro h1 em{font-style:italic; color:var(--accent)}
+  header.intro p{color:var(--ink-dim); max-width:44ch}
+  .brandmark{display:flex; align-items:baseline; gap:14px}
+  .brandmark .delta{font-family:var(--serif); font-size:22px; letter-spacing:.14em}
+  /* ---------- act ---------- */
+  .act{display:grid; grid-template-columns:minmax(0,1fr) 430px; min-height:100vh; border-bottom:1px solid var(--hair)}
+  .mapcol{position:relative; border-right:1px solid var(--hair); overflow:hidden; background:var(--bg2)}
+  .mapcol svg.city{position:absolute; inset:0; width:100%; height:100%}
+  .map-vignette{position:absolute; inset:0; pointer-events:none;
+    background:
+      linear-gradient(90deg, rgba(16,22,29,.55), transparent 14%, transparent 86%, rgba(16,22,29,.6)),
+      linear-gradient(180deg, rgba(16,22,29,.5), transparent 16%, transparent 84%, rgba(16,22,29,.55));}
+  /* ---------- sidebar ---------- */
+  .side{position:relative; padding:52px 48px 40px; display:flex; flex-direction:column; overflow:hidden}
+  .ghost{position:absolute; right:-30px; top:-40px; font-family:var(--serif); font-size:420px; line-height:1;
+    color:var(--ink); opacity:.045; pointer-events:none; user-select:none}
+  .side .brandline{display:flex; justify-content:space-between; align-items:baseline; padding-bottom:26px; border-bottom:1px solid var(--hair)}
+  .bignum-block{padding:34px 0 26px; border-bottom:1px solid var(--hair)}
+  .bignum{
+    font-family:var(--serif); font-size:clamp(96px,10.5vw,150px); line-height:.92;
+    font-variant-numeric:tabular-nums; letter-spacing:-.02em; color:var(--ink);
+    display:flex; align-items:baseline; gap:10px;
+  }
+  .bignum .unitmark{font-size:26px; color:var(--accent); font-style:italic; letter-spacing:0}
+  .underline-meta{margin-top:14px; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--ink-dim)}
+  .underline-meta b{color:var(--accent); font-weight:400}
+  /* POI list */
+  .poilist{list-style:none; flex:1; margin-top:6px}
+  .poilist li{border-bottom:1px solid var(--hair)}
+  .poilist button{
+    all:unset; cursor:pointer; display:grid; grid-template-columns:34px 1fr auto; gap:16px;
+    align-items:baseline; width:100%; padding:17px 2px;
+    transition:padding .3s cubic-bezier(.25,.74,.22,.99);
+  }
+  .poilist button:hover{padding-left:10px}
+  .poilist .idx{font-size:10px; letter-spacing:.25em; color:var(--ink-faint);
+    transition:color .3s cubic-bezier(.25,.74,.22,.99)}
+  .poilist .nm{font-size:14px; letter-spacing:.04em; transition:color .3s cubic-bezier(.25,.74,.22,.99)}
+  .poilist .mins{font-family:var(--serif); font-size:19px; font-variant-numeric:tabular-nums; color:var(--ink-dim);
+    transition:color .3s cubic-bezier(.25,.74,.22,.99)}
+  .poilist button:hover .idx, .poilist button:hover .mins{color:var(--accent)}
+  .poilist li.on .idx, .poilist li.on .mins{color:var(--accent)}
+  .poilist li.on .nm{color:var(--accent)}
+  .footnote{margin-top:26px; font-size:12px; line-height:1.75; color:var(--ink-faint); max-width:40ch}
+  /* ---------- footer ---------- */
+  footer{padding:26px 0 30px}
+  footer .row{display:flex; justify-content:space-between; align-items:baseline; gap:24px; flex-wrap:wrap}
+  footer nav{display:flex; gap:34px}
+  footer nav a{font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--ink-dim)}
+  footer .legal{font-size:11px; color:var(--ink-faint)}
+  /* ---------- svg map styling ---------- */
+  .st{stroke:rgba(232,228,220,.13); fill:none; stroke-linecap:round}
+  .st.w1{stroke-width:1}
+  .st.w2{stroke-width:1.9}
+  .st.w3{stroke-width:3.4; stroke:rgba(232,228,220,.17)}
+  .blk{fill:#161e27; opacity:.85}
+  .park{fill:#141f19}
+  .rail{stroke:rgba(232,228,220,.18); stroke-width:1.1; stroke-dasharray:7 5; fill:none}
+  .stlabel{font-family:var(--grot); font-size:10px; letter-spacing:.18em; fill:rgba(232,228,220,.34); text-transform:uppercase}
+  .riverlabel{font-family:var(--grot); font-size:11px; letter-spacing:.34em; fill:rgba(232,228,220,.28)}
+  .route{fill:none; stroke:var(--accent); stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; opacity:0}
+  .poi-dot{fill:var(--ink-dim); transition:fill .3s cubic-bezier(.25,.74,.22,.99)}
+  .poi g{cursor:pointer}
+  .poi g:hover .poi-dot, .poi g.on .poi-dot{fill:var(--accent)}
+  .poi text{font-family:var(--grot); font-size:9.5px; letter-spacing:.2em; fill:var(--ink-dim); text-transform:uppercase;
+    transition:fill .3s cubic-bezier(.25,.74,.22,.99)}
+  .poi g:hover text, .poi g.on text{fill:var(--accent)}
+  .metro rect{fill:none; stroke:rgba(232,228,220,.4); stroke-width:1}
+  .metro text{font-family:var(--grot); font-size:7.5px; fill:rgba(232,228,220,.5); letter-spacing:0}
+  .home-pulse{fill:none; stroke:var(--accent); stroke-width:1; opacity:.5}
+  .maptools text{font-family:var(--grot); font-size:9px; letter-spacing:.2em; fill:var(--ink-dim)}
+  .maptools line, .maptools path{stroke:var(--ink-dim); stroke-width:1; fill:none}
+  .maptools-html{position:absolute; left:34px; bottom:26px; pointer-events:none}
+  @media (max-width:1100px){
+    .act{grid-template-columns:1fr}
+    .mapcol{min-height:70vh; border-right:0; border-bottom:1px solid var(--hair)}
+  }
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <div class="brandmark"><span class="delta">DELTA</span><span class="label">Riverside Campus · Velna Left Bank</span></div>
+        <h1>Everything the day needs,<br>inside a <em>quarter hour</em>.</h1>
+      </div>
+      <p>Five addresses shape a resident’s week — the market, the baths, the station, the gallery, the park. Select one and watch the walk unfold: the route traces the actual streets while the minutes settle into place.</p>
+    </div>
+  </div>
+</header>
+
+<section class="act">
+  <div class="mapcol">
+    <svg class="city" viewBox="0 150 900 710" preserveAspectRatio="xMidYMid slice" aria-label="Map of the DELTA quarter">
+      <defs>
+        <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope="0.06"/></feComponentTransfer></filter>
+        <filter id="soft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+        <path id="riverPath" d="M -40 660 C 150 615, 250 720, 430 695 C 610 670, 700 565, 940 610" />
+        <path id="lblA1" d="M -20 196 C 200 236, 500 176, 920 256" />
+        <path id="lblA3" d="M -20 862 C 420 792, 640 732, 920 692" />
+        <path id="lblS1" d="M 60 470 L 620 410" />
+        <path id="lblS2" d="M 250 60 L 330 560" />
+        <path id="lblS3" d="M 470 120 L 700 480" />
+      </defs>
+
+      <!-- district block fills -->
+      <g class="blocks">
+        <polygon class="blk" points="180,250 340,225 355,335 200,362"/>
+        <polygon class="blk" points="392,208 560,180 585,300 415,330"/>
+        <polygon class="blk" points="430,360 590,330 615,455 455,490"/>
+        <polygon class="blk" points="160,400 330,372 345,470 178,502"/>
+        <polygon class="blk" points="480,740 640,715 660,830 500,860"/>
+        <polygon class="blk" points="230,760 400,738 415,850 248,878"/>
+        <polygon class="blk" points="620,190 780,150 810,270 650,305"/>
+        <polygon class="blk" points="640,480 790,440 815,545 665,585"/>
+        <polygon class="blk" points="70,600 200,575 212,650 84,678" opacity=".6"/>
+      </g>
+
+      <!-- parks -->
+      <g filter="url(#soft)">
+        <path class="park" d="M 118 690 C 90 640, 170 610, 230 640 C 292 672, 268 748, 200 760 C 140 772, 138 736, 118 690 Z"/>
+        <path class="park" d="M 700 320 C 680 270, 760 246, 812 276 C 862 306, 842 380, 776 388 C 722 394, 716 362, 700 320 Z"/>
+      </g>
+
+      <!-- river -->
+      <g>
+        <use href="#riverPath" stroke="#0a0f15" stroke-width="70" fill="none"/>
+        <use href="#riverPath" stroke="#0c1219" stroke-width="54" fill="none"/>
+        <use href="#riverPath" stroke="rgba(232,228,220,.05)" stroke-width="1" fill="none" transform="translate(0,-29)"/>
+        <use href="#riverPath" stroke="rgba(232,228,220,.05)" stroke-width="1" fill="none" transform="translate(0,29)"/>
+        <text class="riverlabel"><textPath href="#riverPath" startOffset="56%">VELNA&#160;&#160;RIVER</textPath></text>
+      </g>
+
+      <!-- streets: curved avenues -->
+      <g>
+        <use href="#lblA1" class="st w3"/>
+        <path class="st w3" d="M 250 -20 C 268 200, 320 420, 300 620 C 288 740, 258 940, 300 1120"/>
+        <path class="st w3" d="M -20 862 C 420 792, 640 732, 920 692"/>
+        <path class="st w2" d="M 620 -20 C 600 160, 660 340, 640 520 C 626 660, 660 860, 630 1120"/>
+        <!-- secondary streets -->
+        <path class="st w2" d="M 60 470 L 640 405"/>
+        <path class="st w2" d="M 40 340 L 600 300"/>
+        <path class="st w2" d="M 470 120 L 710 490"/>
+        <path class="st w2" d="M 120 560 L 460 522"/>
+        <path class="st w2" d="M 440 760 L 900 700"/>
+        <path class="st w2" d="M 150 872 L 760 838"/>
+        <path class="st w2" d="M 420 60 L 455 300"/>
+        <!-- small streets, irregular -->
+        <path class="st w1" d="M 180 250 L 355 228"/>
+        <path class="st w1" d="M 200 362 L 358 338"/>
+        <path class="st w1" d="M 415 330 L 590 302"/>
+        <path class="st w1" d="M 455 490 L 618 458"/>
+        <path class="st w1" d="M 178 502 L 348 472"/>
+        <path class="st w1" d="M 500 862 L 662 832"/>
+        <path class="st w1" d="M 248 880 L 418 852"/>
+        <path class="st w1" d="M 650 308 L 812 272"/>
+        <path class="st w1" d="M 665 588 L 818 548"/>
+        <path class="st w1" d="M 355 228 L 348 120"/>
+        <path class="st w1" d="M 540 60 L 560 178"/>
+        <path class="st w1" d="M 680 150 L 662 40"/>
+        <path class="st w1" d="M 90 250 L 178 240"/>
+        <path class="st w1" d="M 84 678 L 60 760"/>
+        <path class="st w1" d="M 400 852 L 392 908"/>
+        <path class="st w1" d="M 700 840 L 712 902"/>
+        <path class="st w1" d="M 160 400 L 148 320"/>
+        <path class="st w1" d="M 760 620 L 850 700"/>
+        <path class="st w1" d="M 505 560 L 540 660"/>
+        <path class="st w1" d="M 372 560 L 400 470"/>
+        <path class="st w1" d="M 60 836 L 190 870"/>
+      </g>
+
+      <!-- bridges over the river -->
+      <path class="st w2" d="M 372 622 L 400 760" stroke="rgba(232,228,220,.22)"/>
+      <path class="st w1" d="M 606 588 L 636 700"/>
+
+      <!-- railway -->
+      <path class="rail" d="M -20 302 C 180 262, 380 242, 560 266 C 720 288, 830 258, 940 272"/>
+
+      <!-- street name labels -->
+      <text class="stlabel"><textPath href="#lblA1" startOffset="12%">Granary Avenue</textPath></text>
+      <text class="stlabel"><textPath href="#lblS1" startOffset="8%">Weavers’ Row</textPath></text>
+      <text class="stlabel"><textPath href="#lblS2" startOffset="55%">Old Lyceum Line</textPath></text>
+      <text class="stlabel"><textPath href="#lblS3" startOffset="30%">Chandlery Street</textPath></text>
+      <text class="stlabel"><textPath href="#lblA3" startOffset="60%">South Embankment</textPath></text>
+
+      <!-- routes (drawn on demand) -->
+      <g id="routes">
+        <path class="route" d="M 400 470 L 462 452 L 472 398 L 540 380"/>
+        <path class="route" d="M 400 470 L 362 432 L 350 358 L 300 320"/>
+        <path class="route" d="M 400 470 L 386 540 L 372 622 L 400 760 L 500 742 L 556 720"/>
+        <path class="route" d="M 400 470 L 462 452 L 522 420 L 562 340 L 622 298 L 680 250"/>
+        <path class="route" d="M 400 470 L 330 522 L 300 620 L 232 668 L 196 716"/>
+      </g>
+
+      <!-- metro pins (decor) -->
+      <g class="metro">
+        <g transform="translate(246,414)"><rect x="-5" y="-5" width="10" height="10"/><text x="-2.6" y="2.8">M</text></g>
+        <g transform="translate(640,520)"><rect x="-5" y="-5" width="10" height="10"/><text x="-2.6" y="2.8">M</text></g>
+        <g transform="translate(448,842)"><rect x="-5" y="-5" width="10" height="10"/><text x="-2.6" y="2.8">M</text></g>
+      </g>
+
+      <!-- POIs -->
+      <g class="poi" id="poiPins">
+        <g data-i="0"><circle class="poi-dot" cx="540" cy="380" r="4.5"/><text x="552" y="376">Market Hall</text></g>
+        <g data-i="1"><circle class="poi-dot" cx="300" cy="320" r="4.5"/><text x="242" y="304">Gallery W</text></g>
+        <g data-i="2"><circle class="poi-dot" cx="556" cy="720" r="4.5"/><text x="568" y="736">River Baths</text></g>
+        <g data-i="3"><circle class="poi-dot" cx="680" cy="250" r="4.5"/><text x="692" y="246">Central Station</text></g>
+        <g data-i="4"><circle class="poi-dot" cx="196" cy="716" r="4.5"/><text x="120" y="748">Lyceum Park</text></g>
+      </g>
+
+      <!-- DELTA origin -->
+      <g id="home" transform="translate(400,470)">
+        <circle class="home-pulse" r="13"/>
+        <circle r="5.5" fill="#d9a066"/>
+        <text x="14" y="22" style="font-family:var(--serif); font-size:15px; letter-spacing:.16em; fill:#e8e4dc">DELTA</text>
+      </g>
+
+      <rect width="900" height="1100" filter="url(#grain)" opacity=".9" style="pointer-events:none"/>
+    </svg>
+    <div class="map-vignette"></div>
+    <div class="maptools-html" aria-hidden="true">
+      <svg width="210" height="34" viewBox="0 0 210 34">
+        <g class="maptools" transform="translate(2,8)">
+          <line x1="0" y1="0" x2="120" y2="0"/>
+          <line x1="0" y1="-4" x2="0" y2="4"/><line x1="60" y1="-3" x2="60" y2="3"/><line x1="120" y1="-4" x2="120" y2="4"/>
+          <text x="0" y="18">0</text><text x="96" y="18">200 M</text>
+          <g transform="translate(170,-6)"><path d="M 0 10 L 5 -8 L 10 10 L 5 5 Z" fill="rgba(232,228,220,.5)" stroke="none"/><text x="1" y="26">N</text></g>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <aside class="side">
+    <div class="ghost">Δ</div>
+    <div class="brandline">
+      <span class="label" style="color:var(--ink)">On foot from Delta</span>
+      <span class="label">55°57′ N · 24°06′ E</span>
+    </div>
+    <div class="bignum-block">
+      <div class="bignum"><span id="bigMin">0</span><span class="unitmark">min</span></div>
+      <div class="underline-meta" id="metaLine">MIN ON FOOT · <b>—</b></div>
+    </div>
+    <ul class="poilist" id="poiList">
+      <li><button data-i="0"><span class="idx">01</span><span class="nm">Market Hall, Weavers’ Row</span><span class="mins">4′</span></button></li>
+      <li><button data-i="1"><span class="idx">02</span><span class="nm">Gallery W, Granary Avenue</span><span class="mins">6′</span></button></li>
+      <li><button data-i="2"><span class="idx">03</span><span class="nm">River Baths, South Bank</span><span class="mins">7′</span></button></li>
+      <li><button data-i="3"><span class="idx">04</span><span class="nm">Central Station</span><span class="mins">9′</span></button></li>
+      <li><button data-i="4"><span class="idx">05</span><span class="nm">Lyceum Park, West Gate</span><span class="mins">12′</span></button></li>
+    </ul>
+    <p class="footnote">Times measured at a walking pace of 5 km/h along public streets, rounded to the whole minute. Winter surveys add roughly forty seconds per crossing of the Velna bridges.</p>
+  </aside>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="row">
+      <nav><a href="#">Delta Campus</a><a href="#">Masterplan</a><a href="#">Leasing</a><a href="#">Contact</a></nav>
+      <span class="legal">© 2026 Delta Riverside Partners UAB — cartography drawn from the 1998 municipal survey, sheet 14-B.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var POIS=[
+    {min:4,  km:0.3},
+    {min:6,  km:0.5},
+    {min:7,  km:0.6},
+    {min:9,  km:0.8},
+    {min:12, km:1.0}
+  ];
+  var routes=Array.prototype.slice.call(document.querySelectorAll('#routes .route'));
+  var pins=Array.prototype.slice.call(document.querySelectorAll('#poiPins g[data-i]'));
+  var items=Array.prototype.slice.call(document.querySelectorAll('#poiList li'));
+  var bigMin=document.getElementById('bigMin');
+  var metaLine=document.getElementById('metaLine');
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+  var DUR=1400;
+  // cubic-bezier(0.25,0.74,0.22,0.99) solver
+  function bezier(p1x,p1y,p2x,p2y){
+    var cx=3*p1x, bx=3*(p2x-p1x)-cx, ax=1-cx-bx;
+    var cy=3*p1y, by=3*(p2y-p1y)-cy, ay=1-cy-by;
+    function sx(t){return ((ax*t+bx)*t+cx)*t}
+    function sy(t){return ((ay*t+by)*t+cy)*t}
+    function dx(t){return (3*ax*t+2*bx)*t+cx}
+    return function(x){
+      if(x<=0)return 0; if(x>=1)return 1;
+      var t=x,i,d;
+      for(i=0;i<8;i++){ d=dx(t); if(Math.abs(d)<1e-6)break; t-=(sx(t)-x)/d; }
+      if(t<0||t>1){ var lo=0,hi=1; t=x;
+        while(lo<hi){ if(sx(t)<x)lo=t; else hi=t; t=(lo+hi)/2; if(hi-lo<1e-6)break; } }
+      return sy(t);
+    };
+  }
+  var ease=bezier(0.25,0.74,0.22,0.99);
+  routes.forEach(function(p){
+    var len=p.getTotalLength();
+    p.dataset.len=len;
+    p.style.strokeDasharray=len;
+    p.style.strokeDashoffset=len;
+  });
+  var active=null, prog=0, raf=null;
+  window.__ROUTE={ active:function(){return active}, progress:function(){return prog} };
+  function setMeta(i){
+    metaLine.innerHTML='MIN ON FOOT · <b>'+POIS[i].km.toFixed(1)+'&#8202;KM</b>';
+  }
+  function select(i){
+    if(i===active) return;
+    var prev=active; active=i;
+    items.forEach(function(li,k){li.classList.toggle('on',k===i)});
+    pins.forEach(function(g,k){g.classList.toggle('on',k===i)});
+    setMeta(i);
+    if(raf){cancelAnimationFrame(raf); raf=null;}
+    if(prev!==null){
+      var op=routes[prev];
+      op.style.transition = reduced.matches ? 'none' : 'opacity .3s linear';
+      op.style.opacity=0;
+    }
+    var p=routes[i], len=+p.dataset.len, target=POIS[i].min;
+    p.style.transition='none';
+    if(reduced.matches){
+      p.style.strokeDashoffset=0; p.style.opacity=1;
+      bigMin.textContent=target; prog=1; return;
+    }
+    p.style.strokeDashoffset=len; p.style.opacity=1;
+    var t0=performance.now();
+    prog=0;
+    function frame(now){
+      var t=Math.min(1,(now-t0)/DUR);
+      var e=ease(t);
+      prog=t;
+      p.style.strokeDashoffset=len*(1-e);
+      bigMin.textContent=Math.round(e*target);
+      if(t<1){ raf=requestAnimationFrame(frame); }
+      else { raf=null; bigMin.textContent=target; prog=1; }
+    }
+    raf=requestAnimationFrame(frame);
+  }
+  items.forEach(function(li){
+    li.querySelector('button').addEventListener('click',function(){ select(+this.dataset.i); });
+  });
+  pins.forEach(function(g){
+    g.addEventListener('click',function(){ select(+this.dataset.i); });
+  });
+  select(0);
+})();
+</script>
+</body>
+</html>

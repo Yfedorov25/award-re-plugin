@@ -38,7 +38,7 @@ const PAIRS = [
   ['headquarters', '#headquarters'],
   ['space', '#space-splash'],
   ['autonomy', '#autonomy'],
-  ['services', '#services'],
+  ['service', '#services'],  /* с28: live section id = "service" (singular!), НЕ "services" — інакше live.secs пропускає анкор */
   ['certificate', '#certificate'],
   ['solutions', '#layout-splash'],  /* с27: live "solutions" = наш #layout-splash (splash перед стеком), НЕ #stack-layout */
 ];

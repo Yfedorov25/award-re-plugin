@@ -1,0 +1,97 @@
+<!doctype html>
+<!-- TRANSFER-TEST · air-seam-1 (fade-шов світле→темне)
+     Фасад: TERRA — крем-секція «день» в'їжджає у ГЛИБОКО-ЗЕЛЕНУ секцію «ніч»
+     (не чорну!), serif, інший контент. НУЛЬ спільного з AIR-демо.
+     Закон (з PUZZLE CARD): панель 60svh кольору наступної секції внизу;
+     opacity = p*.5; p = 1 - clamp(bottom/(vh + h*0.6)); rAF-тикер, toFixed(3). -->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>transfer · air-seam-1 → TERRA</title>
+<style>
+  :root { --clay: #c96f4a; --cream: #f7efe4; --pine: #1e3327; --serif: Georgia, serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-x: clip; background: var(--cream); }
+  body { font-family: var(--serif); background: var(--cream); color: #2a2019; }
+  .blk { padding: 12vh 6vw; max-width: 1100px; margin: 0 auto; }
+  .tag { font-size: 12px; letter-spacing: .3em; color: var(--clay); margin-bottom: 4vh; }
+  .note { font-size: 16px; font-style: italic; line-height: 1.6; color: #6b5b4d; max-width: 55ch; }
+  .big { font-size: clamp(34px, 5vw, 76px); line-height: 1.05; letter-spacing: -.01em; color: #33261b; }
+  .dark { background: var(--pine); color: #e9e2d4; }
+  .dark .big { color: #e9e2d4; }
+  .dark .note { color: #9db09e; }
+  .ill { width: 100%; height: 46vh; border-radius: 10px; margin-top: 5vh;
+    background: linear-gradient(160deg, #e4c39a 0%, #c96f4a 55%, #7a4a33 100%); } /* «фото» = градієнт: нуль зовнішніх асетів */
+
+  /* ═══ МЕХАНІКА air-seam-1 (закон дослівно; колір панелі = колір НАСТУПНОЇ секції) ═══ */
+  .fade-seam { position: relative; }
+  .fade-seam::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+    height: 60svh; background: var(--pine); pointer-events: none; z-index: 1;
+    opacity: calc(var(--seam-p, 0) * .5); }
+</style>
+</head>
+<body>
+
+<section class="blk">
+  <p class="tag">terra · день і ніч</p>
+  <p class="note">Transfer-тест: механіка air-seam-1 на чужому фасаді. Низ крем-секції нижче
+  має плавно «затягуватись» зеленню ночі в міру виходу з екрана — без різкої межі фону.</p>
+</section>
+
+<!-- СВІТЛА СЕКЦІЯ З ШВОМ (шов на FULL-BLEED обгортці — панель має йти від краю до краю) -->
+<section class="fade-seam" id="day">
+  <div class="blk">
+    <h2 class="big">День у terra:<br>стежки, купіль, сонце на терасі</h2>
+    <p class="note" style="max-width:44ch;margin:6vh 0 0 auto">Сніданок із печі, дев'ять маркованих
+    маршрутів від дверей, купіль з дощової води, підігріта сонцем. Час тут вимірюється не годинами,
+    а перевалами.</p>
+    <div class="ill" role="img" aria-label="теракотовий градієнт — умовне фото дня"></div>
+    <p class="note" style="margin-top:5vh">Скроль далі: прозорість панелі шва зараз
+    <span data-seam-readout>0</span>.</p>
+  </div>
+</section>
+
+<!-- ТЕМНА СЕКЦІЯ, В ЯКУ ВИХОДИТЬ ШОВ -->
+<section class="dark">
+  <div class="blk" style="min-height:100svh;display:flex;flex-direction:column;justify-content:center">
+    <h2 class="big">Ніч у terra:<br>небо без ліхтарів</h2>
+    <p class="note" style="margin-top:3vh">Якщо межа між кремом і зеленню пройшла непомітно —
+    закон шва переноситься.</p>
+  </div>
+</section>
+
+<section class="blk">
+  <p class="note">Кінець тесту.</p>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  /* закон air-seam-1: p = 1 - clamp(bottom/(vh + h*0.6)); rAF по скролу */
+  (function initSeams(){
+    var seams = document.querySelectorAll('.fade-seam');
+    if (!seams.length) return;
+    var readout = document.querySelector('[data-seam-readout]');
+    var ticking = false;
+    window.__SEAM_GATE = { p: 0, updates: 0 };
+    function upd(){
+      ticking = false;
+      var vh = window.innerHeight;
+      seams.forEach(function(s){
+        var r = s.getBoundingClientRect();
+        var p = 1 - Math.max(0, Math.min(1, r.bottom / (vh + r.height * 0.6)));
+        s.style.setProperty('--seam-p', p.toFixed(3));
+        window.__SEAM_GATE.p = p; window.__SEAM_GATE.updates++;
+        if (readout) readout.textContent = (p * .5).toFixed(2);
+      });
+    }
+    function onScroll(){ if (ticking) return; ticking = true; requestAnimationFrame(upd); }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    upd();
+  })();
+}());
+</script>
+</body>
+</html>

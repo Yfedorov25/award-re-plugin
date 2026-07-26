@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8">
+<title>ХОРЕО-БОРД i1 sticky-card v2 ↔ запис 21.06.54</title>
+<style>
+  body{background:#111;color:#eee;font:14px/1.5 -apple-system,sans-serif;margin:0;padding:24px}
+  h1{font-size:18px} h2{font-size:14px;color:#9dd;margin:28px 0 6px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+  .pair img{width:100%;display:block;border:1px solid #333}
+  .cap{display:grid;grid-template-columns:1fr 1fr;gap:8px;color:#999;font-size:12px;margin-bottom:20px}
+  .verdict{background:#1a2a1a;border:1px solid #2a4;padding:10px 14px;margin:24px 0;border-radius:6px}
+  .warn{background:#2a241a;border-color:#a82}
+</style></head><body>
+<h1>i1 sticky-card v2 — покадрова хорео-звірка з записом Єгора 21.06.54 (еталон)</h1>
+<p>Зліва = ЖИВИЙ запис (2560×1396, 60fps, 8.76s). Справа = наш білд (скрол-прогрес p по треку 460vh).<br>
+Темп нормалізовано: t0≈0.3s (початок скролу), span до кінця запису (запис обривається на ~25% накриття).</p>
+
+<h2>Біт 0 — старт: фасад full-bleed, картки ще нема</h2>
+<div class="pair"><img src="frames/i1-r0-start-t0.25.jpg"><img src="frames/i1-b0-p0.00.jpg"></div>
+<div class="cap"><span>реф t=0.25s (p≈0.0)</span><span>білд p=0.00</span></div>
+
+<h2>Біт 1 — картка входить справа (glass, текст)</h2>
+<div class="pair"><img src="frames/i1-r1-card-t1.25.jpg"><img src="frames/i1-b1-p0.10.jpg"></div>
+<div class="cap"><span>реф t=1.25s (p≈0.12)</span><span>білд p=0.10</span></div>
+
+<h2>Біт 2 — сфера в картці; початок FREEZE</h2>
+<div class="pair"><img src="frames/i1-r2-sphere-t2.0.jpg"><img src="frames/i1-b2-p0.20.jpg"></div>
+<div class="cap"><span>реф t=2.0s (p≈0.20)</span><span>білд p=0.20</span></div>
+
+<h2>Біт 3 — FREEZE середина: картка нерухома, фон панить фасад→вулиця</h2>
+<div class="pair"><img src="frames/i1-r3-freezemid-t4.25.jpg"><img src="frames/i1-b3-p0.45.jpg"></div>
+<div class="cap"><span>реф t=4.25s (p≈0.47)</span><span>білд p=0.45</span></div>
+
+<h2>Біт 4 — FREEZE фінал: вулиця повністю, картка досі на місці</h2>
+<div class="pair"><img src="frames/i1-r4-freezelate-t5.75.jpg"><img src="frames/i1-b4-p0.55.jpg"></div>
+<div class="cap"><span>реф t=5.75s (p≈0.64)</span><span>білд p=0.55</span></div>
+
+<h2>Біт 5 — темна секція починає накривати знизу (нативний sticky-стек)</h2>
+<div class="pair"><img src="frames/i1-r5-coverstart-t6.25.jpg"><img src="frames/i1-b5-p0.65.jpg"></div>
+<div class="cap"><span>реф t=6.25s (p≈0.70)</span><span>білд p=0.65</span></div>
+
+<h2>Біт 6 — накриття ~25% (тут запис закінчується)</h2>
+<div class="pair"><img src="frames/i1-r6-cover25-t8.25.jpg"><img src="frames/i1-b6-p0.75.jpg"></div>
+<div class="cap"><span>реф t=8.25s (p≈0.94, кінець запису)</span><span>білд p=0.75</span></div>
+
+<h2>Понад запис — накриття завершується (у записі не зафіксовано, за SPEC)</h2>
+<div class="pair"><div></div><img src="frames/i1-b7-p0.90-beyond-ref.jpg"></div>
+<div class="cap"><span>—</span><span>білд p=0.90</span></div>
+
+<div class="verdict warn" style="background:#2a1a1a;border-color:#a44">🔴 ВЕРДИКТ ЄГОРА (С33-2): ВІДХИЛЕНО — «купа відмінностей». Покадровий розбір на 1280px підтвердив КОРІНЬ: у референсі картка НІКОЛИ не замерзає — вона їде ЗВИЧАЙНИМ потоком через увесь в'юпорт (top 90vh→за верх) над повільно панованим пінованим фоном; темна секція йде слідом у тому ж потоці з КОНСТАНТНИМ зазором 14vh. Мій v2-freeze (картка прибита 40% треку) — вигадка з неправильного декоду С32, як і v1 exit-up. Пінований у сцені ТІЛЬКИ ФОН.</div>
+<div class="verdict warn">⏭️ v3: закон переписано (SPEC atoms/air-sticky-card v3) + зібрано CD-RUN-air-sticky-v3 з розкадровкою 10 бітів (beat-01…beat-10, scrollY-контракт на кожен) + історія двох відхилень у 00-READ-FIRST, щоб CD не вигадував пін утретє.</div>
+</body></html>

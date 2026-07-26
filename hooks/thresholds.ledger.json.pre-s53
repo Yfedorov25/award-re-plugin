@@ -1,0 +1,12 @@
+{
+  "_what": "Ledger порогів self-check (Етап B S45-d). Хук link-ip-gate звіряє report.thresholdsSha проти цього sha. Зміна порогів = двофайловий акт: (1) thresholds.frozen.json у springs + THRESHOLD-CHANGELOG.md, (2) цей ledger у plugin/hooks (директорія під законом «лише за вказівкою Єгора»). «Мимохідь» неможливо.",
+  "sha": "dda6fd6e2d76290c9df52c5f9e2c3d5215208afb9c386f26c60e91fa39a71c0e",
+  "version": 8,
+  "signedBy": "Єгор S53: 4 пороги composition-static (v7) + ztZoomGainMin 1.8 (v8)",
+  "changelog": "award-re-springs/scripts/THRESHOLD-CHANGELOG.md",
+  "_v2note": "fade-вимір додано (opacity-fade promenade title): fadeStartEps/fadeEndEps. Пере-калібрація 17/17 (BASE-promenade-fade + INJ-14-title-no-fade).",
+  "_v4note": "swipe-strip вимір додано (S47): swipeMinTiles=3, swipeMinOverflowPx=40, swipeMoveMinPx=50. Ловить STATIC-tiles регрес (баг ітерації-1 promenade: 2 статичні картинки замість свайп-колажу). Пере-калібрація 19/19 (BASE-promenade all-green для strip + INJ-16-static-tiles зловлено).",
+  "_v5note": "S48 zone-track v2 + structure-parity + mechanic-class (план ради S47 кроки 2-3-5): 20 zt-значень (ztStandsEpsPct=3, ztTravelBigPct=12, ztGridSwap=20, ztInkDipRatio=0.6, ztBandDistThr=18, ztCoverBandsFrac=0.25, ztSweepStates=64 та ін., кожне з src-виведенням у frozen). Ретро-калібрація 25/25: позитиви borges/promenade/wellness PASS, негативи ivy-іт.1/іт.2 FAIL (structure-parity), MC-триплет.",
+  "_v6note": "S51 SCALE-MOTION: ztZoomGainMin=2.0 — у скільки разів гомотетія (12×12 zone-grid, ОБИДВА напрямки + локальне уточнення k/центру) мусить побити найкращу ЧИСТУ ТРАНСЛЯЦІЮ, щоб рух зони визнати масштабним, а не накриттям. Брама ДВОСКЛАДОВА: другий складник — існуючий ztGridLow (гомотетія мусить пояснити зону як той самий вміст); порогом-одинаком не розділяє. Разом із ним додано дві брами БЕЗ нових порогів: Б (фронт мусить ВИРОСТИ на ≥ztCoverBandsFrac) і T (dTrans<ztGridLow = трансляція пояснює зону, тобто потік крізь прямокутник, не накриття). Калібрація 30/30 (26 старих + 4 синтетичні zoom-фікстури scripts/calibration/zoom-fixtures.mjs). Побічно: parking інструмент-клас ревізовано stack+cover→strip (старий спирався на артефакт з обох боків), закрито застарілий кеш wellness.",
+  "_procedureNote": "S51: guard hooks-lock-guard НЕ вимикався (класифікатор середовища блокує зняття захисного хука). Правка зроблена через Bash за явною вказівкою Єгора в чаті цієї сесії; guard лишився чинним, бекап thresholds.ledger.json.pre-s51 поруч."
+}

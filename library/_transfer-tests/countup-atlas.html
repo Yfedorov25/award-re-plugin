@@ -1,0 +1,142 @@
+<!doctype html>
+<!-- TRANSFER-BUILD · air-count-up (T-422 + /about числа-факти) — v1, КАЛІБРУВАТИ по Desktop-air.mp4
+     Фасад: вигаданий гірський атлас «ATLAS» — курсив-серіф, синьо-крейдова гама,
+     інші числа (дробове · з суфіксом · з тисячами). НУЛЬ спільного з AIR/TERRA/VOLT.
+     Закон (SPEC air-count-up): value = target·easeOutCubic(t), dur 1.4s; формат стабільний
+     покадрово; нуль-CLS (ширина зарезервована фіналом); IO .25 one-shot; reduced → фінал. -->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>transfer · air-count-up → ATLAS</title>
+<style>
+  :root { --chalk: #eef2f5; --slate: #26323c; --sky: #5b87a6; --serif: 'Iowan Old Style', 'Palatino', Georgia, serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-x: clip; background: var(--chalk); }
+  body { font-family: var(--serif); background: var(--chalk); color: var(--slate); }
+  .blk { padding: 13vh 6vw; max-width: 1150px; margin: 0 auto; }
+  .cap { font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: var(--sky); margin-bottom: 4vh; }
+  .note { font-size: 15px; line-height: 1.6; color: #5a6a76; max-width: 52ch; font-style: italic; }
+  .gap { height: 62vh; display: grid; place-items: center; color: #9fb0bc; font-size: 12px;
+    letter-spacing: .2em; text-transform: uppercase; }
+  .facts { display: flex; flex-wrap: wrap; gap: 6vw; align-items: flex-end; }
+  .fact .cu-row { display: flex; align-items: baseline; gap: .15em; }
+
+  /* ═══ МЕХАНІКА air-count-up (закон; скін інший) ═══ */
+  .cu-num { font-size: clamp(64px, 9vw, 150px); font-style: italic; line-height: .95;
+    letter-spacing: -.02em; color: var(--slate); font-variant-numeric: tabular-nums;
+    display: inline-block; text-align: right; }        /* ширина фіксується JS-ом фіналом → нуль-CLS */
+  .cu-suffix { font-size: clamp(16px, 2vw, 28px); color: var(--sky); letter-spacing: .06em; }
+  .cu-label { margin-top: 1.2vh; font-size: 11px; letter-spacing: .3em; text-transform: uppercase;
+    color: #7d8f9d; }
+  .dark { background: var(--slate); color: var(--chalk); }
+  .dark .cu-num { color: var(--chalk); }
+  .dark .cu-label { color: #9fb3c0; }
+</style>
+</head>
+<body>
+
+<section class="blk">
+  <p class="cap">atlas · верхів'я в цифрах</p>
+  <p class="note">Transfer-білд: механіка air-count-up. Скроль — числа мають розігнатись до цілі
+  з гальмуванням у кінці, формат (кома, суфікс, тисячі) стабільний кожен кадр, сусідній текст не стрибає.</p>
+</section>
+
+<div class="gap">↓</div>
+
+<section class="blk">
+  <div class="facts">
+    <div class="fact">
+      <span class="cu-row"><span class="cu-num" data-cu-target="2469" data-cu-suffix=""></span><span class="cu-suffix">м</span></span>
+      <p class="cu-label">Найвища точка хребта</p>
+    </div>
+    <div class="fact">
+      <span class="cu-row"><span class="cu-num" data-cu-target="14.8" data-cu-suffix=""></span><span class="cu-suffix">км</span></span>
+      <p class="cu-label">Маркований гребеневий маршрут</p>
+    </div>
+  </div>
+</section>
+
+<div class="gap">↓ темна сцена</div>
+
+<section class="dark">
+  <div class="blk" style="min-height:64vh;display:flex;flex-direction:column;justify-content:center">
+    <div class="fact">
+      <span class="cu-row"><span class="cu-num" data-cu-target="1200" data-cu-suffix=""></span><span class="cu-suffix">мм/рік</span></span>
+      <p class="cu-label">Опадів — найвологіший схил країни</p>
+    </div>
+  </div>
+</section>
+
+<section class="blk"><p class="note">Кінець білда.</p></section>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var easeOutCubic = function (t) { return 1 - Math.pow(1 - t, 3); };
+
+  function fmt(v, decimals, grouped) {
+    var s = v.toFixed(decimals);
+    if (grouped) { var p = s.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' '); s = p.join('.'); }
+    return s;
+  }
+
+  var nodes = [].slice.call(document.querySelectorAll('[data-cu-target]'));
+  nodes.forEach(function (el) {
+    var target = parseFloat(el.getAttribute('data-cu-target'));
+    var decimals = (el.getAttribute('data-cu-target').split('.')[1] || '').length;
+    var grouped = target >= 1000;
+    var dur = parseFloat(el.getAttribute('data-cu-dur') || '1400');
+    var finalText = fmt(target, decimals, grouped);
+    /* M3 нуль-CLS: резервуємо ширину фіналом */
+    el.textContent = finalText;
+    var w = el.getBoundingClientRect().width;
+    el.style.minWidth = Math.ceil(w) + 'px';
+    el.textContent = fmt(0, decimals, grouped);
+    el.__cu = { target: target, decimals: decimals, grouped: grouped, dur: dur, finalText: finalText, done: false };
+  });
+
+  function run(el) {
+    var c = el.__cu;
+    if (c.done) return;
+    c.done = true;
+    if (reduced) { el.textContent = c.finalText; return; }
+    var t0 = null;
+    function tick(ts) {
+      if (!t0) t0 = ts;
+      var t = Math.min(1, (ts - t0) / c.dur);
+      var v = c.target * easeOutCubic(t);
+      el.textContent = t >= 1 ? c.finalText : fmt(v, c.decimals, c.grouped);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function snapIfPassed(el) {
+    /* закон-фікс (тортура-телепорт): елемент уже НАД в'юпортом = проскочили → фінал миттєво */
+    var r = el.getBoundingClientRect();
+    if (r.bottom < 0) { el.__cu.done = true; el.textContent = el.__cu.finalText; return true; }
+    return false;
+  }
+  if (reduced) { nodes.forEach(run); }
+  else {
+    var io = new IntersectionObserver(function (ents) {
+      ents.forEach(function (e) {
+        if (e.isIntersecting) { run(e.target); io.unobserve(e.target); }
+        else if (snapIfPassed(e.target)) { io.unobserve(e.target); }
+      });
+    }, { threshold: 0.25 });
+    nodes.forEach(function (el) { io.observe(el); });
+    window.addEventListener('scroll', function () {
+      nodes.forEach(function (el) { if (!el.__cu.done) snapIfPassed(el); });
+    }, { passive: true });
+  }
+  window.__CU_GATE = {
+    values: function () { return nodes.map(function (n) { return n.textContent; }); },
+    widths: function () { return nodes.map(function (n) { return Math.round(n.getBoundingClientRect().width); }); }
+  };
+}());
+</script>
+</body>
+</html>

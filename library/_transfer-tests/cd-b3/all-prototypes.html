@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ВСІ ПРОТОТИПИ — sticky-v3 + батч-3 (С33-3)</title>
+<style>
+  body{background:#101010;color:#eee;font:14px/1.5 -apple-system,sans-serif;margin:0;padding:28px}
+  h1{font-size:19px;margin:0 0 4px} .sub{color:#888;font-size:12px;margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px}
+  .card{background:#181818;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden}
+  .card iframe{width:100%;height:340px;border:0;background:#000;pointer-events:none}
+  .card .meta{padding:14px 16px}
+  .card h2{font-size:15px;margin:0 0 4px} .card p{margin:0 0 10px;color:#9a9a9a;font-size:12px}
+  .card a{display:inline-block;margin-right:14px;color:#8fd3c7;text-decoration:none;font-size:12.5px}
+  .card a:hover{text-decoration:underline}
+  .tag{display:inline-block;font-size:10px;letter-spacing:.08em;padding:2px 8px;border-radius:3px;margin-left:8px;vertical-align:2px}
+  .pass{background:#173322;color:#7ce0a3}
+</style></head><body>
+<h1>Всі прототипи · sticky-card v3 + батч-3 (preloader · flash-drill)</h1>
+<div class="sub">С33-3, 2026-07-17 · RAW з Claude Design + мої фікси (replay-кнопка + safety-timer у preloader) · гейти числами внизу кожної картки</div>
+<div class="grid">
+  <div class="card">
+    <iframe src="../cd-sv3/RESULTS/air-i1-sticky-card-v3.html" loading="lazy" scrolling="no"></iframe>
+    <div class="meta">
+      <h2>air-i1-sticky-card-v3 (SELA)<span class="tag pass">гейти 7/7 RAW</span></h2>
+      <p>Flow-картка над пінованим паном фасаду; зазор до next 14.00vh констант; нуль піна картки. Дивитись ПАРОЮ з записом 21.06.54.</p>
+      <a href="../cd-sv3/RESULTS/air-i1-sticky-card-v3.html">відкрити прототип</a>
+      <a href="../cd-sv3/parity/board-sv3.html">хорео-борд (8 бітів)</a>
+    </div>
+  </div>
+  <div class="card">
+    <iframe src="air-b3-preloader-split.html" loading="lazy" scrolling="no"></iframe>
+    <div class="meta">
+      <h2>air-b3-preloader-split (KORA)<span class="tag pass">гейти 8/8 (2 фікси)</span></h2>
+      <p>Конвой-літери 76.6/51/25.5/0 → spread-рядок · бар лінійний · вихід «одне дихання» 2s bezier(.7,0,.3,1), сторінка видна КРІЗЬ вуаль. Кнопка Replay внизу справа.</p>
+      <a href="air-b3-preloader-split.html">відкрити прототип</a>
+    </div>
+  </div>
+  <div class="card">
+    <iframe src="air-b3-flash-drill.html" loading="lazy" scrolling="no"></iframe>
+    <div class="meta">
+      <h2>air-b3-flash-drill (PORT ELV)<span class="tag pass">гейти 10/10 RAW</span></h2>
+      <p>Клік плити → чорний flash 220/60/320ms → свап РІВНО під повним покриттям (per-rAF доведено: свап на op=0.999) → FLIP числа поверху 0.6s. «← All floors» = той самий ритуал назад. Мертві плити інертні.</p>
+      <a href="air-b3-flash-drill.html">відкрити прототип</a>
+    </div>
+  </div>
+</div>
+</body></html>

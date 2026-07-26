@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIR · Office Selection — Catalog & Filters (B10 · a)</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --panel:#f0efed;
+    --card:#f0efed;
+    --card-hover:#e7e6e2;
+    --field:#ffffff;
+    --chip:#ffffff;
+    --chip-hover:#f0efeb;
+    --clear:#e4e3df;
+    --clear-hover:#dbdad5;
+    --ink:#111111;
+    --muted:#9c9c96;
+    --muted2:#b9b9b2;
+    --hair:rgba(0,0,0,.12);
+    --hair2:rgba(0,0,0,.18);
+    --red:#e11d34;
+    --favbtn:#ebeae8;
+    --favbtn-hover:#e0dfda;
+    --rp:20px;   /* panel radius */
+    --rc:16px;   /* card radius */
+    --rf:14px;   /* field radius */
+    --rchip:11px;
+    --rblack:14px;
+    --handle:#ffffff;
+    --handle-b:#151515;
+    --handle-active:#2b2b2b;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:16px;line-height:1.3;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  .tabular{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  .wrap{max-width:1500px;margin:0 auto;padding:34px 44px 100px}
+  .lab{font-size:12px;letter-spacing:.17em;text-transform:uppercase;color:var(--muted);font-weight:400}
+
+  /* ---------- header ---------- */
+  .hdr-title{
+    font-size:clamp(38px,3.9vw,54px);line-height:.98;font-weight:200;
+    letter-spacing:-.005em;text-transform:uppercase;color:var(--ink);margin:0 0 16px;
+  }
+  .hdr-row{display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .hdr-left{display:flex;align-items:center;gap:12px}
+  .burger{width:64px;height:46px;border:none;border-radius:var(--rblack);background:var(--ink);
+    cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0}
+  .burger span{display:block;width:22px;height:2px;background:#fff;border-radius:2px}
+  .iconbtn{width:52px;height:46px;border:none;border-radius:var(--rblack);background:var(--favbtn);
+    cursor:pointer;display:grid;place-items:center;padding:0;transition:background .16s ease}
+  .iconbtn:hover{background:var(--favbtn-hover)}
+  .iconbtn svg{width:24px;height:24px;fill:none;stroke:var(--ink);stroke-width:1.7}
+  .masterplan{display:flex;align-items:center;gap:16px;height:46px;padding:0 22px;border:none;
+    border-radius:var(--rblack);background:var(--ink);color:#fff;cursor:pointer;white-space:nowrap;
+    font-size:13px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+  .masterplan svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:1.5}
+
+  /* ---------- toolbar ---------- */
+  .grid2{display:grid;grid-template-columns:32.5% 63.5%;gap:4%}
+  .toolbar{margin-top:30px;align-items:center}
+  .found{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .found b{font-weight:400;color:var(--muted)}
+  .toolbar-right{display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .sort{position:relative}
+  .sort-btn{display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;white-space:nowrap;
+    font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);padding:6px 2px}
+  .sort-btn svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:1.8;transition:transform .18s ease}
+  .sort.open .sort-btn svg{transform:rotate(180deg)}
+  .sort-menu{position:absolute;top:calc(100% + 8px);left:0;min-width:230px;background:var(--field);
+    border:1px solid var(--hair);border-radius:12px;padding:6px;z-index:40;display:none}
+  .sort.open .sort-menu{display:block}
+  .sort-opt{display:block;width:100%;text-align:left;background:none;border:none;cursor:pointer;
+    padding:11px 14px;border-radius:8px;font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+  .sort-opt:hover{background:var(--panel)}
+  .sort-opt.active{color:var(--ink)}
+  .viewtoggle{display:flex;align-items:center;gap:18px}
+  .vt{background:none;border:none;cursor:pointer;font-size:13px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--muted2);padding:6px 0}
+  .vt.active{color:var(--ink)}
+
+  /* ---------- catalog ---------- */
+  .catalog{margin-top:22px;align-items:start}
+
+  /* filters panel */
+  .filters{position:sticky;top:22px;align-self:start;background:var(--panel);
+    border-radius:var(--rp);padding:26px 26px 30px}
+  .clear{background:var(--clear);border:none;border-radius:10px;cursor:pointer;
+    padding:12px 22px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    transition:background .16s ease,color .16s ease}
+  .clear:hover{background:var(--clear-hover);color:var(--ink)}
+
+  .sky{margin:22px auto 6px;width:270px;max-width:100%;display:block}
+  .sky-cap{text-align:center;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);margin:2px 0 4px}
+
+  .frow{margin-top:24px}
+  .frow .lab{margin-bottom:12px}
+  .frow-pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px}
+  .frow-pair .frow{margin-top:0}
+
+  .dr-fields{display:flex;background:var(--field);border-radius:var(--rf);overflow:hidden}
+  .dr-in{flex:1 1 0;min-width:0;width:100%;border:none;background:none;outline:none;
+    font-family:inherit;color:var(--ink);font-size:20px;font-weight:400;padding:19px 20px;
+    font-variant-numeric:tabular-nums}
+  .dr-in+.dr-in{border-left:1px solid var(--hair)}
+  .frow-pair .dr-in{font-size:19px;padding:17px 16px}
+
+  .dr{padding:16px 8px 2px;user-select:none;-webkit-user-select:none}
+  .dr-track{position:relative;height:14px}
+  .dr-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:1.5px;
+    transform:translateY(-50%);background:var(--hair2)}
+  .dr-fill{position:absolute;top:50%;height:1.5px;transform:translateY(-50%);background:var(--ink)}
+  .dr-h{position:absolute;top:50%;width:14px;height:14px;transform:translate(-50%,-50%);
+    background:var(--handle);border:1.5px solid var(--handle-b);cursor:grab;touch-action:none;outline:none}
+  .dr-h:hover,.dr-h:focus-visible,.dr-h.drag{background:var(--handle-active);border-color:var(--handle-active)}
+  .dr-h.drag{cursor:grabbing}
+
+  .chips{display:flex;flex-wrap:wrap;gap:14px;margin-top:30px}
+  .chip{position:relative;background:var(--chip);border:1.5px solid transparent;border-radius:var(--rchip);
+    cursor:pointer;padding:14px 20px;font-size:12px;letter-spacing:.11em;text-transform:uppercase;
+    color:var(--ink);transition:background .16s ease}
+  .chip:hover{background:var(--chip-hover)}
+  /* active chip — facade variant A: solid black fill */
+  body[data-chipstyle="fill"] .chip.on{background:var(--ink);color:#fff}
+  body[data-chipstyle="outline"] .chip.on{background:var(--field);border-color:var(--ink)}
+  .chip .pct{position:absolute;top:-11px;left:-9px;width:24px;height:24px;border-radius:7px;
+    background:var(--red);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600;letter-spacing:0}
+
+  /* ---------- results ---------- */
+  .results{transition:opacity .19s ease;min-height:320px}
+  .results.swapping{opacity:0}
+  .results.list{display:flex;flex-direction:column;gap:16px}
+  .results.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  .row{display:grid;grid-template-columns:128px minmax(70px,1.3fr) minmax(72px,.8fr) minmax(70px,.8fr) 42px minmax(116px,1.1fr) 46px;
+    align-items:center;gap:18px;background:var(--card);border-radius:var(--rc);height:100px;
+    padding:0 24px 0 8px;transition:background .16s ease;cursor:pointer}
+  .row:hover{background:var(--card-hover)}
+  .row .thumb{display:grid;place-items:center;height:100%}
+  .oname{font-size:18px;font-weight:500;color:var(--ink);letter-spacing:.01em;text-transform:uppercase}
+  .meta{font-size:15px;color:var(--muted);letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+  .row .price{font-size:18px;font-weight:500;text-align:right;color:var(--ink)}
+  .fav{background:var(--favbtn);border:none;border-radius:12px;width:52px;height:44px;cursor:pointer;
+    display:grid;place-items:center;padding:0;transition:background .16s ease}
+  .row .fav{justify-self:end}
+  .fav:hover{background:var(--favbtn-hover)}
+  .fav .h{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:1.7}
+  .isfav .fav .h{fill:var(--ink);stroke:var(--ink)}
+  .plan{display:block}
+  .plan.sm{width:74px;height:auto}
+  .row.locked{cursor:default}
+
+  /* grid card */
+  .gcard{display:flex;flex-direction:column;background:var(--card);border-radius:var(--rc);
+    padding:24px 26px 26px;min-height:360px;transition:background .16s ease;cursor:pointer}
+  .gcard:hover{background:var(--card-hover)}
+  .gtop{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+  .gmeta{font-size:15px;line-height:1.55;color:var(--muted);margin-top:8px;text-transform:uppercase;letter-spacing:.02em}
+  .gplan{flex:1 1 auto;display:grid;place-items:center;padding:18px 0}
+  .plan.lg{width:150px;height:auto}
+  .gprice{font-size:30px;font-weight:400;letter-spacing:-.005em;color:var(--ink);margin-top:6px}
+  .gcard.locked{cursor:default}
+
+  @media (max-width:1120px){
+    .grid2{grid-template-columns:1fr;gap:26px}
+    .filters{position:static}
+    .toolbar-right{justify-content:space-between}
+  }
+  @media (max-width:680px){
+    .results.grid{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important}
+  }
+</style>
+</head>
+<body data-chipstyle="fill">
+<main class="wrap">
+  <header>
+    <h1 class="hdr-title">Office Selection</h1>
+    <div class="hdr-row">
+      <div class="hdr-left">
+        <button class="burger" aria-label="Menu"><span></span><span></span></button>
+        <button class="iconbtn" aria-label="Favourites">
+          <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.6-9.3-9C1.2 8 2.5 4.8 5.8 4.8c2 0 3.3 1.3 4.2 2.6.9-1.3 2.2-2.6 4.2-2.6 3.3 0 4.6 3.2 3.1 6.2C19 15.4 12 20 12 20Z"/></svg>
+        </button>
+      </div>
+      <button class="masterplan">Select on the master plan
+        <svg viewBox="0 0 24 24"><path d="M4 8V4h4"/><path d="M16 4h4v4"/><path d="M20 16v4h-4"/><path d="M8 20H4v-4"/><path d="M12 9v6M9 12h6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="grid2 toolbar">
+    <div class="found">Found <b id="foundN">69</b></div>
+    <div class="toolbar-right">
+      <div class="sort" id="sort">
+        <button class="sort-btn" id="sortBtn">
+          <span id="sortLabel">Ascending price</span>
+          <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="sort-menu" id="sortMenu">
+          <button class="sort-opt active" data-sort="price-asc">Ascending price</button>
+          <button class="sort-opt" data-sort="price-desc">Descending price</button>
+          <button class="sort-opt" data-sort="area-asc">Smallest area</button>
+          <button class="sort-opt" data-sort="area-desc">Largest area</button>
+          <button class="sort-opt" data-sort="floor-desc">Highest floor</button>
+        </div>
+      </div>
+      <div class="viewtoggle">
+        <button class="vt active" data-view="list">List</button>
+        <button class="vt" data-view="grid">Grid</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2 catalog">
+    <aside class="filters">
+      <button class="clear" id="clearBtn">Clear</button>
+
+      <svg class="sky" viewBox="0 0 300 220" fill="none">
+        <!-- ground shadow -->
+        <polygon points="95,172 162,184 288,150 214,141" fill="#e6e5e1"/>
+        <!-- MALL (low, back) -->
+        <g stroke="#4a4a47" stroke-width="1.2" stroke-linejoin="round">
+          <polygon points="174,120 209,140 191,150 156,130" fill="#fbfbfa"/>
+          <polygon points="209,140 191,150 191,164 209,154" fill="#f2f1ee"/>
+          <polygon points="156,130 191,150 191,164 156,144" fill="#f6f5f2"/>
+        </g>
+        <!-- B3 (short, right) -->
+        <g stroke="#3a3a37" stroke-width="1.3" stroke-linejoin="round">
+          <polygon points="194,123 214,135 194,146 174,135" fill="#fbfbfa"/>
+          <polygon points="214,135 194,146 194,170 214,159" fill="#eeede9"/>
+          <polygon points="174,135 194,146 194,170 174,159" fill="#f5f4f1"/>
+        </g>
+        <!-- B2 (tallest, center) — tall slim prism with a pitched/gabled apex ridge -->
+        <g stroke="#2b2b28" stroke-width="1.4" stroke-linejoin="round">
+          <!-- gabled roof: apex ridge above the top faces -->
+          <polygon points="150,72 166,101 150,110 136,101" fill="#fdfdfc"/>
+          <polygon points="166,101 150,110 150,116 166,107" fill="#ecebe7"/>
+          <polygon points="136,101 150,110 150,116 136,107" fill="#f4f3f0"/>
+          <!-- tall slim body -->
+          <polygon points="166,107 150,116 150,172 166,161" fill="#ecebe7"/>
+          <polygon points="136,107 150,116 150,172 136,161" fill="#f5f4f1"/>
+        </g>
+        <!-- B1 (medium, left) -->
+        <g stroke="#3a3a37" stroke-width="1.3" stroke-linejoin="round">
+          <polygon points="106,113 126,124 106,136 86,124" fill="#fbfbfa"/>
+          <polygon points="126,124 106,136 106,170 126,159" fill="#eeede9"/>
+          <polygon points="86,124 106,136 106,170 86,159" fill="#f5f4f1"/>
+        </g>
+        <!-- foreground slab -->
+        <g stroke="#54544f" stroke-width="1.1" stroke-linejoin="round">
+          <polygon points="71,146 88,156 73,164 55,154" fill="#fbfbfa"/>
+          <polygon points="88,156 73,164 73,169 88,160" fill="#f0efec"/>
+          <polygon points="55,154 73,164 73,169 55,159" fill="#f5f4f1"/>
+        </g>
+        <!-- label tags -->
+        <g font-family="Helvetica Neue,Helvetica,Arial,sans-serif" font-size="11" fill="#8b8b85">
+          <rect x="88" y="80" width="26" height="19" rx="5" fill="#f4f3f0" stroke="#c9c8c3" stroke-width="1"/>
+          <text x="101" y="93" text-anchor="middle">B1</text>
+          <rect x="138" y="52" width="26" height="19" rx="5" fill="#f4f3f0" stroke="#c9c8c3" stroke-width="1"/>
+          <text x="151" y="65" text-anchor="middle">B2</text>
+          <rect x="196" y="92" width="26" height="19" rx="5" fill="#f4f3f0" stroke="#c9c8c3" stroke-width="1"/>
+          <text x="209" y="105" text-anchor="middle">B3</text>
+          <text x="214" y="70">MALL</text>
+        </g>
+      </svg>
+      <div class="sky-cap">Skyline Fields</div>
+
+      <div class="frow">
+        <div class="lab">Price</div>
+        <div class="dr-fields">
+          <input class="dr-in" id="price-min" inputmode="numeric" aria-label="Price from">
+          <input class="dr-in" id="price-max" inputmode="numeric" aria-label="Price to">
+        </div>
+        <div class="dr" id="dr-price">
+          <div class="dr-track"><div class="dr-fill"></div>
+            <div class="dr-h" data-h="min" tabindex="0" role="slider" aria-label="Price from"></div>
+            <div class="dr-h" data-h="max" tabindex="0" role="slider" aria-label="Price to"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frow">
+        <div class="lab">Price, /m²</div>
+        <div class="dr-fields">
+          <input class="dr-in" id="ppm-min" inputmode="numeric" aria-label="Price per m² from">
+          <input class="dr-in" id="ppm-max" inputmode="numeric" aria-label="Price per m² to">
+        </div>
+        <div class="dr" id="dr-ppm">
+          <div class="dr-track"><div class="dr-fill"></div>
+            <div class="dr-h" data-h="min" tabindex="0" role="slider" aria-label="Price per m² from"></div>
+            <div class="dr-h" data-h="max" tabindex="0" role="slider" aria-label="Price per m² to"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frow-pair">
+        <div class="frow">
+          <div class="lab">Area, m²</div>
+          <div class="dr-fields">
+            <input class="dr-in" id="area-min" inputmode="numeric" aria-label="Area from">
+            <input class="dr-in" id="area-max" inputmode="numeric" aria-label="Area to">
+          </div>
+          <div class="dr" id="dr-area">
+            <div class="dr-track"><div class="dr-fill"></div>
+              <div class="dr-h" data-h="min" tabindex="0" role="slider" aria-label="Area from"></div>
+              <div class="dr-h" data-h="max" tabindex="0" role="slider" aria-label="Area to"></div>
+            </div>
+          </div>
+        </div>
+        <div class="frow">
+          <div class="lab">Floor</div>
+          <div class="dr-fields">
+            <input class="dr-in" id="floor-min" inputmode="numeric" aria-label="Floor from">
+            <input class="dr-in" id="floor-max" inputmode="numeric" aria-label="Floor to">
+          </div>
+          <div class="dr" id="dr-floor">
+            <div class="dr-track"><div class="dr-fill"></div>
+              <div class="dr-h" data-h="min" tabindex="0" role="slider" aria-label="Floor from"></div>
+              <div class="dr-h" data-h="max" tabindex="0" role="slider" aria-label="Floor to"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chips">
+        <button class="chip" data-flag="availableOnly">Available only</button>
+        <button class="chip" data-flag="limitedOffer"><span class="pct">%</span>Limited offer</button>
+        <button class="chip" data-flag="water">With water &amp; drainage</button>
+      </div>
+    </aside>
+
+    <section class="results list" id="results" aria-live="polite"></section>
+  </div>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- number format ---------- */
+  function fmt(n){ return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
+  function digits(s){ var d = String(s).replace(/[^\d]/g,''); return d===''?null:parseInt(d,10); }
+
+  /* ---------- plan thumbnails (svg inner markup) ---------- */
+  var PLANS = [
+    '<path d="M13 10H51V72H13Z"/><path d="M43 10a5 5 0 0 1 5 5" stroke-width="1.6"/><circle cx="45" cy="18" r="2.6" fill="#111" stroke="none"/>',
+    '<path d="M13 10H51V72H13Z"/><path d="M43 10a5 5 0 0 1 5 5" stroke-width="1.6"/><circle cx="20" cy="64" r="3" fill="#111" stroke="none"/>',
+    '<path d="M14 15H40V11H52V66H14Z"/><path d="M46 66a5 5 0 0 0 5 -5" stroke-width="1.6"/><circle cx="21" cy="22" r="4.4" fill="#111" stroke="none"/>',
+    '<path d="M15 10H51V70H15Z"/><path d="M15 12a5 5 0 0 1 5 -5" stroke-width="1.6"/><circle cx="21" cy="62" r="3" fill="#111" stroke="none"/>',
+    '<path d="M14 10H52V50H38V70H14Z"/><path d="M31 10a5 5 0 0 1 5 5" stroke-width="1.6"/><circle cx="20" cy="62" r="3.2" fill="#111" stroke="none"/>',
+    '<path d="M15 12H51V68H15Z"/><path d="M51 40a5 5 0 0 1 -5 5" stroke-width="1.6"/><circle cx="23" cy="21" r="4" fill="#111" stroke="none"/>'
+  ];
+  function lockMarkup(o){
+    return '<g opacity=".16" transform="translate(5,-3)">'+PLANS[o.plan]+'</g>'+
+      '<rect x="12" y="24" width="42" height="38" rx="7" fill="#fbfbfa" stroke="rgba(0,0,0,.12)" stroke-width="1.4"/>'+
+      '<rect x="25" y="41" width="16" height="13" rx="2.5" fill="#111" stroke="none"/>'+
+      '<path d="M28 41v-4a5 5 0 0 1 10 0v4" fill="none" stroke="#111" stroke-width="2.4"/>';
+  }
+  function planSVG(o,size){
+    var inner = o.locked ? lockMarkup(o) : PLANS[o.plan];
+    return '<svg class="plan '+size+'" viewBox="0 0 66 80" fill="none" stroke="#111" stroke-width="2.4" '+
+      'stroke-linejoin="round" stroke-linecap="round">'+inner+'</svg>';
+  }
+  var HEART = '<svg class="h" viewBox="0 0 24 24"><path d="M12 20s-7-4.6-9.3-9C1.2 8 2.5 4.8 5.8 4.8c2 0 3.3 1.3 4.2 2.6.9-1.3 2.2-2.6 4.2-2.6 3.3 0 4.6 3.2 3.1 6.2C19 15.4 12 20 12 20Z"/></svg>';
+
+  /* ---------- dataset: 69 offices, exactly 9 priced > 231 000 000 ---------- */
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+  var rnd = mulberry32(409);
+
+  function mk(n,areaStr,area,floor,b,price,opts){
+    opts=opts||{};
+    var ppm = Math.min(811400, Math.max(450000, Math.round(price/area)));
+    return {n:n,areaStr:areaStr,area:area,floor:floor,b:b,price:price,ppm:ppm,
+      available:opts.available!==false, limited:!!opts.limited, water:!!opts.water,
+      locked:!!opts.locked, fav:false, plan:0};
+  }
+  var OFFICES = [];
+  var used = {};
+  function push(o){ OFFICES.push(o); used[o.n]=1; }
+
+  // 12 offices taken verbatim from the reference frames (cheapest band)
+  push(mk(18,'59.9',59.9,9,1,39611870,{water:true}));
+  push(mk(148,'56.6',56.6,15,2,40016200,{locked:true}));
+  push(mk(46,'60',60,11,1,43728000,{water:true}));
+  push(mk(59,'70.4',70.4,7,2,47914240,{limited:true}));
+  push(mk(60,'73.7',73.7,7,2,47949220));
+  push(mk(20,'77.3',77.3,9,1,48227470,{water:true}));
+  push(mk(165,'64.4',64.4,22,2,50425200));
+  push(mk(3,'77',77,7,1,50573600,{water:true,limited:true}));
+  push(mk(48,'78.2',78.2,11,1,51885700));
+  push(mk(171,'64.4',64.4,22,2,52254160,{locked:true}));
+  push(mk(47,'78',78,11,1,53679600,{water:true}));
+  push(mk(27,'84.7',84.7,5,2,53936960,{limited:true}));
+
+  // explicit extreme-setters (keep default field bounds real)
+  push(mk(112,'56',56,6,1,40320000,{water:true}));          // AREA min = 56
+  push(mk(9,'100',100,12,1,81140000,{limited:true}));        // PPM max = 811 400
+  push(mk(74,'88',88,3,2,61952000,{water:true}));            // FLOOR min = 3
+
+  // 45 generated mid-band offices, all priced 49M–229M (<= 231M)
+  for(var i=0;i<45;i++){
+    var price = Math.round((49000000 + rnd()*180000000)/1000)*1000;
+    var ppmB  = Math.round(470000 + rnd()*300000);
+    var area  = Math.max(58, Math.round(price/ppmB));
+    var floor = Math.max(3, Math.min(28, Math.round(3 + rnd()*25)));
+    var b     = 1 + (Math.floor(rnd()*3));
+    var num;  do { num = 2 + Math.floor(rnd()*260); } while(used[num]);
+    push(mk(num, String(area), area, floor, b, price,
+      {available: rnd()>0.16, limited: rnd()>0.72, water: rnd()>0.5}));
+  }
+
+  // 9 premium offices, all priced > 231 000 000 (these are the ones filtered out at 231M)
+  var PREM = [
+    [251400000,340,21,1],[274320000,388,22,2],[309600000,452,23,1],
+    [351900000,512,24,3],[402640000,604,25,2],[468000000,688,26,1],
+    [540500000,792,27,2],[623700000,905,28,3],[706815000,1571,28,2]
+  ];
+  for(var p=0;p<PREM.length;p++){
+    var pr=PREM[p], num2; do{ num2 = 200 + Math.floor(rnd()*180);}while(used[num2]);
+    var aStr = pr[1]>=1000 ? fmt(pr[1]) : String(pr[1]);
+    push(mk(num2, aStr, pr[1], pr[2], pr[3], pr[0],
+      {available: rnd()>0.25, limited: rnd()>0.7, water: rnd()>0.4}));
+  }
+
+  // assign a plan variant per office
+  OFFICES.forEach(function(o,idx){ o.id=idx; o.plan = idx % PLANS.length; });
+
+  /* ---------- default bounds = true dataset extremes ---------- */
+  var DEF = {
+    price:[39611870,706815000],
+    ppm:[450000,811400],
+    area:[56,1571],
+    floor:[3,28]
+  };
+  var F = {
+    price:DEF.price.slice(), ppm:DEF.ppm.slice(), area:DEF.area.slice(), floor:DEF.floor.slice(),
+    availableOnly:false, limitedOffer:false, water:false
+  };
+  var view='list', sort='price-asc';
+
+  /* ---------- filter + sort ---------- */
+  function passes(o){
+    return o.price>=F.price[0] && o.price<=F.price[1]
+      && o.ppm>=F.ppm[0] && o.ppm<=F.ppm[1]
+      && o.area>=F.area[0] && o.area<=F.area[1]
+      && o.floor>=F.floor[0] && o.floor<=F.floor[1]
+      && (!F.availableOnly || o.available)
+      && (!F.limitedOffer || o.limited)
+      && (!F.water || o.water);
+  }
+  var CMP = {
+    'price-asc':function(a,b){return a.price-b.price;},
+    'price-desc':function(a,b){return b.price-a.price;},
+    'area-asc':function(a,b){return a.area-b.area;},
+    'area-desc':function(a,b){return b.area-a.area;},
+    'floor-desc':function(a,b){return b.floor-a.floor || a.price-b.price;}
+  };
+  function filtered(){ return OFFICES.filter(passes).sort(CMP[sort]); }
+
+  function updateCatalog(arr){
+    window.__CATALOG = {
+      found: arr.length,
+      total: OFFICES.length,
+      view: view,
+      sort: sort,
+      filters: {
+        price:F.price.slice(), pricePerM2:F.ppm.slice(), area:F.area.slice(), floor:F.floor.slice(),
+        availableOnly:F.availableOnly, limitedOffer:F.limitedOffer, water:F.water
+      }
+    };
+  }
+
+  /* ---------- render ---------- */
+  var results = document.getElementById('results');
+  var foundEl = document.getElementById('foundN');
+
+  function rowHTML(o){
+    return '<article class="row'+(o.fav?' isfav':'')+(o.locked?' locked':'')+'" data-id="'+o.id+'">'+
+      '<div class="thumb">'+planSVG(o,'sm')+'</div>'+
+      '<div class="oname">Office №'+o.n+'</div>'+
+      '<div class="meta">'+o.areaStr+' m²</div>'+
+      '<div class="meta">Floor '+o.floor+'</div>'+
+      '<div class="meta">B'+o.b+'</div>'+
+      '<div class="price tabular">'+fmt(o.price)+'</div>'+
+      '<button class="fav" data-fav="'+o.id+'" aria-label="Add to favourites">'+HEART+'</button>'+
+    '</article>';
+  }
+  function cardHTML(o){
+    return '<article class="gcard'+(o.fav?' isfav':'')+(o.locked?' locked':'')+'" data-id="'+o.id+'">'+
+      '<div class="gtop"><div class="oname">Office №'+o.n+'</div>'+
+        '<button class="fav" data-fav="'+o.id+'" aria-label="Add to favourites">'+HEART+'</button></div>'+
+      '<div class="gmeta">'+o.areaStr+' m²<br>Floor '+o.floor+'<br>Building '+o.b+'</div>'+
+      '<div class="gplan">'+planSVG(o,'lg')+'</div>'+
+      '<div class="gprice tabular">'+fmt(o.price)+'</div>'+
+    '</article>';
+  }
+  function buildHTML(arr){
+    var fn = view==='list'?rowHTML:cardHTML, s='';
+    for(var i=0;i<arr.length;i++) s+=fn(arr[i]);
+    return s;
+  }
+
+  var swapToken=0;
+  function doSwap(arr){
+    var html=buildHTML(arr);
+    if(REDUCED){ results.innerHTML=html; return; }
+    var my=++swapToken;
+    results.classList.add('swapping');           // old set fades to 0
+    setTimeout(function(){
+      if(my!==swapToken) return;                  // superseded by a newer swap
+      results.innerHTML=html;                     // swap DOM only while invisible
+      void results.offsetWidth;                   // reflow
+      results.classList.remove('swapping');       // new set fades in
+    }, 190);
+  }
+
+  /* ---------- FOUND counter ---------- */
+  var countRaf=0;
+  function animateCount(to){
+    cancelAnimationFrame(countRaf);
+    var from = digits(foundEl.textContent) || 0;
+    if(REDUCED || from===to){ foundEl.textContent=to; return; }
+    var t0=performance.now(), dur=420;
+    (function tick(t){
+      var p=Math.min(1,(t-t0)/dur); p=1-Math.pow(1-p,3);
+      foundEl.textContent = Math.round(from+(to-from)*p);
+      if(p<1) countRaf=requestAnimationFrame(tick);
+    })(t0);
+  }
+
+  // live tick while dragging a slider — number only, list untouched
+  function liveCount(){
+    var arr=filtered(); updateCatalog(arr); foundEl.textContent=arr.length;
+  }
+  // full re-render (clean swap). animate:true → counter tween
+  function commit(animate){
+    var arr=filtered(); updateCatalog(arr);
+    if(animate) animateCount(arr.length); else foundEl.textContent=arr.length;
+    doSwap(arr);
+  }
+
+  /* ---------- dual range slider ---------- */
+  function DualRange(id, key, step, opts){
+    opts=opts||{};
+    this.root=document.getElementById(id);
+    this.key=key; this.step=step;
+    this.min=DEF[key][0]; this.max=DEF[key][1];
+    this.track=this.root.querySelector('.dr-track');
+    this.fill=this.root.querySelector('.dr-fill');
+    this.hMin=this.root.querySelector('[data-h="min"]');
+    this.hMax=this.root.querySelector('[data-h="max"]');
+    this.inMin=document.getElementById(opts.inMin);
+    this.inMax=document.getElementById(opts.inMax);
+    this.bind();
+    this.layout(true);
+  }
+  DualRange.prototype.pct=function(v){ return (v-this.min)/(this.max-this.min)*100; };
+  DualRange.prototype.layout=function(setInputs){
+    var a=F[this.key][0], b=F[this.key][1];
+    var pa=this.pct(a), pb=this.pct(b);
+    this.hMin.style.left=pa+'%';
+    this.hMax.style.left=pb+'%';
+    this.fill.style.left=pa+'%';
+    this.fill.style.width=(pb-pa)+'%';
+    this.hMin.setAttribute('aria-valuenow',a);
+    this.hMax.setAttribute('aria-valuenow',b);
+    if(setInputs){
+      this.inMin.value=fmt(a); this.inMax.value=fmt(b);
+      this.inMin.setAttribute('value',fmt(a)); this.inMax.setAttribute('value',fmt(b));
+    }
+  };
+  DualRange.prototype.valAt=function(clientX){
+    var r=this.track.getBoundingClientRect();
+    var p=Math.min(1,Math.max(0,(clientX-r.left)/r.width));
+    var v=this.min+p*(this.max-this.min);
+    v=Math.round(v/this.step)*this.step;
+    return Math.min(this.max,Math.max(this.min,v));
+  };
+  DualRange.prototype.setV=function(which,v,live){
+    if(which==='min') F[this.key][0]=Math.min(v,F[this.key][1]);
+    else               F[this.key][1]=Math.max(v,F[this.key][0]);
+    this.layout(true);
+    if(live) liveCount();
+  };
+  DualRange.prototype.bind=function(){
+    var self=this;
+    function startDrag(handle,which){
+      handle.addEventListener('pointerdown',function(e){
+        e.preventDefault(); handle.setPointerCapture(e.pointerId); handle.classList.add('drag');
+        function move(ev){ self.setV(which, self.valAt(ev.clientX), true); }
+        function up(ev){
+          handle.classList.remove('drag');
+          handle.removeEventListener('pointermove',move);
+          handle.removeEventListener('pointerup',up);
+          handle.removeEventListener('pointercancel',up);
+          commit(false);
+        }
+        handle.addEventListener('pointermove',move);
+        handle.addEventListener('pointerup',up);
+        handle.addEventListener('pointercancel',up);
+      });
+      handle.addEventListener('keydown',function(e){
+        var d=0;
+        if(e.key==='ArrowLeft'||e.key==='ArrowDown') d=-self.step;
+        else if(e.key==='ArrowRight'||e.key==='ArrowUp') d=self.step;
+        else return;
+        e.preventDefault();
+        var cur=F[self.key][which==='min'?0:1];
+        self.setV(which, cur+d, true); commit(false);
+      });
+    }
+    startDrag(this.hMin,'min'); startDrag(this.hMax,'max');
+
+    // click on track jumps the nearest handle
+    this.track.addEventListener('pointerdown',function(e){
+      if(e.target.classList.contains('dr-h')) return;
+      var v=self.valAt(e.clientX);
+      var which = Math.abs(v-F[self.key][0]) <= Math.abs(v-F[self.key][1]) ? 'min':'max';
+      self.setV(which,v,false); commit(true);
+    });
+
+    // editable fields
+    function fieldLive(input,which){
+      function apply(){
+        var v=digits(input.value); if(v===null) return false;
+        v=Math.min(self.max,Math.max(self.min,v));
+        if(which==='min') F[self.key][0]=Math.min(v,F[self.key][1]);
+        else               F[self.key][1]=Math.max(v,F[self.key][0]);
+        return true;
+      }
+      input.addEventListener('input',function(){ if(apply()){ self.layout(false); liveCount(); } });
+      input.addEventListener('change',function(){ apply(); self.layout(true); commit(true); });
+      input.addEventListener('blur',function(){ self.layout(true); });
+      input.addEventListener('keydown',function(e){ if(e.key==='Enter') input.blur(); });
+    }
+    fieldLive(this.inMin,'min'); fieldLive(this.inMax,'max');
+  };
+  DualRange.prototype.reset=function(){ F[this.key]=DEF[this.key].slice(); this.layout(true); };
+
+  var sliders=[
+    new DualRange('dr-price','price',10000,{inMin:'price-min',inMax:'price-max'}),
+    new DualRange('dr-ppm','ppm',100,{inMin:'ppm-min',inMax:'ppm-max'}),
+    new DualRange('dr-area','area',1,{inMin:'area-min',inMax:'area-max'}),
+    new DualRange('dr-floor','floor',1,{inMin:'floor-min',inMax:'floor-max'})
+  ];
+
+  /* ---------- chips ---------- */
+  document.querySelectorAll('.chip').forEach(function(chip){
+    chip.addEventListener('click',function(){
+      var flag=chip.dataset.flag;
+      F[flag]=!F[flag];
+      chip.classList.toggle('on',F[flag]);
+      commit(true);
+    });
+  });
+
+  /* ---------- sort ---------- */
+  var sortEl=document.getElementById('sort');
+  var sortBtn=document.getElementById('sortBtn');
+  var sortLabel=document.getElementById('sortLabel');
+  sortBtn.addEventListener('click',function(e){ e.stopPropagation(); sortEl.classList.toggle('open'); });
+  document.addEventListener('click',function(){ sortEl.classList.remove('open'); });
+  document.querySelectorAll('.sort-opt').forEach(function(opt){
+    opt.addEventListener('click',function(e){
+      e.stopPropagation();
+      sort=opt.dataset.sort;
+      document.querySelectorAll('.sort-opt').forEach(function(o){o.classList.remove('active');});
+      opt.classList.add('active');
+      sortLabel.textContent=opt.textContent;
+      sortEl.classList.remove('open');
+      commit(false);
+    });
+  });
+
+  /* ---------- view toggle ---------- */
+  document.querySelectorAll('.vt').forEach(function(vt){
+    vt.addEventListener('click',function(){
+      if(view===vt.dataset.view) return;
+      view=vt.dataset.view;
+      document.querySelectorAll('.vt').forEach(function(v){v.classList.toggle('active',v.dataset.view===view);});
+      results.classList.toggle('list',view==='list');
+      results.classList.toggle('grid',view==='grid');
+      commit(false);
+    });
+  });
+
+  /* ---------- clear ---------- */
+  document.getElementById('clearBtn').addEventListener('click',function(){
+    sliders.forEach(function(s){s.reset();});
+    F.availableOnly=F.limitedOffer=F.water=false;
+    document.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+    sort='price-asc';
+    document.querySelectorAll('.sort-opt').forEach(function(o){o.classList.toggle('active',o.dataset.sort==='price-asc');});
+    sortLabel.textContent='Ascending price';
+    commit(true);
+  });
+
+  /* ---------- favourites (does not touch filters) ---------- */
+  results.addEventListener('click',function(e){
+    var favBtn=e.target.closest('.fav');
+    if(favBtn){
+      e.stopPropagation();
+      var id=+favBtn.dataset.fav, o=OFFICES[id];
+      o.fav=!o.fav;
+      favBtn.closest('.row,.gcard').classList.toggle('isfav',o.fav);
+      return;
+    }
+  });
+
+  /* ---------- initial paint (no animation) ---------- */
+  (function init(){
+    var arr=filtered(); updateCatalog(arr);
+    foundEl.textContent=arr.length;
+    results.innerHTML=buildHTML(arr);
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CD-RUN · AIR · Batch-6 — Prototypes</title>
+<style>
+  :root{
+    --bg:#ffffff; --card:#f1f0ee; --ink:#111; --muted:#9c9c96; --muted2:#b7b6b0;
+    --hair:rgba(0,0,0,.12); --red:#e11d34;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1500px;margin:0 auto;padding:54px 48px 100px}
+
+  .top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+    padding-bottom:26px;border-bottom:1px solid var(--hair);flex-wrap:wrap}
+  h1{font-size:clamp(34px,4vw,58px);font-weight:300;letter-spacing:-.01em;text-transform:uppercase;margin:0;line-height:1}
+  .sub{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:16px}
+  .meta{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);text-align:right;line-height:1.9}
+  .meta b{color:var(--ink);font-weight:400}
+
+  .sectlab{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin:44px 0 20px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:26px}
+  .card{background:var(--card);border-radius:16px;overflow:hidden;display:block;transition:background .18s ease}
+  .card:hover{background:#e9e8e4}
+  .frame{position:relative;width:100%;aspect-ratio:1440/900;overflow:hidden;background:#fff;border-bottom:1px solid var(--hair)}
+  .frame iframe{position:absolute;top:0;left:0;width:1440px;height:900px;border:0;transform-origin:top left;pointer-events:none}
+  .cap{display:flex;align-items:center;gap:16px;padding:20px 24px}
+  .cap-id{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+    background:var(--ink);color:#fff;padding:7px 11px;border-radius:8px;white-space:nowrap}
+  .cap-body{flex:1 1 auto;min-width:0}
+  .cap-name{font-size:15px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink)}
+  .cap-desc{font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .cap-open{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;transition:color .16s ease}
+  .card:hover .cap-open{color:var(--ink)}
+
+  .card.pending{cursor:default}
+  .card.pending:hover{background:var(--card)}
+  .frame.ph{display:grid;place-items:center;background:#f7f6f4;border-bottom:1px solid var(--hair)}
+  .ph-mark{width:52px;height:52px;border:1.5px dashed var(--muted2);border-radius:12px;display:grid;place-items:center;color:var(--muted2);font-size:22px;font-weight:300}
+  .cap-id.soon{background:none;color:var(--muted);border:1px solid var(--hair)}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <h1>AIR · Batch-6</h1>
+      <div class="sub">CD-RUN · Track AIR · Office Selection Catalog</div>
+    </div>
+    <div class="meta">
+      <div>Atom <b>B10 · T-409</b></div>
+      <div>Facade <b>Swiss Tech-Minimal</b></div>
+      <div>Build <b>18 · 07 · 2026</b></div>
+    </div>
+  </header>
+
+  <div class="sectlab">B10 — Catalog &amp; live filters · 3 variants</div>
+  <section class="grid">
+    <a class="card" href="air-b6-catalog-filters-a.html">
+      <div class="frame"><iframe data-src="air-b6-catalog-filters-a.html" scrolling="no" loading="lazy" title="B10 A"></iframe></div>
+      <div class="cap">
+        <span class="cap-id">B10 · A</span>
+        <div class="cap-body">
+          <div class="cap-name">Catalog &amp; Filters</div>
+          <div class="cap-desc">Reference build · white / flat grey</div>
+        </div>
+        <span class="cap-open">Open →</span>
+      </div>
+    </a>
+
+    <a class="card" href="air-b6-catalog-filters-b.html">
+      <div class="frame"><iframe data-src="air-b6-catalog-filters-b.html" scrolling="no" loading="lazy" title="B10 B"></iframe></div>
+      <div class="cap">
+        <span class="cap-id">B10 · B</span>
+        <div class="cap-body">
+          <div class="cap-name">Catalog &amp; Filters</div>
+          <div class="cap-desc">Warm neutral · outline active-chip</div>
+        </div>
+        <span class="cap-open">Open →</span>
+      </div>
+    </a>
+
+    <a class="card" href="air-b6-catalog-filters-c.html">
+      <div class="frame"><iframe data-src="air-b6-catalog-filters-c.html" scrolling="no" loading="lazy" title="B10 C"></iframe></div>
+      <div class="cap">
+        <span class="cap-id">B10 · C</span>
+        <div class="cap-body">
+          <div class="cap-name">Catalog &amp; Filters</div>
+          <div class="cap-desc">Cool neutral · sharp radii</div>
+        </div>
+        <span class="cap-open">Open →</span>
+      </div>
+    </a>
+  </section>
+
+  <div class="sectlab">Batch-6 — Remaining atoms</div>
+  <section class="grid">
+    <div class="card pending">
+      <div class="frame ph"><div class="ph-mark">+</div></div>
+      <div class="cap">
+        <span class="cap-id soon">B14</span>
+        <div class="cap-body">
+          <div class="cap-name">Brand Object</div>
+          <div class="cap-desc">Pending — awaiting generated asset</div>
+        </div>
+        <span class="cap-open">Soon</span>
+      </div>
+    </div>
+
+    <div class="card pending">
+      <div class="frame ph"><div class="ph-mark">+</div></div>
+      <div class="cap">
+        <span class="cap-id soon">B7</span>
+        <div class="cap-body">
+          <div class="cap-name">Snap</div>
+          <div class="cap-desc">Pending — awaiting motion capture</div>
+        </div>
+        <span class="cap-open">Soon</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  // scale live iframe previews to their frame width, and lazy-load them
+  function scaleAll(){
+    document.querySelectorAll('.frame iframe').forEach(function(f){
+      var w=f.parentElement.clientWidth;
+      f.style.transform='scale('+(w/1440)+')';
+    });
+  }
+  window.addEventListener('resize',scaleAll);
+  // lazy mount via IntersectionObserver so the hub stays light
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        var f=e.target;
+        if(!f.src && f.dataset.src){ f.src=f.dataset.src; }
+        io.unobserve(f);
+      }
+    });
+  },{rootMargin:'300px'});
+  document.querySelectorAll('.frame iframe').forEach(function(f){ io.observe(f); });
+  scaleAll();
+  window.addEventListener('load',scaleAll);
+})();
+</script>
+</body>
+</html>

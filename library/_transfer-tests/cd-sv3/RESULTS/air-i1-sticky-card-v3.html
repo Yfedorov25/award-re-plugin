@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELA — The Street Level Survey</title>
+<link rel="preload" as="image" href="assets/facade-street.png">
+<link rel="preload" as="image" href="assets/chrome-sphere.png">
+<style>
+  :root{
+    --ink:#f2f0ea;
+    --dark:#0e0d0b;
+    --card:rgba(178,175,168,.82);
+    --accent:#b28a55;
+    --grot:'Helvetica Neue',Helvetica,'Arial Nova',Arial,sans-serif;
+    --serif:'Didot','Bodoni MT','Playfair Display',Georgia,'Times New Roman',serif;
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:auto;}
+  body{
+    margin:0;
+    background:var(--dark);
+    color:var(--ink);
+    font-family:var(--grot);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+  }
+  a{color:var(--accent);text-decoration:none;}
+  a:hover{color:#d8b581;}
+
+  /* ---------- site chrome ---------- */
+  .site-header{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    padding:2.6vh 1.6vw; pointer-events:none;
+    font-feature-settings:"tnum" 1;
+  }
+  .site-header > *{pointer-events:auto;}
+  .brand{
+    font-weight:700; font-size:16px; letter-spacing:.34em;
+    color:#fff; text-shadow:0 1px 30px rgba(0,0,0,.4);
+    padding-top:2px;
+  }
+  .floor-chip{
+    -webkit-appearance:none; appearance:none; border:0; cursor:pointer;
+    display:inline-flex; align-items:center; gap:2.4em;
+    background:var(--dark); color:#fff;
+    font-family:var(--grot); font-size:10.5px; letter-spacing:.24em; text-transform:uppercase;
+    padding:13px 17px; border-radius:2px;
+    box-shadow:0 18px 40px -22px rgba(0,0,0,.7);
+    transition:background .3s ease, transform .3s ease;
+  }
+  .floor-chip:hover{background:#20201c; transform:translateY(-1px);}
+  .plus{font-size:13px; line-height:1; opacity:.9;}
+
+  /* ---------- the pinned act ---------- */
+  .track{position:relative; height:307vh;}
+  .bg{
+    position:sticky; top:0; height:100vh; overflow:hidden; z-index:1;
+    background:#161310;
+  }
+  .bg-img{
+    display:block; width:100%; height:auto;
+    transform:translate3d(0,0,0); will-change:transform;
+  }
+  .bg-shade{
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      linear-gradient(180deg, rgba(14,13,11,.34) 0%, rgba(14,13,11,0) 20%, rgba(14,13,11,0) 70%, rgba(14,13,11,.20) 100%),
+      radial-gradient(150vw 60vh at 78% -8%, rgba(210,190,160,.10), transparent 60%);
+  }
+  .grain{
+    position:absolute; inset:0; pointer-events:none;
+    background-image:var(--grain); background-size:150px 150px;
+    opacity:.05; mix-blend-mode:overlay;
+  }
+
+  .layer{position:absolute; inset:0; z-index:2; pointer-events:none;}
+  .card{
+    position:absolute; top:115vh; right:1.5vw; width:31vw; height:78vh;
+    padding:1.6vw; box-sizing:border-box; pointer-events:auto;
+    background:var(--card);
+    -webkit-backdrop-filter:blur(18px) saturate(115%);
+    backdrop-filter:blur(18px) saturate(115%);
+    box-shadow:0 44px 90px -44px rgba(0,0,0,.5), 0 3px 22px rgba(0,0,0,.14);
+    display:flex; flex-direction:column;
+  }
+  .card-title{
+    margin:0; color:#fff; font-weight:500;
+    font-size:1.9vw; line-height:1.22; letter-spacing:.01em;
+    text-transform:uppercase; text-wrap:balance;
+  }
+  .sphere-wrap{flex:1; display:flex; align-items:center; justify-content:center; min-height:0; padding:.4vw 0;}
+  .sphere{
+    width:78%; aspect-ratio:1/1; object-fit:contain; display:block;
+    -webkit-mask-image:radial-gradient(circle at 49% 48%, #000 43%, rgba(0,0,0,0) 54%);
+    mask-image:radial-gradient(circle at 49% 48%, #000 43%, rgba(0,0,0,0) 54%);
+    filter:drop-shadow(0 20px 30px rgba(0,0,0,.3));
+  }
+  .chip{
+    -webkit-appearance:none; appearance:none; cursor:pointer;
+    align-self:flex-start; width:58%; height:6.5vh; min-width:200px;
+    display:flex; align-items:center; justify-content:space-between; gap:1.2em;
+    padding:0 1.1vw;
+    background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.35);
+    color:#fff; font-family:var(--grot); white-space:nowrap;
+    font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+    transition:background .3s ease, border-color .3s ease;
+  }
+  .chip:hover{background:rgba(255,255,255,.22); border-color:rgba(255,255,255,.5);}
+
+  /* ---------- dark section (native flow, covers by -100vh margin) ---------- */
+  .next{
+    position:relative; z-index:3; margin-top:-100vh;
+    min-height:160vh; background:var(--dark); color:#fff; overflow:hidden;
+  }
+  .next .grain{opacity:.06;}
+  .next-glow{
+    position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(120vw 70vh at 82% 2%, rgba(178,138,85,.12), transparent 58%);
+  }
+  .ghost{
+    position:absolute; left:.3vw; bottom:-6vh; z-index:0;
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size:74vh; line-height:.7; color:#fff; opacity:.04;
+    pointer-events:none; user-select:none; letter-spacing:-.04em;
+  }
+  .spread-l,.spread-r{
+    position:absolute; top:4vh; z-index:2;
+    font-weight:500; font-size:clamp(42px,4.8vw,92px); line-height:.95;
+    letter-spacing:-.015em; text-transform:uppercase; color:#fff;
+  }
+  .spread-l{left:1.6vw;}
+  .spread-r{right:1.6vw;}
+  .caption{
+    position:absolute; left:54vw; top:5vh; z-index:2; max-width:16vw;
+    font-size:clamp(12px,.95vw,17px); line-height:1.5; letter-spacing:.04em;
+    text-transform:uppercase; color:rgba(255,255,255,.58);
+  }
+  .para-block{
+    position:absolute; right:4vw; top:47vh; z-index:2;
+    max-width:46vw; text-align:right;
+  }
+  .para-label{
+    font-size:10.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:rgba(255,255,255,.5); margin-bottom:1.6vh;
+  }
+  .para-label b{color:var(--accent); font-weight:500;}
+  .para{
+    margin:0; font-size:15px; line-height:1.7; color:rgba(255,255,255,.82);
+    text-wrap:pretty;
+  }
+  .footer{
+    position:absolute; left:1.6vw; right:1.6vw; bottom:3.4vh; z-index:2;
+    display:flex; justify-content:space-between; align-items:center;
+    border-top:1px solid rgba(255,255,255,.1); padding-top:1.8vh;
+    font-size:10px; letter-spacing:.26em; text-transform:uppercase;
+    color:rgba(255,255,255,.5);
+  }
+  .footer span:last-child{color:rgba(255,255,255,.4);}
+
+  @media (prefers-reduced-motion: reduce){
+    .floor-chip,.chip{transition:none;}
+  }
+  @media (max-width:900px){
+    .card{width:74vw; right:3vw; height:74vh;}
+    .card-title{font-size:5vw;}
+    .spread-l,.spread-r{font-size:9vw;}
+    .caption{position:static; max-width:none; margin:14vh 1.6vw 0;}
+    .para-block{max-width:80vw; right:6vw; top:52vh;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="brand">SELA</div>
+    <button class="floor-chip" type="button">Choose a floor <span class="plus">✛</span></button>
+  </header>
+
+  <main class="track">
+    <div class="bg">
+      <img class="bg-img" src="assets/facade-street.png" alt="The SELA towers — curved stone-and-glass facade descending to street level at dusk">
+      <div class="bg-shade"></div>
+      <div class="grain"></div>
+    </div>
+    <div class="layer">
+      <article class="card">
+        <h1 class="card-title">An honest geometry of stone and morning light</h1>
+        <div class="sphere-wrap">
+          <img class="sphere" src="assets/chrome-sphere.png" alt="Polished chrome sculptural sphere">
+        </div>
+        <button class="chip" type="button">About the project <span class="plus">✛</span></button>
+      </article>
+    </div>
+  </main>
+
+  <section class="next">
+    <div class="next-glow"></div>
+    <div class="grain"></div>
+    <div class="ghost">02</div>
+    <div class="spread-l">At the measure</div>
+    <div class="spread-r">Of life</div>
+    <div class="caption">At the heart<br>of business</div>
+    <div class="para-block">
+      <div class="para-label">The street <b>· 02</b></div>
+      <p class="para">The Sela towers are set to become the quarter's landmark — two honest silhouettes above a street that finally has somewhere to walk to. Offices above, arcades below, and the day organised around daylight.</p>
+    </div>
+    <div class="footer">
+      <span>SELA © 2027</span>
+      <span>The street level survey</span>
+    </div>
+  </section>
+
+<script>
+(function(){
+  "use strict";
+  var PAN_FACTOR = 1.75;            /* pan speed vs. natural image overflow */
+  var REDUCED_STATE = 0.20;          /* static mid-pan for reduced motion */
+
+  var track = document.querySelector('.track');
+  var bgImg = document.querySelector('.bg-img');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var denom = 1, panPx = 0, progress = 0, ticking = false;
+
+  function measure(){
+    var vh = window.innerHeight;
+    denom = Math.max(1, track.offsetHeight - vh);
+    var overflow = Math.max(0, bgImg.offsetHeight - vh);
+    panPx = overflow * PAN_FACTOR;
+  }
+
+  function apply(){
+    if (reduce){
+      bgImg.style.transform = 'translate3d(0,' + (-panPx * REDUCED_STATE) + 'px,0)';
+    } else {
+      bgImg.style.transform = 'translate3d(0,' + (-panPx * progress) + 'px,0)';
+    }
+  }
+
+  function update(){
+    ticking = false;
+    var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+    progress = y / denom;
+    if (progress < 0) progress = 0; else if (progress > 1) progress = 1;
+    apply();
+  }
+
+  function onScroll(){
+    if (!ticking){ ticking = true; requestAnimationFrame(update); }
+  }
+
+  function init(){
+    measure();
+    if (reduce){ apply(); }
+    else { update(); }
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', function(){ measure(); update(); }, {passive:true});
+  }
+
+  if (bgImg.complete && bgImg.naturalHeight){ init(); }
+  else { bgImg.addEventListener('load', init, {once:true}); window.addEventListener('load', init, {once:true}); }
+
+  /* debug hook */
+  window.__STICKYV3 = {
+    bgP: function(){ return progress; },
+    _remeasure: function(){ measure(); update(); }
+  };
+})();
+</script>
+</body>
+</html>

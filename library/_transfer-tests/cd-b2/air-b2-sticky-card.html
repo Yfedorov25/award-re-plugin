@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SELA — The Courtyard</title>
+<style>
+  :root{
+    --ink:#141311; --paper:#efece5; --accent:#b98a4a;
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --E:cubic-bezier(0.25,0.74,0.22,0.99);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--ink); color:var(--paper); font-family:var(--grot);
+    font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  a{color:var(--paper); text-decoration:none}
+  .caps{text-transform:uppercase; letter-spacing:.3em; font-size:10.5px; font-weight:400}
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:120; opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+  /* ---------- header over photo ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; height:64px; z-index:100;
+    display:flex; align-items:center; justify-content:space-between; padding:0 4vw;
+    color:var(--paper); text-shadow:0 1px 14px rgba(0,0,0,.4);
+  }
+  .brand{font-family:var(--serif); font-size:22px; letter-spacing:.16em}
+  nav{display:flex; gap:32px}
+  nav a{
+    font-size:10.5px; letter-spacing:.3em; text-transform:uppercase;
+    opacity:.75; transition:opacity .3s var(--E);
+  }
+  nav a:hover{opacity:1; color:var(--paper)}
+  /* ---------- act ---------- */
+  .track{position:relative; height:300vh}
+  .stage{position:sticky; top:0; height:100vh; overflow:hidden; background:var(--ink)}
+  .media{position:absolute; inset:0; overflow:hidden}
+  .media img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    will-change:transform; transform:scale(1.08);
+  }
+  .media::after{ /* gentle vignette so card + captions sit on the photo */
+    content:""; position:absolute; inset:0;
+    background:
+      linear-gradient(180deg, rgba(20,19,17,.35), transparent 22%, transparent 72%, rgba(20,19,17,.4)),
+      radial-gradient(120% 90% at 18% 55%, rgba(20,19,17,.25), transparent 55%);
+  }
+  .card{
+    position:absolute; left:8vw; top:24vh; width:clamp(400px,30vw,440px);
+    background:rgba(20,19,17,.55); -webkit-backdrop-filter:blur(18px); backdrop-filter:blur(18px);
+    border:1px solid rgba(239,236,229,.14); border-radius:6px; padding:36px;
+    will-change:transform; z-index:5;
+  }
+  .card .caps{color:var(--accent); display:block; margin-bottom:20px}
+  .card h1{
+    font-family:var(--serif); font-weight:400; font-size:34px; line-height:1.08;
+    letter-spacing:.005em; margin-bottom:18px; text-wrap:pretty;
+  }
+  .card p{font-size:15px; line-height:1.7; color:rgba(239,236,229,.85); margin-bottom:28px; text-wrap:pretty}
+  .card .btn-row{display:flex; gap:14px}
+  .card button{
+    font-family:var(--grot); font-size:10.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--paper); background:transparent; border:1px solid rgba(239,236,229,.35);
+    padding:14px 22px; cursor:pointer; border-radius:2px;
+    transition:background-color .3s var(--E), border-color .3s var(--E);
+  }
+  .card button:hover, .card button.touched{
+    background:rgba(239,236,229,.12); border-color:rgba(239,236,229,.55);
+  }
+  .place-caption{
+    position:absolute; right:4vw; bottom:6vh; z-index:4; text-align:right;
+    color:rgba(239,236,229,.85); text-shadow:0 1px 10px rgba(0,0,0,.45);
+  }
+  .place-caption .rule{
+    display:block; width:120px; height:1px; background:rgba(239,236,229,.4);
+    margin:14px 0 0 auto;
+  }
+  /* ---------- next section (release target) ---------- */
+  .next{
+    position:relative; z-index:10; height:100vh; margin-bottom:-100vh;
+    background:
+      radial-gradient(120% 90% at 82% 12%, rgba(185,138,74,.08), transparent 55%),
+      linear-gradient(180deg,#141311,#12110f);
+    color:var(--paper); will-change:transform;
+    display:flex; flex-direction:column; justify-content:center; padding:0 8vw;
+    overflow:hidden;
+  }
+  .next .ghost{
+    position:absolute; left:-3vw; bottom:-10vh; font-family:var(--serif);
+    font-size:52vh; line-height:1; opacity:.045; user-select:none; pointer-events:none;
+  }
+  .next .statement{
+    font-family:var(--serif); font-weight:400; font-size:clamp(56px,7vw,104px);
+    line-height:.98; letter-spacing:.005em; max-width:14ch; text-wrap:pretty;
+  }
+  .next .footnote{
+    margin-top:7vh; margin-left:auto; max-width:40ch; font-size:14px; line-height:1.7;
+    color:rgba(239,236,229,.7); border-top:1px solid rgba(239,236,229,.1); padding-top:22px;
+    text-wrap:pretty;
+  }
+  .next .strip{
+    position:absolute; left:8vw; right:8vw; bottom:4vh; display:flex;
+    justify-content:space-between; align-items:baseline; font-size:11px;
+    letter-spacing:.04em; color:rgba(239,236,229,.45);
+  }
+  .next .strip .mark{font-family:var(--serif); letter-spacing:.16em; color:rgba(239,236,229,.6)}
+  @media (prefers-reduced-motion: reduce){
+    .track{height:100vh}
+    .next{margin-bottom:0}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">SELA</div>
+  <nav>
+    <a href="#courtyard">The Courtyard</a><a href="#residences">Residences</a><a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<div class="track" id="track">
+  <div class="stage">
+    <div class="media"><img id="photo" src="assets/courtyard-dusk.png" alt="Courtyard at dusk: pathway lamps, a still pool, towers with warm windows"></div>
+    <div class="card" id="card">
+      <span class="caps">SELA · THE COURTYARD</span>
+      <h1>A quiet architecture of light</h1>
+      <p>At dusk the courtyard turns inward: pathway lamps pick out the stone, the pool holds the last of the sky, and the towers keep watch with a hundred warm windows. This is the hour the architects designed first.</p>
+      <div class="btn-row"><button id="cardBtn" type="button">ABOUT THE COURTYARD</button></div>
+    </div>
+    <div class="place-caption caps">COURTYARD № 2 · BLUE HOUR · UNRETOUCHED RENDER<span class="rule"></span></div>
+  </div>
+</div>
+
+<section class="next" id="next">
+  <div class="ghost" aria-hidden="true">S</div>
+  <h2 class="statement">Evenings are the proof of a plan.</h2>
+  <p class="footnote">Lighting masterplan by Studio Lumen — 2,300 fixtures, none brighter than a candle at ten paces.</p>
+  <div class="strip">
+    <span class="mark">SELA</span>
+    <span>© Sela Residence — all rights reserved</span>
+  </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+  var track=document.getElementById("track");
+  var card=document.getElementById("card");
+  var photo=document.getElementById("photo");
+  var next=document.getElementById("next");
+  var btn=document.getElementById("cardBtn");
+  var reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function makeBezier(p1x,p1y,p2x,p2y){
+    var cx=3*p1x,bx=3*(p2x-p1x)-cx,ax=1-cx-bx;
+    var cy=3*p1y,by=3*(p2y-p1y)-cy,ay=1-cy-by;
+    function sX(t){return ((ax*t+bx)*t+cx)*t}
+    function sY(t){return ((ay*t+by)*t+cy)*t}
+    function dX(t){return (3*ax*t+2*bx)*t+cx}
+    return function(x){
+      if(x<=0)return 0; if(x>=1)return 1;
+      var t=x,i,e,d;
+      for(i=0;i<10;i++){e=sX(t)-x; if(Math.abs(e)<1e-6)break; d=dX(t); if(Math.abs(d)<1e-6)break; t-=e/d;}
+      if(t<0)t=0; if(t>1)t=1;
+      return sY(t);
+    };
+  }
+  var E=makeBezier(0.25,0.74,0.22,0.99);
+  function lerp(a,b,t){return a+(b-a)*t}
+  function clamp01(v){return v<0?0:(v>1?1:v)}
+
+  var p=0;
+
+  function computeP(){
+    var vh=window.innerHeight, range=track.offsetHeight-vh;
+    if(range<=0)return 1;
+    return clamp01((-track.getBoundingClientRect().top)/range);
+  }
+
+  function apply(){
+    p=computeP();
+    var vh=window.innerHeight;
+    if(reduced.matches){
+      photo.style.transform="scale(1.08)";
+      card.style.transform="translateY(0)";
+      card.style.opacity="1";
+      next.style.transform="none";
+      return;
+    }
+    /* §2 media drift: -4% -> +4% linear across whole p, scale constant */
+    photo.style.transform="scale(1.08) translateY("+(-4+8*p)+"%)";
+    /* §3 card: enter / frozen / release (enter softened: longer window + gentle fade) */
+    var ty, op=1;
+    if(p<0.30){
+      var ee=E(clamp01(p/0.30));
+      ty=lerp(0.7*vh,0,ee);
+      op=lerp(0.15,1,E(clamp01(p/0.22)));
+    }
+    else if(p<=0.68){ ty=0; }
+    else { ty=lerp(0,-1.2*vh,E(clamp01((p-0.68)/0.18))); }
+    card.style.transform="translateY("+ty+"px)";
+    card.style.opacity=String(op);
+    /* §4 next section rises 100vh -> 0 over p .78-1, hard edge */
+    var r=clamp01((p-0.78)/0.22);
+    next.style.transform="translateY("+(-vh*r)+"px)";
+  }
+
+  var ticking=false;
+  function onScroll(){
+    if(ticking)return;
+    ticking=true;
+    requestAnimationFrame(function(){ticking=false; apply();});
+  }
+  window.addEventListener("scroll",onScroll,{passive:true});
+  window.addEventListener("resize",apply);
+  if(reduced.addEventListener) reduced.addEventListener("change",apply);
+  apply();
+  window.addEventListener("load",apply);
+
+  /* touch stub: first tap shows hover state, follows nothing */
+  btn.addEventListener("touchstart",function(){btn.classList.add("touched");},{passive:true});
+  btn.addEventListener("click",function(ev){ev.preventDefault();});
+
+  window.__STICKYCARD={
+    p:function(){return p},
+    phase:function(){return p<0.30?"enter":(p<=0.68?"frozen":"release")}
+  };
+})();
+</script>
+</body>
+</html>

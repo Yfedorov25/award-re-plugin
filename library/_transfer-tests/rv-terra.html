@@ -1,0 +1,118 @@
+<!doctype html>
+<!-- TRANSFER-TEST · air-rv-1 (blur-reveal word-by-word)
+     Мета: механіка з картки air-rv-1 на РАДИКАЛЬНО іншому фасаді.
+     Фасад: вигаданий гірський еко-курорт TERRA — serif (Georgia), lowercase,
+     теракота/крем/глибока зелень, укр. текст. НУЛЬ спільного з AIR-демо.
+     Закон (з PUZZLE CARD): blur(10px)->0 + opacity 0->1; dur 1s;
+     ease cubic-bezier(.25,.74,.22,.99); stagger 60ms/слово (--rv-i); IO threshold .25;
+     лейаут не рухається (нуль CLS). -->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>transfer · air-rv-1 → TERRA</title>
+<style>
+  :root { --clay: #c96f4a; --cream: #f7efe4; --pine: #1e3327; --serif: Georgia, 'Times New Roman', serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-x: clip; background: var(--cream); }
+  body { font-family: var(--serif); background: var(--cream); color: #2a2019; }
+  .blk { padding: 12vh 6vw; max-width: 1100px; margin: 0 auto; }
+  .tag { font-size: 12px; letter-spacing: .3em; color: var(--clay); margin-bottom: 4vh; }
+  .note { font-size: 16px; font-style: italic; line-height: 1.6; color: #6b5b4d; max-width: 55ch; }
+  .gap { height: 60vh; display: grid; place-items: center; color: #b09a83; font-size: 13px; font-style: italic; }
+  .dark { background: var(--pine); color: #e9e2d4; }
+
+  /* ═══ МЕХАНІКА air-rv-1 (закон дослівно; скін — інший) ═══ */
+  .reveal-text { font-size: clamp(26px, 3.4vw, 52px); line-height: 1.25; letter-spacing: 0;
+    color: #a58c74; max-width: 30ch; }            /* skin: serif lowercase, НЕ uppercase */
+  .reveal-text strong { color: var(--clay); font-weight: 400; font-style: italic; }
+  .dark .reveal-text { color: #7d8f7f; }
+  .dark .reveal-text strong { color: #f0c9a8; }
+  .reveal-text .rv-w { display: inline-block; white-space: pre; }
+  .reveal-text.rv-armed .rv-w { filter: blur(10px); opacity: 0; }
+  .reveal-text .rv-w { transition: filter 1s cubic-bezier(.25,.74,.22,.99),
+    opacity 1s cubic-bezier(.25,.74,.22,.99);
+    transition-delay: calc(var(--rv-i, 0) * 60ms); }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-text.rv-armed .rv-w { filter: none; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<section class="blk">
+  <p class="tag">terra · високогірний курорт</p>
+  <p class="note">Transfer-тест: механіка air-rv-1 (word-by-word blur-проява) на чужому фасаді.
+  Скроль — абзаци мають «наводитись на різкість» словами, без жодного руху лейауту.</p>
+</section>
+
+<div class="gap">↓</div>
+
+<section class="blk">
+  <p class="reveal-text">тут, на висоті тисяча чотириста метрів, повітря пахне смерекою,
+  а тиша має власну вагу — гості приїжджають по неї, як по головну розкіш.</p>
+</section>
+
+<div class="gap">↓</div>
+
+<section class="blk">
+  <p class="reveal-text" style="max-width:26ch;margin-left:auto;text-align:right;font-size:clamp(20px,2.6vw,38px)">
+  кожен будинок terra поставлено на палі, щоб <strong>жоден корінь</strong> не був потривожений —
+  ліс лишається господарем цієї землі.</p>
+</section>
+
+<div class="gap">↓ темна сцена</div>
+
+<section class="dark">
+  <div class="blk" style="min-height:70vh;display:flex;align-items:center">
+    <p class="reveal-text" style="max-width:40ch;font-size:clamp(18px,2.2vw,32px)">
+    вночі над хребтом відкривається небо без жодного ліхтаря на сорок кілометрів довкола:
+    <strong>справжня темрява</strong> — найрідкісніший ресурс континенту.</p>
+  </div>
+</section>
+
+<section class="blk">
+  <p class="note">Кінець тесту. Якщо всі три абзаци проявились словами з каскадом — закон переноситься.</p>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* закон air-rv-1: split на слова (зберігаючи <strong>) + IO threshold .25 */
+  (function initReveal(){
+    var nodes = document.querySelectorAll('.reveal-text');
+    if (!nodes.length) return;
+    nodes.forEach(function(el){
+      var i = 0;
+      (function walk(node){
+        Array.prototype.slice.call(node.childNodes).forEach(function(ch){
+          if (ch.nodeType === 3) {
+            var frag = document.createDocumentFragment();
+            ch.textContent.split(/(\s+)/).forEach(function(tok){
+              if (tok === '') return;
+              if (/^\s+$/.test(tok)) { frag.appendChild(document.createTextNode(tok)); return; }
+              var w = document.createElement('span');
+              w.className = 'rv-w'; w.style.setProperty('--rv-i', i++); w.textContent = tok;
+              frag.appendChild(w);
+            });
+            node.replaceChild(frag, ch);
+          } else if (ch.nodeType === 1) { walk(ch); }
+        });
+      })(el);
+      el.classList.add('rv-armed');
+    });
+    if (reduced) { nodes.forEach(function(el){ el.classList.remove('rv-armed'); }); return; }
+    var io = new IntersectionObserver(function(ents){
+      ents.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.remove('rv-armed'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.25 });
+    nodes.forEach(function(el){ io.observe(el); });
+    window.__RV_GATE = { armed: function(){ return document.querySelectorAll('.reveal-text.rv-armed').length; },
+                         total: nodes.length };
+  })();
+}());
+</script>
+</body>
+</html>

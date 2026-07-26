@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARO — The Geometry of Quiet Ambition</title>
+<style>
+  :root{
+    --paper:#f4f3f0; --ink:#121212; --accent:#2f6b5e;
+    --E:cubic-bezier(0.25,0.74,0.22,0.99);
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --serif:Didot,"Bodoni MT","Playfair Display",Georgia,serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--grot);font-size:15px;line-height:1.7;
+       -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+  a{color:var(--ink);text-decoration:none;transition:color .3s var(--E)}
+  a:hover{color:var(--accent)}
+  img{display:block}
+  button{font:inherit;border:0;background:none;cursor:pointer}
+  body::after{content:"";position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.04;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  /* ---------- header ---------- */
+  .hdr{position:fixed;inset:0 0 auto 0;height:64px;z-index:50;display:flex;align-items:center;
+       padding:0 24px 0 56px}
+  .logo{width:140px;display:flex;visibility:hidden}
+  .logo span{font-size:28px;font-weight:600;line-height:1;letter-spacing:.14em}
+  .tagline{margin-left:auto;margin-right:28px;font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+           color:rgba(18,18,18,.72)}
+  .pill{display:flex;align-items:center;gap:14px;height:40px;padding:0 18px;border-radius:10px;
+        background:var(--ink);color:var(--paper);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+        transition:background-color .3s var(--E),color .3s var(--E)}
+  .pill:hover{background:var(--paper);color:var(--ink)}
+  .xg{font-size:14px;line-height:1;color:var(--accent)}
+
+  /* ---------- act 1 — kinetic hero ---------- */
+  /* фікс: cover = чистий CSS sticky-стек (закон wipe-up); трек подовжено, щоб фото-секція
+     їхала потоком ПОВЕРХ пінованої сцени останні ~100vh без жодного JS-transform */
+  .act1{height:280vh;position:relative}
+  .stage1{position:sticky;top:0;height:100vh;overflow:hidden}
+  .relief{position:absolute;left:50%;top:44vh;width:30vw;aspect-ratio:1;transform:translate(-50%,-50%);
+          border-radius:50%;z-index:1;filter:blur(5px);
+          background:repeating-conic-gradient(from 0deg,#ffffff 0deg 5deg,#e4e2dc 5deg 10deg);
+          -webkit-mask-image:radial-gradient(circle,transparent 30%,#000 36% 68%,transparent 74%);
+          mask-image:radial-gradient(circle,transparent 30%,#000 36% 68%,transparent 74%)}
+  .lw{position:absolute;top:52vh;width:0;height:0;display:flex;align-items:flex-end;justify-content:center;z-index:2}
+  .lw--a{left:12vw}.lw--r{left:50vw}.lw--o{left:88vw}
+  .letter{font-size:clamp(140px,24vw,340px);font-weight:500;line-height:.8;white-space:nowrap;
+          will-change:transform;pointer-events:none}
+  .cap{position:absolute;left:4vw;bottom:6vh;z-index:2;font-size:10.5px;letter-spacing:.3em;
+       text-transform:uppercase;color:rgba(18,18,18,.72)}
+  .cap b{color:var(--accent);font-weight:400}
+
+  /* ---------- act 2 — momentum ---------- */
+  .act2{position:relative;z-index:6;margin-top:-100vh;background:var(--paper)}
+  .act2 .photo{width:100%;height:115vh;object-fit:cover}
+  .spread2{height:55vh;display:flex;justify-content:space-between;align-items:center;padding:0 4vw}
+  .m{overflow:hidden}
+  .m>span{display:inline-block;font-size:clamp(40px,6.5vw,96px);line-height:1.02;font-weight:500;
+          letter-spacing:-.01em;text-transform:uppercase;white-space:nowrap;padding-bottom:.04em;
+          transform:translateY(108%);transition:transform .95s var(--E)}
+  .m--2>span{transition-delay:170ms}
+  .risen .m>span{transform:translateY(0)}
+  .act2b{position:relative;overflow:hidden;padding:28vh 4vw;background:var(--paper)}
+  .act2b .ghost{position:absolute;left:4vw;bottom:-14vh;font-family:var(--serif);font-size:34vw;line-height:1;
+                opacity:.04;pointer-events:none;user-select:none}
+  .act2b p{position:relative;margin:0 auto;max-width:44ch;text-align:center;font-size:15px;line-height:1.8;
+           letter-spacing:.06em;text-transform:uppercase;color:rgba(18,18,18,.55);text-wrap:pretty;
+           opacity:0;transform:translateY(18px);transition:opacity 1s var(--E),transform 1s var(--E)}
+  .act2b p.pin{opacity:1;transform:translateY(0)}
+
+  /* ---------- act 3 — sticky text + media swap ---------- */
+  .act3{height:240vh;position:relative}
+  .stage3{position:sticky;top:0;height:100vh}
+  .col3{position:absolute;left:4vw;top:18vh;width:40vw}
+  .stmt{font-size:26px;line-height:1.5;font-weight:500;text-transform:uppercase;text-indent:18%;text-wrap:pretty;
+        opacity:0;transform:translateY(24px);transition:opacity 1.05s var(--E),transform 1.05s var(--E)}
+  .sub{margin-top:8vh;font-size:14px;line-height:1.6;letter-spacing:.08em;text-transform:uppercase;
+       color:rgba(18,18,18,.45);opacity:0;transform:translateY(18px);
+       transition:opacity 1s var(--E) .18s,transform 1s var(--E) .18s}
+  .col3.pin .stmt,.col3.pin .sub,.col3.pin .chip{opacity:1;transform:translateY(0)}
+  /* фікс Єгора: чіп = видимий прямокутник */
+  .chip{margin-top:7vh;display:flex;justify-content:space-between;align-items:stretch;gap:26px;
+        width:300px;min-height:76px;padding:13px 15px;border-radius:8px;
+        background:rgba(18,18,18,.07);border:1px solid rgba(18,18,18,.14);
+        opacity:0;transform:translateY(14px);
+        transition:background-color .3s var(--E),opacity 1s var(--E) .32s,transform 1s var(--E) .32s}
+  .chip-txt{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;text-align:left;
+            align-self:flex-start;line-height:1.5}
+  .chip .xg{align-self:flex-end;font-size:16px;transition:transform .3s var(--E)}
+  .chip:hover{background:rgba(18,18,18,.17)}
+  .chip:hover .xg{transform:rotate(45deg)}
+  .slot{position:absolute;right:4vw;top:11vh;width:46vw;height:78vh;overflow:hidden;
+        box-shadow:0 30px 60px -30px rgba(18,18,18,.25)}
+  .slot img{width:100%;height:106%;object-fit:cover;will-change:transform}
+  .slot .mA{position:absolute;left:0;top:0}
+  .coverB{position:absolute;inset:0;overflow:hidden;will-change:transform;transform:translateY(100%)}
+  .coverB img{position:absolute;left:0;top:-6%}
+
+  /* ---------- act 4 — format row ---------- */
+  .act4{padding:26vh 4vw 18vh;background:var(--paper)}
+  .row4{display:flex;justify-content:space-between;align-items:baseline}
+  .b{font-size:clamp(72px,10vw,150px);line-height:.95;font-weight:500;letter-spacing:-.01em;
+     text-transform:uppercase;white-space:nowrap;filter:blur(16px);opacity:0;
+     transition:filter 1.25s var(--E),opacity 1.25s var(--E)}
+  .b--2{transition-delay:200ms}.b--3{transition-delay:400ms}
+  .shown .b{filter:blur(0);opacity:1}
+  .no-anim .m>span,.no-anim .b,.no-anim .act2b p,.no-anim .col3 *{transition:none!important}
+
+  /* ---------- act 5 — outro ---------- */
+  .act5{border-top:1px solid rgba(18,18,18,.08);padding:26px 4vw 30px;display:flex;
+        justify-content:space-between;align-items:center;font-size:10px;letter-spacing:.3em;
+        text-transform:uppercase;color:rgba(18,18,18,.6)}
+  .act5 nav{display:flex;gap:28px}
+  .act5 a{font-size:10px;letter-spacing:.3em}
+
+  /* ---------- reduced motion ---------- */
+  .rm .act2{margin-top:0}
+  .rm .letter{visibility:hidden}
+  .rm .logo{visibility:visible!important}
+  .rm .relief{opacity:0}
+  .rm .coverB{transform:none!important}
+  .rm .m>span{transform:none!important;transition:none}
+  .rm .b{filter:none!important;opacity:1!important;transition:none}
+  .rm .act2b p,.rm .stmt,.rm .sub,.rm .chip{opacity:1!important;transform:none!important;transition:none!important}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo" id="logo"><span>A</span><span>R</span><span>O</span></div>
+  <p class="tagline">The Geometry of Quiet Ambition</p>
+  <button class="pill"><span>Choose a floor</span><span class="xg">&#10011;</span></button>
+</header>
+
+<main>
+  <div class="act1" id="act1" data-screen-label="Act 1 — kinetic hero">
+    <div class="stage1" id="stage1">
+      <div class="relief" id="relief" aria-hidden="true"></div>
+      <div class="lw lw--a"><span class="letter" data-i="0">A</span></div>
+      <div class="lw lw--r"><span class="letter" data-i="1">R</span></div>
+      <div class="lw lw--o"><span class="letter" data-i="2">O</span></div>
+      <p class="cap">ARO <b>&middot;</b> Class A Business Center</p>
+    </div>
+  </div>
+
+  <section class="act2" id="act2" data-screen-label="Act 2 — momentum">
+    <img class="photo" src="../assets/tower-sky.png" alt="ARO tower against the open sky">
+    <div class="spread2" id="spread2">
+      <h2 class="m m--1"><span>The Courage</span></h2>
+      <h2 class="m m--2"><span>To Build Calm</span></h2>
+    </div>
+  </section>
+
+  <section class="act2b" data-screen-label="Act 2 — creed">
+    <p class="ghost" aria-hidden="true">A</p>
+    <p id="creed">ARO is a new generation of offices that brings a new level of premium quality and calm to business real estate.</p>
+  </section>
+
+  <div class="act3" id="act3" data-screen-label="Act 3 — sticky statement">
+    <div class="stage3">
+      <div class="col3" id="col3">
+        <h2 class="stmt">Efficient layouts and premium infrastructure, panoramic glazing and impressive views, luxurious lobbies, and forward-looking facades set a new benchmark for business environment.</h2>
+        <p class="sub">At this level, ARO has no competitors.</p>
+        <button class="chip"><span class="chip-txt">About the project</span><span class="xg">&#10011;</span></button>
+      </div>
+      <div class="slot">
+        <img class="mA" id="mA" src="../assets/facade-street.png" alt="ARO facade at street level">
+        <div class="coverB" id="coverB">
+          <img class="mB" id="mB" src="../assets/lobby.png" alt="ARO lobby interior">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="act4" data-screen-label="Act 4 — a new working format">
+    <div class="row4" id="row4">
+      <h2 class="b b--1">A New</h2>
+      <h2 class="b b--2">Working</h2>
+      <h2 class="b b--3">Format</h2>
+    </div>
+  </section>
+
+  <footer class="act5" data-screen-label="Act 5 — outro">
+    <span>ARO &copy; 2027 &middot; THE QUIET FLOORS</span>
+    <nav>
+      <a href="#">Offices</a><a href="#">Lobby</a><a href="#">Investment</a><a href="#">Contact</a>
+    </nav>
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
+  function cubicBezier(x1,y1,x2,y2){
+    var cx=3*x1,bx=3*(x2-x1)-cx,ax=1-cx-bx,cy=3*y1,by=3*(y2-y1)-cy,ay=1-cy-by;
+    var sx=function(t){return ((ax*t+bx)*t+cx)*t;};
+    var sy=function(t){return ((ay*t+by)*t+cy)*t;};
+    var dx=function(t){return (3*ax*t+2*bx)*t+cx;};
+    return function(x){
+      if(x<=0)return 0; if(x>=1)return 1;
+      var t=x,i,d;
+      for(i=0;i<6;i++){d=dx(t);if(Math.abs(d)<1e-6)break;t-=(sx(t)-x)/d;}
+      t=clamp(t,0,1);
+      if(Math.abs(sx(t)-x)>1e-4){var lo=0,hi=1;while(hi-lo>1e-5){t=(lo+hi)/2;if(sx(t)<x)lo=t;else hi=t;}}
+      return sy(t);
+    };
+  }
+  var E=cubicBezier(0.25,0.74,0.22,0.99);
+  /* фікс «менше різкості»: політ літер — м'який in-out на довшому вікні (сигнатурний E front-loaded і колапсив геро зарано) */
+  var E2=cubicBezier(0.45,0.05,0.20,1.00);
+
+  var act1=document.getElementById('act1'), stage1=document.getElementById('stage1'),
+      relief=document.getElementById('relief'), logo=document.getElementById('logo'),
+      letters=[].slice.call(document.querySelectorAll('.letter')),
+      tletters=[].slice.call(logo.querySelectorAll('span')),
+      act2=document.getElementById('act2'), spread2=document.getElementById('spread2'),
+      act3=document.getElementById('act3'), coverB=document.getElementById('coverB'),
+      mA=document.getElementById('mA'), mB=document.getElementById('mB'),
+      row4=document.getElementById('row4'), creed=document.getElementById('creed'),
+      col3=document.getElementById('col3'),
+      root=document.documentElement;
+
+  var RM=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(RM)root.classList.add('rm');
+
+  var vh=0,range1=1,act2Top=0,act3Top=0,range3=1;
+  var flip=[];
+  var p1=0,p3=0,composed=false,shown2=false,shown4=false,creedIn=false,col3In=false;
+  var prev2=null,prev4=null,firstFrame=true;
+
+  function measure(){
+    vh=window.innerHeight;
+    var i;
+    for(i=0;i<3;i++)letters[i].style.transform='none';
+    var sR=stage1.getBoundingClientRect();
+    flip=[];
+    for(i=0;i<3;i++){
+      var a=letters[i].getBoundingClientRect(), b=tletters[i].getBoundingClientRect();
+      flip.push({dx:(b.left+b.width/2)-((a.left-sR.left)+a.width/2),
+                 dy:(b.top+b.height/2)-((a.top-sR.top)+a.height/2),
+                 ds:b.height/a.height-1});
+    }
+    range1=act1.offsetHeight-vh;
+    act3Top=act3.offsetTop;
+    range3=act3.offsetHeight-vh;
+    fitRow(spread2); fitRow(row4);
+  }
+
+  /* фікс «текст кривий»: гігантські рядки мусять вміщатись у в'юпорт на будь-якій ширині */
+  function fitRow(row){
+    var spans=row.querySelectorAll('.m>span, .b'), i, total=0;
+    for(i=0;i<spans.length;i++)spans[i].style.removeProperty('font-size');
+    var avail=row.clientWidth-120;
+    var items=row.children;
+    for(i=0;i<items.length;i++)total+=items[i].getBoundingClientRect().width;
+    if(total>avail){
+      var scale=avail/total;
+      for(i=0;i<spans.length;i++){
+        var fs=parseFloat(getComputedStyle(spans[i]).fontSize);
+        spans[i].style.fontSize=Math.max(36,fs*scale)+'px';
+      }
+    }
+  }
+
+  function reveal(el,cls,instant){
+    if(instant){
+      root.classList.add('no-anim');
+      el.classList.add(cls);
+      void el.offsetWidth;
+      requestAnimationFrame(function(){requestAnimationFrame(function(){root.classList.remove('no-anim');});});
+    }else{
+      el.classList.add(cls);
+    }
+  }
+
+  function frame(y){
+    p1=clamp(range1>0?y/range1:0,0,1);
+    p3=clamp(range3>0?(y-act3Top)/range3:0,0,1);
+
+    if(RM){shown2=true;shown4=true;composed=true;creed.classList.add('pin');col3.classList.add('pin');firstFrame=false;return;}
+
+    /* §1 FLIP letters → header wordmark; м'який E2, довше вікно, swap at p1 >= 0.62 */
+    var t=E2(clamp(p1/0.62,0,1)),i;
+    for(i=0;i<3;i++){
+      var f=flip[i];
+      letters[i].style.transform='translate('+(f.dx*t)+'px,'+(f.dy*t)+'px) scale('+(1+f.ds*t)+')';
+    }
+    composed=p1>=0.62;
+    logo.style.visibility=composed?'visible':'hidden';
+    for(i=0;i<3;i++)letters[i].style.visibility=composed?'hidden':'visible';
+
+    /* §1 centre relief fade 0.25..0.5 */
+    relief.style.opacity=String(1-clamp((p1-0.25)/0.25,0,1));
+
+    /* §1 tower panel: їде НАТИВНИМ потоком поверх пінованої сцени (sticky-стек), JS її не рухає */
+
+    /* §3 media swap + drift */
+    var swapT=E(clamp((p3-0.45)/0.30,0,1));
+    coverB.style.transform='translate3d(0,'+((1-swapT)*100)+'%,0)';
+    mA.style.transform='translate3d(0,'+(-3*p3)+'%,0)';
+    mB.style.transform='translate3d(0,'+(3*(1-p3))+'%,0)';
+
+    /* §2 act-2 word masks — enter at 75vh, one-shot, passed=instant */
+    if(!shown2){
+      var r2=spread2.getBoundingClientRect().top;
+      if(r2<=0.75*vh){
+        reveal(spread2,'risen',firstFrame||(prev2!==null&&(prev2-r2)>0.4*vh));
+        shown2=true;
+      }
+      prev2=r2;
+    }
+    /* фікс «поява тексту»: creed-абзац м'яко входить */
+    if(!creedIn){
+      var rc=creed.getBoundingClientRect().top;
+      if(rc<=0.82*vh){creedIn=true;reveal(creed,'pin',firstFrame);}
+    }
+    /* фікс «поява тексту»: sticky-колона act-3 входить каскадом stmt→sub→chip */
+    if(!col3In){
+      var r3=act3.getBoundingClientRect().top;
+      if(r3<=0.55*vh){col3In=true;reveal(col3,'pin',firstFrame);}
+    }
+    /* §4 act-4 blur entrance — trigger at 80vh, one-shot, passed=instant */
+    if(!shown4){
+      var r4=row4.getBoundingClientRect().top;
+      if(r4<=0.80*vh){
+        reveal(row4,'shown',firstFrame||(prev4!==null&&(prev4-r4)>0.4*vh));
+        shown4=true;
+      }
+      prev4=r4;
+    }
+    firstFrame=false;
+  }
+
+  /* ВІДКІТ смузінгу (розсинхрон із нативним sticky → стрибки/смуги). Прямий драйвер, як у RAW. */
+  var ticking=false;
+  function onScroll(){
+    if(ticking)return;
+    ticking=true;
+    requestAnimationFrame(function(){ticking=false;frame(window.scrollY||window.pageYOffset||0);});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',function(){measure();frame(window.scrollY||0);});
+
+  window.__HERO={
+    p1:function(){return p1;},
+    composed:function(){return composed;},
+    p3:function(){return p3;},
+    swapDone:function(){return p3>=0.75;},
+    formatShown:function(){return shown4;}
+  };
+
+  measure();
+  frame(window.scrollY||0);
+})();
+</script>
+</body>
+</html>

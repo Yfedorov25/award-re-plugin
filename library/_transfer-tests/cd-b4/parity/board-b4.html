@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8">
+<title>ХОРЕО-БОРД batch-4 ↔ live AIR reference-frames</title>
+<style>
+  body{background:#111;color:#eee;font:14px/1.5 -apple-system,sans-serif;margin:0;padding:24px}
+  h1{font-size:18px} h2{font-size:15px;color:#9dd;margin:30px 0 4px} h3{font-size:13px;color:#bbb;margin:16px 0 4px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+  .pair img{width:100%;display:block;border:1px solid #333}
+  .cap{display:grid;grid-template-columns:1fr 1fr;gap:8px;color:#999;font-size:12px;margin-bottom:18px}
+  .v{background:#1a2a1a;border:1px solid #2a4;padding:9px 13px;margin:16px 0;border-radius:6px}
+  .w{background:#2a241a;border-color:#a82}
+  .r{background:#2a1a1a;border-color:#a44}
+</style></head><body>
+<h1>Batch-4 ↔ live AIR — хорео-звірка (наше зліва = CD RAW, ЖИВЕ справа = reference-frames)</h1>
+<p>Транзиш-логіка звірена ЧИСЛАМИ (гейти нижче). Тут — ОКО на композицію/темп проти живих кадрів. Це НЕ формальний video-parity (наш фасад інший бренд); фінальний вердикт — Єгор.</p>
+
+<h2>01 · FLOOR-SELECT (DUNE) ↔ live b8-select</h2>
+<h3>Hover вежі: плити + закріплена картка</h3>
+<div class="pair"><img src="board-frames/our-fs.jpg"><img src="board-frames/ref-b8-select-t6.4.jpg"></div>
+<div class="cap"><span>наше DUNE: T2 hover, картка «14 · 3 UNITS OPEN»</span><span>live: hover-стан (плити+картка)</span></div>
+<div class="v">✅ Композиція 1-в-1: 3 вежі (мала-велика-мала), лейбли T1/T2/T3 над ними, SELECT FLOOR ліворуч, чіп праворуч, картка з боку вежі. Гейти: anchor fixed Δ0px, dead-inert, sweep=1 hot, 0-CLS, 0 err.</div>
+
+<h2>02 · PLAN-POPOVER (ATELIER) ↔ live b9-plan</h2>
+<h3>Сеттл: план в'їжджає повернутим (-28°) → рівний</h3>
+<div class="pair"><img src="board-frames/our-pp-settle.jpg"><img src="board-frames/ref-b9-plan-vsd-t7.4.jpg"></div>
+<div class="cap"><span>наше ATELIER: мід-сеттл (rotate-tilt)</span><span>live: план прибув повернутим/тьмяним</span></div>
+<h3>Попавер юніта з міні-планом + драбинка</h3>
+<div class="pair"><img src="board-frames/our-pp-hover.jpg"><img src="board-frames/ref-b9-plan-vsd-t10.0.jpg"></div>
+<div class="cap"><span>наше: Unit 702 попавер + міні-план + драбинка 2-18</span><span>live: план 2_18, попавер, драбинка «2..18»</span></div>
+<div class="v">✅ Сеттл transform-only (гейт), попавер з РЕАЛЬНИМ міні-планом, драбинка+свап-під-вуаллю, 1 pinned max, 0 err. Механіка = закон.</div>
+<div class="w">⚠️ Дрібниця: swap-під-вуаллю фіксує swap коли вуаль ~93% (ще дотікає 220ms) — візуально ок, але не «під 100%». Косметика: подовжити вуаль-hold на +60ms при полірі.</div>
+
+<h2>03 · PUSH-CAROUSEL (MERIDIAN) ↔ live b13-carousel</h2>
+<h3>Slide 1 held + панель «1»</h3>
+<div class="pair"><img src="board-frames/our-pc-s1.jpg"><img src="board-frames/ref-b13-carousel-t33.5.jpg"></div>
+<div class="cap"><span>наше: s1 фасад + панель «1»</span><span>live: слайд 1, панель «1»</span></div>
+<h3>🔴 MID-PUSH 1→2 — тут проблема</h3>
+<div class="pair"><img src="board-frames/our-pc-push1.jpg"><img src="board-frames/ref-b13-carousel-t36.5.jpg"></div>
+<div class="cap"><span>наше: панель «1» і «2» НАКЛАДАЮТЬСЯ = каша тексту</span><span>live: акуратний крос-свап, текст не налазить</span></div>
+<div class="v" style="background:#1a2a1a;border-color:#2a4">✅ ВИПРАВЛЕНО (С33-5): overlap-каша прибрана — свап тепер ЧИСТИЙ HANDOFF (стара caption повністю гасне на першій половині push-вікна, нова заходить на другій; панель-бокс не рухається). Детектор колізій: було 1/21 кадр з обома @0.17 → тепер 0/21 в ОБОХ push-вікнах. Пер-варіант гейти 12/12 (holds цілі, панель Δ0px, 0 err). Скріншот mid-push: панель порожня в момент кросу — тексти не налазять. Фікс у всіх 3 (спільний JS) + перезалито в CD-проєкт.</div>
+<h3>Slide 2 held + панель «2»</h3>
+<div class="pair"><img src="board-frames/our-pc-s2.jpg"><img src="board-frames/ref-b13-carousel-t37.5.jpg"></div>
+<div class="cap"><span>наше: s2 інтер'єр + панель «2» (чисто на holdʼі)</span><span>live: слайд 2, панель «2»</span></div>
+<div class="v">✅ На HOLD-ах — чисто (гейт: h1/h2/h3 по одному caption, панель-бокс Δ0px, push монотонний, телепорт детермінований). Проблема ЛИШЕ в overlap-вікні свапу.</div>
+</body></html>

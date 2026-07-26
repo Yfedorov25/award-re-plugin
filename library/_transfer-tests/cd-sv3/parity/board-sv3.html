@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8">
+<title>ХОРЕО-БОРД sticky-card v3 ↔ розкадровка запису 21.06.54</title>
+<style>
+  body{background:#111;color:#eee;font:14px/1.5 -apple-system,sans-serif;margin:0;padding:24px}
+  h1{font-size:18px} h2{font-size:14px;color:#9dd;margin:28px 0 6px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+  .pair img{width:100%;display:block;border:1px solid #333}
+  .cap{display:grid;grid-template-columns:1fr 1fr;gap:8px;color:#999;font-size:12px;margin-bottom:20px}
+  .verdict{background:#1a2a1a;border:1px solid #2a4;padding:10px 14px;margin:24px 0;border-radius:6px}
+</style></head><body>
+<h1>sticky-card v3 (CD RAW) — покадрово проти розкадровки запису 21.06.54</h1>
+<p>Зліва = живий референс · справа = наш білд на scrollY з контракту розкадровки. Гейти: 1:1 потік ✓ (Δcard==Δscroll), зазор 14.00vh ×5 ✓, пан лінійний від сирого скролу ✓, телепорт ✓, 2560 ✓.</p>
+<h2>beat-01 · scrollY=0 — тільки фон, картки нема</h2>
+<div class="pair"><img src="frames/ref-01.jpg"><img src="frames/bld-01.jpg"></div>
+<div class="cap"><span>реф t=0.3s</span><span>білд scrollY=0</span></div>
+<h2>beat-02 · ~25vh — верх картки на 90vh, титул читається</h2>
+<div class="pair"><img src="frames/ref-02.jpg"><img src="frames/bld-02.jpg"></div>
+<div class="cap"><span>реф t=1.2s</span><span>білд 25vh</span></div>
+<h2>beat-04 · ~76vh — картка top≈39vh, сфера, фон дійшов вулиці</h2>
+<div class="pair"><img src="frames/ref-04.jpg"><img src="frames/bld-04.jpg"></div>
+<div class="cap"><span>реф t=2.6s</span><span>білд 76vh</span></div>
+<h2>beat-05 · ~99vh — повна картка: титул+сфера+чіп</h2>
+<div class="pair"><img src="frames/ref-05.jpg"><img src="frames/bld-05.jpg"></div>
+<div class="cap"><span>реф t=3.5s</span><span>білд 99vh</span></div>
+<h2>beat-07 · ~120vh — темна секція входить знизу</h2>
+<div class="pair"><img src="frames/ref-07.jpg"><img src="frames/bld-07.jpg"></div>
+<div class="cap"><span>реф t=6.2s</span><span>білд 120vh</span></div>
+<h2>beat-08 · ~143vh — титул за верхом; темна top≈64vh; spread на краях</h2>
+<div class="pair"><img src="frames/ref-08.jpg"><img src="frames/bld-08.jpg"></div>
+<div class="cap"><span>реф t=6.8s</span><span>білд 143vh</span></div>
+<h2>beat-09 · ~152vh — параграф входить справа внизу</h2>
+<div class="pair"><img src="frames/ref-09.jpg"><img src="frames/bld-09.jpg"></div>
+<div class="cap"><span>реф t=7.4s</span><span>білд 152vh</span></div>
+<h2>beat-10 · ~168vh — темна ~41%; чіп картки ще видно</h2>
+<div class="pair"><img src="frames/ref-10.jpg"><img src="frames/bld-10.jpg"></div>
+<div class="cap"><span>реф t=8.6s (кінець запису)</span><span>білд 168vh</span></div>
+<div class="verdict">✅ МОЄ ОКО (С33-3): порядок бітів і геометрія збігаються з розкадровкою; контракт витриманий числами (1:1 потік · зазор 14.00vh ×5 · пан лінійний від сирого скролу · телепорт · 2560-fit). CD цього разу НЕ вигадав пін — розкадровка в промпті спрацювала. ⚠️ Формальний video-parity не ганявся; «1-в-1» тут НЕ заявляється — фінальний вердикт = око Єгора ПАРОЮ з записом 21.06.54.</div>
+<div class="verdict" style="background:#2a241a;border-color:#a82">⚠️ ДЕЛЬТИ (обидві дрібні, не блокери): (1) параграф у реф має ВЛАСНУ появу (fade-in при ~35% секції: dark top 64→62vh, а параграф з'являється) — у нас чистий потік, приходить на ~10vh пізніше; це скоуп атома appear/fade-coupling, врахувати при збірці організму. (2) вхід темної секції на beat-07 у реф на ~0.2s пізніше — шум нормалізації швидкості скролу.</div>
+</body></html>

@@ -88,7 +88,10 @@ function hasVisualSuccessClaim(text) {
 // ── Свіжий доказ у самій відповіді (посилання на артефакт звірки) ──────────
 function responseCitesParityArtifact(text) {
   const t = text.toLowerCase();
-  const PROOF = /(parity-board\.html|-diff-|-ours-|baselines\/|visual-parity-report\.json|parity[-_/]board)/i;
+  // S55, за прямим дозволом Єгора в чаті. Для АТОМА чесний доказ це його self-check-report.json
+  // або probe.json, а не піксельний борд СЕКЦІЇ: такого борда на атомній роботі не буває.
+  // Старий список вимагав звітів, яких не існує, і тому вчив ослаблювати формулювання.
+  const PROOF = /(parity-board\.html|-diff-|-ours-|baselines\/|visual-parity-report\.json|parity[-_/]board|self-check-report\.json|self-check\.mjs|atom-probe|probe\.json)/i;
   return PROOF.test(t);
 }
 

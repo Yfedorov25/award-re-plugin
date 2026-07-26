@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PRIVATE — Asset resale</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#12140f;color:#ece9df;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:#b8a457;color:#12140f}
+  .atmos{position:fixed;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 12% 0%, rgba(184,164,87,0.1), transparent 55%),radial-gradient(90% 80% at 100% 100%, rgba(236,233,223,0.05), transparent 60%)}
+  .grain{position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(rgba(236,233,223,0.05) 1px, transparent 1px);background-size:4px 4px;opacity:.55;mix-blend-mode:screen;}
+  .ghost{position:fixed;top:44px;left:-14px;font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-size:min(46vw,600px);line-height:.7;color:rgba(236,233,223,0.06);pointer-events:none;user-select:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:1520px;margin:0 auto;padding:30px 52px 46px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:20px}
+  .brandbox{display:flex;align-items:center;gap:14px}
+  .burger{width:54px;height:40px;border-radius:12px;background:#ece9df;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+  .burger span{width:22px;height:2px;background:#12140f;border-radius:2px}.burger span:last-child{width:14px}
+  .heart{width:40px;height:40px;border-radius:11px;border:1px solid rgba(236,233,223,0.14);display:flex;align-items:center;justify-content:center}
+  .bword{font-size:12px;letter-spacing:.34em;color:#ece9df;margin-left:4px}
+  .chip{display:inline-flex;align-items:center;gap:14px;background:#ece9df;color:#12140f;border:0;border-radius:11px;padding:12px 18px;font-size:11px;letter-spacing:.22em;cursor:pointer;text-transform:uppercase}
+  .chip svg path{stroke:#12140f}
+  .layout{display:grid;grid-template-columns:minmax(260px,25%) 1fr;gap:52px;margin-top:40px;align-items:start}
+  .mlabel{font-size:11px;letter-spacing:.28em;color:rgba(236,233,223,0.34);text-transform:uppercase}
+  .mrule{height:1px;background:rgba(236,233,223,0.14);margin:14px 0 16px}
+  .model{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-weight:500;font-size:clamp(30px,3.4vw,44px);line-height:1;letter-spacing:.01em;text-transform:uppercase;display:inline-block;padding-bottom:8px;background-image:linear-gradient(#b8a457,#b8a457);background-repeat:no-repeat;background-position:0 100%;transition:color .3s ease,background-size .38s cubic-bezier(.25,.74,.22,.99)}
+  .model.on{color:#ece9df;background-size:100% 2px}
+  .model.off{color:rgba(236,233,223,0.32);background-size:0% 2px;cursor:pointer}
+  .model.off:hover{color:#ece9df;background-size:100% 2px}
+  aside p{margin:40px 0 0;max-width:33ch;font-size:14px;line-height:1.75;color:rgba(236,233,223,0.5)}
+  .panel{position:relative;background:#1a1c15;border:1px solid rgba(236,233,223,0.14);border-radius:4px;box-shadow:0 50px 90px -60px rgba(0,0,0,.28);display:flex;flex-direction:column}
+  .subtabs{position:relative;display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(236,233,223,0.14)}
+  .subtabs .div{position:absolute;top:0;bottom:0;left:50%;width:1px;background:rgba(236,233,223,0.14)}
+  .subtab{text-align:left;background:none;border:0;padding:22px 28px;font-size:11px;letter-spacing:.14em;color:#ece9df;cursor:pointer;text-transform:uppercase;line-height:1.3}
+  .subunder{position:absolute;bottom:-1px;left:0;width:50%;height:2px;background:#ece9df;transition:transform .3s cubic-bezier(.25,.74,.22,.99)}
+  .stage{position:relative;padding:44px 34px 8px;min-height:452px}
+  .swapbox{transition:opacity .24s ease, transform .24s ease}
+  .stateA .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:34px}
+  .stepnum{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-weight:500;font-size:clamp(84px,11vw,148px);line-height:.86;color:#ece9df;display:inline-block;will-change:filter,opacity}
+  .steprule{height:1px;background:rgba(236,233,223,0.14);margin:14px 0 16px;overflow:hidden}
+  .steprule span{display:block;height:100%;background:#b8a457;transform-origin:left}
+  .stepcap{font-size:13px;line-height:1.6;color:rgba(236,233,223,0.5);max-width:26ch;display:inline-block;will-change:transform,opacity}
+  .pctrow{display:flex;align-items:flex-end;gap:16px}
+  .pct{font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-weight:500;font-size:clamp(52px,6.6vw,96px);line-height:.88;color:#ece9df;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tipbtn{position:relative;flex:none;margin-bottom:14px;width:26px;height:26px;border-radius:6px;border:0;background:rgba(236,233,223,0.05);color:#ece9df;cursor:pointer;font-family:'Playfair Display',Didot,'Bodoni MT',Georgia,serif;font-style:italic;font-size:14px}
+  .tip{position:absolute;left:50%;bottom:calc(100% + 10px);width:220px;transform:translate(-50%,4px);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;background:#ece9df;color:#12140f;font-size:10px;letter-spacing:.12em;line-height:1.6;text-transform:uppercase;padding:12px 14px;border-radius:6px;text-align:left;z-index:5}
+  .tipbtn.open .tip,.tipbtn:hover .tip{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  .subcap{margin-top:16px;font-size:11px;letter-spacing:.16em;line-height:1.7;color:rgba(236,233,223,0.34);text-transform:uppercase;max-width:34ch}
+  .apara{margin:0;font-size:15px;line-height:1.75;color:rgba(236,233,223,0.5);display:inline-block;will-change:transform,opacity}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+  .rc{position:relative;overflow:hidden;background:#1a1c15;border:1px solid rgba(236,233,223,0.14);border-radius:3px;transition:transform .3s cubic-bezier(.25,.74,.22,.99),box-shadow .3s ease,border-color .3s ease;box-shadow:0 20px 40px -34px rgba(0,0,0,.2)}
+  .rc:hover{transform:translateY(-3px);box-shadow:0 34px 60px -34px rgba(0,0,0,.2);border-color:#b8a457}
+  .rc .in{padding:22px 22px 46px;min-height:126px;will-change:transform,opacity}
+  .rc .t{font-size:15px;line-height:1.4;letter-spacing:.02em;color:#ece9df;max-width:22ch}
+  .rc .ck{position:absolute;right:18px;bottom:16px;color:#b8a457;display:inline-flex}.rc .ck svg path{stroke:#b8a457}
+  footer.f{margin-top:44px;border-top:1px solid rgba(236,233,223,0.14);padding-top:18px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:11px;letter-spacing:.18em;color:rgba(236,233,223,0.34);text-transform:uppercase}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style></head>
+<body>
+<div class="atmos"></div><div class="grain"></div><div class="ghost">2</div>
+<div class="wrap">
+  <header>
+    <div class="brandbox">
+      <div class="burger"><span></span><span></span></div>
+      <div class="heart"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ece9df" stroke-width="1.6" stroke-linejoin="round"><path d="M12 20.5S3.8 15 3.8 9.2A4.3 4.3 0 0 1 12 6.9a4.3 4.3 0 0 1 8.2 2.3c0 5.8-8.2 11.3-8.2 11.3z"/></svg></div>
+      <span class="bword">PRIVATE</span>
+    </div>
+    <button class="chip">Choose an office <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 0v13M0 6.5h13" stroke-width="1"/></svg></button>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div><div class="mlabel">Model 1</div><div class="mrule"></div><div class="model off" id="m1">Rental Income</div></div>
+      <div style="margin-top:38px"><div class="mlabel">Model 2</div><div class="mrule"></div><div class="model on" id="m2">Asset Resale</div></div>
+      <p>Capital appreciation instead of a rent roll. Enter early, hold through the district's maturation, and exit when the asset is worth the most — or sell it complete, with a paying tenant already in place.</p>
+    </aside>
+
+    <section class="panel">
+      <div class="subtabs">
+        <span class="div"></span>
+        <button class="subtab" data-sub="0">CAPITALIZATION THROUGH RESALE</button>
+        <button class="subtab" data-sub="1">SALE OF A READY-MADE RENTAL BUSINESS</button>
+        <span class="subunder" id="subunder"></span>
+      </div>
+      <div class="stage">
+        <div class="swapbox" id="swapbox"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="f"><span>PRIVATE — Investment Desk</span><span>Model 2 · Asset Resale</span><span>© 2026 · Informational only</span></footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduced=false; try{ reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+  var SUBTABS=['CAPITALIZATION THROUGH RESALE','SALE OF A READY-MADE RENTAL BUSINESS'];
+  var CAPTIONS=['Buy at the early construction stage.','Hold while the district matures and rents rise.','Exit at peak value, or sell the running rental business.'];
+  var CARDS=['Increased asset liquidity','Higher resale value driven by rental cash flow','Wide selection of the most ready-mode liquid units'];
+  var PARAGRAPH='The investor independently chooses the optimal exit moment to maximize returns. This investment model allows for a combination of regular rental income and further capital growth upon exit from the asset.';
+  var SUBCAP='POTENTIAL INCREASE IN PROPERTY VALUE WHEN PURCHASED AT EARLY STAGES';
+  var CK='<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.2 3.2L13 4.5" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var state={subtab:0,animating:false,tipOpen:false,_raf:0,_enter:0,_swap:0};
+  var box=document.getElementById('swapbox'), subunder=document.getElementById('subunder');
+
+  function eo(x){ x=Math.max(0,Math.min(1,x)); return 1-Math.pow(1-x,3); }
+
+  function renderStateA(){
+    var h='<div class="stateA"><div class="steps">';
+    for(var i=0;i<3;i++){
+      h+='<div><div class="stepnum" data-num="'+i+'">'+(i+1)+'</div>'+
+        '<div class="steprule"><span data-rule="'+i+'"></span></div>'+
+        '<div class="stepcap" data-cap="'+i+'">'+CAPTIONS[i]+'</div></div>';
+    }
+    h+='</div><div style="display:grid;grid-template-columns:1fr 1fr;margin-top:40px"><div></div><div>'+
+      '<div class="pctrow"><div class="pct">~&thinsp;<span data-pct>40</span>%</div>'+
+      '<button class="tipbtn" id="tipbtn" aria-label="More information">i<span class="tip">'+SUBCAP+'</span></button></div>'+
+      '<div class="subcap">'+SUBCAP+'</div></div></div>';
+    h+=cardsHtml();
+    box.innerHTML=h; wireTip(); enter();
+  }
+  function renderStateB(){
+    var h='<div class="stateB"><div style="display:grid;grid-template-columns:1fr 1.15fr;gap:44px;align-items:start"><div></div><div>'+
+      '<p class="apara" data-para>'+PARAGRAPH+'</p>'+
+      '<div class="pctrow" style="margin-top:38px"><div class="pct">~&thinsp;<span data-pct>40</span>%</div>'+
+      '<button class="tipbtn" id="tipbtn" aria-label="More information">i<span class="tip">'+SUBCAP+'</span></button></div>'+
+      '<div class="subcap">'+SUBCAP+'</div></div></div>';
+    h+=cardsHtml();
+    box.innerHTML=h; wireTip(); enter();
+  }
+  function cardsHtml(){
+    var h='<div class="cards">';
+    for(var i=0;i<3;i++){ h+='<div class="rc"><div class="in" data-card="'+i+'"><div class="t">'+CARDS[i]+'</div><span class="ck">'+CK+'</span></div></div>'; }
+    return h+'</div>';
+  }
+  function wireTip(){
+    var b=document.getElementById('tipbtn'); if(!b)return;
+    b.addEventListener('click',function(e){ e.stopPropagation(); state.tipOpen=!state.tipOpen; b.classList.toggle('open',state.tipOpen); });
+  }
+
+  function applyAnim(t){
+    // step numbers blur-sharpen staggered
+    for(var i=0;i<3;i++){
+      var num=box.querySelector('[data-num="'+i+'"]');
+      if(num){ var e=eo((t-i*90)/500); num.style.filter='blur('+(10*(1-e)).toFixed(2)+'px)'; num.style.opacity=(0.15+0.85*e).toFixed(3); }
+      var rule=box.querySelector('[data-rule="'+i+'"]');
+      if(rule){ rule.style.transform='scaleX('+eo((t-(i*90+120))/420).toFixed(3)+')'; }
+      var cap=box.querySelector('[data-cap="'+i+'"]');
+      if(cap){ var ec=eo((t-(i*90+150))/450); cap.style.opacity=ec.toFixed(3); cap.style.transform='translateY('+(12*(1-ec)).toFixed(2)+'px)'; }
+      var card=box.querySelector('[data-card="'+i+'"]');
+      if(card){ var ecd=eo((t-(200+i*70))/450); card.style.opacity=ecd.toFixed(3); card.style.transform='translateY('+(14*(1-ecd)).toFixed(2)+'px)'; }
+    }
+    var para=box.querySelector('[data-para]');
+    if(para){ var epa=eo(t/520); para.style.opacity=epa.toFixed(3); para.style.transform='translateY('+(12*(1-epa)).toFixed(2)+'px)'; }
+    var pct=box.querySelector('[data-pct]');
+    if(pct){ pct.textContent=String(Math.round(40*eo(t/600))); }
+  }
+  function enter(){
+    state._enter=performance.now();
+    if(reduced){ applyAnim(1e7); state.animating=false; return; }
+    state.animating=true; clearTimeout(state._raf);
+    function step(){ var t=performance.now()-state._enter;
+      if(t<1080){ applyAnim(t); state._raf=setTimeout(step,16); } else { applyAnim(1e7); state.animating=false; } }
+    state._raf=setTimeout(step,16);
+  }
+  function switchTo(i){
+    if(i===state.subtab){ enter(); return; }
+    clearTimeout(state._swap); state.tipOpen=false;
+    // clean handoff: fade current OUT fully, then swap + fade in
+    box.style.opacity='0'; box.style.transform='translateY(8px)';
+    state._swap=setTimeout(function(){
+      state.subtab=i;
+      subunder.style.transform='translateX('+(i*100)+'%)';
+      if(i===0) renderStateA(); else renderStateB();
+      box.style.opacity='1'; box.style.transform='translateY(0)';
+    }, reduced?0:240);
+  }
+
+  document.querySelectorAll('.subtab').forEach(function(b){ b.addEventListener('click',function(){ switchTo(+b.dataset.sub); }); });
+  document.addEventListener('click',function(e){ if(!e.target.closest('.tipbtn')){ var b=document.getElementById('tipbtn'); if(b){ state.tipOpen=false; b.classList.remove('open'); } } });
+
+  renderStateA();
+
+  window.__RESALE={ subtab:function(){return state.subtab+1;}, pct:function(){return 40;}, animating:function(){return state.animating;} };
+})();
+</script>
+</body></html>

@@ -1,0 +1,461 @@
+<!doctype html>
+<!-- TRANSFER-TEST · air-iswpin-1 (fullbleed pin-слайдер із glass-панеллю)
+     Фасад: TERRA — 4 «пори доби» (N=4, у демо було 3!), слайди = CSS-градієнти
+     (.isw-fill, НУЛЬ фото/зовнішніх асетів), glass-картка ЗЛІВА (у демо справа),
+     serif, укр. Движок ImageSliderWipe = ІНЛАЙН-КОПІЯ ДОСЛІВНО (закон у движку).
+     Закони: pin minHeight 100svh+(N-1)*85svh; index=min(floor(p·N),N-1), гістерезис
+     1.5% спану; wipe polygon 1s ease-out; текст blur(10px)->0 delay 250ms;
+     лічильник свапається НА СТАРТІ; ticks translateX-fill; дрейф 120%, -16.666%->0. -->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>transfer · air-iswpin-1 → TERRA</title>
+<style>
+  :root { --clay: #c96f4a; --cream: #f7efe4; --pine: #1e3327; --serif: Georgia, serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; overflow-x: clip; background: var(--cream); }
+  body { font-family: var(--serif); background: var(--cream); color: #2a2019; }
+  .blk { padding: 12vh 6vw; max-width: 1100px; margin: 0 auto; }
+  .tag { font-size: 12px; letter-spacing: .3em; color: var(--clay); margin-bottom: 4vh; }
+  .note { font-size: 16px; font-style: italic; line-height: 1.6; color: #6b5b4d; max-width: 55ch; }
+  .big { font-size: clamp(34px, 5vw, 76px); line-height: 1.05; color: #33261b; }
+
+  /* ============================================================
+     IMAGE-SLIDER-WIPE · структурні хуки (копія з компонента — це L2, не скін)
+     ============================================================ */
+  .isw-mode-pin [data-isw-layer] {
+    position: sticky; top: 0; height: 100svh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    overflow: clip;
+  }
+  [data-isw-stage] { position: relative; }
+  .isw-mode-pin [data-isw-slide] { position: absolute; inset: 0; margin: 0; }
+  [data-isw-slide] img, [data-isw-slide] .isw-fill {
+    width: 100%; height: 100%; object-fit: cover; display: block; }
+  .isw-drift [data-isw-slide] img, .isw-drift [data-isw-slide] .isw-fill {
+    height: 120%; will-change: transform; }
+  [data-isw-slide].is-off { visibility: hidden; }
+  [data-isw-text], [data-isw-extra] { grid-area: 1 / 1; }
+  [data-isw-text].is-off, [data-isw-extra].is-off { visibility: hidden; }
+  [data-isw-ticks] { display: flex; gap: 20px; }
+  .isw-tick { flex: 1; height: 2px; border-radius: 2px; overflow: hidden;
+    background: rgba(127, 127, 127, .25); }
+  .isw-tick-fill { height: 100%; border-radius: 2px; background: currentColor;
+    transform: translateX(-100%); }
+  .isw-strip { display: flex; flex-wrap: nowrap; gap: 10px;
+    overflow-x: scroll; overflow-y: hidden; scroll-snap-type: x mandatory;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    padding-inline: calc((100% - var(--isw-item-w, 76vw)) / 2); }
+  .isw-strip::-webkit-scrollbar { display: none; }
+  .isw-strip [data-isw-slide] { position: relative;
+    flex: 0 0 var(--isw-item-w, 76vw); width: var(--isw-item-w, 76vw);
+    scroll-snap-align: center; margin: 0; visibility: visible; }
+  [data-isw-prev].is-disabled, [data-isw-next].is-disabled {
+    opacity: .3; pointer-events: none; }
+
+  /* ═══ СКІН TERRA (НАВМИСНО інший за AIR): картка ЗЛІВА, тепле скло,
+     serif-лічильник, слайди = градієнти пір доби ═══ */
+  .isw-row { position: relative; height: 100svh; padding: 0; }
+  [data-isw-stage] { position: absolute; inset: 0; border-radius: 0; overflow: clip; }
+  .fill-dawn    { background: linear-gradient(170deg,#f3d9c4 0%,#e0987a 60%,#8f5b4e 100%); }
+  .fill-noon    { background: linear-gradient(160deg,#dfe8d9 0%,#8fae8b 55%,#41604a 100%); }
+  .fill-sunset  { background: linear-gradient(165deg,#f0b98a 0%,#c96f4a 50%,#5c3a3a 100%); }
+  .fill-night   { background: linear-gradient(175deg,#3c4a54 0%,#22303c 55%,#101a22 100%); }
+  .isw-card { position: absolute; top: 0; left: 0; height: 100svh;   /* ЗЛІВА, не справа */
+    width: min(34vw, 480px);
+    display: flex; flex-direction: column;
+    padding: 80px 44px 44px;
+    background: rgba(247, 239, 228, .18);                            /* тепле скло, не чорне */
+    backdrop-filter: blur(34px); -webkit-backdrop-filter: blur(34px);
+    color: #241a12; }
+  .isw-counter { display: flex; justify-content: space-between; align-items: flex-start;
+    margin-top: 3vh; }
+  .isw-counter [data-isw-count] { font-size: clamp(60px, 8vw, 140px); font-style: italic;
+    line-height: .95; color: #241a12; }
+  .isw-counter [data-isw-total] { font-size: 14px; letter-spacing: .2em; color: rgba(36,26,18,.5); }
+  .isw-texts { flex: 1; display: grid; align-content: flex-end; }
+  .isw-texts p { font-size: clamp(15px, 1.3vw, 19px); line-height: 1.45; font-style: italic;
+    color: #4a3a2c; }
+  .isw-texts p strong { color: var(--clay); font-weight: 400; }
+  .isw-nav { display: none; }
+  .isw-card [data-isw-ticks] { color: #241a12; }
+  .isw-card .isw-tick { background: rgba(36,26,18,.18); }
+  @media (max-width: 768px) {
+    .isw-row { height: auto; }
+    [data-isw-stage] { position: static; overflow-x: scroll; overflow-y: hidden; }
+    #isw-terra { --isw-item-w: 100vw; }
+    #isw-terra .isw-row { position: relative; }
+    .isw-strip [data-isw-slide] { height: 56svh; overflow: clip; }
+    .isw-card { position: absolute; z-index: 2;
+      left: 0; right: 0; bottom: 0; top: auto; width: auto; height: auto;
+      margin: 0; padding: 14px 20px 18px; color: #fff;
+      background: rgba(16, 26, 34, .38);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+    .isw-counter { display: none; }
+    .isw-texts { margin-top: 10px; }
+    .isw-texts p { color: rgba(255,255,255,.78); }
+    .isw-texts p strong { color: #f0c9a8; }
+    .isw-card [data-isw-ticks] { color: #fff; }
+    .isw-card .isw-tick { background: rgba(255, 255, 255, .3); }
+  }
+</style>
+</head>
+<body>
+
+<section class="blk">
+  <p class="tag">terra · чотири пори доби</p>
+  <h2 class="big">Один схил,<br>чотири світла</h2>
+  <p class="note" style="margin-top:4vh">Transfer-тест: движок air-iswpin-1 дослівно, фасад чужий:
+  4 слайди-градієнти (у демо — 3 фото), скляна картка зліва (у демо — справа). Скроль —
+  кадри мають гортатися clip-швом, лічильник свапатися на старті руху.</p>
+</section>
+
+<!-- ═══ FULLBLEED PIN-СЛАЙДЕР · 4 слайди, нуль зображень ═══ -->
+<section id="isw-terra">
+  <div data-isw-layer>
+    <div class="isw-row">
+      <div data-isw-stage>
+        <figure data-isw-slide><div class="isw-fill fill-dawn"></div></figure>
+        <figure data-isw-slide><div class="isw-fill fill-noon"></div></figure>
+        <figure data-isw-slide><div class="isw-fill fill-sunset"></div></figure>
+        <figure data-isw-slide><div class="isw-fill fill-night"></div></figure>
+      </div>
+      <div class="isw-card" data-isw-card>
+        <div data-isw-ticks></div>
+        <p class="isw-counter"><span data-isw-count>1</span><span data-isw-total>/ 4</span></p>
+        <div class="isw-texts">
+          <p data-isw-text>Світанок: перший чай на терасі, туман ще <strong>нижче за тебе</strong>.</p>
+          <p data-isw-text class="is-off">Полудень: смерековий ліс тримає тінь навіть у спеку.</p>
+          <p data-isw-text class="is-off">Захід: схил повертає накопичене тепло — <strong>година міді</strong>.</p>
+          <p data-isw-text class="is-off">Ніч: небо без жодного ліхтаря на сорок кілометрів.</p>
+        </div>
+        <div class="isw-nav">
+          <button data-isw-prev aria-label="назад">←</button>
+          <span class="nn"><span data-isw-count>1</span> / 4</span>
+          <button data-isw-next aria-label="далі">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="blk">
+  <p class="note">Кінець тесту. Якщо 4 кадри гортались швом і лічильник жив — движок переноситься
+  (N-генералізація: 4 ≠ 3).</p>
+</section>
+
+<script>
+/* ============================================================
+   IMAGE-SLIDER-WIPE · component.js — ІНЛАЙН-КОПІЯ ДОСЛІВНО
+   з air-isw-fullbleed-pin.html (закон руху живе тут, НЕ у скіні)
+   ============================================================ */
+(function (global) {
+  'use strict';
+  var doc = global.document;
+
+  var FULL = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)';
+  var TOP_LINE = 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)';
+  var BOTTOM_LINE = 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)';
+
+  function toEl(x) { return typeof x === 'string' ? doc.querySelector(x) : x; }
+  function all(root, sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
+  function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+
+
+  function create(section, options) {
+    options = options || {};
+    var root = toEl(section);
+    if (!root) return { error: 'no section' };
+    var layer = root.querySelector('[data-isw-layer]');
+    var stage = root.querySelector('[data-isw-stage]');
+    var slides = all(root, '[data-isw-slide]');
+    if (!layer || !stage || slides.length < 2)
+      return { error: 'потрібні [data-isw-layer], [data-isw-stage], ≥2 [data-isw-slide]' };
+
+    var texts = all(root, '[data-isw-text]');
+    var extras = all(root, '[data-isw-extra]');
+    var counter = root.querySelector('[data-isw-count]');
+    var total = root.querySelector('[data-isw-total]');
+    var ticksBox = root.querySelector('[data-isw-ticks]');
+    var btnPrev = root.querySelector('[data-isw-prev]');
+    var btnNext = root.querySelector('[data-isw-next]');
+
+    var N = slides.length;
+    var opt = {
+      stepSvh: options.stepSvh != null ? options.stepSvh : 85,
+      wipeMs: options.wipeMs != null ? options.wipeMs : 1000,
+      wipeEase: options.wipeEase || 'ease-out',
+      textDelayMs: options.textDelayMs != null ? options.textDelayMs : 250,
+      lineStaggerMs: options.lineStaggerMs != null ? options.lineStaggerMs : 60,
+      blurPx: options.blurPx != null ? options.blurPx : 10,
+      driftPct: options.driftPct != null ? options.driftPct : 16.666,
+      mobile: options.mobile || 'tap',
+      touchMq: options.touchMq || '(pointer: coarse), (max-width: 768px)'
+    };
+    var reduced = global.matchMedia &&
+      global.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var touch = global.matchMedia && global.matchMedia(opt.touchMq).matches;
+    var tapMode = touch && opt.mobile === 'tap';
+
+    var gate = { swaps: 0, lastDir: 0, renders: 0, mode: tapMode ? 'tap' : 'pin' };
+    var idx = 0;
+    var anims = [];
+
+    if (total) total.textContent = '/ ' + N;
+    if (counter) counter.textContent = '1';
+
+    var tickFills = [];
+    if (ticksBox) {
+      ticksBox.innerHTML = '';
+      for (var i = 0; i < N; i++) {
+        var item = doc.createElement('div');
+        item.className = 'isw-tick';
+        var fill = doc.createElement('div');
+        fill.className = 'isw-tick-fill';
+        fill.style.transform = 'translateX(-100%)';
+        item.appendChild(fill);
+        ticksBox.appendChild(item);
+        tickFills.push(fill);
+      }
+    }
+
+    slides.forEach(function (s, i) { if (i) s.classList.add('is-off'); });
+    texts.forEach(function (t, i) { if (i) t.classList.add('is-off'); });
+    extras.forEach(function (x, i) { if (i) x.classList.add('is-off'); });
+
+    function killAnims() {
+      anims.forEach(function (a) { try { a.cancel(); } catch (e) {} });
+      anims = [];
+    }
+
+    function goTo(next, dir) {
+      next = Math.max(0, Math.min(N - 1, next));
+      if (next === idx) return;
+      dir = dir || (next > idx ? 1 : -1);
+      var cur = idx;
+      idx = next;
+      gate.swaps++; gate.lastDir = dir;
+      if (counter) counter.textContent = String(next + 1);
+      root.style.setProperty('--isw-index', String(next));
+      updateNav();
+
+      killAnims();
+      var oldS = slides[cur], newS = slides[next];
+      var oldT = texts[cur], newT = texts[next];
+      var oldX = extras[cur], newX = extras[next];
+      newS.classList.remove('is-off');
+
+      if (reduced || !newS.animate) {
+        slides.forEach(function (s, i) {
+          s.classList.toggle('is-off', i !== next);
+          s.style.clipPath = '';
+        });
+        texts.forEach(function (t, i) { t.classList.toggle('is-off', i !== next); });
+        extras.forEach(function (x, i) { x.classList.toggle('is-off', i !== next); });
+        return;
+      }
+
+      var outClip = dir > 0 ? [FULL, TOP_LINE] : [FULL, BOTTOM_LINE];
+      var inClip = dir > 0 ? [BOTTOM_LINE, FULL] : [TOP_LINE, FULL];
+      var tOut = oldS.animate({ clipPath: outClip },
+        { duration: opt.wipeMs, easing: opt.wipeEase, fill: 'both' });
+      tOut.onfinish = function () { oldS.classList.add('is-off'); oldS.style.clipPath = ''; tOut.cancel(); };
+      var tIn = newS.animate({ clipPath: inClip },
+        { duration: opt.wipeMs, easing: opt.wipeEase, fill: 'both' });
+      tIn.onfinish = function () { newS.style.clipPath = ''; tIn.cancel(); };
+      anims.push(tOut, tIn);
+
+      if (oldT && newT) {
+        var b = opt.blurPx;
+        var aOut = oldT.animate(
+          { filter: ['blur(0px)', 'blur(' + b + 'px)'], opacity: [1, 0] },
+          { duration: opt.wipeMs, easing: 'ease-out', fill: 'both' });
+        aOut.onfinish = function () { oldT.classList.add('is-off'); aOut.cancel(); };
+        anims.push(aOut);
+        newT.classList.remove('is-off');
+        var aIn = newT.animate(
+          { filter: ['blur(' + b + 'px)', 'blur(0px)'], opacity: [0, 1] },
+          { duration: opt.wipeMs, easing: 'ease-out', fill: 'both',
+            delay: opt.textDelayMs });
+        aIn.onfinish = function () { aIn.cancel(); };
+        anims.push(aIn);
+      }
+
+      if (oldX && newX && oldX !== newX) {
+        var fOut = oldX.animate({ opacity: [1, 0] },
+          { duration: 400, easing: 'ease-out', fill: 'both' });
+        fOut.onfinish = function () { oldX.classList.add('is-off'); fOut.cancel(); };
+        newX.classList.remove('is-off');
+        var fIn = newX.animate({ opacity: [0, 1] },
+          { duration: 400, easing: 'ease-out', fill: 'both', delay: opt.textDelayMs });
+        fIn.onfinish = function () { fIn.cancel(); };
+        anims.push(fOut, fIn);
+      }
+    }
+
+    function updateNav() {
+      if (btnPrev) btnPrev.classList.toggle('is-disabled', idx === 0);
+      if (btnNext) btnNext.classList.toggle('is-disabled', idx === N - 1);
+    }
+
+    /* ================= TAP-РЕЖИМ ================= */
+    if (tapMode) {
+      root.classList.add('isw-mode-tap');
+      stage.classList.add('isw-strip');
+      slides.forEach(function (s) { s.classList.remove('is-off'); });
+      updateNav();
+
+      function targetFor(i) {
+        var sr = stage.getBoundingClientRect();
+        var r = slides[i].getBoundingClientRect();
+        var t = stage.scrollLeft + (r.left - sr.left) -
+                (stage.clientWidth - r.width) / 2;
+        return Math.max(0, Math.min(stage.scrollWidth - stage.clientWidth, t));
+      }
+      function nearestIdx() {
+        var best = 0, bestD = Infinity;
+        for (var i = 0; i < N; i++) {
+          var d = Math.abs(targetFor(i) - stage.scrollLeft);
+          if (d < bestD) { bestD = d; best = i; }
+        }
+        return best;
+      }
+      function tap(dir) {
+        var next = Math.max(0, Math.min(N - 1, idx + dir));
+        if (next === idx) return;
+        idx = next;
+        gate.swaps++; gate.lastDir = dir;
+        if (counter) counter.textContent = String(next + 1);
+        updateNav();
+        slides[next].scrollIntoView({ behavior: reduced ? 'auto' : 'smooth',
+                                      block: 'nearest', inline: 'center' });
+      }
+      function onPrev(ev) { ev.preventDefault(); tap(-1); }
+      function onNext(ev) { ev.preventDefault(); tap(1); }
+      if (btnPrev) btnPrev.addEventListener('click', onPrev);
+      if (btnNext) btnNext.addEventListener('click', onNext);
+
+      var tick2 = false;
+      function onStrip() {
+        if (tick2) return;
+        tick2 = true;
+        requestAnimationFrame(function () {
+          tick2 = false;
+          var near = nearestIdx();
+          if (near !== idx) {
+            idx = near;
+            if (counter) counter.textContent = String(near + 1);
+            updateNav();
+          }
+          if (tickFills.length) {
+            var max = stage.scrollWidth - stage.clientWidth;
+            var p = max > 0 ? clamp01(stage.scrollLeft / max) : 0;
+            for (var i = 0; i < N; i++)
+              tickFills[i].style.transform =
+                'translateX(' + (-100 * (1 - clamp01(p * N - i))) + '%)';
+          }
+        });
+      }
+      stage.addEventListener('scroll', onStrip, { passive: true });
+      onStrip();
+
+      return {
+        mode: 'tap', index: function () { return idx; },
+        goTo: function (i) { tap(i - idx); },
+        targetFor: targetFor, gate: gate,
+        destroy: function () {
+          if (btnPrev) btnPrev.removeEventListener('click', onPrev);
+          if (btnNext) btnNext.removeEventListener('click', onNext);
+          stage.removeEventListener('scroll', onStrip);
+          root.classList.remove('isw-mode-tap');
+          stage.classList.remove('isw-strip');
+          killAnims();
+        }
+      };
+    }
+
+    /* ================= PIN-РЕЖИМ ================= */
+    root.classList.add('isw-mode-pin');
+    root.style.minHeight = 'calc(100svh + ' + (N - 1) * opt.stepSvh + 'svh)';
+
+    var driftImgs = opt.driftPct > 0 && !touch && !reduced
+      ? slides.map(function (s) { return s.querySelector('img, .isw-fill'); })
+      : [];
+    if (driftImgs.length && driftImgs.every(Boolean)) root.classList.add('isw-drift');
+    else driftImgs = [];
+    function renderDrift() {
+      if (!driftImgs.length) return;
+      var r = root.getBoundingClientRect();
+      var vh = global.innerHeight;
+      var entry = clamp01((vh - r.top) / vh);
+      var span = Math.max(1, r.height - vh);
+      var sp = clamp01(-r.top / span);
+      var exit = clamp01((sp - 0.8) / 0.2);
+      var ty = Math.max(-opt.driftPct,
+                        -opt.driftPct * ((1 - entry) + exit));
+      gate.driftTy = Math.round(ty * 100) / 100;
+      for (var i = 0; i < driftImgs.length; i++)
+        driftImgs[i].style.transform = 'translateY(' + ty + '%)';
+    }
+
+    function progress() {
+      var r = root.getBoundingClientRect();
+      var span = r.height - global.innerHeight;
+      return span > 0 ? clamp01(-r.top / span) : 0;
+    }
+
+    var lastQ = -1;
+    function render(p) {
+      p = clamp01(p);
+      var q = Math.round(p * 1000);
+      if (q === lastQ) return;
+      lastQ = q;
+      gate.renders++;
+      var want = Math.min(Math.floor(p * N), N - 1);
+      if (want !== idx) {
+        var boundary = (want > idx ? idx + 1 : idx) / N;
+        if (Math.abs(p - boundary) > 0.015) goTo(want, want > idx ? 1 : -1);
+      }
+      for (var i = 0; i < tickFills.length; i++)
+        tickFills[i].style.transform =
+          'translateX(' + (-100 * (1 - clamp01(p * N - i))) + '%)';
+    }
+
+    var ticking = false;
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        render(progress());
+        renderDrift();
+      });
+    }
+    global.addEventListener('scroll', onScroll, { passive: true });
+    render(progress());
+    renderDrift();
+
+    return {
+      mode: 'pin', render: render, progress: progress,
+      index: function () { return idx; }, goTo: goTo, gate: gate,
+      destroy: function () {
+        global.removeEventListener('scroll', onScroll);
+        killAnims();
+        root.classList.remove('isw-mode-pin');
+        root.style.minHeight = '';
+      }
+    };
+  }
+
+  global.ImageSliderWipe = { create: create };
+}(window));
+
+/* ---- init transfer-тесту ---- */
+(function () {
+  'use strict';
+  window.__ISW = window.ImageSliderWipe.create('#isw-terra', { mobile: 'tap' });
+}());
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch 4 · AIR track — prototype index</title>
+<style>
+  :root{
+    --bg:#f2efe8; --ink:#181510; --accent:#9a6a44;
+    --ink-70:rgba(24,21,16,.70); --ink-45:rgba(24,21,16,.45); --ink-25:rgba(24,21,16,.25);
+    --line:rgba(24,21,16,.13);
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--grot);-webkit-font-smoothing:antialiased;
+    line-height:1.5;
+    background-image:
+      radial-gradient(120% 70% at 88% -8%, rgba(154,106,68,.08), rgba(154,106,68,0) 55%),
+      radial-gradient(90% 60% at 4% 108%, rgba(60,80,110,.05), rgba(60,80,110,0) 60%)}
+  a{color:inherit;text-decoration:none}
+  .grain{position:fixed;inset:0;opacity:.05;mix-blend-mode:multiply;pointer-events:none;z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .ghost{position:fixed;right:-2vw;top:2vh;font-family:var(--serif);font-size:min(64vh,720px);line-height:.8;
+    color:var(--ink);opacity:.035;pointer-events:none;user-select:none;z-index:0}
+
+  .wrap{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 40px}
+
+  header{display:flex;align-items:baseline;justify-content:space-between;gap:24px;
+    padding:34px 0 0;border-bottom:1px solid var(--line);padding-bottom:22px}
+  .mark{font-family:var(--serif);font-size:26px;letter-spacing:.02em}
+  .meta{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-45)}
+
+  .intro{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:end;padding:9vh 0 7vh}
+  .intro .ey{font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+  .intro h1{font-family:var(--serif);font-weight:400;font-size:clamp(40px,6vw,84px);line-height:.98;
+    letter-spacing:-.015em;text-wrap:balance}
+  .intro p{font-size:14.5px;line-height:1.75;color:var(--ink-70);max-width:42ch;text-wrap:pretty}
+  .intro .sub{margin-top:16px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-45)}
+
+  .group{padding:0 0 6vh}
+  .ghead{display:flex;align-items:baseline;gap:20px;border-top:1px solid var(--line);padding-top:20px;margin-bottom:26px;flex-wrap:wrap}
+  .ghead .gi{font-family:var(--serif);font-size:16px;color:var(--ink-45);font-variant-numeric:tabular-nums}
+  .ghead .gt{font-family:var(--serif);font-size:23px;letter-spacing:.01em;flex:0 0 auto}
+  .ghead .gl{font-size:12.5px;line-height:1.6;color:var(--ink-70);max-width:64ch;margin-left:auto;text-wrap:pretty}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:230px;
+    background:linear-gradient(160deg, rgba(255,255,255,.5), rgba(255,255,255,.16));
+    border:1px solid var(--line);border-radius:5px;padding:20px 20px 18px;
+    box-shadow:0 30px 50px -34px rgba(50,36,22,.4);
+    transition:transform .3s cubic-bezier(.25,.74,.22,.99),box-shadow .3s ease,border-color .3s ease}
+  .card:hover{transform:translateY(-4px);border-color:var(--ink-25);box-shadow:0 40px 66px -34px rgba(50,36,22,.5)}
+  .card .top{display:flex;align-items:flex-start;justify-content:space-between}
+  .card .badge{font-size:10px;letter-spacing:.26em;color:var(--ink-45);font-variant-numeric:tabular-nums}
+  .card .sw{display:flex;gap:5px}
+  .card .sw i{width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+  .card .name{font-family:var(--serif);font-size:34px;letter-spacing:.01em;line-height:1;margin-top:26px}
+  .card .tag{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-45);margin-top:10px}
+  .card .facade{font-size:12.5px;line-height:1.55;color:var(--ink-70);margin-top:14px;text-wrap:pretty}
+  .card .open{display:flex;align-items:center;gap:9px;margin-top:20px;padding-top:14px;border-top:1px solid var(--line);
+    font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent)}
+  .card .open .ar{transition:transform .3s cubic-bezier(.25,.74,.22,.99)}
+  .card:hover .open .ar{transform:translate(4px,-4px)}
+
+  footer{border-top:1px solid var(--line);margin-top:4vh;padding:26px 0 44px;display:flex;
+    justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+  footer .fl{font-size:12px;line-height:1.6;color:var(--ink-70);max-width:60ch;text-wrap:pretty}
+  footer .fr{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-45);white-space:nowrap}
+
+  @media (max-width:920px){
+    .intro{grid-template-columns:1fr;gap:24px}
+    .cards{grid-template-columns:1fr}
+    .ghead .gl{margin-left:0;flex-basis:100%}
+  }
+  @media (prefers-reduced-motion: reduce){*{transition-duration:0s !important;animation-duration:0s !important}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="ghost">4</div>
+
+<div class="wrap">
+  <header>
+    <div class="mark">CD·RUN <span style="color:var(--ink-45)">/ Batch 04</span></div>
+    <div class="meta">AIR track · 3 acts × 3 facades</div>
+  </header>
+
+  <section class="intro">
+    <div>
+      <div class="ey">Prototype index</div>
+      <h1>Nine prototypes. Three motions. One rulebook.</h1>
+    </div>
+    <div>
+      <p>Each act is built three times. The motion law is byte-identical across a, b and c — only the facade changes: palette, type and composition. Open any card to run it.</p>
+      <div class="sub">Self-contained · pointer &amp; scroll · reduced-motion safe</div>
+    </div>
+  </section>
+
+  <div id="groups"></div>
+
+  <footer>
+    <div class="fl">Every prototype is a single self-contained file — no libraries, no build. Debug hooks are exposed on <code>window</code> (<code>__FSELECT</code>, <code>__PLAN</code>, <code>__PUSHC</code>).</div>
+    <div class="fr">CD·RUN — AIR track — Batch 04</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var GROUPS=[
+    { gi:"01", gt:"Floor select",
+      gl:"Hover a tower and its floor plates scan in bottom-to-top; a fixed anchored card reads that floor's units; a click locks the selection.",
+      cards:[
+        {id:"1a",name:"DUNE",tag:"Warm sand · dusk · serif",file:"air-b4-floor-select-a.html",sw:["#e9e2d4","#171512","#a3684a"]},
+        {id:"1b",name:"NORD",tag:"Cold paper · day · grotesque",file:"air-b4-floor-select-b.html",sw:["#eef0f2","#10141a","#2f5d8a"]},
+        {id:"1c",name:"ONYX",tag:"Night scene · lit glass",file:"air-b4-floor-select-c.html",sw:["#101110","#f0ede6","#c9a35e"]}
+      ]},
+    { gi:"02", gt:"Plan popover",
+      gl:"The plan settles from a rotated, dimmed state into place; hovering a unit opens a popover with a drawn mini-plan; the ladder swaps floors under a paper veil.",
+      cards:[
+        {id:"2a",name:"ATELIER",tag:"Warm paper · blueprint-thin",file:"air-b4-plan-popover-a.html",sw:["#f2efe8","#15130f","#8a5a34"]},
+        {id:"2b",name:"TECHNIC",tag:"Cool white · mono · dotted",file:"air-b4-plan-popover-b.html",sw:["#f4f6f7","#0f1317","#39627f"]},
+        {id:"2c",name:"GALLERY",tag:"Green-black · floating sheet",file:"air-b4-plan-popover-c.html",sw:["#12160f","#ece9df","#b8a457"]}
+      ]},
+    { gi:"03", gt:"Push carousel",
+      gl:"One pinned scene, pure scrub: scroll pushes each full-bleed slide up over the last while a fixed glass caption swaps its number and copy with overlap.",
+      cards:[
+        {id:"3a",name:"MERIDIAN",tag:"Warm dusk · serif",file:"air-b4-push-carousel-a.html",sw:["#141210","#efe4d3","#d9a05b"]},
+        {id:"3b",name:"FRAME",tag:"Light editorial · thin rules",file:"air-b4-push-carousel-b.html",sw:["#e8e6e0","#22252a","#4a6b8a"]},
+        {id:"3c",name:"VELVET",tag:"Green-noir · hairline grid",file:"air-b4-push-carousel-c.html",sw:["#0f1512","#e9e8dd","#c2b06a"]}
+      ]}
+  ];
+  var root=document.getElementById("groups"), html="";
+  GROUPS.forEach(function(g){
+    html+='<section class="group"><div class="ghead"><span class="gi">'+g.gi+'</span>'+
+      '<span class="gt">'+g.gt+'</span><span class="gl">'+g.gl+'</span></div><div class="cards">';
+    g.cards.forEach(function(c){
+      var sw=c.sw.map(function(x){return '<i style="background:'+x+'"></i>';}).join("");
+      html+='<a class="card" href="'+c.file+'"><div class="top"><span class="badge">'+c.id+
+        '</span><span class="sw">'+sw+'</span></div>'+
+        '<div><div class="name">'+c.name+'</div><div class="tag">'+c.tag+'</div></div>'+
+        '<div class="open">Open prototype <span class="ar">↗</span></div></a>';
+    });
+    html+='</div></section>';
+  });
+  root.innerHTML=html;
+})();
+</script>
+</body>
+</html>

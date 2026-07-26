@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIR batch 1v2 — all prototypes</title>
+<style>
+  :root{--bg:#0d1117; --ink:#f2f1ee; --dim:rgba(242,241,238,.55); --accent:#d9a066; --hair:rgba(242,241,238,.1);
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif; --serif:"Didot","Bodoni MT",Georgia,serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--bg); color:var(--ink); font-family:var(--grot); display:flex; flex-direction:column}
+  header{display:flex; align-items:baseline; gap:26px; padding:14px 24px; border-bottom:1px solid var(--hair); flex-wrap:wrap}
+  header .t{font-family:var(--serif); font-size:17px; letter-spacing:.12em}
+  nav{display:flex; gap:6px; flex-wrap:wrap}
+  nav button{all:unset; cursor:pointer; font-size:10px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--dim); padding:8px 14px; border-radius:999px; transition:color .25s, background .25s}
+  nav button:hover{color:var(--ink)}
+  nav button.on{color:var(--accent); background:rgba(217,160,102,.1)}
+  main{flex:1; position:relative}
+  iframe{position:absolute; inset:0; width:100%; height:100%; border:0; background:#0d1117; display:none}
+  iframe.on{display:block}
+</style>
+</head>
+<body>
+<header>
+  <span class="t">AIR · BATCH 1v2</span>
+  <nav id="nav">
+    <button data-f="air-b1v2-route-time.html" class="on">01 · Delta route</button>
+    <button data-f="air-b1v2-aerial-zones.html">02 · Nord aerial</button>
+    <button data-f="air-b1v2-comfort-pin.html">03 · Onsen comfort</button>
+    <button data-f="air-b1v2-plan-poi.html">04 · Terreno plan</button>
+    <button data-f="air-b1v2-plus-toggle.html">05 · Cima ✛</button>
+  </nav>
+</header>
+<main id="main"></main>
+<script>
+(function(){
+  "use strict";
+  var btns=Array.prototype.slice.call(document.querySelectorAll('#nav button'));
+  var main=document.getElementById('main');
+  var frames={};
+  function show(f){
+    btns.forEach(function(b){b.classList.toggle('on',b.dataset.f===f)});
+    Object.keys(frames).forEach(function(k){frames[k].classList.toggle('on',k===f)});
+    if(!frames[f]){
+      var fr=document.createElement('iframe');
+      fr.src=f; fr.className='on'; frames[f]=fr; main.appendChild(fr);
+    }
+    try{ localStorage.setItem('air-b1v2-all-tab', f); }catch(e){}
+  }
+  btns.forEach(function(b){ b.addEventListener('click',function(){show(b.dataset.f)}); });
+  var saved=null;
+  try{ saved=localStorage.getItem('air-b1v2-all-tab'); }catch(e){}
+  show(saved && btns.some(function(b){return b.dataset.f===saved}) ? saved : btns[0].dataset.f);
+})();
+</script>
+</body>
+</html>
