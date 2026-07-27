@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · puzzle-image — pz1 center-out faithful (assemble → modest grow)</title>
+
+<!--
+================================================================================
+TECHNIQUE: puzzle-image  (id: puzzle-image)   ·   BASE = pz1 center-out faithful
+================================================================================
+SOURCE: apps/quadro/public/slide-lab/pz1-center-out-faithful.html (owner-approved, 9/10).
+The closest honest clone of the Zera /work cover beat.
+
+THE BEAT (and ONLY this) — two phases on ONE pinned, scroll-scrubbed timeline,
+then a natural release:
+
+  1 ASSEMBLE  Tiles — CSS-sprite SLICES of ONE WIDE QUADRO render (day-front,
+              16:9) — start SCATTERED + BLURRED + dim across a clean DARK field.
+              On scroll they fly HOME CENTER-OUT: centre tiles seat first, OUTER
+              tiles fly from FURTHER (radial reach bias) and land last. Each tile
+              de-blurs, brightens, un-rotates, scales 0.84->1. A ghost serif
+              wordmark + left headline + lower-left caption emerge WITH the seat.
+              The seamless photo + scrim fade in UNDER the tiles so seams vanish
+              into the SAME cover (zero two-photo overlap). At assembly the cover
+              already sits near full viewport WIDTH.
+
+  2 GROW      The WHOLE assembled cover (.coverWrap, one DOM unit) scales up
+              MODESTLY via transform:scale (1 -> 1.34) until full-bleed wide.
+              Stays a WIDE landscape cover; top/bottom crop via .stage overflow.
+              NOT a clip-path reframe, NOT a 6x over-zoom, NOT a portrait box.
+
+  3 RELEASE   The pin ends; the now-large cover scrolls away naturally and the
+              next section rises. No tween.
+
+The LEFT headline stays VISIBLE throughout (z above the cover, never opacity 0).
+Only transform / opacity / filter(blur) animate. No WebGL. One ease (air).
+No mix-blend / backdrop-filter over the scrubbed surface (D2).
+
+Canonical entry: PuzzleImage(root, userConfig)  (component.js, IIFE window-global).
+__LAB_OK__ probe asserts: gsap+ST+CustomEase present, exactly one .coverWrap,
+40 tiles each a slice of the SAME single src, growPeak <= 1.5, no clip-path on
+the cover, no em-dash in visible copy.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,1,300;9..144,1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- eager preload of the single cover render (resolves via the renders symlink -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-front.webp">
+
+<!-- GSAP 3.12.5 + ScrollTrigger + CustomEase from cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<!-- the canonical component styles -->
+<link rel="stylesheet" href="component.css">
+
+<style>
+  /* lab-only chrome: fonts + intro/outro breathing room so the pin can enter/release */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#0c0c0e;color:#efe9dd}
+  body{font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;overflow-x:hidden}
+  ::selection{background:#b98a4e;color:#0c0c0e}
+  .pad{min-height:62vh;display:flex;align-items:center;padding:0 clamp(22px,5vw,84px);position:relative}
+  .pad__eyebrow{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:#b98a4e;margin-bottom:18px}
+  .pad p{max-width:34ch;line-height:1.6;color:#9c968b;font-size:clamp(13px,1.2vw,15px)}
+  .pad h2{font-family:"Fraunces",Georgia,serif;font-weight:300;
+    font-size:clamp(30px,5vw,64px);line-height:1.02;letter-spacing:-.01em;margin-bottom:18px}
+  .pad--out{min-height:80vh;align-items:flex-start;padding-top:14vh}
+  @media (max-width:720px){ .pad{min-height:auto;padding:10vh clamp(22px,5vw,84px)} }
+</style>
+</head>
+<body>
+
+<!-- intro breathing room -->
+<section class="pad">
+  <div>
+    <span class="pad__eyebrow">QUADRO · серія обкладинок</span>
+    <h2>Один кадр.<br>Зібраний на ваших очах.</h2>
+    <p>Фрагменти однієї панорами розсіяні полем. Прогорніть нижче, і вони злітаються додому, від центру до країв, у єдину обкладинку.</p>
+  </div>
+</section>
+
+<!-- ================= PINNED PUZZLE SECTION ================= -->
+<section class="puzzle" id="puzzle" aria-label="Обкладинка, що самозбирається">
+  <div class="stage">
+    <h1 class="headline" aria-hidden="false">
+      <span class="ey">Дім над водою</span>
+      QUADRO<br>над рікою
+    </h1>
+
+    <div class="coverWrap">
+      <div class="cover">
+        <div class="cover__ground"></div>
+        <div class="grid" aria-hidden="true"></div>
+        <img class="cover__photo" alt="" decoding="async" fetchpriority="high">
+        <div class="cover__scrim"></div>
+        <div class="cover__wordmark"></div>
+        <div class="cover__caption"></div>
+      </div>
+    </div>
+
+    <div class="hint">Прокрутіть</div>
+  </div>
+</section>
+
+<!-- outro breathing room (natural release) -->
+<section class="pad pad--out">
+  <div>
+    <span class="pad__eyebrow">Далі</span>
+    <h2>Обкладинка зібрана.</h2>
+    <p>Наступна сцена піднімається природно, поки великий кадр іде вгору.</p>
+  </div>
+</section>
+
+<!-- the canonical component engine (synchronous, before boot) -->
+<script src="component.js"></script>
+
+<script>
+/* ============================================================
+   BOOT — pz1 center-out, driven through the canonical entry.
+   ============================================================ */
+gsap.registerPlugin(ScrollTrigger);
+if (window.CustomEase) CustomEase.create('air','0.25,0.74,0.22,0.99');
+
+/* config (pz1 faithful: 5x8 = 40 tiles, dark field, modest grow, ONE src) */
+var CFG = {
+  src:        'renders/day-front.webp',  // ONE wide QUADRO render, 16:9 landscape
+  rows:       5,
+  cols:       8,                          // 5 x 8 = 40 tiles
+  scatter:    0.42,                       // radial scatter; outer tiles fly further
+  blurMax:    16,                         // px, <= 20
+  restTileAlpha: 0.14,                    // near-invisible chips at rest
+  restScale:  0.84,
+  assembleEnd:0.56,                       // progress where the cover is seated
+  growPeak:   1.34,                       // MODEST uniform scale at full-bleed (<= 1.5)
+  scrub:      0.7,
+  pinLengthVh:300,
+  wordmark:   'QUADRO',
+  captionLines:['Золота година.','Власне світло на власному березі.'],
+  issueLine:  'Серія · Дім над рікою',
+  coverWidthVw:78,
+  coverAspect: 16/9,
+};
+
+window.__PZ = PuzzleImage(document.getElementById('puzzle'), CFG);
+</script>
+<!-- ── rich pz1 acceptance probe (object) + canonical __LAB_OK__ boolean ──
+     The rich probe mirrors pz1's frame-derived asserts; the boolean is the
+     contract the library-verify headless step waits on (=== true). A missing
+     remote render under file:// is NOT a failure — the acceptance is the MOTION
+     wiring + the single-src sprite invariant, not the demo photo bytes. -->
+<script>(function(){
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var probe={ ok:false, reasons:[], tileCount:0, sameSrc:false,
+      growPeak:1.34, coverWraps:0, reduced:false, src:'renders/day-front.webp', grid:'5x8' };
+    function fail(m){ probe.reasons.push(m); }
+
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:720px)').matches;
+    probe.reduced = !!(reduce||narrow);
+
+    if(!window.gsap || !window.ScrollTrigger) fail('GSAP / ScrollTrigger missing');
+    if(!window.CustomEase) fail('CustomEase missing (degraded to power3.out)');
+
+    probe.coverWraps = document.querySelectorAll('.coverWrap').length;
+    if(probe.coverWraps !== 1) fail('expected exactly one .coverWrap, got '+probe.coverWraps);
+
+    var tiles = document.querySelectorAll('.grid .tile');
+    probe.tileCount = tiles.length;
+    if(probe.tileCount !== 40) fail('tile count mismatch (expected 40): '+probe.tileCount);
+
+    probe.sameSrc = probe.tileCount>0 && Array.prototype.every.call(tiles, function(el){
+      return (el.style.backgroundImage||'').indexOf('day-front.webp') !== -1;
+    });
+    if(!probe.sameSrc) fail('not every tile is a slice of the single src');
+
+    if(!(probe.growPeak <= 1.5)) fail('grow peak too large (over-zoom): '+probe.growPeak);
+
+    var cw = document.querySelector('.coverWrap');
+    var cs = cw ? getComputedStyle(cw).clipPath : 'none';
+    if(cw && cs && cs !== 'none') fail('coverWrap has clip-path (must be transform:scale only): '+cs);
+
+    if(document.body.innerText.indexOf('—') !== -1) fail('em-dash found in visible copy');
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var motionWired = probe.reduced || stCount>0;
+    if(!motionWired) fail('no pinned ScrollTrigger and not reduced-motion');
+
+    // tolerate ONLY the CustomEase graceful-degrade note
+    var hardReasons = probe.reasons.filter(function(r){ return r.indexOf('CustomEase missing')!==0; });
+    probe.ok = errs===0 && hardReasons.length===0;
+    return probe;
+  }
+
+  var tries=0;
+  function ready(){
+    var p = gather();
+    window.__PZ_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
+})();</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · oval-mask-reveal · r1864 (an arched/oval mask animates open — slit → arch — revealing a photo; media parallaxes, kicker + serif title settle)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · oval-mask-reveal
+================================================================================
+  r1864's section media-reveal — an ARCHED / OVAL mask over a photo that REVEALS by ANIMATING
+  the mask GEOMETRY on enter: a thin centred SLIT GROWS into a full arch (rounded top + soft
+  oval bottom), unveiling the photo; the media parallaxes inside; a kicker + serif title settle.
+  Distinct from oval-mask (EVER, STATIC shape). Harvested from D_r1864 (r18644 /location
+  ОКРУЖЕНИЕ + heritage arched-window imagery). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#211c1b; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:#e7e2d6;font-family:'Inter',system-ui,sans-serif}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--paper);opacity:.5;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .omr-stage{ --omr-bg:#211c1b; --omr-ink:#e7e2d6;
+    --omr-serif:'Playfair Display',Georgia,serif; --omr-sans:'Inter',sans-serif;
+    --omr-title:3vw; --omr-w:44vw; --omr-h:76vh; --omr-arch-top:48%; --omr-arch-bottom:14%; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — арочна маска розкривається: вузька щілина → повна арка, фото проявляється + параллакс; кікер + serif-заголовок</div>
+
+  <section class="omr-stage" id="okruzhenie">
+    <div class="omr-frame">
+      <div class="omr-media"><img src="renders/night-front.webp" alt=""></div>
+    </div>
+    <div class="omr-kicker">В сердце исторического центра</div>
+    <h2 class="omr-title">Окружение</h2>
+  </section>
+
+  <div class="spacer">окружение — показано</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__omr = OvalMaskReveal.create('#okruzhenie', { start:'top 76%', archTop:48, archBottom:14, mediaScaleFrom:1.12, parallax:6, duration:1.1, ease:'power3.out', once:true, pin:false, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

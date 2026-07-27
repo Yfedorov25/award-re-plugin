@@ -1,0 +1,851 @@
+{
+  "tool": "zone-track.mjs",
+  "version": 1,
+  "ts": "2026-07-26T19:38:14.213Z",
+  "video": "carousel-live.mp4",
+  "videoSha": "a9dd4490354e593c07c1a891eb2bba0b698641cc24747d754062a3288a1434d7",
+  "zonesSha": "1f503a084b6b328f21bd30a000124cbe39e2e64c858dd0afb41315a79ad7f036",
+  "fps": 12,
+  "frames": 384,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "cuts": {
+    "topPct": 5.5,
+    "botPct": 11.4
+  },
+  "zones": [
+    {
+      "id": "slide",
+      "rectPct": [
+        3,
+        10,
+        97,
+        55
+      ],
+      "note": "область слайда, де живе ВАЙП: наступний слайд відкривається жорстким вертикальним швом справа наліво. Верх смуги 10% щоб не залазити під хедер Springs.",
+      "kind": "media",
+      "_kind_src": "🔴 kind:'media' НЕ на око: atom-probe знайшов 22 ЧАСОВІ клітинки в рядках 1,2,5,6,7,8 (вміст живе при НЕРУХОМІЙ сторінці) ⇒ у слайдах ВІДЕО. Без kind:'media' кожна монтажна склейка читалась би як SWAPS-CONTENT."
+    },
+    {
+      "id": "caption",
+      "rectPct": [
+        3,
+        62,
+        97,
+        82
+      ],
+      "note": "смуга табів (POOL · FITNESS · BEAUTY · HAMMAM) плюс підпис станції і абзац під ним. Підміняється на ВСТАНОВЛЕНОМУ індексі, тобто після доводчика, а не посеред вайпу.",
+      "kind": "text"
+    }
+  ],
+  "liveScope": {
+    "range": [
+      0.34,
+      0.9
+    ],
+    "src": "🔴 запис НЕ обрізаний до тіла атома, і це видно покадрово. До f130 (0.34) на екрані ще ПОПЕРЕДНЯ секція (yoga-текст і фото), після f345 (0.90) знизу вже заїжджає НАСТУПНА («Riverside Promenade at Your Doorstep»). Саме цей шов давав UNKNOWN на caption f347-357 («сигнали суперечать», conf 0.46): екстрактор чесно не міг назвати подію, бо там не подія атома, а зміна секції. Межі взяті з кадрів, не вгадані."
+  },
+  "scopeFrames": [
+    131,
+    346
+  ],
+  "windows": {
+    "slide": [
+      {
+        "f0": 63,
+        "f1": 71
+      },
+      {
+        "f0": 100,
+        "f1": 113
+      },
+      {
+        "f0": 118,
+        "f1": 131
+      },
+      {
+        "f0": 139,
+        "f1": 143
+      },
+      {
+        "f0": 150,
+        "f1": 157
+      },
+      {
+        "f0": 173,
+        "f1": 187
+      },
+      {
+        "f0": 198,
+        "f1": 205
+      },
+      {
+        "f0": 224,
+        "f1": 239
+      },
+      {
+        "f0": 250,
+        "f1": 266
+      },
+      {
+        "f0": 271,
+        "f1": 290
+      },
+      {
+        "f0": 295,
+        "f1": 312
+      },
+      {
+        "f0": 324,
+        "f1": 340
+      },
+      {
+        "f0": 347,
+        "f1": 374
+      }
+    ],
+    "caption": [
+      {
+        "f0": 20,
+        "f1": 37
+      },
+      {
+        "f0": 54,
+        "f1": 71
+      },
+      {
+        "f0": 100,
+        "f1": 113
+      },
+      {
+        "f0": 118,
+        "f1": 132
+      },
+      {
+        "f0": 139,
+        "f1": 159
+      },
+      {
+        "f0": 347,
+        "f1": 357
+      }
+    ]
+  },
+  "verdicts": [
+    {
+      "zone": "caption",
+      "f0": 20,
+      "f1": 37,
+      "numbers": {
+        "driftPct": -16,
+        "pagePct": 0,
+        "confMin": 0.15,
+        "changedFrac": 0.92,
+        "bandsFrac": 0.21,
+        "gridDist": 48.4,
+        "ink": [
+          39,
+          30,
+          72
+        ],
+        "texVar": [
+          1155,
+          1589
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.91,
+          "dPx": -69
+        },
+        "pageLocked": null
+      },
+      "verdict": "STANDS"
+    },
+    {
+      "zone": "slide",
+      "f0": 32,
+      "f1": 143,
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "numbers": {
+        "front": "bottom",
+        "frontEnd": 1,
+        "frontStart": 0.08,
+        "growth": 0.92,
+        "accumulated": true,
+        "zoomK": 1.43,
+        "zoomDScale": 15.2,
+        "zoomGain": 2.3
+      },
+      "enterMerged": 3
+    },
+    {
+      "zone": "caption",
+      "f0": 54,
+      "f1": 71,
+      "numbers": {
+        "driftPct": -25,
+        "pagePct": 0,
+        "confMin": 0.67,
+        "changedFrac": 0.82,
+        "bandsFrac": 0.46,
+        "gridDist": 46.2,
+        "ink": [
+          72,
+          72,
+          84
+        ],
+        "texVar": [
+          1589,
+          1463
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 25
+    },
+    {
+      "zone": "caption",
+      "f0": 100,
+      "f1": 113,
+      "numbers": {
+        "driftPct": -7.6,
+        "pagePct": -15.7,
+        "confMin": 0.87,
+        "changedFrac": 0.94,
+        "bandsFrac": 0.83,
+        "gridDist": 84.2,
+        "ink": [
+          84,
+          49,
+          49
+        ],
+        "texVar": [
+          1433,
+          863
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -40
+        },
+        "pageLocked": "5.8<84.2"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 7.6
+    },
+    {
+      "zone": "caption",
+      "f0": 118,
+      "f1": 132,
+      "numbers": {
+        "driftPct": -4.5,
+        "pagePct": -11.7,
+        "confMin": 0.82,
+        "changedFrac": 0.72,
+        "bandsFrac": 0.42,
+        "gridDist": 48.4,
+        "ink": [
+          47,
+          18,
+          22
+        ],
+        "texVar": [
+          850,
+          408
+        ],
+        "front": "top",
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -27
+        },
+        "pageLocked": "2.2<48.4"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 4.5
+    },
+    {
+      "zone": "caption",
+      "f0": 139,
+      "f1": 159,
+      "numbers": {
+        "driftPct": -1,
+        "pagePct": -1.7,
+        "confMin": 0.79,
+        "changedFrac": 0.23,
+        "bandsFrac": 0,
+        "gridDist": 9.2,
+        "ink": [
+          22,
+          22,
+          25
+        ],
+        "texVar": [
+          408,
+          411
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "3.9<9.2"
+      },
+      "verdict": "STANDS"
+    },
+    {
+      "zone": "slide",
+      "f0": 150,
+      "f1": 157,
+      "numbers": {
+        "driftPct": 4.8,
+        "pagePct": 4.5,
+        "confMin": 0.97,
+        "changedFrac": 0.7,
+        "bandsFrac": 0,
+        "gridDist": 26.2,
+        "ink": [
+          183,
+          183,
+          189
+        ],
+        "texVar": [
+          1445,
+          1592
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "2.6<26.2"
+      },
+      "verdict": "TRAVELS",
+      "dir": "down",
+      "movePct": 4.8
+    },
+    {
+      "zone": "slide",
+      "f0": 173,
+      "f1": 187,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.98,
+        "changedFrac": 0.32,
+        "bandsFrac": 0,
+        "gridDist": 7,
+        "ink": [
+          189,
+          189,
+          189
+        ],
+        "texVar": [
+          1829,
+          1686
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "STANDS"
+    },
+    {
+      "zone": "slide",
+      "f0": 198,
+      "f1": 239,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.7,
+        "changedFrac": 0.89,
+        "bandsFrac": 1,
+        "gridDist": 65.8,
+        "ink": [
+          189,
+          189,
+          189
+        ],
+        "texVar": [
+          2137,
+          2366
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "enterMerged": 1
+    },
+    {
+      "zone": "slide",
+      "f0": 250,
+      "f1": 266,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.43,
+        "changedFrac": 0.83,
+        "bandsFrac": 0.96,
+        "gridDist": 46.5,
+        "ink": [
+          189,
+          174,
+          174
+        ],
+        "texVar": [
+          2172,
+          1561
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 0.75
+    },
+    {
+      "zone": "slide",
+      "f0": 271,
+      "f1": 290,
+      "numbers": {
+        "driftPct": 0.2,
+        "pagePct": 0,
+        "confMin": 0.83,
+        "changedFrac": 0.83,
+        "bandsFrac": 0.96,
+        "gridDist": 46.5,
+        "ink": [
+          173,
+          173,
+          189
+        ],
+        "texVar": [
+          1556,
+          2170
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 0.75
+    },
+    {
+      "zone": "slide",
+      "f0": 295,
+      "f1": 312,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.82,
+        "changedFrac": 0.89,
+        "bandsFrac": 1,
+        "gridDist": 77.5,
+        "ink": [
+          189,
+          181,
+          189
+        ],
+        "texVar": [
+          2171,
+          2357
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1
+    },
+    {
+      "zone": "slide",
+      "f0": 324,
+      "f1": 374,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.92,
+        "changedFrac": 0.89,
+        "bandsFrac": 1,
+        "gridDist": 71.5,
+        "ink": [
+          189,
+          189,
+          189
+        ],
+        "texVar": [
+          2353,
+          1649
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "enterMerged": 1
+    },
+    {
+      "zone": "caption",
+      "f0": 347,
+      "f1": 357,
+      "numbers": {
+        "driftPct": -19,
+        "pagePct": -31.7,
+        "confMin": 0.46,
+        "changedFrac": 0.53,
+        "bandsFrac": 0.38,
+        "gridDist": 16,
+        "ink": [
+          24,
+          14,
+          52
+        ],
+        "texVar": [
+          389,
+          690
+        ],
+        "front": null,
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -88
+        },
+        "pageLocked": "14.8<16"
+      },
+      "verdict": "UNKNOWN",
+      "reason": "сигнали суперечать: drift=-19.0% conf=0.46 bands=0.38 grid=16.0 front=null ink=24→14→52"
+    }
+  ],
+  "verdictsScoped": [
+    {
+      "zone": "slide",
+      "f0": 32,
+      "f1": 143,
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "numbers": {
+        "front": "bottom",
+        "frontEnd": 1,
+        "frontStart": 0.08,
+        "growth": 0.92,
+        "accumulated": true,
+        "zoomK": 1.43,
+        "zoomDScale": 15.2,
+        "zoomGain": 2.3
+      },
+      "enterMerged": 3
+    },
+    {
+      "zone": "caption",
+      "f0": 118,
+      "f1": 132,
+      "numbers": {
+        "driftPct": -4.5,
+        "pagePct": -11.7,
+        "confMin": 0.82,
+        "changedFrac": 0.72,
+        "bandsFrac": 0.42,
+        "gridDist": 48.4,
+        "ink": [
+          47,
+          18,
+          22
+        ],
+        "texVar": [
+          850,
+          408
+        ],
+        "front": "top",
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -27
+        },
+        "pageLocked": "2.2<48.4"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 4.5
+    },
+    {
+      "zone": "caption",
+      "f0": 139,
+      "f1": 159,
+      "numbers": {
+        "driftPct": -1,
+        "pagePct": -1.7,
+        "confMin": 0.79,
+        "changedFrac": 0.23,
+        "bandsFrac": 0,
+        "gridDist": 9.2,
+        "ink": [
+          22,
+          22,
+          25
+        ],
+        "texVar": [
+          408,
+          411
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "3.9<9.2"
+      },
+      "verdict": "STANDS"
+    },
+    {
+      "zone": "slide",
+      "f0": 150,
+      "f1": 157,
+      "numbers": {
+        "driftPct": 4.8,
+        "pagePct": 4.5,
+        "confMin": 0.97,
+        "changedFrac": 0.7,
+        "bandsFrac": 0,
+        "gridDist": 26.2,
+        "ink": [
+          183,
+          183,
+          189
+        ],
+        "texVar": [
+          1445,
+          1592
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "2.6<26.2"
+      },
+      "verdict": "TRAVELS",
+      "dir": "down",
+      "movePct": 4.8
+    },
+    {
+      "zone": "slide",
+      "f0": 173,
+      "f1": 187,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.98,
+        "changedFrac": 0.32,
+        "bandsFrac": 0,
+        "gridDist": 7,
+        "ink": [
+          189,
+          189,
+          189
+        ],
+        "texVar": [
+          1829,
+          1686
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "STANDS"
+    },
+    {
+      "zone": "slide",
+      "f0": 198,
+      "f1": 239,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.7,
+        "changedFrac": 0.89,
+        "bandsFrac": 1,
+        "gridDist": 65.8,
+        "ink": [
+          189,
+          189,
+          189
+        ],
+        "texVar": [
+          2137,
+          2366
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "enterMerged": 1
+    },
+    {
+      "zone": "slide",
+      "f0": 250,
+      "f1": 266,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.43,
+        "changedFrac": 0.83,
+        "bandsFrac": 0.96,
+        "gridDist": 46.5,
+        "ink": [
+          189,
+          174,
+          174
+        ],
+        "texVar": [
+          2172,
+          1561
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 0.75
+    },
+    {
+      "zone": "slide",
+      "f0": 271,
+      "f1": 290,
+      "numbers": {
+        "driftPct": 0.2,
+        "pagePct": 0,
+        "confMin": 0.83,
+        "changedFrac": 0.83,
+        "bandsFrac": 0.96,
+        "gridDist": 46.5,
+        "ink": [
+          173,
+          173,
+          189
+        ],
+        "texVar": [
+          1556,
+          2170
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 0.75
+    },
+    {
+      "zone": "slide",
+      "f0": 295,
+      "f1": 312,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.82,
+        "changedFrac": 0.89,
+        "bandsFrac": 1,
+        "gridDist": 77.5,
+        "ink": [
+          189,
+          181,
+          189
+        ],
+        "texVar": [
+          2171,
+          2357
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1
+    },
+    {
+      "zone": "slide",
+      "f0": 324,
+      "f1": 374,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 0.92,
+        "changedFrac": 0.89,
+        "bandsFrac": 1,
+        "gridDist": 71.5,
+        "ink": [
+          189,
+          189,
+          189
+        ],
+        "texVar": [
+          2353,
+          1649
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "enterMerged": 1
+    }
+  ],
+  "tokens": {
+    "seq": {
+      "caption": [
+        "TRAVELS:up",
+        "UNKNOWN"
+      ],
+      "slide": [
+        "COVERED-BY",
+        "TRAVELS:down",
+        "COVERED-BY"
+      ]
+    },
+    "counters": {
+      "caption": {
+        "TRAVELS": 1,
+        "UNKNOWN": 1
+      },
+      "slide": {
+        "COVERED-BY": 2,
+        "TRAVELS": 1
+      }
+    }
+  },
+  "tokensScoped": {
+    "seq": {
+      "slide": [
+        "COVERED-BY",
+        "TRAVELS:down",
+        "COVERED-BY"
+      ],
+      "caption": [
+        "TRAVELS:up"
+      ]
+    },
+    "counters": {
+      "slide": {
+        "COVERED-BY": 2,
+        "TRAVELS": 1
+      },
+      "caption": {
+        "TRAVELS": 1
+      }
+    }
+  },
+  "mechanicClass": {
+    "class": "stack+cover",
+    "evidence": [
+      "зона COVERED-BY/ENTERS без swap-тексту"
+    ]
+  },
+  "unknownCount": 0,
+  "note": "вердикти-кандидати З LIVE (закритий словник). CHOREO-CLAIMS цитує ці числа (src=zonetrack:...). UNKNOWN = автоматичний борд-блокер Єгору. Порівняння з нашим render — ТІЛЬКИ EVENT-домен (structure-parity)."
+}

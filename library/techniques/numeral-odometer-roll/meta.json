@@ -1,0 +1,26 @@
+{
+  "id": "numeral-odometer-roll",
+  "title": "Numeral odometer roll (Springs)",
+  "level": "L1-atom",
+  "batch": "A (#4/17)",
+  "source": "springs.estate stat blocks (extracted pin-less from stat-odometer). Engine = library/components/numeral-odometer-roll (proven, owns_pin:false). NO engine patch needed.",
+  "engine": "A vertical strip of numerals in a one-number-tall overflow:hidden window; the column translateY so the active value sits in frame — the number ROLLS. Pure set(p) maps across the value sequence.",
+
+  "dual_platform": true,
+  "differs": "Same roll mechanic (translateY the column) + same pure set(p). TRIGGER differs: desktop scrubs set(p) from scroll while the stat pins (reversible); mobile cycles set(p) 0→1→0 over time on its own (auto-play). Springs mobile shows the stat as an auto beat, not a scroll-pin.",
+
+  "desktop": { "driver": "scrollRoll — p = scroll progress across the stat span (reversible).", "knobs": ["values", "digits"] },
+  "mobile":  { "driver": "autoRoll — p cycles 0→1→0 over cycleMs each way, eased, looped.", "knobs": ["values", "digits", "cycleMs"] },
+
+  "knobs": {
+    "values": { "default": "[6,12,24,48]", "what": "the value sequence the odometer rolls through." },
+    "value": { "default": "first of values", "what": "start value." },
+    "digits": { "default": 2, "what": "pad each value to N chars." },
+    "cycleMs": { "default": 1800, "unit": "ms", "platform": "mobile", "what": "duration of one roll (up) in the auto loop." }
+  },
+
+  "engine_patch": "NONE — this engine has no narrow-guard and owns_pin:false; set(p) is pure translateY at any width. The simplest module in batch A.",
+  "entry": "NumeralOdometerRollDual.init(target, opts) -> { platform, engine, driver }. Load engine.js THEN component.js. Markup: .nor-window > .nor-col (engine builds .nor-num rows from values).",
+  "law": "translateY (the column) only; overflow:hidden window; tabular-nums; GPU; NO mix-blend / NO backdrop / NO WebGL / NO width/height animation. reduced-motion → rest on final value.",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core, unpatched)", "component.css", "stage.html", "demo.html", "meta.json", "README.md"]
+}

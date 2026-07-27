@@ -1,0 +1,176 @@
+{
+  "atomId": "amenities-promenade",
+  "ts": "2026-07-26T10:36:45.855Z",
+  "pass": true,
+  "url": "http://localhost:8879/atoms/amenities-promenade/variants/promenade.html",
+  "tool": "self-check.mjs",
+  "version": 2,
+  "thresholdsVersion": 10,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "harnessHash": "e3bf425f371a48009d465f7c5d87dd01786fcce76d087596b4fb0309b68d9b2a",
+  "configSha": "78cb311eec8ffd20b2cca569dd0314cf4a70a220135da7a660ec8b3a45552127",
+  "expectationsSha": "158986f0378ba38734d5ece53c10bea251924f448b8a6b00bcf9f03428db8c1f",
+  "inputsHash": "1536c928b4e0121971f5e6b37b8d20a1b4b79d28510d41e3aa34438120cee357",
+  "calibration": {
+    "ok": true,
+    "ts": "2026-07-26T08:00:33.350Z"
+  },
+  "coverage": {
+    "dimensionsRun": [
+      "render-api",
+      "purity",
+      "census",
+      "geometry",
+      "channel-identity",
+      "timing",
+      "fade",
+      "surface-parity",
+      "structure-parity",
+      "mechanic-class",
+      "swipe-strip",
+      "console-errors",
+      "http-status"
+    ],
+    "movers": 3,
+    "declared": 3,
+    "basisSelf": 0
+  },
+  "summary": "green (live:18 / self-regression:0); unchecked:1 — нове судить око Єгора",
+  "checks": [
+    {
+      "dimension": "render-api",
+      "name": "render-api",
+      "pass": true,
+      "detail": "window.render(p) присутній",
+      "basis": "live"
+    },
+    {
+      "dimension": "purity",
+      "name": "render-p-pure",
+      "pass": true,
+      "detail": "render(p) чиста (снапшоти збігаються після стрибків; transition=0 на 3 мōверах)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "census-movers",
+      "pass": true,
+      "detail": "3 рухомих елементів, усі задекларовані (targets/ignore)",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:none",
+      "pass": true,
+      "detail": "card-таргетів нема (атом без картки)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:band",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=717px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:band.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.360 vs очікуване 0.36 ±0.03 [live-профайлер: перший шов <90% на p0.36 (t93.5s seam 86.7%); панель заходить ПОКИ title ще тримається]",
+      "basis": "live"
+    },
+    {
+      "dimension": "fade",
+      "name": "fade:titleblock",
+      "pass": true,
+      "detail": "opacity fade [0.484,0.618] vs очікуване [0.48,0.62] ±0.02 [live fade-zoom: title тримається до ~96с=p0.48, opacity 1→0 до ~99с=p0.62]",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.25",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.5",
+      "pass": true,
+      "detail": "верх панелі 80%↔79.8% Δ0.2 (≤10)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.75",
+      "pass": true,
+      "detail": "верх панелі 47.1%↔54.9% Δ7.8 (≤10)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.95",
+      "pass": true,
+      "detail": "верх панелі 21.5%↔16.8% Δ4.7 (≤10)",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:photo",
+      "pass": true,
+      "detail": "послідовність подій збігається: [COVERED-BY]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:photo.COVERED-BY",
+      "pass": true,
+      "detail": "COVERED-BY у зоні photo: live=1 vs наш=1",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "mechanic-class-parity",
+      "pass": true,
+      "detail": "клас механіки збігається: stack+cover",
+      "basis": "live"
+    },
+    {
+      "dimension": "mechanic-class",
+      "name": "class-vs-live",
+      "pass": true,
+      "detail": "config.mechanicClass=\"stack+cover\" = клас з live",
+      "basis": "live"
+    },
+    {
+      "dimension": "swipe-strip",
+      "name": "strip:#tiles",
+      "pass": true,
+      "detail": "свайп-стрічка: 3 плиток, overflow 367px, snap-x ✓, всі snap-align ✓, swipe рухає 243px [SPEC M7 + CHOREO Ф5 (live-вимір повного ролика 108-114с: ≥3 плитки, touch-swipe+snap, scroll-scrub REFUTED track.mjs)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "console-errors",
+      "name": "console-errors",
+      "pass": true,
+      "detail": "0 console-error",
+      "basis": "live"
+    },
+    {
+      "dimension": "http-status",
+      "name": "http-status",
+      "pass": true,
+      "detail": "0 HTTP>=400",
+      "basis": "live"
+    }
+  ],
+  "unchecked": [
+    {
+      "dimension": "media-type",
+      "target": "media",
+      "reason": "waived",
+      "detail": "photo-first плейсхолдер до заміни на відео [live = статичний рендер (не відео); наш higgsfield-асет фінальний. media-type не застосовний.]"
+    }
+  ],
+  "uncheckedCount": 1
+}

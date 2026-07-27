@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · building-floor-drill · T-115 + T-104 (плити поверхів, clickable=count>0)</title>
+<!--
+================================================================================
+  LAB: building-floor-drill — рівень 1 visual-search дрілу AIR.
+  Контракт: ЖИВИЙ /visual-search (2026-07-06): data-plugin="plan buildingPlan";
+  конфіг {ref,building,floor,count,areaMin,areaMax,href}; clickable = count>0
+  ДОСЛІВНО; плити 0.6s air-bezier, clickable hover = біла .4, disabled
+  hovered = primary .15; маркер вежі active при hover її плит (set 60ms,
+  clear 120ms — живий buildingPlan); tooltip «Floor N · offices · м²»
+  placement right; T-M32 — на моб дрил не існує (заглушка).
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability (CLS<0.1, дрейф ≤4px);
+  2. hover плити 2-3 → tooltip «Floor 3 / 2 offices / 45–120 m²» видимий,
+     маркер B2 active ≤200ms (живі 60ms) — інверсія фону;
+  3. leave → active знятий ПІСЛЯ ~120ms (на 60ms ще active, на 400ms нема);
+  4. клік плити count>0 → gate.selected=ref (переходу нема, onSelect);
+     клік плити count=0 → gate.clickBlocked++, selected не змінився;
+  5. живий темп: computed transition-duration плити = 0.6s;
+  6. console errors == 0.
+  mobile (390): SVG/маркери/tooltip сховані, [data-bfd-mobile] видимий.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; overflow-x: clip; }
+  body { font-family: var(--sans); background: #101112; color: #f2f1ee; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #888; text-transform: uppercase; pointer-events: none; }
+  header.vs { display: flex; justify-content: space-between; align-items: center; padding: 16px 3vw; }
+  header.vs .logo { letter-spacing: .32em; font-weight: 500; }
+  header.vs .hint { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #8b8a86; }
+  .stage { padding: 4vh 6vw 8vh; }
+  /* «фото» ізометрії: три вежі градієнтами під SVG-плитами */
+  [data-bfd-photo] { position: absolute; inset: 0; }
+  [data-bfd-photo] .t { position: absolute; bottom: 8%; border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, #3a4657 0%, #232b38 100%); }
+  [data-bfd-photo] .t1 { left: 8%; width: 20%; height: 42%; }
+  [data-bfd-photo] .t2 { left: 38%; width: 24%; height: 78%; }
+  [data-bfd-photo] .t3 { left: 70%; width: 22%; height: 58%; }
+  [data-bfd] { max-width: 1100px; margin: 0 auto; aspect-ratio: 1594 / 780; }
+  [data-bfd] svg { position: relative; z-index: 2; }
+  .bfd-mobile-stub { padding: 10vh 8vw; text-align: center; color: #c9c7c2; }
+  .bfd-mobile-stub b { display: block; margin-bottom: 2vh; color: #f2f1ee; font-weight: 400;
+    letter-spacing: .06em; text-transform: uppercase; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · building-floor-drill · t-115 + t-104 · наведи на поверхи</div>
+
+<header class="vs"><span class="logo">AIR</span><span class="hint">Select floor</span></header>
+
+<div class="stage">
+  <div data-bfd id="drill">
+    <div data-bfd-photo aria-hidden="true"><i class="t t1"></i><i class="t t2"></i><i class="t t3"></i></div>
+    <svg data-bfd-svg viewBox="0 0 1594 780" xmlns="http://www.w3.org/2000/svg">
+      <!-- B1: 3 плити -->
+      <g data-hoverable="1-1"><rect x="128" y="640" width="318" height="52"/></g>
+      <g data-hoverable="1-2"><rect x="128" y="580" width="318" height="52"/></g>
+      <g data-hoverable="1-3"><rect x="128" y="520" width="318" height="52"/></g>
+      <!-- B2: 4 плити -->
+      <g data-hoverable="2-1"><rect x="606" y="640" width="382" height="52"/></g>
+      <g data-hoverable="2-2"><rect x="606" y="580" width="382" height="52"/></g>
+      <g data-hoverable="2-3"><rect x="606" y="520" width="382" height="52"/></g>
+      <g data-hoverable="2-4"><rect x="606" y="460" width="382" height="52"/></g>
+      <!-- B3: 3 плити -->
+      <g data-hoverable="3-1"><rect x="1116" y="640" width="350" height="52"/></g>
+      <g data-hoverable="3-2"><rect x="1116" y="580" width="350" height="52"/></g>
+      <g data-hoverable="3-3"><rect x="1116" y="520" width="350" height="52"/></g>
+    </svg>
+    <div data-bfd-markers></div>
+    <div data-bfd-tooltip></div>
+    <div data-bfd-mobile hidden>
+      <div class="bfd-mobile-stub">
+        <b>Selecting on the plan is only available on desktop</b>
+        Обери офіс зі списку — це той самий вибір, без плану.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  /* конфіг у ЖИВОМУ форматі (clickable = count>0 вирішує движок) */
+  var CONFIG = {
+    floors: [
+      { ref: '1-1', building: 1, floor: 1, count: 0, areaMin: 0, areaMax: 0, href: null },
+      { ref: '1-2', building: 1, floor: 2, count: 3, areaMin: 58, areaMax: 210, href: '#b1f2' },
+      { ref: '1-3', building: 1, floor: 3, count: 1, areaMin: 96, areaMax: 96, href: '#b1f3' },
+      { ref: '2-1', building: 2, floor: 1, count: 0, areaMin: 0, areaMax: 0, href: null },
+      { ref: '2-2', building: 2, floor: 2, count: 4, areaMin: 45, areaMax: 180, href: '#b2f2' },
+      { ref: '2-3', building: 2, floor: 3, count: 2, areaMin: 45, areaMax: 120, href: '#b2f3' },
+      { ref: '2-4', building: 2, floor: 4, count: 6, areaMin: 62, areaMax: 340, href: '#b2f4' },
+      { ref: '3-1', building: 3, floor: 1, count: 0, areaMin: 0, areaMax: 0, href: null },
+      { ref: '3-2', building: 3, floor: 2, count: 2, areaMin: 84, areaMax: 152, href: '#b3f2' },
+      { ref: '3-3', building: 3, floor: 3, count: 5, areaMin: 51, areaMax: 274, href: '#b3f3' }
+    ],
+    markers: [
+      { building: 1, title: 'B1', anchor: '1-3' },
+      { building: 2, title: 'B2', anchor: '2-4' },
+      { building: 3, title: 'B3', anchor: '3-3' }
+    ]
+  };
+  var picked = [];
+  var bfd = window.BuildingFloorDrill.create('#drill', CONFIG, {
+    onSelect: function (f) { picked.push(f.ref); }
+  });
+  window.__BFD = bfd;
+
+  var report = { stability: null, hover: null, release: null, click: null,
+                 tempo: null, mob: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    var anchor = document.querySelector('header.vs .logo');
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    if (touch || bfd.touch) {
+      var svgHidden = getComputedStyle(document.querySelector('[data-bfd-svg]')).display === 'none';
+      var stub = document.querySelector('[data-bfd-mobile]');
+      report.mob = { svgHidden: svgHidden, stubShown: !stub.hasAttribute('hidden'),
+                     ok: svgHidden && !stub.hasAttribute('hidden') };
+      report.errors = errs;
+      window.__LAB_OK__ = !!(ok && report.mob.ok && errs === 0);
+      console.log('[lab:building-floor-drill:mob]', JSON.stringify(report));
+      return;
+    }
+
+    /* 2: hover 2-3 → tooltip + маркер B2 active ≤200ms */
+    bfd.hover('2-3');
+    await delay(200);
+    var tt = document.querySelector('[data-bfd-tooltip]');
+    var b2 = document.querySelectorAll('.bfd-marker')[1];
+    report.hover = {
+      ttOn: tt.classList.contains('bfd-tt-on'),
+      ttText: tt.textContent.replace(/\s+/g, ' ').trim(),
+      b2active: b2.classList.contains('bfd-marker-active'),
+      active: bfd.activeBuilding()
+    };
+    report.hover.ok = report.hover.ttOn && /Floor\s*3/.test(report.hover.ttText) &&
+                      /2 offices/.test(report.hover.ttText) && /45–120 m²/.test(report.hover.ttText) &&
+                      report.hover.b2active && report.hover.active === 2;
+    ok = report.hover.ok && ok;
+
+    /* 3: leave → зняття ЗАТРИМАНЕ (живі 120ms): на 60ms ще active, на 400 — нема */
+    bfd.leave();
+    await delay(60);
+    var still = b2.classList.contains('bfd-marker-active');
+    await delay(340);
+    var gone = !b2.classList.contains('bfd-marker-active');
+    report.release = { stillAt60: still, goneAt400: gone, ok: still && gone };
+    ok = report.release.ok && ok;
+
+    /* 4: клік count>0 → selected; клік count=0 → blocked */
+    document.querySelector('[data-hoverable="2-4"]').dispatchEvent(
+      new MouseEvent('click', { bubbles: true }));
+    var sel1 = bfd.gate.selected;
+    document.querySelector('[data-hoverable="1-1"]').dispatchEvent(
+      new MouseEvent('click', { bubbles: true }));
+    report.click = { selected: sel1, blocked: bfd.gate.clickBlocked,
+                     stillSelected: bfd.gate.selected,
+                     ok: sel1 === '2-4' && bfd.gate.clickBlocked >= 1 &&
+                         bfd.gate.selected === '2-4' && picked.length === 1 };
+    ok = report.click.ok && ok;
+
+    /* 5: живий темп 0.6s air на плиті */
+    var dur = getComputedStyle(document.querySelector('.bfd-plate')).transitionDuration;
+    report.tempo = { dur: dur, ok: /0\.6s/.test(dur) };
+    ok = report.tempo.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:building-floor-drill]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

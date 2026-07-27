@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · poi-caption-carousel · r1864 (place cards each with caption-under; round ‹ › page in a big step, edge-peek + active emphasis)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · poi-caption-carousel
+================================================================================
+  r1864's standalone POI card-rail — a row of place cards, EACH with its CAPTION directly UNDER
+  the card, advancing in a BIG STEP via round ‹ › arrows (page-by-page) with EDGE-PEEK + active-
+  page emphasis (off-page cards dim). Cards stagger up on enter; drag supported. Distinct from
+  horizontal-spec-carousel (swapping spec-row + vertical-pill) and map-dim-carousel-announce
+  (this rail over a dimmed map). Harvested from D_r1864 (r18641 /location POI cards). NO WebGL.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#211c1b; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:#e7e2d6;font-family:'Inter',system-ui,sans-serif}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--paper);opacity:.5;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .pcc-stage{ --pcc-ground:#2c2724; --pcc-ink:#e7e2d6; --pcc-line:#8d8a82;
+    --pcc-serif:'Playfair Display',Georgia,serif; --pcc-sans:'Inter',sans-serif;
+    --pcc-card-w:19vw; --pcc-gap:1.4rem; }
+  .pcc-head{ text-align:center; font-family:var(--pcc-serif); text-transform:uppercase;
+    font-size:2.4vw; letter-spacing:.02em; margin:0 5vw 5vh; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — картки місць зʼявляються знизу; ‹ › гортають сторінкою (крупний крок), активна сторінка яскрава, решта приглушена; можна тягнути</div>
+
+  <section class="pcc-stage" id="poi">
+    <h2 class="pcc-head">Что рядом</h2>
+    <div class="pcc-rail-wrap">
+      <div class="pcc-rail">
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/aerial.webp" alt=""></div><div class="pcc-card-cap">Набережная<br>Москвы-реки</div></div>
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/day-front.webp" alt=""></div><div class="pcc-card-cap">Парк «Зарядье» с<br>концертным залом</div></div>
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/scene18.webp" alt=""></div><div class="pcc-card-cap">ГУМ</div></div>
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/day-34.webp" alt=""></div><div class="pcc-card-cap">Репинский<br>сквер</div></div>
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/day-09.webp" alt=""></div><div class="pcc-card-cap">Третьяковская<br>галерея</div></div>
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/night-front.webp" alt=""></div><div class="pcc-card-cap">Храм Христа<br>Спасителя</div></div>
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/terrace-04.webp" alt=""></div><div class="pcc-card-cap">Болотная<br>набережная</div></div>
+        <div class="pcc-card"><div class="pcc-card-img"><img src="renders/night-34.webp" alt=""></div><div class="pcc-card-cap">Дом<br>музыки</div></div>
+      </div>
+    </div>
+    <div class="pcc-nav">
+      <button class="pcc-prev" aria-label="попередня сторінка">‹</button>
+      <span class="pcc-counter">01 / 02</span>
+      <button class="pcc-next" aria-label="наступна сторінка">›</button>
+    </div>
+  </section>
+
+  <div class="spacer">що рядом — показано</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__pcc = PoiCaptionCarousel.create('#poi', { start:'top 78%', pageStep:0, ease:'power3.out', slideDur:0.7, loop:false, activeDim:0.5, cardStagger:0.6, once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

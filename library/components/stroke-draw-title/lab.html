@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · stroke-draw-title · Saisei homepage title draws itself (outline trace → fill)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{ --cream:#f1ebd6; --ink:#2a2418; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#0c0c0a;font-family:system-ui;overflow:hidden}
+  .bg{position:fixed;inset:0;z-index:0}
+  .bg img{width:100%;height:100%;object-fit:cover;opacity:.5}
+  .sdt-stage{position:fixed;left:0;right:0;bottom:6vh;height:30vh;z-index:1}
+  .replay{position:fixed;z-index:9;left:50%;bottom:16px;transform:translateX(-50%);color:var(--ink);
+    background:var(--cream);border:0;padding:.55rem 1rem;font:600 .68rem/1 system-ui;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="bg"><img src="renders/terrace.webp" alt=""></div>
+  <div class="sdt-stage" id="stage"></div>
+  <button class="replay" id="replay">▶ програти draw</button>
+<script src="component.js"></script>
+<script>
+  (function(){
+    var t = StrokeDrawTitle.create('#stage', { text:'QUADRO', font:"'Fraunces',Georgia,serif", weight:300,
+      stroke:'#f1ebd6', fill:'#f1ebd6', strokeWidth:1, drawDur:1.0, drawEase:'power2.out', fontSize:'clamp(3rem,13vw,10rem)' });
+    function play(){ t.reset(); requestAnimationFrame(function(){ t.play(); }); }
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 500);
+    try{ window.__LAB_OK__ = true; }catch(e){}
+  })();
+</script>
+</body>
+</html>

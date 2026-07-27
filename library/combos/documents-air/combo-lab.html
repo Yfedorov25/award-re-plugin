@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЗБОРКА · documents-air — /documents AIR (сервісна, спринт-7)</title>
+<!--
+================================================================================
+  ЗБОРКА /documents (сервісна сторінка-збірка, спринт-7 юніт 1/5).
+  Жива правда: recon-20260706/live-documents.html + live-documents-top.png.
+  Граматика (ДОСЛІВНО з живого DOM):
+    <section> hero: h1 «Documents» (leading-trim mb-6) у .container-h
+      .document-page + СТАТИЧНА спіраль-картинка праворуч (НЕ Vimeo-луп —
+      на /documents iframe немає, спіраль = lazy <picture>; асет = діра,
+      беремо наш ambient-градієнт-спіраль як у menu-lab).
+    <ul class="document-list"></ul> — ПОРОЖНІЙ на живому сайті (документів
+      ще не опубліковано; вердикт Єгора: будуємо 1-в-1 з порожнім списком,
+      НЕ вигадуємо рядки — BUILD-PROTOCOL §1.5).
+    <footer ui-dark> з breadcrumb: Home / Documents (disabled current).
+  Змонтовані атоми: air-menu-overlay (cand, №9 no-giant desktop) ·
+    cookie-consent (cand, жива пігулка remove()).
+  Пін: НЕМА (page-assembly pin.count = 0; сторінка статична, без скрол-движка).
+
+  ГЕЙТ (PROBE_MODE): loadStability (CLS<0.1 + дрейф якоря ≤4px) ·
+    menu open/close живий (amo gate) · cookie visible→accept→removed ·
+    document-list порожній (0 li) · console errors == 0.
+  Живий перегляд (без ?probe) = НУЛЬ автоскролів.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
+<link rel="stylesheet" href="../../components/cookie-consent/component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --dark: #111110; --sans: 'Inter', 'Onest', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; background: var(--paper); }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  .container { padding-inline: 3vw; }
+
+  /* ---- хедер (той самий скін, що home-air) ---- */
+  [data-amo-header] { background: rgba(244, 242, 238, .8); color: #111110;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .8); color: #f2f1ee; }
+  .hrow { display: flex; align-items: center; gap: 12px; padding: 12px 3vw; }
+  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; margin-right: auto; }
+  .hbtn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+          border: 1px solid currentColor; border-radius: 4px; padding: 10px 13px;
+          background: none; color: inherit; cursor: pointer; }
+  [data-amo-burger] { display: inline-flex; align-items: center; gap: 10px;
+    background: #111110; color: #f2f1ee; border: 0; border-radius: 4px;
+    padding: 11px 15px; font-size: 11px; letter-spacing: .1em; cursor: pointer; }
+  .amo-header-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
+  @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
+
+  /* ---- модал-меню AIR-скін (як у menu-lab: 690px, no-giant desktop) ---- */
+  [data-amo-bg] { background: var(--paper); }
+  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0;
+    background: radial-gradient(closest-side at 72% 60%, transparent 30%, rgba(17,17,16,.05) 31% 60%, transparent 61%),
+                repeating-conic-gradient(from 10deg at 72% 60%, rgba(17,17,16,.05) 0 6deg, transparent 6deg 12deg); }
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center;
+              justify-content: center; padding: 12vh 4vw 6vh; }
+  [data-amo-panel] { width: min(690px, 92vw); background: rgba(236, 234, 229, .75); }
+  [data-amo-left] { padding: 4vh 3vw; display: flex; flex-direction: column;
+                    justify-content: space-between; gap: 6vh; }
+  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  [data-amo-left] ul.small { gap: 10px; margin-top: 5vh; }
+  ul.large [data-amo-item] a { font-size: clamp(26px, 3.4vw, 52px); font-weight: 400;
+    text-transform: uppercase; letter-spacing: -.02em; line-height: 1.07; }
+  ul.small [data-amo-item] a { font-size: 13px; color: #55544f; }
+  [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between;
+    padding: 24px; color: #111110; text-decoration: none; font-size: 13px; min-height: 160px; }
+  [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px;
+    border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  @media (min-width: 769px) { [data-amo-giant] { display: none; } }
+
+  /* ---- HERO: h1 ліворуч + статична спіраль праворуч ---- */
+  .doc-hero { position: relative; min-height: 78vh; display: flex; align-items: center;
+              padding: 16vh 3vw 8vh; overflow: clip; }
+  .doc-hero__spiral { position: absolute; right: -4vw; top: 0; bottom: 0; width: 58vw;
+    pointer-events: none; opacity: .9;
+    background:
+      radial-gradient(closest-side at 62% 46%, transparent 26%, rgba(17,17,16,.05) 27% 55%, transparent 56%),
+      repeating-conic-gradient(from 24deg at 62% 46%, rgba(17,17,16,.055) 0 5deg, transparent 5deg 11deg); }
+  .doc-title { position: relative; font-size: clamp(40px, 8vw, 132px); font-weight: 300;
+    line-height: 1.0; text-transform: uppercase; letter-spacing: -.02em; }
+
+  /* ---- document-list (порожній на живому — резервуємо мінімальну зону) ---- */
+  .doc-list-wrap { padding: 0 3vw 12vh; }
+  .document-list { list-style: none; min-height: 8vh; }
+  .doc-list-empty { font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    color: #a9a8a3; padding: 3vh 0; }
+
+  /* ---- FOOTER ui-dark з breadcrumb Home / Documents ---- */
+  .footer { background: var(--dark); color: #d9d8d4; padding: 7vh 3vw 4vh; margin-top: 6vh; }
+  .breadcrumbs { display: flex; align-items: center; gap: 10px; font-size: 12px;
+    letter-spacing: .1em; text-transform: uppercase; }
+  .breadcrumbs a { color: #d9d8d4; }
+  .breadcrumbs .divider { color: #6b6a66; }
+  .breadcrumbs .current { color: #6b6a66; pointer-events: none; }
+
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 60; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+
+  /* ---- cookie-consent (скін як в атом-лабі) ---- */
+  [data-cc] { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 50; }
+</style>
+</head>
+<body>
+<div class="lab-tag">зборка · documents-air · сервісна · тисни Menu</div>
+
+<header data-amo-header>
+  <div class="hrow">
+    <a class="hlogo" href="/combos/home-air/combo-lab.html">AIR</a>
+    <a class="hbtn hide-m" href="/combos/funnel-air/combo-lab.html">Choose an office ✛</a>
+    <button data-amo-burger type="button" aria-label="Open menu">
+      <span data-amo-burger-lines><i></i><i></i></span> Menu
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO: h1 «Documents» + статична спіраль (жива .container-h .document-page) -->
+  <section class="doc-hero" data-amo-theme="light">
+    <div class="doc-hero__spiral" aria-hidden="true"></div>
+    <h1 class="doc-title">Documents</h1>
+  </section>
+
+  <!-- document-list: ПОРОЖНІЙ 1-в-1 з живим (немає опублікованих документів) -->
+  <div class="doc-list-wrap container">
+    <ul class="document-list" data-doc-list></ul>
+    <p class="doc-list-empty" data-doc-empty>No documents published</p>
+  </div>
+</main>
+
+<!-- FOOTER ui-dark з живим breadcrumb Home / Documents -->
+<footer class="footer">
+  <ol class="breadcrumbs">
+    <li><a href="/combos/home-air/combo-lab.html">Home</a></li>
+    <li class="divider">/</li>
+    <li class="current">Documents</li>
+  </ol>
+</footer>
+
+<!-- меню-модал (той самий контракт, що menu-lab / home-air) -->
+<div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div data-amo-bg></div>
+  <div data-amo-bg-image></div>
+  <div data-amo-giant>AIR</div>
+  <div class="amo-wrap">
+    <nav data-amo-panel>
+      <div data-amo-left>
+        <ul class="large">
+          <li data-amo-item><a href="/combos/about-air/combo-lab.html">About the project</a></li>
+          <li data-amo-item><a href="/combos/location-air/combo-lab.html">Location</a></li>
+          <li data-amo-item><a href="/combos/home-air/combo-lab.html">Project management</a></li>
+          <li data-amo-item><a href="/combos/home-air/combo-lab.html">Investment</a></li>
+        </ul>
+        <ul class="small">
+          <li data-amo-item><a href="/combos/progress-air/combo-lab.html">Construction progress</a></li>
+          <li data-amo-item><a href="/combos/news-air/combo-lab.html">News and offers</a></li>
+          <li data-amo-item><a href="/combos/developer-air/combo-lab.html">About the developer</a></li>
+        </ul>
+      </div>
+      <div data-amo-right>
+        <a data-amo-card href="/combos/funnel-air/combo-lab.html"><span>Choose an<br>office</span><span class="sq">✛</span></a>
+        <a data-amo-card href="/combos/parking-air/combo-lab.html"><span>Choose a<br>parking spot</span><span class="sq">✛</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<!-- cookie-consent (жива пігулка aircenter) -->
+<div data-cc>
+  <div data-cc-box class="cc-box">
+    <span class="cc-text">This website uses <b>cookies</b></span>
+    <button data-cc-accept type="button" class="cc-accept">Accept</button>
+  </div>
+</div>
+
+<script src="../../components/air-menu-overlay/component.js"></script>
+<script src="../../components/cookie-consent/component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var amo = window.AirMenuOverlay.create({});
+  var cc = window.CookieConsent.create(document.querySelector('[data-cc]'),
+             { storageKey: 'air-doc-cc-lab', storage: null });
+  window.__AMO = amo; window.__CC = cc;
+
+  var report = { stability: null, docHeight: null, menu: null, cookie: null, list: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function probeStability(anchor) {
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    var out = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    report.stability = out; return out.ok;
+  }
+
+  async function probeMenu() {
+    var g0 = amo.gate.opens;
+    amo.open(); await delay(1750);
+    var opened = amo.isOpen() && amo.gate.opens === g0 + 1;
+    amo.close(); await delay(1750);
+    var closed = !amo.isOpen();
+    report.menu = { opened: opened, closed: closed, ok: opened && closed };
+    return report.menu.ok;
+  }
+
+  async function probeCookie() {
+    var vis0 = cc.visible();
+    cc.accept(); await delay(50);
+    var gone = !document.querySelector('[data-cc]');
+    report.cookie = { visibleBefore: vis0, removedAfter: gone, ok: vis0 && gone };
+    return report.cookie.ok;
+  }
+
+  function probeList() {
+    var li = document.querySelectorAll('[data-doc-list] li').length;
+    report.list = { count: li, empty: li === 0, ok: li === 0 };
+    return report.list.ok;
+  }
+
+  /* ГЕЙТ #4 (ANTI-ISC): docHeight стабільна за прохід — ловить пізні
+     декоди/GSAP-мірянки, що ростять сторінку. Ідентично home-air. */
+  async function probeDocHeight() {
+    var doc1 = document.body.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight); await delay(400);
+    window.scrollTo(0, 0); await delay(300);
+    var after = document.body.scrollHeight;
+    report.docHeight = { before: doc1, after: after, stable: Math.abs(after - doc1) <= 2,
+                         ok: Math.abs(after - doc1) <= 2 };
+    return report.docHeight.ok;
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = await probeStability(document.querySelector('.doc-title'));
+    ok = await probeDocHeight() && ok;
+    ok = await probeMenu() && ok;
+    ok = probeList() && ok;
+    ok = await probeCookie() && ok;   /* cookie ОСТАННІМ — видаляє вузол */
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:documents-air]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

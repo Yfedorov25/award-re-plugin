@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>residences-slab — 7 прийомів</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0b1c15;color:#e9e4d8;font-family:'Helvetica Neue',Helvetica,'Segoe UI',sans-serif;padding:56px 64px}
+  a{color:#e9e4d8}a:hover{color:#fff}
+  h1{font-family:Didot,'Bodoni MT',Georgia,serif;font-weight:400;font-size:44px;color:#ece7da}
+  .sub{margin-top:10px;font-size:14px;color:rgba(233,228,216,.6);letter-spacing:.06em}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:32px;margin-top:48px}
+  .beat{border:1px solid rgba(233,228,216,.14);background:#0e241b}
+  .shot{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden}
+  .shot iframe{position:absolute;left:0;top:0;width:1280px;height:720px;border:0;
+    transform-origin:0 0;pointer-events:none}
+  .cap{display:flex;align-items:baseline;gap:14px;padding:16px 20px;border-top:1px solid rgba(233,228,216,.14)}
+  .cap b{font-family:Didot,'Bodoni MT',Georgia,serif;font-weight:400;font-size:20px;color:#e5dfcd}
+  .cap span{font-size:13px;color:rgba(233,228,216,.72);letter-spacing:.04em}
+  .cap i{margin-left:auto;font-style:normal;font-size:11px;letter-spacing:.18em;color:rgba(233,228,216,.45)}
+</style>
+</head>
+<body>
+<h1>residences-slab — усі 7 прийомів</h1>
+<p class="sub">Кожне вікно — живий атом, зупинений на середині свого біта через window.render(p). Повна хореографія — у <a href="build.html">build.html</a> (скрольте).</p>
+<div class="grid" id="grid"></div>
+<script>
+  var beats = [
+    {p:0.05, n:'01', t:'Title hold',   d:'заставка: заголовок зліва, прогрес живий'},
+    {p:0.16, n:'02', t:'Рендер 1',     d:'накриває справа→наліво, label + картка'},
+    {p:0.30, n:'03', t:'Hold 1',       d:'повільний зум, картка активна'},
+    {p:0.44, n:'04', t:'Рендер 2',     d:'свап label з перекриттям, свап тексту картки'},
+    {p:0.57, n:'05', t:'Hold 2',       d:'живий зум таунхауса'},
+    {p:0.70, n:'06', t:'Рендер 3',     d:'той самий закон, третій свап'},
+    {p:0.88, n:'07', t:'Hold 3',       d:'довгий фінальний settle, нічого не виходить'}
+  ];
+  var grid = document.getElementById('grid');
+  beats.forEach(function(b){
+    var el = document.createElement('div');
+    el.className = 'beat';
+    el.innerHTML = '<div class="shot"><iframe src="build.html" scrolling="no"></iframe></div>' +
+      '<div class="cap"><b>'+b.n+'</b><span><strong>'+b.t+'</strong> — '+b.d+'</span><i>p = '+b.p.toFixed(2)+'</i></div>';
+    grid.appendChild(el);
+    var shot = el.querySelector('.shot'), ifr = el.querySelector('iframe');
+    function fit(){ ifr.style.transform = 'scale(' + (shot.clientWidth/1280) + ')'; }
+    fit(); window.addEventListener('resize', fit);
+    ifr.addEventListener('load', function(){
+      var w = ifr.contentWindow;
+      var tries = 0;
+      (function set(){
+        if (w.__ATOM_OK__ && w.render) { w.render(b.p); }
+        else if (++tries < 60) { setTimeout(set, 100); }
+      })();
+    });
+  });
+</script>
+</body>
+</html>

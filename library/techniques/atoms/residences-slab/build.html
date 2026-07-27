@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>residences-slab</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#0b1c15;color:#e9e4d8;font-family:'Helvetica Neue',Helvetica,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#e9e4d8}a:hover{color:#fff}
+  #stage{position:relative;height:100vh;overflow:hidden}
+  .layer{position:absolute;inset:0;pointer-events:none}
+  /* ---------- intro ---------- */
+  #intro{z-index:2;background:
+    radial-gradient(120% 90% at 82% 12%,rgba(96,150,120,.16),transparent 58%),
+    radial-gradient(90% 80% at 10% 92%,rgba(6,14,10,.6),transparent 62%),
+    linear-gradient(118deg,#0a1a13 0%,#143128 52%,#1d4636 100%)}
+  #intro .vig{background:radial-gradient(120% 120% at 50% 42%,transparent 52%,rgba(4,9,6,.5) 100%)}
+  .titleblock{position:absolute;left:12vw;top:36vh}
+  .title{font-family:Didot,'Bodoni MT','Playfair Display','Cormorant Garamond',Georgia,serif;
+    font-weight:400;font-size:clamp(64px,9.5vw,148px);line-height:.98;letter-spacing:.01em;color:#ece7da}
+  .subtitle{font-family:Didot,'Bodoni MT',Georgia,serif;font-style:italic;font-weight:400;
+    font-size:clamp(16px,1.5vw,22px);color:rgba(233,228,216,.72);margin-top:24px;letter-spacing:.02em}
+  /* ---------- renders ---------- */
+  .render{will-change:clip-path}
+  #r1{z-index:3}#r2{z-index:4}#r3{z-index:5}
+  .img{position:absolute;inset:-8%;will-change:transform}
+  #r1 .img{background:
+    repeating-linear-gradient(90deg,rgba(20,12,6,.14) 0 2px,transparent 2px 190px),
+    radial-gradient(120% 90% at 76% 18%,rgba(255,226,178,.4),rgba(255,226,178,0) 56%),
+    radial-gradient(90% 70% at 16% 80%,rgba(66,44,28,.55),rgba(66,44,28,0) 62%),
+    linear-gradient(180deg,transparent 60%,rgba(26,17,10,.34) 62%,rgba(30,20,12,.5) 100%),
+    linear-gradient(112deg,#2b2119 0%,#55412f 36%,#8a6b4b 66%,#c9a878 100%)}
+  #r2 .img{background:
+    repeating-linear-gradient(90deg,rgba(230,240,240,.05) 0 1px,transparent 1px 160px),
+    radial-gradient(110% 80% at 72% 14%,rgba(212,232,236,.34),transparent 56%),
+    radial-gradient(84% 62% at 22% 88%,rgba(12,30,32,.62),transparent 64%),
+    linear-gradient(180deg,transparent 56%,rgba(8,18,20,.36) 59%,rgba(6,14,16,.52) 100%),
+    linear-gradient(108deg,#141f26 0%,#26404a 40%,#3f606a 70%,#7ea0a6 100%)}
+  #r3 .img{background:
+    radial-gradient(58% 42% at 66% 40%,rgba(255,216,150,.78),rgba(255,172,110,.26) 46%,transparent 64%),
+    radial-gradient(120% 62% at 18% 92%,rgba(28,18,14,.58),transparent 60%),
+    linear-gradient(180deg,transparent 63.6%,rgba(60,36,26,.4) 64%,transparent 64.6%),
+    linear-gradient(180deg,#66788f 0%,#b78c73 34%,#e8b083 52%,#ad6e4e 66%,#40291f 100%)}
+  .vig{position:absolute;inset:0;background:radial-gradient(125% 120% at 50% 44%,transparent 54%,rgba(10,7,4,.55) 100%)}
+  .grain{position:absolute;inset:0;opacity:.09;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
+  /* ---------- labels ---------- */
+  #labelbar{position:absolute;left:64px;top:56px;z-index:20;pointer-events:none}
+  #lscrim{position:absolute;left:-64px;top:-56px;width:520px;height:200px;
+    background:radial-gradient(140% 150% at 0% 0%,rgba(6,10,8,.38),transparent 68%)}
+  .lmask{position:relative;height:24px;min-width:380px;overflow:hidden}
+  .lbl{position:absolute;left:0;top:0;white-space:nowrap;font-size:13px;line-height:24px;
+    letter-spacing:.34em;text-transform:uppercase;color:#f0ece2;
+    text-shadow:0 1px 14px rgba(6,9,7,.6),0 0 2px rgba(6,9,7,.4)}
+  /* ---------- info cards (hotspots) ---------- */
+  .spot{position:absolute;right:0;bottom:6vh;width:min(360px,86vw);padding:36px 40px;
+    pointer-events:auto;z-index:15;cursor:pointer;will-change:transform,opacity;
+    background:linear-gradient(165deg,#14342a 0%,#0e2820 100%)}
+  .swap{display:grid}
+  .swap>*{grid-area:1/1}
+  .btn .swap{display:inline-grid;white-space:nowrap}
+  .cardTitle{font-size:26px;font-weight:400;color:#ece7da;letter-spacing:.01em}
+  .cardSub{font-size:15px;color:rgba(233,228,216,.6);margin-top:10px}
+  .ptrack{position:relative;height:1px;background:rgba(233,228,216,.24);margin-top:26px}
+  .pfill{position:absolute;inset:0;background:#d9d3c0;will-change:transform}
+  .more{height:0;overflow:hidden}
+  .stat{padding-top:34px}
+  .stat b{display:block;font-family:Didot,'Bodoni MT',Georgia,serif;font-weight:400;
+    font-size:44px;line-height:1;color:#e5dfcd}
+  .stat span{display:block;margin-top:8px;font-size:15px;color:rgba(233,228,216,.8)}
+  .btn{display:inline-block;margin-top:34px;padding:14px 28px;border:1px solid rgba(233,228,216,.55);
+    border-radius:999px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#ece7da}
+</style>
+</head>
+<body>
+<div id="stage">
+  <section class="layer" id="intro">
+    <div class="vig"></div><div class="grain"></div>
+    <div class="titleblock">
+      <h1 class="title">Residences</h1>
+      <p class="subtitle">three ways to live above the park</p>
+    </div>
+  </section>
+
+  <section class="layer render" id="r1">
+    <div class="img"></div><div class="vig"></div><div class="grain"></div>
+  </section>
+
+  <section class="layer render" id="r2">
+    <div class="img"></div><div class="vig"></div><div class="grain"></div>
+  </section>
+
+  <section class="layer render" id="r3">
+    <div class="img"></div><div class="vig"></div><div class="grain"></div>
+  </section>
+
+  <div id="labelbar">
+    <div id="lscrim"></div>
+    <div class="lmask">
+      <div class="lbl" id="lb1">Flat — 158 m²</div>
+      <div class="lbl" id="lb2">Townhouse — 214 m²</div>
+      <div class="lbl" id="lb3">Penthouse — 305 m²</div>
+    </div>
+  </div>
+
+  <!-- .block = group-anchor для video-parity collision-гейта: увесь info-контейнер = один
+       дизайн-блок, внутрішній стек g1/g2/g3 — навмисний кросфейд, не колізія -->
+  <div class="spot block" id="spot" role="button" tabindex="0" aria-label="Residence details">
+    <div class="swap cardTitle"><span class="g1">Flats</span><span class="g2">Townhouses</span><span class="g3">Penthouses</span></div>
+    <div class="swap cardSub"><span class="g1">Designer finishings</span><span class="g2">Private gardens</span><span class="g3">Sunset terraces</span></div>
+    <div class="ptrack"><div class="pfill"></div></div>
+    <div class="more"><div class="swap">
+      <div class="g1">
+        <div class="stat"><b>138</b><span>panoramic view flats</span></div>
+        <div class="stat"><b>up to 3.1 m</b><span>Ceiling height</span></div>
+      </div>
+      <div class="g2">
+        <div class="stat"><b>24</b><span>two-level townhouses</span></div>
+        <div class="stat"><b>up to 214 m²</b><span>with own entrance</span></div>
+      </div>
+      <div class="g3">
+        <div class="stat"><b>12</b><span>crown residences</span></div>
+        <div class="stat"><b>up to 3.6 m</b><span>Ceiling height</span></div>
+      </div>
+    </div></div>
+    <div class="btn"><span class="swap"><span class="g1">Search flats</span><span class="g2">Available units</span><span class="g3">Available units</span></span></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  CustomEase.create('slab','M0,0 C0.25,0.74 0.22,0.99 1,1');
+
+  // Lenis wiring (required form)
+  var lenis = new Lenis();
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+  gsap.ticker.lagSmoothing(0);
+
+  // Initial states — transforms owned by GSAP only
+  gsap.set('.pfill', {scaleX:0, transformOrigin:'0% 50%'});
+  gsap.set('#r1,#r2,#r3', {clipPath:'inset(0% 0% 0% 100%)'});
+  gsap.set('.img', {xPercent:8, scale:1.04});
+  gsap.set('.lbl', {yPercent:120});
+  gsap.set('.spot', {autoAlpha:0, y:28});
+  gsap.set('.g2,.g3', {autoAlpha:0});
+
+  // ONE master timeline, duration 10 == p 0..1
+  var tl = gsap.timeline({defaults:{ease:'slab'}});
+  tl.to('.pfill', {scaleX:1, duration:10, ease:'none'}, 0)
+    // p .10–.22 — render 1 covers right→left
+    .to('#r1', {clipPath:'inset(0% 0% 0% 0%)', duration:1.2}, 1.0)
+    .to('#r1 .img', {xPercent:0, duration:1.2}, 1.0)
+    .to('#lb1', {yPercent:0, duration:.5}, 1.85)
+    .to('#spot', {autoAlpha:1, y:0, duration:.7}, 1.75)
+    // p .22–.38 — hold 1, living zoom
+    .to('#r1 .img', {scale:1.10, duration:1.6, ease:'none'}, 2.2)
+    // p .38–.50 — render 2 covers; label swap with overlap
+    .to('#r2', {clipPath:'inset(0% 0% 0% 0%)', duration:1.2}, 3.8)
+    .to('#r2 .img', {xPercent:0, duration:1.2}, 3.8)
+    .to('.g1', {autoAlpha:0, duration:.4}, 4.3)
+    .to('#lb1', {yPercent:-120, duration:.5}, 4.35)
+    .to('#lb2', {yPercent:0, duration:.5}, 4.55)
+    .to('.g2', {autoAlpha:1, duration:.5}, 4.55)
+    // p .50–.64 — hold 2
+    .to('#r2 .img', {scale:1.10, duration:1.4, ease:'none'}, 5.0)
+    // p .64–.76 — render 3
+    .to('#r3', {clipPath:'inset(0% 0% 0% 0%)', duration:1.2}, 6.4)
+    .to('#r3 .img', {xPercent:0, duration:1.2}, 6.4)
+    .to('.g2', {autoAlpha:0, duration:.4}, 6.9)
+    .to('#lb2', {yPercent:-120, duration:.5}, 6.95)
+    .to('#lb3', {yPercent:0, duration:.5}, 7.15)
+    .to('.g3', {autoAlpha:1, duration:.5}, 7.15)
+    // p .76–1.00 — long final hold, nothing exits
+    .to('#r3 .img', {scale:1.10, duration:2.4, ease:'none'}, 7.6);
+
+  // ONE pinned ScrollTrigger
+  ScrollTrigger.create({
+    trigger:'#stage', start:'top top', end:'+=800%',
+    pin:true, scrub:1, animation:tl, anticipatePin:1
+  });
+
+  // Card expand — the only motion off the scroll clock (0.3s UI tween)
+  document.querySelectorAll('.spot').forEach(function(spot){
+    var more = spot.querySelector('.more'), open = false;
+    function setCard(o){
+      open = o;
+      gsap.to(more, {height:o?'auto':0, duration:.35, ease:'power2.out', overwrite:'auto'});
+    }
+    spot.addEventListener('mouseenter', function(){ setCard(true); });
+    spot.addEventListener('mouseleave', function(){ setCard(false); });
+    spot.addEventListener('click', function(){ setCard(!open); });
+  });
+
+  // Hooks
+  window.render = function(p){
+    p = Number(p); if (!isFinite(p)) p = 0;
+    p = Math.max(0, Math.min(1, p));
+    tl.progress(p); // direct — not routed through scroll
+  };
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

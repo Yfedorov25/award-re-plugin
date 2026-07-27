@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Springs · Location — choreography board (A/B/C)</title>
+<style>
+@font-face{font-display:swap;font-family:"Victor Serif";src:url(_fonts/VictorSerif-40Regular.woff2) format("woff2")}
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-weight:400;src:url(_fonts/TT_Commons_Pro_Regular.woff2) format("woff2")}
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-weight:500;src:url(_fonts/TTCommonsPro-Md.woff2) format("woff2")}
+:root{--cream:#e0d1b6;--cream-lite:#f5e8d1;--panel:#0e241d;--ink:#0b1712;--dot:#6b7a5f;--on:#9ec24a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink);color:var(--cream);font-family:"TT Commons Pro",system-ui,sans-serif;min-height:100vh;padding:26px 26px 60px}
+.head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.head h1{font-family:"Victor Serif",serif;font-weight:400;font-size:30px;letter-spacing:-.4px;color:var(--cream-lite)}
+.head p{font-size:12.5px;letter-spacing:.2px;color:#95a389;max-width:640px;line-height:1.4}
+/* master bar */
+.master{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#10201a;border:1px solid #23342a;border-radius:12px;padding:12px 16px;margin:16px 0 26px}
+.master label{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;font-weight:500;color:#8fa084}
+.master .val{font-variant-numeric:tabular-nums;font-size:12px;color:var(--cream-lite);min-width:38px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:#2c3d31;border-radius:3px;outline:none;cursor:pointer}
+input[type=range].wide{flex:1;min-width:220px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--cream-lite);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--cream-lite);cursor:pointer}
+button{font-family:inherit;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;font-weight:500;color:var(--cream-lite);background:#1c3025;border:1px solid #2f4335;border-radius:999px;padding:8px 16px;cursor:pointer;transition:background .2s,border-color .2s}
+button:hover{background:#264031;border-color:#3c5544}
+button:active{transform:translateY(1px)}
+/* board */
+.board{display:flex;gap:26px;flex-wrap:wrap}
+.frame{width:265px}
+.cap{display:flex;align-items:center;gap:9px;margin-bottom:10px;height:20px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--dot);box-shadow:0 0 0 0 rgba(158,194,74,0);transition:background .3s,box-shadow .3s}
+.dot.on{background:var(--on);box-shadow:0 0 10px 1px rgba(158,194,74,.5)}
+.cap .k{font-family:"Victor Serif",serif;font-size:19px;color:var(--cream-lite);line-height:1}
+.cap .n{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#8fa084}
+.viewport{width:265px;height:574px;overflow:hidden;border-radius:14px;background:var(--panel);box-shadow:0 20px 50px rgba(0,0,0,.5);border:1px solid #22332a}
+.viewport iframe{width:390px;height:844px;border:0;transform:scale(.679487);transform-origin:top left;display:block}
+.ctrl{display:flex;align-items:center;gap:11px;margin-top:12px}
+.ctrl input[type=range]{flex:1}
+.ctrl .val{font-variant-numeric:tabular-nums;font-size:11px;color:#b9c3ad;min-width:30px}
+.rp{padding:7px 13px}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>Springs · Location</h1>
+  <p>Same 13-block narrative, three takes on the scroll choreography. Each frame is the live section at 390&nbsp;px, driven by its own <code>render(0→1)</code>. Green dot = <code>__ATOM_OK__</code>.</p>
+</div>
+
+<div class="master">
+  <label>Drive all</label>
+  <input type="range" class="wide" id="mAll" min="0" max="1" step="0.001" value="0">
+  <span class="val" id="mVal">0.000</span>
+  <button id="mReplay">Replay all</button>
+  <button id="mReset">Reset</button>
+</div>
+
+<div class="board" id="board"></div>
+
+<script>
+var FRAMES=[
+  {k:'A',n:'editorial calm',src:'location-a.html?board=1'},
+  {k:'B',n:'crossfade drift',src:'location-b.html?board=1'},
+  {k:'C',n:"designer's cut",src:'location-c.html?board=1'}
+];
+var board=document.getElementById('board'), refs=[];
+
+FRAMES.forEach(function(f,i){
+  var el=document.createElement('div'); el.className='frame';
+  el.innerHTML=
+    '<div class="cap"><span class="dot"></span><span class="k">'+f.k+'</span><span class="n">'+f.n+'</span></div>'+
+    '<div class="viewport"><iframe src="'+f.src+'" loading="eager" title="Variant '+f.k+'"></iframe></div>'+
+    '<div class="ctrl"><input type="range" min="0" max="1" step="0.001" value="0"><span class="val">0.000</span><button class="rp">Replay</button></div>';
+  board.appendChild(el);
+  var iframe=el.querySelector('iframe'), slider=el.querySelector('input'), val=el.querySelector('.val'),
+      dot=el.querySelector('.dot'), replay=el.querySelector('.rp');
+  var r={iframe:iframe,slider:slider,val:val,dot:dot,ready:false,raf:0};
+  refs.push(r);
+  function win(){try{return iframe.contentWindow;}catch(e){return null;}}
+  function drive(p){var w=win(); if(w&&typeof w.render==='function'){try{w.render(p);}catch(e){}} val.textContent=(+p).toFixed(3);}
+  slider.addEventListener('input',function(){cancelAnimationFrame(r.raf); drive(+slider.value);});
+  replay.addEventListener('click',function(){runReplay(r,drive,slider);});
+  r.drive=drive;
+});
+
+function runReplay(r,drive,slider){
+  cancelAnimationFrame(r.raf);
+  var t0=performance.now(), DUR=4200;
+  (function step(t){
+    var p=Math.min(1,(t-t0)/DUR);
+    slider.value=p; drive(p);
+    if(p<1) r.raf=requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ready-dot polling */
+var poll=setInterval(function(){
+  var allReady=true;
+  refs.forEach(function(r){
+    var ok=false; try{ok=!!r.iframe.contentWindow.__ATOM_OK__;}catch(e){}
+    if(ok&&!r.ready){r.ready=true; r.dot.classList.add('on'); r.drive(+r.slider.value);}
+    if(!ok) allReady=false;
+  });
+  if(allReady) clearInterval(poll);
+},250);
+
+/* master controls */
+var mAll=document.getElementById('mAll'), mVal=document.getElementById('mVal'), mRaf=0;
+function driveAll(p){ p=+p; mVal.textContent=p.toFixed(3);
+  refs.forEach(function(r){ r.slider.value=p; r.drive(p); }); }
+mAll.addEventListener('input',function(){cancelAnimationFrame(mRaf); driveAll(mAll.value);});
+document.getElementById('mReplay').addEventListener('click',function(){
+  cancelAnimationFrame(mRaf); var t0=performance.now(), DUR=4200;
+  (function step(t){var p=Math.min(1,(t-t0)/DUR); mAll.value=p; driveAll(p); if(p<1) mRaf=requestAnimationFrame(step);})(t0);
+});
+document.getElementById('mReset').addEventListener('click',function(){cancelAnimationFrame(mRaf); mAll.value=0; driveAll(0);});
+</script>
+</body>
+</html>

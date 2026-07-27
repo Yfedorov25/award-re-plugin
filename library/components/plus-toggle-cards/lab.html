@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · plus-toggle-cards · T-M24 (✛-toggle: in-place крос-фейд, стани незалежні)</title>
+<!--
+================================================================================
+  LAB: plus-toggle-cards — живі сервіс-картки /management (card-team
+  --service + cardHover) з ЖИВИМ копі (Brokerage/Lease management/
+  Interior design). T-M24: крос-фейд face↔popup 0.35s air, ✛→45°,
+  стани НЕЗАЛЕЖНІ.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. клік картки 1 → is-active (face op→0, popup
+  op→1, ✛ rotate 45°); 3. клік картки 3 → ОБИДВІ активні (незалежність);
+  4. повторний клік картки 1 → лише вона гаснеться; 5. errors 0.
+  desktop додатково: hover картки 2 → активна; mouseout → гасне
+  (без фіксації).
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .wrap { max-width: 1100px; margin: 6vh auto 10vh; padding: 0 3vw; }
+  h1 { font-size: clamp(26px, 3.4vw, 44px); font-weight: 300; margin-bottom: 4vh; }
+  [data-ptc] { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  [data-ptc-card] { min-height: 250px; border-radius: 6px;
+    background: rgba(236, 235, 230, .85); backdrop-filter: blur(10px); }
+  [data-ptc-face] { height: 100%; padding: 20px; display: flex; flex-direction: column; }
+  [data-ptc-face] .t { font-size: 14px; }
+  [data-ptc-face] .ic { flex: 1; display: grid; place-items: center; font-size: 44px;
+    font-weight: 200; color: #8b8a86; }
+  [data-ptc-face] [data-ptc-plus] { align-self: flex-end; }
+  [data-ptc-popup] { padding: 20px; background: rgba(236, 235, 230, .97); }
+  [data-ptc-popup] .pt { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: #8b8a86; margin-bottom: 12px; }
+  [data-ptc-popup] ul { margin: 0; padding-left: 16px; font-size: 12.5px; line-height: 1.55;
+    color: #3c3b39; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · plus-toggle-cards · t-m24 · клікай/наводь ✛</div>
+
+<div class="wrap">
+  <h1>Service excellence</h1>
+  <div data-ptc id="ptc">
+    <article data-ptc-card>
+      <div data-ptc-face><p class="t">Brokerage</p><div class="ic">◎</div><span data-ptc-plus>✛</span></div>
+      <div data-ptc-popup><p class="pt">Brokerage</p><ul>
+        <li>Tenant search and acquisition;</li><li>Property presentation;</li>
+        <li>Creation of marketing materials;</li><li>Commercial negotiations;</li>
+        <li>Legal support.</li></ul></div>
+    </article>
+    <article data-ptc-card>
+      <div data-ptc-face><p class="t">Lease management</p><div class="ic">↙</div><span data-ptc-plus>✛</span></div>
+      <div data-ptc-popup><p class="pt">Lease management</p><ul>
+        <li>Lease agreements administration;</li><li>Indexation control;</li>
+        <li>Tenant relations.</li></ul></div>
+    </article>
+    <article data-ptc-card>
+      <div data-ptc-face><p class="t">Interior design</p><div class="ic">✿</div><span data-ptc-plus>✛</span></div>
+      <div data-ptc-popup><p class="pt">Interior design</p><ul>
+        <li>Fit-out concepts;</li><li>Author supervision;</li><li>Furniture procurement.</li></ul></div>
+    </article>
+    <article data-ptc-card>
+      <div data-ptc-face><p class="t">24/7 helpdesk</p><div class="ic">◍</div><span data-ptc-plus>✛</span></div>
+      <div data-ptc-popup><p class="pt">24/7 helpdesk</p><ul>
+        <li>Service hotline;</li><li>Incident management;</li><li>Reader support.</li></ul></div>
+    </article>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  var ptc = window.PlusToggleCards.create('#ptc', {});
+  window.__PTC = ptc;
+
+  var cards = document.querySelectorAll('[data-ptc-card]');
+  var report = { stability: null, one: null, indep: null, off: null, hover: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function faceOp(i) { return parseFloat(getComputedStyle(cards[i].querySelector('[data-ptc-face]')).opacity); }
+  function plusRot(i) {
+    var t = getComputedStyle(cards[i].querySelector('[data-ptc-plus]')).transform;
+    return t && t !== 'none';
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(120);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('h1');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* 2: клік картки 1 */
+    cards[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await delay(500);
+    report.one = { active: cards[0].classList.contains('is-active'),
+                   faceOp: faceOp(0), rot: plusRot(0) };
+    report.one.ok = report.one.active && report.one.faceOp < 0.1 && report.one.rot;
+    ok = report.one.ok && ok;
+
+    /* 3: незалежність — картка 3 теж */
+    cards[2].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await delay(500);
+    report.indep = { states: ptc.states().join(','),
+                     ok: ptc.states()[0] && ptc.states()[2] && !ptc.states()[1] };
+    ok = report.indep.ok && ok;
+
+    /* 4: повторний клік гасить лише картку 1 */
+    cards[0].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await delay(500);
+    report.off = { states: ptc.states().join(','),
+                   ok: !ptc.states()[0] && ptc.states()[2] };
+    ok = report.off.ok && ok;
+
+    /* 5 (desktop): hover без фіксації */
+    if (!touch) {
+      cards[1].dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+      await delay(150);
+      var hovOn = cards[1].classList.contains('is-active');
+      cards[1].dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body }));
+      await delay(150);
+      report.hover = { on: hovOn, offAfter: !cards[1].classList.contains('is-active') };
+      report.hover.ok = hovOn && report.hover.offAfter;
+      ok = report.hover.ok && ok;
+    } else { report.hover = { ok: true, skipped: 'touch' }; }
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:plus-toggle-cards]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "_note": "config swim (S55). Механіка ПРИЙНЯТА оком Єгора в S44. Гейт-обвʼязка додана заднім числом: харнес зʼявився з S48, а чиста render(p) виділена в S55.",
+  "url": "variants/swim.html",
+  "mechanicClass": "pin+swap",
+  "_mechanicClass_src": "reference/swim-live.zonetrack.json — клас порахував LIVE-екстрактор («текст-зона SWAPS на місці + картки COVER/ENTER; page-зсув 24.8%»). Я спершу написав тут «scale-morph» від себе, і це було НЕ ПРАВО: клас рахує вимірник, config лише декларує збіг. Виправлено на те, що дав live.",
+  "targets": [
+    {
+      "id": "card",
+      "sel": "[data-card]",
+      "channel": "bh",
+      "mechanism": "scale",
+      "role": "media",
+      "_note": "картка МОРФИТЬ від мініатюри (66% ширини, ландшафт 1.45:1) до full-bleed через ключові кадри KF. Не translate: міняються width/height, тому механізм scale.",
+      "_probe": "atom-probe: 4 вікна руху, 39 з 119 проб сторінка стоїть, 17 часових клітинок (в картці ВІДЕО)"
+    },
+    {
+      "id": "title",
+      "sel": ".title",
+      "channel": "opacity",
+      "role": "text",
+      "_note": "«Where Change Becomes Art»: fade 1→0 на p 0.06-0.42, раніше за нижній текст"
+    },
+    {
+      "id": "body",
+      "sel": ".body",
+      "channel": "opacity",
+      "role": "text",
+      "_note": "нижній абзац: fade 1→0 на p 0.10-0.52, трохи пізніше за заголовок (coupled fade)"
+    }
+  ],
+  "ignore": [],
+  "media": {
+    "declared": "photo-placeholder",
+    "waiverSrc": "🔴 у live в картці ГРАЄ ВІДЕО, і це доведено числом: atom-probe знайшов кадри, де СТОРІНКА СТОЇТЬ (зміна поза карткою 0.24-1.18), а КАРТКА ЖИВЕ (3.47-11.26). Скрол-керована підміна так не може за побудовою. У нас фото-плейсхолдер, тому ідентичність медіа судить ОКО, а не вимір. Закон КОНТЕЙНЕРА (морфінг + coupled fade) від цього не залежить."
+  }
+}

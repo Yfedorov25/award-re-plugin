@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-6 · Residences → Interiors · під-організм</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* ── SO-6 Residences → Interiors. LIVE-verified (CDP, S25): the cream architecture block gives
+     way to a FULL-BLEED warm interior photo (muted palette — boucle chair, wood table, blinds)
+     with a big serif act-word "Interiors" + subtitle "BEAUTY IN THE ESSENCE OF THINGS" and bottom-
+     left body copy. Same full-bleed-photo+act-word grammar as SO-1/SO-2, but WARM neutral palette
+     (not dark green, not cream). Self-floor 0.3% (nearly still) → strict parity. */
+  :root{ --green-deep:#0e241d; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#2b2620;color:var(--cream);font-family:var(--body);overflow-x:clip}
+  .track{ height:620vh; position:relative; }
+  .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+
+  /* ── RESIDENCES INNER CAROUSEL (S28, live-verified via animation-map-residences: .l-residences is a
+     pinned full-height section; 3 full-bleed residence renders (img-cover, parallax scale 1.2) each
+     with a caption CARD on the RIGHT column — title + stats + CTA — swapping Flats→Townhouses→
+     Penthouses on scroll. Header "Residences / Collection of premium living space" reveals first.
+     Real springs assets: media/residence-{1,2,3}.webp (flat interior / townhouse patio / penthouse terrace). */
+  .rslide{ position:absolute; inset:0; background-size:cover; background-position:center;
+    opacity:var(--o,0); transform:scale(1.12); }               /* parallax-scaled full-bleed, like live scale 1.2 */
+  .rslide::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(20,34,26,.14) 0%, rgba(20,34,26,.05) 40%, rgba(20,34,26,.52) 100%); }
+  /* rslide-1 (Flats) is the section's opening image — a base copy sits under everything so the
+     section never opens on the dark base bg even at scroll-progress exactly 0. */
+  .rbase{ position:absolute; inset:0; background:url('media/residence-1.webp') center/cover no-repeat; }
+  .rbase::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(20,34,26,.14) 0%, rgba(20,34,26,.05) 40%, rgba(20,34,26,.52) 100%); }
+  .rslide-1{ background-image:url('media/residence-1.webp'); }
+  .rslide-2{ background-image:url('media/residence-2.webp'); }
+  .rslide-3{ background-image:url('media/residence-3.webp'); }
+
+  /* section header — top-left, reveals as the section opens */
+  .rhead{ position:absolute; left:clamp(28px,5vw,90px); top:clamp(96px,16vh,150px); z-index:6;
+    opacity:var(--rheadO,0); }
+  .rhead__t{ font-family:var(--serif); font-weight:400; line-height:.98; letter-spacing:-.02em;
+    font-size:clamp(2.6rem,7vw,5.4rem); color:var(--cream); text-shadow:0 4px 34px rgba(0,0,0,.4); }
+  .rhead__s{ font-size:.72rem; letter-spacing:.26em; text-transform:uppercase; color:#dbe6dd;
+    margin-top:.9em; text-shadow:0 2px 14px rgba(0,0,0,.5); }
+
+  /* caption card — RIGHT column (live: col--md-3 offset, translateX to right), title+stats+CTA */
+  .rcard{ position:absolute; right:clamp(24px,5vw,80px); bottom:clamp(64px,13vh,120px); z-index:6;
+    width:clamp(300px,30vw,420px); opacity:var(--rcardO,0); }
+  .rcard__eyebrow{ font-family:var(--serif); font-size:clamp(1.7rem,3vw,2.6rem); color:var(--cream);
+    line-height:1; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+  .rcard__tag{ font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; color:#e2ece4;
+    margin-top:.7em; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+  .rcard__stats{ display:flex; gap:2.2em; margin-top:1.4em; }
+  .rcard__stat b{ display:block; font-family:var(--serif); font-size:clamp(1.5rem,2.6vw,2.1rem);
+    color:var(--cream); line-height:1; }
+  .rcard__stat span{ font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:#c7d3cb;
+    display:block; margin-top:.5em; }
+  .rcard__cta{ margin-top:1.7em; display:inline-block; border:1px solid rgba(240,244,236,.5);
+    color:var(--cream); font-size:.72rem; letter-spacing:.2em; text-transform:uppercase;
+    padding:.95em 1.8em; border-radius:2px; }
+  @media (max-width:700px){ .rslide::after{ background:linear-gradient(180deg, rgba(20,34,26,.12) 0%, rgba(20,34,26,.15) 45%, rgba(20,34,26,.62) 100%); }
+    .rcard{ left:clamp(20px,5vw,40px); right:clamp(20px,5vw,40px); width:auto; bottom:clamp(48px,10vh,90px); }
+    .rhead{ top:clamp(80px,12vh,120px); } }
+
+  /* Residences cream tail (a warm architecture card exits as the interior photo arrives) */
+  .resTail{ position:absolute; inset:0; background:var(--cream-lite); opacity:calc(1 - var(--photo,0)); }
+  .resTail__card{ position:absolute; top:0; right:0; width:33%; height:42%;
+    background:url('media/res-card.webp') center 62%/cover no-repeat; box-shadow:0 30px 80px rgba(20,40,30,.28); }
+
+  /* Interiors — full-bleed warm interior photo */
+  /* live springs zooms the bg ~112% past the full asset frame (measured: baseline shows a tighter
+     crop than the 2016×1260 asset). So size 112% + settle to that (not 100%). */
+  .photo{ position:absolute; inset:0; background:url('media/interiors-bg.webp') center 46%/112% auto no-repeat;
+    background-color:#8a8378; opacity:var(--photo,0); transform:scale(calc(1.05 - var(--photo,0)*0.05)); }
+  .photo::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(30,26,20,.14) 0%, rgba(30,26,20,.02) 34%, rgba(30,26,20,.30) 100%); }
+
+  .head{ position:absolute; top:0; left:0; right:0; z-index:8; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#e6ded0; }
+  .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+  @media (max-width:700px){ .head .nav,.head .r span{ display:none; } }
+
+  /* act-word "Interiors" — right-centre, big serif cream */
+  .act{ position:absolute; right:clamp(20px,3vw,50px); top:50%; transform:translateY(-50%);
+    text-align:right; z-index:5; }
+  .act .word{ --r:0; font-family:var(--serif); font-weight:400; line-height:.9; letter-spacing:-.02em;
+    font-size:clamp(3.6rem,11vw,9rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.4);
+    opacity:var(--r); transform:translateY(calc((1 - var(--r)) * 0.5em));
+    clip-path:inset(calc((1 - var(--r)) * 100%) 0 0 0); will-change:transform,clip-path,opacity; }
+  .act .sub{ font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color:#e6ded0;
+    margin-top:1.1em; opacity:var(--subO,0); text-shadow:0 2px 16px rgba(0,0,0,.5); }
+
+  /* bottom-left body copy */
+  .copy{ position:absolute; left:clamp(28px,5vw,80px); bottom:clamp(48px,10vh,90px); max-width:34ch;
+    z-index:5; color:#f2ece0; font-size:clamp(.95rem,1.25vw,1.1rem); line-height:1.62;
+    opacity:var(--copyO,0); transform:translateY(calc((1 - var(--copyO,0)) * 0.6em));
+    text-shadow:0 2px 20px rgba(0,0,0,.5); }
+
+  .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#cfc6b6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+  @media (max-width:700px){ .resTail__card{ width:64%; height:34%; } .copy{ max-width:26ch; } }
+</style>
+</head>
+<body>
+  <div class="track" id="track">
+    <div class="pin">
+      <!-- RESIDENCES inner carousel — 3 full-bleed renders + swapping caption card -->
+      <div class="rbase" id="rbase"></div>
+      <div class="rslide rslide-1" id="rslide1"></div>
+      <div class="rslide rslide-2" id="rslide2"></div>
+      <div class="rslide rslide-3" id="rslide3"></div>
+      <div class="rhead" id="rhead">
+        <div class="rhead__t">Residences</div>
+        <div class="rhead__s">Collection of premium living space</div>
+      </div>
+      <div class="rcard" id="rcard">
+        <div class="rcard__eyebrow" id="rcardName">Flats</div>
+        <div class="rcard__tag" id="rcardTag">Designer finishings</div>
+        <div class="rcard__stats">
+          <div class="rcard__stat"><b id="rcardN">138</b><span id="rcardNL">panoramic view flats</span></div>
+          <div class="rcard__stat"><b id="rcardH">3.1 m</b><span>ceiling height</span></div>
+        </div>
+        <div class="rcard__cta" id="rcardCta">Search flats</div>
+      </div>
+
+      <div class="resTail" id="resTail"><div class="resTail__card"></div></div>
+      <div class="photo" id="photo"></div>
+      <header class="head"><div class="nav">Menu · Residences</div><div class="mark">Springs</div><div class="r"><span>Contact us</span> ♥</div></header>
+
+      <div class="act" id="act">
+        <div class="word" id="word">Interiors</div>
+        <div class="sub" id="sub">Beauty in the essence of things</div>
+      </div>
+      <div class="copy" id="copy">Our designs are chosen with a delicate treatment of materials and time; time that will soon become history, a story of family generations. Natural stone, warm wood, aged metal, and textured textiles. This is how we create a visual and tactile space for authentically high-class comfort.</div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Residences → Interiors</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);color:var(--cream);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Residences → Interiors — шов (звірено з LIVE, CDP)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Таблиця казала «slide/tab-in, 🟢→🟢». <b style="color:#eaf2ec">Live:</b> крем-архітектура →
+        <b style="color:#eaf2ec">full-bleed тепле інтер'єрне фото</b> (muted palette: букле, дерево, жалюзі)
+        + велике акт-слово «Interiors» + «Beauty in the essence of things» + копі знизу-ліворуч. Це та
+        сама full-bleed+акт-слово граматика що SO-1/2, але <b style="color:#eaf2ec">ТЕПЛА палітра</b> (не зелень, не крем).
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        Джерело: <code>extraction/live-ref/SO-6-int3-cdp/</code> + baseline <code>so6-interiors.png</code>.
+        Медіа — <b>реальний springs</b> (8.interiors_bg — точний кадр). Self-floor 0.3%. RESEARCH.md.
+      </div>
+    </div>
+  </div>
+
+<script>
+  var track=document.getElementById('track');
+  var resTail=document.getElementById('resTail'), photo=document.getElementById('photo'),
+      word=document.getElementById('word'), sub=document.getElementById('sub'),
+      copy=document.getElementById('copy'), cue=document.getElementById('cue');
+  var rhead=document.getElementById('rhead'), rcard=document.getElementById('rcard'), rbase=document.getElementById('rbase');
+  var rslides=[document.getElementById('rslide1'),document.getElementById('rslide2'),document.getElementById('rslide3')];
+  var rcardName=document.getElementById('rcardName'), rcardTag=document.getElementById('rcardTag'),
+      rcardN=document.getElementById('rcardN'), rcardNL=document.getElementById('rcardNL'),
+      rcardH=document.getElementById('rcardH'), rcardCta=document.getElementById('rcardCta');
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function ss(t){return t*t*(3-2*t);}                 // smoothstep — symmetric ease (smoothness lesson S28)
+  function set(el,k,v){el.style.setProperty(k,v);}
+  // live copy per residence type (from animation-map-residences)
+  var RES=[
+    {name:'Flats',      tag:'Designer finishings', n:'138', nl:'panoramic view flats', h:'3.1 m', cta:'Search flats'},
+    {name:'Townhouses', tag:'Private patios',      n:'5',   nl:'townhouses',           h:'4.1 m', cta:'Available soon'},
+    {name:'Penthouses', tag:'Green terraces',      n:'7',   nl:'penthouses',           h:'4.1 m', cta:'Available soon'}
+  ];
+  // carousel window across the 3 residence types (before the interiors seam)
+  var RC0=0.14, RC1=0.50;
+  var curR=-1;
+  function renderResidences(p){
+    // header + card enter LINEARLY over a wide band (0.05→0.18), out before the seam (0.52→0.58) —
+    // wide non-overlapping windows + a settled hold, per the SO-2 smoothness fix (no 5% pop).
+    var inO=seg(p,0.05,0.18) * (1-ss(seg(p,0.56,0.70)));   // out overlaps photo-in for a continuous handoff
+    set(rhead,'--rheadO', inO.toFixed(3));
+    set(rcard,'--rcardO', inO.toFixed(3));
+    var t=clamp((p-RC0)/(RC1-RC0),0,1);
+    var pos=t*(RES.length-1);            // 0..2 continuous
+    var idx=Math.round(pos);
+    // the render stack fades in early (0→0.10) so the section never opens on the dark base bg, and
+    // fades out at the seam (0.56→0.70). Between, the symmetric cross-dissolve ss(1-d) runs per type
+    // (solo at settle, 0.5/0.5 at boundary, no bleed — SO-2 pattern). Header/card use inO separately.
+    var seamOut = (1-ss(seg(p,0.56,0.70)));   // whole residences layer fades at the seam
+    // rbase (Flats opening image) is fully lit from p=0 (so the section never opens dark), then fades
+    // out only at the seam. The cross-dissolving rslides ride on top of it.
+    rbase.style.opacity = seamOut.toFixed(3);
+    for(var i=0;i<rslides.length;i++){
+      var d=Math.abs(pos-i);
+      rslides[i].style.setProperty('--o', (ss(clamp(1-d,0,1))*seamOut).toFixed(3));
+    }
+    if(idx!==curR){ curR=idx; var r=RES[idx];
+      rcardName.textContent=r.name; rcardTag.textContent=r.tag; rcardN.textContent=r.n;
+      rcardNL.textContent=r.nl; rcardH.textContent=r.h; rcardCta.textContent=r.cta;
+    }
+  }
+  var smooth=0;
+  function render(p){
+    renderResidences(p);
+    // interior seam runs in the LATER track portion (residences out → cream tail → interior photo)
+    // interior photo crossfades in over the cream residences tail (0.56→0.80) — wide, smoothstep
+    set(photo,'--photo', ss(seg(p,0.56,0.80)).toFixed(3));
+    // resTail cream is only present during the seam handoff (kept off during the residences carousel)
+    resTail.style.opacity = (ss(seg(p,0.56,0.66)) * (1 - ss(seg(p,0.60,0.80)))).toFixed(3);
+    // act-word Interiors rises+wipes in — WIDE window (0.74→0.94) with smoothstep so the big serif
+    // eases in over the photo instead of snapping (the front-loaded eo made an entry spike).
+    set(word,'--r', ss(seg(p,0.74,0.94)).toFixed(3));
+    set(sub,'--subO', ss(seg(p,0.88,0.98)).toFixed(3));
+    // bottom-left body copy (0.82→0.97)
+    set(copy,'--copyO', ss(seg(p,0.82,0.97)).toFixed(3));
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  function frame(){
+    if(window.__SCAN__){ requestAnimationFrame(frame); return; }   // scan mode drives render() itself
+    var r=track.getBoundingClientRect(), total=track.offsetHeight-window.innerHeight;
+    var target=clamp((-r.top)/total,0,1);
+    smooth += (target-smooth)*0.09; if(Math.abs(target-smooth)<0.0002) smooth=target;
+    render(smooth); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var qs=new URLSearchParams(location.search), sQ=parseFloat(qs.get('s'));
+  if(!isNaN(sQ)){ var jump=function(){var t=document.getElementById('track');window.scrollTo(0,Math.round((t.offsetHeight-window.innerHeight)*sQ));smooth=sQ;render(sQ);};
+    jump(); setTimeout(jump,300); setTimeout(jump,900);
+  } else if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__SO6_OK__=true;
+</script>
+</body>
+</html>

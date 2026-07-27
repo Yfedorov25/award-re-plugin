@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ARCHITECTURE · база секції · 3 суперкомпозиції</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { height: 100vh; overflow: hidden; display: grid; grid-template-columns: 320px 1fr;
+    background: #16130f; color: #f3f1ec; font-family: 'Inter', system-ui, sans-serif; }
+  aside { border-right: 1px solid rgba(243,241,236,.12); padding: 22px 0 22px 22px; overflow-y: auto; }
+  h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 300; font-size: 1.45rem; letter-spacing: -.02em; margin-bottom: .2rem; }
+  .sub { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(243,241,236,.45); margin-bottom: 1.2rem; }
+  button.it { display: block; width: calc(100% - 22px); text-align: left; appearance: none; background: none;
+    border: none; border-bottom: 1px solid rgba(243,241,236,.08); color: rgba(243,241,236,.8);
+    font: 500 .8rem/1.35 'Inter', sans-serif; padding: .55rem .5rem; cursor: pointer; border-radius: 4px 4px 0 0; }
+  button.it small { display: block; color: rgba(243,241,236,.42); font-size: .68rem; margin-top: .12rem; }
+  button.it .atoms { display: block; color: rgba(243,241,236,.3); font-size: .62rem; margin-top: .18rem; letter-spacing: .02em; }
+  button.it:hover { background: rgba(243,241,236,.06); }
+  button.it.is-on { background: rgba(176,106,79,.22); color: #fff; }
+  button.it.is-on small { color: rgba(243,241,236,.6); }
+  main { position: relative; }
+  iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #100e0b; }
+</style>
+</head>
+<body>
+  <aside>
+    <h1>ARCHITECTURE · база секції</h1>
+    <p class="sub">3 суперкомпозиції з атомів · копі-першою · round-2</p>
+    <button class="it" data-src="a1-vechir-vdoma.html"><b>A1 · Вечір вдома</b><small>яким тут буде вечір? · вікна загоряються по одному, підписи життя</small><span class="atoms">daynight-masked-windows · daynight-engine · content-stage-cascade</span></button>
+    <button class="it" data-src="a2-chomu-vin-takyi.html"><b>A2 · Чому він такий</b><small>чому дім виглядає саме так? · констатація веде, кадр доводить</small><span class="atoms">media-step-switch · blur-reveal-stagger-title · corner-frame-meta</span></button>
+    <button class="it" data-src="a3-z-choho-zbudovanyi.html"><b>A3 · З чого збудований</b><small>з чого? · постер 4 макро, нуль кліків</small><span class="atoms">parallax-collage · split-word-headline · de-bleed</span></button>
+  </aside>
+  <main><iframe data-frame src="a1-vechir-vdoma.html" title="Прототип"></iframe></main>
+  <script>
+    var btns = document.querySelectorAll('.it');
+    var frame = document.querySelector('[data-frame]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        btns.forEach(function (x) { x.classList.remove('is-on'); });
+        b.classList.add('is-on');
+        frame.src = b.dataset.src;
+      });
+    });
+    btns[0].classList.add('is-on');
+  </script>
+</body>
+</html>

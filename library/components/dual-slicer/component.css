@@ -1,0 +1,42 @@
+/* ============================================================
+   DUAL-SLICER · component.css
+   Coupled-split section skin. Owns the two-column scaffold, the right render-strip
+   stacking, the per-line clip wraps, and GPU isolation. Photos / copy / colors are
+   composition (per site).
+   ============================================================ */
+
+.ds-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; display: flex; }
+
+/* LEFT column — copy + heading + rising inset */
+.ds-left { position: relative; flex: 0 0 50%; height: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(28px, 5vw, 90px); z-index: 2; }
+.ds-eyebrow { font-size: .72rem; letter-spacing: .34em; text-transform: uppercase; margin-bottom: 1.2em; }
+.ds-head { margin-bottom: .8em; }
+.ds-line { display: block; overflow: hidden; }                  /* the clip wrap */
+.ds-line__i { display: block; will-change: transform; backface-visibility: hidden; }
+.ds-body { max-width: 40ch; }
+.ds-inset { margin-top: clamp(18px, 3vh, 40px); width: clamp(180px, 20vw, 280px); aspect-ratio: 1/1;
+  overflow: hidden; will-change: transform; backface-visibility: hidden; }
+.ds-inset img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* RIGHT column — the vertical clip-path render strip */
+.ds-right { position: relative; flex: 0 0 50%; height: 100%; overflow: hidden; z-index: 1; }
+.ds-render { position: absolute; inset: 0; will-change: clip-path; backface-visibility: hidden; }
+.ds-render img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* NO mix-blend-mode / NO backdrop-filter over the scrubbed render strip.
+   clip-path (inset) + transform + opacity only. */
+
+/* reduced-motion / <=820px static fallback: stack the columns, show all renders */
+.ds-stage.ds-static { height: auto; flex-direction: column; }
+.ds-stage.ds-static .ds-left,
+.ds-stage.ds-static .ds-right { flex: none; width: 100%; }
+.ds-stage.ds-static .ds-right { height: 70vh; }
+.ds-stage.ds-static .ds-render { position: relative; clip-path: none !important; }
+.ds-stage.ds-static .ds-line__i,
+.ds-stage.ds-static .ds-inset { transform: none !important; }
+@media (max-width: 820px) {
+  .ds-stage { height: auto; flex-direction: column; }
+  .ds-left, .ds-right { flex: none; width: 100%; }
+}

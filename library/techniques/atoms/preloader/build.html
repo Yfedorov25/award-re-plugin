@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian — Preloader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Archivo:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#ece5d2;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#07110b;color:var(--cream);font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--cream)}a:hover{color:#fff}
+/* ---------- dummy page underneath (stand-in so the exit reveals something) ---------- */
+#underlay{position:relative;height:150vh;overflow:hidden;background:linear-gradient(180deg,#0a1a12 0%,#08130b 60%,#060e09 100%)}
+#umosaic{position:absolute;left:50%;top:50%;width:160vw;height:130vh;display:flex;gap:3vw;align-items:center;justify-content:center}
+.ucol{flex:1;display:flex;flex-direction:column;gap:3vw}
+.ucol:nth-child(1){margin-top:-10vh}
+.ucol:nth-child(2){margin-top:7vh}
+.ucol:nth-child(3){margin-top:-5vh}
+.utile{width:100%;position:relative;overflow:hidden;border-radius:2px}
+.plate{position:absolute;inset:0}
+.plate::before{content:"";position:absolute;inset:0;background-image:var(--grain);opacity:.1}
+.plate::after{content:"";position:absolute;inset:0;background:radial-gradient(130% 130% at 50% 35%,rgba(0,0,0,0) 48%,rgba(3,10,7,.6) 100%)}
+.utile .plate{filter:brightness(.55) saturate(.85)}
+.m1{background:radial-gradient(70% 55% at 30% 18%,rgba(178,200,168,.28),transparent 62%),radial-gradient(60% 60% at 75% 80%,rgba(24,52,40,.9),transparent 75%),linear-gradient(180deg,#25382c 0%,#111f17 100%)}
+.m2{background:radial-gradient(55% 45% at 62% 30%,rgba(150,190,185,.30),transparent 60%),radial-gradient(70% 55% at 20% 85%,rgba(16,42,40,.85),transparent 72%),linear-gradient(165deg,#2b4a47 0%,#132522 100%)}
+.m3{background:radial-gradient(60% 50% at 40% 25%,rgba(170,205,120,.26),transparent 58%),radial-gradient(65% 60% at 80% 85%,rgba(14,34,14,.9),transparent 75%),linear-gradient(140deg,#33502f 0%,#152613 100%)}
+.m4{background:radial-gradient(65% 50% at 55% 20%,rgba(190,200,130,.24),transparent 60%),radial-gradient(70% 55% at 15% 80%,rgba(20,28,12,.9),transparent 72%),linear-gradient(200deg,#48592f 0%,#1b2312 100%)}
+.m5{background:radial-gradient(60% 45% at 35% 22%,rgba(190,196,190,.22),transparent 58%),radial-gradient(70% 60% at 80% 85%,rgba(16,20,17,.9),transparent 75%),linear-gradient(180deg,#3a403a 0%,#161a17 100%)}
+.m6{background:radial-gradient(75% 55% at 50% 15%,rgba(210,222,220,.30),transparent 62%),radial-gradient(70% 55% at 50% 95%,rgba(22,36,34,.85),transparent 75%),linear-gradient(180deg,#6d8286 0%,#2a3937 100%)}
+#uscreen{position:absolute;left:0;top:0;width:100%;height:100vh}
+#uhead{position:absolute;right:6vw;bottom:9vh;text-align:right}
+#uhead .ulabel{margin:0 0 18px;font-size:10px;font-weight:500;letter-spacing:.32em;color:rgba(222,215,195,.55)}
+#uhead h1{margin:0;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(44px,6vw,92px);line-height:.98;color:#ded7c3}
+#ubelow{position:absolute;top:118vh;left:6vw;font-size:10px;letter-spacing:.32em;color:rgba(222,215,195,.45)}
+/* ---------- exit darkener over the page ---------- */
+#udark{position:fixed;inset:0;z-index:5;background:#000;pointer-events:none}
+/* ---------- preloader panel ---------- */
+#panel{position:fixed;inset:0;z-index:10;pointer-events:none;background:
+  radial-gradient(55% 48% at 16% 10%,rgba(120,138,78,.30),transparent 62%),
+  radial-gradient(50% 45% at 6% 94%,rgba(52,108,94,.28),transparent 65%),
+  radial-gradient(70% 60% at 88% 80%,rgba(10,26,18,.8),transparent 70%),
+  linear-gradient(118deg,#14291f 0%,#10231a 45%,#0b1a13 100%)}
+#mottle{position:absolute;inset:0;will-change:opacity;background:
+  radial-gradient(40% 36% at 62% 40%,rgba(150,170,120,.10),transparent 65%),
+  radial-gradient(35% 40% at 30% 65%,rgba(70,120,100,.12),transparent 60%)}
+#panel .vig{position:absolute;inset:0;background:radial-gradient(120% 105% at 50% 50%,transparent 55%,rgba(2,8,5,.5) 100%)}
+#panel .gr{position:absolute;inset:0;background-image:var(--grain);opacity:.07}
+/* ---------- wordmark layer (outlives the panel) ---------- */
+#wmlayer{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;pointer-events:none}
+#wmwrap{position:relative}
+.wm{display:block;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(52px,6.5vw,88px);letter-spacing:.04em;line-height:1.1;white-space:nowrap}
+#wmghost{color:#93a394;opacity:.35}
+#wmcream{position:absolute;inset:0;color:var(--cream);
+  -webkit-mask-image:linear-gradient(90deg,#000 0%,#000 40%,transparent 55%);
+  mask-image:linear-gradient(90deg,#000 0%,#000 40%,transparent 55%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-position:90% 0%;mask-position:90% 0%}
+#spinner{position:absolute;top:-24px;right:-58px;width:44px;height:44px}
+#spinner svg{position:absolute;inset:0;overflow:visible;display:block}
+#arcrot{position:absolute;inset:0;will-change:transform}
+#smono{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--cream)}
+/* ---------- replay ---------- */
+#replay{position:fixed;right:40px;bottom:32px;z-index:30;background:none;border:0;padding:10px 2px;cursor:pointer;
+  color:#ded7c3;font-family:'Archivo',sans-serif;font-size:11px;font-weight:500;letter-spacing:.28em;
+  border-bottom:1px solid rgba(222,215,195,.35);opacity:0;pointer-events:none;transition:opacity .35s ease}
+#replay.on{opacity:.85;pointer-events:auto}
+#replay:hover{color:#fff}
+</style>
+</head>
+<body>
+<div id="underlay">
+  <div id="umosaic">
+    <div class="ucol">
+      <div class="utile" style="height:36vh"><div class="plate m1"></div></div>
+      <div class="utile" style="height:30vh"><div class="plate m2"></div></div>
+    </div>
+    <div class="ucol">
+      <div class="utile" style="height:42vh"><div class="plate m3"></div></div>
+      <div class="utile" style="height:34vh"><div class="plate m5"></div></div>
+    </div>
+    <div class="ucol">
+      <div class="utile" style="height:32vh"><div class="plate m6"></div></div>
+      <div class="utile" style="height:40vh"><div class="plate m4"></div></div>
+    </div>
+  </div>
+  <div id="uscreen">
+    <div id="uhead">
+      <p class="ulabel">MERIDIAN RESIDENCES</p>
+      <h1>Stillness<br>of Waters</h1>
+    </div>
+  </div>
+  <div id="ubelow">MERIDIAN — RESIDENCES ON THE WATER</div>
+</div>
+<div id="udark"></div>
+<div id="panel"><div id="mottle"></div><div class="vig"></div><div class="gr"></div></div>
+<div id="wmlayer">
+  <div id="wmwrap">
+    <span class="wm" id="wmghost">Meridian</span>
+    <span class="wm" id="wmcream" aria-hidden="true">Meridian</span>
+    <div id="spinner">
+      <svg viewBox="0 0 44 44"><circle id="ringc" cx="22" cy="22" r="20" fill="none" stroke="rgba(236,229,210,.28)" stroke-width="1"/></svg>
+      <div id="arcrot">
+        <svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="none" stroke="#ece5d2" stroke-width="1.2" stroke-dasharray="26 99.6" stroke-linecap="round"/></svg>
+      </div>
+      <span id="smono">M</span>
+    </div>
+  </div>
+</div>
+<button id="replay" type="button">REPLAY</button>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var replayBtn = document.getElementById('replay');
+
+  var lenis = new Lenis();
+  gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+  gsap.ticker.lagSmoothing(0);
+  lenis.stop(); // scroll locked until exit completes
+
+  // initial states — GSAP owns all transforms
+  gsap.set('#umosaic', {xPercent:-50, yPercent:-50, rotation:-14});
+  gsap.set('#wmlayer', {opacity:0});
+  gsap.set('#udark',   {opacity:.35});
+  gsap.set('#mottle',  {opacity:1});
+  gsap.set('#panel',   {opacity:1});
+  gsap.set('#arcrot',  {rotation:0, transformOrigin:'50% 50%'});
+  gsap.set(['#arcrot','#smono'], {opacity:1});
+  gsap.set('#wmcream', {maskPosition:'90% 0%', webkitMaskPosition:'90% 0%'});
+
+  // MASTER timeline — 2.6s choreography; p fractions map to seconds (f * 2.6)
+  var T = 2.6;
+  var master = gsap.timeline({paused:true, onUpdate:syncUI, onComplete:syncUI});
+  master
+    // p0.00–0.15 APPEAR
+    .to('#wmlayer', {opacity:1, duration:.36, ease:'power1.out'}, 0)
+    // spinner rotation: linear function of p across the WHOLE timeline (~2 turns)
+    .to('#arcrot', {rotation:720, duration:T, ease:'none'}, 0)
+    // p0.15–0.55 LOADING HOLD: breathing gradient, drift <= 3%
+    .to('#mottle', {opacity:.97, duration:.52, ease:'sine.inOut'}, .39)
+    .to('#mottle', {opacity:1,   duration:.52, ease:'sine.inOut'}, .91)
+    // p0.55–0.72 READY SWEEP: gradient-mask travels left -> right across the glyphs
+    .to('#wmcream', {maskPosition:'0% 0%', webkitMaskPosition:'0% 0%', duration:.44, ease:'power1.inOut'}, 1.43)
+    // p0.72–0.88 PANEL EXIT: opacity only — panel dies, page clears, arc dies with panel
+    .to('#panel',  {opacity:0, duration:.42, ease:'power2.inOut'}, 1.872)
+    .to('#udark',  {opacity:0, duration:.42, ease:'power2.inOut'}, 1.872)
+    .to(['#arcrot','#smono'], {opacity:0, duration:.42, ease:'power2.inOut'}, 1.872)
+    // p0.80–1.00 WORDMARK TRAIL: slower + strictly later end than the panel
+    .to('#wmlayer', {opacity:0, duration:.52, ease:'sine.out'}, 2.08);
+
+  function syncUI(){
+    var done = master.progress() > 0.999;
+    replayBtn.classList.toggle('on', done);
+    if (done) lenis.start(); else lenis.stop();
+  }
+
+  // autoplay: 0 -> 0.55, hold ~0.8s (simulated readiness), then -> 1
+  var driver = null;
+  function autoplay(){
+    if (driver) driver.kill();
+    master.pause().progress(0);
+    syncUI();
+    driver = gsap.timeline();
+    driver.to(master, {time:1.43, duration:1.43, ease:'none'})
+          .to(master, {time:T, duration:T-1.43, ease:'none'}, '+=0.8');
+  }
+
+  window.render = function(p){
+    if (driver) { driver.kill(); driver = null; }
+    var c = Math.min(1, Math.max(0, Number(p) || 0));
+    master.pause();
+    master.progress(c);
+  };
+
+  replayBtn.addEventListener('click', autoplay);
+
+  autoplay();
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

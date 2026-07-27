@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-2 · Wellness → Nature · під-організм</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* ── Architecture copied from the WORKING SO-1: one pin, a full-bleed background
+     that is ALWAYS on screen (never scrolls away → never a black gap), and content
+     that only fades/reveals via opacity+clip. Live mechanic (animation-map-*): both
+     sections pinned, media reveals via clipPath, act-word title enters on section entry. */
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);overflow-x:clip}
+  .track{ height:620vh; position:relative; }
+  .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+
+  /* ── WELLNESS INNER CAROUSEL (S27, live-verified: 4 tabs Spa·Yoga·Fitness·Café, each a full-bleed
+     springs photo + category name + its own body copy; a tab-rail top-right tracks the active tab).
+     Real springs assets: media/wellness-tab-{1..4}-hd.webp (spa pool / yoga / fitness / café salad). */
+  /* live layout: photo LEFT ~50%, deep-teal gradient panel RIGHT ~50% (rail + copy over the panel). */
+  .wtab{ position:absolute; top:0; left:0; bottom:0; width:50%; background-size:cover;
+    background-position:center; opacity:var(--o,0); }
+  .wtab-1{ background-image:url('media/wellness-tab-1-hd.webp'); }
+  .wtab-2{ background-image:url('media/wellness-tab-2-hd.webp'); }
+  .wtab-3{ background-image:url('media/wellness-tab-3-hd.webp'); }
+  .wtab-4{ background-image:url('media/wellness-tab-4-hd.webp'); }
+  /* right gradient panel (always present under the carousel; teal→green like live) */
+  .wpanel{ position:absolute; top:0; right:0; bottom:0; width:50%; opacity:var(--panelO,0);
+    background:linear-gradient(135deg, #124f52 0%, #123f36 46%, #16322a 100%); }
+  /* tab rail — top-right vertical list, active one bright cream, others dim */
+  .wrail{ position:absolute; top:clamp(120px,20vh,190px); right:clamp(24px,5vw,80px); z-index:6;
+    display:flex; flex-direction:column; gap:.55em; text-align:right; opacity:var(--railO,0); }
+  .wrail__i{ font-family:var(--serif); font-weight:400; font-size:clamp(1.6rem,3.4vw,3rem); line-height:1.1;
+    letter-spacing:.01em; color:rgba(234,242,236,.34); transition:color .3s; }
+  .wrail__i.on{ color:var(--cream); }
+  /* per-tab caption copy, bottom-right over the gradient panel */
+  .wcap{ position:absolute; right:clamp(24px,5vw,80px); bottom:clamp(56px,12vh,120px); z-index:5;
+    width:44%; max-width:40ch; text-align:left; opacity:var(--capO,0); }
+  .wcap__name{ display:none; } /* live shows category only in the rail, not a separate heading */
+  .wcap__txt{ color:#e4ede7; font-size:clamp(.98rem,1.25vw,1.12rem); line-height:1.62; }
+  @media (max-width:700px){ .wtab{ width:100%; } .wpanel{ width:100%;
+      background:linear-gradient(180deg, rgba(18,79,82,.2), #123f36 60%, #16322a 100%); }
+    .wrail{ font-size:.8em; right:clamp(20px,6vw,40px); } .wcap{ width:auto; left:clamp(20px,5vw,40px); right:clamp(20px,5vw,40px); max-width:none; } }
+
+  /* FULL-BLEED background layers — REAL Higgsfield media (springs-matched), ALWAYS cover
+     the viewport (crossfade between them) → screen is never dark/empty. A soft green
+     scrim keeps cream text legible over the photos. */
+  .bg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+  .bg::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(14,36,29,.82) 0%, rgba(14,36,29,.35) 46%, rgba(14,36,29,.15) 100%); }
+  .bg-well{ opacity:var(--bgWell,1); background-image:url('media/wellness.webp'); }
+  .bg-nat{ opacity:var(--bgNat,0); background-image:url('media/nature.webp');
+    background-color:#173f2c; }
+  .bg-nat::after{ background:linear-gradient(270deg, rgba(13,42,30,.82) 0%, rgba(13,42,30,.32) 46%, rgba(13,42,30,.12) 100%); }
+
+  .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#cfe0d6; }
+  .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+  @media (max-width:700px){ .head .nav,.head .r span{ display:none; } }
+
+  /* content — text sits DIRECTLY over the full-bleed photo (springs-style), no dark panels.
+     Reveal grammar taken from live extracts: each line RISES (translateY from below) + a
+     clip-wipe reveal (polygon bottom→up) + opacity — NOT a flat opacity fade. Staggered. */
+  .block{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:0 clamp(28px,7vw,110px); }
+  .block.right{ align-items:flex-end; text-align:right; }
+  /* each animated line: driven by a per-line --r (0..1 reveal). translateY + clip + opacity */
+  .ln{ --r:0;
+    opacity: var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.9em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0);
+    will-change: transform, clip-path, opacity; }
+  .title{ font-family:var(--serif); font-weight:400; line-height:.96; letter-spacing:-.02em;
+    font-size:clamp(3.4rem,10vw,8rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.45); }
+  .sub{ font-family:var(--serif); font-size:clamp(1.1rem,2.2vw,1.7rem); color:#eaf2ec; margin-top:.35em; text-shadow:0 2px 24px rgba(0,0,0,.5); }
+  .body{ color:#e4ede7; font-size:clamp(1rem,1.4vw,1.15rem); line-height:1.6; margin-top:1.2em; max-width:38ch; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+  .block.right .body{ margin-left:auto; }
+  .kicker{ font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#cfe0d6; margin-bottom:1.1em; text-shadow:0 2px 16px rgba(0,0,0,.5); }
+  .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#9fb0a6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+</style>
+</head>
+<body>
+  <div class="track" id="track">
+    <div class="pin">
+      <div class="bg bg-well" id="bgWell"></div>
+      <div class="bg bg-nat" id="bgNat"></div>
+      <header class="head">
+        <div class="nav">Menu · Residences</div><div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+      <!-- WELLNESS INNER CAROUSEL — photo-left / gradient-panel-right (live layout). -->
+      <div class="wpanel" id="wpanel"></div>
+      <div class="wtab wtab-1" id="wtab1"></div>
+      <div class="wtab wtab-2" id="wtab2"></div>
+      <div class="wtab wtab-3" id="wtab3"></div>
+      <div class="wtab wtab-4" id="wtab4"></div>
+      <div class="wrail" id="wrail">
+        <div class="wrail__i" data-t="0">Spa</div>
+        <div class="wrail__i" data-t="1">Yoga</div>
+        <div class="wrail__i" data-t="2">Fitness</div>
+        <div class="wrail__i" data-t="3">Café</div>
+      </div>
+      <div class="wcap" id="wcap">
+        <div class="wcap__name" id="wcapName">Spa</div>
+        <div class="wcap__txt" id="wcapTxt"></div>
+      </div>
+
+      <!-- WELLNESS intro block — text over the wellness photo (left). .ln lines rise+wipe, staggered.
+           No kicker: live springs has no "the first bit" line — title leads straight in. -->
+      <div class="block" id="wellB" data-grp="well">
+        <div class="ln title">Wellness</div>
+        <div class="ln sub">Essence of Self-Care</div>
+        <div class="ln body">Springs brings wellness right into your home. A thoughtfully designed infrastructure for relaxation rejuvenates body and mind, leaving you refreshed and perfectly balanced.</div>
+      </div>
+      <!-- NATURE block — text over the nature watercolor (right) -->
+      <div class="block right" id="natB" data-grp="nat">
+        <div class="ln kicker">Step outside</div>
+        <div class="ln title">Nature</div>
+        <div class="ln sub">Lightness of Breathing</div>
+        <div class="ln body">Breathe in the air and open space. Do you feel like running? Don't hold back.</div>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Wellness → Nature</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Wellness → Nature — шов (звірено з live-екстрактів)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Поява тексту = <b style="color:var(--cream)">translateY-встання знизу + clip-wipe + opacity, по-рядково зі stagger</b> (граматика з animation-map: springs-заголовки op 0.005→1, nature-текст translateY 180px + polygon-clip). НЕ плоский fade. Фон — реальні Higgsfield-кадри (жінка-спа + акварельний ліс). Pin тримає, екран завжди світлий.
+      </div>
+      <div style="color:#c7d3cb;font-size:.95rem;line-height:1.65">
+        <p><a style="color:#dfece4" href="RESEARCH.md">RESEARCH.md</a> · <a style="color:#dfece4" href="../SUBORGANISMS.md">SUBORGANISMS.md</a> · live: <a style="color:#dfece4" href="../../../extraction/live-ref/SO-2-wellness-nature/sheet.png">sheet.png</a></p>
+      </div>
+      <div style="margin-top:40px;color:var(--slate);font-size:.8rem">SO-2/9 · Медіа — Higgsfield (springs-matched). Пікс-парність НЕ заявляється.</div>
+    </div>
+  </div>
+
+<script>
+  var track=document.getElementById('track');
+  var bgWell=document.getElementById('bgWell'), bgNat=document.getElementById('bgNat'),
+      cue=document.getElementById('cue');
+  var wellLines=[].slice.call(document.querySelectorAll('#wellB .ln'));
+  var natLines=[].slice.call(document.querySelectorAll('#natB .ln'));
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function ss(t){return t*t*(3-2*t);}              // smoothstep — symmetric ease, no front-loaded jump
+  function set(el,k,v){el.style.setProperty(k,v);}
+  // staggered per-line reveal over [start,end]; each line lags the previous by `stag`.
+  // dir=+1 reveal (0→1), dir=-1 hide (1→0). Returns nothing, writes --r per line.
+  function revealLines(lines, p, start, end, stag, dir){
+    var span=(end-start);
+    lines.forEach(function(el,i){
+      var a=start + i*stag, b=a + (span - (lines.length-1)*stag);
+      var r=eo(seg(p,a,b));
+      if(dir<0) r=1-r;
+      el.style.setProperty('--r', r.toFixed(3));
+    });
+  }
+  // WELLNESS carousel tab data (live copy, per tab)
+  var TABS=[
+    {name:'Spa', txt:'Let your thoughts flow freely as you immerse yourself in our crystal-clear spa pool with a view of the garden. Soft glare on the water, herbal tea in the fragrant warmth of the hammam — and just like that, you leave the day’s worries behind.'},
+    {name:'Yoga', txt:'A relaxing yoga session mellows the mind and makes your body feel light and responsive. Finding balance is easy.'},
+    {name:'Fitness', txt:'Face the day guided by your personal trainer in our modern fitness center. Exercise at your convenience — the gym is just a few steps away, right up the stairs.'},
+    {name:'Café', txt:'Do you sense the aroma of espresso adorned with creamy milk foam? Cozy up on the terrace of our wellness-café and relax to the sounds of ambient music.'}
+  ];
+  var wtabs=[document.getElementById('wtab1'),document.getElementById('wtab2'),document.getElementById('wtab3'),document.getElementById('wtab4')];
+  var wrailItems=[].slice.call(document.querySelectorAll('#wrail .wrail__i'));
+  var wrail=document.getElementById('wrail'), wcap=document.getElementById('wcap'),
+      wcapName=document.getElementById('wcapName'), wcapTxt=document.getElementById('wcapTxt'),
+      wpanel=document.getElementById('wpanel');
+  var curTab=-1;
+  // carousel window: [C0,C1]; 4 tabs each get an equal slice with crossfade at the boundary.
+  // Widened + shifted later (S28): the intro title now holds & rises out fully BEFORE the rail fades
+  // in, so nothing overlaps at the intro→carousel handoff (was the source of the jerky pop).
+  // Carousel tab advance starts at C0=0.50 — AFTER the panel/entry fade (0.32→0.54) has essentially
+  // completed — so Spa holds a SOLO, settled beat (photo + full panel, no neighbour) before the first
+  // Spa→Yoga swap. Without this beat there was no clean settled-Spa frame (entry & swap overlapped).
+  var C0=0.56, C1=0.80;
+  function renderCarousel(p){
+    // rail/cap/panel fade IN only AFTER the intro title has fully risen out (>0.32), out at the seam.
+    // LINEAR ramp (not smoothstep) over a wide band: the teal panel occludes the full-bleed intro
+    // portrait, so a steep-middle ss() made the panel slam over the face (a 26/255 pixel jump). A
+    // constant-rate fade over 0.32→0.54 spreads that occlusion evenly — no single hard step.
+    var railIn=seg(p,0.32,0.54) * (1-ss(seg(p,0.84,0.91)));
+    set(wrail,'--railO',railIn.toFixed(3)); set(wcap,'--capO',railIn.toFixed(3));
+    set(wpanel,'--panelO',railIn.toFixed(3));
+    // the whole tab stack ALSO fades in, but must finish BEFORE the first Spa→Yoga boundary (~0.49)
+    // so the entry-fade never fights the tab crossfade (that overlap was the 0.47→0.50 spike).
+    var tabsIn=seg(p,0.32,0.48);
+    var t=clamp((p-C0)/(C1-C0),0,1);          // 0..1 across all 4 tabs
+    var pos=t*(TABS.length-1);                  // 0..3 continuous tab position
+    var idx=Math.round(pos);
+    // crossfade each tab layer by proximity to `pos`, but keep each tab SOLO for most of its slice
+    // (only a short crossfade near the .3 boundary) so two photos never overlap at a settled tab.
+    for(var i=0;i<wtabs.length;i++){
+      var d=Math.abs(pos-i);
+      // Symmetric cross-dissolve spread over the WHOLE slice: o = smoothstep(1 - d). At a settled tab
+      // d=0 → o=1; at the boundary pos=x.5 both neighbours are d=0.5 → o=0.5 each (even dissolve);
+      // at the next settled tab d=1 → o=0 (no bleed-through). Because the fade is spread across the
+      // full inter-tab distance instead of onset-ing at d≈0.72, there's no sudden second-photo entry
+      // (that onset was the left-half spike at p≈0.47) — the change rate is constant across the swap.
+      var o=ss(clamp(1.0-d,0,1))*tabsIn;
+      wtabs[i].style.setProperty('--o', o.toFixed(3));
+    }
+    // active rail item + caption text (swap on integer change)
+    if(idx!==curTab){ curTab=idx;
+      wrailItems.forEach(function(el,i){ el.classList.toggle('on', i===idx); });
+      wcapName.textContent=TABS[idx].name; wcapTxt.textContent=TABS[idx].txt;
+    }
+  }
+  var smooth=0;
+  function render(p){
+    // WELLNESS intro title (S28 choreography — wide, non-overlapping, glide not pop):
+    //   rise+wipe IN over 0.03→0.18, HOLD fully lit 0.18→0.26, rise-OUT over 0.26→0.40.
+    // One continuous per-line --r (in-curve minus out-curve) so there is no gap-flicker between the
+    // reveal and hide passes (the old 5%-window 0.10→0.15 hide was the pop Yehor caught).
+    (function introTitle(){
+      var span=0.15, stag=0.035;                       // in-window 0.03..0.18
+      wellLines.forEach(function(el,i){
+        var a=0.03 + i*stag, b=a + (span - (wellLines.length-1)*stag);
+        var rin=eo(seg(p,a,b));                          // 0→1 rise in
+        var rout=eo(seg(p,0.26,0.40));                   // 0→1 as it leaves
+        el.style.setProperty('--r', (rin*(1-rout)).toFixed(3));
+      });
+    })();
+    // The intro portrait bg (bg-well) dims as the carousel enters (0.34→0.54) — the tab photos +
+    // panel occlude it anyway, and leaving it at full opacity made the occlusion complete in one
+    // abrupt step (~p0.47) when the tab photo hit full opacity over a still-full portrait. Dropping
+    // it to a low floor during the carousel, then handing off to nature at the seam, removes that step.
+    var wellDim=1 - 0.85*seg(p,0.34,0.54);          // 1 → 0.15 across carousel entry
+    var cross=eo(seg(p,0.86,0.93));                  // → nature at the seam
+    set(bgWell,'--bgWell',(wellDim*(1-cross)).toFixed(3)); set(bgNat,'--bgNat',cross.toFixed(3));
+    // 4-tab carousel Spa·Yoga·Fitness·Café (0.44→0.70), tabs fade out at the seam
+    renderCarousel(p);
+    var tabsOut=1-eo(seg(p,0.84,0.91));
+    for(var i=0;i<wtabs.length;i++){ var cur=parseFloat(wtabs[i].style.getPropertyValue('--o'))||0; wtabs[i].style.setProperty('--o',(cur*tabsOut).toFixed(3)); }
+    // NATURE lines RISE+WIPE in after the seam (0.89→0.99, staggered)
+    revealLines(natLines, p, 0.89, 0.99, 0.028, +1);
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  function frame(){
+    if(window.__SCAN__){ requestAnimationFrame(frame); return; }  // scan mode drives render() itself
+    var r=track.getBoundingClientRect(), total=track.offsetHeight-window.innerHeight;
+    var target=clamp((-r.top)/total,0,1);
+    smooth += (target-smooth)*0.09; if(Math.abs(target-smooth)<0.0002) smooth=target;
+    render(smooth); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var qs=new URLSearchParams(location.search), sQ=parseFloat(qs.get('s'));
+  if(!isNaN(sQ)){ var jump=function(){var t=document.getElementById('track');window.scrollTo(0,Math.round((t.offsetHeight-window.innerHeight)*sQ));smooth=sQ;render(sQ);};
+    jump(); setTimeout(jump,300); setTimeout(jump,900);
+  } else if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__SO2_OK__=true;
+</script>
+</body>
+</html>

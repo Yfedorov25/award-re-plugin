@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NORTH — Investment · Asset Resale</title>
+<style>
+  :root{
+    --bg:#f4f3f0;
+    --ink:#161512;
+    --black:#0b0b0a;
+    --grey:#9c988c;
+    --grey-lo:#b4b0a4;
+    --faint:#c6c2b6;
+    --line:rgba(18,16,10,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:inherit}
+  html,body{background:var(--bg)}
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    line-height:1.45;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  a:hover{color:var(--ink)}
+
+  .stage{max-width:2040px;margin:0 auto}
+
+  /* header */
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding:26px 40px 24px}
+  .hdr-left{display:flex;align-items:center;gap:12px}
+  .burger{width:52px;height:38px;border-radius:11px;background:var(--black);border:none;cursor:pointer;
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;padding-left:15px}
+  .burger i{display:block;height:2.5px;border-radius:2px;background:#fff}
+  .burger i:nth-child(1){width:22px}
+  .burger i:nth-child(2){width:15px}
+  .heart{width:44px;height:38px;border-radius:11px;background:#e7e5df;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .25s}
+  .heart:hover{background:#dedcd4}
+  .heart svg{width:17px;height:17px}
+  .wordmark{font-size:12px;letter-spacing:.34em;color:var(--ink);margin-left:8px}
+  .chip{background:var(--black);color:#fff;border:none;border-radius:11px;height:40px;padding:0 17px;cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:15px;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+  .chip svg{width:11px;height:11px}
+  .chip:hover{background:#1c1c1a}
+
+  /* grid + rail */
+  .calc{display:grid;grid-template-columns:34% 66%;padding:0 40px}
+  .rail{padding:18px 46px 30px 0}
+  .rail .mlabel{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--grey);margin-bottom:14px}
+  .rail hr{border:none;border-top:1px solid var(--line);margin:0 0 20px}
+  .rail .model{display:block;margin-bottom:42px}
+  .rail .mtitle{font-size:27px;font-weight:400;letter-spacing:.01em;text-transform:uppercase;line-height:1.05;display:inline-block;
+    padding-bottom:11px;color:var(--ink);transition:color .35s}
+  .rail .mtitle.bar{border-bottom:2px solid var(--ink)}
+  .rail a.model .mtitle{color:var(--faint);border-bottom:2px solid transparent;transition:color .35s,border-color .35s}
+  .rail a.model:hover .mtitle{color:var(--ink);border-bottom-color:var(--ink)}
+
+  .panel{border-left:1px solid var(--line);padding-left:34px;display:flex;flex-direction:column;padding-bottom:34px}
+
+  /* sub-tabs */
+  .subtabs{position:relative;display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);min-height:66px}
+  .subtab{position:relative;background:none;border:none;cursor:pointer;text-align:left;padding:12px 0 0 0;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey-lo);transition:color .3s}
+  .subtab.active{color:var(--ink)}
+  .subtab+.subtab{border-left:1px solid var(--line);padding-left:26px}
+  .subtab .lbl{display:inline-block}
+  .subtab-underline{position:absolute;bottom:-1px;left:0;height:2px;background:var(--ink);
+    transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1)}
+
+  /* state region */
+  .stateregion{position:relative;min-height:420px;padding-top:46px}
+  .swap{transition:opacity .25s ease}
+  .swap.out{opacity:0}
+  .steps123{display:grid;grid-template-columns:repeat(3,1fr);gap:34px}
+  .step .snum{font-size:clamp(48px,5.4vw,82px);font-weight:400;line-height:.95;letter-spacing:-.02em;color:var(--ink)}
+  .step .shr{border:none;border-top:1px solid var(--line);margin:22px 0 18px}
+  .step .scap{font-size:11.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--grey);line-height:1.65;max-width:230px}
+
+  .para{margin-left:50%;font-size:13px;letter-spacing:.11em;text-transform:uppercase;color:var(--grey);line-height:1.8;max-width:450px}
+
+  .forty{margin-left:50%;padding-top:64px}
+  .forty-fig{display:flex;align-items:center;gap:16px}
+  .forty-fig .big{font-size:clamp(40px,4.4vw,56px);font-weight:400;letter-spacing:-.01em;color:var(--ink);
+    display:inline-flex;align-items:baseline;gap:10px}
+  .ichip{width:26px;height:26px;border-radius:5px;background:#e5e3dc;color:#8f8c81;font-size:13px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;border:none}
+  .ichip .tip{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%) translateY(5px);
+    background:#161512;color:#f1f0ec;font-size:10px;letter-spacing:.1em;text-transform:uppercase;line-height:1.55;
+    padding:12px 14px;width:236px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:5}
+  .ichip:hover .tip,.ichip:focus-visible .tip{opacity:1;transform:translateX(-50%) translateY(0)}
+  .forty-sub{margin-top:24px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey-lo);line-height:1.7;max-width:300px}
+
+  /* cards */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:60px}
+  .card{background:#ffffff;border:1px solid rgba(18,16,10,.06);padding:28px 28px 24px;min-height:158px;
+    display:flex;flex-direction:column;justify-content:space-between;transition:background .25s}
+  .card:hover{background:#f7f6f2}
+  .card .ctext{font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);line-height:1.5;max-width:220px}
+  .card .check{align-self:flex-end;width:20px;height:20px;opacity:.5}
+
+  @keyframes sharpen{from{filter:blur(10px);opacity:.15;transform:translateY(8px)}to{filter:blur(0);opacity:1;transform:none}}
+  @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes cardin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  @media (max-width:1080px){
+    .calc{grid-template-columns:1fr;padding:0 24px}
+    .panel{border-left:none;padding-left:0;border-top:1px solid var(--line);margin-top:24px;padding-top:8px}
+    .para,.forty{margin-left:0}
+    .cards{grid-template-columns:1fr;margin-top:44px}
+    .hdr{padding:20px 24px}
+    .wordmark{display:none}
+    .stateregion{min-height:0;padding-bottom:8px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .swap,.subtab-underline{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="hdr">
+    <div class="hdr-left">
+      <button class="burger" aria-label="Menu"><i></i><i></i></button>
+      <button class="heart" aria-label="Saved">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.6"><path d="M12 20.5S3.5 14.8 3.5 8.9C3.5 6.2 5.6 4.2 8.1 4.2c1.7 0 3.1.9 3.9 2.3.8-1.4 2.2-2.3 3.9-2.3 2.5 0 4.6 2 4.6 4.7 0 5.9-8.4 11.6-8.4 11.6Z"/></svg>
+      </button>
+      <span class="wordmark">NORTH</span>
+    </div>
+    <button class="chip">CHOOSE AN OFFICE
+      <svg viewBox="0 0 12 12" stroke="#fff" stroke-width="1.1"><path d="M6 1v10M1 6h10"/></svg>
+    </button>
+  </header>
+
+  <div class="calc">
+    <aside class="rail">
+      <a class="model" href="air-b5r-invest-calculator.html">
+        <div class="mlabel">Model 1</div>
+        <hr>
+        <span class="mtitle">Rental income</span>
+      </a>
+      <div class="model">
+        <div class="mlabel">Model 2</div>
+        <hr>
+        <span class="mtitle bar">Asset resale</span>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <div class="subtabs">
+        <button class="subtab active" data-tab="A"><span class="lbl">Capitalization through resale</span></button>
+        <button class="subtab" data-tab="B"><span class="lbl">Sale of a ready-made rental business</span></button>
+        <span class="subtab-underline" id="subUnderline"></span>
+      </div>
+
+      <div class="stateregion">
+        <div class="swap" id="swapA">
+          <div class="steps123">
+            <div class="step">
+              <div class="snum">1</div><hr class="shr">
+              <div class="scap">Buy at the early construction stage.</div>
+            </div>
+            <div class="step">
+              <div class="snum">2</div><hr class="shr">
+              <div class="scap">Hold while the district matures and rents rise.</div>
+            </div>
+            <div class="step">
+              <div class="snum">3</div><hr class="shr">
+              <div class="scap">Exit at peak value, or sell the running rental business.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="swap" id="swapB" hidden>
+          <p class="para">The investor independently chooses the optimal exit moment to maximize returns. This investment model allows for a combination of regular rental income and further capital growth upon exit from the asset.</p>
+        </div>
+
+        <div class="forty">
+          <div class="forty-fig">
+            <span class="big"><span class="tilde">~</span><span class="numpct"><span class="fnum">40</span>%</span></span>
+            <button class="ichip" aria-label="More information">i
+              <span class="tip">Potential increase in property value when purchased at early stages</span>
+            </button>
+          </div>
+          <div class="forty-sub">Potential increase in property value when purchased at early stages</div>
+        </div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="ctext">Increased asset liquidity</div>
+          <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#9c988c" stroke-width="1.4"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        </div>
+        <div class="card">
+          <div class="ctext">Higher resale value driven by rental cash flow</div>
+          <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#9c988c" stroke-width="1.4"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        </div>
+        <div class="card">
+          <div class="ctext">Wide selection of the most ready-made liquid units</div>
+          <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#9c988c" stroke-width="1.4"><path d="M4 12.5l5 5L20 6.5"/></svg>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var swapA = document.getElementById('swapA');
+  var swapB = document.getElementById('swapB');
+  var fnum  = document.querySelector('.fnum');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var current = 'A';
+
+  // ---------- count-up (capture-safe) ----------
+  function countUp(el, to, dur, fmtFn){
+    el.textContent = fmtFn(to);                 // final synchronously
+    if(reduce) return;
+    var start=null;
+    function tick(now){
+      if(start===null) start=now;
+      var t=(now-start)/dur;
+      if(t>=1){ el.textContent=fmtFn(to); return; }
+      el.textContent = fmtFn(to*(1-Math.pow(1-t,3)));
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    setTimeout(function(){ el.textContent=fmtFn(to); }, dur+220);  // safety if rAF throttled
+  }
+
+  // ---------- entrance animations (resting state is final; safe if throttled) ----------
+  function playSharpen(){
+    if(reduce) return;
+    var nums = swapA.querySelectorAll('.snum');
+    var trail = swapA.querySelectorAll('.shr,.scap');
+    // fill:forwards + base delay -> a frozen/throttled timeline rests on the SHARP base state
+    nums.forEach(function(n,i){ n.style.animation='none'; void n.offsetWidth;
+      n.style.animation='sharpen .5s ease '+(0.12+i*0.09)+'s forwards'; });
+    trail.forEach(function(c,i){ c.style.animation='none'; void c.offsetWidth;
+      c.style.animation='fadeup .5s ease '+(0.22+i*0.05)+'s forwards'; });
+  }
+  function playCards(){
+    if(reduce) return;
+    cards.forEach(function(c,i){ c.style.animation='none'; void c.offsetWidth;
+      c.style.animation='cardin .5s ease '+(0.05+i*0.07)+'s forwards'; });
+  }
+  function play40(){ countUp(fnum, 40, 600, function(v){ return String(Math.round(v)); }); }
+
+  function setHook(animating){
+    window.__RESALE = { subtab: current==='A'?1:2, pct:40, animating: !!animating };
+  }
+
+  // ---------- sub-tab underline ----------
+  var subs = document.querySelectorAll('.subtab');
+  var underline = document.getElementById('subUnderline');
+  function positionUnderline(){
+    var active = document.querySelector('.subtab.active');
+    var lbl = active.querySelector('.lbl');
+    var rowLeft = active.parentElement.getBoundingClientRect().left;
+    var lblRect = lbl.getBoundingClientRect();
+    underline.style.width = Math.round(lblRect.width)+'px';
+    underline.style.transform = 'translateX('+Math.round(lblRect.left - rowLeft)+'px)';
+  }
+
+  // ---------- state switch (clean handoff) ----------
+  function activate(tab){
+    if(tab===current) return;
+    subs.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tab')===tab); });
+    positionUnderline();
+    var outEl = current==='A'?swapA:swapB;
+    var inEl  = tab==='A'?swapA:swapB;
+    current = tab;
+    setHook(true);
+    if(reduce){
+      outEl.hidden=true; inEl.hidden=false;
+      if(tab==='A') playSharpen();
+      play40(); playCards(); setHook(false); return;
+    }
+    outEl.classList.add('out');
+    setTimeout(function(){
+      outEl.hidden=true; outEl.classList.remove('out');
+      inEl.hidden=false; inEl.classList.add('out');
+      void inEl.offsetWidth;
+      inEl.classList.remove('out');
+      if(tab==='A') playSharpen();
+      play40(); playCards();
+      setTimeout(function(){ setHook(false); }, 700);
+    }, 260);
+  }
+
+  subs.forEach(function(btn){
+    btn.addEventListener('click', function(){ activate(btn.getAttribute('data-tab')); });
+  });
+  window.addEventListener('resize', positionUnderline);
+
+  // ---------- init (State A) ----------
+  positionUnderline();
+  setHook(true);
+  playSharpen();
+  play40();
+  playCards();
+  setTimeout(function(){ setHook(false); }, 900);
+})();
+</script>
+</body>
+</html>

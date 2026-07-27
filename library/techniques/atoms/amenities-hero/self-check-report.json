@@ -1,0 +1,189 @@
+{
+  "atomId": "amenities-hero",
+  "ts": "2026-07-26T17:20:55.846Z",
+  "pass": false,
+  "url": "http://localhost:8879/atoms/amenities-hero/variants/hero.html",
+  "tool": "self-check.mjs",
+  "version": 2,
+  "thresholdsVersion": 10,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "harnessHash": "fc08c1462041ce8c24c3946f8db764529ec383235b6fc48af838d01f20e99cd9",
+  "configSha": "e44ce950c7b155d1ec7e383b0dc1610e210d0dec393e130c7a26995667d9840b",
+  "expectationsSha": null,
+  "inputsHash": "95c9b36182994511546733833596ab15d12209c3cab4af0eceba12c9c094e65d",
+  "calibration": {
+    "ok": true,
+    "ts": "2026-07-26T17:19:58.570Z"
+  },
+  "coverage": {
+    "dimensionsRun": [
+      "render-api",
+      "purity",
+      "census",
+      "motion-direction",
+      "geometry",
+      "channel-identity",
+      "surface-parity",
+      "structure-parity",
+      "mechanic-class",
+      "composition-static",
+      "console-errors",
+      "http-status"
+    ],
+    "movers": 4,
+    "declared": 3,
+    "basisSelf": 0
+  },
+  "summary": "є провалені виміри — НЕ показувати compare-URL",
+  "checks": [
+    {
+      "dimension": "render-api",
+      "name": "render-api",
+      "pass": true,
+      "detail": "window.render(p) присутній",
+      "basis": "live"
+    },
+    {
+      "dimension": "purity",
+      "name": "render-p-pure",
+      "pass": true,
+      "detail": "render(p) чиста (снапшоти збігаються після стрибків; transition=0 на 4 мōверах)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "census-movers",
+      "pass": true,
+      "detail": "4 рухомих елементів, усі задекларовані (targets/ignore)",
+      "basis": "live"
+    },
+    {
+      "dimension": "motion-direction",
+      "name": "wipe:cream",
+      "pass": true,
+      "detail": "UP-wipe: visible-top 844→0px, jitter 0.0px",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:none",
+      "pass": true,
+      "detail": "card-таргетів нема (атом без картки)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:facade",
+      "pass": true,
+      "detail": "scale-механізм: Δbbox=1185px (≥100), Δtranslate=0.0px (≤2), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:cream",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=844px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.25",
+      "pass": false,
+      "detail": "live має панель (верх @88.5%), у нас ПАНЕЛІ НЕМА — текст на фото/скримі?",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.5",
+      "pass": false,
+      "detail": "у нас панель @72.8%, а в live на цьому стані панелі нема",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.75",
+      "pass": false,
+      "detail": "у нас панель @34.9%, а в live на цьому стані панелі нема",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.95",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:panel",
+      "pass": true,
+      "detail": "послідовність подій збігається: []",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:photo",
+      "pass": true,
+      "detail": "послідовність подій збігається: [COVERED-BY]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:photo.COVERED-BY",
+      "pass": true,
+      "detail": "COVERED-BY у зоні photo: live=1 vs наш=1",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "mechanic-class-parity",
+      "pass": true,
+      "detail": "клас механіки збігається: stack+cover",
+      "basis": "live"
+    },
+    {
+      "dimension": "mechanic-class",
+      "name": "class-vs-live",
+      "pass": true,
+      "detail": "config.mechanicClass=\"stack+cover\" = клас з live",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-static",
+      "name": "comp:panel@p1:line-count",
+      "pass": false,
+      "detail": "розділювачів (hairline): live=2 vs наш=0 [live 57.79%, 58.84% · наш —]",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-static",
+      "name": "comp:panel@p1:row-count",
+      "pass": false,
+      "detail": "текст-рядків: live=3 vs наш=0 [live 56.51%, 80.85%, 84.17% · наш —]",
+      "basis": "live"
+    },
+    {
+      "dimension": "console-errors",
+      "name": "console-errors",
+      "pass": true,
+      "detail": "0 console-error",
+      "basis": "live"
+    },
+    {
+      "dimension": "http-status",
+      "name": "http-status",
+      "pass": true,
+      "detail": "0 HTTP>=400",
+      "basis": "live"
+    }
+  ],
+  "unchecked": [
+    {
+      "dimension": "media-type",
+      "target": "media",
+      "reason": "waived",
+      "detail": "photo-first плейсхолдер до заміни на відео [фасад = наш higgsfield-рендер (dummy-фасад за задумом атома), не той самий кадр що в live. Ідентичність медіа судить око Єгора на компараторі; механіку прийнято S45.]"
+    }
+  ],
+  "uncheckedCount": 1
+}

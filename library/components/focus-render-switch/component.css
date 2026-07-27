@@ -1,0 +1,88 @@
+/* ============================================================
+   focus-render-switch — component styles
+   Pair with component.js. Tokens are overridable per-site.
+   ============================================================ */
+.frs{
+  --frs-ink:#10171d;
+  --frs-paper:#f3f2ee;
+  --frs-mid:#b9bdc0;
+  --frs-accent:#1aa6c7;
+  --frs-media-bg:#0c1116;
+  --frs-radius:22px;
+  --frs-mx:clamp(20px,4vw,64px);
+  --frs-media-col:48%;     /* width of the left media column */
+
+  position:relative;width:100vw;height:100vh;overflow:hidden;
+  background:var(--frs-paper);color:var(--frs-ink);
+}
+/* component.js reads --accent (unscoped) to set the sweep; mirror it */
+.frs{--accent:var(--frs-accent);--mid:var(--frs-mid);--ink:var(--frs-ink);}
+
+.frs__grid{
+  position:absolute;inset:0;
+  display:grid;
+  grid-template-columns:var(--frs-media-col) calc(100% - var(--frs-media-col));
+  align-items:center;
+}
+
+/* ---- LEFT media frame, bleeding off the left edge ---- */
+.frs__media{
+  position:relative;height:84vh;overflow:hidden;
+  border-radius:0 var(--frs-radius) var(--frs-radius) 0;
+  background:var(--frs-media-bg);
+  /* SIGNATURE concave bite on the right edge (paper pushes into media) */
+  -webkit-mask:
+     radial-gradient(120px 160px at 100% 50%, transparent 99%, #000 100%),
+     linear-gradient(#000,#000);
+  -webkit-mask-composite:source-out;
+          mask-composite:subtract;
+}
+.frs__slide{position:absolute;inset:0;opacity:0;will-change:transform,opacity}
+.frs__slide.is-active{opacity:1}
+.frs__slide img{width:100%;height:100%;object-fit:cover;transform:scale(1.06);will-change:transform}
+
+/* step counter in the seam gutter */
+.frs__count{
+  position:absolute;left:calc(var(--frs-media-col) - 14px);top:50%;z-index:5;
+  transform:translateY(-50%);
+  font-size:.62rem;letter-spacing:.18em;color:var(--frs-mid);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---- RIGHT heading ticker ---- */
+.frs__text{
+  position:relative;height:84vh;display:flex;align-items:center;
+  padding:0 var(--frs-mx) 0 clamp(28px,5vw,80px);
+}
+.frs__stack{position:relative;width:100%;max-width:18ch}
+.frs__head{
+  position:absolute;left:0;top:50%;width:100%;
+  font-size:clamp(1.6rem,2.6vw,2.3rem);font-weight:600;
+  line-height:1.12;letter-spacing:-.01em;color:var(--frs-mid);
+  opacity:0;will-change:transform,opacity;
+}
+.frs__head .w{color:inherit}
+.frs__head .w.lit{color:var(--frs-accent)}
+.frs__head .w.done{color:var(--frs-ink)}
+
+/* ---- reduced motion fallback (component.js also no-ops the pin) ---- */
+@media (prefers-reduced-motion: reduce){
+  .frs{height:auto}
+  .frs__grid{position:relative;grid-template-columns:1fr}
+  .frs__media{height:50vh;border-radius:var(--frs-radius);-webkit-mask:none;mask:none}
+  .frs__slide{position:relative;opacity:1}
+  .frs__slide+.frs__slide{display:none}
+  .frs__text{height:auto;padding:32px var(--frs-mx)}
+  .frs__stack{max-width:none}
+  .frs__head{position:relative;top:auto;opacity:1;transform:none;color:var(--frs-ink);margin:.4em 0}
+}
+
+/* ---- responsive: stack on narrow screens (let JS keep the pin, or
+        disable the pin via a matchMedia in the host site) ---- */
+@media (max-width:820px){
+  .frs__grid{grid-template-columns:1fr;align-content:center;gap:20px}
+  .frs__media{height:46vh;border-radius:var(--frs-radius);-webkit-mask:none;mask:none}
+  .frs__count{display:none}
+  .frs__text{height:auto;padding:0 var(--frs-mx)}
+  .frs__stack{max-width:none}
+}

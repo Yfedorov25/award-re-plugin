@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mobile-residencies · review board (A/B/C)</title>
+<style>
+  :root{ --ink:#e8efe9; --dim:#8ea79a; --line:rgba(160,190,175,.16); --panel:#10201700; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, #143024 0%, #0b1710 55%, #070f0a 100%);
+    color:var(--ink);
+    font:13px/1.4 ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    -webkit-font-smoothing:antialiased;
+    min-height:100%;
+    display:flex;flex-direction:column;align-items:center;
+    padding:20px 24px 40px;
+  }
+  a{color:var(--ink);}
+  .head{width:100%;max-width:1260px;display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;gap:16px;flex-wrap:wrap;}
+  .head h1{margin:0;font-size:14px;font-weight:600;letter-spacing:.4px;}
+  .head h1 b{color:#cbe6d5;}
+  .head .meta{color:var(--dim);font-size:11.5px;letter-spacing:.3px;white-space:nowrap;}
+  .head .allbtn{
+    font:inherit;font-size:11.5px;color:var(--ink);background:transparent;border:1px solid var(--line);
+    padding:6px 12px;border-radius:6px;cursor:pointer;letter-spacing:.4px;white-space:nowrap;
+  }
+  .head .allbtn:hover{border-color:rgba(160,200,175,.4);background:rgba(160,200,175,.06);}
+
+  .stage{transform-origin:top center;}
+  .board{display:flex;gap:34px;align-items:flex-start;}
+
+  .device{display:flex;flex-direction:column;gap:12px;width:390px;}
+  .cap{display:flex;align-items:center;gap:11px;padding:0 2px;}
+  .cap .badge{
+    font-size:15px;font-weight:700;letter-spacing:.5px;color:#0c1a12;
+    background:#cbe6d5;width:26px;height:26px;border-radius:6px;display:grid;place-items:center;
+  }
+  .cap .nm{font-size:13px;color:var(--ink);letter-spacing:.3px;}
+  .cap .nm span{color:var(--dim);}
+  .cap .dot{
+    margin-left:auto;display:flex;align-items:center;gap:7px;color:var(--dim);font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;
+  }
+  .cap .dot i{
+    width:9px;height:9px;border-radius:50%;background:#455a4e;display:inline-block;
+    box-shadow:0 0 0 0 rgba(127,214,160,0);transition:background .25s, box-shadow .25s;
+  }
+  .cap .dot.on i{background:#7fd6a0;box-shadow:0 0 10px 1px rgba(127,214,160,.6);}
+  .cap .dot.on{color:#7fd6a0;}
+
+  .phone{
+    width:390px;height:844px;border-radius:16px;overflow:hidden;position:relative;
+    background:#0e2419;
+    box-shadow:0 30px 70px -24px rgba(0,0,0,.7), 0 0 0 1px var(--line), inset 0 0 0 1px rgba(255,255,255,.03);
+  }
+  .phone iframe{width:390px;height:844px;border:0;display:block;background:#0e2419;}
+
+  .ctrl{display:flex;flex-direction:column;gap:9px;padding:2px;}
+  .ctrl .row{display:flex;align-items:center;gap:12px;}
+  .ctrl .pv{width:52px;color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums;letter-spacing:.5px;}
+  .ctrl input[type=range]{
+    -webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:3px;
+    background:linear-gradient(90deg,#cbe6d5 var(--fill,0%),rgba(160,190,175,.18) var(--fill,0%));
+    outline:none;cursor:pointer;
+  }
+  .ctrl input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#e8efe9;
+    box-shadow:0 1px 4px rgba(0,0,0,.5);cursor:pointer;border:2px solid #0e2419;
+  }
+  .ctrl input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#e8efe9;border:2px solid #0e2419;cursor:pointer;}
+  .ctrl .btn{
+    font:inherit;font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink);
+    background:transparent;border:1px solid var(--line);padding:6px 13px;border-radius:6px;cursor:pointer;
+  }
+  .ctrl .btn:hover{border-color:rgba(160,200,175,.45);background:rgba(160,200,175,.07);}
+  .ctrl .btn:active{transform:translateY(1px);}
+  .ctrl .beats{display:flex;gap:6px;margin-left:auto;}
+  .ctrl .beats button{
+    font:inherit;font-size:10.5px;color:var(--dim);background:transparent;border:1px solid var(--line);
+    padding:5px 8px;border-radius:5px;cursor:pointer;font-variant-numeric:tabular-nums;
+  }
+  .ctrl .beats button:hover{color:var(--ink);border-color:rgba(160,200,175,.4);}
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1><b>mobile-residencies</b> &nbsp;·&nbsp; review board</h1>
+    <div class="meta">titled photo-stack · 390×844 · A / B / C</div>
+    <button class="allbtn" id="replayAll">▶ replay all</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="board" id="board">
+      <div class="device" data-src="mobile-residencies-a.html" data-badge="A" data-name="hard pin"></div>
+      <div class="device" data-src="mobile-residencies-b.html" data-badge="B" data-name="parallax drift"></div>
+      <div class="device" data-src="mobile-residencies-c.html" data-badge="C" data-name="designer&#39;s cut"></div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const devices=[];
+    document.querySelectorAll('.device').forEach(function(el){
+      const src=el.dataset.src, badge=el.dataset.badge, name=el.dataset.name;
+      el.innerHTML=
+        '<div class="cap">'
+        +'<span class="badge">'+badge+'</span>'
+        +'<span class="nm">mobile-residencies-'+badge.toLowerCase()+' <span>· '+name+'</span></span>'
+        +'<span class="dot"><span>waiting</span><i></i></span>'
+        +'</div>'
+        +'<div class="phone"><iframe src="'+src+'" scrolling="no" loading="eager"></iframe></div>'
+        +'<div class="ctrl">'
+        +'<div class="row"><span class="pv">0.000</span>'
+        +'<input type="range" min="0" max="1" step="0.001" value="0"></div>'
+        +'<div class="row"><button class="btn replay">▶ replay</button>'
+        +'<div class="beats"><button data-p="0">0</button><button data-p="0.5">0.5</button><button data-p="1">1</button></div>'
+        +'</div></div>';
+
+      const fr=el.querySelector('iframe');
+      const slider=el.querySelector('input');
+      const pv=el.querySelector('.pv');
+      const dot=el.querySelector('.dot');
+      const dotTxt=dot.querySelector('span');
+      const d={el:el,fr:fr,slider:slider,pv:pv,raf:0};
+      devices.push(d);
+
+      function drive(p){
+        p=Math.max(0,Math.min(1,p));
+        slider.value=p;
+        slider.style.setProperty('--fill',(p*100)+'%');
+        pv.textContent=p.toFixed(3);
+        try{ if(fr.contentWindow && fr.contentWindow.render) fr.contentWindow.render(p); }catch(e){}
+      }
+      d.drive=drive;
+
+      slider.addEventListener('input',function(){ cancelAnimationFrame(d.raf); drive(parseFloat(slider.value)); });
+      el.querySelector('.replay').addEventListener('click',function(){ play(d); });
+      el.querySelectorAll('.beats button').forEach(function(b){
+        b.addEventListener('click',function(){ cancelAnimationFrame(d.raf); drive(parseFloat(b.dataset.p)); });
+      });
+
+      // lock internal scroll so the scrubber is the sole driver
+      fr.addEventListener('load',function(){
+        try{ const doc=fr.contentDocument; doc.documentElement.style.overflow='hidden'; doc.body.style.overflow='hidden'; }catch(e){}
+        drive(0);
+      });
+
+      // ready-dot poll
+      setInterval(function(){
+        let ok=false; try{ ok=!!(fr.contentWindow&&fr.contentWindow.__ATOM_OK__); }catch(e){}
+        dot.classList.toggle('on',ok);
+        dotTxt.textContent=ok?'ready':'waiting';
+      },250);
+    });
+
+    function play(d){
+      cancelAnimationFrame(d.raf);
+      const dur=2600; let t0=null;
+      function step(ts){
+        if(t0===null)t0=ts;
+        const p=Math.min(1,(ts-t0)/dur);
+        d.drive(p);
+        if(p<1) d.raf=requestAnimationFrame(step);
+      }
+      d.raf=requestAnimationFrame(step);
+    }
+    document.getElementById('replayAll').addEventListener('click',function(){ devices.forEach(play); });
+
+    // scale the board to fit the viewport
+    const stage=document.getElementById('stage'), board=document.getElementById('board');
+    function fit(){
+      stage.style.transform='scale(1)';
+      const w=board.offsetWidth, h=board.offsetHeight;
+      const availW=window.innerWidth-48, availH=window.innerHeight-96;
+      const s=Math.max(.3,Math.min(1, availW/w, availH/h));
+      stage.style.transform='scale('+s+')';
+      stage.style.height=(h*s)+'px';
+    }
+    window.addEventListener('resize',fit);
+    window.addEventListener('load',fit);
+    fit();
+  })();
+  </script>
+</body>
+</html>

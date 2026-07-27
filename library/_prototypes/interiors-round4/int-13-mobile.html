@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<!--
+  int-13-mobile «Пульт дому» - mobile twin of int-13-house-console.html
+  Same film spine: statement with skeleton index -> pinned console (scroll or tap advances rooms,
+  rigid push-swap, threshold settle 1.04->1, copy lag; the bulb switch turns THIS room to evening,
+  two-way; every room arrives in DAY) -> failsafe lights-on -> full-bleed evening arrival.
+  Mobile shape: window fills upper ~72dvh; index docks to the bottom as a horizontal swipeable serif
+  row (tap allowed on mobile); copy 2 lines between window and bar; switch >=50px in the upper 2/3.
+  390 x 844 target. Zero em/en-dash. No WebGL.
+  FIX (import pass): overflow-x:clip on .phone (hidden made .phone a scroll container, which breaks
+  position:sticky, so the console never pinned; clip crops without creating a scrollport).
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Всередині - Пульт дому (мобайл)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F1ECE2;--ink:#292219;--sub:#87796a;--oak:#9c7b52;--warm:#e0a05c;--eve:#15100a;--hs:cubic-bezier(.25,.74,.22,.99);--dvh:100vh}
+  @supports (height:100dvh){:root{--dvh:100dvh}}
+  body{font-family:"Jost",sans-serif;background:#0b0a09;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;position:relative;overflow-x:clip;background:var(--paper);container-type:inline-size;box-shadow:0 0 80px rgba(0,0,0,.6)}
+  .st{min-height:var(--dvh);position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:0 22px}
+  .eyebrow{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--oak)}
+  .title{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em;line-height:1.08}
+  .line{font-size:15px;line-height:1.65;color:var(--sub);font-weight:300}
+
+  .s1 .eyebrow{margin-bottom:20px}
+  .s1 .title{font-size:clamp(30px,8.4cqw,42px)}
+  .s1 .invite{margin-top:16px;max-width:34ch}
+  .skel{margin-top:30px;display:flex;flex-wrap:wrap;gap:10px 22px}
+  .skel span{font-family:"Cormorant Garamond",serif;font-size:22px;color:transparent;-webkit-text-stroke:1px rgba(41,34,25,.32)}
+  .scrollcue{position:absolute;bottom:110px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+
+  /* pinned console */
+  .pinwrap{position:relative;height:calc(var(--dvh) * 5)}
+  .s2{position:sticky;top:0;height:var(--dvh);min-height:0;padding:0;display:flex;flex-direction:column;background:var(--paper);transition:background 1.2s var(--hs);overflow:hidden}
+  .s2 .cover{position:absolute;inset:0;background:#171009;z-index:9}
+  .win{position:relative;overflow:hidden;height:70vh;height:70dvh;flex:none}
+  .room{position:absolute;inset:0}
+  .room img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .room .ni{opacity:0;transition:opacity .95s var(--hs)}
+  .room.lit .ni{opacity:1}
+  .lswitch{position:absolute;z-index:10;display:flex;align-items:center;gap:9px;min-height:50px;padding:12px 18px 12px 13px;border-radius:40px;
+    background:rgba(20,14,8,.52);border:1px solid rgba(242,232,221,.4);color:#f2e8dd;cursor:pointer;
+    font-family:"Jost",sans-serif;font-size:12.5px;letter-spacing:.08em;transition:transform .3s,background .4s;transform:translate(-50%,-50%)}
+  .lswitch .lsl{white-space:nowrap}
+  .lswitch .bulb{width:20px;height:20px;flex:none}
+  .lswitch .dome{fill:none;stroke:#f2e8dd;stroke-width:1.5;transition:fill .4s}
+  .lswitch .base{stroke:#f2e8dd;stroke-width:1.5;stroke-linecap:round}
+  .room.lit .lswitch{background:rgba(56,38,18,.62);border-color:rgba(246,201,107,.65);box-shadow:0 0 22px rgba(246,201,107,.35)}
+  .room.lit .lswitch .dome{fill:#f6c96b;stroke:#f6c96b}
+  .win .grad{position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(to top,rgba(10,7,3,.46),rgba(10,7,3,0) 34%)}
+  .win .cap{position:absolute;z-index:5;left:18px;bottom:14px;color:#fff}
+  .win .cap .rn{font-family:"Cormorant Garamond",serif;font-size:24px;font-weight:500}
+  .win .cap .ar{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#e8dccb;margin-top:3px}
+  .between{flex:1;display:flex;align-items:center;padding:10px 20px}
+  .between p{font-size:14px;line-height:1.55;color:var(--sub);font-weight:300;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .bar{flex:none;display:flex;gap:26px;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    padding:0 20px 18px;scrollbar-width:none}
+  .bar::-webkit-scrollbar{display:none}
+  .bar a{font-family:"Cormorant Garamond",serif;font-size:23px;font-weight:500;color:var(--ink);opacity:.35;transition:opacity .4s;
+    position:relative;white-space:nowrap;padding:10px 0;min-height:50px;display:flex;align-items:center}
+  .bar a.on{opacity:1}
+  .bar a i{position:absolute;right:-14px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--warm);
+    box-shadow:0 0 10px 2px rgba(224,160,92,.6);opacity:0;transition:opacity .5s}
+  .bar a.lit i{opacity:1}
+  .s2.dark{background:#171009}
+  .s2.dark .bar a{color:#efe1d0}
+  .s2.dark .between p{color:#a2907f}
+
+  .s3{padding:0;background:var(--eve);color:#efe1d0}
+  .s3 .frame{position:absolute;inset:0;overflow:hidden}
+  .s3 .frame img{width:100%;height:100%;object-fit:cover}
+  .s3 .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(9,6,3,.7),rgba(9,6,3,0) 52%,rgba(9,6,3,.28))}
+  .s3 .ov{position:absolute;z-index:4;left:22px;right:22px;bottom:120px}
+  .s3 .eyebrow{color:#e6b878}
+  .s3 .title{font-size:clamp(28px,8cqw,40px);color:#fff;margin:14px 0 12px}
+  .s3 .line{color:#d7c6b2}
+  .pill{display:inline-block;margin-top:18px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#c9bcab;border:1px solid rgba(233,225,214,.28);padding:8px 14px;border-radius:40px}
+</style>
+</head>
+<body>
+<div class="phone"><div class="film">
+
+  <section class="st s1">
+    <div class="eyebrow rise">Всередині</div>
+    <h1 class="title rise d1">Пройдись кімнатами.<br>Увімкни світло там,<br>де вже почуваєшся вдома.</h1>
+    <p class="line invite rise d2">П'ять кімнат чекають. У кожній є лампа.</p>
+    <div class="skel rise d2">
+      <span>Кухня</span><span>Спальня</span><span>Друга кімната</span><span>Сходи</span><span>Гардероб</span>
+    </div>
+    <div class="scrollcue rise d3">До пульта</div>
+  </section>
+
+  <div class="pinwrap" id="consoleWrap">
+  <section class="st s2" id="console">
+    <div class="cover cover" id="cover"></div>
+    <div class="win" id="win"></div>
+    <div class="between"><p id="basecopy"></p></div>
+    <nav class="bar" id="idx"></nav>
+  </section>
+  </div>
+
+  <section class="st s3" id="arrival">
+    <div class="frame cV"><img src="assets/interiors-townhouse/int-kitchen-night.jpg" alt="Кухня-вітальня ввечері"></div>
+    <div class="ov">
+      <div class="eyebrow rise d1">Коли темніє</div>
+      <h2 class="title rise d2">А ввечері дім<br>світиться зсередини.</h2>
+      <p class="line rise d3">Світло тепле і низьке, під стелею. Ти вдома, і нікуди не поспішаєш.</p>
+      <div class="pill rise d4">Ремонт під ключ. Меблі на візуалізації для прикладу.</div>
+    </div>
+  </section>
+
+</div></div>
+<script>
+(function(){
+  var sts=[].slice.call(document.querySelectorAll('.st'));
+  var SEL='.rise,.fade,.cV,.cU,.portal,.rule,.cover';
+  function ease(t){return 1-Math.pow(1-t,3);}
+  function dOf(el){return el.classList.contains('d4')?0.64:el.classList.contains('d3')?0.48:el.classList.contains('d2')?0.3:el.classList.contains('d1')?0.14:0;}
+  function kOf(el){var c=el.classList;return c.contains('cover')?'cover':c.contains('cV')?'cV':c.contains('cU')?'cU':c.contains('portal')?'portal':c.contains('rule')?'rule':c.contains('fade')?'fade':'rise';}
+  function set(el,k,e){var i=1-e;
+    if(k==='rise'){el.style.opacity=e;el.style.transform='translateY('+(30*i).toFixed(1)+'px)';}
+    else if(k==='fade'){el.style.opacity=e;}
+    else if(k==='cV'){el.style.clipPath='inset('+(i*50).toFixed(2)+'% 0 '+(i*50).toFixed(2)+'% 0)';}
+    else if(k==='cU'){el.style.clipPath='inset('+(i*100).toFixed(2)+'% 0 0 0)';}
+    else if(k==='portal'){var p=(i*40).toFixed(2);el.style.clipPath='inset('+p+'% '+p+'% '+p+'% '+p+'%)';}
+    else if(k==='rule'){el.style.transformOrigin='left';el.style.transform='scaleX('+e.toFixed(3)+')';}
+    else if(k==='cover'){el.style.transform='translateY('+(-e*101).toFixed(2)+'%)';}
+  }
+  function anim(el){var k=kOf(el),delay=dOf(el)*1000,dur=(k==='rise'||k==='rule'||k==='fade')?850:1250,t0=null;
+    function step(ts){if(t0===null)t0=ts;var m=ts-t0-delay;if(m<0){requestAnimationFrame(step);return;}var p=Math.min(1,m/dur);set(el,k,ease(p));if(p<1)requestAnimationFrame(step);}
+    requestAnimationFrame(step);setTimeout(function(){set(el,k,1);},delay+dur+150);}
+  var played=[];
+  function play(st){if(played.indexOf(st)>-1)return;played.push(st);
+    [].slice.call(st.querySelectorAll(SEL)).forEach(anim);
+    if(st.id==='console')setTimeout(armConsole,800);
+    if(st.id==='arrival')lightsFailsafe();}
+  sts.forEach(function(st){[].slice.call(st.querySelectorAll(SEL)).forEach(function(el){set(el,kOf(el),0);});});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)play(e.target);});},{threshold:0.25});
+  sts.forEach(function(s,i){if(i===0){setTimeout(function(){play(s);},40);}else io.observe(s);});
+  function checkStages(){var vh=innerHeight;sts.forEach(function(s){var r=s.getBoundingClientRect();if(r.top<vh*0.72&&r.bottom>vh*0.2)play(s);});}
+  window.addEventListener('scroll',checkStages,{passive:true});
+  setTimeout(checkStages,600);
+
+  var ROOMS=[
+    {id:'kitchen',nm:'Кухня',d:'assets/interiors-townhouse/int-kitchen-day.jpg',n:'assets/interiors-townhouse/int-kitchen-night.jpg',ar:'Кухня-вітальня · 19,44 м²',cp:'Одна велика кімната на цілий день. Готуєш, розмовляєш, живеш поруч.',lx:'38%',ly:'40%'},
+    {id:'bedmain',nm:'Спальня',d:'assets/interiors-townhouse/int-bedmain-day.jpg',n:'assets/interiors-townhouse/int-bedmain-night.jpg',ar:'Спальня · 14,05 м²',cp:'Білі стіни, м\'яке світло, нічого зайвого.',lx:'62%',ly:'40%'},
+    {id:'bed2',nm:'Друга кімната',d:'assets/interiors-townhouse/int-bed2-day.jpg',n:'assets/interiors-townhouse/int-bed2-night.jpg',ar:'Друга кімната · 12,49 м²',cp:'Дитяча, кабінет, гостьова. Ти сам вирішиш, ким вона стане.',lx:'54%',ly:'40%'},
+    {id:'stairs',nm:'Сходи',d:'assets/interiors-townhouse/int-stairs1-day.jpg',n:'assets/interiors-townhouse/int-stairs1-night.jpg',ar:'Коридор і сходи · 7,89 м²',cp:'Дорога нагору, де день стихає.',lx:'30%',ly:'22%'},
+    {id:'wardrobe',nm:'Гардероб',d:'assets/interiors-townhouse/int-wardrobe1-day.jpg',n:'assets/interiors-townhouse/int-wardrobe1-night.jpg',ar:'Гардероб',cp:'Все на своїх місцях, за зачиненими дверима.',lx:'58%',ly:'58%'}
+  ];
+  var cur=0,busy=false,queued=null,armed=false;
+  var win=document.getElementById('win'),idx=document.getElementById('idx'),basecopy=document.getElementById('basecopy');
+  var s2=document.getElementById('console');
+  ROOMS.forEach(function(r){var a=new Image();a.src=r.d;var b=new Image();b.src=r.n;if(b.decode)b.decode().catch(function(){});});
+  var BULB='<svg class="bulb" viewBox="0 0 24 24" aria-hidden="true"><path class="dome" d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2h5a3.5 3.5 0 0 1 1.1-2A6 6 0 0 0 12 3z"></path><path class="base" d="M10 18.5h4M10.8 21h2.4" fill="none"></path></svg>';
+  function makeRoom(r){
+    var d=document.createElement('div');d.className='room';d.dataset.id=r.id;
+    d.innerHTML='<img class="di" src="'+r.d+'" alt="'+r.nm+'"><img class="ni" src="'+r.n+'" alt="'+r.nm+' ввечері">'+
+      '<div class="grad"></div>'+
+      '<button class="lswitch" style="left:'+r.lx+';top:'+r.ly+'" aria-label="Увімкнути світло">'+BULB+'<span class="lsl">Увімкнути світло</span></button>'+
+      '<div class="cap"><div class="rn">'+r.nm+'</div><div class="ar">'+r.ar+'</div></div>';
+    return d;
+  }
+  win.addEventListener('click',function(e){
+    var l=e.target.closest?e.target.closest('.lswitch'):null;
+    if(!l)return;
+    var room=l.closest('.room');if(!room)return;
+    var on=room.classList.toggle('lit');
+    l.querySelector('.lsl').textContent=on?'Вимкнути світло':'Увімкнути світло';
+    idx.children[cur].classList.toggle('lit',on);
+  });
+  ROOMS.forEach(function(r,i){
+    var a=document.createElement('a');a.innerHTML=r.nm+'<i></i>';if(i===0)a.className='on';
+    a.addEventListener('click',function(){go(i);});
+    idx.appendChild(a);
+  });
+  function go(i){
+    if(i===cur)return;
+    if(busy){queued=i;return;}
+    busy=true;var r=ROOMS[i];var dir=i>cur?1:-1;cur=i;
+    [].slice.call(idx.children).forEach(function(el,j){el.classList.toggle('on',j===i);el.classList.remove('lit');});
+    var a=idx.children[i];
+    idx.scrollTo({left:Math.max(0,a.offsetLeft-40),behavior:'smooth'});
+    var incoming=makeRoom(r);
+    incoming.style.transform='translateY('+(dir*100)+'%)';
+    var outgoing=win.lastElementChild;
+    win.appendChild(incoming);
+    var t0=null,D=700;
+    (function step(){var now=performance.now();if(t0===null)t0=now;var p=Math.min(1,(now-t0)/D);
+      var e=p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+      incoming.style.transform='translateY('+(dir*100*(1-e)).toFixed(2)+'%)';
+      if(outgoing)outgoing.style.transform='translateY('+(-dir*100*e).toFixed(2)+'%)';
+      if(p<1)requestAnimationFrame(step);})();
+    setTimeout(function(){
+      incoming.style.transform='none';
+      if(outgoing&&outgoing.parentNode)win.removeChild(outgoing);
+      var im=incoming.querySelector('.di');im.style.transform='scale(1.04)';im.style.transition='transform .8s var(--hs)';
+      setTimeout(function(){im.style.transform='scale(1)';},30);
+      busy=false;
+      if(queued!==null){var q=queued;queued=null;go(q);}
+    },D+80);
+    setTimeout(function(){basecopy.style.opacity=0;setTimeout(function(){basecopy.textContent=r.cp;basecopy.style.transition='opacity .5s';basecopy.style.opacity=1;},160);},110);
+  }
+  function armConsole(){
+    if(armed)return;armed=true;
+    var first=makeRoom(ROOMS[0]);win.appendChild(first);
+    basecopy.textContent=ROOMS[0].cp;
+    var sw=first.querySelector('.lswitch');
+    setTimeout(function(){sw.style.transform='translate(-50%,-50%) scale(1.12)';setTimeout(function(){sw.style.transform='';},420);},700);
+  }
+  function lightsFailsafe(){
+    [].slice.call(idx.children).forEach(function(el){el.classList.add('lit');});
+    var room=win.lastElementChild;
+    if(room){room.classList.add('lit');var sl=room.querySelector('.lsl');if(sl)sl.textContent='Вимкнути світло';}
+    s2.classList.add('dark');
+  }
+  /* scroll advances rooms through the pin */
+  var wrap=document.getElementById('consoleWrap');
+  function onConsoleScroll(){
+    if(!armed)return;
+    var r=wrap.getBoundingClientRect();var vh=innerHeight;
+    var total=wrap.offsetHeight-vh;
+    var p=Math.min(1,Math.max(0,-r.top/total));
+    var st=Math.min(ROOMS.length-1,Math.floor(p*ROOMS.length));
+    if(st!==cur&&!busy)go(st);
+  }
+  window.addEventListener('scroll',onConsoleScroll,{passive:true});
+})();
+</script>
+</body>
+</html>

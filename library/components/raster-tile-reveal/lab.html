@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · raster-tile-reveal · real raster map mosaic (decode-guarded staggered tile reveal + real POI dots)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · raster-tile-reveal
+================================================================================
+  The first PHOTOGRAPHIC-map medium in the location family. A pre-baked STATIC mosaic of raster
+  map tiles (plain <img>, NO canvas) laid out as a grid; on reveal every tile FORCE-DECODES
+  (img.decode()) up front, THEN fades + scales in along a diagonal stagger, after which real POI
+  dots drop on real positions. NO live tile server / NO Leaflet / NO Mapbox / NO pan engine ->
+  no-WebGL, no second scroll owner. The DECODE-GUARD is the whole point: never paint an
+  undecoded tile (black flicker).
+
+  PLACEHOLDER MOSAIC: renders/aerial.webp (QUADRO aerial 1920x2560) sliced into a 3x4 CSS grid of
+  <img> tiles via object-position. The 6 POI dots are REAL Агрономічне coordinates from
+  osm-agronomichne.js (projected to % of the mosaic). PRODUCTION swaps in real baked satellite
+  tiles of the OSM coordinates via the same tiles[] contract. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+  :root{ --ink:#0e0d0b; --paper:#f3efe6; --accent:#e8c98a; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans)}
+
+  .spacer{height:88vh;display:grid;place-items:center;text-align:center;opacity:.45;
+    font-size:.78rem;letter-spacing:.22em;text-transform:uppercase}
+
+  .wrap{max-width:760px;margin:0 auto;padding:0 6vw}
+  .lede{padding:4vh 0 3vh}
+  .lede .kick{font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;opacity:.55}
+  .lede h1{font-weight:500;font-size:1.7rem;line-height:1.2;margin:.7rem 0 .5rem}
+  .lede p{font-size:.96rem;line-height:1.6;opacity:.7;max-width:46ch}
+
+  /* lab knobs on the stage */
+  .rtr-stage{ --rtr-bg:#0e0d0b; --rtr-ink:#f3efe6; --rtr-accent:#e8c98a; --rtr-sans:'Inter',sans-serif;
+    --rtr-ratio:3/4; --rtr-radius:6px; --rtr-dot:11px; }
+
+  /* LAB-ONLY slice: each tile img shows its piece of the one aerial via object-position.
+     This is the placeholder mosaic; production gives each tile its own real satellite-tile src.
+     (size/position are set ONCE here, never animated; the reveal animates only opacity + scale.) */
+  .rtr-tile img{ object-fit:cover; }
+  .rtr-tile[data-c="0"] img{ object-position: 0%   var(--oy); }
+  .rtr-tile[data-c="1"] img{ object-position: 50%  var(--oy); }
+  .rtr-tile[data-c="2"] img{ object-position: 100% var(--oy); }
+  .rtr-tile[data-r="0"]{ --oy:0%; }
+  .rtr-tile[data-r="1"]{ --oy:33.3%; }
+  .rtr-tile[data-r="2"]{ --oy:66.6%; }
+  .rtr-tile[data-r="3"]{ --oy:100%; }
+  /* widen the img content so object-position pans across distinct slices */
+  .rtr-tile img{ width:300%; height:400%; }
+  .rtr-tile{ display:grid; place-items:center; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ справжня мапа збирається з плиток</div>
+
+  <div class="wrap">
+    <div class="lede">
+      <div class="kick">Локація · вид зверху</div>
+      <h1>Агрономічне, з висоти</h1>
+      <p>Реальний знімок району. Плитки проявляються по черзі, тоді на свої точки спускаються магазин, пошта, аптека, школа.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section class="rtr-stage" id="map"></section>
+  </div>
+
+  <div class="spacer">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    // --- placeholder mosaic: 3 cols x 4 rows of the SAME aerial, sliced by object-position ---
+    var COLS = 3, ROWS = 4, SRC = 'renders/aerial.webp';
+    var tiles = [];
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) tiles.push({ src: SRC, col: c, row: r });
+    }
+
+    // --- 6 REAL Агрономічне POIs (osm-agronomichne.js), projected to % of the mosaic box ---
+    var pois = [
+      { x: 53.8, y: 87.5, label: 'Траш!' },
+      { x: 10.9, y: 39.7, label: 'Аврора' },
+      { x: 33.0, y: 10.9, label: 'Грош Експрес' },
+      { x: 48.1, y: 89.1, label: 'Нова Пошта' },
+      { x: 37.6, y: 40.7, label: 'Подорожник' },
+      { x: 49.1, y: 64.3, label: 'Школа · садок' }
+    ];
+
+    window.__rtr = RasterTileReveal.create('#map', {
+      cols: COLS, rows: ROWS,
+      tiles: tiles,
+      pois: pois,
+      stagger: 0.04,
+      scaleFrom: 1.04,
+      ease: 'air',
+      auto: true
+    });
+
+    // tag the injected tiles with their col/row so the lab slice CSS can target them
+    document.querySelectorAll('#map .rtr-tile').forEach(function (cell, i) {
+      var t = tiles[i];
+      cell.setAttribute('data-c', t.col);
+      cell.setAttribute('data-r', t.row);
+    });
+  })();
+</script>
+</body>
+</html>

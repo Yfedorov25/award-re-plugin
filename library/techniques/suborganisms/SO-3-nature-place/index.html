@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-3 · Nature → Place · під-організм (choreography rebuild S35)</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<!-- S35 CHOREOGRAPHY rebuild. Timeline positions MAPPED from spec/SO-3/beats.json thresholds
+     (NOT eyeball seconds): Nature p0, Nature-title p0.204, Place/morph p0.315, Runners p0.428,
+     Odometer p0.519, Location extrapolated p~0.80, Design edge p~0.96.
+     Mechanics verified frame-by-frame vs live 21.17.25 dense frames + Egor's canon
+     (KAI/SO3-CHOREOGRAPHY-EGOR-CANON.md): full-bleed scenes WIPE-UP from bottom (clipPath inset),
+     each covering the previous; texts travel up; counter-motion (one up / one down shutter);
+     slider = image left + caption right + clickable nav, new slide wipes up over previous;
+     odometer = STABLE card panel right, bg scenes flow up (leaf→water→city), photo wipes up inside
+     card, number rolls; runners zoom-in; Location = pic-in-pic map.
+     Geometry from spec/SO-3/answer-key.json (normalized %). Real assets. -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<style>
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); --ease:cubic-bezier(0.25,0.74,0.22,0.99); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);overflow-x:clip}
+  .stage{ position:relative; height:100vh; }
+  .pin{ position:relative; height:100vh; overflow:hidden; background:var(--green-deep);
+    user-select:none; -webkit-user-select:none; cursor:none; }
+
+  /* ── FULL-BLEED SCENE LAYERS — each WIPES UP from the bottom (clipPath) to cover the previous ── */
+  .scene{ position:absolute; inset:0; background-size:cover; background-position:center;
+    will-change:transform,clip-path; }
+  #scNat{ background-image:url('media/nature-bg-live.webp'); background-color:#0e1f16; }
+  #scNat::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(8,20,14,.22) 0%, rgba(8,20,14,.02) 45%, rgba(8,20,14,.4) 100%); }
+  /* the interactive leaf layer — subtly reacts to the pointer (N0 hover) */
+  #scNatFx{ background-image:url('media/nature-bg-live.webp'); background-color:transparent;
+    opacity:0; mix-blend-mode:screen; will-change:transform,opacity; }
+  /* place scene = green field, MUTED olive glow lower-left (measured live glow ≈ RGB101,133,58 — not salad-bright) */
+  #scPlace{ opacity:0; background:
+      radial-gradient(62% 84% at 4% 66%, #9aac4a 0%, #7d963c 18%, #557036 40%, transparent 70%),
+      linear-gradient(120deg, #34532a 0%, #24451f 44%, #17331f 74%, #122b23 100%);
+    clip-path:inset(100% 0 0 0); }
+  #scRunners{ opacity:0; background-image:url('media/place-bg@xxl.webp'); background-color:#132b1e; clip-path:inset(100% 0 0 0); }
+  #scRunners::after{ content:''; position:absolute; inset:0; background:rgba(12,30,22,.22); }
+  /* odometer scene bgs — real Higgsfield loop VIDEOS that flow up one over the next (canon: bgs = video) */
+  #scLeaf{ opacity:0; background-color:#12200f; clip-path:inset(100% 0 0 0); }
+  #scWater{ opacity:0; background-color:#0e2028; clip-path:inset(100% 0 0 0); }
+  #scCity{ opacity:0; background-color:#181428; clip-path:inset(100% 0 0 0); }
+  /* odometer bg videos: lift brightness/saturation to match live (ours read darker/flatter) */
+  .scene>video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:brightness(1.28) saturate(1.15) contrast(1.05); }
+  /* location scene = green leaf */
+  #scLoc{ opacity:0; background-image:url('media/nature-bg-live.webp'); background-color:#0e1f16; filter:brightness(.8); clip-path:inset(100% 0 0 0); }
+
+  /* MORPH: real t12 ribbon as translucent green glass over the place field */
+  /* morph ribbon — the real t12 silver-glass ribbon rendered as GREEN GLASS:
+     silver luminance drives light/dark of a translucent green sheet (glassy, not flat).
+     Live springs Place = a green glass S-ribbon that lets the field show through. */
+  .morph{ position:absolute; top:-6%; height:112%; width:auto; aspect-ratio:2016/3267; left:22%;
+    opacity:0; z-index:3; will-change:opacity,transform; }
+  /* body of the ribbon = translucent green glass (multiply lets the field show through) — brighter to match live */
+  .morph::before{ content:''; position:absolute; inset:0; background:url('media/t12@xxl.webp') center/contain no-repeat;
+    mix-blend-mode:multiply; opacity:.88; filter:grayscale(1) brightness(.62) sepia(1) hue-rotate(62deg) saturate(2.4); }
+  /* specular highlights on the brightest glass edges — muted sheen (live morph is deeper green, not bright) */
+  .morph::after{ content:''; position:absolute; inset:0; background:url('media/t12@xxl.webp') center/contain no-repeat;
+    mix-blend-mode:screen; opacity:.2; filter:grayscale(1) brightness(1.0) contrast(1.4) sepia(1) hue-rotate(56deg) saturate(1.6); }
+
+  /* ── SLIDE-UP CARDS (enter from bottom via clipPath wipe) ── */
+  .card{ position:absolute; overflow:hidden; background-size:cover; background-position:center;
+    box-shadow:0 24px 70px rgba(0,0,0,.42); will-change:clip-path,transform,opacity; z-index:4; }
+  /* enjoy hand card (right, mid) — matches live beat_14s: right ~52%, square-ish */
+  #cardHand{ left:52%; top:29%; width:26vw; height:42vh; background-image:url('media/nature-video@xxl.webp'); opacity:0; clip-path:inset(100% 0 0 0); }
+  /* conveyor terrace (fills whole frame, rises FULL-BLEED per live beat_17s) */
+  #cardTerr{ left:0; top:0; width:100%; height:100%; background-image:url('media/nature-caption@xxl.webp'); opacity:0; clip-path:inset(100% 0 0 0); z-index:2; }
+  /* slider card (image LEFT per live beat_20-28s: x ~6% w ~44% h ~74%, sits over green field) */
+  #cardSlide{ left:6%; top:13%; width:44%; height:74%; background-image:url('media/nature-slider-md-1@xxxl.webp'); opacity:0; clip-path:inset(100% 0 0 0); }
+  /* slider nav — two circular arrows under the caption (live beat_24s: right side, below caption) */
+  /* nav under the caption (live: below the slider text, right side) */
+  .slider__nav{ position:absolute; left:66.4%; top:80%; z-index:6; opacity:0; display:flex; gap:14px; }
+  .slider__nav button{ width:44px;height:44px;border-radius:50%;border:1px solid rgba(234,244,236,.55);
+    background:transparent; display:flex;align-items:center;justify-content:center;color:#eaf4ec;
+    font-style:normal;cursor:pointer; transition:background .3s var(--ease),border-color .3s var(--ease); }
+  .slider__nav button:hover{ background:rgba(234,244,236,.12); border-color:rgba(234,244,236,.9); }
+  .slider__nav svg{ width:16px;height:16px; }
+
+  /* ── HEADER ── */
+  .head{ position:absolute; top:0; left:0; right:0; z-index:9; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#cfe0d6; }
+  .head .nav{ display:flex; align-items:center; gap:16px; }
+  .head .burger{ display:inline-flex; flex-direction:column; gap:5px; width:26px; }
+  .head .burger i{ height:1px; background:#cfe0d6; display:block; }
+  .head .mark{ font-family:var(--serif); }
+  .head .r{ display:flex; align-items:center; gap:12px; }
+  @media (max-width:700px){ .head .nav span,.head .r span{ display:none; } }
+
+  /* ── CUSTOM CURSOR DOT (live: small ring dot) ── */
+  .cursor{ position:absolute; z-index:20; width:9px; height:9px; margin:-4.5px 0 0 -4.5px;
+    border-radius:50%; border:1px solid rgba(234,244,236,.7); pointer-events:none;
+    transition:transform .18s var(--ease),opacity .3s; opacity:0; will-change:left,top; }
+
+  /* ── TEXT ATOMS (geometry from answer-key, normalized) ── */
+  .atom{ position:absolute; z-index:5; will-change:opacity,transform; opacity:0; }
+  .title{ font-family:var(--serif); font-weight:400; line-height:.74; letter-spacing:-.005em;
+    color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.4); }
+  .eyebrow{ font-family:var(--body); text-transform:uppercase; letter-spacing:.22em; color:#cfe0d6; }
+  .body{ font-family:var(--body); color:#e7f1e9; line-height:1.55; text-shadow:0 2px 20px rgba(0,0,0,.55); }
+
+  /* Nature title — measured from live: xL 4.8%, width 39%, baseline y67.8% */
+  #natTitle{ left:4.17%; top:auto; bottom:32%; }  #natTitle .title{ font-size:13.8vw; }
+  /* live: UPPERCASE letter-spaced SANS (not italic serif) */
+  #natSub{ left:4.17%; top:auto; bottom:24%; font-size:.72rem; font-family:var(--body); text-transform:uppercase; letter-spacing:.22em; color:#cfe0d6; }
+  /* nature body — measured live: xL 64.7%, yT 75.2%, w 30% */
+  #natBody{ left:64.7%; top:75.2%; bottom:auto; width:30%; font-size:clamp(.95rem,1.2vw,1.12rem); }
+  /* enjoy caption LEFT — live: BIG serif copy on a soft gradient scrim (not a hard solid panel) */
+  #enjoy{ left:0; top:15%; width:clamp(420px,46vw,680px); opacity:0; z-index:6;
+    font-family:var(--serif); font-weight:400; font-size:clamp(1.5rem,2.3vw,2.15rem); line-height:1.28; color:#eef4e9;
+    padding:clamp(32px,4vw,64px) clamp(36px,4.4vw,72px);
+    background:linear-gradient(105deg, rgba(14,36,29,.82) 0%, rgba(14,36,29,.6) 55%, rgba(14,36,29,0) 100%);
+    text-shadow:0 2px 24px rgba(0,0,0,.5); }
+  /* slider caption RIGHT (live beat_24s: right column, mid) */
+  /* slider caption — measured live beat_24s: xL 66.4%, yT 66.7%, w 29% (lower-right, not mid) */
+  #slideCap{ left:66.4%; right:auto; top:66.7%; width:29%; opacity:0; z-index:6; color:#f2f8f0;
+    font-size:clamp(.95rem,1.15vw,1.08rem); line-height:1.55; text-shadow:0 2px 26px rgba(0,0,0,.85),0 1px 3px rgba(0,0,0,.6); }
+
+  /* Place title — element-gate spec (frame-086, viewport-centered): x983.4 y397.2 w396.6 h133.2 fs180px
+     → at 1440×900: left 68.3%, top 44.1%, font-size 12.5vw (180px). NOT eyeballed — copied from spec. */
+  #placeTitle{ left:68.29%; right:auto; top:44.13%; bottom:auto; }  #placeTitle .title{ font-size:12.5vw; }
+  /* place eyebrow = live 'place-body' container: x983.4 y486 w396.6 (27.5%) h8.4 fs12px lh~0.7 */
+  #placeEyebrow{ left:68.29%; right:auto; top:54%; bottom:auto; width:27.54%; font-size:12px; line-height:.7; text-align:left; }
+  /* place-body — measured live: xL 4.3%, yT 79.8%, w 30% (lower than we had) */
+  #placeBody{ left:4.17%; top:79.8%; bottom:auto; width:30%; font-size:clamp(.95rem,1.25vw,1.15rem); }
+  /* runners caption — measured live: xL 55%, yT 56.7%, w 40% (centre-low right, not bottom-crammed) */
+  #runners{ left:55%; top:56.7%; bottom:auto; width:40%; font-family:var(--serif); font-size:clamp(1.15rem,1.65vw,1.55rem);
+    line-height:1.36; color:#eef4ee; text-shadow:0 2px 22px rgba(0,0,0,.55); z-index:6; }
+
+  /* ── ODOMETER card (STABLE panel right; photo + number + caption swap inside) ── */
+  /* odometer card — live anchors it BOTTOM-right (its base near viewport bottom), not mid-height */
+  .odo{ position:absolute; right:9%; bottom:6%; top:auto; width:clamp(260px,24vw,380px); opacity:0; z-index:7; }
+  /* solid opaque panel + hairline edge (NO blur box-shadow — its blur read as a ghost panel).
+     Needs to hold contrast over BRIGHT video bgs (city), so keep it fully opaque. */
+  .odo__panel{ background:#0e2622; padding:14px 14px 22px; outline:1px solid rgba(255,255,255,.06); }
+  .odo__card{ position:relative; width:100%; aspect-ratio:448/420; overflow:hidden; }
+  .odo__card .ph{ position:absolute; inset:0; background-size:cover; background-position:center;
+    will-change:clip-path; clip-path:inset(100% 0 0 0); }
+  .ph1{ background-image:url('media/place-caption-1@xxl.webp'); clip-path:inset(0% 0 0 0); }
+  .ph2{ background-image:url('media/place-caption-3@xxl.webp'); }
+  .ph3{ background-image:url('media/place-caption-2@xxl.webp'); }
+  .odo__num{ font-family:var(--serif); font-size:clamp(3rem,6vw,5.4rem); line-height:1.02; color:var(--cream); margin-top:.24em; text-shadow:0 4px 30px rgba(0,0,0,.5); overflow:hidden; }
+  .odo__num span{ display:inline-block; will-change:transform; }
+  .odo__cap{ text-align:right; font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:#cfe0d6; margin-top:.6em; line-height:1.7; }
+
+  /* ── LOCATION map (picture-in-picture over green leaf) ── */
+  /* real Higgsfield vector map (matches live springs: rises from bottom, centre-right, large) */
+  .map{ position:absolute; left:20%; top:auto; bottom:0; width:80%; height:62%; opacity:0; z-index:6;
+    box-shadow:0 30px 90px rgba(0,0,0,.4); clip-path:inset(100% 0 0 0);
+    background:#efe9dc url('media/location-map@xxl.webp') center/cover no-repeat; }
+  .map__cap{ position:absolute; right:8%; top:16%; max-width:24ch; opacity:0; z-index:7; color:#1c2a1e;
+    font-size:clamp(.95rem,1.2vw,1.15rem); line-height:1.4; }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="pin" id="pin">
+      <!-- full-bleed scene layers (wipe up over each other) -->
+      <div class="scene" id="scNat"></div>
+      <div class="scene" id="scNatFx"></div>
+      <div class="card" id="cardTerr"></div>
+      <div class="scene" id="scPlace"></div>
+      <div class="scene" id="scRunners"></div>
+      <div class="scene" id="scLeaf"><video src="media/odo-leaf.mp4" muted loop playsinline preload="auto"></video></div>
+      <div class="scene" id="scWater"><video src="media/odo-water.mp4" muted loop playsinline preload="auto"></video></div>
+      <div class="scene" id="scCity"><video src="media/odo-city.mp4" muted loop playsinline preload="auto"></video></div>
+      <div class="scene" id="scLoc"></div>
+
+      <div class="morph" id="morph"></div>
+
+      <!-- cards -->
+      <div class="card" id="cardHand"></div>
+      <div class="card" id="cardSlide"></div>
+      <div class="slider__nav" id="sliderNav">
+        <button id="navPrev" aria-label="prev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <button id="navNext" aria-label="next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+
+      <!-- location map (pic-in-pic) — real Higgsfield vector map -->
+      <div class="map" id="map"></div>
+      <div class="atom body map__cap" id="mapCap">Easy access to Nature Park. Landscapes of watercolor tenderness that belong only to you.</div>
+
+      <header class="head">
+        <div class="nav"><span class="burger"><i></i><i></i></span> <span>Menu&nbsp;&nbsp;&nbsp;Residences</span></div>
+        <div class="mark"><svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><circle cx="20" cy="20" r="18.5" fill="none" stroke="#cfe0d6" stroke-width="1"/><path d="M25 14 C17 14 15 20 20 22 C25 24 23 30 15 28" fill="none" stroke="#cfe0d6" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="r"><span>Contact us</span> <svg viewBox="0 0 24 22" width="17" height="16" aria-hidden="true"><path d="M12 20 C4 14 1 9 4 5 C6.5 2 10 3 12 6 C14 3 17.5 2 20 5 C23 9 20 14 12 20 Z" fill="none" stroke="#cfe0d6" stroke-width="1.3"/></svg></div>
+      </header>
+
+      <div class="cursor" id="cursor"></div>
+
+      <!-- Nature -->
+      <div class="atom" id="natTitle"><div class="title">Nature</div></div>
+      <div class="atom" id="natSub">Lightness of Breathing</div>
+      <div class="atom body" id="natBody">Here, nature merges with architecture and becomes an integral part of your home. Nature takes the spotlight, embodied in the painterly curves of our gardens and the green silhouettes of the façade terraces. Nature becomes your companion on meditative walks and at family gatherings, providing a soothing backdrop.</div>
+      <!-- Enjoy -->
+      <div class="atom" id="enjoy">Enjoy nature's embrace that shields you from the world outside. Climbing rooftop plants, winding layouts of flowerbeds, emerald lawns. Springs lets you learn the art of leisure.</div>
+      <!-- slider caption -->
+      <div class="atom" id="slideCap"><span id="slideCapTxt">Landscaped terraces with topiary trees, framed with glass, create the atmosphere of a miniature park floating above the City.</span></div>
+      <!-- Place -->
+      <div class="atom" id="placeTitle"><div class="title">Place</div></div>
+      <div class="atom eyebrow" id="placeEyebrow">Essence of Contemplation</div>
+      <div class="atom body" id="placeBody">Springs is situated in the prestigious Western District of the capital, surrounded by parks and close to the embankment. It is adjacent to the highway, one of the most ecological areas of the City.</div>
+      <!-- runners -->
+      <div class="atom" id="runners">Breathe in the air and open space. Do you feel like running? Don't hold back. As you are running along the embankment, delight in the kaleidoscope of shifting panoramas that will leave you impressed. Set your pace and change it at your desire.</div>
+      <!-- odometer -->
+      <div class="odo" id="odo">
+        <div class="odo__panel">
+          <div class="odo__card"><div class="ph ph1" id="ph1"></div><div class="ph ph2" id="ph2"></div><div class="ph ph3" id="ph3"></div></div>
+          <div class="odo__num" id="odoNum"><span>3</span></div>
+          <div class="odo__cap" id="odoCap">Minute walk<br>to Nature Park</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.defaults({ease:'cubic-bezier(0.25,0.74,0.22,0.99)'});
+
+  var SLIDES=['media/nature-slider-md-1@xxxl.webp','media/nature-slider-md-2@xxxl.webp','media/nature-slider-md-3@xxxl.webp'];
+  var SLIDECAPS=['Landscaped terraces with topiary trees, framed with glass, create the atmosphere of a miniature park floating above the City.',
+    'Shady leafy-coniferous garden that evokes winding paths, branchy trees, and sunlit glades of forests surrounding the City.',
+    'Artfully designed recreation areas that delight you with diverse botanical decor and asymmetrical lawns.'];
+  var ODO=[{n:'3',cap:'Minute walk<br>to Nature Park'},{n:'9',cap:'Minute walk<br>to the embankment'},{n:'16',cap:'Minutes by car<br>to the MIBC'}];
+  var cardSlide=document.getElementById('cardSlide'), slideCapTxt=document.getElementById('slideCapTxt');
+  var odoNum=document.getElementById('odoNum'), odoCap=document.getElementById('odoCap');
+  var ph=[document.getElementById('ph1'),document.getElementById('ph2'),document.getElementById('ph3')];
+  var _slideIdx=0, _swapping=false;
+  function setSlide(i){ cardSlide.style.backgroundImage="url('"+SLIDES[i]+"')"; slideCapTxt.textContent=SLIDECAPS[i]; }
+  var _odoCur=-1;
+  function setOdo(i){ if(i===_odoCur)return; _odoCur=i;
+    odoNum.innerHTML='<span>'+ODO[i].n+'</span>'; odoCap.innerHTML=ODO[i].cap;
+    // photo wipe-up swap INSIDE the card: target photo reveals from bottom, others hidden
+    ph.forEach(function(p,k){ p.style.clipPath = k===i ? 'inset(0% 0 0 0)' : (k<i?'inset(0 0 100% 0)':'inset(100% 0 0 0)'); });
+  }
+
+  // ── wipe helpers: WIPE-UP = inset(100% 0 0 0) → inset(0) (reveals from bottom edge up) ──
+  var HIDE={clipPath:'inset(100% 0 0 0)'}, SHOW={clipPath:'inset(0% 0 0 0)'}, OUTUP={clipPath:'inset(0 0 100% 0)'};
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  TIMELINE — S35 TEMPO FIX. beats.json only covered a narrow theoretical band and
+  //  compressed the early beats ~2×; video-parity vs the live recording proved our
+  //  tempo runs 1-2 beats AHEAD. These positions are MEASURED from the live springs
+  //  VIDEO (21.17.25, SO-3 = 1-44s → normalized progress). The real site is NONLINEAR:
+  //  ~70% of scroll is Nature→slider (long holds), only the last ~30% is Place→odometer.
+  //  TL is authored on a 100-unit clock so tl_time = p*100. (live-first-before-visual #13)
+  // ═══════════════════════════════════════════════════════════════════════════
+  var P = {
+    natIntro:  0.00,   // Nature reveals (video ~2s)
+    natHold:   0.16,   // Nature breathes LONG (video: full Nature ~11s = p0.23)
+    enjoy:     0.30,   // N1 enjoy + hand card (video 14s = p0.30)
+    terrace:   0.37,   // N2 terrace full-bleed (video 17s = p0.37)
+    slider:    0.44,   // N3 slider gallery (video 20s = p0.44; settles ~24s = p0.535)
+    place:     0.68,   // M morph + Place (video 31s = p0.698) — the big correction
+    runners:   0.82,   // P1 runners zoom (video 37s = p0.837)
+    odo3:      0.88,   // P2a odometer leaf (video 40s = p0.907)
+    odo9:      0.93,   // P2b water (video 43s = p0.977)
+    odo16:     0.965,  // P2c city
+    location:  0.99,   // L location/map (tail of SO-3)
+    designEdge:1.0     // SO-3 boundary
+  };
+  var CLK=100;                  // author on 0..100
+  function at(p){ return p*CLK; }
+  var tl=gsap.timeline({paused:true});
+
+  // initial hidden states
+  tl.set(['#cardHand','#cardTerr','#cardSlide','#scPlace','#scRunners','#scLeaf','#scWater','#scCity','#scLoc','#map'],HIDE,0);
+  tl.set(['#morph','#natTitle','#natSub','#natBody','#enjoy','#slideCap','#sliderNav','#placeTitle','#placeEyebrow','#placeBody','#runners','#odo','#mapCap','#scNatFx'],{opacity:0},0);
+
+  // continuous parallax drift on Nature leaf bg
+  tl.fromTo('#scNat',{yPercent:3},{yPercent:-4,duration:at(P.place),ease:'none'},0);
+
+  // ══ N0 Nature intro — title/sub/body appear together, long hold, exit up ══
+  tl.fromTo('#natTitle',{opacity:0,y:60},{opacity:1,y:0,duration:2.2},at(P.natIntro)+0.6);
+  tl.fromTo('#natSub',{opacity:0,y:44},{opacity:1,y:0,duration:1.8},at(P.natIntro)+1.4);
+  tl.fromTo('#natBody',{opacity:0,y:44},{opacity:1,y:0,duration:1.8},at(P.natIntro)+1.8);
+  tl.to(['#natTitle','#natSub','#natBody'],{opacity:0,y:-48,duration:1.6},at(P.enjoy)-1.4);
+
+  // ══ N1 Enjoy — panel LEFT + hand card RIGHT together; then hand card wipes UP/out ══
+  tl.fromTo('#enjoy',{opacity:0,y:44},{opacity:1,y:0,duration:1.4},at(P.enjoy));
+  tl.fromTo('#cardHand',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:8},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:1.5},at(P.enjoy)+0.3);
+  // hand card fully exits UP just BEFORE terrace begins (clean handoff, no overlap)
+  tl.to('#cardHand',{clipPath:'inset(0 0 100% 0)',yPercent:-16,opacity:0,duration:1.2},at(P.terrace)-1.0);
+
+  // ══ N2 Terrace — FULL-BLEED rise from bottom fills the frame; enjoy panel HOLDS left ══
+  tl.fromTo('#cardTerr',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:5},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:2.0},at(P.terrace));
+  tl.fromTo('#enjoy',{yPercent:0},{yPercent:-3,duration:2.4,ease:'none'},at(P.terrace)); // counter drift, holds left
+  // enjoy exits up as terrace fully covers, just before slider
+  tl.to('#enjoy',{opacity:0,y:-40,duration:1.1},at(P.slider)-1.0);
+  // terrace fully wipes UP/out just before slider rises (clean handoff)
+  tl.to('#cardTerr',{clipPath:'inset(0 0 100% 0)',duration:1.2},at(P.slider)-0.8);
+
+  // ══ N3 Slider gallery (LONG band ~0.44→0.68) — CONFIRMED by dense live frames: slides CYCLE by scroll
+  //    (slide1→2→3), each new image wipes up over the previous, caption swaps. ←→ nav also swaps on click. ══
+  var SL_A=at(P.slider), SL_SPAN=at(P.place)-at(P.slider);   // slider occupies this whole window
+  tl.call(function(){setSlide(0);_slideIdx=0;},null,SL_A-0.1);
+  tl.fromTo('#cardSlide',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:5},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:1.5},SL_A);
+  tl.fromTo('#slideCap',{opacity:0,y:28},{opacity:1,y:0,duration:1.1},SL_A+0.7);
+  tl.fromTo('#sliderNav',{opacity:0,y:16},{opacity:1,y:0,duration:1.0},SL_A+0.9);
+  // slide 2 — new image wipes up over slide 1 (≈1/3 through the band)
+  var SL2=SL_A+SL_SPAN*0.42;
+  tl.call(function(){setSlide(1);_slideIdx=1;},null,SL2);
+  tl.fromTo('#cardSlide',{clipPath:'inset(100% 0 0 0)'},{clipPath:'inset(0% 0 0 0)',duration:1.3},SL2);
+  tl.fromTo('#slideCapTxt',{opacity:.2,y:14},{opacity:1,y:0,duration:.8},SL2+.2);
+  // slide 3 (≈2/3 through)
+  var SL3=SL_A+SL_SPAN*0.74;
+  tl.call(function(){setSlide(2);_slideIdx=2;},null,SL3);
+  tl.fromTo('#cardSlide',{clipPath:'inset(100% 0 0 0)'},{clipPath:'inset(0% 0 0 0)',duration:1.3},SL3);
+  tl.fromTo('#slideCapTxt',{opacity:.2,y:14},{opacity:1,y:0,duration:.8},SL3+.2);
+  // slider recedes up as Place field rises
+  tl.to(['#cardSlide','#slideCap','#sliderNav'],{opacity:0,y:-30,duration:1.1},at(P.place)-0.9);
+
+  // ══ M Morph→Place — green field + morph WIPE-UP from bottom; Place rises RIGHT; long hold ══
+  tl.fromTo('#scPlace',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:5},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:2.2},at(P.place)-0.4);
+  tl.fromTo('#morph',{opacity:0,yPercent:14},{opacity:1,yPercent:0,duration:2.4},at(P.place));
+  tl.fromTo('#placeTitle',{opacity:0,y:56},{opacity:1,y:0,duration:2.0},at(P.place)+0.9);
+  tl.fromTo('#placeEyebrow',{opacity:0,y:40},{opacity:1,y:0,duration:1.4},at(P.place)+1.4);
+  tl.fromTo('#placeBody',{opacity:0,y:40},{opacity:1,y:0,duration:1.6},at(P.place)+1.5);
+  // GRADUAL Place EXIT (live animates the title up + ribbon flow, not a static hold→cut):
+  // title/eyebrow/body drift UP and fade over a LONG window; morph flows downward as bg cools.
+  tl.to('#placeTitle',{opacity:0,y:-90,duration:3.2,ease:'none'},at(P.runners)-4.0);
+  tl.to(['#placeEyebrow','#placeBody'],{opacity:0,y:-60,duration:3.0,ease:'none'},at(P.runners)-3.6);
+  tl.to('#morph',{yPercent:22,opacity:0.35,duration:3.4,ease:'none'},at(P.runners)-4.0); // ribbon flows down
+  tl.to('#scPlace',{filter:'brightness(.7) saturate(.8)',duration:3.0,ease:'none'},at(P.runners)-3.5); // bg cools
+
+  // ══ P1 Runners — runners rise THROUGH the cooling green (cross-dissolve), overlapping Place exit ══
+  tl.to('#morph',{opacity:0,duration:1.2},at(P.runners)-0.6);
+  tl.to('#scPlace',{opacity:0,duration:1.8},at(P.runners)-0.8);
+  tl.fromTo('#scRunners',{clipPath:'inset(100% 0 0 0)',opacity:1},{clipPath:'inset(0% 0 0 0)',duration:2.6},at(P.runners)-1.2);
+  tl.fromTo('#scRunners',{scale:1.1},{scale:1.0,duration:at(P.odo3)-at(P.runners)+2,ease:'none'},at(P.runners)-0.2); // continuous zoom-in through beat
+  tl.fromTo('#runners',{opacity:0,y:40},{opacity:1,y:0,duration:1.4},at(P.runners)+0.3);
+  tl.to('#runners',{opacity:0,y:-36,duration:1.2},at(P.odo3)-1.0);
+
+  // ══ P2 Odometer — bgs FLOW UP (leaf→water→city). SHORT wipes so each COMPLETES inside the
+  //    compressed end-of-band window (live races through here). Each prev bg RETIRES once covered. ══
+  tl.fromTo('#scLeaf',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:4},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:1.0},at(P.odo3)-0.5);
+  tl.fromTo('#odo',{opacity:0},{opacity:1,duration:1.0},at(P.odo3)); // opacity-only reveal (no transform ghost)
+  tl.call(function(){setOdo(0);},null,at(P.odo3));
+  // 9 — water wipes up over leaf, then leaf retires
+  tl.fromTo('#scWater',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:4},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:1.0},at(P.odo9)-0.5);
+  tl.set('#scLeaf',{clipPath:'inset(0 0 100% 0)'},at(P.odo9)+0.6);   // leaf fully covered → retire
+  tl.call(function(){setOdo(1);},null,at(P.odo9));
+  tl.fromTo('#odoNum span',{yPercent:100,opacity:0},{yPercent:0,opacity:1,duration:0.7},at(P.odo9)+0.05);
+  // 16 — city wipes up over water, then water retires
+  tl.fromTo('#scCity',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:4},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:1.0},at(P.odo16)-0.5);
+  tl.set('#scWater',{clipPath:'inset(0 0 100% 0)'},at(P.odo16)+0.6); // water fully covered → retire
+  tl.call(function(){setOdo(2);},null,at(P.odo16));
+  tl.fromTo('#odoNum span',{yPercent:100,opacity:0},{yPercent:0,opacity:1,duration:0.7},at(P.odo16)+0.05);
+  tl.to('#odo',{opacity:0,duration:1.0},at(P.location)-0.8); // opacity-only exit
+
+  // ══ L Location — green leaf wipes up over city; cream MAP pic-in-pic reveals; caption ══
+  tl.fromTo('#scLoc',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:5},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:2.0},at(P.location)-0.4);
+  tl.fromTo('#map',{clipPath:'inset(100% 0 0 0)',opacity:1,yPercent:6},{clipPath:'inset(0% 0 0 0)',yPercent:0,duration:1.8},at(P.location)+0.4);
+  tl.fromTo('#mapCap',{opacity:0,y:30},{opacity:1,y:0,duration:1.4},at(P.location)+1.0);
+
+  // ── SCENE HAND-OFF: once a full-bleed scene has been fully covered by the next, wipe it
+  //    OUT (upward) so no dead layer lingers underneath. Each retires just after the next reveals. ──
+  tl.set('#scNat',   {clipPath:'inset(0 0 100% 0)'}, at(P.place)+2.2);   // Nature retired once Place field is up
+  tl.set('#cardTerr',{clipPath:'inset(0 0 100% 0)'}, at(P.slider)+1.6);  // terrace retired once slider covered it
+  tl.set('#scPlace', {clipPath:'inset(0 0 100% 0)'}, at(P.runners)+1.8); // place field retired under runners
+  tl.set('#scRunners',{clipPath:'inset(0 0 100% 0)'},at(P.odo3)+1.6);    // runners retired under leaf
+  tl.set('#scLeaf',  {clipPath:'inset(0 0 100% 0)'}, at(P.odo9)+1.6);    // leaf retired under water
+  tl.set('#scWater', {clipPath:'inset(0 0 100% 0)'}, at(P.odo16)+1.6);   // water retired under city
+  tl.set('#scCity',  {clipPath:'inset(0 0 100% 0)'}, at(P.location)+1.8);// city retired under location leaf
+
+  // Lock TL duration to the clock so tl.progress(p) maps t = p*CLK exactly
+  // → every beat sits at its beats.json normalized p. (nothing is authored past CLK.)
+  tl.set({},{},CLK);
+  var TL_END=tl.duration();
+
+  // state-sync (odometer discrete state on scrub). Slider slide is NOT scroll-driven (live holds slide-1;
+  // the ←→ nav swaps it on click), so we don't force a slide index from scroll progress here.
+  function sync(p){ var t=p*TL_END;
+    // slider cycles by scroll: restore correct slide when scrubbing (matches live)
+    if(!_swapping){ var SA=at(P.slider),SP=at(P.place)-at(P.slider);
+      var si = t>=SA+SP*0.74?2 : t>=SA+SP*0.42?1 : 0;
+      if(t>=SA-1 && t<at(P.place) && si!==_slideIdx){ setSlide(si); _slideIdx=si; } }
+    var oi = t>=at(P.odo16)?2 : t>=at(P.odo9)?1 : 0; setOdo(oi);
+  }
+
+  // odometer bg videos: play only while the odometer zone is on screen (perf); paused otherwise
+  var odoVids=[...document.querySelectorAll('#scLeaf video,#scWater video,#scCity video')];
+  var _vidsOn=false;
+  function odoVideos(on){ if(on===_vidsOn)return; _vidsOn=on;
+    odoVids.forEach(function(v){ if(on){ v.play&&v.play().catch(function(){}); } else { v.pause&&v.pause(); } }); }
+  var st=ScrollTrigger.create({ trigger:'#stage', start:'top top', end:'+=1400%', pin:'#pin', scrub:1,
+    onUpdate:function(self){ tl.progress(self.progress); sync(self.progress);
+      odoVideos(self.progress>0.84 && self.progress<0.99); } });
+
+  // ── slider nav (clickable): swaps the slide in place with a wipe-up, like live springs ──
+  function swapSlide(dir){ if(_swapping)return; var n=(_slideIdx+dir+SLIDES.length)%SLIDES.length; _swapping=true;
+    setSlide(n); _slideIdx=n;
+    gsap.fromTo('#cardSlide',{clipPath:'inset(100% 0 0 0)'},{clipPath:'inset(0% 0 0 0)',duration:0.7,
+      ease:'cubic-bezier(0.25,0.74,0.22,0.99)',onComplete:function(){_swapping=false;}});
+    gsap.fromTo('#slideCapTxt',{opacity:.2,y:12},{opacity:1,y:0,duration:.5},0);
+  }
+  document.getElementById('navNext').addEventListener('click',function(){ swapSlide(1); });
+  document.getElementById('navPrev').addEventListener('click',function(){ swapSlide(-1); });
+
+  // ── N0 interactive leaf + custom cursor (only meaningful early; subtle) ──
+  var pin=document.getElementById('pin'), cursor=document.getElementById('cursor'), scFx=document.getElementById('scNatFx');
+  pin.addEventListener('pointermove',function(e){
+    var r=pin.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+    cursor.style.left=x+'px'; cursor.style.top=y+'px'; cursor.style.opacity=1;
+    // leaf "comes alive": fx layer parallax-shifts toward pointer, only while Nature scene is on top
+    var early = tl.progress() < (P.terrace);
+    if(early){
+      var dx=(x/r.width-0.5), dy=(y/r.height-0.5);
+      gsap.to(scFx,{opacity:0.14, x:dx*26, y:dy*20, duration:0.6, overwrite:'auto'});
+      gsap.to(cursor,{scale:2.2,duration:0.3,overwrite:'auto'});
+    } else {
+      gsap.to(scFx,{opacity:0,duration:0.4,overwrite:'auto'});
+      gsap.to(cursor,{scale:1,duration:0.3,overwrite:'auto'});
+    }
+  });
+  pin.addEventListener('pointerleave',function(){ cursor.style.opacity=0; gsap.to(scFx,{opacity:0,duration:0.4}); });
+
+  window.render=function(p){ p=Math.max(0,Math.min(1,p)); tl.progress(p); sync(p); };
+  window.__SO3_OK__=true;
+  tl.progress(0); setSlide(0); setOdo(0);
+})();
+</script>
+</body>
+</html>

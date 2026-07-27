@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · bleeding-wordmark · EVER/Springs section word (fill + clip-reveal + outline/solid)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · bleeding-wordmark
+================================================================================
+  The oversized SECTION WORD that bleeds off the panel edge (EVER ARCHITECTURE/
+  INTERIOR/TERRITORY, Springs Wellness/Nature/Place). Three things make it VI-grade:
+    1. FILL to the line via fluid-type-sizing (composed in) — any word fills width.
+    2. CLIPPED REVEAL from the bottom edge (overflow:hidden wrap + translateY rise).
+    3. MIRROR-LAW fill: outline (-webkit-text-stroke) for one section, SOLID for the
+       next (data-fill). + optional slow parallax (~0.5x) on scroll.
+
+  ASSET-SUBSTITUTION GATE: OUR words over OUR renders — "архітектура" (outline) and
+  "тераса" (solid) each filling the line and clip-revealing on scroll. NO WebGL.
+
+  Composes fluid-type-sizing (sibling) for the fill. window.__LAB_OK__ on init.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="../fluid-type-sizing/component.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --cream:#DCC5B7; --green:#1f3a32; --slate:#95A3AE;
+    --wm:'Jost','Century Gothic',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif;
+    --gutter:clamp(20px,3.6vw,70px); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#15211d;color:var(--cream);font-family:var(--body)}
+
+  .sec{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;
+    padding:0 var(--gutter) 0;overflow:hidden}
+  .sec__bg{position:absolute;inset:0;z-index:0}
+  .sec__bg img{width:100%;height:100%;object-fit:cover;display:block}
+  .sec__bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,15,.2),rgba(10,18,15,.55))}
+  .sec__copy{position:relative;z-index:2;color:var(--slate);max-width:34ch;margin-bottom:1.4em;font-size:.95rem;line-height:1.6}
+  /* the bleeding wordmark sits at the bottom, clipped by the section edge */
+  .bwm{position:relative;z-index:2;color:var(--cream);margin-bottom:-.06em}
+</style>
+</head>
+<body>
+
+  <section class="sec">
+    <div class="sec__bg"><img src="renders/day.webp" alt="QUADRO фасад"></div>
+    <p class="sec__copy">Фасад читається спокійно з будь-якої точки. Камінь, скло і світло замість зайвого декору.</p>
+    <div class="bwm" data-bleeding-wordmark data-fill="outline"><span class="bwm__i">архітектура</span></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec__bg"><img src="renders/terrace.webp" alt="QUADRO тераса"></div>
+    <p class="sec__copy">Кава вранці над дахами. Простір, який належить тільки твоїй родині.</p>
+    <div class="bwm" data-bleeding-wordmark data-fill="solid"><span class="bwm__i">тераса</span></div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    // optional Lenis for smooth scroll under the parallax
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      lenis.on('scroll', function(){ if (window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+      gsap.ticker.lagSmoothing(0);
+    }
+    BleedingWordmark.init('[data-bleeding-wordmark]', { gutter: 0, fillRatio: 1, parallax: 0.4, strokePx: 1.6 });
+  })();
+</script>
+</body>
+</html>

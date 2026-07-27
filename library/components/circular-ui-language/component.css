@@ -1,0 +1,67 @@
+/* ============================================================
+   CIRCULAR-UI-LANGUAGE · component.css
+   ------------------------------------------------------------
+   The one consistent CIRCULAR UI vocabulary EVER + Springs share: ring buttons,
+   <- -> arrows, a "+" expander that rotates to ×, a teardrop map pin, and a
+   wordmark->monogram collapse. Harvested from the live read (P21). Pure CSS skin;
+   the few interactive states (+ toggle, wordmark->monogram on scroll) are in the JS.
+
+   All built from border-radius:50% + a 1px stroke + currentColor, so they inherit
+   the section ink (pairs with theme-tween). One vocabulary => the whole site's
+   controls feel like one family.
+   ============================================================ */
+
+/* ---- base ring button ---- */
+.cui-ring {
+  width: var(--cui-size, 44px); height: var(--cui-size, 44px);
+  border-radius: 50%; border: 1px solid currentColor; background: none; color: inherit;
+  display: inline-grid; place-items: center; cursor: pointer;
+  opacity: .6; transition: opacity .3s ease, transform .3s ease;
+}
+.cui-ring:hover { opacity: 1; }
+.cui-ring svg { width: 42%; height: 42%; }
+.cui-ring--lg { --cui-size: 64px; }
+.cui-ring--sm { --cui-size: 34px; }
+
+/* ---- arrow pair (carousel / slider controls) ---- */
+.cui-arrows { display: inline-flex; gap: 12px; }
+
+/* ---- "+" expander that rotates to × on open ---- */
+.cui-plus { position: relative; }
+.cui-plus::before, .cui-plus::after {
+  content: ""; position: absolute; left: 50%; top: 50%; background: currentColor;
+  transition: transform .4s cubic-bezier(.16,.84,.24,1), opacity .3s ease;
+}
+.cui-plus::before { width: 42%; height: 1.5px; transform: translate(-50%, -50%); }       /* horizontal bar */
+.cui-plus::after  { width: 1.5px; height: 42%; transform: translate(-50%, -50%); }        /* vertical bar */
+.cui-plus.is-open { transform: rotate(45deg); }   /* + -> × */
+
+/* ---- teardrop map pin ---- */
+.cui-pin {
+  width: var(--cui-pin, 40px); height: var(--cui-pin, 40px);
+  background: currentColor; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+  display: grid; place-items: center; position: relative;
+}
+.cui-pin > * { transform: rotate(45deg); }   /* un-rotate the inner content */
+.cui-pin--ghost { background: none; border: 1px solid currentColor; }
+
+/* ---- POI chip (circular marker on a map) ---- */
+.cui-poi {
+  width: var(--cui-poi, 30px); height: var(--cui-poi, 30px); border-radius: 50%;
+  border: 1px solid currentColor; display: grid; place-items: center;
+  font-size: 11px; background: none; color: inherit;
+}
+
+/* ---- wordmark -> monogram (two stacked marks, crossfaded by JS on scroll) ---- */
+.cui-brand { position: relative; display: inline-grid; }
+.cui-brand__full, .cui-brand__mono { grid-area: 1 / 1; transition: opacity .45s ease; }
+.cui-brand__mono {
+  opacity: 0; justify-self: center;
+  width: var(--cui-mono, 40px); height: var(--cui-mono, 40px);
+  border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center;
+}
+.cui-brand.is-mono .cui-brand__full { opacity: 0; }
+.cui-brand.is-mono .cui-brand__mono { opacity: 1; }
+
+/* circular vocabulary inherits the section ink (currentColor) -> pairs with theme-tween.
+   transform + opacity only; NO mix-blend / NO backdrop. */

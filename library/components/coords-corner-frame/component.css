@@ -1,0 +1,140 @@
+/* COORDS-CORNER-FRAME · component.css
+   A surveyed-drawing metadata frame: four draughting tick-corners (crosshair
+   L-brackets that draw via stroke-dashoffset) + a coordinate readout (lat/long)
+   + a scale bar (0 ... 500 m) + a north arrow + optional corner labels, in small
+   all-caps tracked type. The overlay is INJECTED by the JS, absolutely positioned
+   over any stage. opacity + transform + stroke-dashoffset only. NO width/height/
+   top/left animation. NO mix-blend / NO backdrop / NO WebGL / NO canvas. */
+
+.ccf-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--ccf-z, 4);
+  color: var(--ccf-ink, #e9e6dd);
+  font-family: var(--ccf-mono, 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace);
+  --ccf-inset: 4.2vmin;
+  --ccf-size: 34px;
+  --ccf-track: 0.22em;
+  --ccf-fs: 0.62rem;
+}
+
+/* ---- the four draughting tick-corners (crosshair L-brackets) ---------------- */
+.ccf-tick {
+  position: absolute;
+  width: var(--ccf-size);
+  height: var(--ccf-size);
+}
+.ccf-tick svg { display: block; overflow: visible; }
+.ccf-tick-path {
+  fill: none;
+  stroke: var(--ccf-tick-stroke, currentColor);
+  stroke-width: var(--ccf-tick-w, 1.2);
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+  will-change: stroke-dashoffset;
+}
+.ccf-tick--tl { top: var(--ccf-inset); left: var(--ccf-inset); }
+.ccf-tick--tr { top: var(--ccf-inset); right: var(--ccf-inset); }
+.ccf-tick--bl { bottom: var(--ccf-inset); left: var(--ccf-inset); }
+.ccf-tick--br { bottom: var(--ccf-inset); right: var(--ccf-inset); }
+.ccf-tick--tr svg { transform: scaleX(-1); }
+.ccf-tick--bl svg { transform: scaleY(-1); }
+.ccf-tick--br svg { transform: scale(-1, -1); }
+
+/* ---- the all-caps tracked readout type ------------------------------------- */
+.ccf-label,
+.ccf-coords-text,
+.ccf-scale-cap,
+.ccf-north-n {
+  text-transform: uppercase;
+  letter-spacing: var(--ccf-track);
+  font-size: var(--ccf-fs);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* corner labels sit just inside each tick */
+.ccf-label {
+  position: absolute;
+  opacity: 0;
+  color: var(--ccf-ink-dim, rgba(233, 230, 221, 0.74));
+  will-change: transform, opacity;
+}
+.ccf-label--tl { top: calc(var(--ccf-inset) + 2px); left: calc(var(--ccf-inset) + var(--ccf-size) + 0.9rem); }
+.ccf-label--bl { bottom: calc(var(--ccf-inset) + 2px); left: calc(var(--ccf-inset) + var(--ccf-size) + 0.9rem); }
+.ccf-label--br { bottom: calc(var(--ccf-inset) + 2px); right: calc(var(--ccf-inset) + var(--ccf-size) + 0.9rem); }
+.ccf-label--rc { top: 50%; right: var(--ccf-inset); transform: translateY(-50%);
+  writing-mode: vertical-rl; letter-spacing: 0.3em; }
+
+/* ---- coordinate readout (bottom-centre) ------------------------------------ */
+.ccf-coords {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--ccf-inset) - 2px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.ccf-coords-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--ccf-accent, #d98a3b);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ccf-accent, #d98a3b) 22%, transparent);
+}
+.ccf-coords-text { color: var(--ccf-ink, #e9e6dd); }
+
+/* ---- scale bar (bottom-left, above the bl tick) ---------------------------- */
+.ccf-scale {
+  position: absolute;
+  left: var(--ccf-inset);
+  bottom: calc(var(--ccf-inset) + var(--ccf-size) + 0.7rem);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.ccf-scale-bar {
+  display: flex;
+  align-items: flex-end;
+  height: 9px;
+  width: var(--ccf-scale-w, 112px);
+  border-bottom: 1px solid var(--ccf-ink, #e9e6dd);
+  justify-content: space-between;
+}
+.ccf-scale-tick {
+  width: 1px;
+  height: 9px;
+  background: var(--ccf-ink, #e9e6dd);
+}
+.ccf-scale-tick:nth-child(odd) { height: 6px; }
+.ccf-scale-cap {
+  margin-top: 0.4rem;
+  color: var(--ccf-ink-dim, rgba(233, 230, 221, 0.74));
+}
+
+/* ---- north arrow (top-right, under the tr tick) ---------------------------- */
+.ccf-north {
+  position: absolute;
+  right: calc(var(--ccf-inset) + 1px);
+  top: calc(var(--ccf-inset) + var(--ccf-size) + 0.6rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.ccf-north-n { color: var(--ccf-ink, #e9e6dd); }
+.ccf-north-needle { fill: var(--ccf-ink, #e9e6dd); stroke: none; }
+.ccf-north-stem { fill: none; stroke: var(--ccf-ink-dim, rgba(233, 230, 221, 0.55)); stroke-width: 1; }
+
+.ccf-static .ccf-tick-path { stroke-dashoffset: 0 !important; }
+.ccf-static .ccf-label,
+.ccf-static .ccf-coords,
+.ccf-static .ccf-scale,
+.ccf-static .ccf-north { opacity: 1 !important; transform: none; }
+.ccf-static .ccf-label--rc { transform: translateY(-50%); }
+.ccf-static .ccf-coords { transform: translateX(-50%); }

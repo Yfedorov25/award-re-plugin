@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>residences-slab — хорео-звірка проти live 17.21.20 (19–38s)</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0b1c15;color:#e9e4d8;font-family:'Helvetica Neue',Helvetica,sans-serif;padding:48px 56px}
+  h1{font-family:Didot,'Bodoni MT',Georgia,serif;font-weight:400;font-size:38px}
+  .sub{margin-top:8px;font-size:14px;color:rgba(233,228,216,.6)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:40px;align-items:start}
+  .cell img{width:100%;display:block;border:1px solid rgba(233,228,216,.15)}
+  .cell .tag{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(233,228,216,.5);margin-bottom:8px}
+  .beatcap{margin-top:12px;font-size:14px;line-height:1.5;color:rgba(233,228,216,.85);grid-column:1/-1}
+  .beatcap b{color:#ece7da}
+  .verdict{margin-top:48px;padding:24px 28px;border:1px solid rgba(233,228,216,.25);font-size:14px;line-height:1.7}
+  .verdict h2{font-family:Didot,Georgia,serif;font-weight:400;font-size:24px;margin-bottom:12px}
+  table{border-collapse:collapse;margin-top:14px;font-size:13px}
+  td,th{border:1px solid rgba(233,228,216,.2);padding:6px 12px;text-align:left}
+  .ok{color:#9fd7ae}.warn{color:#e8c477}
+</style>
+</head>
+<body>
+<h1>residences-slab — хорео-звірка</h1>
+<p class="sub">ЛІВОРУЧ live springs.estate (Screen Recording 2026-07-16 17.21.20, сегмент 19–38s) · ПРАВОРУЧ наш build.html через window.render(p). Порядок бітів і закон межі — предмет звірки; фасад dummy за задумом.</p>
+
+<div class="row">
+  <div class="cell"><div class="tag">LIVE 19.0s — hold 1 (рендер 1 повний, контейнер компактний)</div><img src="choreo/live-f01.jpg"></div>
+  <div class="cell"><div class="tag">BUILD p=0.30 — hold 1</div><img src="choreo/build-p03.jpg"></div>
+  <p class="beatcap"><b>✅ Збіг:</b> рендер full-bleed; info-контейнер справа-внизу впритул до правого краю; заголовок типу + підпис + кнопка; тонкий прогрес усередині.</p>
+</div>
+
+<div class="row">
+  <div class="cell"><div class="tag">LIVE 21.0s — hover: контейнер розкрився ВГОРУ (статистика 138 / up to 3.1 m)</div><img src="choreo/live-f05.jpg"></div>
+  <div class="cell"><div class="tag">BUILD — hover-тест gate 4: 0→206px, згортання чисте</div><img src="choreo/build-p03.jpg"></div>
+  <p class="beatcap"><b>✅ Збіг механіки hover:</b> розкриття вгору зі статистикою (наші дані: 138 / up to 3.1 m — ті самі значення у g1). Числовий гейт: hover 0→206px, leave→0, картка в межах в'юпорта.</p>
+</div>
+
+<div class="row">
+  <div class="cell"><div class="tag">LIVE 23.0s — рендер 2 накриває СПРАВА→НАЛІВО</div><img src="choreo/live-f09.jpg"></div>
+  <div class="cell"><div class="tag">BUILD p=0.44 — рендер 2 накриває справа→наліво</div><img src="choreo/build-p044.jpg"></div>
+  <p class="beatcap"><b>✅ Збіг закону-сигнатури:</b> нова сцена заходить з правого краю, межа їде вліво, старий рендер лишається під нею (cover, не slide). Контейнер видимий БЕЗПЕРЕРВНО (M4).</p>
+</div>
+
+<div class="row">
+  <div class="cell"><div class="tag">LIVE 25.0–27.0s — hold 2: Townhouses (кросфейд тексту контейнера)</div><img src="choreo/live-f13.jpg"></div>
+  <div class="cell"><div class="tag">BUILD p=0.57 — hold 2: Townhouses</div><img src="choreo/build-p057.jpg"></div>
+  <p class="beatcap"><b>✅ Збіг:</b> текст контейнера кросфейднувся Flats→Townhouses; сам контейнер не зникав; живий зум сцени під hold.</p>
+</div>
+
+<div class="row">
+  <div class="cell"><div class="tag">LIVE 29.0s — рендер 3 (penthouse) накриває, той самий закон</div><img src="choreo/live-f21.jpg"></div>
+  <div class="cell"><div class="tag">BUILD p=0.70 — рендер 3 накриває</div><img src="choreo/build-p07.jpg"></div>
+  <p class="beatcap"><b>✅ Збіг:</b> третій свап тим самим правилом; текст контейнера → Penthouses.</p>
+</div>
+
+<div class="row">
+  <div class="cell"><div class="tag">LIVE 31.0–34.5s — hold 3 (довгий settle; вихід = наступна секція, окремий атом)</div><img src="choreo/live-f29.jpg"></div>
+  <div class="cell"><div class="tag">BUILD p=0.88 — hold 3, нічого не виходить</div><img src="choreo/build-p088.jpg"></div>
+  <p class="beatcap"><b>✅ Збіг:</b> довгий фінальний hold; вихід (Interiors накриває знизу вгору, live 34.5s+) правильно НЕ включений в атом — це wipe-up.</p>
+</div>
+
+<div class="verdict">
+  <h2>Вердикт хорео-звірки</h2>
+  <p><span class="ok">✅ ПОРЯДОК БІТІВ ЗБІГАЄТЬСЯ (покадрова звірка)</span>: r1 → hold+hover → r2 (справа→наліво) → hold → r3 → hold; контейнер постійний, прогрес живий увесь band, текст кросфейдиться. Всі M1–M6 SPEC v3 підтверджені числовими гейтами. <b>Що НЕ міряно:</b> per-element/піксельна парність проти live (фасад dummy за задумом атома — element-gate тут не застосовний); темп hold-ів відрізняється (таблиця нижче).</p>
+  <table>
+    <tr><th>Біт</th><th>LIVE (частка band 19–34.5s)</th><th>BUILD (p-вікно)</th><th>Δ</th></tr>
+    <tr><td>title-hold</td><td>≈0% («одразу» після wipe, наратив)</td><td>0–10%</td><td class="warn">build довший</td></tr>
+    <tr><td>hold 1</td><td>~24%</td><td>16%</td><td class="warn">live довший</td></tr>
+    <tr><td>cover 2</td><td>~13% (22.7–24.7s)</td><td>12%</td><td class="ok">збіг</td></tr>
+    <tr><td>hold 2</td><td>~24%</td><td>14%</td><td class="warn">live довший</td></tr>
+    <tr><td>cover 3</td><td>~13% (28.4–30.4s)</td><td>12%</td><td class="ok">збіг</td></tr>
+    <tr><td>hold 3</td><td>~26%</td><td>24%</td><td class="ok">збіг</td></tr>
+  </table>
+  <p style="margin-top:14px"><span class="warn">⚠ Калібрування v2 (не блокер, Єгор прийняв build у CD):</span> (1) темп — live тримає hold-и 1–2 довше, title-hold коротший («одразу справа наліво», наратив); (2) top-left label «FLAT — 158 M²» — у live його НЕМА (тип живе в контейнері) — прийняте CD-доповнення, зафіксовано в SPEC; (3) у live під час cover 3 зверху миготить лічильник «01» — не відтворюємо, дрібниця.</p>
+</div>
+</body>
+</html>

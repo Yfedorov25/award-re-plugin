@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · air-menu-overlay · A-17 + A-18 + T-M11 (двофазне меню, themed-хедер)</title>
+<!--
+================================================================================
+  LAB: air-menu-overlay — меню-оверлей AIR + themed-хедер + моб-дзеркало.
+  Контракт: ЖИВИЙ DOM/CSS aircenter.space (витяг 2026-07-06):
+  modal--menu двофазний 1.6s — фон 0.8s cubic-bezier(.7,0,.3,1), потім
+  (delay .8s) frosted-панель (translateY 30→0) + спіраль + гігант-лого;
+  close дзеркально (панель до −30 першою, фон другим). Панель md-up:
+  frosted, списки 68.57% / CTA-плитки 31.43%. Хедер: fixed, themed
+  1.2s cubic-bezier(.25,.74,.22,.99) під секцію (A-18). Бургер: 2 спани
+  → хрест .6s cubic-bezier(.29,.73,.45,1). Моб (T-M11): column-reverse
+  stack (плитки над списками), активний пункт посірілий.
+
+  ГЕЙТ (PROBE_MODE):
+  desktop:
+  1. loadStability: CLS < 0.1 + дрейф якоря <= 4px;
+  2. open двофазний: клік → ~250ms фон у польоті (0.03<op<0.95),
+     панель ще 0; ~1750ms — панель op≈1, ty≈0, гігант СХОВАНИЙ (desktop
+     без гігант-лого, виправлення інтерпретації №9);
+  3. бургер = хрест (спани мають transform), close: ~250ms панель
+     гасне ПЕРШОЮ (op<0.9) а фон ще ≥0.9; ~1900ms модал visibility
+     hidden;
+  4. themed (A-18): скрол у темну секцію → .amo-header-dark;
+     назад у світлу → клас знятий;
+  5. пріоритет меню: на темній секції open → клас знятий (тема меню),
+     close → повернувся;
+  6. console errors == 0.
+  mobile (390): панель column-reverse; активний пункт [aria-current]
+  посірілий (opacity .35); open — фон → панель (двофазність жива).
+  Живий перегляд (без ?probe) = НУЛЬ автоскролів (закон PROBE_MODE).
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 40; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+
+  /* хедер AIR-скін */
+  [data-amo-header] { background: rgba(244, 242, 238, .85); color: #111110;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .85); color: #f2f1ee; }
+  .hrow { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; }
+  .hlogo { font-size: 20px; letter-spacing: .35em; font-weight: 500; }
+  .hcta { font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+          border: 1px solid currentColor; border-radius: 4px; padding: 10px 14px;
+          background: none; color: inherit; }
+  [data-amo-burger] { display: inline-flex; align-items: center; gap: 10px;
+    background: #111110; color: #f2f1ee; border: 0; border-radius: 4px;
+    padding: 12px 16px; font-size: 11px; letter-spacing: .12em; cursor: pointer; }
+  .amo-header-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
+
+  /* секції для themed-проби */
+  section.act { min-height: 120vh; padding: 22vh 6vw 8vh; }
+  section.act h2 { font-size: clamp(28px, 4vw, 56px); font-weight: 300; }
+  #dark { background: #161616; color: #f2f1ee; }
+
+  /* модал AIR-скін */
+  [data-amo-bg] { background: var(--paper); }
+  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0;
+    background: radial-gradient(closest-side at 72% 60%, transparent 30%, rgba(17,17,16,.05) 31% 60%, transparent 61%),
+                repeating-conic-gradient(from 10deg at 72% 60%, rgba(17,17,16,.05) 0 6deg, transparent 6deg 12deg); }
+  [data-amo-giant] { left: 4vw; top: 12vh; font-size: clamp(40px, 6vw, 90px);
+    letter-spacing: .3em; font-weight: 500; color: #111110; }
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center;
+              justify-content: center; padding: 12vh 4vw 6vh; }
+  [data-amo-panel] { width: min(690px, 92vw); background: rgba(236, 234, 229, .75); }
+  /* виправлення інтерпретації №9: desktop меню БЕЗ гігант-лого (int-menu-open.png
+     + AIR-REF--menu-desktop.mp4 t≈11s — лишень хедерний AIR + спіраль). Моб лишає (T-M11). */
+  @media (min-width: 769px) { [data-amo-giant] { display: none; } }
+  [data-amo-left] { padding: 4vh 3vw; display: flex; flex-direction: column;
+                    justify-content: space-between; gap: 6vh; }
+  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  [data-amo-left] ul.small { gap: 10px; margin-top: 5vh; }
+  [data-amo-item] a { color: #111110; text-decoration: none; }
+  ul.large [data-amo-item] a { font-size: clamp(26px, 3.4vw, 52px); font-weight: 400;
+    text-transform: uppercase; letter-spacing: -.02em; line-height: 1.07; }
+  ul.small [data-amo-item] a { font-size: 13px; color: #55544f; }
+  [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between;
+    padding: 24px; color: #111110; text-decoration: none; font-size: 13px; min-height: 160px; }
+  [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px;
+    border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  @media (max-width: 768px) {
+    .amo-wrap { align-items: flex-end; padding: 16vh 4vw 4vh; }
+    [data-amo-panel] { background: none; }
+    [data-amo-left] { padding: 4vh 2vw; }
+  }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · air-menu-overlay · a-17 + a-18 + t-m11 · тисни MENU</div>
+
+<header data-amo-header>
+  <div class="hrow">
+    <span class="hlogo">AIR</span>
+    <button class="hcta" type="button">Обрати офіс ✛</button>
+    <button data-amo-burger type="button" aria-label="Відкрити меню">
+      <span data-amo-burger-lines><i></i><i></i></span> MENU
+    </button>
+  </div>
+</header>
+
+<section class="act" data-amo-theme="light" id="light1">
+  <h2>Світлий акт · хедер світлий</h2>
+  <p style="margin-top:2vh; color:#6b6b68; max-width:44ch;">Скроль до темного акту — хедер перефарбується за 1.2s на air-кривій. Тисни MENU — двофазна завіса.</p>
+</section>
+<section class="act" data-amo-theme="dark" id="dark">
+  <h2>Темний акт · хедер темний</h2>
+</section>
+<section class="act" data-amo-theme="light" id="light2">
+  <h2>Знову світлий</h2>
+</section>
+
+<div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Меню">
+  <div data-amo-bg></div>
+  <div data-amo-bg-image></div>
+  <div data-amo-giant>AIR</div>
+  <div class="amo-wrap">
+    <nav data-amo-panel>
+      <div data-amo-left>
+        <ul class="large">
+          <li data-amo-item><a href="#про">Про проєкт</a></li>
+          <li data-amo-item><a href="#локація">Локація</a></li>
+          <li data-amo-item><a href="#управління" aria-current="page">Управління проєктом</a></li>
+          <li data-amo-item><a href="#інвестиції">Інвестиції</a></li>
+        </ul>
+        <ul class="small">
+          <li data-amo-item><a href="#поступ">Поступ будівництва</a></li>
+          <li data-amo-item><a href="#новини">Новини і пропозиції</a></li>
+          <li data-amo-item><a href="#девелопер">Про девелопера</a></li>
+        </ul>
+      </div>
+      <div data-amo-right>
+        <a data-amo-card href="#офіс"><span>Обрати<br>офіс</span><span class="sq">✛</span></a>
+        <a data-amo-card href="#паркінг"><span>Обрати<br>паркомісце</span><span class="sq">✛</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(max-width: 768px)').matches;
+
+  var amo = window.AirMenuOverlay.create({});
+  window.__AMO = amo;
+
+  var header = document.querySelector('[data-amo-header]');
+  var burger = document.querySelector('[data-amo-burger]');
+  var modal = document.querySelector('[data-amo-modal]');
+  var bg = document.querySelector('[data-amo-bg]');
+  var panel = document.querySelector('[data-amo-panel]');
+  var giant = document.querySelector('[data-amo-giant]');
+  var report = { stability: null, openPhases: null, closePhases: null,
+                 themed: null, menuTheme: null, mob: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function op(el) { return parseFloat(getComputedStyle(el).opacity); }
+  function ty(el) {
+    var t = getComputedStyle(el).transform;
+    if (!t || t === 'none') return 0;
+    var m = /matrix\(([^)]+)\)/.exec(t);
+    return m ? parseFloat(m[1].split(',')[5]) : 0;
+  }
+
+  async function probeStability(anchor) {
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    var out = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    report.stability = out;
+    return out.ok;
+  }
+
+  async function probeOpenClose() {
+    burger.click();
+    await delay(250);
+    var early = { bg: op(bg), panel: op(panel),
+                  burgerX: burger.classList.contains('amo-burger-x') };
+    await delay(1500);
+    /* виправлення інтерпретації №9: desktop меню БЕЗ гігант-лого (display:none md-up) */
+    var giantHidden = getComputedStyle(giant).display === 'none';
+    var late = { panel: op(panel), ty: Math.round(ty(panel)), giantHidden: giantHidden };
+    report.openPhases = { early: early, late: late };
+    report.openPhases.ok = early.bg > 0.03 && early.bg < 0.95 && early.panel < 0.05 &&
+                           early.burgerX && late.panel > 0.98 && Math.abs(late.ty) <= 1 &&
+                           late.giantHidden;
+
+    burger.click();
+    await delay(380); /* bezier(.7,0,.3,1) стартує повільно — точка виміру далі */
+    var cEarly = { panel: op(panel), bg: op(bg) };
+    await delay(1600);
+    var cLate = { hidden: getComputedStyle(modal).visibility === 'hidden',
+                  burgerX: burger.classList.contains('amo-burger-x') };
+    report.closePhases = { early: cEarly, late: cLate };
+    report.closePhases.ok = cEarly.panel < 0.9 && cEarly.bg >= 0.9 &&
+                            cLate.hidden && !cLate.burgerX;
+    return report.openPhases.ok && report.closePhases.ok;
+  }
+
+  async function probeThemed() {
+    var dark = document.getElementById('dark');
+    window.scrollTo(0, dark.offsetTop + 10);
+    await delay(500);
+    var d1 = header.classList.contains('amo-header-dark');
+    window.scrollTo(0, 0);
+    await delay(500);
+    var d2 = header.classList.contains('amo-header-dark');
+    report.themed = { onDark: d1, backLight: !d2, ok: d1 && !d2 };
+    return report.themed.ok;
+  }
+
+  async function probeMenuTheme() {
+    var dark = document.getElementById('dark');
+    window.scrollTo(0, dark.offsetTop + 10);
+    await delay(500);
+    burger.click();               /* меню світле → клас темного знятий */
+    await delay(300);
+    var whileOpen = !header.classList.contains('amo-header-dark');
+    burger.click();
+    await delay(1900);
+    var afterClose = header.classList.contains('amo-header-dark');
+    window.scrollTo(0, 0);
+    await delay(400);
+    report.menuTheme = { whileOpen: whileOpen, afterClose: afterClose,
+                         ok: whileOpen && afterClose };
+    return report.menuTheme.ok;
+  }
+
+  async function runDesktop() {
+    var ok = await probeStability(document.querySelector('#light1 h2'));
+    ok = await probeOpenClose() && ok;
+    ok = await probeThemed() && ok;
+    ok = await probeMenuTheme() && ok;
+    return ok;
+  }
+
+  async function runMobile() {
+    var ok = await probeStability(document.querySelector('#light1 h2'));
+    var dir = getComputedStyle(panel).flexDirection;
+    var cur = document.querySelector('[data-amo-item] a[aria-current]');
+    var greyed = parseFloat(getComputedStyle(cur).opacity) <= 0.4;
+    burger.click();
+    await delay(250);
+    var early = { bg: op(bg), panel: op(panel) };
+    await delay(1500);
+    var late = { panel: op(panel) };
+    report.mob = { dir: dir, greyed: greyed, early: early, late: late };
+    report.mob.ok = dir === 'column-reverse' && greyed &&
+                    early.bg > 0.03 && early.panel < 0.05 && late.panel > 0.98;
+    return ok && report.mob.ok;
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; } /* без автоскролів */
+    var ok = touch ? await runMobile() : await runDesktop();
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:air-menu-overlay]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

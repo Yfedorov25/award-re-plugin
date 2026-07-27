@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!-- all-prototypes.html - INTERIORS base gallery: dark rail + iframe stage. Zero em/en-dash. -->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>INTERIORS - база секції: 5 фінальних варіантів</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg:#15181C;--ink:#EAE4D8;--sub:#828B93;--gold:#C8A06A}
+  html,body{height:100%}
+  body{font-family:"Jost",sans-serif;background:var(--bg);color:var(--ink);display:grid;grid-template-columns:minmax(300px,380px) 1fr;-webkit-font-smoothing:antialiased}
+  .rail{border-right:1px solid rgba(234,228,216,.14);display:flex;flex-direction:column;overflow-y:auto}
+  .railhead{padding:30px 26px 22px;border-bottom:1px solid rgba(234,228,216,.14)}
+  .railhead .k{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+  .railhead h1{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:26px;margin-top:10px;letter-spacing:-.01em}
+  .railhead p{font-size:12px;color:var(--sub);margin-top:8px;font-weight:300;line-height:1.6}
+  .grouphead{padding:16px 26px 8px;font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold)}
+  .item{display:flex;align-items:baseline;gap:14px;padding:17px 26px;border-bottom:1px solid rgba(234,228,216,.08);cursor:pointer;background:none;border-left:2px solid transparent;text-align:left;color:var(--ink);width:100%;border-top:0;border-right:0;font-family:"Jost",sans-serif;transition:background .3s,border-color .3s}
+  .item:hover{background:rgba(234,228,216,.05)}
+  .item.on{background:rgba(234,228,216,.07);border-left-color:var(--gold)}
+  .item .no{font-family:"Cormorant Garamond",serif;font-size:21px;color:var(--gold);min-width:44px;font-variant-numeric:tabular-nums}
+  .item .tt{font-size:14px;letter-spacing:.02em}
+  .item .arch{display:block;font-size:11px;color:var(--sub);margin-top:4px;font-weight:300;line-height:1.5}
+  .item .tag{margin-left:auto;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(200,160,106,.4);border-radius:20px;padding:3px 9px;white-space:nowrap;align-self:flex-start}
+  .stage{position:relative}
+  .stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#12100d}
+  .openlink{position:absolute;right:18px;top:14px;z-index:5;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);background:rgba(21,24,28,.75);border:1px solid rgba(234,228,216,.25);border-radius:30px;padding:9px 15px;text-decoration:none}
+  .openlink:hover{background:rgba(21,24,28,.95)}
+</style>
+</head>
+<body>
+<aside class="rail">
+  <div class="railhead">
+    <div class="k">INTERIORS · База секції</div>
+    <h1>5 фінальних варіантів</h1>
+    <p>Секція «Всередині»: кімнати, життя всередині дому, день і ніч. Один сайт бере один варіант. Round 4, прийнято власником як гіпервисокий рівень.</p>
+  </div>
+  <nav id="list"></nav>
+</aside>
+<main class="stage">
+  <a class="openlink" id="openlink" href="int-11-collage-depth.html" target="_blank" rel="noopener">Відкрити окремо</a>
+  <iframe id="frame" src="int-11-collage-depth.html" title="Прототип"></iframe>
+</main>
+<script>
+(function(){
+  var P = [
+    { group: 'Всередині · день і ніч, кімнати дому' },
+    { f: 'int-11-collage-depth.html', t: 'Колаж на глибині', a: 'sticky-колонка + колаж 4:3 на глибинах; cursor-seam ласка на кухні', tag: 'smarts-live', no: 'i-11' },
+    { f: 'int-12-two-columns.html', t: 'Дві колони', a: 'спліт-колонки + стрічка-handoff; ніч = 4-й кадр стрічки', tag: 'springs', no: 'i-12' },
+    { f: 'int-13-house-console.html', t: 'Пульт дому', a: 'персистентний serif-індекс + push-swap; вимикач-чип у кожній кімнаті', tag: 'springs', no: 'i-13' },
+    { f: 'int-15-hour-odometer.html', t: 'Година дому', a: 'pinned одометр 4 механіки; ніч приходить у ту саму ноду спальні', tag: 'springs', no: 'i-15' },
+    { f: 'int-16-editorial-spread.html', t: 'Розворот', a: 'de-bleed розворот + mirror law; drag center-seam ритуал 55%', tag: 'ever', no: 'i-16' }
+  ];
+  var list = document.getElementById('list');
+  var frame = document.getElementById('frame');
+  var open = document.getElementById('openlink');
+  var first = true;
+  P.forEach(function(p){
+    if (p.group){
+      var g = document.createElement('div');
+      g.className = 'grouphead';
+      g.textContent = p.group;
+      list.appendChild(g);
+      return;
+    }
+    var b = document.createElement('button');
+    b.className = 'item' + (first ? ' on' : '');
+    first = false;
+    b.type = 'button';
+    b.innerHTML = '<span class="no">' + p.no + '</span><span><span class="tt">' + p.t + '</span><span class="arch">' + p.a + '</span></span>' +
+      '<span class="tag">' + p.tag + '</span>';
+    b.addEventListener('click', function(){
+      [].slice.call(list.querySelectorAll('.item')).forEach(function(c){ c.classList.remove('on'); });
+      b.classList.add('on');
+      frame.src = p.f;
+      open.href = p.f;
+    });
+    list.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

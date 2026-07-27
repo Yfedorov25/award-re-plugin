@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Place — morph-ribbon (A · WebGL glass)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ background:#12271a; color:#ece3ce; overflow-x:hidden; }
+  body{ font-family:'Hanken Grotesk',sans-serif; -webkit-font-smoothing:antialiased; }
+
+  #stage{ position:relative; width:100%; height:100vh; overflow:hidden; }
+
+  #field{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(120% 95% at 6% 108%, rgba(178,196,74,0.95) 0%, rgba(150,170,60,0.35) 26%, rgba(150,170,60,0) 52%),
+      radial-gradient(90% 80% at 2% 96%, rgba(70,150,140,0.35) 0%, rgba(70,150,140,0) 46%),
+      radial-gradient(120% 120% at 100% 4%, rgba(9,28,17,0.96) 0%, rgba(12,36,22,0.5) 40%, rgba(12,36,22,0) 70%),
+      linear-gradient(150deg, #274a25 0%, #21421f 34%, #17331f 62%, #0f2717 100%);
+  }
+  #field::after{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(70% 60% at 40% 46%, rgba(120,150,60,0.16), rgba(120,150,60,0) 60%);
+  }
+
+  #plate{
+    position:absolute; inset:0; opacity:0; visibility:hidden;
+    background:
+      radial-gradient(130% 90% at 50% 128%, rgba(196,210,150,0.65) 0%, rgba(150,175,95,0.28) 38%, rgba(150,175,95,0) 62%),
+      radial-gradient(46% 42% at 20% 12%, rgba(150,172,78,0.5) 0%, rgba(150,172,78,0) 60%),
+      radial-gradient(50% 60% at 88% 20%, rgba(20,44,26,0.72) 0%, rgba(20,44,26,0) 62%),
+      radial-gradient(60% 70% at 8% 44%, rgba(24,50,30,0.55) 0%, rgba(24,50,30,0) 60%),
+      linear-gradient(158deg, #1b3a22 0%, #24492a 34%, #2b5330 58%, #14301d 100%);
+  }
+  #plate .fol{ position:absolute; border-radius:50%; filter:blur(38px); mix-blend-mode:multiply; }
+  #plate .f1{ width:46vw; height:70vh; left:-10vw; top:-14vh; background:radial-gradient(closest-side, rgba(10,28,16,0.9), rgba(10,28,16,0)); }
+  #plate .f2{ width:40vw; height:60vh; right:-8vw; top:-10vh; background:radial-gradient(closest-side, rgba(14,34,20,0.85), rgba(14,34,20,0)); }
+  #plate .f3{ width:34vw; height:50vh; right:6vw; bottom:-12vh; background:radial-gradient(closest-side, rgba(12,30,18,0.8), rgba(12,30,18,0)); }
+  #plate .trunks{
+    position:absolute; left:0; right:0; top:0; height:64%; opacity:0.5; filter:blur(3px);
+    background:repeating-linear-gradient(91deg,
+      rgba(8,22,13,0.22) 0 2px, rgba(8,22,13,0) 2px 22px,
+      rgba(8,22,13,0.14) 22px 24px, rgba(8,22,13,0) 24px 52px);
+    -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 52%, transparent 100%);
+    mask-image:linear-gradient(180deg, #000 0%, #000 52%, transparent 100%);
+  }
+  #plate .path{
+    position:absolute; left:35vw; bottom:-6vh; width:30vw; height:74vh;
+    background:radial-gradient(52% 92% at 50% 100%, rgba(206,218,172,0.55), rgba(206,218,172,0) 68%);
+    filter:blur(8px);
+  }
+  #plate .shimmer{
+    position:absolute; inset:0; mix-blend-mode:screen; opacity:0.5;
+    background:radial-gradient(38% 30% at 62% 30%, rgba(190,206,120,0.28), rgba(190,206,120,0) 60%);
+    background-size:180% 180%; animation:drift 14s ease-in-out infinite alternate;
+  }
+  @keyframes drift{ from{ background-position:20% 30%; } to{ background-position:70% 60%; } }
+
+  #ribbon{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+
+  #grain{
+    position:absolute; inset:0; pointer-events:none; opacity:0.11; mix-blend-mode:soft-light;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .type{ position:absolute; z-index:5; will-change:transform,opacity; }
+  #place{
+    top:9vh; right:5vw; font-family:'Cormorant Garamond',serif; font-weight:500;
+    font-size:clamp(88px, 15.5vw, 248px); line-height:0.9; letter-spacing:-0.01em; color:#ece3ce;
+    text-shadow:0 2px 40px rgba(0,0,0,0.28);
+  }
+  #kicker{
+    top:calc(9vh + clamp(88px, 15.5vw, 248px) + 8px); right:5vw;
+    font-size:12px; letter-spacing:0.34em; font-weight:500; color:rgba(236,227,206,0.66); text-transform:uppercase;
+  }
+  #para{
+    left:5vw; top:46vh; max-width:392px; font-size:19px; line-height:1.5; font-weight:400;
+    color:rgba(236,227,206,0.9); text-wrap:pretty;
+  }
+  #caption{
+    position:absolute; left:5vw; bottom:7vh; max-width:640px; z-index:6; opacity:0; visibility:hidden;
+    font-family:'Cormorant Garamond',serif; font-weight:400; font-style:italic;
+    font-size:clamp(26px, 3.4vw, 44px); line-height:1.24; letter-spacing:0.005em; color:#f2ecda;
+    text-shadow:0 2px 28px rgba(0,0,0,0.5);
+  }
+  #rule{ position:absolute; top:0; left:0; right:0; height:1px; z-index:5;
+    background:linear-gradient(90deg, rgba(236,227,206,0) 0%, rgba(236,227,206,0.22) 12%, rgba(236,227,206,0.22) 88%, rgba(236,227,206,0) 100%); }
+  .badge{ position:fixed; left:14px; bottom:12px; z-index:20; font-size:10.5px; letter-spacing:0.22em;
+    text-transform:uppercase; color:rgba(236,227,206,0.5); font-weight:500; pointer-events:none; }
+</style>
+</head>
+<body>
+  <section id="stage">
+    <div id="field"></div>
+    <div id="plate">
+      <div class="fol f1"></div><div class="fol f2"></div><div class="fol f3"></div>
+      <div class="trunks"></div>
+      <div class="path"></div>
+      <div class="shimmer"></div>
+    </div>
+    <canvas id="ribbon"></canvas>
+    <div id="grain"></div>
+    <div id="rule"></div>
+
+    <h1 class="type" id="place">Place</h1>
+    <div class="type" id="kicker">Essence of Contemplation</div>
+    <p class="type" id="para">Held within the western green belt, the residences open onto protected woodland and slow water — a rare address where the city loosens into forest and the morning arrives as air.</p>
+    <div id="caption">Breathe in the open space. Feel the ground soften, the light move through the leaves — here, the day slows to your own pace.</div>
+  </section>
+  <div class="badge">morph-ribbon · A · webgl glass</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  CustomEase.create("seam", "M0,0 C0.4,0 0.2,1 1,1");
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  function smoothstep(a, b, x){ x = clamp01((x - a) / (b - a)); return x * x * (3 - 2 * x); }
+
+  const cv = document.getElementById('ribbon');
+  const renderer = new THREE.WebGLRenderer({ canvas: cv, alpha: true, antialias: true, preserveDrawingBuffer: true });
+  renderer.setClearColor(0x000000, 0);
+  const scene = new THREE.Scene();
+  const S = 2.75;
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+  camera.position.set(0, 0, 4);
+
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  const baseX = -S * 0.055;
+
+  const uni = {
+    uProg:      { value: 0 },
+    uAmp:       { value: S * 0.07 },
+    uLean:      { value: S * 0.20 },
+    uHalfW:     { value: S * 0.185 },
+    uLen:       { value: S * 1.95 },
+    uTurns:     { value: 1.15 },
+    uTwistBase: { value: 0.34 },
+    uDescend:   { value: 0 },
+    uOpacity:   { value: 1 }
+  };
+
+  const vert = `
+    precision highp float;
+    uniform float uProg, uAmp, uLean, uHalfW, uLen, uTurns, uTwistBase, uDescend;
+    varying vec3 vNormal; varying vec3 vViewDir; varying float vV; varying float vU;
+    const float PI = 3.14159265;
+    vec3 posAt(float u, float v){
+      float tw = uTwistBase + v*uTurns*PI + uProg*PI*0.7;
+      float bendX = uAmp*sin(v*PI*1.15 + 0.5) + uLean*(v-0.5);
+      float pw = uHalfW*(0.24 + 0.76*abs(cos(tw)));
+      float x = bendX + u*pw;
+      float z = u*uHalfW*0.85*sin(tw);
+      float y = (v-0.5)*uLen + uDescend;
+      return vec3(x, y, z);
+    }
+    void main(){
+      float u = uv.x*2.0 - 1.0;
+      float v = uv.y;
+      vV = v; vU = u;
+      vec3 P  = posAt(u, v);
+      vec3 Pu = posAt(u + 0.02, v) - P;
+      vec3 Pv = posAt(u, v + 0.004) - P;
+      vec3 nrm = normalize(cross(Pv, Pu));
+      vec4 mvPos = modelViewMatrix * vec4(P, 1.0);
+      vNormal  = normalize(normalMatrix * nrm);
+      vViewDir = normalize(-mvPos.xyz);
+      gl_Position = projectionMatrix * mvPos;
+    }`;
+
+  const frag = `
+    precision highp float;
+    uniform float uOpacity;
+    varying vec3 vNormal; varying vec3 vViewDir; varying float vV; varying float vU;
+    void main(){
+      vec3 N = normalize(vNormal);
+      vec3 V = normalize(vViewDir);
+      float facing = abs(dot(N, V));
+      float fres = pow(1.0 - facing, 2.5);
+      vec3 deep = vec3(0.08, 0.24, 0.16);
+      vec3 lit  = vec3(0.26, 0.54, 0.40);
+      vec3 col  = mix(deep, lit, facing);
+      vec3 rim  = vec3(0.84, 0.95, 0.40);
+      col += rim * fres * 0.95;
+      float edge = smoothstep(-0.5, -1.0, vU);
+      float up   = smoothstep(0.32, 0.92, vV);
+      float leftUpper = edge * up;
+      col += rim * (fres * 0.7 + 0.6) * leftUpper;
+      float alpha = (0.12 + 0.30*facing + 0.5*fres + 0.4*leftUpper) * uOpacity;
+      gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
+    }`;
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms: uni, vertexShader: vert, fragmentShader: frag,
+    transparent: true, side: THREE.DoubleSide, depthWrite: false, depthTest: false
+  });
+  const geo = new THREE.PlaneGeometry(1, 1, 2, 280);
+  const mesh = new THREE.Mesh(geo, mat);
+  const group = new THREE.Group();
+  group.add(mesh);
+  group.position.x = baseX;
+  scene.add(group);
+
+  let W = 0, H = 0;
+  function resize(){
+    W = window.innerWidth; H = window.innerHeight;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(W, H, false);
+    camera.aspect = W / H;
+    camera.updateProjectionMatrix();
+  }
+
+  function updateRibbon(p){
+    const desc = smoothstep(0, 0.62, p);
+    uni.uProg.value    = p;
+    uni.uHalfW.value   = S * 0.185 * (1 - 0.24 * desc);
+    uni.uAmp.value     = S * 0.07  * (1 - 0.30 * desc);
+    uni.uLean.value    = S * 0.20  * (1 - 0.18 * desc);
+    uni.uLen.value     = S * 1.95  * (1 - 0.15 * desc);
+    uni.uDescend.value = desc * S * 0.70;
+    uni.uOpacity.value = 1 - smoothstep(0.5, 0.9, p);
+  }
+
+  function frame(){
+    mouse.x += (mouse.tx - mouse.x) * 0.06;
+    mouse.y += (mouse.ty - mouse.y) * 0.06;
+    group.rotation.y = mouse.x * 0.14;
+    group.position.x = baseX + mouse.x * S * 0.03;
+    group.position.y = -mouse.y * S * 0.02;
+    renderer.render(scene, camera);
+  }
+
+  const state = { p: 0 };
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
+  tl.to(state, { p: 1, duration: 1, onUpdate: () => updateRibbon(state.p) }, 0);
+  tl.to('#place',  { yPercent: -118, autoAlpha: 0, duration: 0.42, ease: 'power1.in' }, 0.04);
+  tl.to('#kicker', { yPercent: -60, autoAlpha: 0, duration: 0.30 }, 0.04);
+  tl.to('#para',   { y: -46, autoAlpha: 0, duration: 0.40, ease: 'power1.in' }, 0.10);
+  tl.set('#plate', { visibility: 'visible' }, 0.42);
+  tl.fromTo('#plate', { autoAlpha: 0, scale: 1.06 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'seam' }, 0.5);
+  tl.set('#caption', { visibility: 'visible' }, 0.76);
+  tl.fromTo('#caption', { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.8);
+
+  window.render = function(p){ tl.progress(clamp01(+p || 0)); };
+
+  const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((t) => lenis.raf(t * 1000));
+  gsap.ticker.add(frame);
+  gsap.ticker.lagSmoothing(0);
+
+  ScrollTrigger.create({
+    trigger: '#stage', start: 'top top', end: '+=200%', scrub: 1, pin: true, anticipatePin: 1,
+    onUpdate: (self) => window.render(self.progress)
+  });
+
+  window.addEventListener('resize', () => { resize(); ScrollTrigger.refresh(); });
+  window.addEventListener('mousemove', (e) => {
+    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.ty = (e.clientY / window.innerHeight) * 2 - 1;
+  });
+
+  resize();
+  updateRibbon(0);
+  window.render(0);
+  requestAnimationFrame(() => { ScrollTrigger.refresh(); window.render(0); });
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

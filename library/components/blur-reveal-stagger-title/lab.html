@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · blur-reveal-stagger-title · 11tanjung (headline materialises via per-word blur 20→0)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · blur-reveal-stagger-title
+================================================================================
+  11tanjung's headline reveal — a multi-line cursive title materialises via a per-word
+  blur(20px->0) + opacity(0->1), staggered ~100ms per word, NO translate (a frosted
+  focus-pull, words sharpening into place). Harvested from D_11tanjung (a027-a033).
+  OUR QUADRO render. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --ink:#f4f1ea; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#1e1a17;color:var(--ink);font-family:var(--sans);overflow:hidden}
+
+  .stage{position:fixed;inset:0;overflow:hidden}
+  .stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .stage .scrim{position:absolute;inset:0;background:radial-gradient(70% 50% at 50% 50%,rgba(20,18,15,.5),rgba(20,18,15,0) 72%)}
+  /* the headline — 3 diagonally-positioned lines (11tanjung's split layout) */
+  .title{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+    padding:0 8vw;color:#fff;font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:clamp(2.4rem,7vw,6rem);line-height:1.0;letter-spacing:-.01em}
+  .title .l1{align-self:flex-start;margin-left:2vw}
+  .title .l2{align-self:flex-end;margin-right:6vw;margin-top:-.4em}
+  .title .l3{align-self:flex-start;margin-left:10vw;margin-top:-.2em}
+
+  .replay{position:fixed;z-index:10;left:50%;bottom:16px;transform:translateX(-50%);color:#1e1a17;
+    background:#f4f1ea;border:0;padding:.5rem 1rem;font:600 .68rem/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+</style>
+</head>
+<body>
+
+  <section class="stage">
+    <img src="renders/terrace.webp" alt="QUADRO">
+    <div class="scrim"></div>
+    <div class="title" id="title"><span class="l1">Новий</span><span class="l2">стандарт</span><span class="l3">життя</span></div>
+  </section>
+
+  <button class="replay" id="replay">▶ програти reveal</button>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    // each .l1/.l2/.l3 is a line; split each into words and reveal them in reading order
+    var lines = [].slice.call(document.querySelectorAll('#title span'));
+    var apis = lines.map(function(l){ return BlurRevealStaggerTitle.create(l, { blur:20, stagger:0.11, duration:0.58, ease:'power2.out' }); });
+    function play(){ apis.forEach(function(a){ a.reset(); });
+      // play line by line with a small line-gap for the diagonal cascade
+      apis.forEach(function(a, i){ setTimeout(function(){ a.play(); }, i*220); });
+    }
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 500);
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

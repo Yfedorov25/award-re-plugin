@@ -1,0 +1,20 @@
+/* HERO-TITLE-TO-NAV-PILL · component.css
+   The hero wordmark scroll-scrubs scale+translateY into a frosted pill top-centre; a
+   readability scrim under the big title fades as it shrinks. transform + opacity +
+   backdrop-filter (static pill) only. NO mix-blend over the render. NO WebGL. */
+.htp-stage { position: relative; height: 100vh; overflow: hidden; }
+.htp-render { position: absolute; inset: 0; z-index: 0; }
+.htp-render img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* readability scrim behind the big title (radial, fades out as the title shrinks) */
+.htp-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(60% 40% at 50% 50%, rgba(20,18,15,.55), rgba(20,18,15,0) 70%); }
+/* frosted pill plate that appears under the docked mark (top-centre) */
+.htp-pill { position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  z-index: 2; width: var(--htp-pill-w, 190px); height: var(--htp-pill-h, 60px);
+  border-radius: 14px 14px 22px 22px; background: rgba(30,26,23,.42);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(244,241,234,.12); opacity: 0; pointer-events: none; }
+/* the moving wordmark — starts giant centred, docks into the pill */
+.htp-mark { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center;
+  transform-origin: 50% calc(50% + var(--htp-origin-shift, 0px)); pointer-events: none; will-change: transform; }
+/* NO mix-blend on the mark over the render. */

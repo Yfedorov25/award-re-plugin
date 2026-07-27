@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>pinned-caption-crossfade — atom (dummy facade)</title>
+<script>window.__PIN_CAPTION_OK__=false;</script>
+<style>
+  /* ── DUMMY FACADE (навмисне НЕ springs): чужі градієнт-пейзажі + чужа копі ── */
+  :root{
+    --ease:cubic-bezier(.25,.74,.22,.99);
+    --cap:#f0ece0;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#10130f;-webkit-font-smoothing:antialiased}
+  body{font-family:var(--sans);color:var(--cap)}
+
+  .pin-wrap{position:relative;height:calc(var(--vh,1vh)*300)} /* N=2 hold-екрани */
+  .stage{position:sticky;top:0;width:min(390px,100%);height:calc(var(--vh,1vh)*100);
+    margin:0 auto;overflow:hidden;background:#10130f}
+
+  /* M2 два чужі фони (світанковий пустельний → холодний туманний) */
+  .bg{position:absolute;will-change:transform,opacity}
+  .bg-a{inset:-7% 0;
+    background:
+      radial-gradient(120% 70% at 30% 20%, #d98a52 0%, #a85c39 40%, #5c3324 100%),
+      linear-gradient(180deg,#e0a06a,#7a4327);}
+  .bg-b{inset:-4% 0;opacity:0;
+    background:
+      radial-gradient(120% 80% at 60% 30%, #9fb6c0 0%, #607a86 45%, #2b3b42 100%),
+      linear-gradient(180deg,#b9cdd4,#33474f);}
+  .scrim{position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(15,20,17,.06),rgba(15,20,17,0) 46%,rgba(14,20,17,.6))}
+
+  /* M3 held-caption — у нижній частині stage */
+  .caption{position:absolute;left:22px;right:28px;bottom:calc(var(--vh,1vh)*12);
+    will-change:transform,opacity}
+  .caption p{font-family:var(--sans);font-weight:400;font-size:15px;line-height:1.42;
+    letter-spacing:.1px;color:var(--cap)}
+
+  .badge{position:absolute;left:22px;bottom:14px;z-index:50;font-size:9px;font-weight:600;
+    letter-spacing:1.4px;text-transform:uppercase;color:rgba(240,236,224,.5);pointer-events:none}
+</style>
+</head>
+<body>
+<div class="scroller" style="height:calc(var(--vh,1vh)*100);overflow-y:auto;overflow-x:hidden;position:relative;-webkit-overflow-scrolling:touch">
+  <div class="pin-wrap">
+    <div class="stage">
+      <div class="bg bg-a"></div>
+      <div class="bg bg-b"></div>
+      <div class="scrim"></div>
+      <div class="caption"><p>Hand-blown borosilicate, brushed titanium seams, wax-rubbed ash frames, and a floor cut from a single quarry block.</p></div>
+      <div class="badge">atom · pinned-caption-crossfade · dummy facade</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var clamp=function(v,a,b){a=a==null?0:a;b=b==null?1:b;return v<a?a:v>b?b:v;};
+  var lerp=function(a,b,t){return a+(b-a)*t;};
+  function bezier(p1x,p1y,p2x,p2y){
+    function A(a,b){return 1-3*b+3*a;} function B(a,b){return 3*b-6*a;} function C(a){return 3*a;}
+    function calc(t,a,b){return ((A(a,b)*t+B(a,b))*t+C(a))*t;}
+    function slope(t,a,b){return 3*A(a,b)*t*t+2*B(a,b)*t+C(a);}
+    function tForX(x){var t=x;for(var i=0;i<8;i++){var xx=calc(t,p1x,p2x)-x;if(Math.abs(xx)<1e-4)return t;var d=slope(t,p1x,p2x);if(Math.abs(d)<1e-6)break;t-=xx/d;}return t;}
+    return function(x){if(x<=0)return 0;if(x>=1)return 1;return calc(tForX(x),p1y,p2y);};
+  }
+  var ease=bezier(.25,.74,.22,.99);
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  var scroller=document.querySelector('.scroller'),
+      pinWrap=document.querySelector('.pin-wrap'),
+      bgA=document.querySelector('.bg-a'), bgB=document.querySelector('.bg-b'),
+      cap=document.querySelector('.caption');
+
+  var probe=document.createElement('div');
+  probe.style.cssText='position:fixed;top:0;left:0;height:100vh;width:1px;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  var vh=probe.offsetHeight||window.innerHeight||844;
+  function setVH(){ vh=probe.offsetHeight||window.innerHeight||844; document.documentElement.style.setProperty('--vh',(vh/100)+'px'); }
+  setVH();
+
+  function render(hold){
+    hold=clamp((typeof hold==='number'&&isFinite(hold))?hold:0,0,1);
+    window.__hold=hold;
+    if(reduce){ bgA.style.opacity='0'; bgB.style.opacity='1'; bgB.style.transform='scale(1)'; cap.style.opacity='1'; cap.style.transform='translateY(0)'; return; }
+    // M2 crossfade
+    var cx=ease(clamp((hold-0.14)/0.34,0,1));
+    bgB.style.opacity=cx.toFixed(4);
+    bgA.style.opacity=(1-cx).toFixed(4);
+    bgB.style.transform='scale('+lerp(1.06,1.0,cx).toFixed(4)+')';
+    // M3 held-caption
+    var capIn=ease(clamp(hold/0.12,0,1));
+    var capOut=1-ease(clamp((hold-0.82)/0.18,0,1));
+    cap.style.opacity=clamp(capIn*capOut,0,1).toFixed(4);
+    cap.style.transform='translateY('+((1-capIn)*18).toFixed(2)+'px)';
+    // M4 release — на hold→1 stage-контент їде вгору; тут керує наступний scroll поза pin-band
+  }
+  window.__pinCaptionRender=render;
+
+  function onScroll(){
+    var span=pinWrap.offsetHeight - vh;
+    var prog = span>0 ? clamp((scroller.scrollTop - pinWrap.offsetTop)/span,0,1) : 0;
+    render(prog);
+  }
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+  scroller.scrollTop=0;
+  scroller.addEventListener('scroll',onScroll,{passive:true});
+  var rsT; window.addEventListener('resize',function(){ clearTimeout(rsT); rsT=setTimeout(function(){ setVH(); onScroll(); },160); });
+  render(0);
+  window.__PIN_CAPTION_OK__=true;
+})();
+</script>
+</body>
+</html>

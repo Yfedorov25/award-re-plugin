@@ -1,0 +1,174 @@
+{
+  "atomId": "amenities-swim",
+  "ts": "2026-07-26T19:54:32.562Z",
+  "pass": false,
+  "url": "http://localhost:8879/atoms/amenities-swim/variants/swim.html",
+  "tool": "self-check.mjs",
+  "version": 2,
+  "thresholdsVersion": 10,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "harnessHash": "cdbc515d38ec4ae5803bee15b3699f962899a9dd844b705f72493c2d69107dcf",
+  "configSha": "ee4a18d6bda5a46bfdd437d3deccdf2bb8b3ce51e4debab4d955a30b04274668",
+  "expectationsSha": null,
+  "inputsHash": "9a6e258c2348901416d13031dfe6d6f0a39cf750339c3d532eb49a71d2aeaddb",
+  "calibration": {
+    "ok": true,
+    "ts": "2026-07-26T19:51:59.212Z"
+  },
+  "coverage": {
+    "dimensionsRun": [
+      "render-api",
+      "purity",
+      "census",
+      "geometry",
+      "channel-identity",
+      "surface-parity",
+      "structure-parity",
+      "mechanic-class",
+      "composition-static",
+      "console-errors",
+      "http-status"
+    ],
+    "movers": 3,
+    "declared": 3,
+    "basisSelf": 0
+  },
+  "summary": "є провалені виміри — НЕ показувати compare-URL",
+  "checks": [
+    {
+      "dimension": "render-api",
+      "name": "render-api",
+      "pass": true,
+      "detail": "window.render(p) присутній",
+      "basis": "live"
+    },
+    {
+      "dimension": "purity",
+      "name": "render-p-pure",
+      "pass": true,
+      "detail": "render(p) чиста (снапшоти збігаються після стрибків; transition=0 на 3 мōверах)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "census-movers",
+      "pass": true,
+      "detail": "3 рухомих елементів, усі задекларовані (targets/ignore)",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:none",
+      "pass": true,
+      "detail": "card-таргетів нема (атом без картки)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:card",
+      "pass": false,
+      "detail": "scale-механізм: Δbbox=799px (≥100), Δtranslate=399.5px (≤2), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.25",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.5",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.75",
+      "pass": false,
+      "detail": "верх панелі: наш 69.8% vs live 51.2% (Δ18.6 > 10)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.95",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:card",
+      "pass": false,
+      "detail": "механіка РОЗІЙШЛАСЬ: live=[COVERED-BY] vs наш=[]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:card.COVERED-BY",
+      "pass": false,
+      "detail": "COVERED-BY у зоні card: live=1 vs наш=0",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:title",
+      "pass": false,
+      "detail": "механіка РОЗІЙШЛАСЬ: live=[SWAPS-CONTENT, SWAPS-CONTENT] vs наш=[]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:title.SWAPS-CONTENT",
+      "pass": false,
+      "detail": "SWAPS-CONTENT у зоні title: live=2 vs наш=0",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "mechanic-class-parity",
+      "pass": false,
+      "detail": "КЛАС РОЗІЙШОВСЯ: live=pin+swap (текст-зона SWAPS на місці + картки COVER/ENTER; page-зсув 24.8%) vs наш=strip",
+      "basis": "live"
+    },
+    {
+      "dimension": "mechanic-class",
+      "name": "class-vs-live",
+      "pass": true,
+      "detail": "config.mechanicClass=\"pin+swap\" = клас з live",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-static",
+      "name": "comp:title@p1:row-count",
+      "pass": false,
+      "detail": "текст-рядків: live=1 vs наш=0 [live 21.58% · наш —]",
+      "basis": "live"
+    },
+    {
+      "dimension": "console-errors",
+      "name": "console-errors",
+      "pass": true,
+      "detail": "0 console-error",
+      "basis": "live"
+    },
+    {
+      "dimension": "http-status",
+      "name": "http-status",
+      "pass": true,
+      "detail": "0 HTTP>=400",
+      "basis": "live"
+    }
+  ],
+  "unchecked": [
+    {
+      "dimension": "media-type",
+      "target": "media",
+      "reason": "waived",
+      "detail": "photo-first плейсхолдер до заміни на відео [🔴 у live в картці ГРАЄ ВІДЕО, і це доведено числом: atom-probe знайшов кадри, де СТОРІНКА СТОЇТЬ (зміна поза карткою 0.24-1.18), а КАРТКА ЖИВЕ (3.47-11.26). Скрол-керована підміна так не може за побудовою. У нас фото-плейсхолдер, тому ідентичність медіа судить ОКО, а не вимір. Закон КОНТЕЙНЕРА (морфінг + coupled fade) від цього не залежить.]"
+    }
+  ],
+  "uncheckedCount": 1
+}

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · section-pager · wheel-hijack fullpage pager (EVER engine, on OUR content)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · section-pager
+================================================================================
+  The wheel-hijack FULLPAGE PAGER engine, harvested ONE-TO-ONE from the live EVER
+  site (ever-live-here.com) — read off its real landing.js + measured live:
+    - custom controller, NO Lenis / NO GSAP / NO ScrollTrigger; page does not scroll.
+    - stacked position:fixed panes; one wheel/touch/key gesture = ONE section step.
+    - paired curtain: incoming translateY +100%->0, outgoing 0->-100%, easeOutQuart
+      (verbatim from EVER), ~850ms.
+    - TWO clocks: the short curtain + a longer (~1700ms) CONTENT settle (wordmark +
+      per-line reveal + bg zoom) that OUTLASTS the curtain = the luxury overhang.
+    - reveal is TRANSLATE-only (EVER barely fades).
+
+  THIS LAB IS THE ASSET-SUBSTITUTION GATE (per the council verdict): it drives the
+  EXACT engine on OUR QUADRO renders + Ukrainian copy + a different word + a
+  different section count than EVER — proving the primitive is config-driven and
+  re-fires on our content, not a trace of EVER's assets. NO WebGL.
+
+  window.__LAB_OK__ is set by the engine once panes mount.
+  RENDERS resolve via the renders symlink -> apps/quadro/public/proto.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="renders/day-front.webp">
+<link rel="preload" as="image" href="renders/day.webp">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  /* ---- lab composition layer (per-site; the engine does NOT own this) ---- */
+  :root{ --cream:#DCC5B7; --accent:#AC7E65; --panel:#313E48; --slate:#95A3AE;
+    --wm:'Jost','Century Gothic',system-ui,sans-serif; --body:'Inter',system-ui,sans-serif;
+    --gutter:clamp(20px,3.47vw,50px); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#11161a;color:var(--cream);font-family:var(--body);overflow:hidden}
+  body{position:fixed;inset:0}
+
+  .bg::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(12,16,18,.26) 0%,rgba(12,16,18,0) 26%,rgba(12,16,18,.08) 58%,rgba(12,16,18,.5) 100%)}
+
+  /* HERO */
+  .hero__right{position:absolute;top:0;right:0;width:50%;height:100%;background:var(--panel);z-index:1;overflow:hidden}
+  .hero__right video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    clip-path:ellipse(78% 74% at 50% 56%);will-change:transform;transform:translateZ(0)}
+  .hero__wm{position:absolute;z-index:3;left:var(--gutter);right:var(--gutter);top:120px;
+    font-family:var(--wm);font-weight:400;font-size:clamp(54px,7.5vw,108px);line-height:1.02;
+    letter-spacing:-.02em;text-transform:uppercase;text-align:right;color:var(--cream);pointer-events:none}
+  .hero__live{position:absolute;z-index:3;right:var(--gutter);bottom:clamp(40px,11.5vh,104px);
+    font-family:var(--wm);font-weight:400;font-size:clamp(2.4rem,5.5vw,80px);line-height:.92;
+    text-align:right;text-transform:uppercase;color:var(--cream)}
+  .hero__lead{position:absolute;z-index:3;left:var(--gutter);bottom:clamp(40px,9vh,88px);
+    max-width:34ch;font-size:clamp(.84rem,1.1vw,16px);line-height:1.5;color:var(--slate)}
+
+  /* ARCHITECTURE */
+  .arch__wmwrap{position:absolute;z-index:3;left:var(--gutter);bottom:clamp(34px,9.2vh,317px);overflow:hidden;pointer-events:none}
+  .arch__wm{font-family:var(--wm);font-weight:400;font-size:clamp(54px,7.5vw,108px);line-height:1.0;
+    letter-spacing:-.02em;text-transform:uppercase;color:var(--cream);white-space:nowrap}
+  .arch__title{position:absolute;z-index:4;left:67%;top:clamp(80px,12.1vh,109px);
+    font-family:var(--wm);font-weight:400;font-size:clamp(22px,2.8vw,40px);line-height:1.18;
+    text-transform:uppercase;color:var(--cream)}
+  .arch__sub{position:absolute;z-index:4;left:67%;top:clamp(220px,38vh,360px);max-width:26ch;
+    font-size:clamp(.84rem,1.05vw,15px);line-height:1.55;color:var(--slate)}
+
+  /* TERRACE — a THIRD section (proves config section-count != EVER's) */
+  .ter__wmwrap{position:absolute;z-index:3;left:var(--gutter);bottom:clamp(34px,9vh,300px);overflow:hidden;pointer-events:none}
+  .ter__wm{font-family:var(--wm);font-weight:400;font-size:clamp(54px,7.5vw,108px);line-height:1.0;
+    letter-spacing:-.02em;text-transform:uppercase;color:var(--cream);white-space:nowrap}
+  .ter__title{position:absolute;z-index:4;left:var(--gutter);top:clamp(80px,14vh,130px);
+    font-family:var(--wm);font-weight:400;font-size:clamp(22px,2.8vw,40px);line-height:1.18;text-transform:uppercase;color:var(--cream)}
+  .ter__sub{position:absolute;z-index:4;left:var(--gutter);top:clamp(210px,34vh,320px);max-width:30ch;
+    font-size:clamp(.84rem,1.05vw,15px);line-height:1.55;color:var(--slate)}
+
+  /* chrome */
+  .chrome{position:fixed;top:0;left:0;right:0;z-index:20;height:74px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--gutter);color:var(--cream)}
+  .chrome::after{content:"";position:absolute;left:var(--gutter);right:var(--gutter);bottom:0;height:1px;background:rgba(220,197,183,.18)}
+  .chrome__l,.chrome__r{display:flex;align-items:center;gap:12px}
+  .chip{border:1px solid rgba(220,197,183,.38);border-radius:40px;padding:9px 17px;font-family:var(--wm);font-size:.78rem;color:var(--cream);white-space:nowrap}
+  .chip--g{border:none;padding:9px 6px}
+  .brand{font-family:var(--wm);font-weight:500;font-size:1.5rem;position:absolute;left:50%;transform:translateX(-50%)}
+  .dots{position:fixed;right:clamp(16px,2vw,28px);top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:11px}
+  .dots i{width:7px;height:7px;border-radius:50%;background:rgba(220,197,183,.3);transition:background .4s,transform .4s}
+  .dots i.on{background:var(--cream);transform:scale(1.25)}
+  .cue{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:20;width:40px;height:40px;border:1px solid rgba(220,197,183,.4);border-radius:50%;display:grid;place-items:center;color:var(--cream);transition:opacity .5s}
+  .sp-stage.is-moving ~ .cue{opacity:0}
+  .cue svg{width:15px;height:15px}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <div class="chrome__l"><span class="chip">Меню</span><span class="chip">Квартири</span><span class="chip">3D тур</span></div>
+  <div class="brand">QUADRO</div>
+  <div class="chrome__r"><span class="chip chip--g">♡</span><span class="chip">Зворотний дзвінок</span></div>
+</div>
+<div class="dots" id="dots"><i class="on"></i><i></i><i></i></div>
+<button class="cue" aria-label="далі"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+
+<!-- markup-first: the engine pages these .pane children. THREE sections (not EVER's count). -->
+<div class="sp-stage" id="stage">
+
+  <section class="pane" data-i="0">
+    <div class="bg"><img src="renders/day-front.webp" alt="Фасад QUADRO вдень" decoding="async"></div>
+    <div class="hero__right"><video src="renders/clip-river-lite.mp4" autoplay loop muted playsinline></video></div>
+    <div class="hero__wm" data-rise-wrap><span data-rise style="display:inline-block">quadro</span></div>
+    <div class="hero__live">жити<br>тут</div>
+    <p class="hero__lead" data-fade>Композиція кварталу побудована на контрасті архітектури і природи. Вони не сперечаються, а живуть поряд.</p>
+  </section>
+
+  <section class="pane" data-i="1">
+    <div class="bg"><img src="renders/day.webp" alt="Архітектура QUADRO" decoding="async"></div>
+    <div class="arch__title" data-rise-line>Прості<br>обриси,<br>виразні<br>матеріали</div>
+    <div class="arch__sub" data-fade>Камінь, скло і світло замість зайвого декору.</div>
+    <div class="arch__wmwrap"><div class="arch__wm" data-rise>архітектура</div></div>
+  </section>
+
+  <section class="pane" data-i="2">
+    <div class="bg"><img src="renders/terrace.webp" alt="Тераса QUADRO на заході" decoding="async"></div>
+    <div class="ter__title" data-rise-line>Тераса<br>над кварталом</div>
+    <div class="ter__sub" data-fade>Кава вранці над дахами. Простір, який належить тільки твоїй родині.</div>
+    <div class="ter__wmwrap"><div class="ter__wm" data-rise>тераса</div></div>
+  </section>
+
+</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    var dots = [].slice.call(document.querySelectorAll('#dots i'));
+    var cue = document.querySelector('.cue');
+    // CONFIG-DRIVEN: same engine, OUR content, OUR section count, OUR word.
+    var pager = SectionPager.init('#stage', {
+      curtainMs: 850,
+      contentMs: 1700,
+      bgZoom: 0.06,
+      ease: SectionPager.ease.easeOutQuart,
+      onStep: function (i) {
+        dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
+        if (cue) cue.style.opacity = i === 0 ? '' : '0';
+      }
+    });
+    if (cue) cue.addEventListener('click', function () { pager.go && pager.go(1); });
+  })();
+</script>
+</body>
+</html>

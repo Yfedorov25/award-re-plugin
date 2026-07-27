@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>S54 · борд панорами parking: A / B / C</title>
+<style>
+  :root{--bg:#0e0f0e;--fg:#e8e6e1;--dim:#8d8d8d;--line:#2a2c2a}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);
+    font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{padding:14px 18px 10px;border-bottom:1px solid var(--line)}
+  h1{margin:0 0 4px;font-size:15px;font-weight:600;letter-spacing:.01em}
+  .sub{color:var(--dim);font-size:12px;max-width:900px}
+  .ctl{padding:12px 18px;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--line);
+    position:sticky;top:0;background:var(--bg);z-index:5}
+  input[type=range]{flex:1;accent-color:#7fa06a}
+  .num{font-variant-numeric:tabular-nums;min-width:170px;color:var(--dim);font-size:12px}
+  .grid{display:flex;gap:8px;padding:14px 18px 26px;align-items:flex-start;overflow-x:auto}
+  figure{margin:0;flex:1 1 0;min-width:190px}
+  figcaption{font-size:12px;padding:6px 2px 0;color:var(--dim)}
+  figcaption b{color:var(--fg);font-weight:600}
+  img{width:100%;display:block;border:1px solid var(--line);background:#000}
+  table{border-collapse:collapse;margin:0 18px 14px;font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:5px 10px;text-align:right;font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left}
+  thead th{color:var(--dim);font-weight:500}
+  .ok{color:#8fbf72} .bad{color:#d08a6a}
+  .note{margin:0 18px 30px;color:var(--dim);font-size:12px;max-width:900px}
+  kbd{border:1px solid var(--line);border-radius:3px;padding:1px 5px;font-size:11px;color:var(--dim)}
+</style></head><body>
+<header>
+  <h1>S54 · панорама parking — <b>яку збірку ставимо</b></h1>
+  <div class="sub">Однакові позиції сторінки. <b>A</b> = поточна: вікно кропу сталої ширини, лише ЇДЕ вправо.
+    <b>B</b> = вікно ШИРШАЄ (зала відкривається), але лишається на лівому боці кліпу.
+    <b>C</b> = вікно і ШИРШАЄ, і ДОЇЖДЖАЄ вправо.</div>
+</header>
+<div class="ctl">
+  <button id="play">▶︎</button>
+  <input id="s" type="range" min="0" max="43" value="0" step="1">
+  <span class="num" id="n"></span>
+  <span class="sub"><kbd>←</kbd><kbd>→</kbd></span>
+</div>
+<div class="grid">
+  <figure><img id="iL"><figcaption><b>LIVE</b> springs.estate</figcaption></figure>
+  <figure><img id="iA"><figcaption><b>A</b> — поточна (тільки ЇДЕ)</figcaption></figure>
+  <figure><img id="iB"><figcaption><b>B</b> — ШИРШАЄ (лівий бік)</figcaption></figure>
+  <figure><img id="iC"><figcaption><b>C</b> — старий асет, ШИРШАЄ+ЇДЕ</figcaption></figure>
+  <figure><img id="iR"><figcaption><b>R6</b> — НОВИЙ асет, стале вікно</figcaption></figure>
+</div>
+<table>
+  <thead><tr><th>кінець ходу камери</th><th>вікно в кліпі, px</th><th>зала відкривається</th><th>sR (правий край у сцені)</th></tr></thead>
+  <tbody>
+    <tr><td>LIVE (ціль)</td><td>—</td><td>×1.51</td><td>2.16</td></tr>
+    <tr><td>A — поточна</td><td>748 → 748 &nbsp;<span class="bad">(стала)</span></td><td class="bad">×0.95</td><td>2.11</td></tr>
+    <tr><td>B — ШИРШАЄ</td><td>504 → 766</td><td class="ok">×1.37</td><td>1.98</td></tr>
+    <tr><td>C — ШИРШАЄ + ЇДЕ</td><td>504 → 766</td><td class="ok">×1.53</td><td>2.96</td></tr>
+    <tr><td><b>R6 — новий асет</b></td><td>886 → 886 <span class="ok">(стале)</span></td><td class="ok">×1.33</td><td>1.31</td></tr>
+    <tr><td>0.19 — відкинуто оком</td><td>748 → 748</td><td class="bad">×0.93</td><td class="bad">1.65</td></tr>
+    <tr><td>0.00 — нег. еталон</td><td>748 → 748</td><td class="bad">×0.90</td><td class="bad">1.45</td></tr>
+  </tbody>
+</table>
+<p class="note">🔴 Чесно про число: «зала відкривається ×N» — це зиск ВІДНОСНО ВЛАСНОГО старту збірки,
+  а не ширина фінального кадру. B і C стартують тіснішим вікном (504px кліпу проти 748), тому
+  їхнє ×1.37/×1.53 дає в фіналі 766px — практично ту саму абсолютну ширину, що в A (748px).
+  Різниця не в ширині фіналу, а в тому, чи РОЗКРИВАЄТЬСЯ зала по ходу скролу і куди дивиться
+  вікно наприкінці. Стеля кліпу — 768px з 1244 (більше не влазить під аспект 585×1266).</p>
+<script>
+var PAGES=[0,-0.9,-1.7,-2.5,-3.4,-4.2,-5.1,-5.9,-6.8,-7.6,-8.5,-9.3,-10.2,-11,-11.9,-12.7,-13.6,-14.4,-15.3,-16.1,-17,-17.8,-18.7,-19.5,-20.4,-21.2,-22.1,-22.9,-23.8,-24.6,-25.5,-26.3,-27.2,-28,-28.9,-29.7,-30.6,-31.4,-32.3,-33.1,-34,-34.8,-35.7,-36.5];
+var s=document.getElementById('s'),n=document.getElementById('n');
+var im={iL:'live',iA:'a',iB:'b',iC:'c',iR:'r6'};
+function pad(i){return i<10?'0'+i:''+i}
+function show(i){for(var k in im){document.getElementById(k).src=im[k]+'/p'+pad(i)+'.webp'}
+  n.textContent='кадр '+i+'/43 · page '+PAGES[i].toFixed(1)+'%';}
+s.addEventListener('input',function(){show(+s.value)});
+addEventListener('keydown',function(e){if(e.key==='ArrowRight'){s.value=Math.min(43,+s.value+1);show(+s.value)}
+  if(e.key==='ArrowLeft'){s.value=Math.max(0,+s.value-1);show(+s.value)}});
+var t=null;document.getElementById('play').onclick=function(){
+  if(t){clearInterval(t);t=null;this.textContent='▶︎';return}
+  this.textContent='❙❙';t=setInterval(function(){var v=+s.value+1;if(v>43){v=0}s.value=v;show(v)},130)};
+show(0);
+</script>
+</body></html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PASSPORT · t-1-keys-road «Шлях до ключів: шов-естафета» · клас A (хребет-мандат)
+Граматика: ERA construction-progress. Пінений скраб.
+SIGNATURE MORPH (F-45): CLIP-WIPE знизу вгору. Стадія-1 і стадія-2 приходять як
+clip-path: inset(100% 0 0 0) -> inset(0), кромка їде вгору по стінах будинку.
+stage-0 = база opacity:1 назавжди (ZERO-BLANK).
+
+STAGE MAP (p = прогрес піна, чиста функція скролу):
+  p 0.00-0.18  dwell     stage-0 «ділянка», одометр 0-1, лінія росте
+  p 0.18-0.30  WIPE-1    stage-1 wipe знизу вгору (вікно 12% p)
+  p 0.30-0.74  dwell     stage-1 «каркас», одометр крутиться, віхи 2-3
+  p 0.74-0.86  WIPE-2    stage-2 wipe знизу вгору (вікно 12% p)
+  p 0.86       BEAT      кромка stage-2 довершена + одометр «9» + віха 4 + лінія 100%
+  p 0.86-1.00  dwell     фінальний кадр тримається, підпис «2 квартал 2027 · ключі»
+
+Анімовані властивості: clip-path, transform, opacity, stroke-dashoffset. Більше нічого.
+Reduced-motion / <=820px: render(1) статично, пін відпущено, всі докази видимі.
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-1 · Шлях до ключів</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,400&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --bg-2:#211D18; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.16); --gutter:56px;
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{overflow-x:clip;background:var(--bg);color:var(--ink)}
+  body{font-family:var(--sans);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  img{display:block}
+  a{color:var(--ink)}
+
+  .meta-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:28px var(--gutter) 0;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .head{padding:72px var(--gutter) 56px;display:grid;grid-template-columns:1fr 420px;gap:48px;align-items:end}
+  .eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+  h1{font-family:var(--serif);font-weight:300;font-size:clamp(44px,4.8vw,72px);line-height:1.04;letter-spacing:.005em;text-wrap:balance}
+  .lede{color:var(--muted);max-width:40ch;padding-bottom:8px}
+
+  /* ── pinned spine ── */
+  .pin{height:520vh;position:relative}
+  html.static .pin{height:auto}
+  .stage-stick{position:sticky;top:0;height:100vh;display:grid;grid-template-rows:1fr auto;overflow:clip;background:var(--bg)}
+  html.static .stage-stick{position:relative;height:auto;min-height:100vh}
+  .stage-media{position:relative;overflow:clip;background:var(--bg-2)}
+  .stage-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 62%}
+  .stage-media img.s1,.stage-media img.s2{clip-path:inset(100% 0 0 0)}
+  .h-cap{position:absolute;left:16px;bottom:14px;z-index:5;font:500 11px/1 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(237,230,216,.82);
+    text-shadow:0 1px 8px rgba(10,8,6,.65)}
+
+  .instruments{display:grid;grid-template-columns:minmax(300px,380px) 1fr minmax(260px,320px);
+    gap:48px;align-items:center;padding:34px var(--gutter) 44px;background:var(--bg)}
+  .stage-cap{font-family:var(--serif);font-weight:400;font-size:34px;line-height:1.1;min-height:1.2em}
+  .stage-cap .in{display:inline-block;animation:capIn .45s cubic-bezier(.2,.7,.2,1) both}
+  html.static .stage-cap .in{animation:none}
+  @keyframes capIn{from{opacity:0;transform:translateY(.35em)}to{opacity:1;transform:none}}
+
+  .road{position:relative}
+  .road svg{display:block;width:100%;height:76px;overflow:visible}
+  .road .base{stroke:var(--hair);stroke-width:1}
+  .road .fill{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:1;stroke-dashoffset:1}
+  .tick circle{fill:var(--bg);stroke:rgba(237,230,216,.4);stroke-width:1;transition:fill .3s,stroke .3s}
+  .tick text{font-family:var(--sans);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    fill:var(--muted);opacity:.45;transition:opacity .3s}
+  .tick.lit circle{fill:var(--accent);stroke:var(--accent)}
+  .tick.lit text{opacity:1;fill:var(--ink)}
+
+  .odo{display:flex;align-items:baseline;gap:18px;justify-content:flex-end}
+  .reel{height:1em;overflow:clip;font-family:var(--serif);font-weight:300;font-size:128px;line-height:1;color:var(--ink)}
+  .reel .strip{transition:transform .5s cubic-bezier(.3,0,.2,1);will-change:transform}
+  html.static .reel .strip{transition:none}
+  .reel .strip span{display:block;height:1em;text-align:right}
+  .odo-word{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);max-width:12ch;line-height:1.6}
+
+  /* ── terms below pin ── */
+  .terms{padding:110px var(--gutter) 130px;display:grid;grid-template-columns:minmax(240px,1fr) minmax(0,2fr);gap:64px}
+  .terms h2{font-family:var(--serif);font-weight:300;font-size:40px;line-height:1.1}
+  .rows{display:grid}
+  .row{display:grid;grid-template-columns:220px 1fr;gap:32px;padding:26px 0;border-top:1px solid var(--hair);
+    opacity:0;transform:translateY(14px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+  .row:last-of-type{border-bottom:1px solid var(--hair)}
+  .row.on{opacity:1;transform:none}
+  html.static .row{opacity:1;transform:none;transition:none}
+  .row .k{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding-top:4px}
+  .row .v{font-size:19px}
+  .bridge{margin-top:40px;display:inline-flex;align-items:center;gap:14px;font-size:15px;letter-spacing:.04em;
+    text-decoration:none;border-bottom:1px solid var(--accent);padding-bottom:8px;color:var(--ink)}
+  .bridge svg{transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+  .bridge:hover svg{transform:translateX(5px)}
+
+  @media (max-width:820px){
+    :root{--gutter:20px}
+    .head{grid-template-columns:1fr;gap:24px}
+    .instruments{grid-template-columns:1fr;gap:22px;padding-bottom:28px}
+    .odo{justify-content:flex-start}
+    .reel{font-size:84px}
+    .terms{grid-template-columns:1fr;gap:28px;padding:64px var(--gutter) 80px}
+    .row{grid-template-columns:1fr;gap:8px;padding:20px 0}
+  }
+</style>
+</head>
+<body>
+<section data-screen-label="t-1 keys road">
+  <div class="meta-row"><span data-slot="project"></span><span>Клас A · t-1</span></div>
+  <header class="head">
+    <div>
+      <p class="eyebrow" data-slot="eyebrow"></p>
+      <h1 data-slot="title"></h1>
+    </div>
+    <p class="lede" data-slot="body"></p>
+  </header>
+
+  <div class="pin" id="pin">
+    <div class="stage-stick">
+      <figure class="stage-media" id="media">
+        <figcaption class="h-cap" id="hcap"></figcaption>
+      </figure>
+      <div class="instruments">
+        <div class="stage-cap"><span class="in" id="scap"></span></div>
+        <div class="road" id="road"></div>
+        <div class="odo">
+          <div class="reel"><div class="strip" id="strip"></div></div>
+          <div class="odo-word" id="odoword"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="terms">
+    <h2 data-slot="termsTitle"></h2>
+    <div>
+      <div class="rows" id="rows"></div>
+      <a class="bridge" data-slot-href="bridge" href="#">
+        <span data-slot="bridgeLabel"></span>
+        <svg width="22" height="10" viewBox="0 0 22 10" fill="none" aria-hidden="true">
+          <path d="M0 5h20M16 1l4 4-4 4" stroke="#AC7E65" stroke-width="1.2"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ═ TEMPLATE CONTRACT ═
+   ОБОВʼЯЗКОВІ поля для нового проєкту:
+   project.name · section.{eyebrow,title,body} · stages[3] (frame-matched кадри
+   ОДНІЄЇ камери: src, caption «дата · стан», honesty «Візуалізація · стан, дата»)
+   · finale.caption · odometer.{finalValue,unitForms[3],sub} · milestones[4]
+   {at 0..1, date, word} · terms.{title,rows[{k,v}]} · bridge.{label,href}
+   ОПЦІЙНІ: terms.rows може бути порожнім (блок ховається); alt збирається з honesty. */
+const DATA = {
+  project: { name: 'ЖК Агрономічне' },
+  section: {
+    eyebrow: 'Будівництво',
+    title: 'Від старту до ключів менше року',
+    body: 'Малий будинок на 3 поверхи будується швидко. Гортайте: ділянка виросте в готовий будинок.'
+  },
+  stages: [
+    { src: 'assets/build-smarts/build-stage-0.webp', caption: 'Червень 2026 · ділянка',
+      honesty: 'Візуалізація · ділянка, червень 2026' },
+    { src: 'assets/build-smarts/build-stage-1.webp', caption: 'Осінь 2026 · каркас',
+      honesty: 'Візуалізація · каркас, осінь 2026' },
+    { src: 'assets/build-smarts/build-stage-2.webp', caption: 'Кінець 2026 · фасади',
+      honesty: 'Візуалізація · фасади, кінець 2026' }
+  ],
+  finale: { caption: '2 квартал 2027 · ключі' },
+  odometer: { finalValue: 9, unitForms: ['місяць','місяці','місяців'], sub: 'від старту до ключів' },
+  milestones: [
+    { at: 0.0,  date: 'Червень 2026', word: 'ділянка' },
+    { at: 0.34, date: 'Осінь 2026',   word: 'каркас'  },
+    { at: 0.67, date: 'Кінець 2026',  word: 'фасади'  },
+    { at: 1.0,  date: '2 кв 2027',    word: 'ключі'   }
+  ],
+  terms: {
+    title: 'Умови без дрібного шрифту',
+    rows: [
+      { k: 'Оплата',           v: 'Платите всю суму одразу та отримуєте знижку.' },
+      { k: 'Розтермінування',  v: 'Графік платежів складаємо під ваш бюджет.' },
+      { k: 'Супровід',         v: 'Наш менеджер веде вашу угоду до ключів.' }
+    ]
+  },
+  bridge: { label: 'Запитати про розтермінування', href: '#cta' }
+};
+
+/* ── slots ── */
+const $ = s => document.querySelector(s);
+const put = (slot, v) => { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = v; };
+put('project', DATA.project.name);
+put('eyebrow', DATA.section.eyebrow);
+put('title', DATA.section.title);
+put('body', DATA.section.body);
+put('termsTitle', DATA.terms.title);
+put('bridgeLabel', DATA.bridge.label);
+$('[data-slot-href="bridge"]').href = DATA.bridge.href;
+
+const media = $('#media');
+const stageEls = DATA.stages.map((st, i) => {
+  const img = new Image();
+  img.src = st.src;
+  img.alt = st.honesty.replace(' · ', ': ');
+  img.className = 's' + i;
+  img.loading = 'eager';
+  media.insertBefore(img, media.querySelector('.h-cap'));
+  return img;
+});
+
+/* odometer strip 0..9 */
+const strip = $('#strip');
+for (let d = 0; d <= 9; d++) { const s = document.createElement('span'); s.textContent = d; strip.appendChild(s); }
+const plural = n => DATA.odometer.unitForms[n === 1 ? 0 : (n >= 2 && n <= 4 ? 1 : 2)];
+const odoword = $('#odoword');
+
+/* road line svg */
+(function buildRoad(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 1000 76'); svg.setAttribute('preserveAspectRatio', 'none');
+  const mk = (cls) => { const l = document.createElementNS(NS, 'line');
+    l.setAttribute('x1', 12); l.setAttribute('x2', 988); l.setAttribute('y1', 30); l.setAttribute('y2', 30);
+    l.setAttribute('pathLength', '1'); l.setAttribute('class', cls);
+    l.setAttribute('vector-effect', 'non-scaling-stroke'); return l; };
+  svg.appendChild(mk('base'));
+  const fill = mk('fill'); svg.appendChild(fill);
+  DATA.milestones.forEach(m => {
+    const g = document.createElementNS(NS, 'g'); g.setAttribute('class', 'tick');
+    const x = 12 + m.at * 976;
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', x); c.setAttribute('cy', 30); c.setAttribute('r', 4.5);
+    c.setAttribute('vector-effect', 'non-scaling-stroke');
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', x); t.setAttribute('y', 58);
+    t.setAttribute('text-anchor', m.at === 0 ? 'start' : (m.at === 1 ? 'end' : 'middle'));
+    t.textContent = m.date + ' · ' + m.word;
+    g.appendChild(c); g.appendChild(t); svg.appendChild(g);
+  });
+  $('#road').appendChild(svg);
+  window.__roadFill = fill;
+})();
+const ticks = [...document.querySelectorAll('.tick')];
+
+/* terms rows */
+const rowsEl = $('#rows');
+DATA.terms.rows.forEach(r => {
+  const d = document.createElement('div'); d.className = 'row';
+  const k = document.createElement('div'); k.className = 'k'; k.textContent = r.k;
+  const v = document.createElement('div'); v.className = 'v'; v.textContent = r.v;
+  d.appendChild(k); d.appendChild(v); rowsEl.appendChild(d);
+});
+
+/* ── engine: pure render(p) ── */
+const seg = (p, a, b) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+const W1 = [0.18, 0.30], W2 = [0.74, 0.86], BEAT = 0.86;
+let lastM = -1, lastCap = -1, lastH = -1, lastLit = -1;
+const scap = $('#scap'), hcap = $('#hcap');
+const captions = [DATA.stages[0].caption, DATA.stages[1].caption, DATA.stages[2].caption, DATA.finale.caption];
+
+function render(p){
+  stageEls[1].style.clipPath = `inset(${(1 - seg(p, W1[0], W1[1])) * 100}% 0 0 0)`;
+  stageEls[2].style.clipPath = `inset(${(1 - seg(p, W2[0], W2[1])) * 100}% 0 0 0)`;
+
+  const lp = Math.min(1, p / BEAT);
+  window.__roadFill.style.strokeDashoffset = 1 - lp;
+
+  const lit = DATA.milestones.reduce((n, m, i) => lp >= m.at - 0.001 ? i : n, -1);
+  if (lit !== lastLit) { ticks.forEach((t, i) => t.classList.toggle('lit', i <= lit)); lastLit = lit; }
+
+  const F = DATA.odometer.finalValue;
+  /* квантовано: одна величина на рил, «9» лягає рівно в BEAT разом з кромкою і віхою */
+  const mQ = lp >= 1 ? F : Math.floor(lp * F);
+  if (mQ !== lastM) {
+    strip.style.transform = `translateY(${-mQ}em)`;
+    odoword.textContent = plural(mQ) + ' ' + DATA.odometer.sub;
+    lastM = mQ;
+  }
+
+  const cap = p >= BEAT ? 3 : p >= W2[0] ? 2 : p >= W1[1] ? 1 : 0;
+  if (cap !== lastCap) {
+    scap.classList.remove('in'); void scap.offsetWidth;
+    scap.textContent = captions[cap]; scap.classList.add('in');
+    lastCap = cap;
+  }
+  const h = p >= W2[0] ? 2 : p >= W1[0] ? 1 : 0;
+  if (h !== lastH) { hcap.textContent = DATA.stages[h].honesty; lastH = h; }
+}
+
+/* zero-blank probe: samples p across the range, asserts base coverage */
+window.__zeroBlankProbe = function(){
+  for (let p = 0; p <= 1.001; p += 0.02) {
+    render(p);
+    if (getComputedStyle(stageEls[0]).opacity !== '1') return { ok: false, p };
+  }
+  return { ok: true };
+};
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const narrow = matchMedia('(max-width: 820px)');
+
+const decoded = img => Promise.race([
+  img.decode().catch(() => {}),
+  new Promise(r => { if (img.complete) r(); else img.addEventListener('load', r, { once: true }); }),
+  new Promise(r => setTimeout(r, 800))
+]);
+async function init(){
+  /* DECODE-GUARD: усі стадійні img декодуються ДО створення тригера */
+  await Promise.all(stageEls.map(decoded));
+
+  if (reduced.matches || narrow.matches) {
+    document.documentElement.classList.add('static');
+    requestAnimationFrame(() => requestAnimationFrame(() => render(1)));
+    return;
+  }
+  document.documentElement.classList.remove('static');
+
+  const pin = $('#pin');
+  let start = 0, len = 1;
+  const measure = () => {
+    const r = pin.getBoundingClientRect();
+    start = r.top + scrollY;
+    len = pin.offsetHeight - innerHeight;
+  };
+  /* PIN-MEASURE: подвійний rAF після декодування, потім слухаємо resize */
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    measure(); render(0);
+    let raf = null;
+    const loop = () => {
+      raf = null;
+      render(Math.min(1, Math.max(0, (scrollY - start) / len)));
+    };
+    addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(loop); }, { passive: true });
+    addEventListener('resize', () => { measure(); loop(); });
+    loop();
+  }));
+
+  /* terms reveal: одна крива на в'їзд, media веде, текст слідом */
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) {
+      [...rowsEl.children].forEach((r, i) => setTimeout(() => r.classList.add('on'), i * 110));
+      io.disconnect();
+    }
+  }), { threshold: 0.3 });
+  io.observe(rowsEl);
+}
+init();
+/* повторний прогін decode-guard при зміні breakpoint (джерела ті самі, гейт формальний) */
+narrow.addEventListener('change', () => init());
+reduced.addEventListener('change', () => init());
+</script>
+</body>
+</html>

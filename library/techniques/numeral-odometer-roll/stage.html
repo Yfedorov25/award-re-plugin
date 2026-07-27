@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>numeral-odometer-roll · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);min-height:100%}
+  .before{ height:60vh; } .after{ height:120vh; }
+  .wrap{ min-height:70vh; display:flex; flex-direction:column; justify-content:center; align-items:flex-start;
+    padding:clamp(24px,6vw,90px); max-width:100%; }
+  .stat-eyebrow{ font-size:.7rem; letter-spacing:.32em; text-transform:uppercase; color:var(--slate); margin-bottom:clamp(16px,3vh,30px); }
+  /* number stacked ABOVE the word so neither clips the frame on a phone */
+  .stat-row{ display:flex; flex-direction:column; align-items:flex-start; gap:.05em; font-family:var(--serif);
+    font-weight:400; line-height:1; color:var(--cream); max-width:100%; }
+  .stat-num{ font-size:clamp(3.4rem,13vw,9rem); --nor-row:1em; }
+  .stat-word{ font-size:clamp(1.6rem,7vw,3.6rem); }
+  .nor-window{ font-variant-numeric:tabular-nums; }
+  .stat-label{ margin-top:clamp(12px,2.5vh,26px); font-family:var(--body); font-size:clamp(.9rem,1.6vw,1.15rem);
+    letter-spacing:.02em; color:#c7d3cb; max-width:min(22ch,100%); }
+  .badge{ position:fixed; top:10px; left:10px; z-index:9; font-family:ui-monospace,Menlo,monospace;
+    font-size:.62rem; letter-spacing:.06em; color:#7fd8b0; background:rgba(8,22,17,.72);
+    border:1px solid #26463c; border-radius:999px; padding:4px 10px; pointer-events:none; }
+</style>
+</head>
+<body>
+  <div class="badge" id="badge">…</div>
+  <div class="before" id="before"></div>
+  <section class="wrap" id="stage">
+    <div class="stat-eyebrow">QUADRO · квартал у цифрах</div>
+    <div class="stat-row">
+      <span class="stat-num nor-window" id="odo"><span class="nor-col"></span></span>
+      <span class="stat-word">резиденцій</span>
+    </div>
+    <div class="stat-label">приватних будинків у зеленому периметрі кварталу</div>
+  </section>
+  <div class="after" id="after"></div>
+
+<script src="engine.js"></script>
+<script src="component.js"></script>
+<script>
+  var r = NumeralOdometerRollDual.init('#odo', {
+    platform: 'auto', values: [6, 12, 24, 48], digits: 2, rollMs: 900
+  });
+  var badge = document.getElementById('badge');
+  badge.textContent = r.platform === 'desktop' ? 'desktop · scroll-roll' : 'mobile · counter-settle';
+  if (r.platform === 'mobile') { document.getElementById('after').style.height='0'; document.getElementById('before').style.height='0'; }
+  if (r.platform === 'desktop' && window.Lenis) {
+    var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); });
+  }
+</script>
+</body>
+</html>

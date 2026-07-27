@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--windows-light-up · Коли вечір вмикає світло</title>
+<!--
+  SECTION VARIANT · architecture · "Коли вечір вмикає світло"  (status: candidate)
+  Shape = MANUAL-ATOM: the harness owns ONE pin; daynight-masked-windows is a PURE set(t)
+  atom driven by that pin. As you scroll the DAY building stays put and its windows ignite
+  one by one into the dusk (the atom fades each window's warm glow across its own band).
+  A serif title + a sparse caption ride the same progress (transform/opacity only).
+  The render is the hero; the copy sits low and far, with generous air around it.
+  __LAB_OK__ (combo-scaffold.js) passes only with: 1 pin, the cited real atom ran,
+  a [data-render-surface] painted a decoded image, 0 real console errors.
+  NO WebGL. NO mix-blend. NO backdrop-filter. transform/opacity/filter only.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/daynight-engine/component.css">
+<link rel="stylesheet" href="../../components/daynight-masked-windows/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the rails) */
+
+  /* a slow vignette + warm wash that deepens as the windows light, so the building
+     reads as evening without touching the render. opacity-only, sits above the night
+     crops' z-index? no, it stays a quiet field UNDER the caption, OVER the stage glow. */
+  .wlu__dusk {
+    position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: 0;
+    background:
+      radial-gradient(120% 80% at 50% 18%, rgba(12,16,24,0) 38%, rgba(8,11,18,.55) 100%),
+      linear-gradient(180deg, rgba(8,11,18,.18) 0%, rgba(8,11,18,0) 34%, rgba(6,8,14,.42) 100%);
+  }
+
+  /* eyebrow sits high-left, a quiet address line */
+  .wlu__eyebrow {
+    position: absolute; z-index: 6; left: clamp(20px,4.5vw,72px); top: clamp(24px,6vh,64px);
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: var(--combo-cream); opacity: .72; pointer-events: none;
+    text-shadow: 0 1px 14px rgba(0,0,0,.5);
+  }
+
+  /* the title + caption live low-left, generous distance from the render's bright centre */
+  .wlu__cap {
+    position: absolute; z-index: 6; left: clamp(20px,4.5vw,72px); bottom: clamp(28px,8vh,84px);
+    max-width: 21ch; pointer-events: none; color: var(--combo-cream);
+    text-shadow: 0 2px 26px rgba(0,0,0,.55);
+  }
+  .wlu__title {
+    font-family: var(--combo-serif); font-weight: 300; font-size: clamp(2.6rem,7vw,5.6rem);
+    line-height: .96; letter-spacing: -.02em;
+  }
+  .wlu__line {
+    margin-top: 1.1rem; max-width: 24ch;
+    font: 400 clamp(.86rem,1.25vw,1.04rem)/1.5 var(--combo-sans);
+    color: var(--combo-cream); opacity: .8;
+  }
+  /* a hairline that grows with the dusk, a quiet progress tell */
+  .wlu__rule {
+    margin-top: 1.4rem; width: clamp(64px,12vw,150px); height: 1px; transform-origin: left center;
+    background: linear-gradient(90deg, rgba(247,206,142,.9), rgba(244,239,230,0));
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--windows-light-up">
+    <div id="winHost" data-render-surface></div>   <!-- daynight-masked-windows injects .dn + real <img>s + lit window crops here -->
+    <div class="wlu__dusk" data-dusk></div>
+    <div class="wlu__eyebrow" data-eyebrow>вул. Замкова</div>
+    <div class="wlu__cap" data-spine>
+      <div class="wlu__title">Дім оживає</div>
+      <div class="wlu__line">Світло вмикається кімната за кімнатою. Вечір, у який хочеться повертатись.</div>
+      <div class="wlu__rule" data-rule></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/daynight-engine/component.js"></script>
+  <script src="../../components/daynight-masked-windows/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var mw;
+      // RENDER job: the real day/night exterior pair; windows light one by one (PURE set(t))
+      SectionHarness.ranOK('daynight-masked-windows', function () {
+        mw = window.DayNightMaskedWindows.create('#winHost', {
+          dayMedia: 'renders/dn-ext-day.webp',
+          nightMedia: 'renders/dn-ext-night.webp'
+          // windows / band / glow use the tuned defaults for THIS exterior render
+        });
+        window.__mw = mw;
+        if (mw && mw.set) mw.set(0);   // start on the daytime building
+      });
+
+      // ONE section pin (harness). mw.set(p) lights the windows; the dusk wash, the title
+      // and the hairline all drift on the same progress bus. transform/opacity/filter only.
+      var st = SectionHarness.pin('#combo', { length: '+=130%', scrub: 0.8 });
+      if (st) st.onUpdate = function (p) {
+        if (mw && mw.set) mw.set(p);
+        if (window.gsap) {
+          window.gsap.set('[data-dusk]',    { opacity: p });
+          window.gsap.set('[data-spine]',   { y: (0.5 - p) * 34, opacity: 0.5 + p * 0.5 });
+          window.gsap.set('[data-eyebrow]', { opacity: 0.72 - p * 0.32 });
+          window.gsap.set('[data-rule]',    { scaleX: 0.18 + p * 0.82 });
+        }
+      };
+
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['daynight-masked-windows']
+      });
+    })();
+  </script>
+</body>
+</html>

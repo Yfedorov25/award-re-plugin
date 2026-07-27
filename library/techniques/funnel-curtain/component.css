@@ -1,0 +1,57 @@
+/* ============================================================
+   FUNNEL-CURTAIN · component.css
+   ------------------------------------------------------------
+   Панель і рух будуються ЦІЛКОМ у JS (inline transform + один
+   transition-крок на стадію). Літери кромки — системний шрифт
+   проєкту; хук лишається для проєктного перекриття типографіки.
+   ============================================================ */
+
+.fcr__edge span {
+  /* stateless: типографіка кромки = проєкт (кегль/трекінг перекривай тут) */
+}
+
+/* ============================================================
+   Technique layout (l-callback funnel hub, the conversion beat).
+   The curtain PANEL is JS-built; these rules are only the section
+   the curtain reveals over — cross-faded page panels (.fc-page)
+   and the CTA. Same panels on both platforms; the DIFFERENCE is
+   layout — desktop wide, mobile single-col full-bleed.
+   ============================================================ */
+.fc-stage { position: relative; overflow: hidden; }
+
+/* page panels stacked; only .is-on visible (crossfade under coverage) */
+.fc-page {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity .35s ease;
+}
+.fc-page.is-on { opacity: 1; visibility: visible; }
+.fc-page::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background-size: cover; background-position: center;
+}
+.fc-hub::before  { background-image: var(--fc-hub); }
+.fc-next::before { background-image: var(--fc-next); }
+.fc-page::after {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(180deg, rgba(8,18,14,.35), rgba(8,18,14,.82));
+}
+
+/* funnel copy + CTA block sit above the render */
+.fc-hub-inner {
+  position: relative; z-index: 2;
+  width: min(1180px, 100%);
+  padding: clamp(28px, 6vw, 90px);
+  display: grid; grid-template-columns: 1.1fr .9fr; align-items: end;
+  gap: clamp(20px, 4vw, 60px);
+}
+.fc-next-inner {
+  position: relative; z-index: 2; text-align: center;
+  padding: clamp(28px, 6vw, 90px);
+}
+/* mobile: single-col full-bleed funnel (springs mobile is 1-col) */
+@media (max-width: 1023px) {
+  .fc-hub-inner { grid-template-columns: 1fr; align-items: start; }
+}
+

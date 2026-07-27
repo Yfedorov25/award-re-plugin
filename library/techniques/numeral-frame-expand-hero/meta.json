@@ -1,0 +1,13 @@
+{
+  "id": "numeral-frame-expand-hero", "title": "Numeral frame-expand hero (Springs)", "level": "L2-molecule", "batch": "C (#14/17)",
+  "source": "springs.estate nature hero. Engine = library/components/numeral-frame-expand-hero (proven, set(p), owns_pin).",
+  "engine": "Giant outline numerals with a small framed view inside; on scroll the frame expands to full-bleed, numerals fade, a serif title rises, a parallax pan, then exit-rise — one continuous pinned scroll-narrative. Pure set(p) across the whole story.",
+  "dual_platform": true,
+  "differs": "Same narrative + same set(p). TRIGGER differs: desktop scrubs set(p) from scroll while the hero pins (full narrative incl. exit); mobile plays set(p) 0->restAt once over time on mount, resting at the resolved frame (no exit). Springs mobile plays the hero on load; desktop scrubs the full story.",
+  "desktop": { "driver": "scrollHero — set(p) = scroll progress across the pin span (full 0..1 incl. exit).", "knobs": ["frameInset","frameScale","panY","exitY","pinFactor"] },
+  "mobile": { "driver": "autoHero — set(p) plays 0->restAt once over playMs on mount, then rests.", "knobs": ["playMs","restAt"] },
+  "engine_patch": "forceMotion + manualDrive (expose set() without engine pin/ScrollTrigger; guard registerPlugin/ticker/lenis). Additive & opt-in.",
+  "entry": "NumeralFrameExpandHeroDual.init(target, opts). Load engine.js THEN component.js. Markup: .nfe-hero > .nfe-bg(.nfe-frame>img) + .nfe-numerals + .nfe-title + .nfe-sub. Desktop wraps in .pin-wrap.",
+  "law": "set(p) PURE; clip-path inset + transform (scale/translateY) + opacity only; GPU; NO WebGL. reduced-motion -> resolved frame + title (no exit).",
+  "files": ["component.js","engine.js (+forceMotion/manualDrive)","component.css","img/a.webp","stage.html","demo.html","meta.json","README.md"]
+}

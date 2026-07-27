@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · oval-mask · EVER portrait oval with parallax-within media</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · oval-mask
+================================================================================
+  EVER's portrait OVAL with media inside (the hero "eveR" oval = a looping video
+  between the letters). Harvested live: clip-path ellipse on a fixed-shape mask;
+  the media INSIDE parallaxes (scale + drift on pointer/scroll) while the MASK
+  never deforms.
+
+  ASSET-SUBSTITUTION GATE: OUR clip-river video in a portrait oval on a dark panel
+  (like EVER's right hero half). Move the mouse: the video drifts within the static
+  oval. NO WebGL. window.__LAB_OK__ on init.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --cream:#DCC5B7; --panel:#313E48; --wm:'Jost',system-ui,sans-serif; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--panel);color:var(--cream);font-family:'Inter',system-ui,sans-serif;
+    display:grid;place-items:center;overflow:hidden}
+
+  /* a portrait oval centred on a dark panel, like EVER's right hero half */
+  .ovm{ width: clamp(220px,28vw,380px); aspect-ratio: 0.66 / 1; }
+
+  .hint{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);font-family:var(--wm);
+    font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--cream);opacity:.6}
+</style>
+</head>
+<body>
+
+  <div class="ovm" data-oval-mask>
+    <video class="ovm__media" src="renders/clip-river-lite.mp4" autoplay loop muted playsinline></video>
+  </div>
+
+  <div class="hint">рухай мишею — відео дрейфує в овалі</div>
+
+<script src="component.js"></script>
+<script>
+  OvalMask.init('[data-oval-mask]', { ratio: 0.66, scale: 1.12, parallax: 12, drive: 'pointer' });
+</script>
+</body>
+</html>

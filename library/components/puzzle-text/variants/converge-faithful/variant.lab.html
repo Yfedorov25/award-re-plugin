@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · puzzle-text / converge-faithful — tx1 (faithful Zera text assemble)</title>
+
+<!--
+================================================================================
+VARIANT: puzzle-text / converge-faithful   ·   tx1 converge-faithful (9/10)
+================================================================================
+SOURCE: apps/quadro/public/slide-lab/tx1-converge-faithful.html
+
+The FAITHFUL Zera /portfolio6 read of the text scatter↔assemble beat. A confident
+SERIF statement whose WORDS start scattered — GRAY and displaced across the
+viewport on BOTH axes (wide diagonal, some rotated/skewed, sized larger) — and
+CONVERGE into the final readable paragraph on ONE shared air ease, darkening
+gray -> ink as each word seats. Calm, composed, scroll-scrubbed, fully reversible.
+On a LIGHT field. NO paired render (just an optional quiet companion whisper in
+the lower-right that resolves AFTER the statement seats). Pure text — that is the
+WHOLE move.
+
+The converge is staged as a READING-ORDER CASCADE computed from each word's
+RESTING x/y AFTER layout (top-row→bottom-row, left→right), and the scatter is
+biased OUTWARD from the measured paragraph centre (centre words barely move +
+seat first, edge words fly far + seat last).
+
+Words are ALWAYS OPAQUE (opacity NEVER touched) => zero layout shift; assembly is
+transform + COLOR only. ONE air ease. Only transform / color animate. No WebGL,
+no mix-blend / backdrop over the scrub, no video.currentTime. reduced-motion /
+narrow (<=720px) => static readable paragraph, no scatter / pin / scrub.
+
+Entry: PuzzleTextConvergeFaithful.init(opts)  (variant.js — base-importing; loads
+../../component.js so the word-split + always-opaque + air-ease + reduced-motion
+contract is the SHARED base contract, not a fork).
+
+__LAB_OK__ probe asserts: base (PuzzleText) + variant (PuzzleTextConvergeFaithful)
+present, exactly one .statement split into >=6 opaque word spans, no opacity tween
+on a word, reading-order cascade applied (or reduced/narrow static), no em-dash,
+a pinned ScrollTrigger live (or static), zero real console.error.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,1,300;9..144,1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- quiet companion render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/terrace-02.webp">
+
+<!-- the variant skin (light field) -->
+<link rel="stylesheet" href="variant.css">
+
+<!-- GSAP 3.12.5 + ScrollTrigger + CustomEase from cdnjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+</head>
+<body>
+
+  <!-- intro breathing room -->
+  <section class="pad">
+    <div>
+      <span class="pad__eyebrow">QUADRO · маніфест</span>
+      <h2>Слова розсіяні полем.<br>Прогорніть, і вони стають фразою.</h2>
+      <p>Кожне слово починає сірим і зміщеним. На прокрутці вони злітаються додому в одну читабельну думку, темнішаючи від сірого до чорнила.</p>
+    </div>
+  </section>
+
+  <!-- the puzzle-text assemble -->
+  <section class="puzzle" id="puzzle">
+    <div class="stage">
+      <span class="eyebrow">Дім над водою</span>
+
+      <p class="statement" id="statement">Ви купуєте не стіни, а ранок над власною водою, де тиша належить лише вам.</p>
+
+      <figure class="companion" id="companion">
+        <img src="renders/terrace-02.webp" alt="" decoding="async">
+        <figcaption>QUADRO · тераса</figcaption>
+      </figure>
+
+      <div class="hint">Прокрутіть</div>
+    </div>
+  </section>
+
+  <!-- outro breathing room -->
+  <section class="pad pad--out">
+    <div>
+      <span class="pad__eyebrow">Далі</span>
+      <h2>Фраза зібрана.</h2>
+      <p>Думка стоїть на місці. Наступна сцена піднімається природно, поки поле йде вгору.</p>
+    </div>
+  </section>
+
+<!-- the SHARED base engine + the converge-faithful engine (base-importing, NOT a fork) -->
+<script src="../../component.js"></script>
+<script src="variant.js"></script>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+
+  /* the faithful text-converge — drives the existing tx1 DOM */
+  window.__PT_FAITHFUL = window.PuzzleTextConvergeFaithful && PuzzleTextConvergeFaithful.init({
+    root:'#puzzle', statement:'#statement', companion:'#companion',
+    maxX:0.46, maxY:0.40, centreCalm:0.18, rotate:11, skew:8, scaleFar:1.46,
+    duration:0.62, cascade:0.40, scrub:0.7, pinLengthVh:260, seed:7
+  });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (variant) ── -->
+<script>(function(){
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:720px)').matches;
+    var hasBase = !!window.PuzzleText;                    // ../../component.js
+    var hasVariant = !!window.PuzzleTextConvergeFaithful; // variant.js
+    var statements = document.querySelectorAll('.statement').length;
+    var words = document.querySelectorAll('#statement .pt-word');
+    var wordCount = words.length;
+
+    var allOpaque = wordCount>0 && Array.prototype.every.call(words, function(w){
+      return parseFloat(getComputedStyle(w).opacity) === 1;
+    });
+    var opacityTweened = window.gsap && Array.prototype.some.call(words, function(w){
+      return gsap.getTweensOf(w).some(function(tw){ return 'opacity' in (tw.vars||{}); });
+    });
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var pinned  = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().some(function(s){return s.pin;}):false;
+    var motionWired = (reduce||narrow) || pinned || stCount>0;
+    var noEmDash = document.body.innerText.indexOf('—') === -1;
+    var vp = window.__PT_FAITHFUL || {};
+    var cascadeOk = (reduce||narrow) || vp.cascadeApplied === true;
+
+    return {
+      ok: errs===0 && hasBase && hasVariant && statements===1 && wordCount>=6 &&
+          allOpaque && !opacityTweened && cascadeOk && motionWired && noEmDash,
+      hasBase:hasBase, hasVariant:hasVariant, statements:statements, words:wordCount,
+      allOpaque:allOpaque, opacityTweened:opacityTweened, cascadeApplied:!!vp.cascadeApplied,
+      pinned:pinned, reduced:!!(reduce||narrow), errs:errs
+    };
+  }
+
+  var tries=0;
+  function ready(){
+    var p = gather();
+    window.__PT_FAITHFUL_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,600); });
+})();</script>
+
+</body>
+</html>

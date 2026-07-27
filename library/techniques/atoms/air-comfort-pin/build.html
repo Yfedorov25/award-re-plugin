@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ONSEN — A quiet order of the day</title>
+<style>
+  :root{
+    --bg:#efe7dc; --bg2:#f4eee5; --ink:#241d15; --ink-dim:rgba(36,29,21,.6); --ink-faint:rgba(36,29,21,.35);
+    --accent:#b0765a; --hair:rgba(36,29,21,.09);
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --ease:cubic-bezier(.25,.74,.22,.99);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:
+      radial-gradient(1000px 700px at 92% -6%, rgba(176,118,90,.08), transparent 60%),
+      radial-gradient(900px 800px at -8% 100%, rgba(214,196,168,.5), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:var(--grot); font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--ink); text-decoration:none; transition:color .3s var(--ease)}
+  a:hover{color:var(--accent)}
+  .label{font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:var(--ink-dim)}
+  .wrap{max-width:1480px; margin:0 auto; padding:0 56px}
+  /* intro */
+  .intro{padding:96px 0 90px; border-bottom:1px solid var(--hair)}
+  .intro .grid{display:grid; grid-template-columns:minmax(0,7fr) minmax(0,4fr); gap:72px; align-items:end}
+  .intro h1{font-family:var(--serif); font-weight:400; font-size:clamp(56px,6.2vw,116px); line-height:.96; letter-spacing:-.01em; margin-top:26px; text-wrap:balance}
+  .intro h1 em{font-style:italic; color:var(--accent)}
+  .intro p{color:var(--ink-dim); max-width:42ch}
+  .intro .meta{margin-top:22px; display:flex; gap:28px}
+  /* act */
+  .act{position:relative; overflow:clip; padding:110px 0 130px;
+    background:linear-gradient(168deg, var(--bg2) 0%, #ece3d5 46%, #e6dbc9 100%)}
+  .enso{position:absolute; left:4%; top:120px; width:720px; height:720px; opacity:.06; pointer-events:none}
+  .grainlayer{position:absolute; inset:0; pointer-events:none; opacity:.55;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.06'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .act-grid{position:relative; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,660px); gap:96px; align-items:start}
+  .caption-col{align-self:stretch}
+  .caption{position:sticky; top:66vh; max-width:34ch}
+  .caption .rule{width:56px; height:1px; background:var(--accent); margin-bottom:22px}
+  .caption h2{font-family:var(--serif); font-weight:400; font-size:clamp(34px,3vw,52px); line-height:1.05; letter-spacing:-.01em}
+  .caption .sub{margin-top:16px; color:var(--ink-dim); font-size:14px; max-width:36ch}
+  /* cards */
+  .cards{display:grid; grid-template-columns:1fr 1fr; gap:30px; padding-bottom:34px}
+  .card{--off:0px; background:rgba(255,255,255,.55); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border:1px solid rgba(17,17,16,.06); border-radius:6px; min-height:280px; padding:30px 28px 26px;
+    display:flex; flex-direction:column; box-shadow:0 30px 60px -30px rgba(36,29,21,.25);
+    opacity:0; transform:translateY(calc(var(--off) + 24px));}
+  .card.in{opacity:1; transform:translateY(var(--off));
+    transition:opacity .7s var(--ease), transform .7s var(--ease)}
+  .card.in.now{transition:none}
+  .card:nth-child(even){--off:34px}
+  .card .icon{width:54px; height:54px; stroke:rgba(36,29,21,.3); stroke-width:1.6; fill:none; stroke-linecap:round}
+  .card h3{font-family:var(--serif); font-weight:400; font-size:23px; letter-spacing:.01em; margin-top:auto; padding-top:26px}
+  .card p{margin-top:10px; color:var(--ink-dim); font-size:14px; line-height:1.65}
+  .card .idx{margin-top:18px; padding-top:14px; border-top:1px solid var(--hair); font-size:10px; letter-spacing:.3em; color:var(--ink-faint)}
+  /* outro */
+  .outro{padding:88px 0 0}
+  .outro .takeaway{font-family:var(--serif); font-size:clamp(24px,2.4vw,38px); font-style:italic; max-width:28ch; line-height:1.25; text-wrap:balance}
+  .outro .takeaway b{color:var(--accent); font-weight:400}
+  .outro .rule{height:1px; background:var(--hair); margin:54px 0 26px}
+  footer .row{display:flex; justify-content:space-between; align-items:baseline; gap:24px; flex-wrap:wrap; padding-bottom:34px}
+  footer nav{display:flex; gap:34px}
+  footer nav a{font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--ink-dim)}
+  footer .legal{font-size:11px; color:var(--ink-faint)}
+  @media (prefers-reduced-motion: reduce){
+    .card{opacity:1!important; transform:translateY(var(--off))!important; transition:none!important}
+  }
+  @media (max-width:1100px){
+    .act-grid{grid-template-columns:1fr}
+    .caption{position:static; margin-bottom:56px}
+  }
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <span class="label" style="color:var(--ink)">ONSEN · Mountain Bath House</span>
+        <h1>A quiet order <em>of the day</em></h1>
+      </div>
+      <div>
+        <p>ONSEN keeps six small institutions and nothing else — water, linen, tea, silence, stone, and the night pool. Each has its hour and its custodian. Guests learn the rhythm by the second morning and stop looking at clocks.</p>
+        <div class="meta"><span class="label">Est. 1972 · rebuilt 2021</span><span class="label">41 rooms · 2 springs</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="act">
+  <svg class="enso" viewBox="0 0 200 200"><path d="M 104 18 C 152 22, 184 62, 180 108 C 176 156, 132 186, 88 180 C 44 174, 14 134, 20 90 C 25 52, 54 26, 88 20" fill="none" stroke="#241d15" stroke-width="11" stroke-linecap="round"/></svg>
+  <div class="grainlayer"></div>
+  <div class="wrap">
+    <div class="act-grid">
+      <div class="caption-col">
+        <div class="caption">
+          <div class="rule"></div>
+          <h2>The six comforts</h2>
+          <p class="sub">Everything the house insists on; everything else is optional.</p>
+        </div>
+      </div>
+      <div class="cards" id="cards">
+        <article class="card">
+          <svg class="icon" viewBox="0 0 54 54"><path d="M 16 44 C 12 36, 20 32, 16 24 C 13 18, 18 13, 17 8"/><path d="M 28 46 C 24 38, 32 34, 28 26 C 25 20, 30 15, 29 10"/><path d="M 40 44 C 36 36, 44 32, 40 24 C 37 18, 42 13, 41 8"/></svg>
+          <h3>Morning ritual</h3>
+          <p>Bathing opens at six, before speech. Warm water first, then cold, then the long sitting on the cedar bench.</p>
+          <span class="idx">01</span>
+        </article>
+        <article class="card">
+          <svg class="icon" viewBox="0 0 54 54"><rect x="10" y="16" width="34" height="24" rx="3"/><path d="M 10 26 L 44 26"/></svg>
+          <h3>Towels &amp; robes</h3>
+          <p>Linen arrives twice a day, warmed on the stone flue. The grey robe may go to the garden; white stays inside.</p>
+          <span class="idx">02</span>
+        </article>
+        <article class="card">
+          <svg class="icon" viewBox="0 0 54 54"><path d="M 12 24 L 40 24 C 40 38, 34 44, 26 44 C 18 44, 12 38, 12 24 Z"/><path d="M 40 28 C 46 28, 46 36, 39 37"/><path d="M 24 10 C 22 14, 26 15, 25 19"/></svg>
+          <h3>Tea room</h3>
+          <p>Roasted hōjicha and spring water, poured on the hour. There is no menu — the pot decides.</p>
+          <span class="idx">03</span>
+        </article>
+        <article class="card">
+          <svg class="icon" viewBox="0 0 54 54"><path d="M 14 38 C 14 22, 20 12, 27 12 C 34 12, 40 22, 40 38 Z"/><path d="M 23 44 C 24 46, 30 46, 31 44"/></svg>
+          <h3>Silence hours</h3>
+          <p>From two until four the house speaks in gestures. Bells are cushioned; even the kettle waits its turn.</p>
+          <span class="idx">04</span>
+        </article>
+        <article class="card">
+          <svg class="icon" viewBox="0 0 54 54"><path d="M 10 42 C 10 34, 18 32, 24 36"/><path d="M 20 40 C 20 28, 32 26, 38 32"/><path d="M 32 42 C 32 36, 40 34, 44 38"/></svg>
+          <h3>Stone garden</h3>
+          <p>Fifteen stones, raked gravel, one bench in shade. The gardener redraws the lines each dawn.</p>
+          <span class="idx">05</span>
+        </article>
+        <article class="card">
+          <svg class="icon" viewBox="0 0 54 54"><circle cx="38" cy="15" r="6"/><path d="M 8 36 C 14 32, 20 40, 27 36 C 34 32, 40 40, 46 36"/><path d="M 8 44 C 14 40, 20 48, 27 44 C 34 40, 40 48, 46 44"/></svg>
+          <h3>Night pool</h3>
+          <p>Open water until one in the morning, lit only from below. Steam carries the day off the surface.</p>
+          <span class="idx">06</span>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="outro">
+  <div class="wrap">
+    <p class="takeaway">Comfort here is not abundance — it is <b>six things, done at the same hour, forever</b>.</p>
+    <div class="rule"></div>
+    <footer>
+      <div class="row">
+        <nav><a href="#">The House</a><a href="#">Springs</a><a href="#">Seasons</a><a href="#">Reserve</a></nav>
+        <span class="legal">© 2026 Onsen Bath House KK — silence hours observed daily, 14:00–16:00.</span>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+  var cards=Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var revealed=0;
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+  window.__COMFORT={ revealed:function(){return revealed} };
+  function show(el,instant){
+    if(el.classList.contains('in'))return;
+    if(instant)el.classList.add('now');
+    el.classList.add('in');
+    revealed++;
+  }
+  if(reduced.matches){
+    cards.forEach(function(c){show(c,true)});
+    return;
+  }
+  var pending=[];
+  cards.forEach(function(c){
+    var r=c.getBoundingClientRect();
+    if(r.bottom<0){ show(c,true); } else { pending.push(c); }
+  });
+  if(!('IntersectionObserver' in window)){ pending.forEach(function(c){show(c,true)}); return; }
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ show(e.target,false); io.unobserve(e.target); }
+    });
+  },{threshold:.25});
+  pending.forEach(function(c){io.observe(c)});
+  /* фікс тортури-телепорту: проскочена картка (bottom<0) показується миттєво і ПІСЛЯ load */
+  window.addEventListener('scroll',function(){
+    var atBottom = window.scrollY + window.innerHeight >= document.body.scrollHeight - 4;
+    pending.forEach(function(c){
+      if(c.classList.contains('in')) return;
+      var r=c.getBoundingClientRect();
+      if(r.bottom<0){ show(c,true); io.unobserve(c); }          /* проскочена = миттєво */
+      else if(atBottom && r.top<window.innerHeight){ show(c,false); io.unobserve(c); } /* дно документа: частково видима (<25%, IO мовчить) — показати анімовано */
+    });
+  },{passive:true});
+})();
+</script>
+</body>
+</html>

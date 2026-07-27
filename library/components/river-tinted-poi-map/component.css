@@ -1,0 +1,46 @@
+/* RIVER-TINTED-POI-MAP · component.css
+   A hand-styled vector district map: warm-taupe/near-black field, slate-blue river band, green
+   park blobs, thin roads, white landmark glyphs, terracotta POI pins, a copper project disc.
+   stroke-dashoffset + transform + opacity only. NO mix-blend. NO WebGL (not Mapbox). */
+.rtm-stage { position: relative; height: 100vh; overflow: hidden;
+  background: var(--rtm-bg, #2b2622); color: var(--rtm-ink, #e9e3db); }
+
+.rtm-map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* the river band */
+.rtm-map [data-river] { fill: none; stroke: var(--rtm-river, #4a5563); stroke-width: var(--rtm-river-w, 26);
+  stroke-linecap: round; stroke-linejoin: round; will-change: stroke-dashoffset; }
+/* green park blobs + roads */
+.rtm-map .rtm-park { fill: var(--rtm-park, rgba(96,112,82,.55)); stroke: none; will-change: opacity; }
+.rtm-map .rtm-road { fill: none; stroke: var(--rtm-road, rgba(233,227,219,.16)); stroke-width: 1.5;
+  vector-effect: non-scaling-stroke; will-change: opacity; }
+/* landmark glyphs (white line-icons + labels) */
+.rtm-map [data-glyph] { will-change: transform, opacity; }
+.rtm-map [data-glyph] path, .rtm-map [data-glyph] rect, .rtm-map [data-glyph] line, .rtm-map [data-glyph] polygon {
+  fill: var(--rtm-ink, #e9e3db); stroke: none; }
+.rtm-map [data-glyph] text { fill: var(--rtm-ink, #e9e3db); font-size: 13px; opacity: .85;
+  font-family: var(--rtm-sans, system-ui, sans-serif); }
+
+/* terracotta POI pins (DOM, positioned by left/top) */
+.rtm-pin { position: absolute; transform: scale(0); transform-origin: center; will-change: transform, opacity;
+  display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.rtm-pin .dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--rtm-pin, #b07a52); color: #fff; font-size: 12px;
+  transition: transform .24s ease, background .24s ease; }
+.rtm-pin.is-hot .dot { transform: scale(1.15); background: var(--rtm-pin-hot, #c98a5e); }
+.rtm-pin .lbl { font-size: .64rem; letter-spacing: .04em; color: var(--rtm-ink, #e9e3db); opacity: .6;
+  white-space: nowrap; text-align: center; transition: opacity .24s; }
+.rtm-pin.is-hot .lbl { opacity: 1; }
+
+/* the copper project disc — a thin copper-tinted disc with OUTLINE numerals (matches the
+   hero numerals); NOT a heavy filled circle. */
+.rtm-disc { position: absolute; transform: translate(-50%,-50%) scale(0.7); will-change: transform, opacity;
+  width: 116px; height: 116px; border-radius: 50%;
+  background: var(--rtm-disc, rgba(176,106,62,.92));
+  display: grid; place-items: center; text-align: center; color: #fff;
+  box-shadow: 0 12px 44px rgba(176,106,62,.32); }
+.rtm-disc .n { font-family: var(--rtm-serif, Georgia, serif); font-weight: 400; font-size: 1.7rem;
+  letter-spacing: .04em; color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.92); text-stroke: 1px rgba(255,255,255,.92); }
+.rtm-disc-cap { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: .7rem;
+  font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--rtm-ink, #e9e3db);
+  white-space: nowrap; text-align: center; }

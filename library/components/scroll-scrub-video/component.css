@@ -1,0 +1,26 @@
+/* ============================================================
+   SCROLL-SCRUB-VIDEO · component.css
+   A pinned full-bleed <canvas> that paints a pre-extracted frame sequence on scroll.
+   The frame art + copy are composition; the engine preloads + paints + pins.
+   ============================================================ */
+
+.ssv-stage { position: relative; width: 100%; height: 100vh; overflow: hidden;
+  background: var(--ssv-bg, #0e1512); }
+
+.ssv-canvas { position: absolute; inset: 0; z-index: 1; display: block;
+  width: 100%; height: 100%; }
+
+/* content over the canvas (title / caption) */
+.ssv-content { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+
+/* preload veil — covers the stage until the gate opens, shows a 0..100 hint */
+.ssv-preload { position: absolute; inset: 0; z-index: 4;
+  display: grid; place-items: center;
+  background: var(--ssv-bg, #0e1512); color: var(--ssv-ink, #e9e2d2);
+  font-family: var(--ssv-sans, 'Inter', system-ui, sans-serif);
+  font-size: clamp(2rem, 7vw, 5rem); font-weight: 300; letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+  transition: opacity .6s ease; }
+.ssv-stage.ssv-ready .ssv-preload { opacity: 0; pointer-events: none; }
+
+/* NO mix-blend / NO backdrop over the canvas. canvas drawImage only. */

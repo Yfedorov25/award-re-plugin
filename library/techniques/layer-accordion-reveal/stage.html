@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>layer-accordion-reveal · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);min-height:100%}
+  .wrap{ min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:clamp(20px,5vw,70px); gap:clamp(16px,3vh,30px); }
+  .lar-eyebrow{ font-size:.7rem; letter-spacing:.32em; text-transform:uppercase; color:var(--slate); }
+  .lar-rack{ height:min(62vh,560px); border-radius:3px; overflow:hidden; }
+  .lar-label{ font-family:var(--serif); font-weight:400; }
+  .lar-kicker{ color:var(--slate); }
+  .badge{ position:fixed; top:10px; left:10px; z-index:9; font-family:ui-monospace,Menlo,monospace;
+    font-size:.62rem; letter-spacing:.06em; color:#7fd8b0; background:rgba(8,22,17,.72);
+    border:1px solid #26463c; border-radius:999px; padding:4px 10px; pointer-events:none; }
+</style>
+</head>
+<body>
+  <div class="badge" id="badge">…</div>
+  <section class="wrap">
+    <div class="lar-eyebrow">QUADRO · інтер'єри</div>
+    <div class="lar-rack" id="rack"></div>
+  </section>
+
+<script src="engine.js"></script>
+<script src="component.js"></script>
+<script>
+  var r = LayerAccordionRevealDual.init('#rack', {
+    // slower, springs-like transition (dur) + longer hold (autoMs) so each open
+    // fully settles and reads before the next — no abrupt jump.
+    platform: 'auto', autoMs: 0, dur: 0.9, uiDur: 0.5, defaultIndex: 0,
+    panels: [
+      { img:'img/l1.webp', label:'Вітальня',  kicker:'01', spec:'подвійна висота · панорама' },
+      { img:'img/l2.webp', label:'Тераса',    kicker:'02', spec:'вихід у сад · дерево' },
+      { img:'img/l3.webp', label:'Деталь',    kicker:'03', spec:'натуральні матеріали' },
+      { img:'img/l4.webp', label:'Вечір',     kicker:'04', spec:'тепле світло · ламелі' }
+    ]
+  });
+  document.getElementById('badge').textContent = r.platform === 'desktop' ? 'desktop · hover' : 'mobile · tap+swipe';
+</script>
+</body>
+</html>

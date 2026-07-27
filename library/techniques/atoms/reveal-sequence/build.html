@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATOM: reveal-sequence — motion-law demo</title>
+<style>
+  /* NOTE: no transform/translate/scale anywhere in this stylesheet.
+     All animated elements get initial states via gsap.set() — transform ownership = GSAP only. */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #101210; color: #e8e6df; font-family: Georgia, 'Times New Roman', serif; }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+  .intro, .outro {
+    height: 100vh; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 14px; background: linear-gradient(180deg, #101210 0%, #151814 100%);
+  }
+  .intro small, .outro small {
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: #7d8177;
+  }
+  .intro h1 { font-size: 1.5rem; font-weight: 400; font-style: italic; color: #c9c7bd; }
+
+  /* ---- pinned stage ---- */
+  .stage { position: relative; height: 100vh; overflow: hidden; }
+
+  .bg1 {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(120% 90% at 78% 12%, #2a2f28 0%, rgba(42,47,40,0) 55%),
+      linear-gradient(168deg, #1b1f1a 0%, #12140f 46%, #0c0e0a 100%);
+  }
+  .bg2 { position: absolute; inset: 0; overflow: hidden; }
+  .bg2-inner {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(90% 70% at 30% 85%, #4a4438 0%, rgba(74,68,56,0) 60%),
+      repeating-linear-gradient(115deg, rgba(232,230,223,0.028) 0 2px, rgba(232,230,223,0) 2px 26px),
+      linear-gradient(196deg, #2e2b23 0%, #201e17 52%, #14130d 100%);
+  }
+
+  .copy {
+    position: absolute; left: 0; top: 20vh;
+    width: min(46vw, 620px); padding: 6vh 4.5vw 6vh 5vw;
+    background: linear-gradient(112deg, rgba(16,19,15,0.94) 0%, rgba(20,24,19,0.82) 62%, rgba(20,24,19,0.55) 100%);
+  }
+  .copy p { font-size: 2.2rem; line-height: 1.32; max-width: 34ch; font-weight: 400; color: #ece9df; }
+  .copy .kicker {
+    display: block; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10px;
+    letter-spacing: 0.26em; text-transform: uppercase; color: #99a08e; margin-bottom: 2.2vh;
+  }
+
+  .card {
+    position: absolute; right: 16vw; top: 33vh;
+    width: 26vw; height: 30vh; overflow: hidden;
+  }
+  .card-inner {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(80% 90% at 65% 30%, #6a705f 0%, rgba(106,112,95,0) 65%),
+      repeating-linear-gradient(45deg, rgba(16,18,16,0.10) 0 1px, rgba(16,18,16,0) 1px 18px),
+      linear-gradient(160deg, #565c4d 0%, #3a3f34 58%, #262a22 100%);
+  }
+  .card .tag {
+    position: absolute; left: 14px; bottom: 12px;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: rgba(236,233,223,0.65);
+  }
+
+  .caption {
+    position: absolute; right: 7vw; bottom: 9vh;
+    width: min(30vw, 380px); font-size: 0.95rem; line-height: 1.55; color: #b9b6aa;
+  }
+  .caption em { font-style: normal; color: #e2dfd3; }
+
+  .hud {
+    position: fixed; left: 16px; bottom: 14px; z-index: 50;
+    font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10px;
+    letter-spacing: 0.14em; color: #6f746a; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<section class="intro">
+  <small>atom demo · reveal-sequence</small>
+  <h1>Scroll slowly — the law lives in the holds.</h1>
+</section>
+
+<section class="stage" id="stage">
+  <div class="bg1"></div>
+  <div class="bg2" id="bg2"><div class="bg2-inner" id="bg2Inner"></div></div>
+
+  <div class="copy" id="copy1">
+    <span class="kicker">01 — placeholder block</span>
+    <p>A quiet paragraph settles on the left, held on its own scrim, saying nothing in particular while the stage decides what comes next.</p>
+  </div>
+
+  <div class="card" id="card">
+    <div class="card-inner" id="cardInner"></div>
+    <span class="tag">media stand-in</span>
+  </div>
+
+  <div class="copy" id="copy2">
+    <span class="kicker">02 — next block, same law</span>
+    <p>A second paragraph arrives exactly the way the first one did, proving the sequence is a rule rather than a moment.</p>
+  </div>
+
+  <div class="caption" id="caption">
+    <em>Caption stand-in.</em> Small supporting line that enters by the same wipe-up law, anchored bottom-right.
+  </div>
+</section>
+
+<section class="outro">
+  <small>end of band · scroll back up to reverse</small>
+</section>
+
+<div class="hud" id="hud">p = 0.000</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function () {
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  CustomEase.create('reveal', '0.25,0.74,0.22,0.99');
+  var EASE = 'reveal';
+
+  var copy1 = document.getElementById('copy1'),
+      copy2 = document.getElementById('copy2'),
+      card = document.getElementById('card'),
+      cardInner = document.getElementById('cardInner'),
+      bg2 = document.getElementById('bg2'),
+      bg2Inner = document.getElementById('bg2Inner'),
+      caption = document.getElementById('caption'),
+      hud = document.getElementById('hud');
+
+  // Initial states — GSAP only (no CSS transforms anywhere).
+  gsap.set(copy1, { clipPath: 'inset(100% 0% 0% 0%)', y: 40, willChange: 'transform, clip-path' });
+  gsap.set(card,  { clipPath: 'inset(100% 0% 0% 0%)', y: 40, scale: 0.85, transformOrigin: '50% 60%', willChange: 'transform, clip-path' });
+  gsap.set(cardInner, { scale: 1.06, transformOrigin: '50% 50%' });
+  gsap.set(bg2,   { clipPath: 'inset(100% 0% 0% 0%)', willChange: 'clip-path' });
+  gsap.set(bg2Inner, { scale: 1.08, transformOrigin: '50% 60%' });
+  gsap.set(copy2, { clipPath: 'inset(100% 0% 0% 0%)', y: 40, willChange: 'transform, clip-path' });
+  gsap.set(caption, { clipPath: 'inset(100% 0% 0% 0%)', y: 40, willChange: 'transform, clip-path' });
+
+  // ONE master timeline. Total time = 10 → tween time t maps to progress p = t/10.
+  var tl = gsap.timeline({
+    paused: true,
+    onUpdate: function () { hud.textContent = 'p = ' + tl.progress().toFixed(3); }
+  });
+
+  // p 0.00–0.08 — IN: copy wipes up; card follows with overlap ('<0.25').
+  tl.to(copy1, { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 0.6, ease: EASE }, 0);
+  tl.to(card,  { clipPath: 'inset(0% 0% 0% 0%)', y: 0, scale: 1.0, duration: 0.55, ease: EASE }, '<0.25'); // v2: картка РОСТЕ при вході (live 13.0-14.0s)
+
+  // p 0.08–0.30 — HOLD: card breathes, slow inner zoom, linear.
+  tl.to(cardInner, { scale: 1.0, duration: 2.2, ease: 'none' }, 0.8);
+
+  // p 0.30–0.42 — SWAP (same position): card wipes UP+OUT, new full-bleed rises from bottom.
+  // Copy1 does NOT move.
+  tl.to(card, { clipPath: 'inset(0% 0% 100% 0%)', y: -30, duration: 1.2, ease: EASE }, 3.0);
+  tl.to(bg2,  { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.4, ease: 'power1.inOut' }, 3.0); // v2: рівномірніша межа (live 15.3-16.8s)
+
+  // p 0.42–0.72 — HOLD 2: new layer settles, linear.
+  tl.to(bg2Inner, { scale: 1.0, duration: 3.0, ease: 'none' }, 4.2);
+
+  // p 0.72–0.85 — EXIT: copy travels up + clip collapses toward top.
+  tl.to(copy1, { clipPath: 'inset(0% 0% 100% 0%)', y: -60, duration: 1.3, ease: EASE }, 7.2);
+
+  // p 0.85–1.00 — NEXT: second copy + caption enter by the beat-1 law.
+  tl.to(copy2,   { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 1.1, ease: EASE }, 7.5); // v2: OVERLAP з виходом copy1 (live 19.5-21.0s)
+  tl.to(caption, { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 0.8, ease: EASE }, '<0.25');
+
+  // Pad timeline to exactly 10 so p-windows map 1:1.
+  tl.add(function () {}, 10);
+
+  // ONE pinned ScrollTrigger driving the master timeline.
+  ScrollTrigger.create({
+    trigger: '#stage',
+    start: 'top top',
+    end: '+=500%',
+    pin: true,
+    scrub: 1,
+    animation: tl,
+    invalidateOnRefresh: true
+  });
+
+  // Lenis smooth scroll drives ScrollTrigger.
+  if (window.Lenis) {
+    var lenis = new Lenis();
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  // Verify hooks.
+  window.render = function (p) {
+    p = Math.max(0, Math.min(1, Number(p) || 0));
+    tl.progress(p);
+  };
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

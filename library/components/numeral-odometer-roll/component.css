@@ -1,0 +1,42 @@
+/* ============================================================
+   NUMERAL-ODOMETER-ROLL · component.css
+   A one-number-tall overflow window + a vertical column of numbers that translates
+   on Y so the active value sits in the window (the odometer roll). transform on the
+   column only; the window CLIPS the rest. NO mix-blend / NO backdrop / NO WebGL.
+   Type face, size, colour and the window framing are composition — set them from
+   the host (CSS vars below).
+   ============================================================ */
+
+/* the window: shows exactly ONE row, clips the column above/below */
+.nor-window {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  height: var(--nor-row, 1em);          /* one number tall */
+  line-height: var(--nor-row, 1em);
+  vertical-align: bottom;
+}
+
+/* the column: a stack of rows, translated to bring the active one into the window */
+.nor-col {
+  display: block;
+  will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);             /* own GPU layer */
+}
+
+/* one value per row — tabular so multi-digit numbers roll as a steady band */
+.nor-num {
+  height: var(--nor-row, 1em);
+  line-height: var(--nor-row, 1em);
+  font-family: var(--nor-font, inherit);
+  font-size: var(--nor-size, inherit);
+  font-weight: var(--nor-weight, inherit);
+  color: var(--nor-ink, inherit);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  text-align: var(--nor-align, center);
+  white-space: pre;                     /* keep the leading thin-space pad */
+}
+
+/* reduced-motion / static: column un-translated by JS (snap), window still clips */

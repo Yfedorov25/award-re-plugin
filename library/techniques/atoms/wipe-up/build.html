@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATOM: wipe-up — scene-transition cover-scroll (dummy facade)</title>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     ATOM BUILD: wipe-up (springs sticky--under-next/previous, 37 інстансів site-wide).
+     LAW (SPEC.md): base-сцена position:sticky top:0 СТОЇТЬ і ЖИВЕ (scale-drift),
+     наступна секція їде потоком ПОВЕРХ (шов = її топ-край, 1:1, твердий, без clip/opacity);
+     cover-контент досідає entrance-drift'ом. Ядро закону = ЛЕЙАУТ (CSS sticky-стек),
+     JS лише для M3/M4 драйву. Facade навмисно НЕ springs (transfer-гейт).
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#141416;color:#eee7d9;font-family:system-ui,sans-serif}
+  /* ── ЗАКОН ЖИВЕ ТУТ: кожна сцена = sticky 100vh; наступна в DOM = вища z → накриває ── */
+  .scene{position:sticky;top:0;height:100vh;overflow:hidden}
+  .scene .media{position:absolute;inset:0;will-change:transform}
+  .scene .content{position:relative;height:100%;display:flex;flex-direction:column;
+    justify-content:center;padding:0 8vw;will-change:transform}
+  .t{font-family:Georgia,serif;font-size:5.2rem;line-height:1.05;max-width:60vw}
+  .low{position:absolute;left:8vw;bottom:7vh;font-size:.72rem;letter-spacing:.2em;
+    text-transform:uppercase;opacity:.75}
+  /* dummy-фасади (навмисно НЕ springs) */
+  .sA{z-index:1}.sB{z-index:2}.sC{z-index:3}.sD{z-index:4}
+  .sA .media{background:linear-gradient(150deg,#59583f,#33321f 60%,#1e1e12)}
+  .sB .media{background:linear-gradient(165deg,#274a4a,#173234 55%,#0d2022)}
+  .sC .media{background:linear-gradient(170deg,#4b3a54,#2e2338 55%,#191024)}
+  .sD .media{background:linear-gradient(180deg,#21262b,#101417)}
+  .hud{position:fixed;right:14px;bottom:12px;font-size:.66rem;opacity:.5;z-index:99;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+  <section class="scene sA" id="sA">
+    <div class="media"></div>
+    <div class="content"><h2 class="t">Scene A — base stays &amp; lives</h2></div>
+    <div class="low">low element of A — covered first (emergent)</div>
+  </section>
+  <section class="scene sB" id="sB">
+    <div class="media"></div>
+    <div class="content"><h2 class="t">Scene B covers A at 1:1</h2></div>
+    <div class="low">low element of B</div>
+  </section>
+  <section class="scene sC" id="sC">
+    <div class="media"></div>
+    <div class="content"><h2 class="t">Scene C — same law, chained</h2></div>
+    <div class="low">low element of C</div>
+  </section>
+  <section class="scene sD" id="sD">
+    <div class="media"></div>
+    <div class="content"><h2 class="t" style="font-size:2rem;opacity:.6">tail — atom ends (exit is just the next cover)</h2></div>
+  </section>
+  <div class="hud" id="hud">y=0</div>
+
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ── M3: база ЖИВЕ поки її накривають (scale-drift 1.00→1.05 за 1vh накриття) ──
+  // ── M4: cover-контент досідає (yPercent 6→0), лінійно по скролу ──
+  var scenes=['#sA','#sB','#sC','#sD'];
+  scenes.forEach(function(sel,i){
+    if(i===0) return;
+    var cover=sel, base=scenes[i-1];
+    ScrollTrigger.create({ trigger:cover, start:'top bottom', end:'top top', scrub:true,
+      onUpdate:function(st){
+        gsap.set(base+' .media',{scale:1+st.progress*0.05});
+        gsap.set(cover+' .content',{yPercent:(1-st.progress)*6});
+      }});
+  });
+
+  // ── verify hooks: закон скрол-нативний → render(p) мапить p на scrollTop ──
+  window.render=function(p){ p=Math.max(0,Math.min(1,p));
+    var max=document.documentElement.scrollHeight-innerHeight;
+    window.scrollTo(0,p*max); ScrollTrigger.update();
+    document.getElementById('hud').textContent='y='+Math.round(p*max)+' p='+p.toFixed(3);
+  };
+  window.__ATOM_OK__=true;
+
+  if(window.Lenis){
+    var lenis=new Lenis({lerp:0.1});
+    lenis.on('scroll',ScrollTrigger.update);
+    gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+    gsap.ticker.lagSmoothing(0);
+  }
+  window.addEventListener('scroll',function(){ document.getElementById('hud').textContent='y='+Math.round(scrollY); },{passive:true});
+})();
+</script>
+</body>
+</html>

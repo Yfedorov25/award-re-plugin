@@ -1,0 +1,27 @@
+/* COMPASS-ROSE-SECTION-DIVIDER · component.css
+   A thin line-art compass-rose / quatrefoil ornament that draws + scales + fades in as a
+   section announces itself, above a kicker + serif title + body + CTA. stroke-dashoffset +
+   transform + opacity only. NO mix-blend. NO WebGL. */
+.crd-stage { min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; text-align: center; gap: 1.6rem;
+  padding: 14vh 7vw; background: var(--crd-bg, #e9e3db); color: var(--crd-ink, #2a2622); }
+
+.crd-rose { width: var(--crd-rose-size, 120px); height: var(--crd-rose-size, 120px);
+  transform-origin: 50% 50%; will-change: transform, opacity; overflow: visible; }
+.crd-rose [data-draw] { fill: none; stroke: var(--crd-ink, #2a2622); stroke-width: 1.2;
+  stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+  will-change: stroke-dashoffset; }
+
+.crd-kicker { font-family: var(--crd-sans, system-ui, sans-serif); font-size: .68rem;
+  letter-spacing: .26em; text-transform: uppercase; opacity: 0; color: var(--crd-ink, #2a2622); }
+.crd-title { font-family: var(--crd-serif, Georgia, serif); font-weight: 400; text-transform: uppercase;
+  font-size: var(--crd-title, 4.2vw); line-height: 1.08; letter-spacing: .02em; margin: 0;
+  opacity: 0; will-change: transform, opacity; }
+.crd-body { font-family: var(--crd-sans, system-ui, sans-serif); font-size: .8rem;
+  letter-spacing: .12em; text-transform: uppercase; line-height: 1.8; max-width: 52ch;
+  opacity: 0; will-change: transform, opacity; }
+.crd-cta { display: inline-flex; align-items: center; gap: .6rem; padding: 1rem 2.4rem;
+  border: 1px solid var(--crd-ink, #2a2622); color: var(--crd-ink, #2a2622); text-decoration: none;
+  font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; opacity: 0;
+  will-change: transform, opacity; transition: background .24s, color .24s; }
+.crd-cta:hover { background: var(--crd-ink, #2a2622); color: var(--crd-bg, #e9e3db); }

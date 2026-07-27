@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIR B3 scroll-pin (self-contained, CD-converted, Onest)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ overflow-x:clip; background:#fff; overscroll-behavior-y:none; }
+  body{ font-family:'Onest','Helvetica Neue',Helvetica,Arial,sans-serif; background:#e9e9ec; color:#111;
+    overscroll-behavior-y:none; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  a{ color:#111; text-decoration:none; } a:hover{ color:#555; }
+  img{ display:block; }
+  .phone-col{ position:relative; width:100%; max-width:390px; margin:0 auto; background:#fff;
+    box-shadow:0 0 0 1px rgba(0,0,0,.045), 0 24px 70px rgba(0,0,0,.11); }
+  .chrome-fixed{ position:fixed; top:0; bottom:0; left:50%; transform:translateX(-50%);
+    width:390px; max-width:100vw; z-index:120; pointer-events:none; }
+  .chrome-fixed button, .chrome-fixed a{ pointer-events:auto; }
+
+  /* ImageSliderWipe structural hooks (engine-coupled, toggled by JS) */
+  .isw-mode-pin [data-isw-layer]{ position:sticky; top:0; height:100svh;
+    display:flex; flex-direction:column; justify-content:flex-end; overflow:clip; }
+  [data-isw-stage]{ position:relative; }
+  .isw-mode-pin [data-isw-slide]{ position:absolute; inset:0; margin:0; }
+  [data-isw-slide] img, [data-isw-slide] .isw-fill{ width:100%; height:100%; object-fit:cover; display:block; }
+  .isw-drift [data-isw-slide] img, .isw-drift [data-isw-slide] .isw-fill{ height:120%; will-change:transform; }
+  [data-isw-slide].is-off{ visibility:hidden; }
+  [data-isw-text].is-off, [data-isw-extra].is-off{ visibility:hidden; }
+  [data-isw-ticks]{ display:flex; gap:20px; }
+  .isw-tick{ flex:1; height:2px; border-radius:2px; overflow:hidden; background:rgba(127,127,127,.25); }
+  .isw-tick-fill{ height:100%; border-radius:2px; background:currentColor; transform:translateX(-100%); }
+
+  /* AIR B3 skin */
+  #b3{ position:relative; background:#fff; }
+  #b3 [data-isw-stage]{ position:absolute; inset:0; overflow:clip; background:#fff; }
+  #b3 [data-isw-slide]{ display:flex; align-items:flex-start; justify-content:center; padding:7svh 26px 0; }
+  #b3 .isw-fill{ width:auto; height:46svh; max-width:66%; object-fit:contain; object-position:center top; margin:0 auto; }
+  #b3 .isw-card{ position:relative; z-index:3; display:flex; flex-direction:column; gap:32px;
+    padding:0 18px calc(150px + env(safe-area-inset-bottom)); }
+  #b3 .isw-texts{ display:grid; }
+  #b3 [data-isw-text]{ grid-area:1 / 1; margin:0; font-size:15px; line-height:1.32; letter-spacing:.012em;
+    font-weight:500; text-transform:uppercase; color:#8d8d8d; max-width:31ch; text-wrap:pretty; }
+  #b3 [data-isw-ticks]{ color:#111; gap:12px; }
+  #b3 .isw-tick{ height:2px; background:#d7d7d7; }
+</style>
+</head>
+<body>
+<main class="phone-col">
+<!-- B0 lead-in -->
+<section id="b0" style="min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:120px 24px 80px; background:#fff;">
+  <p style="font-size:12px; letter-spacing:.32em; font-weight:600; color:#111; text-transform:uppercase; margin-bottom:24px;">The architecture of new success</p>
+  <h1 style="font-size:min(33vw,130px); line-height:.8; font-weight:800; letter-spacing:-.025em; color:#0a0a0a;">AIR</h1>
+  <p style="margin-top:46px; font-size:11px; letter-spacing:.24em; font-weight:600; color:#bcbcbc; text-transform:uppercase;">Scroll to explore</p>
+</section>
+
+<!-- B3 scroll-pin hero -->
+<section id="b3">
+  <div data-isw-layer>
+    <div data-isw-stage>
+      <figure data-isw-slide><img class="isw-fill" src="spiral-vertical.jpg" alt="AIR spiral sculpture"></figure>
+      <figure data-isw-slide class="is-off"><img class="isw-fill" src="spiral-vertical.jpg" alt=""></figure>
+    </div>
+    <div class="isw-card" data-isw-card>
+      <div class="isw-texts">
+        <p data-isw-text>THREE TOWERS RANGING FROM 14 TO 34 FLOORS REFLECT THE DYNAMIC CHARACTER OF OFFICE LIFE THROUGH THEIR EXPRESSIVE FORMS. THEY SYMBOLIZE ONE OF THE CAPITAL&rsquo;S KEY BUSINESS DISTRICTS</p>
+        <p data-isw-text class="is-off">THE SMOOTH ROTATION OF THE FACADES AROUND A CENTRAL AXIS ADDS MOVEMENT AND ENERGY TO THE OVERALL SILHOUETTE. THE ROTATIONAL EFFECT CREATES A DISTINCTIVE ARCHITECTURAL RHYTHM.</p>
+      </div>
+      <div data-isw-ticks></div>
+      <p class="isw-counter" style="display:none"><span data-isw-count>1</span><span data-isw-total>/ 2</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- B4 lead-out (unpin target) -->
+<section id="b4" style="min-height:100svh; padding:112px 24px 132px; background:#fff; display:flex; flex-direction:column;">
+  <h2 style="font-size:44px; line-height:1.0; font-weight:800; letter-spacing:-.02em; color:#0f0f0f; text-transform:uppercase; max-width:9ch;">A New Premium Format</h2>
+  <p style="margin-top:26px; font-size:15px; line-height:1.32; letter-spacing:.012em; font-weight:500; color:#8c8c8c; text-transform:uppercase; max-width:33ch;">Air is not only a new generation of offices but also a strong architectural statement by ADM Architects.</p>
+</section>
+</main>
+
+<!-- engine (verbatim CD-RAW isw-engine.js, inlined for self-contained) -->
+<script src="isw-engine.js"></script>
+<!-- self-contained init (replaces DC host-driver with the engine's own native-scroll driver) -->
+<script>
+(function(){
+  'use strict';
+  function boot(){
+    if(!window.ImageSliderWipe || !document.getElementById('b3')){ return setTimeout(boot, 30); }
+    window.__ISW = window.ImageSliderWipe.create('#b3', {
+      mobile:'scroll-pin', stepSvh:85, driftPct:0, wipeMs:1000, textDelayMs:250, blurPx:10
+    });
+  }
+  boot();
+}());
+</script>
+</body>
+</html>

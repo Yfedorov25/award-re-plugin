@@ -1,0 +1,70 @@
+# PB_prototype_engine — ГЕНЕРАЦІЯ HTML-ПРОТОТИПІВ ВАРІАНТІВ ★★
+> Як плагін реально будує клікабельні прототипи варіантів секцій (рівень C у [PB_variants_prototyping](PB_variants_prototyping)). Адаптовано з design-engineer dev-prototyping патерну. 2026-06-09.
+> Споріднено: [PB_variants_prototyping](PB_variants_prototyping) [_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md) [PB_motion_score](../../motion-score/references/PB_motion_score) [PB_color](../../re-color/references/PB_color.md) [PB_media](../../re-media/references/PB_media).
+
+## 0. ПРИНЦИП
+Прототип = одно-файловий HTML (CSS+JS inline, 0 build, 0 залежностей крім CDN GSAP/Lenis) що показує РУХ варіанту наживо. Throwaway-артефакт: код може бути брудний, він для візуального вибору й як референс реальної побудови. НЕ git/НЕ tests на цьому етапі.
+
+## 1. ЩО ПРОТОТИПУЄМО (наш контекст ≠ design-engineer)
+DE прототипує екрани продукту. Ми — **варіанти ПРИЙОМУ для секції**: 2-4 standalone HTML, кожен = той самий контент-каркас, але інший VI-прийом (frame-scrub vs video vs ken-burns vs split-hover). Мета: побачити рух, обрати найкращий → motion-score.md.
+
+## 2. КОЛИ (у потоці)
+Рівень C у [PB_variants_prototyping](PB_variants_prototyping) — для КЛЮЧОВИХ секцій (hero, visual-search, map, головний перехід). v1: прохідні секції ТЕЖ отримують живий прототип (можна полегшений, 1-2 варіанти) — «без HTML» скасовано законом A6.
+
+## 3. PRE-FLIGHT (design-grounding — щоб НЕ AI-slop)
+ПЕРЕД генерацією HTML прочитати й застосувати:
+1. [_TECHNIQUE_REGISTRY](_TECHNIQUE_REGISTRY.md) — точний прийом + його VI-механіка (data-parallax-keyframe, ease, тощо)
+2. [PB_color](../../re-color/references/PB_color.md) — токени бренду проєкту (--c-/--t-, тема=клас)
+3. [PB_media](../../re-media/references/PB_media) — обробка (parallax-zoom, aspect-ratio-слот, no-WebGL)
+4. [PB_motion_score](../../motion-score/references/PB_motion_score) — ОБРАНИЙ ease проєкту (НЕ дефолтний air — пер-сайт!) + константи
+5. copywriting/_ANTISLOP — якщо є текст у прототипі
+Без цього прототип виглядатиме як slop і зіб'є візуальний baseline.
+
+## 4. СТРУКТУРА ПРОТОТИПУ (single-file)
+```html
+<!doctype html><html><head>
+  <style>
+    :root{ /* токени проєкту з PB_color */ --c-base:…; --c-deep:…; --c-accent:…; --ease:cubic-bezier(…проєктний…); }
+    /* секція-каркас + стилі прийому */
+  </style>
+</head><body>
+  <!-- 1 секція, реальний контент-плейсхолдер (lorem заборонено — реальні фрази-чернетки Fedoriv) -->
+  <script src="https://cdn…/gsap"></script><script src="https://cdn…/lenis"></script>
+  <script>/* прийом наживо: scrub/reveal/parallax за _TECHNIQUE_REGISTRY */</script>
+</body></html>
+```
+- Реальне медіа якщо є (рендери клієнта); інакше — плейсхолдер-блоки з правильним aspect-ratio.
+- НІ lorem — чернетки копі у голосі Fedoriv (бо текст впливає на відчуття).
+- no-WebGL: 🔴-прийоми у прототипі = їхній no-WebGL переклад (canvas-2D/CSS), не Three.
+
+## 5. ПОТІК ГЕНЕРАЦІЇ
+```
+1. Анонсувати план (що прототипуємо, скільки варіантів).
+2. Pre-flight Reads (§3).
+3. Для КОЖНОГО з 2-4 варіантів → окремий .html (той самий каркас, інший прийом).
+4. Зберегти у .award/prototypes/{section}/{variant}.html (throwaway-тека).
+5. Показати user: ЛОКАЛЬНИЙ ПОРТ (python3 -m http.server у /tmp/proto-*/) + посилання
+   в чаті. «Описати рух» замість показу — ЗАБОРОНЕНО (закон A6); скріни — не показ (B1).
+6. User обирає → запис рішення в motion-score.md + коротко чому.
+```
+Інкрементально: один варіант → обговорити → наступний. Не дампити все одразу.
+
+## 6. ВІЗУАЛІЗАЦІЯ ВИБОРУ
+- Локально: відкрити HTML у браузері (user сам) або browse-скрін кожного.
+- Вибір варіанта: юзер дивиться ЖИВІ прототипи на порту і відповідає вільним текстом
+  у чаті (закон E10/A6). AskUserQuestion для варіантів секцій/копі — ЗАБОРОНЕНО
+  (гейт-хук section-gates відхилить); допустимий лише для бінарних НЕтекстових
+  розвилок процесу (так/ні, A/B-режим пайплайна).
+- Autopilot: згенерувати всі, обрати за критеріями (бренд+перф+A1), показати обране+альтернативу.
+
+## 7. ЗБЕРІГАННЯ / ПРИБИРАННЯ
+- Прототипи → `.award/prototypes/` (gitignored, throwaway).
+- Рішення (обраний варіант + чому) → `motion-score.md` (НЕ throwaway, живить section-builder).
+- Decisions-log: який варіант обрано на кожну секцію + 1 рядок чому.
+- Після фіналізації прототипи можна чистити (вони відіграли роль).
+
+## 8. ПОМИЛКИ
+lorem замість живої копі · прототип ігнорує проєктний ease/токени (виглядає не як фінал) · 🔴 WebGL у прототипі (має бути no-WebGL переклад) · дамп усіх варіантів одразу без обговорення · прототип як «фінальний код» (це throwaway) · git/tests на прототипі · прототип без VI-джерела прийому (вигадка).
+
+## 9. ЧЕК
+☐ pre-flight Reads (registry+color+media+motion-score ease+antislop) ☐ single-file, CDN-deps, no-build ☐ 2-4 варіанти, той самий каркас різний прийом ☐ реальна копі (не lorem) + проєктні токени+ease ☐ no-WebGL (🔴→переклад) ☐ збережено в .award/prototypes/ ☐ user обрав → motion-score.md + чому ☐ кожен варіант має VI-джерело з _TECHNIQUE_REGISTRY.

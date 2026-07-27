@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · persistent-index-menu · Springs amenity menu (push-swap + fixed index + glow)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · persistent-index-menu
+================================================================================
+  Springs' Wellness menu (Spa/Yoga/Fitness/Café) — the award-rhythm list-index <->
+  (media + copy) binding. Harvested from D_springs_wellness_menu_clip.
+    - SPLIT: media LEFT (rectangle window), persistent serif INDEX + copy RIGHT.
+    - index FIXED stack; active bright, rest dimmed (binary opacity ~1/.35); list
+      never moves, only the highlight.
+    - CLICK-DRIVEN (not scroll-jacked); label LEADS, then media + copy follow.
+    - media swap = VERTICAL PUSH (2-layer stack translateY: old up, new from below,
+      ~0.6s eased) — NOT a crossfade.
+    - copy swaps (fade+rise) a beat after, bottom-anchored.
+    - a constant gradient GLOW behind the copy NEVER changes.
+
+  ASSET-SUBSTITUTION GATE: OUR amenities — Двір / Тераса / Паркінг / Кафе — on OUR
+  renders + Ukrainian copy. Click the list. NO WebGL.
+  window.__LAB_OK__ on init.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --green:#16291e; --teal:#0e2e2c; --cream:#e9e2d2; --slate:#9fb0a6;
+    --serif:'Fraunces',Georgia,serif; --body:'Inter',system-ui,sans-serif; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--green);color:var(--cream);font-family:var(--body);overflow:hidden}
+
+  /* RIGHT column: the STATIC gradient glow (teal core lower-left -> forest edge) */
+  .pim-right{ background:
+    radial-gradient(60% 50% at 35% 70%, var(--teal) 0%, rgba(14,46,44,0) 70%),
+    var(--green); color:var(--cream); }
+
+  .pim-eyebrow{font-family:var(--body);font-size:.72rem;letter-spacing:.34em;text-transform:uppercase;color:var(--slate)}
+  .pim-word{font-family:var(--serif);font-weight:300;font-size:clamp(2.2rem,4vw,3.4rem);color:var(--cream)}
+  .pim-copy{font-size:clamp(.92rem,1.1vw,1.05rem);line-height:1.6;color:var(--cream);opacity:1}
+</style>
+</head>
+<body>
+
+  <section class="pim-stage" id="menu" tabindex="0">
+    <!-- LEFT: the media push-swap window (engine builds the 2 layers) -->
+    <div class="pim-media"></div>
+
+    <!-- RIGHT: eyebrow + persistent index + bottom-anchored copy, over the glow -->
+    <div class="pim-right">
+      <div class="pim-eyebrow">QUADRO · простори</div>
+      <div class="pim-index"></div>
+      <p class="pim-copy"></p>
+    </div>
+
+    <!-- amenity data (markup-first): OUR spaces -->
+    <div class="pim-item" data-label="Двір"    data-media="renders/day-08.webp"     data-copy="Тихий внутрішній двір з мощенням і зеленню. Місце, де ранок починається з тиші, а не з чужих вікон." hidden></div>
+    <div class="pim-item" data-label="Тераса"  data-media="renders/terrace-03.webp" data-copy="Власна тераса над дахами. Кава на світанку, вечеря під відкритим небом, простір тільки для твоєї родини." hidden></div>
+    <div class="pim-item" data-label="Паркінг" data-media="renders/aerial.webp"     data-copy="Закритий паркінг на території. Авто завжди поруч, двір лишається пішохідним і безпечним." hidden></div>
+    <div class="pim-item" data-label="Кафе"    data-media="renders/scene18.webp"    data-copy="Кав’ярня за крок від дому. Аромат еспресо зранку, місце зустрічей увечері, життя кварталу поруч." hidden></div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  PersistentIndexMenu.init('#menu', { pushMs: 600 });
+  document.getElementById('menu').focus();
+</script>
+</body>
+</html>

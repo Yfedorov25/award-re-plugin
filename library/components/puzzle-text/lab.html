@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · puzzle-text · tx5 paired-with-render (1:1)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · puzzle-text   ·   BASE = tx5-paired-with-render (9/10)
+================================================================================
+  SOURCE: apps/quadro/public/slide-lab/tx5-paired-with-render.html
+
+  SAISEI-style PAIRED composition. A big contained QUADRO render slab on the
+  LEFT (~45vw, portrait-cropped, fully painted, quietly present). The confident
+  STATEMENT in the facing CREAM AIR COLUMN on the RIGHT.
+
+  THE MOVE (Zera portfolio6, technique #4, faithful):
+  the statement's WORDS start GRAY and displaced across BOTH axes — a wide
+  diagonal scatter, some rotated / skewed / sized larger, CONTAINED to the text
+  side so the debris never crosses onto the render slab — and on a pinned,
+  scrubbed (reversible) ScrollTrigger they CONVERGE to their natural flow
+  positions on ONE air ease, color darkening gray -> ink as each word seats.
+  The render slab counter-drifts to rest as the last word seats; a hairline rule
+  + ordinal draw on.
+
+  HARD LAWS
+  ---------
+  • Words are ALWAYS OPAQUE. opacity stays 1; assembly is transform + COLOR only
+    (gray -> ink). Zero fade => ZERO layout shift (browser lays it out once; we
+    animate each word FROM an offset back to transform:none).
+  • Display = Fraunces serif. Body/eyebrow = Inter.
+  • ONE air ease everywhere: cubic-bezier(0.25,0.74,0.22,0.99).
+  • GPU transform / opacity / color only. No WebGL, no video.currentTime, no
+    mix-blend / backdrop-filter over the scrubbed surface.
+  • Pinned scroll-scrub, fully reversible (scroll back re-scatters).
+  • prefers-reduced-motion OR narrow => static readable paragraph (render stacks
+    above), no scatter, no pin.
+
+  RENDER: renders/terrace-04.webp (a sunset terrace over the water) — resolves
+  via the renders symlink -> apps/quadro/public/proto. Paired companion; the
+  TEXT is the star.
+
+  STACK: vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase (cdnjs). No build.
+  Canonical drop-in: award-re-plugin/library/components/puzzle-text/
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,340;9..144,0,420;9..144,1,360&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- eager-preload the ONE paired render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/terrace-04.webp">
+
+<!-- the canonical component skin -->
+<link rel="stylesheet" href="component.css">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* set the real paired render onto the slab image (component.css leaves the url
+     to the author so the technique is render-agnostic) */
+  #slabImg{ background-image:url("renders/terrace-04.webp"); }
+</style>
+</head>
+<body>
+
+  <header class="rail">
+    <span class="eyebrow">QUADRO · technique #4 · puzzle-text · paired with render</span>
+  </header>
+
+  <section class="stage" id="stage">
+    <div class="slab" id="slab">
+      <div class="slab__img" id="slabImg"></div>
+      <span class="slab__cap">візуалізація</span>
+    </div>
+
+    <div class="col">
+      <p class="col__eyebrow" id="eyebrow">Власний берег</p>
+      <h2 class="statement" id="statement">Деякі ранки ти зустрічаєш над водою, а не серед стін. Тераса твоя ще до того, як прокинеться місто, і тиша лишається стільки, скільки ти захочеш.</h2>
+      <div class="col__rule" id="rule"></div>
+      <div class="col__ord" id="ord">QUADRO · 01</div>
+    </div>
+  </section>
+
+  <footer class="rail bottom">
+    <span class="eyebrow">прокрутіть назад · слова знову розлітаються</span>
+  </footer>
+
+<!-- the canonical component engine -->
+<script src="component.js"></script>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+  if (window.CustomEase) gsap.registerPlugin(CustomEase);
+
+  /* the WHOLE tx5 paired scene — drives the existing DOM (tx5 ids). */
+  window.__PT = PuzzleText.mount({
+    renderSrc: 'renders/terrace-04.webp',
+    renderSide: 'left'
+  });
+
+  /* refresh after fonts/layout settle so word boxes measure at final metrics */
+  window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
+  var rT; window.addEventListener('resize', function(){
+    clearTimeout(rT); rT = setTimeout(function(){ ScrollTrigger.refresh(); }, 200);
+  });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe ──
+     asserts: gsap + ScrollTrigger present; words split + ALL opaque (opacity
+     untouched, color-only assembly = zero layout shift); the converge is wired
+     (a pinned ScrollTrigger live, OR the reduced-motion / narrow static branch);
+     no opacity tween on any word; no em-dash in visible copy; zero real
+     console.error. -->
+<script>(function(){
+  var errs=0; var _e=console.error;
+  console.error=function(){var s=Array.prototype.join.call(arguments," ");
+    if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++;
+    return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+
+  function gather(){
+    var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var narrow = matchMedia && matchMedia('(max-width:880px)').matches;
+    var hasGsap = !!window.gsap;
+    var hasST   = !!window.ScrollTrigger;
+    var words   = document.querySelectorAll('#statement .w');
+    var wordCount = words.length;
+
+    // every word span OPAQUE at rest (color-only assembly, zero layout shift)
+    var allOpaque = wordCount>0 && Array.prototype.every.call(words, function(w){
+      return parseFloat(getComputedStyle(w).opacity) === 1;
+    });
+    // never an opacity tween on a word (would be a fade / pop smell)
+    var opacityTweened = window.gsap && Array.prototype.some.call(words, function(w){
+      return gsap.getTweensOf(w).some(function(tw){ return 'opacity' in (tw.vars||{}); });
+    });
+
+    var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+    var pinned  = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().some(function(s){return s.pin;}):false;
+    var isStatic = !!(window.__PT && window.__PT.static);
+    var convergeWired = isStatic || pinned || stCount>0;   // pinned scrub OR static branch
+    var noEmDash = document.body.innerText.indexOf('—') === -1;
+
+    return {
+      ok: errs===0 && hasGsap && hasST && wordCount>=6 && allOpaque &&
+          !opacityTweened && convergeWired && noEmDash,
+      words:wordCount, allOpaque:allOpaque, opacityTweened:opacityTweened,
+      pinned:pinned, isStatic:isStatic, reduced:!!(reduce||narrow), errs:errs
+    };
+  }
+
+  var tries=0;
+  function ready(){
+    var p = gather();
+    window.__PT_PROBE__ = p;
+    window.__LAB_OK__ = !!p.ok;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    if(!p.ok && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,500); });
+})();</script>
+
+</body>
+</html>

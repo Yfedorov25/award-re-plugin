@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · theme-tween · per-section color engine (slate -> brown -> green)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · theme-tween
+================================================================================
+  EVER's per-section COLOR ENGINE: the whole chrome (bg / ink / accent / header)
+  recolors as each section comes on screen, tweened across the seam (NOT a hard
+  flip). Modals reading the same vars inherit the active theme for free.
+
+  Implemented as CSS custom props on :root, lerped in linear-RGB toward the centred
+  section's theme every rAF (IntersectionObserver picks the active section).
+
+  ASSET-SUBSTITUTION GATE: OUR day-arc themes — РАНОК (warm) -> ДЕНЬ (slate) ->
+  ВЕЧІР (amber) -> НІЧ (blue-black). Scroll: the page + header + a "modal" chip all
+  recolor smoothly across each boundary. NO WebGL.
+
+  window.__LAB_OK__ on init.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{font-family:'Inter',system-ui,sans-serif}
+  body{ background: var(--bg); color: var(--ink); transition: none; }  /* color comes from the tweened vars */
+
+  /* fixed header recolors via the same vars (proves chrome inherits the theme) */
+  .hdr{position:fixed;top:0;left:0;right:0;z-index:30;height:64px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 clamp(20px,3.6vw,56px); color: var(--ink); }
+  .hdr::after{content:"";position:absolute;left:clamp(20px,3.6vw,56px);right:clamp(20px,3.6vw,56px);bottom:0;height:1px;background:var(--ink);opacity:.2}
+  .hdr__brand{font-family:'Jost';font-weight:500;font-size:1.3rem}
+  .hdr__dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+
+  /* a floating "modal" chip that reads the vars => inherits the active theme */
+  .modal{position:fixed;right:clamp(20px,3.6vw,56px);bottom:24px;z-index:30;
+    background:var(--bg);color:var(--ink);border:1px solid var(--accent);border-radius:40px;
+    padding:12px 20px;font-family:'Jost';font-size:.8rem;letter-spacing:.08em}
+
+  .sec{min-height:100vh;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+    padding:0 clamp(20px,3.6vw,56px); background: var(--bg); color: var(--ink); }
+  .sec__eye{font-family:'Jost';font-size:.74rem;letter-spacing:.34em;text-transform:uppercase;color:var(--accent);margin-bottom:1.2em}
+  .sec__big{font-family:'Jost';font-weight:300;font-size:clamp(3rem,9vw,8rem);line-height:.95;letter-spacing:-.02em}
+  .sec__note{margin-top:1.4em;max-width:40ch;font-size:.95rem;line-height:1.6;color:var(--ink);opacity:.7}
+</style>
+</head>
+<body>
+
+<div class="hdr"><span class="hdr__brand">QUADRO</span><span class="hdr__dot"></span></div>
+<div class="modal">модалка читає тему</div>
+
+<!-- each section carries its theme; the engine tweens :root toward the centred one -->
+<section class="sec" data-theme data-theme-bg="#2a211a" data-theme-ink="#e9ddcd" data-theme-accent="#c9925e">
+  <div class="sec__eye">01 · ранок</div>
+  <div class="sec__big">Ранок</div>
+  <div class="sec__note">Тепле світло, перша кава. Уся сторінка і хедер у теплій палітрі.</div>
+</section>
+
+<section class="sec" data-theme data-theme-bg="#313E48" data-theme-ink="#DCC5B7" data-theme-accent="#AC7E65">
+  <div class="sec__eye">02 · день</div>
+  <div class="sec__big">День</div>
+  <div class="sec__note">Прохолодний slate. Колір плавно перетік сюди, поки ти скролив.</div>
+</section>
+
+<section class="sec" data-theme data-theme-bg="#3a2418" data-theme-ink="#f0e3d2" data-theme-accent="#d79a5c">
+  <div class="sec__eye">03 · вечір</div>
+  <div class="sec__big">Вечір</div>
+  <div class="sec__note">Золота година. Бронзовий акцент теплішає.</div>
+</section>
+
+<section class="sec" data-theme data-theme-bg="#0d1320" data-theme-ink="#cdd6e2" data-theme-accent="#6f86a8">
+  <div class="sec__eye">04 · ніч</div>
+  <div class="sec__big">Ніч</div>
+  <div class="sec__note">Глибокий синьо-чорний, холодне чорнило. Хедер і модалка теж стали нічними.</div>
+</section>
+
+<script src="component.js"></script>
+<script>
+  ThemeTween.init({
+    sectionSelector: '[data-theme]',
+    vars: ['--bg','--ink','--accent'],
+    ease: 0.10
+  });
+</script>
+</body>
+</html>

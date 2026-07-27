@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-5 · Location → Residences · під-організм</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* ── SO-5 Location → Residences. LIVE-verified (CDP, S25): the cream field CONTINUES from
+     Location (luma 141→211, NO dark flip — the table was wrong). The Location map EXITS and
+     architecture render-cards of the Springs building scatter across the cream, with a big
+     centred serif manifesto between them (portrait-carousel). Dark ink on cream (like SO-4).
+     Self-floor of this phase = 3.4% (nearly still) → strict parity is achievable. */
+  :root{
+    --green-deep:#0e241d; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --ink:#20362c; --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--cream-lite);color:var(--ink);font-family:var(--body);overflow-x:clip}
+  .track{ height:460vh; position:relative; }        /* map-tail + card1 + manifesto + card2 */
+  .pin{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--cream-lite); }
+
+  .head{ position:absolute; top:0; left:0; right:0; z-index:8; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#4a5f54; }
+  .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--ink); }
+  @media (max-width:700px){ .head .nav,.head .r span{ display:none; } }
+
+  /* LOCATION map tail — a cream panel that EXITS to the left as Residences arrives */
+  .mapTail{ position:absolute; top:15.8%; bottom:0; right:0; width:75%; overflow:hidden;
+    transform: translateX(calc(var(--mapOut,0) * -60%)); opacity:calc(1 - var(--mapOut,0));
+    will-change:transform,opacity; }
+  .mapTail__img{ position:absolute; inset:0; background:url('media/map.webp') 52% 62%/135% auto no-repeat; }
+
+  /* ARCHITECTURE cards — scatter across the cream (chess layout from baseline):
+     card1 top-right, card2 bottom-left. Each slides in from its own edge. */
+  .card{ position:absolute; overflow:hidden; box-shadow:0 30px 80px rgba(20,40,30,.28);
+    background-repeat:no-repeat; will-change:transform,opacity; }
+  /* baseline crops show the BALCONIES up close (zoomed past cover), not the whole tower+sky.
+     card1 top-right reaches ~y0.42; card2 bottom-left. */
+  /* card1 = design-3 (curved balconies, the ракурс that matches baseline card1). card2 = design-1. */
+  .card1{ top:0; right:0; width:33%; height:42%;
+    background-image:url('media/design-3.webp'); background-size:cover; background-position:center 62%;
+    transform: translateX(calc((1 - var(--c1,0)) * 24%)); opacity:var(--c1,0); }
+  .card2{ bottom:0; left:0; width:31%; height:33%;
+    background-image:url('media/design-1.webp'); background-size:cover; background-position:center 40%;
+    transform: translateX(calc((1 - var(--c2,0)) * -24%)); opacity:var(--c2,0); }
+
+  /* central manifesto — big serif dark ink, centred (like baseline) */
+  /* manifesto sits centred but a touch above middle (baseline text band ≈ y 0.42) */
+  .manifesto{ position:absolute; left:50%; top:46%; transform:translate(-50%,-50%);
+    width:min(44vw,600px); text-align:center; z-index:5; opacity:var(--mO,0); }
+  .manifesto .ln{ --r:0; display:block; opacity:var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.5em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0); will-change:transform,clip-path,opacity; }
+  .manifesto h2{ font-family:var(--serif); font-weight:400; letter-spacing:-.01em;
+    font-size:clamp(1.4rem,2.6vw,2.3rem); line-height:1.2; color:var(--ink); }
+  .kick{ position:absolute; left:clamp(28px,7vw,110px); top:calc(15.8% + 18px); z-index:6;
+    font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#5c7266; opacity:var(--kO,0); }
+
+  .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#5c7266;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+  @media (max-width:700px){
+    .card1{ width:64%; height:34%; } .card2{ width:60%; height:32%; }
+    .manifesto{ width:84vw; } .mapTail{ width:100%; }
+  }
+</style>
+</head>
+<body>
+  <div class="track" id="track">
+    <div class="pin">
+      <div class="mapTail" id="mapTail"><div class="mapTail__img"></div></div>
+
+      <div class="card card1" id="card1"></div>
+      <div class="card card2" id="card2"></div>
+
+      <div class="kick" id="kick">Residences</div>
+      <div class="manifesto" id="manifesto">
+        <h2>
+          <span class="ln">Each floor reflects boundless</span>
+          <span class="ln">perspectives in its glistening waves,</span>
+          <span class="ln">inviting you to look farther with a</span>
+          <span class="ln">fuller palette of possibilities.</span>
+        </h2>
+      </div>
+
+      <header class="head" id="head">
+        <div class="nav">Menu · Residences</div><div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Location → Residences</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);color:var(--cream);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Location → Residences — шов (звірено з LIVE, CDP)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Таблиця казала «флип 🟡→🟢 назад у темне». <b style="color:#eaf2ec">Live це спростував:</b> крем
+        ТРИВАЄ (luma <b style="color:#eaf2ec">141→211</b>, ще світлішає — темного провалу немає). Location-карта
+        ВИХОДИТЬ, на її місце — <b style="color:#eaf2ec">архітектурні рендер-картки</b> будівлі Springs
+        (portrait-carousel, scatter-розкладка) + центральний маніфест «Each floor reflects boundless
+        perspectives…». Це другий кремовий блок поспіль — довгий «видих» ритму.
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        🔴 Також live-скан DOM спростував СТРУКТУРУ: немає окремого <code>l-design</code> — Design/
+        архітектура живуть УСЕРЕДИНІ <code>l-residences</code> (8 швів, не 9). Джерело:
+        <code>extraction/live-ref/SO-5-loc-res-seam/</code> + повний CDP-скан. Медіа — <b>реальні springs</b>
+        (6.design рендери). Self-floor фази 3.4%. Дослідження — <code>RESEARCH.md</code>.
+      </div>
+    </div>
+  </div>
+
+<script>
+  var track=document.getElementById('track');
+  var mapTail=document.getElementById('mapTail'), card1=document.getElementById('card1'),
+      card2=document.getElementById('card2'), manifesto=document.getElementById('manifesto'),
+      kick=document.getElementById('kick'), cue=document.getElementById('cue');
+  var mLines=[].slice.call(document.querySelectorAll('#manifesto .ln'));
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function set(el,k,v){el.style.setProperty(k,v);}
+  function revealLines(lines,p,start,end,stag){
+    var span=(end-start);
+    lines.forEach(function(el,i){var a=start+i*stag,b=a+(span-(lines.length-1)*stag);
+      el.style.setProperty('--r', eo(seg(p,a,b)).toFixed(3));});
+  }
+  var smooth=0;
+  function render(p){
+    // Location map exits left (0.06→0.24)
+    set(mapTail,'--mapOut', eo(seg(p,0.06,0.24)).toFixed(3));
+    // kicker + card1 enter as map leaves (0.20→0.36)
+    set(kick,'--kO', eo(seg(p,0.22,0.36)).toFixed(3));
+    set(card1,'--c1', eo(seg(p,0.20,0.40)).toFixed(3));
+    // central manifesto rises in (0.34→0.56), lines staggered
+    set(manifesto,'--mO', eo(seg(p,0.34,0.50)).toFixed(3));
+    revealLines(mLines,p,0.36,0.60,0.05);
+    // card2 slides in from the left, lower (0.46→0.66) — so all three co-exist by ~0.7 (baseline phase)
+    set(card2,'--c2', eo(seg(p,0.46,0.66)).toFixed(3));
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  function frame(){
+    var r=track.getBoundingClientRect(), total=track.offsetHeight-window.innerHeight;
+    var target=clamp((-r.top)/total,0,1);
+    smooth += (target-smooth)*0.09; if(Math.abs(target-smooth)<0.0002) smooth=target;
+    render(smooth); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var qs=new URLSearchParams(location.search), sQ=parseFloat(qs.get('s'));
+  if(!isNaN(sQ)){
+    var jump=function(){var t=document.getElementById('track');window.scrollTo(0,Math.round((t.offsetHeight-window.innerHeight)*sQ));smooth=sQ;render(sQ);};
+    jump(); setTimeout(jump,300); setTimeout(jump,900);
+  } else if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__SO5_OK__=true;
+</script>
+</body>
+</html>

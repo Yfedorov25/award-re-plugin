@@ -1,0 +1,26 @@
+{
+  "id": "brand-overlay-crossfade",
+  "title": "Brand-overlay crossfade (Springs)",
+  "level": "L2-molecule",
+  "batch": "A (#3/17)",
+  "source": "springs.estate Place→Jogging seam (доводчик акт→акт, D_SPRINGS_video seam table). Engine = library/components/brand-overlay-crossfade (proven). Dual wrapper adds manualDrive + two modes (push/wash).",
+  "engine": "Two seam modes on ONE engine. mode:'push' (desktop) = a second full-bleed photo pushed over the first from below with a magnetic overshoot-settle; render(prog) = its translateY. mode:'wash' (mobile) = a brand-colour wash draining wash→0; render(prog) = wash*(1-prog).",
+
+  "dual_platform": true,
+  "differs": "DIFFERENT mechanics per platform (empirical — springs itself splits the доводчик by boundary, D_SPRINGS_video): desktop = PUSH-OVER смугою (a second photo slides up over the first, over-travels past the target, springs back — magnetic settle), scrubbed by scroll while pinned (reversible). mobile = CROSSFADE (brand wash drains wash→0 over time on mount) — a bottom/side вріз reads unnatural on a narrow screen, so springs replaces the push with a long opacity-tween, no вріз.",
+
+  "desktop": { "driver": "scrollPush (mode:'push') — prog = scroll progress across the pin span; drives the next photo's translateY 100%→0 with an overshoot-settle. Reversible.", "knobs": ["pinFactor"] },
+  "mobile":  { "driver": "autoDrain (mode:'wash') — prog ramps 0→1 once over drainMs on mount; drives wash*(1-prog) crossfade.", "knobs": ["wash", "drainMs"] },
+
+  "knobs": {
+    "wash": { "default": 1.0, "what": "starting wash opacity (brand cover → tints to 0)." },
+    "fadeImage": { "default": false, "what": "also crossfade the image 0→1 (only on a brand-coloured backdrop)." },
+    "pinFactor": { "default": 1.0, "platform": "desktop", "what": "pin length as a fraction of viewport (desktop scroll span)." },
+    "drainMs": { "default": 1500, "unit": "ms", "platform": "mobile", "what": "auto-drain duration on mount." }
+  },
+
+  "engine_patch": "forceMotion (skip the <=820px static guard) + manualDrive (expose render() without the engine's own ScrollTrigger/pin). Both additive & opt-in; default behavior unchanged. See memory dual-platform-forcemotion.",
+  "entry": "BrandOverlayCrossfadeDual.init(target, opts) -> { platform, engine, driver }. Load engine.js THEN component.js. Markup: .boc-stage > .boc-img(img) + .boc-img--next(img, push mode) + .boc-wash(brand-colour) [+ .boc-content].",
+  "law": "Lenis→ticker→ScrollTrigger only on desktop-via-wrapper; render(prog) PURE; transform (push) / opacity (wash) only; GPU; NO mix-blend/backdrop over the scrubbed surface; NO WebGL. reduced-motion → resolved (desktop: next photo settled in; mobile: wash 0).",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core + forceMotion/manualDrive + push/wash modes)", "component.css", "img/photo.webp", "img/photo-next.webp (push-over second layer)", "stage.html", "demo.html", "meta.json", "README.md"]
+}

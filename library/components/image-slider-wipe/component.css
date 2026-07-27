@@ -1,0 +1,106 @@
+/* ============================================================
+   IMAGE-SLIDER-WIPE · component.css
+   ------------------------------------------------------------
+   Структурні хуки атома. Рух (кліпи/blur/fill) веде JS.
+   Розміри/кольори картки та фото = проєкт (лаба показує AIR-скін).
+   Живі величини AIR: смужки прогресу 2px (progress-bar__item-inner),
+   gap стрічки 10px, item стрічки ≈ 9/12 колонок, snap center.
+   Застереження К1.7: горизонтальне обрізання у предків — ТІЛЬКИ
+   через clip (hidden-варіант ламає position:sticky).
+   ============================================================ */
+
+/* ---- PIN-режим: шар прилипає на 100svh ---- */
+.isw-mode-pin [data-isw-layer] {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;   /* живий image-slider-sticky__layer */
+  overflow: clip;
+}
+
+/* фото-вікно: слайди стеком, кліпи ріжуть верхній.
+   У pin-режимі stage МУСИТЬ мати власну висоту (flex/грід секції) —
+   всі слайди абсолютні (живий image-slider-images: picture~picture). */
+[data-isw-stage] { position: relative; }
+.isw-mode-pin [data-isw-slide] {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+}
+[data-isw-slide] img,
+[data-isw-slide] .isw-fill {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* дрейф-режим (живий imageSliderImage ДОСЛІВНО): фото 120% висоти,
+   якір згори; translateY у діапазоні [−16.666%, 0] фото-висоти —
+   нижній край рівно flush на −16.666%, краї не оголюються */
+.isw-drift [data-isw-slide] img,
+.isw-drift [data-isw-slide] .isw-fill {
+  height: 120%;
+  will-change: transform;
+}
+[data-isw-slide].is-off { visibility: hidden; }
+
+/* тексти/CTA: стек в одній грід-клітинці (живий content-animation--center:
+   старий і новий існують одночасно під час свапу БЕЗ стрибка лейауту;
+   контейнер тримає висоту найбільшого — нуль CLS) */
+[data-isw-text],
+[data-isw-extra] { grid-area: 1 / 1; }
+[data-isw-text].is-off,
+[data-isw-extra].is-off { visibility: hidden; }
+
+/* ---- прогрес-смужки (живий progress-bar: 2px, translateX-fill) ---- */
+[data-isw-ticks] {
+  display: flex;
+  gap: 20px;
+}
+.isw-tick {
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(127, 127, 127, .25);
+}
+.isw-tick-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform: translateX(-100%);
+  /* скраб: transform ставить JS у rAF — БЕЗ transition (закон перфи) */
+}
+
+/* ---- TAP-режим (T-M23): стрічка + [← N/M →] ---- */
+.isw-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;                       /* живий --scrollable-item-gap */
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;   /* живий mobile-scrollable */
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* бічні відступи = живий side-offset: перший і останній слайд
+     МОЖУТЬ стати в snap-центр (без них край клемпить ціль) */
+  padding-inline: calc((100% - var(--isw-item-w, 76vw)) / 2);
+}
+.isw-strip::-webkit-scrollbar { display: none; }
+.isw-strip [data-isw-slide] {
+  position: relative;
+  flex: 0 0 var(--isw-item-w, 76vw); /* ≈ 9/12 колонок живої стрічки */
+  width: var(--isw-item-w, 76vw);
+  scroll-snap-align: center;
+  margin: 0;
+  visibility: visible;
+}
+.isw-mode-tap [data-isw-slide] img { border-radius: 6px; } /* інсет-вікно */
+
+[data-isw-prev].is-disabled,
+[data-isw-next].is-disabled {
+  opacity: .3;
+  pointer-events: none;            /* живий links: краї без loop */
+}

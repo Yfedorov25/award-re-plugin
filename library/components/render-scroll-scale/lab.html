@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · render-scroll-scale · bare hero render breathes in a clipping frame</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · render-scroll-scale
+================================================================================
+  The bare hero LAYER that breathes — ONE full-bleed QUADRO render in a fixed clipping
+  FRAME that scales up on scroll (the frame clips, the render grows ~1.0 -> ~1.12). No copy,
+  no layout — meant to sit BEHIND a wordmark / split-word title. owns_pin false: here it
+  drives its own plain (NON-pinned) scrub. transform scale + overflow clip only. NO WebGL.
+  DECODE-GUARD before reveal. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --ink:#0c0b08; --paper:#f1efe9; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--ink);color:var(--paper);font-family:var(--sans)}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--paper);color:var(--ink);opacity:.5;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  /* the lab frame */
+  .rss-frame{ --rss-h:100vh; --rss-bg:#0c0b08; }
+  /* a held wordmark stacked over the breathing layer — supplied by the lab, NOT the atom */
+  .hero-mark{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; z-index:2; }
+  .hero-mark h1{ font-family:var(--serif); font-weight:400; font-size:9vw; line-height:1; color:#fff;
+    letter-spacing:-.01em; text-shadow:0 2px 40px rgba(0,0,0,.45); }
+  .hero-mark p{ position:absolute; bottom:8vh; left:0; right:0; text-align:center; color:#fff;
+    font-size:.78rem; letter-spacing:.28em; text-transform:uppercase; opacity:.82; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ рендер у рамці плавно більшає, рамка тримає краї</div>
+
+  <section class="rss-frame" id="hero">
+    <img class="rss-render" src="renders/day-front.webp" alt="QUADRO">
+    <div class="hero-mark">
+      <h1>QUADRO</h1>
+      <p>рендер дихає · титул тримається</p>
+    </div>
+  </section>
+
+  <div class="spacer">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    // standalone: the layer owns its own plain (NON-pinned) scrub via selfTrigger.
+    window.__rss = RenderScrollScale.create('#hero', {
+      scaleFrom:1.0, scaleTo:1.12, originY:'50%', ease:'none',
+      selfTrigger:true, manageLenis:false
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+/* FULLSCREEN-MEDIA-CAROUSEL · component.css
+   A full-bleed carousel where each slide fills the viewport edge-to-edge; swipes one full
+   width at a time. transform: translateX (track) only. Slides can be img or video.
+   NO mix-blend over the media. NO WebGL. */
+.fmc-stage { position: relative; height: var(--fmc-h, 100vh); overflow: hidden;
+  background: #0c0c0a; cursor: grab; touch-action: pan-y; outline: none; }
+.fmc-stage:active { cursor: grabbing; }
+
+.fmc-track { display: flex; height: 100%; will-change: transform; }
+.fmc-slide { position: relative; flex: 0 0 100%; height: 100%; }
+.fmc-slide img, .fmc-slide video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* edge arrows (round, translucent) */
+.fmc-prev, .fmc-next { position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+  width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255,255,255,.55);
+  background: rgba(20,18,15,.22); color: #fff; cursor: pointer; display: grid; place-items: center;
+  font-size: 1.2rem; transition: background .24s, opacity .24s; }
+.fmc-prev { left: 2vw; } .fmc-next { right: 2vw; }
+.fmc-prev:hover, .fmc-next:hover { background: rgba(20,18,15,.5); }
+.fmc-prev:disabled, .fmc-next:disabled { opacity: .25; cursor: default; }
+
+/* counter "02 / 05" */
+.fmc-counter { position: absolute; left: 50%; bottom: 4vh; transform: translateX(-50%); z-index: 5;
+  color: #fff; font-size: .9rem; letter-spacing: .18em; font-variant-numeric: tabular-nums;
+  display: flex; gap: .5rem; align-items: baseline; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+.fmc-counter .sep { opacity: .5; }
+.fmc-counter .fmc-total { opacity: .6; }

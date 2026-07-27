@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Place — morph-ribbon (B · Canvas glass)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Hanken+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  :root{ --cream:#ece3ce; --cream-dim:#ece3ce; }
+  html,body{ background:#12271a; color:var(--cream); overflow-x:hidden; }
+  body{ font-family:'Hanken Grotesk',sans-serif; -webkit-font-smoothing:antialiased; }
+  #stage{ position:relative; width:100%; height:100vh; overflow:hidden; }
+  #field{
+    position:absolute; inset:0;
+    background:
+      radial-gradient(120% 95% at 6% 108%, rgba(178,196,74,0.95) 0%, rgba(150,170,60,0.35) 26%, rgba(150,170,60,0) 52%),
+      radial-gradient(90% 80% at 2% 96%, rgba(70,150,140,0.35) 0%, rgba(70,150,140,0) 46%),
+      radial-gradient(120% 120% at 100% 4%, rgba(9,28,17,0.96) 0%, rgba(12,36,22,0.5) 40%, rgba(12,36,22,0) 70%),
+      linear-gradient(150deg, #274a25 0%, #21421f 34%, #17331f 62%, #0f2717 100%);
+  }
+  #field::after{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(70% 60% at 40% 46%, rgba(120,150,60,0.16), rgba(120,150,60,0) 60%);
+  }
+  #plate{
+    position:absolute; inset:0; opacity:0; visibility:hidden;
+    background:
+      radial-gradient(130% 90% at 50% 128%, rgba(196,210,150,0.65) 0%, rgba(150,175,95,0.28) 38%, rgba(150,175,95,0) 62%),
+      radial-gradient(46% 42% at 20% 12%, rgba(150,172,78,0.5) 0%, rgba(150,172,78,0) 60%),
+      radial-gradient(50% 60% at 88% 20%, rgba(20,44,26,0.72) 0%, rgba(20,44,26,0) 62%),
+      radial-gradient(60% 70% at 8% 44%, rgba(24,50,30,0.55) 0%, rgba(24,50,30,0) 60%),
+      linear-gradient(158deg, #1b3a22 0%, #24492a 34%, #2b5330 58%, #14301d 100%);
+  }
+  #plate .fol{ position:absolute; border-radius:50%; filter:blur(38px); mix-blend-mode:multiply; }
+  #plate .f1{ width:46vw; height:70vh; left:-10vw; top:-14vh; background:radial-gradient(closest-side, rgba(10,28,16,0.9), rgba(10,28,16,0)); }
+  #plate .f2{ width:40vw; height:60vh; right:-8vw; top:-10vh; background:radial-gradient(closest-side, rgba(14,34,20,0.85), rgba(14,34,20,0)); }
+  #plate .f3{ width:34vw; height:50vh; right:6vw; bottom:-12vh; background:radial-gradient(closest-side, rgba(12,30,18,0.8), rgba(12,30,18,0)); }
+  #plate .path{
+    position:absolute; left:35vw; bottom:-6vh; width:30vw; height:74vh;
+    background:radial-gradient(52% 92% at 50% 100%, rgba(206,218,172,0.55), rgba(206,218,172,0) 68%);
+    filter:blur(8px);
+  }
+  #plate .trunks{
+    position:absolute; left:0; right:0; top:0; height:64%; opacity:0.5; filter:blur(3px);
+    background:repeating-linear-gradient(91deg,
+      rgba(8,22,13,0.22) 0 2px, rgba(8,22,13,0) 2px 22px,
+      rgba(8,22,13,0.14) 22px 24px, rgba(8,22,13,0) 24px 52px);
+    -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 52%, transparent 100%);
+    mask-image:linear-gradient(180deg, #000 0%, #000 52%, transparent 100%);
+  }
+  #plate .shimmer{
+    position:absolute; inset:0; mix-blend-mode:screen; opacity:0.5;
+    background:radial-gradient(38% 30% at 62% 30%, rgba(190,206,120,0.28), rgba(190,206,120,0) 60%);
+    background-size:180% 180%; animation:drift 14s ease-in-out infinite alternate;
+  }
+  @keyframes drift{ from{ background-position:20% 30%; } to{ background-position:70% 60%; } }
+  #ribbon{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  #grain{
+    position:absolute; inset:0; pointer-events:none; opacity:0.11; mix-blend-mode:soft-light;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .type{ position:absolute; z-index:5; will-change:transform,opacity; }
+  #place{
+    top:9vh; right:5vw; font-family:'Cormorant Garamond',serif; font-weight:500;
+    font-size:clamp(88px, 15.5vw, 248px); line-height:0.9; letter-spacing:-0.01em; color:var(--cream);
+    text-shadow:0 2px 40px rgba(0,0,0,0.28);
+  }
+  #kicker{
+    top:calc(9vh + clamp(88px, 15.5vw, 248px) + 8px); right:5vw;
+    font-size:12px; letter-spacing:0.34em; font-weight:500; color:rgba(236,227,206,0.66); text-transform:uppercase;
+  }
+  #para{
+    left:5vw; top:46vh; max-width:392px; font-size:19px; line-height:1.5; font-weight:400;
+    color:rgba(236,227,206,0.9); text-wrap:pretty;
+  }
+  #caption{
+    position:absolute; left:5vw; bottom:7vh; max-width:640px; z-index:6; opacity:0; visibility:hidden;
+    font-family:'Cormorant Garamond',serif; font-weight:400; font-style:italic;
+    font-size:clamp(26px, 3.4vw, 44px); line-height:1.24; letter-spacing:0.005em; color:#f2ecda;
+    text-shadow:0 2px 28px rgba(0,0,0,0.5);
+  }
+  #rule{ position:absolute; top:0; left:0; right:0; height:1px; z-index:5;
+    background:linear-gradient(90deg, rgba(236,227,206,0) 0%, rgba(236,227,206,0.22) 12%, rgba(236,227,206,0.22) 88%, rgba(236,227,206,0) 100%); }
+  .badge{ position:fixed; left:14px; bottom:12px; z-index:20; font-size:10.5px; letter-spacing:0.22em;
+    text-transform:uppercase; color:rgba(236,227,206,0.5); font-weight:500; pointer-events:none; }
+</style>
+</head>
+<body>
+  <section id="stage">
+    <div id="field"></div>
+    <div id="plate">
+      <div class="fol f1"></div><div class="fol f2"></div><div class="fol f3"></div>
+      <div class="trunks"></div>
+      <div class="path"></div>
+      <div class="shimmer"></div>
+    </div>
+    <canvas id="ribbon"></canvas>
+    <div id="grain"></div>
+    <div id="rule"></div>
+
+    <h1 class="type" id="place">Place</h1>
+    <div class="type" id="kicker">Essence of Contemplation</div>
+    <p class="type" id="para">Held within the western green belt, the residences open onto protected woodland and slow water — a rare address where the city loosens into forest and the morning arrives as air.</p>
+    <div id="caption">Breathe in the open space. Feel the ground soften, the light move through the leaves — here, the day slows to your own pace.</div>
+  </section>
+  <div class="badge">morph-ribbon · B · canvas glass</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  CustomEase.create("seam", "M0,0 C0.4,0 0.2,1 1,1");
+
+  const cv = document.getElementById('ribbon');
+  const ctx = cv.getContext('2d');
+  let W = 0, H = 0, DPR = 1;
+  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
+  let lastP = 0;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    cv.style.width = W + 'px'; cv.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    drawRibbon(lastP);
+  }
+
+  const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  function smoothstep(a, b, x){ x = clamp01((x - a) / (b - a)); return x * x * (3 - 2 * x); }
+
+  function drawRibbon(p){
+    lastP = p;
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+
+    const ribAlpha = 1 - smoothstep(0.5, 0.9, p);
+    if (ribAlpha <= 0.002) return;
+
+    mouse.x += (mouse.tx - mouse.x) * 0.08;
+    mouse.y += (mouse.ty - mouse.y) * 0.08;
+    const par = W * 0.05 * mouse.x;
+    const parY = H * 0.03 * mouse.y;
+
+    const desc = smoothstep(0, 0.62, p);
+    const cx   = W * 0.44 + par;
+    const amp  = W * 0.055 * (1 - 0.30 * desc);
+    const lean = W * 0.15 * (1 - 0.18 * desc);
+    const halfW = Math.min(W, H) * 0.175 * (1 - 0.24 * desc);
+    const len  = H * 1.72;
+    const yTop = -H * 0.34 - desc * H * 0.52 + parY;
+    const turns = 1.15;
+    const phase = 0.34 + p * Math.PI * 0.7;
+    const N = 116;
+
+    const L = new Array(N + 1), R = new Array(N + 1), MID = new Array(N + 1), TW = new Array(N + 1);
+    const kx = Math.PI * 1.15;
+    for (let i = 0; i <= N; i++){
+      const u = i / N;
+      const y = yTop + u * len;
+      const x = cx + (u - 0.5) * lean + amp * Math.sin(u * kx + 0.5);
+      const dx = (lean / N) + amp * Math.cos(u * kx + 0.5) * kx / N;
+      const dy = len / N;
+      const tl = Math.hypot(dx, dy) || 1;
+      const nx = dy / tl, ny = -dx / tl;
+      const theta = phase + u * turns * Math.PI;
+      const c = Math.cos(theta), s = Math.sin(theta);
+      const w = halfW * (0.26 + 0.74 * Math.abs(c));
+      const skew = s * halfW * 0.22;
+      L[i] = [x + nx * w, y + ny * w + skew];
+      R[i] = [x - nx * w, y - ny * w - skew];
+      MID[i] = [x, y];
+      TW[i] = { c: c, s: s, w: w };
+    }
+
+    for (let i = 0; i < N; i++){
+      const t = TW[i], c = t.c, s = t.s;
+      const facing = Math.abs(c);
+      const front = c >= 0;
+      const baseA = ribAlpha * (0.11 + 0.24 * facing);
+      const lit = 0.5 + 0.5 * s;
+      let r = lerp(34, front ? 104 : 60, facing);
+      let g = lerp(80, front ? 176 : 148, facing);
+      let b = lerp(58, front ? 138 : 120, facing);
+      r += lit * 12; g += lit * 20; b += lit * 10;
+      ctx.beginPath();
+      ctx.moveTo(L[i][0], L[i][1]);
+      ctx.lineTo(R[i][0], R[i][1]);
+      ctx.lineTo(R[i + 1][0], R[i + 1][1]);
+      ctx.lineTo(L[i + 1][0], L[i + 1][1]);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(${r|0},${g|0},${b|0},${baseA})`;
+      ctx.fill();
+    }
+
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.beginPath();
+    ctx.moveTo(MID[0][0], MID[0][1]);
+    for (let i = 1; i <= N; i++) ctx.lineTo(MID[i][0], MID[i][1]);
+    ctx.strokeStyle = `rgba(150,198,120,${0.13 * ribAlpha})`;
+    ctx.lineWidth = halfW * 1.05;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    const topEnd = Math.round(N * 0.52);
+    let grad = ctx.createLinearGradient(R[0][0], R[0][1], R[topEnd][0], R[topEnd][1]);
+    grad.addColorStop(0.0, `rgba(150,190,70,0)`);
+    grad.addColorStop(0.22, `rgba(210,238,96,${0.55 * ribAlpha})`);
+    grad.addColorStop(0.55, `rgba(186,220,86,${0.28 * ribAlpha})`);
+    grad.addColorStop(1.0,  `rgba(150,190,70,0)`);
+    ctx.beginPath();
+    ctx.moveTo(R[0][0], R[0][1]);
+    for (let i = 1; i <= topEnd; i++) ctx.lineTo(R[i][0], R[i][1]);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 5.5;
+    ctx.shadowBlur = 22; ctx.shadowColor = `rgba(216,242,100,${0.6 * ribAlpha})`;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 1.5;
+    let grad2 = ctx.createLinearGradient(R[0][0], R[0][1], R[topEnd][0], R[topEnd][1]);
+    grad2.addColorStop(0.0, `rgba(210,238,120,0)`);
+    grad2.addColorStop(0.24, `rgba(236,250,180,${0.9 * ribAlpha})`);
+    grad2.addColorStop(0.6,  `rgba(220,240,150,${0.4 * ribAlpha})`);
+    grad2.addColorStop(1.0,  `rgba(210,238,120,0)`);
+    ctx.strokeStyle = grad2;
+    ctx.beginPath();
+    ctx.moveTo(R[0][0], R[0][1]);
+    for (let i = 1; i <= topEnd; i++) ctx.lineTo(R[i][0], R[i][1]);
+    ctx.stroke();
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.shadowBlur = 0;
+  }
+
+  const state = { p: 0 };
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'none' } });
+  tl.to(state, { p: 1, duration: 1, onUpdate: () => drawRibbon(state.p) }, 0);
+  tl.to('#place',  { yPercent: -118, autoAlpha: 0, duration: 0.42, ease: 'power1.in' }, 0.04);
+  tl.to('#kicker', { yPercent: -60, autoAlpha: 0, duration: 0.30 }, 0.04);
+  tl.to('#para',   { y: -46, autoAlpha: 0, duration: 0.40, ease: 'power1.in' }, 0.10);
+  tl.set('#plate', { visibility: 'visible' }, 0.42);
+  tl.fromTo('#plate', { autoAlpha: 0, scale: 1.06 }, { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'seam' }, 0.5);
+  tl.set('#caption', { visibility: 'visible' }, 0.76);
+  tl.fromTo('#caption', { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0, duration: 0.22, ease: 'power2.out' }, 0.8);
+
+  window.render = function(p){ tl.progress(clamp01(+p || 0)); };
+
+  const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((t) => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  ScrollTrigger.create({
+    trigger: '#stage',
+    start: 'top top',
+    end: '+=200%',
+    scrub: 1,
+    pin: true,
+    anticipatePin: 1,
+    onUpdate: (self) => window.render(self.progress)
+  });
+
+  window.addEventListener('resize', () => { resize(); ScrollTrigger.refresh(); });
+  window.addEventListener('mousemove', (e) => {
+    mouse.tx = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.ty = (e.clientY / window.innerHeight) * 2 - 1;
+  });
+
+  resize();
+  window.render(0);
+  requestAnimationFrame(() => { ScrollTrigger.refresh(); window.render(0); });
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

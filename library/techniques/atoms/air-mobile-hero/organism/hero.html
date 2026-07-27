@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AIR — mobile hero (organism, compose of 6 atoms)</title>
+<!--
+  ORGANISM MANIFEST build: air-mobile-hero.
+  compose([air-kinetic-letters(B0), air-blur-reveal(B1), reveal-sequence(B2),
+           air-wipe-pin-slider{scroll-pin}(B3), air-blur-reveal(B4), air-brand-object(B5),
+           air-theme-flip(B6)]) + 6 seams + one vertical scroll-narrative.
+  НЕ малює заново — кожен біт = секція зі СВОЇМ atom-engine у власному scroll-band (continuous-strip).
+  Нуль нових законів руху. Токени = Onest (live AIR). Спіраль/сфера = субститут-асети.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  /* ===== AIR tokens (live: Onest + #8d8d8d caption) ===== */
+  :root{
+    --air-sans:"Onest","Helvetica Neue",Helvetica,Arial,sans-serif;
+    --air-ink:#0a0a0a; --air-paper:#ffffff; --air-caption:#8d8d8d; --air-dark:#0a0a0a; --air-dark-ink:#f4efe6;
+    --ease:cubic-bezier(.25,.74,.22,.99);
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html{ overflow-x:clip; overscroll-behavior-y:none; background:var(--air-paper); scroll-behavior:auto; }
+  body{ font-family:var(--air-sans); background:var(--air-paper); color:var(--air-ink);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  img{ display:block; }
+  .col{ position:relative; width:100%; max-width:430px; margin:0 auto; background:var(--air-paper); }
+
+  /* shared type roles (AIR) */
+  .kicker{ font-size:12px; letter-spacing:.28em; font-weight:600; text-transform:uppercase; color:var(--air-ink); }
+  .caption{ font-size:15px; line-height:1.32; letter-spacing:.012em; font-weight:500; text-transform:uppercase;
+    color:var(--air-caption); max-width:31ch; text-wrap:pretty; }
+  .head{ font-weight:800; letter-spacing:-.02em; text-transform:uppercase; line-height:.92; color:var(--air-ink); }
+
+  /* ===== B0 kinetic-letters (wordmark) ===== */
+  #b0{ min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:120px 24px 80px; background:var(--air-paper); }
+  #b0 h1{ font-size:min(40vw,150px); line-height:.8; }
+
+  /* ===== B1 blur-reveal (tower) ===== */
+  #b1{ background:var(--air-paper); padding-bottom:10svh; }
+  #b1 .media{ width:100%; height:66svh; object-fit:cover; }
+  #b1 .body{ padding:6svh 24px 0; display:flex; flex-direction:column; gap:26px; }
+  #b1 .head{ font-size:34px; }
+  .rv-w{ display:inline-block; will-change:filter,opacity;
+    transition:filter 1s var(--ease), opacity 1s var(--ease); }
+  .rv-armed .rv-w{ filter:blur(10px); opacity:0; }
+  .rv-shown .rv-w{ filter:none; opacity:1; }
+
+  /* ===== B2 reveal-sequence (lobby) ===== */
+  #b2{ background:var(--air-paper); padding-bottom:10svh; }
+  #b2 .media{ width:100%; height:60svh; object-fit:cover; }
+  #b2 .body{ padding:6svh 24px 0; }
+
+  /* ===== B3 wipe-pin-slider (spiral, scroll-pin) ===== */
+  #b3{ position:relative; background:var(--air-paper); }
+  #b3 [data-isw-layer]{ position:sticky; top:0; height:100svh;
+    display:flex; flex-direction:column; justify-content:flex-end; overflow:clip; }
+  #b3 [data-isw-stage]{ position:absolute; inset:0; overflow:clip; background:var(--air-paper); }
+  #b3 [data-isw-slide]{ position:absolute; inset:0; display:flex; align-items:flex-start; justify-content:center; padding:7svh 26px 0; }
+  #b3 [data-isw-slide].is-off{ visibility:hidden; }
+  #b3 .isw-fill{ width:auto; height:46svh; max-width:66%; object-fit:contain; object-position:center top; margin:0 auto; }
+  #b3 .isw-card{ position:relative; z-index:3; display:flex; flex-direction:column; gap:32px; padding:0 18px calc(150px + env(safe-area-inset-bottom)); }
+  #b3 .isw-texts{ display:grid; }
+  #b3 [data-isw-text]{ grid-area:1/1; }
+  #b3 [data-isw-text].is-off{ visibility:hidden; }
+  #b3 [data-isw-ticks]{ display:flex; gap:12px; color:var(--air-ink); }
+  #b3 .isw-tick{ flex:1; height:2px; background:#d7d7d7; border-radius:2px; overflow:hidden; }
+  #b3 .isw-tick-fill{ height:100%; background:currentColor; transform:translateX(-100%); }
+
+  /* ===== B4 blur-reveal (format + twin-tower) ===== */
+  #b4{ background:var(--air-paper); padding:112px 24px 12svh; display:flex; flex-direction:column; gap:26px; }
+  #b4 .head{ font-size:44px; max-width:9ch; }
+  #b4 .media{ width:100%; aspect-ratio:16/11; object-fit:cover; border-radius:16px; margin-top:8px; }
+
+  /* ===== B5 brand-object (sphere-card) ===== */
+  #b5{ position:relative; min-height:100svh; background:#f2f2f2; overflow:clip;
+    display:flex; flex-direction:column; justify-content:center; padding:0 24px; }
+  #b5 .sphere{ width:64%; max-width:280px; aspect-ratio:1; margin:0 auto 40px; object-fit:contain; }
+  #b5 .glass{ padding:28px 22px; border-radius:20px; background:rgba(255,255,255,.55);
+    border:1px solid rgba(255,255,255,.7); }
+  #b5 .glass .head{ font-size:26px; }
+
+  /* ===== B6 theme-flip (dark act) ===== */
+  #b6{ min-height:100svh; background:var(--air-dark); color:var(--air-dark-ink);
+    padding:120px 24px; display:flex; flex-direction:column; justify-content:center; gap:30px;
+    transition:background-color 1.2s var(--ease), color 1.2s var(--ease); }
+  #b6 .head{ font-size:52px; color:var(--air-dark-ink); }
+  #b6 .head.right{ text-align:right; color:#8d8d8d; font-size:34px; }
+  #b6 .caption{ color:#9a9a9a; }
+</style>
+</head>
+<body>
+<main class="col">
+
+  <!-- B0 · kinetic-letters wordmark -->
+  <section id="b0">
+    <p class="kicker" style="margin-bottom:24px;">The architecture<br>of new success</p>
+    <h1 class="head">AIR</h1>
+    <p class="kicker" style="margin-top:40px;color:var(--air-caption);font-weight:500;">Class (A)<br>premium business center</p>
+  </section>
+
+  <!-- B1 · blur-reveal tower -->
+  <section id="b1">
+    <img class="media" src="photo-tower-crop.jpg" alt="AIR glass tower">
+    <div class="body">
+      <h2 class="head">The momentum<br>to rise higher</h2>
+      <p class="caption rv" data-rv>AIR is a new generation of offices that brings a new level of premium quality and style to Class A business real estate.</p>
+    </div>
+  </section>
+
+  <!-- B2 · reveal-sequence lobby -->
+  <section id="b2">
+    <img class="media" src="photo-lobby-crop.jpg" alt="AIR lobby">
+    <div class="body">
+      <p class="caption rv" data-rv>Efficient layouts and premium infrastructure, panoramic glazing and impressive views, luxurious lobbies, and forward-looking facades set a new benchmark for business environment.</p>
+    </div>
+  </section>
+
+  <!-- B3 · wipe-pin-slider spiral (scroll-pin) -->
+  <section id="b3">
+    <div data-isw-layer>
+      <div data-isw-stage>
+        <figure data-isw-slide><img class="isw-fill" src="spiral-vertical.jpg" alt="AIR spiral sculpture"></figure>
+        <figure data-isw-slide class="is-off"><img class="isw-fill" src="spiral-vertical.jpg" alt=""></figure>
+      </div>
+      <div class="isw-card">
+        <div class="isw-texts">
+          <p class="caption" data-isw-text>THREE TOWERS RANGING FROM 14 TO 34 FLOORS REFLECT THE DYNAMIC CHARACTER OF OFFICE LIFE THROUGH THEIR EXPRESSIVE FORMS. THEY SYMBOLIZE ONE OF THE CAPITAL&rsquo;S KEY BUSINESS DISTRICTS</p>
+          <p class="caption is-off" data-isw-text>THE SMOOTH ROTATION OF THE FACADES AROUND A CENTRAL AXIS ADDS MOVEMENT AND ENERGY TO THE OVERALL SILHOUETTE. THE ROTATIONAL EFFECT CREATES A DISTINCTIVE ARCHITECTURAL RHYTHM.</p>
+        </div>
+        <div data-isw-ticks></div>
+        <p style="display:none"><span data-isw-count>1</span><span data-isw-total>/ 2</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- B4 · blur-reveal format + twin-tower -->
+  <section id="b4">
+    <h2 class="head">A new<br>premium<br>format</h2>
+    <p class="caption rv" data-rv>Air is not only a new generation of offices but also a strong architectural statement by ADM Architects.</p>
+    <img class="media" src="photo-tower-crop.jpg" alt="ADM glass towers">
+  </section>
+
+  <!-- B5 · brand-object sphere-card -->
+  <section id="b5">
+    <video class="sphere" src="sphere-loop.mp4" poster="sphere-still.jpg" autoplay muted loop playsinline></video>
+    <div class="glass">
+      <h2 class="head">An intelligent<br>harmony of curved<br>glass and radiant<br>metal</h2>
+    </div>
+  </section>
+
+  <!-- B6 · theme-flip dark act -->
+  <section id="b6">
+    <h2 class="head">At the center<br>of life</h2>
+    <h3 class="head right">At the heart<br>of business</h3>
+    <p class="caption">The premium AIR business center is designed to become a symbol the city — a large-scale area spanning one of the city&rsquo;s primary business districts.</p>
+  </section>
+
+</main>
+
+<!-- ============ atom engines (compose, not redraw) ============ -->
+<script src="engine-isw.js"></script>
+<script>
+/* B1/B2/B4 · air-blur-reveal law: split words + IntersectionObserver threshold .25 */
+(function(){
+  'use strict';
+  document.querySelectorAll('[data-rv]').forEach(function(el){
+    // split into words, preserve spaces
+    var words = el.textContent.split(/(\s+)/);
+    el.textContent = '';
+    words.forEach(function(w,i){
+      if(/^\s+$/.test(w)){ el.appendChild(document.createTextNode(w)); return; }
+      var s=document.createElement('span'); s.className='rv-w';
+      s.style.transitionDelay = (i*30)+'ms';   /* stagger */
+      s.textContent=w; el.appendChild(s);
+    });
+    el.classList.add('rv-armed');
+  });
+  var io=new IntersectionObserver(function(ents){
+    ents.forEach(function(e){ if(e.isIntersecting){ e.target.classList.remove('rv-armed'); e.target.classList.add('rv-shown'); io.unobserve(e.target); } });
+  }, { threshold:0.25 });
+  document.querySelectorAll('[data-rv]').forEach(function(el){ io.observe(el); });
+})();
+
+/* B3 · air-wipe-pin-slider law: scroll-pin (engine-isw.js), init scroll-pin */
+(function(){
+  'use strict';
+  function boot(){
+    if(!window.ImageSliderWipe){ return setTimeout(boot,30); }
+    window.__ISW = window.ImageSliderWipe.create('#b3', {
+      mobile:'scroll-pin', stepSvh:85, driftPct:0, wipeMs:1000, textDelayMs:250, blurPx:10
+    });
+  }
+  boot();
+})();
+
+/* B6 · air-theme-flip law: already-dark section; CSS transition owns the color-tween.
+   (у повному hero фон сторінки інвертується на межі B5→B6; тут B6 сам несе темний акт.) */
+window.__HERO_OK__ = true;
+</script>
+</body>
+</html>

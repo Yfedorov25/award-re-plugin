@@ -1,0 +1,111 @@
+<!doctype html>
+<!-- TRANSFER-BUILD · air-split-line (T-301: фраза заходить порядково з-під маски)
+     Hand-конверсія С31 (знаменник часу для CD-правила 2/2).
+     Фасад: вигаданий технопарк VOLT — гротеск UPPERCASE, графіт/електрик-жовтий,
+     3 фрази різних розмірів/вирівнювань. НУЛЬ спільного з AIR/TERRA-фасадами.
+     Закон (SPEC air-split-line): line-wrapper overflow:hidden; inner translateY(110%)→0;
+     stagger 60ms/рядок; ease cubic-bezier(.25,.74,.22,.99); IO threshold .25 one-shot;
+     transform-only; reduced-motion → миттєво. -->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>transfer · air-split-line → VOLT</title>
+<style>
+  :root { --coal: #17181a; --volt: #e8f222; --fog: #b9bcc0; --grot: 'Helvetica Neue', Arial, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-x: clip; background: var(--coal); }
+  body { font-family: var(--grot); background: var(--coal); color: #e9eaec; }
+  .blk { padding: 14vh 6vw; max-width: 1200px; margin: 0 auto; }
+  .cap { font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--volt); margin-bottom: 4vh; }
+  .note { font-size: 15px; line-height: 1.6; color: var(--fog); max-width: 52ch; }
+  .gap { height: 65vh; display: grid; place-items: center; color: #5a5d61; font-size: 12px;
+    letter-spacing: .2em; text-transform: uppercase; }
+  .sec-volt { background: var(--volt); color: var(--coal); }
+  .sec-volt .note { color: #4a4c22; }
+
+  /* ═══ МЕХАНІКА air-split-line (закон дослівно; скін — інший) ═══ */
+  .sl-phrase { font-weight: 700; text-transform: uppercase; letter-spacing: -.02em; }
+  .sl-line { overflow: hidden; display: block; }               /* маска-базлайн per line */
+  .sl-line > span { display: block; will-change: transform;
+    transform: translateY(0); transition: transform 1s cubic-bezier(.25,.74,.22,.99);
+    transition-delay: calc(var(--sl-i, 0) * 60ms); }
+  .sl-phrase.sl-armed .sl-line > span { transform: translateY(110%); transition: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .sl-phrase.sl-armed .sl-line > span { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<section class="blk">
+  <p class="cap">volt · технопарк</p>
+  <p class="note">Transfer-білд: механіка air-split-line (порядковий захід рядків з-під маски)
+  на чужому фасаді. Скроль — фрази мають «надрукуватись» рядок за рядком знизу вгору,
+  без fade-мерехтіння.</p>
+</section>
+
+<div class="gap">↓</div>
+
+<section class="blk">
+  <h2 class="sl-phrase" style="font-size:clamp(40px,7vw,110px);line-height:1.02">
+    <span class="sl-line"><span>Енергія міста</span></span>
+    <span class="sl-line"><span>працює тут,</span></span>
+    <span class="sl-line"><span>поверхом вище.</span></span>
+  </h2>
+</section>
+
+<div class="gap">↓</div>
+
+<section class="blk">
+  <h3 class="sl-phrase" style="font-size:clamp(24px,3.4vw,52px);line-height:1.08;max-width:26ch;margin-left:auto;text-align:right;color:var(--volt)">
+    <span class="sl-line"><span>Two hundred labs.</span></span>
+    <span class="sl-line"><span>One grid.</span></span>
+  </h3>
+</section>
+
+<div class="gap">↓ інверсія</div>
+
+<section class="sec-volt">
+  <div class="blk" style="min-height:72vh;display:flex;flex-direction:column;justify-content:center">
+    <h2 class="sl-phrase" style="font-size:clamp(34px,5.4vw,84px);line-height:1.02">
+      <span class="sl-line"><span>Струм не спить.</span></span>
+      <span class="sl-line"><span>Ідеї — тим паче.</span></span>
+      <span class="sl-line"><span>Ласкаво просимо.</span></span>
+    </h2>
+    <p class="note" style="margin-top:4vh">Кінець білда. Якщо всі рядки зайшли по черзі з-під
+    свого базлайна — закон переноситься.</p>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* закон air-split-line: розмітка вже полінійна (.sl-line>span, як живий AIR .ln>span);
+     ставимо stagger-індекси, армимо, IO threshold .25 one-shot знімає arm */
+  var phrases = document.querySelectorAll('.sl-phrase');
+  phrases.forEach(function (ph) {
+    var inners = ph.querySelectorAll('.sl-line > span');
+    inners.forEach(function (s, i) { s.style.setProperty('--sl-i', i); });
+    ph.classList.add('sl-armed');
+    /* зняти transition:none після кадру, щоб захід анімувався */
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      inners.forEach(function (s) { s.style.transition = ''; });
+    });});
+  });
+  if (reduced) { phrases.forEach(function (ph) { ph.classList.remove('sl-armed'); }); return; }
+  var io = new IntersectionObserver(function (ents) {
+    ents.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.remove('sl-armed'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.25 });
+  phrases.forEach(function (ph) { io.observe(ph); });
+  window.__SL_GATE = {
+    armed: function () { return document.querySelectorAll('.sl-phrase.sl-armed').length; },
+    total: phrases.length
+  };
+}());
+</script>
+</body>
+</html>

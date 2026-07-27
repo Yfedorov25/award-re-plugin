@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-3 seam · Nature → Place</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* ── SO-3 Nature → Place. Architecture inherited from working SO-1/SO-2: one pin, a
+     full-bleed background that is ALWAYS on screen (never a black gap), content reveals
+     via opacity+translateY+clip. LIVE mechanic (CDP-gestures, timing-map-place.json):
+     Place has NO act-word and NO push-over — it is a PINNED running scene where a
+     card-odometer SNAP-rolls 3 → 9 → 16, each step swapping card photo + caption.
+     Reveal grammar = rise+clip-wipe+stagger (from SO-2 live), carrier here is a NUMBER. */
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);overflow-x:clip}
+  .track{ height:520vh; position:relative; }         /* 5 phases: nature-tail + place-intro + 3 odo steps */
+  .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+
+  /* FULL-BLEED backgrounds (REAL springs media). Always cover viewport, crossfade between
+     the two → screen is never dark. Soft green scrim keeps cream text legible. */
+  .bg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+  .bg-nat{ opacity:var(--bgNat,1); background-image:url('media/nature-video.webp'); background-color:#173f2c; }
+  .bg-nat::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(270deg, rgba(13,42,30,.80) 0%, rgba(13,42,30,.34) 46%, rgba(13,42,30,.12) 100%); }
+  /* place-bg = the running couple on a forest lane at golden hour ("Do you feel like running?").
+     Slow ambient parallax drift while pinned. */
+  .bg-place{ opacity:var(--bgPlace,0); background-image:url('media/place-bg.webp'); background-color:#12201a;
+    transform: translateY(var(--placeDrift,0px)) scale(1.06); }
+  .bg-place::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,26,20,.55) 0%, rgba(10,26,20,.20) 40%, rgba(10,26,20,.66) 100%); }
+
+  .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#cfe0d6; }
+  .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+  @media (max-width:700px){ .head .nav,.head .r span{ display:none; } }
+
+  .block{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:0 clamp(28px,7vw,110px); z-index:4; }
+  .block.right{ align-items:flex-end; text-align:right; }
+  .ln{ --r:0; opacity: var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.9em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0);
+    will-change: transform, clip-path, opacity; }
+  .title{ font-family:var(--serif); font-weight:400; line-height:.96; letter-spacing:-.02em;
+    font-size:clamp(3.4rem,10vw,8rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.45); }
+  .sub{ font-family:var(--serif); font-size:clamp(1.1rem,2.2vw,1.7rem); color:#eaf2ec; margin-top:.35em; text-shadow:0 2px 24px rgba(0,0,0,.5); }
+  .body{ color:#e4ede7; font-size:clamp(1rem,1.4vw,1.15rem); line-height:1.6; margin-top:1.2em; max-width:40ch; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+  .block.right .body{ margin-left:auto; }
+  .kicker{ font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#cfe0d6; margin-bottom:1.1em; text-shadow:0 2px 16px rgba(0,0,0,.5); }
+
+  /* ── CARD-ODOMETER (the Place running scene). A photo card on the right-centre with a
+     big serif number under it + caption. Number/photo/caption crossfade between the 3 steps.
+     The odometer "rolls" per snap-step via --step (0..2). */
+  .odo{ position:absolute; z-index:5; right:clamp(28px,9vw,150px); top:50%;
+    width:clamp(240px,26vw,430px); transform:translateY(-50%);
+    opacity:var(--odoO,0); }
+  .odo__card{ position:relative; width:100%; aspect-ratio:448/434; border-radius:2px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .odo__card .ph{ position:absolute; inset:0; background-size:cover; background-position:center;
+    transition:opacity .1s linear; }
+  .ph1{ background-image:url('media/caption-1.webp'); }   /* 3 · Nature Park */
+  .ph2{ background-image:url('media/caption-3.webp'); }   /* 9 · embankment (asset caption-3) */
+  .ph3{ background-image:url('media/caption-2.webp'); }   /* 16 · MIBC (asset caption-2) */
+  /* number sits below the card, big serif; roller = a column of 3 numbers translated by --step */
+  .odo__num{ position:relative; height:1.02em; overflow:hidden; margin-top:.12em;
+    font-family:var(--serif); font-weight:400; font-size:clamp(3.4rem,7vw,6.2rem); line-height:1.02;
+    color:var(--cream); text-shadow:0 4px 30px rgba(0,0,0,.5); }
+  .odo__roll{ display:block; transform: translateY(calc(var(--step,0) * -1.02em));
+    transition:transform .05s linear; }
+  .odo__roll span{ display:block; height:1.02em; }
+  .odo__cap{ font-size:.8rem; letter-spacing:.06em; color:#e4ede7; margin-top:.5em; line-height:1.45;
+    max-width:26ch; text-shadow:0 2px 14px rgba(0,0,0,.6); min-height:2.6em; }
+  .odo__cap b{ font-weight:600; color:var(--cream); }
+
+  .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#9fb0a6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+  @media (max-width:700px){
+    .odo{ right:auto; left:50%; transform:translate(-50%,-50%); width:clamp(200px,64vw,320px); text-align:center; }
+    .odo__cap{ margin-left:auto; margin-right:auto; }
+    .block{ padding:0 clamp(20px,7vw,40px); }
+  }
+</style>
+</head>
+<body>
+  <div class="track" id="track">
+    <div class="pin">
+      <div class="bg bg-nat" id="bgNat"></div>
+      <div class="bg bg-place" id="bgPlace"></div>
+      <header class="head">
+        <div class="nav">Menu · Residences</div><div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+
+      <!-- NATURE tail — the emotional beat that Place answers with facts -->
+      <div class="block right" id="natB" data-grp="nat">
+        <div class="ln kicker">Step outside</div>
+        <div class="ln title">Nature</div>
+        <div class="ln sub">Lightness of Breathing</div>
+        <div class="ln body">Breathe in the air and open space. Do you feel like running? Don't hold back.</div>
+      </div>
+
+      <!-- PLACE intro-text — precedes the running odometer (live: l-place-webgl-caption) -->
+      <div class="block" id="placeB" data-grp="place">
+        <div class="ln kicker">The address answers</div>
+        <div class="ln title">Place</div>
+        <div class="ln sub">Essence of Contemplation</div>
+        <div class="ln body">Springs sits in the prestigious district — and the best of the city is minutes away, on foot.</div>
+      </div>
+
+      <!-- CARD-ODOMETER — the running scene. Number rolls 3 → 9 → 16 with photo+caption crossfade -->
+      <div class="odo" id="odo">
+        <div class="odo__card" id="odoCard">
+          <div class="ph ph1" id="ph1"></div>
+          <div class="ph ph2" id="ph2"></div>
+          <div class="ph ph3" id="ph3"></div>
+        </div>
+        <div class="odo__num"><span class="odo__roll" id="odoRoll">
+          <span>3</span><span>9</span><span>16</span>
+        </span></div>
+        <div class="odo__cap" id="odoCap"><b>minute walk</b> to Nature Park</div>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Nature → Place · 3 · 9 · 16</div>
+
+  <script>
+  var track=document.getElementById('track'), pin=document.querySelector('.pin');
+  var bgNat=document.getElementById('bgNat'), bgPlace=document.getElementById('bgPlace');
+  var natLines=[].slice.call(document.querySelectorAll('#natB .ln'));
+  var placeLines=[].slice.call(document.querySelectorAll('#placeB .ln'));
+  var odo=document.getElementById('odo'), odoRoll=document.getElementById('odoRoll'),
+      odoCap=document.getElementById('odoCap'), cue=document.getElementById('cue');
+  var ph1=document.getElementById('ph1'), ph2=document.getElementById('ph2'), ph3=document.getElementById('ph3');
+
+  var CAPS=[
+    'to Nature Park',
+    'to the embankment',
+    'by car to the MIBC'
+  ];
+  var CAP_LEAD=['<b>minute walk</b> ','<b>minute walk</b> ','<b>minutes</b> '];
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}                 // springs ease-out
+  function set(el,k,v){el.style.setProperty(k,v);}
+  function revealLines(lines,p,start,end,stag,dir){
+    var span=(end-start);
+    lines.forEach(function(el,i){
+      var a=start+i*stag, b=a+(span-(lines.length-1)*stag);
+      var r=eo(seg(p,a,b)); if(dir<0)r=1-r;
+      el.style.setProperty('--r', r.toFixed(3));
+    });
+  }
+  // odometer step is a SNAP: within its scroll window pick 0/1/2 (with a short roll transition)
+  function odoStep(p){
+    // three snap plateaus over [0.52 .. 0.98]; short rolls between them
+    if(p<0.55) return 0;
+    if(p<0.70) return (p<0.635)?0:1;   // roll to 1 around .635
+    if(p<0.855) return 1;
+    return (p<0.855)?1:2;              // roll to 2 around .855
+  }
+  function odoStepSmooth(p){
+    // continuous 0..2 for the roll transform, but mostly snapped (steep between plateaus)
+    var s0=seg(p,0.60,0.665);          // 0→1
+    var s1=seg(p,0.83,0.895);          // 1→2
+    return clamp(s0 + s1, 0, 2);
+  }
+
+  var smooth=0;
+  function render(p){
+    // NATURE tail lines rise in (0.03→0.24), rise out on seam (0.30→0.40)
+    if(p<0.30) revealLines(natLines,p,0.03,0.24,0.05,+1);
+    else       revealLines(natLines,p,0.30,0.40,0.02,-1);
+
+    // background crossfade nature → place running lane (screen always a lit photo)
+    var cross=eo(seg(p,0.30,0.48));
+    set(bgNat,'--bgNat',(1-cross).toFixed(3));
+    set(bgPlace,'--bgPlace',cross.toFixed(3));
+    // ambient parallax drift on the running lane while pinned
+    set(bgPlace,'--placeDrift', (-40*seg(p,0.30,1)).toFixed(1)+'px');
+
+    // PLACE intro text rises in (0.40→0.58), then rises out before the odometer takes over (0.56→0.64)
+    if(p<0.56) revealLines(placeLines,p,0.40,0.56,0.05,+1);
+    else       revealLines(placeLines,p,0.56,0.64,0.02,-1);
+
+    // CARD-ODOMETER appears after intro (0.54→0.62) and stays; number snap-rolls 3→9→16
+    set(odo,'--odoO', eo(seg(p,0.54,0.62)).toFixed(3));
+    var sm=odoStepSmooth(p);
+    set(odoRoll,'--step', sm.toFixed(3));
+    // photo + caption crossfade to the nearest step
+    var step=Math.round(sm);
+    ph1.style.opacity=(step===0?1:0); ph2.style.opacity=(step===1?1:0); ph3.style.opacity=(step===2?1:0);
+    odoCap.innerHTML=CAP_LEAD[step]+CAPS[step];
+
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  function frame(){
+    var r=track.getBoundingClientRect(), total=track.offsetHeight-window.innerHeight;
+    var target=clamp((-r.top)/total,0,1);
+    smooth += (target-smooth)*0.09; if(Math.abs(target-smooth)<0.0002) smooth=target;
+    render(smooth); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__SO3_SEAM_OK__=true;
+</script>
+</body>
+</html>

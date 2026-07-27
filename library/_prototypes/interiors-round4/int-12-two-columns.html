@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!--
+  int-12 «Дві колони» - SPLIT-COLUMN PARALLEL SLICERS (Springs C3)
+  PASSPORT:
+   (a) archetype: coupled 50/50 split columns; right = chained film-strip (P3), left = per-line serif mask + mood photo
+   (b) media count: N-strip (3 day renders + 1 night) + 1 portrait mood photo
+   (c) copy position: left column, baseline-fixed
+   (d) day/night cell: scroll x clip-seam (the strip's 4th handoff IS the time beat; no hand instrument)
+   (e) interaction: scroll-triggered snapped module
+  STAGE MAP (4 true stages; stage 2 is the pinned module = 1 stage + 4 states):
+   1 statement centered in void [a house, told twice] -> P5 vertical curtain wipe L to R parks at 50% (relay: the plaster panel edge becoming the column divider)
+   2 two columns run [parallel day walk]: states kitchen -> stairs -> bedmain, each via horizontal clip-seam handoff; left lines land as handoffs complete
+   3 the 4th handoff = night kitchen slides in [dusk enters strip] (relay: the same clip-seam now carrying evening; theme tweens dark)
+   4 full-bleed evening arrival [home lit within] (relay: the strip frame expanding)
+  Set B. Zero em/en-dash. No WebGL. Pin = 3 viewports, snapped states, every rest a frame.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Всередині - Дві колони</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--ink:#2A231D;--sub:#87796a;--oak:#9c7b52;--eve:#15100a;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{font-family:"Jost",sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .st{min-height:100vh;position:relative;overflow:hidden;display:flex;align-items:center;padding:0 clamp(40px,6vw,110px)}
+  .eyebrow{font-size:13px;letter-spacing:.34em;text-transform:uppercase;color:var(--oak)}
+  .title{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em;line-height:1.04}
+  .line{font-size:clamp(15px,1.15vw,18px);line-height:1.72;color:var(--sub);font-weight:300}
+
+  .s1{flex-direction:column;justify-content:center;text-align:center}
+  .s1 .eyebrow{margin-bottom:32px}
+  .s1 .title{font-size:clamp(42px,6vw,100px)}
+  .scrollcue{position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+
+  /* stage 2 - pinned split module (sticky, snapped states) */
+  .pinwrap{position:relative;height:400vh;background:var(--bg2,#F2EDE4);transition:background 1.2s var(--hs)}
+  .pin{position:sticky;top:0;height:100vh;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+  .divider{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(42,35,29,.22);z-index:5}
+  .colL{position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:0 clamp(36px,4vw,72px) 11vh}
+  .colL .eyebrow{margin-bottom:20px}
+  .colL .hline{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(34px,3.6vw,58px);line-height:1.08;overflow:hidden}
+  .colL .hline span{display:block;transform:translateY(110%)}
+  .colL .roomlab{margin-top:26px;font-size:15px;letter-spacing:.22em;text-transform:uppercase;color:var(--sub);min-height:22px}
+  .colL .mood{position:absolute;top:9vh;left:clamp(36px,4vw,72px);width:min(21vw,300px);aspect-ratio:4/5;overflow:hidden;box-shadow:0 40px 90px -40px rgba(30,20,12,.45)}
+  .colL .mood img{width:100%;height:100%;object-fit:cover}
+  .strip{position:relative;overflow:hidden}
+  .shot{position:absolute;inset:0}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block}
+  .prog{position:absolute;left:0;bottom:0;height:2px;background:var(--oak);z-index:6;width:0%;transition:width .5s var(--hs)}
+  .pin .curtain{position:absolute;inset:0;background:var(--paper);z-index:8;transform:translateX(0)}
+  .pinwrap.dark{ --bg2:#1a140d }
+  .pinwrap.dark .colL .eyebrow{color:#e6b878}
+  .pinwrap.dark .colL .hline,.pinwrap.dark .colL .roomlab{color:#efe1d0}
+  .pinwrap.dark .divider{background:rgba(239,225,208,.2)}
+
+  .s4{padding:0;background:var(--eve);color:#efe1d0}
+  .s4 .frame{position:absolute;inset:0;overflow:hidden}
+  .s4 .frame img{width:100%;height:100%;object-fit:cover}
+  .s4 .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(9,6,3,.68),rgba(9,6,3,0) 50%,rgba(9,6,3,.28))}
+  .s4 .ov{position:absolute;z-index:4;left:clamp(40px,6vw,110px);bottom:12vh;max-width:620px}
+  .s4 .eyebrow{color:#e6b878}
+  .s4 .title{font-size:clamp(36px,4.4vw,66px);color:#fff;margin:18px 0}
+  .s4 .line{color:#d7c6b2;max-width:44ch}
+  .pill{display:inline-block;margin-top:26px;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#c9bcab;border:1px solid rgba(233,225,214,.28);padding:9px 16px;border-radius:40px}
+</style>
+</head>
+<body>
+<div class="film">
+
+  <section class="st s1">
+    <div class="eyebrow rise">Всередині</div>
+    <h1 class="title rise d1">Двері зачиняються,<br>і місто лишається зовні.</h1>
+    <div class="scrollcue rise d3">Дві колони, один дім</div>
+  </section>
+
+  <div class="pinwrap" id="pinwrap">
+    <div class="pin">
+      <div class="colL">
+        <div class="mood" id="mood"><img src="assets/interiors-townhouse/int-hall-day.jpg" alt="Передпокій"></div>
+        <div class="eyebrow" id="colEyebrow">Кухня-вітальня</div>
+        <div class="hline"><span id="hl1">Тут пахне кавою</span></div>
+        <div class="hline"><span id="hl2">і зібралися всі.</span></div>
+        <div class="roomlab" id="roomlab">Кухня-вітальня · 19,44 м²</div>
+      </div>
+      <div class="strip" id="strip"></div>
+      <div class="divider"></div>
+      <div class="prog" id="prog"></div>
+      <div class="curtain" id="curtain"></div>
+    </div>
+  </div>
+
+  <section class="st s4">
+    <div class="frame cC"><img src="assets/interiors-townhouse/int-kitchen-night.jpg" alt="Кухня-вітальня ввечері"></div>
+    <div class="ov">
+      <div class="eyebrow rise d1">Коли темніє</div>
+      <h2 class="title rise d2">А ввечері дім<br>світиться зсередини.</h2>
+      <p class="line rise d3">Світло тепле і низьке, під стелею. Ти вдома, і нікуди не поспішаєш.</p>
+      <div class="pill rise d4">Ремонт під ключ. Меблі на візуалізації для прикладу.</div>
+    </div>
+  </section>
+
+</div>
+<script>
+(function(){
+  /* engine */
+  var sts=[].slice.call(document.querySelectorAll('.st'));
+  var SEL='.rise,.fade,.cL,.cR,.cU,.cD,.cC,.cV,.portal,.cover,.scale,.rule';
+  function ease(t){return 1-Math.pow(1-t,3);}
+  function dOf(el){return el.classList.contains('d4')?0.64:el.classList.contains('d3')?0.48:el.classList.contains('d2')?0.3:el.classList.contains('d1')?0.14:0;}
+  function kOf(el){var c=el.classList;return c.contains('cover')?'cover':c.contains('cL')?'cL':c.contains('cR')?'cR':c.contains('cU')?'cU':c.contains('cD')?'cD':c.contains('cC')?'cC':c.contains('cV')?'cV':c.contains('portal')?'portal':c.contains('scale')?'scale':c.contains('rule')?'rule':c.contains('fade')?'fade':'rise';}
+  function set(el,k,e){var i=1-e;
+    if(k==='rise'){el.style.opacity=e;el.style.transform='translateY('+(38*i).toFixed(1)+'px)';}
+    else if(k==='fade'){el.style.opacity=e;}
+    else if(k==='cC'){el.style.clipPath='inset(0 '+(i*50).toFixed(2)+'% 0 '+(i*50).toFixed(2)+'%)';}
+    else if(k==='cL'){el.style.clipPath='inset(0 '+(i*100).toFixed(2)+'% 0 0)';}
+    else if(k==='cU'){el.style.clipPath='inset('+(i*100).toFixed(2)+'% 0 0 0)';}
+    else if(k==='rule'){el.style.transformOrigin='left';el.style.transform='scaleX('+e.toFixed(3)+')';}
+    else {el.style.opacity=e;}
+  }
+  function anim(el){var k=kOf(el),delay=dOf(el)*1000,dur=(k==='rise'||k==='rule'||k==='fade')?900:1350,t0=null;
+    function step(ts){if(t0===null)t0=ts;var m=ts-t0-delay;if(m<0){requestAnimationFrame(step);return;}var p=Math.min(1,m/dur);set(el,k,ease(p));if(p<1)requestAnimationFrame(step);}
+    requestAnimationFrame(step);setTimeout(function(){set(el,k,1);},delay+dur+150);}
+  var played=[];
+  function play(st){if(played.indexOf(st)>-1)return;played.push(st);[].slice.call(st.querySelectorAll(SEL)).forEach(anim);}
+  sts.forEach(function(st){[].slice.call(st.querySelectorAll(SEL)).forEach(function(el){set(el,kOf(el),0);});});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)play(e.target);});},{threshold:0.25});
+  sts.forEach(function(s,i){if(i===0){setTimeout(function(){play(s);},40);}else io.observe(s);});
+  function checkStages(){var vh=innerHeight;sts.forEach(function(s){var r=s.getBoundingClientRect();if(r.top<vh*0.72&&r.bottom>vh*0.2)play(s);});}
+  window.addEventListener('scroll',checkStages,{passive:true});
+  setTimeout(checkStages,600);
+
+  /* the module */
+  var ROOMS=[
+    {img:'assets/interiors-townhouse/int-kitchen-day.jpg',lab:'Кухня-вітальня · 19,44 м²',h1:'Тут пахне кавою',h2:'і зібралися всі.',eb:'Кухня-вітальня'},
+    {img:'assets/interiors-townhouse/int-stairs1-day.jpg',lab:'Коридор і сходи · 7,89 м²',h1:'Сходи ведуть туди,',h2:'де тихіше.',eb:'Сходи'},
+    {img:'assets/interiors-townhouse/int-bedmain-day.jpg',lab:'Спальня · 14,05 м²',h1:'Кімната, де день',h2:'нарешті стихає.',eb:'Спальня'},
+    {img:'assets/interiors-townhouse/int-kitchen-night.jpg',lab:'Кухня-вітальня · вечір',h1:'А ввечері дім',h2:'світиться зсередини.',eb:'Коли темніє',night:true}
+  ];
+  ROOMS.forEach(function(r){var a=new Image();a.src=r.img;});
+  var strip=document.getElementById('strip'),wrap=document.getElementById('pinwrap');
+  var curtain=document.getElementById('curtain'),prog=document.getElementById('prog');
+  var hl1=document.getElementById('hl1'),hl2=document.getElementById('hl2');
+  var roomlab=document.getElementById('roomlab'),colEyebrow=document.getElementById('colEyebrow');
+  // seed first shot
+  var cur=-1,busy=false,entered=false;
+  function makeShot(src){var d=document.createElement('div');d.className='shot';d.innerHTML='<img src="'+src+'" alt="">';return d;}
+  function tw(el,from,to,dur,fn){var t0=null;
+    function step(){var now=performance.now();if(t0===null)t0=now;var p=Math.min(1,(now-t0)/dur);var e=1-Math.pow(1-p,3);fn(from+(to-from)*e);if(p<1)requestAnimationFrame(step);}
+    requestAnimationFrame(step);setTimeout(function(){fn(to);},dur+120);}
+  function goState(i){
+    if(i===cur||busy)return;busy=true;var r=ROOMS[i];cur=i;
+    // right: P3 clip-seam handoff travelling up (media leads)
+    var s=makeShot(r.img);s.style.clipPath='inset(100% 0 0 0)';strip.appendChild(s);
+    tw(null,100,0,1000,function(v){s.style.clipPath='inset('+v.toFixed(2)+'% 0 0 0)';});
+    // left: line masks re-reveal, lagging media by ~100ms (convergence <=0.3s)
+    setTimeout(function(){
+      hl1.style.transition='none';hl2.style.transition='none';
+      hl1.style.transform='translateY(110%)';hl2.style.transform='translateY(110%)';
+      hl1.textContent=r.h1;hl2.textContent=r.h2;colEyebrow.textContent=r.eb;roomlab.textContent=r.lab;
+      tw(null,110,0,800,function(v){hl1.style.transform='translateY('+v.toFixed(1)+'%)';});
+      setTimeout(function(){tw(null,110,0,800,function(v){hl2.style.transform='translateY('+v.toFixed(1)+'%)';});},110);
+    },100);
+    prog.style.width=((i+1)/ROOMS.length*100)+'%';
+    if(r.night)wrap.classList.add('dark');
+    setTimeout(function(){busy=false;
+      while(strip.children.length>2)strip.removeChild(strip.firstChild);},1150);
+  }
+  function enterModule(){
+    if(entered)return;entered=true;
+    // P5 curtain wipes L to R and parks at the 50% divider
+    tw(null,0,100,1300,function(v){curtain.style.transform='translateX('+v.toFixed(2)+'%)';});
+    setTimeout(function(){curtain.style.display='none';goState(0);},600);
+  }
+  function onScroll(){
+    var r=wrap.getBoundingClientRect();var vh=innerHeight;
+    if(r.top<vh*0.6)enterModule();
+    if(!entered)return;
+    var total=wrap.offsetHeight-vh;
+    var p=Math.min(1,Math.max(0,-r.top/total));
+    var st=Math.min(ROOMS.length-1,Math.floor(p*ROOMS.length));
+    if(st!==cur&&!busy)goState(st);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  setTimeout(onScroll,700);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+/* DAYNIGHT-MASKED-WINDOWS · component.css   (V11 chrome — the MASKED-WINDOW GLOW composite)
+   The CANON (../daynight-engine/component.css) styles the stage (.dn) and the day/night
+   layers. This file ONLY adds the composite chrome: the per-window lit crops and the warm
+   lamp glow that rises with each one. opacity / transform / gradient only — no mix-blend,
+   no backdrop-filter, no canvas. The night layer stays pinned at opacity 0 (set inline by JS);
+   only these window boxes light up over the daytime building. */
+
+/* each window: an absolutely-placed crop of the NIGHT render, registered 1:1 over the day
+   building. JS sets left/top/width/height + the cropped background; opacity is the lamp. */
+.dnw__win {
+  position: absolute;
+  z-index: 4;                 /* above day(1) + pinned night(2) + glow/scrim(3) */
+  background-repeat: no-repeat;
+  border-radius: 2px;         /* soften the crop edge so it reads as light, not a sticker */
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* the warm lamp glow — a blurred amber pool that rises with the same opacity as its window
+   (it is a child of .dnw__win, so it shares the box's opacity ramp). transform/opacity only. */
+.dnw__win::after {
+  content: "";
+  position: absolute;
+  inset: -32%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--dnw-glow, rgba(247, 206, 142, 0.55)), transparent 72%);
+  filter: blur(10px);         /* a static blur on a small box — not a scroll/scrub property */
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* JS already statics the windows lit; keep the glow but drop nothing animated here. */
+  .dnw__win { transition: none; }
+}

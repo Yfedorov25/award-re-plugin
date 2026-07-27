@@ -1,0 +1,13 @@
+{
+  "id": "editorial-act-crossfade", "title": "Editorial act-crossfade (Springs)", "level": "L2-molecule", "batch": "C (#13/17)",
+  "source": "springs.estate design section. Engine = library/components/editorial-act-crossfade (proven, set(p)).",
+  "engine": "One pinned scroll drives N acts that crossfade 4 layers at once (full-bleed image push-zoom + split-word centre-word swap + topline swap + body crossfade). Pure set(p) across the acts.",
+  "dual_platform": true,
+  "differs": "CORRECTED (S19g vs D_SPRINGS_video): springs mobile is a PINNED-SCROLL, not auto. BOTH platforms scroll-pin drive the same set(p) crossfade; the difference is LAYOUT + pin-length (desktop wide 2-col; mobile full-bleed single-col sticky, copy crossfades over frozen media per scroll-progress = T-PIN-RUNSCENE). NOT scroll-vs-time.",
+  "desktop": { "driver": "scrollActs — set(p) = scroll progress across the pin span.", "knobs": ["xfade","zoom","pinFactor"] },
+  "mobile": { "driver": "autoActs — set(p) steps through acts: hold(holdMs)+ease(moveMs), loops.", "knobs": ["holdMs","moveMs"] },
+  "engine_patch": "forceMotion + manualDrive (expose set() without engine pin/ScrollTrigger; guard registerPlugin/ticker/lenis). Additive & opt-in.",
+  "entry": "EditorialActCrossfadeDual.init(target, opts). Load engine.js THEN component.js. Markup: .eac-stage > .eac-images(.eac-img[data-act]) + .eac-toplines + .eac-headline(.eac-centre>.eac-word[data-act]) + .eac-bodies(.eac-body[data-act]). Desktop wraps in .pin-wrap.",
+  "law": "set(p) PURE; transform (image push-zoom) + opacity (crossfades) only; GPU; NO mix-blend/backdrop over scrubbed images; NO WebGL. reduced-motion -> first act shown.",
+  "files": ["component.js","engine.js (+forceMotion/manualDrive)","component.css","img/a-c.webp","stage.html","demo.html","meta.json","README.md"]
+}

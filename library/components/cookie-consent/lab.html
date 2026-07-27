@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · cookie-consent · жива пігулка aircenter (fixed bottom 20, remove() без фейду)</title>
+<!--
+================================================================================
+  LAB: cookie-consent — жива cookie-пігулка aircenter.space (дозйомка
+  2026-07-06): THIS WEBSITE USES COOKIES + ACCEPT. Живий hide() =
+  container.remove() МИТТЄВО (нуль фейду), кука 356 днів, повторний
+  візит — банер не з'являється.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. банер видимий, bottom-зона, z-index 13;
+  3. клік ACCEPT → root ВИДАЛЕНИЙ з DOM (не opacity!) + html без
+  with-cookie-consent + сховище '1'; 4. re-init з тим самим сховищем →
+  visible()=false (повторний візит); 5. errors 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .wrap { max-width: 1100px; margin: 8vh auto; padding: 0 3vw; min-height: 140vh; }
+  h1 { font-size: clamp(26px, 3.4vw, 44px); font-weight: 300; margin-bottom: 3vh; }
+  .wrap p { max-width: 52ch; line-height: 1.6; color: #55544f; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · cookie-consent · клікни accept</div>
+
+<div class="wrap">
+  <h1>Cookie consent</h1>
+  <p>Пігулка знизу по центру — 1-в-1 жива: біла, radius 5, shadow 80,
+     ACCEPT прибирає її миттєво (живий hide() = remove(), без анімації)
+     і запам'ятовує на 356 днів.</p>
+</div>
+
+<div data-cc id="cc">
+  <div data-cc-box>
+    <p>This website uses <a href="#">cookies</a></p>
+    <button data-cc-accept type="button">Accept</button>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  /* лаба ізолює сховище (не бруднити localStorage браузера власника) */
+  var mem = (function () {
+    var m = {};
+    return { getItem: function (k) { return k in m ? m[k] : null; },
+             setItem: function (k, v) { m[k] = String(v); } };
+  }());
+  var cc = window.CookieConsent.create('#cc', { storage: mem });
+  window.__CC = cc;
+
+  var report = { stability: null, shown: null, accept: null, revisit: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(120);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('h1');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* 2: банер видимий у bottom-зоні, z-index 13 */
+    var root = document.getElementById('cc');
+    var r = root.getBoundingClientRect();
+    var cs = getComputedStyle(root);
+    report.shown = { visible: cc.visible() && r.height > 0,
+                     bottomZone: r.bottom > innerHeight - 120,
+                     z: cs.zIndex === '13',
+                     htmlClass: document.documentElement.classList.contains('with-cookie-consent') };
+    report.shown.ok = report.shown.visible && report.shown.bottomZone &&
+                      report.shown.z && report.shown.htmlClass;
+    ok = report.shown.ok && ok;
+
+    /* 3: ACCEPT → remove() миттєво + сховище '1' + html-клас знято */
+    root.querySelector('[data-cc-accept]')
+        .dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await delay(80); /* живий hide() миттєвий — 80ms досить */
+    report.accept = { removed: !document.getElementById('cc'),
+                      stored: mem.getItem('cc-status') === '1',
+                      htmlClean: !document.documentElement.classList.contains('with-cookie-consent') };
+    report.accept.ok = report.accept.removed && report.accept.stored && report.accept.htmlClean;
+    ok = report.accept.ok && ok;
+
+    /* 4: повторний візит — банер не з'являється */
+    var again = document.createElement('div');
+    again.setAttribute('data-cc', '');
+    again.innerHTML = '<div data-cc-box><p>This website uses cookies</p>' +
+                      '<button data-cc-accept type="button">Accept</button></div>';
+    document.body.appendChild(again);
+    var cc2 = window.CookieConsent.create(again, { storage: mem });
+    await delay(80);
+    report.revisit = { hidden: !cc2.visible() && !document.contains(again) };
+    report.revisit.ok = report.revisit.hidden;
+    ok = report.revisit.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:cookie-consent]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

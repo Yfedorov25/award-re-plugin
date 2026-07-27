@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--material-collage / Прості обриси, виразні матеріали</title>
+<!--
+  SECTION VARIANT · architecture--material-collage
+  ----------------------------------------------------------------------------
+  The EVER-class editorial collage on OUR QUADRO renders: a giant fluid-fit word
+  'архітектура' as a depth-plane behind, MATERIAL tiles (round + rect) drifting at
+  different parallax depths as you scroll, sparse Fedoriv meta copy.
+
+  CONCEPT = materials first (камінь, скло, світло). EVERY tile foregrounds a
+  material or the clean form of the building, never cars or generic gallery:
+    - round detail  = macro-pergola  (dark timber slats + steel post - texture)
+    - centre rect   = day-34         (clean rear elevation: glass + dark panel +
+                                       white slab, NO cars, the BUILDING is the
+                                       centre of mass; object-position frames the
+                                       facade band, trimming sky/garden)
+    - far rect      = macro-roof     (a true material macro: timber decking planks)
+    - decor         = macro-table    (timber-deck + steel macro - material even in
+                                       the floating accent)
+
+  PIN SHAPE = MANUAL (harness-owned): the cited atom parallax-collage is a
+  MOUSE-parallax engine - it creates NO ScrollTrigger of its own (rAF + mousemove
+  only). So the SCROLL drift of the tiles + caption rides ONE harness pin, while
+  ParallaxCollage.init() layers the pointer-parallax of the decor on top. That is
+  why this declares pinOwner:'harness', expectPins:1 (the engine owns zero pins).
+
+  MOTION = counter-parallax with REAL amplitude: deeper tiles travel further and
+  in OPPOSITE directions (data-dir), so the collage OPENS/CLOSES around its centre
+  on scroll (the field breathes) instead of translating as a block - the
+  composition reads centred at EVERY scroll position, never a one-sided empty band.
+  The wordmark slides OPPOSITE the tiles through the gutters. transform/opacity/
+  clip-path/filter only. NO WebGL, NO mix-blend, NO backdrop-filter, NO will-change
+  left on permanently (cleared after mount).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Jost:wght@300;400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="renders/day-34.webp">
+<link rel="preload" as="image" href="renders/macro-roof.webp">
+<link rel="preload" as="image" href="renders/macro-pergola.webp">
+
+<!-- cited atom's component.css + the shared rails -->
+<link rel="stylesheet" href="../../components/parallax-collage/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ---- variant SKIN only (scaffold owns the rails) ---- */
+  .combo-stage { background: var(--combo-bg); }
+
+  /* the editorial field, centred with EVER-class gutters */
+  #collage {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(1340px, calc(100vw - 2 * clamp(24px, 5vw, 80px)));
+    height: min(660px, 74vh);
+  }
+
+  /* the render surface is #collage itself (holds the tile imgs). The scaffold's
+     generic [data-render-surface] img rule would yank every tile img to fill the
+     whole stage - re-scope imgs to their OWN tile so the collage composes right. */
+  [data-render-surface] { position: absolute; inset: auto; }
+  #collage .pc-tile img { position: static; inset: auto;
+    width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* wordmark BEHIND - sized to fill the field by fluid-type-sizing */
+  .pc-word {
+    left: 0; right: 0; bottom: 4%;
+    font-family: 'Jost', 'Century Gothic', system-ui, sans-serif; font-weight: 300;
+    text-transform: uppercase; color: var(--combo-cream); opacity: .14;
+    letter-spacing: -.02em; line-height: .86; white-space: nowrap;
+  }
+
+  /* tiles: a ROUND material tile (left) + a tall RECT facade tile (centre) +
+     a small far material rect (right) - three depths.
+     The centre facade tile frames the BUILDING band, trimming sky + foreground. */
+  .pc-tile { box-shadow: 0 40px 90px -40px rgba(0,0,0,.6); }
+  .pc-tile--round { left: 0; top: 6%; width: 30%; height: 46%; }
+  .pc-tile--rect  { left: 34%; top: 0; width: 32%; height: 100%; }
+  .pc-tile--rect img { object-position: center 42%; }
+  .pc-tile--far   { left: 70.5%; top: 30%; width: 27%; height: 42%; z-index: 2; }
+  .pc-tile--far { position: absolute; overflow: hidden; }
+
+  /* meta layer - sparse, premium, generous distance from the render */
+  .pc-meta--title {
+    right: 0; top: 1%; max-width: 12ch;
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.9rem, 3.4vw, 3rem); line-height: 1.02;
+    letter-spacing: -.01em; color: var(--combo-cream);
+  }
+  .pc-meta--sub {
+    right: 0; top: 22%; max-width: 22ch;
+    font-family: var(--combo-sans); font-weight: 400;
+    font-size: clamp(.82rem, 1vw, .95rem); line-height: 1.6; color: rgba(244,239,230,.62);
+  }
+  .pc-meta--eyebrow {
+    left: 0; top: -8%;
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .24em; text-transform: uppercase;
+    color: var(--combo-accent);
+  }
+  .pc-meta--counter {
+    left: 0; bottom: -6%;
+    font-family: 'Jost', system-ui, sans-serif; font-weight: 300;
+    font-size: clamp(48px, 7vw, 104px); color: var(--combo-accent);
+    line-height: .8; letter-spacing: -.04em;
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--material-collage">
+    <div class="pc-stage" id="collage" data-render-surface>
+      <!-- z1: wordmark behind, sized to fill the field -->
+      <div class="pc-word" data-fluid-fit>архітектура</div>
+
+      <!-- z2: MATERIAL / form tiles (mixed masks) on OUR QUADRO renders.
+           data-dir sets the counter-parallax direction so the field breathes. -->
+      <div class="pc-tile pc-tile--round" data-tile data-depth="0.9"  data-dir="1"><img src="renders/macro-pergola.webp" alt="Дерев'яні рейки перголи зблизька"></div>
+      <div class="pc-tile pc-tile--rect"  data-tile data-depth="0.45" data-dir="-1"><img src="renders/day-34.webp" alt="Скло і темні панелі фасаду"></div>
+      <div class="pc-tile pc-tile--far"   data-tile data-depth="1.25" data-dir="1"><img src="renders/macro-roof.webp" alt="Дерев'яний настил тераси"></div>
+
+      <!-- z3: floating decor, mouse-parallax at its own depth (the atom's native beat) -->
+      <div class="pc-tile pc-tile--round" data-deco data-depth="1.0" data-axis="0.9"
+           style="left:18%;top:62%;width:9%;height:16%;border-radius:50%;box-shadow:0 20px 44px -16px rgba(0,0,0,.55)">
+        <img src="renders/macro-table.webp" alt="Деталь настилу і столу">
+      </div>
+
+      <!-- z4: meta - sparse, the render stays the hero -->
+      <div class="pc-meta pc-meta--eyebrow">QUADRO · Архітектура</div>
+      <div class="pc-meta pc-meta--title" data-spine>Прості обриси,<br>виразні матеріали</div>
+      <div class="pc-meta pc-meta--sub">Камінь, скло і світло замість зайвого декору. Форма, що читається з першого погляду.</div>
+      <div class="pc-meta pc-meta--counter">01</div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom's canon deps + component (canon FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/fluid-type-sizing/component.js"></script>
+  <script src="../../components/parallax-collage/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // size the behind-word to fill the collage field (compose with fluid-type-sizing)
+      if (window.FluidType) {
+        FluidType.fit(document.querySelector('.pc-word'), {
+          container: document.getElementById('collage'), gutter: 0, fill: 1
+        });
+      }
+
+      // RENDER + DECOR job: the EVER collage engine - mouse-parallaxes the decor (+
+      // wordmark a touch). It owns NO pin (rAF + mousemove only), so the harness pin
+      // below is the section's single pin.
+      SectionHarness.ranOK('parallax-collage', function () {
+        window.__collage = ParallaxCollage.init('#collage', {
+          decoSelector: '[data-deco]',
+          wordmark: '.pc-word',
+          maxShiftPx: 24,
+          ease: 0.09,
+          wordmarkDepth: 0.10
+        });
+      });
+
+      // PROJECT SCROLL-PERF LAW: no persistent will-change. The cited atom promotes
+      // its decor + wordmark to compositor layers on mount and never clears them. We
+      // do not touch the atom; we clear those leftover hints here once the resting
+      // composition is set. The compositor re-promotes on demand during the rare
+      // pointer-parallax frames - far cheaper than holding layers indefinitely.
+      var deco = document.querySelector('[data-deco]');
+      var wordEl = document.querySelector('.pc-word');
+      if (deco) deco.style.willChange = 'auto';
+      if (wordEl) wordEl.style.willChange = 'auto';
+
+      // ONE section pin (harness). On scroll the tiles COUNTER-parallax at their
+      // per-tile depth+direction (transform/opacity only): the field OPENS at
+      // mid-scroll and re-CLOSES toward both ends, so the composition reads
+      // COMPOSED at entry (p=0), mid-state stays BALANCED (opposite-dir tiles
+      // separate symmetrically about the centre - never a one-sided empty band),
+      // and it re-settles at exit (p=1). The wordmark + meta spine slide OPPOSITE
+      // the tiles, revealing through the gutters. NEVER width/height/top/left.
+      var tiles = Array.prototype.slice.call(document.querySelectorAll('[data-tile]'));
+      var word = document.querySelector('.pc-word');
+      var spine = document.querySelector('[data-spine]');
+      var AMP = 96;   // base travel for depth=1 - real, clearly-visible amplitude
+      var st = SectionHarness.pin('#combo', { end: '+=130%', scrub: 0.8 });
+      if (st) st.onUpdate = function (p) {
+        if (!window.gsap) return;
+        // breathe: 0 at both ends (composed), 1 at the middle (field fully open).
+        // symmetric about the centre, so opposite-dir tiles balance at every p.
+        var breathe = Math.sin(p * Math.PI);
+        tiles.forEach(function (t) {
+          var depth = parseFloat(t.getAttribute('data-depth')) || 0.5;
+          var dir = parseFloat(t.getAttribute('data-dir')) || 1;
+          // counter-parallax: each tile travels AMP*depth*dir as the field opens -
+          // opposite-dir tiles move apart symmetrically, then re-converge
+          window.gsap.set(t, {
+            y: breathe * AMP * depth * dir,
+            opacity: 0.66 + breathe * 0.34
+          });
+        });
+        if (word) window.gsap.set(word, {
+          // wordmark eases up through the gutters as the field opens
+          y: -breathe * 58,
+          letterSpacing: (-0.02 + breathe * 0.035) + 'em',
+          opacity: 0.10 + breathe * 0.12
+        });
+        if (spine) window.gsap.set(spine, { y: -breathe * 44, opacity: 0.6 + breathe * 0.4 });
+      };
+
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['parallax-collage', 'fluid-type-sizing']
+      });
+    })();
+  </script>
+</body>
+</html>

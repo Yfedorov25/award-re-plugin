@@ -1,0 +1,36 @@
+/* SPLIT-WORD-HEADLINE · component.css
+   The atom splits a headline into per-word clip rows; each WORD sits in a .swh-clip
+   (overflow hidden) and its inner .swh-word rises from under the clip (translateY %)
+   + fades. transform translateY (word) + opacity (word) + overflow clip (per-word) only.
+   NO layout-prop animation (no margin/top/width). NO mix-blend / NO backdrop. NO WebGL. */
+
+/* the host element keeps the headline's own typography; we only manage layout of the rows */
+.swh-host { display: block; }
+
+/* each line is its own row so a word's clip never bleeds into the line above/below */
+.swh-line { display: block; }
+
+/* the per-word clip: overflow hidden so the rising word is masked under its own box.
+   inline-block keeps words on the same line and wrapping naturally; the clip box itself
+   never animates (no layout-prop motion). */
+.swh-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* a touch of vertical padding so descenders (д, ц, щ, р) are not clipped at rest */
+  padding-bottom: var(--swh-clip-pad, 0.12em);
+  margin-bottom: calc(-1 * var(--swh-clip-pad, 0.12em));
+}
+
+/* the transform target: the only thing that moves */
+.swh-word {
+  display: inline-block;
+  transform: translateY(120%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* once revealed (one-shot complete) GSAP leaves transform at translateY(0); the static /
+   reduced-motion branch sets these directly. Defensive rest state for no-JS: */
+.swh-static .swh-word,
+.swh-ready.swh-done .swh-word { transform: translateY(0%); opacity: 1; }

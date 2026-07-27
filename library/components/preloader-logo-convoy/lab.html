@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · preloader-logo-convoy · T-524 + T-M22 (AIR-ритуал входу)</title>
+<!--
+================================================================================
+  LAB: preloader-logo-convoy — T-524 прелоадер AIR + T-M22-initial.
+  Механіка знята дослівно з живого global.css aircenter.space (2026-07-06):
+  конвой 3 wordmark (76.6%/38.5%/0 зсуви, p_half=min(1,2p)) + бар 2px +
+  вихід/вхід 2s cubic-bezier(.7,0,.3,1); хедер згори, низ знизу, текст +20px.
+
+  ГЕЙТ (PROBE_MODE, auto:false — прогрес керується пробою):
+  1. старт: оверлей існує, 3 логотипи, бар; вхідні елементи ЗАПАРКОВАНІ
+     (header translateY(-100%), bottom +100%, text +20px);
+  2. прогрес-конвой: setProgress 0->1 кроками — transform КОЖНОГО лого
+     міняється монотонно (x росте), бар їде; нуль layout-зсувів (CLS<0.1);
+  3. done() mid-flight: на СЕРЕДИНІ виходу завіса напівпрозора
+     (opacity 0.03..0.97) І хедер уже в кадрі — вхід видимий КРІЗЬ
+     завісу (баг-урок «вистрибування» 2026-07-06); після duration+запас
+     оверлей ЗНЯТИЙ З DOM, вхідні на identity;
+  4. console errors == 0.
+  Живий перегляд (без ?probe): auto:true — справжній ритуал на load.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  header { position: fixed; top: 0; left: 0; right: 0; z-index: 5;
+           display: flex; justify-content: space-between; padding: 22px 4vw;
+           font-size: 13px; letter-spacing: .12em; background: var(--paper); }
+  .hero { min-height: 100vh; display: flex; flex-direction: column;
+          justify-content: center; padding: 0 4vw; }
+  .hero .kicker { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+                  color: #6b6b68; margin-bottom: 3vh; }
+  .hero h1 { font-size: clamp(30px, 5vw, 72px); font-weight: 300; line-height: 1.1;
+             max-width: 26ch; }
+  .below { min-height: 60vh; background: #161616; color: #f2f1ee;
+           display: flex; align-items: center; padding: 0 4vw; }
+  .below p { font-size: clamp(18px, 2.2vw, 30px); font-weight: 300; max-width: 36ch; }
+  .plc__logo { font-family: var(--sans); } /* проєктний шрифт конвою */
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · preloader-logo-convoy · t-524 + t-m22 · перезавантаж щоб побачити ритуал</div>
+
+<header data-plc-top>
+  <span>ВИВЧАЙ ПРОСТО · ДІМ</span>
+  <span>МЕНЮ</span>
+</header>
+
+<section class="hero">
+  <p class="kicker" data-plc-text>На цьому сайті лише перевірені цифри</p>
+  <h1 data-plc-text>Умови без дрібного шрифту</h1>
+</section>
+
+<section class="below" data-plc-bottom>
+  <p>Житла тут будують більше, ніж магазинів. Цей розрив і є ваш прибуток.</p>
+</section>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var report = { start: null, convoy: null, exit: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  var plc = window.PreloaderLogoConvoy.create({
+    wordmark: 'ДІМ', auto: !PM, minShowMs: PM ? 0 : 900,
+    duration: PM ? 0.8 : 2  /* проба тисне час, живий = канон 2s */
+  });
+  window.__PLC = plc;
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    if (plc.static) { window.__LAB_OK__ = false; report.start = 'static-гілка в пробі'; return; }
+    var ok = true;
+
+    /* 1. старт: оверлей + парковка */
+    var logos = document.querySelectorAll('.plc__logo');
+    var header = document.querySelector('[data-plc-top]');
+    var lastLogoW = logos[2] ? logos[2].getBoundingClientRect().width : 0;
+    report.start = {
+      overlay: !!document.querySelector('.plc'), logos: logos.length,
+      bar: !!document.querySelector('.plc__bar'),
+      parked: /-100%/.test(header.style.transform),
+      giantVw: Math.round(lastLogoW / window.innerWidth * 100) /* 1-в-1 AIR: гігант на всю ширину */
+    };
+    ok = report.start.overlay && report.start.logos === 3 && report.start.bar &&
+         report.start.parked && report.start.giantVw >= 85 && report.start.giantVw <= 99 && ok;
+
+    /* 2. конвой: прогрес кроками, x кожного лого росте монотонно */
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    function xs() {
+      return Array.prototype.map.call(logos, function (l) {
+        return l.getBoundingClientRect().left;
+      });
+    }
+    var mono = [true, true, true], prev = xs();
+    for (var p = 0.1; p <= 1.001; p += 0.15) {
+      plc.setProgress(Math.min(1, p));
+      await delay(60);
+      var cur = xs();
+      for (var i = 0; i < 3; i++) { if (cur[i] < prev[i] - 1) mono[i] = false; }
+      prev = cur;
+    }
+    report.convoy = { mono: mono, cls: Math.round(cls * 1000) / 1000 };
+    ok = mono[0] && mono[1] && mono[2] && cls < 0.1 && ok;
+
+    /* 3. done() + MID-FLIGHT (баг-урок 2026-07-06 «вистрибування»):
+       на середині виходу завіса МУСИТЬ бути напівпрозорою (розчиняється),
+       а хедер УЖЕ в кадрі — вхід видимий КРІЗЬ завісу, не за нею */
+    plc.done();
+    await delay(80 + 400); /* ~середина duration 0.8s */
+    var ovEl = document.querySelector('.plc');
+    var ovMid = ovEl ? parseFloat(getComputedStyle(ovEl).opacity) : -1;
+    var headerMidIn = header.getBoundingClientRect().bottom > 2;
+    await delay(400 + 300); /* решта duration + запас */
+    var headerT = header.style.transform;
+    report.exit = {
+      ovMid: Math.round(ovMid * 100) / 100,
+      dissolving: ovMid > 0.03 && ovMid < 0.97,
+      headerMidIn: headerMidIn,
+      overlayGone: !document.querySelector('.plc'),
+      headerHome: headerT === '' || /translateY\(0/.test(headerT),
+      removedT: plc.gate.removedT > 0
+    };
+    ok = report.exit.dissolving && report.exit.headerMidIn &&
+         report.exit.overlayGone && report.exit.headerHome && report.exit.removedT && ok;
+
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:preloader-logo-convoy]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

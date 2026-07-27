@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · daynight-masked-windows · the house lights its windows one by one (V11)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · daynight-masked-windows  (V11 — MASKED-WINDOW GLOW)
+================================================================================
+  The building stays in DAY the whole time; only the WINDOWS turn to night, each
+  lighting at its own staggered threshold. A house at dusk switching its lamps on
+  room by room. A composite of the day/night CANON (window.DayNight): the canon
+  stacks the day still + the night still, the night layer is pinned at opacity 0,
+  and a small cropped box per window fades in the matching night slice over the
+  daytime building, with a warm lamp glow that rises with it.
+
+  This lab proves the composite is PURE: a slider writes set(t) and you watch the
+  windows light in sequence from carport to far-right. It autoplays a gentle demo
+  once and stays fully interactive. NO WebGL (opacity + gradient only).
+  window.__LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../daynight-engine/component.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --cream:#f1ebd6; --ink:#20272c; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#0c0c0a;color:var(--cream);font-family:var(--sans);overflow:hidden;display:grid;place-items:center}
+
+  /* aspect-ratio matches the 16:9 exterior render — zero crop (G7) */
+  .frame{position:relative;width:min(92vw,1180px);aspect-ratio:16/9;border-radius:6px;overflow:hidden;
+    box-shadow:0 30px 90px rgba(0,0,0,.5)}
+
+  /* caption over the scene */
+  .cap{position:absolute;z-index:6;left:clamp(20px,4vw,56px);bottom:clamp(20px,5vh,48px);max-width:24ch;pointer-events:none}
+  .cap h1{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,5vw,4rem);line-height:.96;letter-spacing:-.01em;
+    text-shadow:0 2px 22px rgba(0,0,0,.5)}
+  .cap p{margin-top:.5rem;font-size:clamp(.78rem,1.2vw,.95rem);opacity:.85;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+
+  /* controls */
+  .panel{position:fixed;z-index:9999;left:50%;bottom:18px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;
+    background:rgba(12,12,11,.6);border:1px solid rgba(241,235,214,.22);border-radius:10px;padding:10px 16px}
+  .panel label{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .panel input[type=range]{width:min(46vw,340px);accent-color:#f7ce8e}
+  .tval{font-variant-numeric:tabular-nums;font-size:.7rem;opacity:.8;min-width:6ch;text-align:right}
+  .replay{font:500 .62rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--cream);
+    background:transparent;border:1px solid rgba(241,235,214,.32);padding:.55rem .8rem;border-radius:4px;cursor:pointer}
+  .replay:hover{border-color:#f7ce8e;color:#f7ce8e}
+</style>
+</head>
+<body>
+
+  <div class="frame" id="frame">
+    <!-- two frame-matched stills of the SAME exterior (real Higgsfield day/night pair) -->
+    <div class="cap"><h1>Дім засинає не одразу.</h1><p>Вікна загораються одне за одним.</p></div>
+  </div>
+
+  <div class="panel">
+    <div>
+      <label>Присмерк у дворі</label><br>
+      <input id="t" type="range" min="0" max="1" step="0.001" value="0">
+    </div>
+    <span class="tval" id="tval">день</span>
+    <button class="replay" id="replay" type="button">Показати ще раз</button>
+  </div>
+
+<!-- LOAD ORDER: canon JS first, then this composite -->
+<script src="../daynight-engine/component.js"></script>
+<script src="component.js"></script>
+<script>
+  (function () {
+    var frame = document.getElementById('frame');
+    var slider = document.getElementById('t');
+    var tval = document.getElementById('tval');
+    var replay = document.getElementById('replay');
+
+    var DAY = 'renders/dn-ext-day.webp';
+    var NIGHT = 'renders/dn-ext-night.webp';
+
+    var mw = window.DayNightMaskedWindows.create(frame, {
+      dayMedia: DAY,
+      nightMedia: NIGHT
+      // windows / band / glow use the tuned defaults for this exterior render
+    });
+    mw.set(parseFloat(slider.value));
+
+    function label(v) {
+      if (v < 0.04) return 'день';
+      if (v > 0.96) return 'усі вікна';
+      if (v < 0.34) return 'перші лампи';
+      if (v < 0.7)  return 'присмерк';
+      return 'сутінки';
+    }
+
+    var auto = null;
+    function killAuto() { if (auto) { auto.kill(); auto = null; } }
+
+    slider.addEventListener('input', function () {
+      var v = parseFloat(slider.value);
+      mw.set(v);
+      tval.textContent = label(v);
+    });
+    slider.addEventListener('pointerdown', killAuto);
+
+    function playDemo() {
+      killAuto();
+      if (!window.gsap || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        slider.value = 1; mw.set(1); tval.textContent = label(1);
+        return;
+      }
+      var o = { v: 0 };
+      slider.value = 0; mw.set(0); tval.textContent = label(0);
+      auto = gsap.to(o, {
+        v: 1, duration: 5.2, delay: 0.7, ease: 'sine.inOut', yoyo: true, repeat: 1,
+        onUpdate: function () { slider.value = o.v; mw.set(o.v); tval.textContent = label(o.v); },
+        onComplete: function () { auto = null; }
+      });
+    }
+    replay.addEventListener('click', playDemo);
+
+    // gentle autoplay demo so a screen-record shows the windows lighting one by one
+    playDemo();
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

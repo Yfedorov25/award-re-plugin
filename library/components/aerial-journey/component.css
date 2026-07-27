@@ -1,0 +1,27 @@
+/* ============================================================
+   AERIAL-JOURNEY · component.css
+   Живі величини: Outer scale grid→1 + radius 5→0, Inner 1.25→1,
+   easeInOutQuad (в JS); зони/картки — 0.6s air-крива класом.
+   ============================================================ */
+[data-aj-layer] { position: sticky; top: 0; height: 100svh; overflow: clip;
+  display: grid; place-items: center; }
+[data-aj-outer] { position: relative; width: 100%; height: 100%;
+  overflow: clip; will-change: transform; }
+[data-aj-inner] { position: absolute; inset: 0; will-change: transform; }
+[data-aj-inner] img, [data-aj-inner] .aj-fill { width: 100%; height: 100%;
+  object-fit: cover; display: block; }
+
+/* T-210: зони-полігони + хв-картки (з'являються класом .aj-zones-on) */
+[data-aj-zones] { position: absolute; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; }
+[data-aj-zone] { opacity: 0; transition: opacity .6s cubic-bezier(.25,.74,.22,.99); }
+.aj-zones-on [data-aj-zone] { opacity: 1; }
+[data-aj-cards] { position: absolute; inset: 0; pointer-events: none; }
+[data-aj-card] { position: absolute; transform: translate(-50%, -110%);
+  padding: 10px 13px; border-radius: 4px; background: rgba(244, 242, 238, .92);
+  color: #111110; font-size: 12px; white-space: nowrap;
+  opacity: 0; translate: 0 6px;
+  transition: opacity .6s cubic-bezier(.25,.74,.22,.99),
+              translate .6s cubic-bezier(.25,.74,.22,.99); }
+[data-aj-card] b { font-weight: 400; }
+.aj-zones-on [data-aj-card] { opacity: 1; translate: 0 0; }

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAISEI прийоми — прототип-галерея (кожен окремо + усі разом)</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --cream:#f0e9d2; --ink:#13130e; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  body{background:#0a0a09;color:var(--cream);font-family:var(--sans);line-height:1.5}
+  a{color:inherit}
+  .head{padding:48px clamp(24px,5vw,72px) 14px;border-bottom:1px solid rgba(240,233,210,.12)}
+  .head .kana{font-family:var(--serif);opacity:.5;font-size:1.3rem;margin-bottom:.4rem}
+  .head h1{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-.01em}
+  .head .sub{opacity:.62;font-size:.95rem;margin-top:.5rem;max-width:74ch}
+
+  .full{padding:32px clamp(24px,5vw,72px)}
+  .lbl{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;opacity:.6;margin-bottom:10px}
+  .full h2{font-family:var(--serif);font-weight:300;font-size:clamp(1.4rem,3vw,2.2rem);margin-bottom:14px}
+  .stage-full{position:relative;width:100%;aspect-ratio:16/9;border:1px solid rgba(240,233,210,.16);overflow:hidden;background:#000;border-radius:4px}
+  .stage-full iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .acts{display:flex;gap:8px;margin-top:12px}
+  .acts a,.acts button{font:600 .68rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;
+    padding:.55rem .9rem;border-radius:2px;cursor:pointer;text-decoration:none;border:1px solid rgba(240,233,210,.3);background:transparent;color:var(--cream)}
+  .acts .play{background:var(--cream);color:var(--ink);border-color:var(--cream)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:24px;padding:24px clamp(24px,5vw,72px) 80px}
+  .card{border:1px solid rgba(240,233,210,.14);border-radius:4px;overflow:hidden;background:#0c0c0a;display:flex;flex-direction:column}
+  .card .prev{position:relative;aspect-ratio:16/10;overflow:hidden;background:#000}
+  .card .prev iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+  .card .meta{padding:14px 16px 16px}
+  .card .meta .id{font-family:var(--serif);font-size:1.15rem}
+  .card .meta .id b{opacity:.5;font-weight:300;margin-right:.4em}
+  .card .meta p{font-size:.82rem;opacity:.66;margin-top:6px}
+  .card .acts{margin-top:12px}
+  .foot{padding:0 clamp(24px,5vw,72px) 60px;opacity:.5;font-size:.8rem}
+  .foot code{background:rgba(240,233,210,.1);padding:2px 6px;border-radius:3px}
+</style>
+</head>
+<body>
+
+  <div class="head">
+    <div class="kana">再生 · прийоми</div>
+    <h1>SAISEI — прийоми по окремості, і всі разом</h1>
+    <div class="sub">Прототип-галерея. Кожна цеглинка грає у своїй карточці (натисни «програти» щоб повторити, «відкрити» — на повний екран). Угорі — ПОВНИЙ перехід зі всіх чотирьох разом. Усе на нашому QUADRO-контенті, no-WebGL.</div>
+  </div>
+
+  <div class="full">
+    <div class="lbl">усі разом · повний page-transition</div>
+    <h2>Повний Saisei-перехід: закриття → 木-loader → відкриття → збірка hero</h2>
+    <div class="stage-full"><iframe id="fullframe" src="http://localhost:8820/center-seam-split/lab-full.html" title="full transition"></iframe></div>
+    <div class="acts">
+      <button class="play" onclick="rl('fullframe')">▶ програти знову</button>
+      <a href="http://localhost:8820/center-seam-split/lab-full.html" target="_blank">↗ відкрити на повний</a>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="foot">Цеглинки в <code>award-re-plugin/library/components/</code> — кожна має RECIPE.md + tokens.json + lab.html. Галерея вбудовує живі лаби (сервер 8820). Натисни «програти» щоб перезапустити прийом.</div>
+
+<script>
+  var B = [
+    { id:'S1', name:'center-seam-split', src:'http://localhost:8820/center-seam-split/lab.html',
+      desc:'Вертикальний центральний шов: закривається кремовим (краї→центр), відкривається чорним (центр→краї). Ядро — 4 застосування.' },
+    { id:'S2', name:'monogram-ring-loader', src:'http://localhost:8820/monogram-ring-loader/lab.html',
+      desc:'木 + кільце що обводиться (SVG stroke) + рулі сітки. Тримається до готовності — буфер навігації, не таймер.' },
+    { id:'S5', name:'mask-up-title', src:'http://localhost:8820/mask-up-title/lab.html',
+      desc:'Гігант-serif title виїжджає з-під baseline-маски, по рядках, expo.out. Не fade — висування.' },
+    { id:'S4', name:'content-stage-cascade', src:'http://localhost:8820/content-stage-cascade/lab.html',
+      desc:'Дирижер появи: фон → awards → title → meta → хедер ОСТАННІМ (обʼєкт перед інтерфейсом).' },
+    { id:'S6', name:'scroll-clip-rise', src:'http://localhost:8820/scroll-clip-rise/lab.html',
+      desc:'Секція ТЕКСТ+КАРТИНКИ: фото зліва росте стовпчиком знизу, текст справа по рядках (masked). Вісь Y, скрол. Проскрол вниз у карточці.' },
+    { id:'S1b', name:'render-slice-reveal', src:'http://localhost:8820/render-slice-reveal/lab.html',
+      desc:'РЕНДЕР з’являється крізь чорний слайс (power2.in) і ПРОЯСНЮЄТЬСЯ синхронно (темний→повний колір). Композит center-seam-split. Точно як Сайсей.' },
+    { id:'S5b', name:'stroke-draw-title', src:'http://localhost:8820/stroke-draw-title/lab.html',
+      desc:'ГОЛОВНА Сайсей: гігант-слово малює СЕБЕ контурними штрихами (SVG stroke) → заливка. Не fade, не rise — обведення.' },
+    { id:'S7', name:'dual-panel-menu', src:'http://localhost:8820/dual-panel-menu/lab.html',
+      desc:'МЕНЮ: cream nav зліва + dark identity справа сходяться до центру (50/50). Колір несе сенс. Тисни «меню» в карточці.' },
+    { id:'S8', name:'corner-frame-meta', src:'http://localhost:8820/corner-frame-meta/lab.html',
+      desc:'Дрібна meta по 4 КУТАХ кадру (eyebrow/локація/рік/index), fade-in. Рамкова композиція hero.' },
+    { id:'S9', name:'vertical-awards-rail', src:'http://localhost:8820/vertical-awards-rail/lab.html',
+      desc:'Awards-плашки вертикальним текстом справа, виїжджають з правого краю. Awwwards-стиль.' },
+    { id:'S10', name:'row-wipe-hover', src:'http://localhost:8820/row-wipe-hover/lab.html',
+      desc:'Hover рядка меню: tan-смуга L→R + лінія + ординал фліпає на кандзі. Наведи в карточці.' },
+    { id:'S3', name:'grid-skeleton-draw', src:'http://localhost:8820/grid-skeleton-draw/lab.html',
+      desc:'Рулі сітки наступної сторінки прокреслюються (scaleY) під лоадером — «сторінка малює скелет».' }
+  ];
+  var grid = document.getElementById('grid');
+  B.forEach(function(b,i){
+    var fid='f_'+i, c=document.createElement('div'); c.className='card';
+    c.innerHTML='<div class="prev"><iframe id="'+fid+'" src="'+b.src+'"></iframe></div>'+
+      '<div class="meta"><div class="id"><b>'+b.id+'</b>'+b.name+'</div><p>'+b.desc+'</p>'+
+      '<div class="acts"><button class="play" data-f="'+fid+'">▶ програти</button>'+
+      '<a href="'+b.src+'" target="_blank">↗ відкрити</a></div></div>';
+    grid.appendChild(c);
+  });
+  function rl(id){ var f=document.getElementById(id); f.src=f.src; }
+  document.addEventListener('click',function(e){ var b=e.target.closest('button.play[data-f]'); if(b) rl(b.getAttribute('data-f')); });
+</script>
+</body>
+</html>

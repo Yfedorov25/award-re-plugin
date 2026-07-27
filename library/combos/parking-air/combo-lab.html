@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЗБОРКА · parking-air — /parking AIR (сервісна, спринт-7)</title>
+<!--
+================================================================================
+  ЗБОРКА /parking (сервісна сторінка-збірка, спринт-7 юніт 5/5 — фінал).
+  Жива правда: recon-20260706/live-parking.html + live-parking-top.png.
+  Граматика (ДОСЛІВНО з живого DOM):
+    HERO h1 «Parking selection».
+    ТАБИ: LEVEL ONE / LEVEL TWO (перемикач планів) + легенда «Available
+      spaces» (spaces is-hidden--sm-down) + маркер-квадрат.
+    ПЛАН: великий інтерактивний SVG (живий = 1843 rect + 490 data-hoverable
+      + 189 data-callback-modal — кожне місце hover-підсвітка + click-modal;
+      підпис MALL зверху). ⚠️ ТОЧНИЙ SVG-план (1843 місця) = АСЕТ-ДІРА (не
+      маємо архрендер); будуємо РЕПРЕЗЕНТАТИВНИЙ план на нашому plan-движку:
+      ~14 місць/рівень зі статусами available/sold, hover-підсвітка + click.
+      Механіка 1-в-1 (data-hoverable + статус + модал), геометрія — наша.
+    ФУТЕР ui-dark breadcrumb Home / Parking.
+  Змонтовані атоми: air-menu-overlay (cand, №9) · cookie-consent (cand).
+    Таби + план-движок = інлайн (репрезентативний; floor-plan-select — важкий
+    квартирний, для паркінгу надлишковий: спрощення за karpathy §2). Пін: 0.
+
+  ГЕЙТ (PROBE_MODE) — повний home-air набір: loadStability (CLS<0.1 + дрейф
+    ≤4px) · docHeight стабільна за прохід (безумовно) · таби: клік LEVEL TWO
+    → активний свап + план міняється · план: hover місця → підсвітка, click
+    available → вибір (sold некликабельний) · menu open/close · cookie
+    visible→removed · console errors == 0. Живий перегляд = НУЛЬ автоскролів.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
+<link rel="stylesheet" href="../../components/cookie-consent/component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --dark: #111110; --sans: 'Inter', 'Onest', system-ui, -apple-system, sans-serif;
+    --avail: #b9c7a6; --avail-hi: #98ac7c; --sold: #d9d7d2; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; background: var(--paper); }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  .container { padding-inline: 3vw; }
+
+  /* ---- хедер ---- */
+  [data-amo-header] { background: rgba(244, 242, 238, .8); color: #111110;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .8); color: #f2f1ee; }
+  .hrow { display: flex; align-items: center; gap: 12px; padding: 12px 3vw; }
+  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; margin-right: auto; }
+  .hbtn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+          border: 1px solid currentColor; border-radius: 4px; padding: 10px 13px; background: none; color: inherit; cursor: pointer; }
+  [data-amo-burger] { display: inline-flex; align-items: center; gap: 10px;
+    background: #111110; color: #f2f1ee; border: 0; border-radius: 4px; padding: 11px 15px; font-size: 11px; letter-spacing: .1em; cursor: pointer; }
+  .amo-header-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
+  @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
+
+  /* ---- модал-меню ---- */
+  [data-amo-bg] { background: var(--paper); }
+  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0;
+    background: radial-gradient(closest-side at 72% 60%, transparent 30%, rgba(17,17,16,.05) 31% 60%, transparent 61%),
+                repeating-conic-gradient(from 10deg at 72% 60%, rgba(17,17,16,.05) 0 6deg, transparent 6deg 12deg); }
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12vh 4vw 6vh; }
+  [data-amo-panel] { width: min(690px, 92vw); background: rgba(236, 234, 229, .75); }
+  [data-amo-left] { padding: 4vh 3vw; display: flex; flex-direction: column; justify-content: space-between; gap: 6vh; }
+  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  [data-amo-left] ul.small { gap: 10px; margin-top: 5vh; }
+  ul.large [data-amo-item] a { font-size: clamp(26px, 3.4vw, 52px); font-weight: 400; text-transform: uppercase; letter-spacing: -.02em; line-height: 1.07; }
+  ul.small [data-amo-item] a { font-size: 13px; color: #55544f; }
+  [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between; padding: 24px; color: #111110; text-decoration: none; font-size: 13px; min-height: 160px; }
+  [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px; border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  @media (min-width: 769px) { [data-amo-giant] { display: none; } }
+
+  /* ---- HERO h1 ---- */
+  .park-hero { padding: 16vh 3vw 5vh; }
+  .park-title { font-size: clamp(38px, 7.5vw, 118px); font-weight: 300; text-transform: uppercase; letter-spacing: -.02em; line-height: 1; margin: 0; }
+
+  /* ---- ТАБИ + легенда ---- */
+  .park-bar { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 0 3vw; flex-wrap: wrap; }
+  .park-tabs { display: inline-flex; gap: 4px; background: rgba(17,17,16,.05); border-radius: 999px; padding: 4px; }
+  .park-tab { border: 0; background: transparent; cursor: pointer; padding: 11px 22px; border-radius: 999px;
+    font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: #55544f;
+    transition: background .35s cubic-bezier(.25,.74,.22,.99), color .35s cubic-bezier(.25,.74,.22,.99); }
+  .park-tab[aria-selected="true"] { background: #111110; color: #f2f1ee; }
+  .park-legend { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: #55544f; }
+  .park-legend .swatch { width: 18px; height: 18px; border-radius: 3px; background: var(--avail); }
+  @media (max-width: 768px) { .park-legend .lg-word { display: none; } }
+
+  /* ---- ПЛАН ---- */
+  .park-plan-wrap { margin: 4vh 3vw 12vh; }
+  .park-mall { text-align: center; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #8b8a86; margin-bottom: 2vh; }
+  .park-plan { width: 100%; height: auto; border: 1px solid rgba(17,17,16,.1); border-radius: 8px; background: #faf9f6; }
+  .park-plan rect[data-hoverable] { transition: fill .28s cubic-bezier(.25,.74,.22,.99); cursor: pointer; }
+  .park-plan rect.is-available { fill: var(--avail); }
+  .park-plan rect.is-available:hover, .park-plan rect.is-available.is-hover { fill: var(--avail-hi); }
+  .park-plan rect.is-sold { fill: var(--sold); cursor: not-allowed; }
+  .park-plan rect.is-selected { fill: #111110; }
+  .park-plan .struct { fill: none; stroke: rgba(17,17,16,.25); stroke-width: 1.2; }
+  .park-plan .lane { fill: none; stroke: rgba(17,17,16,.12); stroke-width: 1; stroke-dasharray: 4 5; }
+
+  /* ---- ФУТЕР ---- */
+  .footer { background: var(--dark); color: #d9d8d4; padding: 7vh 3vw 4vh; }
+  .breadcrumbs { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+  .breadcrumbs a { color: #d9d8d4; }
+  .breadcrumbs .divider, .breadcrumbs .current { color: #6b6a66; }
+  .breadcrumbs .current { pointer-events: none; }
+
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 60; font-size: 10px; letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  [data-cc] { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 50; }
+</style>
+</head>
+<body>
+<div class="lab-tag">зборка · parking-air · сервісна · тисни Menu · таби + план</div>
+
+<header data-amo-header>
+  <div class="hrow">
+    <a class="hlogo" href="/combos/home-air/combo-lab.html">AIR</a>
+    <a class="hbtn hide-m" href="/combos/funnel-air/combo-lab.html">Choose an office ✛</a>
+    <button data-amo-burger type="button" aria-label="Open menu">
+      <span data-amo-burger-lines><i></i><i></i></span> Menu
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO h1 -->
+  <section class="park-hero" data-amo-theme="light">
+    <h1 class="park-title">Parking selection</h1>
+  </section>
+
+  <!-- ТАБИ LEVEL ONE / LEVEL TWO + легенда Available spaces -->
+  <div class="park-bar">
+    <div class="park-tabs" role="tablist" data-park-tabs>
+      <button class="park-tab" role="tab" aria-selected="true" data-park-tab="1" type="button">Level one</button>
+      <button class="park-tab" role="tab" aria-selected="false" data-park-tab="2" type="button">Level two</button>
+    </div>
+    <p class="park-legend"><span class="swatch"></span>Available <span class="lg-word">spaces</span></p>
+  </div>
+
+  <!-- ПЛАН (репрезентативний SVG на нашому plan-движку) -->
+  <section class="park-plan-wrap" data-amo-theme="light">
+    <p class="park-mall">Mall</p>
+    <svg class="park-plan" viewBox="0 0 1200 420" data-park-plan preserveAspectRatio="xMidYMid meet" aria-label="Parking plan">
+      <!-- структурний контур + смуги руху -->
+      <rect class="struct" x="20" y="20" width="1160" height="380" rx="6"/>
+      <line class="lane" x1="20" y1="210" x2="1180" y2="210"/>
+      <!-- ряд місць генерується скриптом у [data-park-spots] -->
+      <g data-park-spots></g>
+    </svg>
+  </section>
+</main>
+
+<footer class="footer">
+  <ol class="breadcrumbs">
+    <li><a href="/combos/home-air/combo-lab.html">Home</a></li>
+    <li class="divider">/</li>
+    <li class="current">Parking</li>
+  </ol>
+</footer>
+
+<!-- меню-модал -->
+<div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div data-amo-bg></div>
+  <div data-amo-bg-image></div>
+  <div data-amo-giant>AIR</div>
+  <div class="amo-wrap">
+    <nav data-amo-panel>
+      <div data-amo-left>
+        <ul class="large">
+          <li data-amo-item><a href="/combos/about-air/combo-lab.html">About the project</a></li>
+          <li data-amo-item><a href="/combos/location-air/combo-lab.html">Location</a></li>
+          <li data-amo-item><a href="/combos/home-air/combo-lab.html">Project management</a></li>
+          <li data-amo-item><a href="/combos/home-air/combo-lab.html">Investment</a></li>
+        </ul>
+        <ul class="small">
+          <li data-amo-item><a href="/combos/progress-air/combo-lab.html">Construction progress</a></li>
+          <li data-amo-item><a href="/combos/news-air/combo-lab.html">News and offers</a></li>
+          <li data-amo-item><a href="/combos/developer-air/combo-lab.html">About the developer</a></li>
+        </ul>
+      </div>
+      <div data-amo-right>
+        <a data-amo-card href="/combos/funnel-air/combo-lab.html"><span>Choose an<br>office</span><span class="sq">✛</span></a>
+        <a data-amo-card href="/combos/parking-air/combo-lab.html" aria-current="page"><span>Choose a<br>parking spot</span><span class="sq">✛</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div data-cc>
+  <div data-cc-box>
+    <p>This website uses <a href="#">cookies</a></p>
+    <button data-cc-accept type="button">Accept</button>
+  </div>
+</div>
+
+<script src="../../components/air-menu-overlay/component.js"></script>
+<script src="../../components/cookie-consent/component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var SVGNS = 'http://www.w3.org/2000/svg';
+
+  var amo = window.AirMenuOverlay.create({});
+  var cc  = window.CookieConsent.create(document.querySelector('[data-cc]'), { storageKey: 'air-park-cc-lab', storage: null });
+  window.__AMO = amo; window.__CC = cc;
+
+  /* ---- план-движок (інлайн): рендерить місця рівня, hover + click ----
+     Живий: data-hoverable + статус + data-callback-modal. Наша геометрія:
+     2 ряди × 7 місць = 14/рівень, детермінований статус (sold за патерном
+     рівня — жодного Math.random, D-закон проб). */
+  var planEngine = (function () {
+    var g = document.querySelector('[data-park-spots]');
+    var selected = null, level = 1;
+    // детермінований набір sold-індексів на рівень (не random)
+    var SOLD = { 1: [2, 5, 9, 12], 2: [0, 3, 4, 7, 11] };
+    function render(lv) {
+      level = lv; selected = null;
+      while (g.firstChild) g.removeChild(g.firstChild);
+      var cols = 7, rows = 2, w = 140, h = 150, gapx = 18, x0 = 40, y0 = 40, rowGap = 40;
+      var sold = SOLD[lv] || [];
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          var idx = r * cols + c;
+          var rect = document.createElementNS(SVGNS, 'rect');
+          rect.setAttribute('x', x0 + c * (w + gapx));
+          rect.setAttribute('y', y0 + r * (h + rowGap));
+          rect.setAttribute('width', w); rect.setAttribute('height', h);
+          rect.setAttribute('rx', 4);
+          var isSold = sold.indexOf(idx) !== -1;
+          rect.setAttribute('data-hoverable', 'P' + lv + '-' + (idx + 1));
+          rect.setAttribute('data-status', isSold ? 'sold' : 'available');
+          rect.setAttribute('class', isSold ? 'is-sold' : 'is-available');
+          g.appendChild(rect);
+        }
+      }
+    }
+    g.addEventListener('mouseover', function (e) {
+      var t = e.target; if (t.getAttribute && t.getAttribute('data-status') === 'available') t.classList.add('is-hover');
+    });
+    g.addEventListener('mouseout', function (e) {
+      var t = e.target; if (t.classList) t.classList.remove('is-hover');
+    });
+    g.addEventListener('click', function (e) {
+      var t = e.target; if (!t.getAttribute || t.getAttribute('data-status') !== 'available') return;
+      if (selected) selected.classList.remove('is-selected');
+      selected = t; t.classList.add('is-selected');
+    });
+    render(1);
+    return {
+      level: function () { return level; },
+      setLevel: render,
+      spots: function () { return g.querySelectorAll('rect').length; },
+      available: function () { return g.querySelectorAll('rect.is-available').length; },
+      selected: function () { return selected ? selected.getAttribute('data-hoverable') : null; }
+    };
+  }());
+  window.__PLAN = planEngine;
+
+  /* ---- таби LEVEL ONE / LEVEL TWO ---- */
+  var tabs = document.querySelectorAll('[data-park-tabs] .park-tab');
+  Array.prototype.forEach.call(tabs, function (tb) {
+    tb.addEventListener('click', function () {
+      Array.prototype.forEach.call(tabs, function (o) { o.setAttribute('aria-selected', o === tb ? 'true' : 'false'); });
+      planEngine.setLevel(parseInt(tb.getAttribute('data-park-tab'), 10));
+    });
+  });
+
+  var report = { stability: null, docHeight: null, tabs: null, plan: null, menu: null, cookie: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  async function probeStability(anchor){
+    var cls=0;
+    try { new PerformanceObserver(function(l){ l.getEntries().forEach(function(e){ if(!e.hadRecentInput) cls+=e.value; }); }).observe({ type:'layout-shift', buffered:true }); } catch(e){}
+    var a1=anchor.getBoundingClientRect().top; await delay(600);
+    var a2=anchor.getBoundingClientRect().top;
+    var out={ cls:Math.round(cls*1000)/1000, drift:Math.abs(a2-a1), ok: cls<0.1 && Math.abs(a2-a1)<=4 };
+    report.stability=out; return out.ok;
+  }
+
+  async function probeDocHeight(){
+    var doc1 = document.body.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight); await delay(400);
+    window.scrollTo(0, 0); await delay(300);
+    var after = document.body.scrollHeight;
+    report.docHeight = { before: doc1, after: after, stable: Math.abs(after-doc1)<=2, ok: Math.abs(after-doc1)<=2 };
+    return report.docHeight.ok;
+  }
+
+  async function probeTabs(){
+    /* клік LEVEL TWO → активний свап + план міняється (available рахунок інший) */
+    var t1 = document.querySelector('[data-park-tab="1"]'), t2 = document.querySelector('[data-park-tab="2"]');
+    var lv1avail = planEngine.available();
+    t2.click(); await delay(80);
+    var selected2 = t2.getAttribute('aria-selected') === 'true' && t1.getAttribute('aria-selected') === 'false';
+    var lv2 = planEngine.level() === 2, lv2avail = planEngine.available();
+    t1.click(); await delay(80);   /* назад на рівень 1 */
+    report.tabs = { level2Selected: selected2, switched: lv2, availChanged: lv1avail !== lv2avail,
+                    lv1avail: lv1avail, lv2avail: lv2avail, ok: selected2 && lv2 && lv1avail !== lv2avail };
+    return report.tabs.ok;
+  }
+
+  async function probePlan(){
+    /* hover available → підсвітка; click available → вибір; sold некликабельний */
+    var avail = document.querySelector('[data-park-spots] rect.is-available');
+    var sold = document.querySelector('[data-park-spots] rect.is-sold');
+    avail.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, cancelable: true }));
+    var hovered = avail.classList.contains('is-hover');
+    avail.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, cancelable: true }));
+    avail.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    var selectedAvail = avail.classList.contains('is-selected') && planEngine.selected() !== null;
+    var soldStart = planEngine.selected();
+    sold.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    var soldNoop = planEngine.selected() === soldStart && !sold.classList.contains('is-selected');
+    report.plan = { spots: planEngine.spots(), hovered: hovered, selectedAvail: selectedAvail, soldNoop: soldNoop,
+                    ok: planEngine.spots() === 14 && hovered && selectedAvail && soldNoop };
+    return report.plan.ok;
+  }
+
+  async function probeMenu(){
+    var g0=amo.gate.opens; amo.open(); await delay(1750);
+    var opened=amo.isOpen() && amo.gate.opens===g0+1;
+    amo.close(); await delay(1750);
+    report.menu={ opened:opened, closed:!amo.isOpen(), ok: opened && !amo.isOpen() };
+    return report.menu.ok;
+  }
+
+  async function probeCookie(){
+    var v0=cc.visible(); cc.accept(); await delay(50);
+    var gone=!document.querySelector('[data-cc]');
+    report.cookie={ visibleBefore:v0, removedAfter:gone, ok: v0 && gone };
+    return report.cookie.ok;
+  }
+
+  async function run(){
+    if (!PM) { window.__LAB_OK__='live-mode'; return; }
+    var ok = await probeStability(document.querySelector('.park-title'));
+    ok = await probeDocHeight() && ok;
+    ok = await probeTabs() && ok;
+    ok = await probePlan() && ok;
+    ok = await probeMenu() && ok;
+    ok = await probeCookie() && ok;
+    report.errors=errs; ok = ok && errs===0;
+    window.__LAB_OK__=!!ok;
+    console.log('[lab:parking-air]', JSON.stringify(report));
+  }
+  if (document.readyState==='complete') run();
+  else window.addEventListener('load', function(){ run(); });
+}());
+</script>
+</body>
+</html>

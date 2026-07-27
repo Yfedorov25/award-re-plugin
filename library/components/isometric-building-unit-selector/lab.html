@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · isometric-building-unit-selector · r1864 (visual-search: iso render + SVG hotspots + filter bar)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · isometric-building-unit-selector  (r1864 visual-search, conversion core)
+================================================================================
+  A pre-rendered ISO building image + an SVG hotspot overlay + a filter bar (коллекция / секция
+  / спальни / площадь) + a hover info-card (collection/section/floor/unit) + a live count.
+  Filtering highlights matching hotspots & dims the rest; hover lights one. NO-WebGL (static
+  render + SVG hotspots; reuse data-nr/stateClass). Harvested from D_r1864 (/plans). QUADRO
+  render stand-in. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#2a2622;color:#e9e3db;font-family:var(--sans)}
+  .ibs-stage{ --ibs-bg:#2a2622; --ibs-ink:#e9e3db; --ibs-hot:#c98a5e; --ibs-serif:'Playfair Display',serif; --ibs-card-bg:rgba(58,48,46,.92); }
+  .ibs-card .v{font-family:var(--serif)}
+</style>
+</head>
+<body>
+
+  <section class="ibs-stage" id="plans">
+    <div class="ibs-render">
+      <img src="renders/aerial.webp" alt="building">
+      <!-- SVG hotspots over the render: each .ibs-unit carries filter data + state -->
+      <svg class="ibs-hotspots" viewBox="0 0 1440 900" preserveAspectRatio="none">
+        <rect class="ibs-unit" data-nr="605" data-coll="chastnaya" data-coll-label="Частные" data-sec="2" data-beds="3" data-area="180" data-floor="6" data-state="available" x="300" y="300" width="170" height="120" rx="3"/>
+        <rect class="ibs-unit" data-nr="606" data-coll="chastnaya" data-coll-label="Частные" data-sec="2" data-beds="2" data-area="140" data-floor="5" data-state="sold"      x="300" y="430" width="170" height="120" rx="3"/>
+        <rect class="ibs-unit" data-nr="312" data-coll="istoricheskaya" data-coll-label="Историческая" data-sec="1" data-beds="1" data-area="120" data-floor="3" data-state="available" x="500" y="360" width="190" height="130" rx="3"/>
+        <rect class="ibs-unit" data-nr="313" data-coll="istoricheskaya" data-coll-label="Историческая" data-sec="1" data-beds="4" data-area="320" data-floor="7" data-state="reserved"  x="500" y="500" width="190" height="120" rx="3"/>
+        <rect class="ibs-unit" data-nr="701" data-coll="penthouse" data-coll-label="Пентхаусы" data-sec="3" data-beds="5" data-area="640" data-floor="8" data-state="available" x="720" y="330" width="230" height="120" rx="3"/>
+        <rect class="ibs-unit" data-nr="220" data-coll="villa" data-coll-label="Вилла с террасой" data-sec="4" data-beds="4" data-area="365" data-floor="2" data-state="available" x="980" y="400" width="230" height="150" rx="3"/>
+      </svg>
+    </div>
+
+    <!-- hover info-card -->
+    <div class="ibs-card">
+      <div class="row"><div class="v ibs-card-coll">—</div><div class="k">Коллекция</div></div>
+      <div class="row"><div class="v ibs-card-sec">—</div><div class="k">Секция</div></div>
+      <div class="row"><div class="v ibs-card-floor">—</div><div class="k">Этаж</div></div>
+      <div class="row"><div class="v ibs-card-nr">—</div><div class="k">Номер</div></div>
+    </div>
+
+    <!-- live count -->
+    <div class="ibs-count"><div class="num">0</div><div class="lbl">апартаментов</div></div>
+
+    <!-- actions -->
+    <button class="ibs-expand">↻ Развернуть вид</button>
+    <button class="ibs-apply">Подбор по параметрам →</button>
+
+    <!-- filter bar -->
+    <div class="ibs-filters">
+      <div class="ibs-fgroup"><div class="glabel">Коллекция</div><div class="opts">
+        <button class="ibs-f" data-filter="coll" data-value="chastnaya">Частная</button>
+        <button class="ibs-f" data-filter="coll" data-value="istoricheskaya">Историческая</button>
+        <button class="ibs-f" data-filter="coll" data-value="penthouse">Пентхаусы</button>
+        <button class="ibs-f" data-filter="coll" data-value="villa">Вилла с террасой</button>
+      </div></div>
+      <div class="ibs-fgroup"><div class="glabel">Секция</div><div class="opts">
+        <button class="ibs-f" data-filter="sec" data-value="1">1</button>
+        <button class="ibs-f" data-filter="sec" data-value="2">2</button>
+        <button class="ibs-f" data-filter="sec" data-value="3">3</button>
+        <button class="ibs-f" data-filter="sec" data-value="4">4</button>
+      </div></div>
+      <div class="ibs-fgroup"><div class="glabel">Кол-во спален</div><div class="opts">
+        <button class="ibs-f" data-filter="beds" data-value="1">1</button>
+        <button class="ibs-f" data-filter="beds" data-value="2">2</button>
+        <button class="ibs-f" data-filter="beds" data-value="3">3</button>
+        <button class="ibs-f" data-filter="beds" data-value="4">4</button>
+        <button class="ibs-f" data-filter="beds" data-value="5">5</button>
+      </div></div>
+    </div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  window.__ibs = IsometricBuildingUnitSelector.create('#plans', {
+    dimOpacity:0.35, hotOpacity:1, matchOpacity:0.92,
+    onSelect:function(d){ console.log('select', d); },
+    onExpand:function(){ console.log('expand -> 2D plate'); }
+  });
+</script>
+</body>
+</html>

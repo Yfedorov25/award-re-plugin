@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>card-overlap-reveal — atom (dummy facade: MERIDIAN)</title>
+<script>window.__CARD_OVERLAP_OK__=false;</script>
+<style>
+  /* ── DUMMY FACADE (навмисне НЕ springs): доводить перенос ЗАКОНУ, не фасаду ── */
+  :root{
+    --ease:cubic-bezier(.25,.74,.22,.99);
+    --ink:#1b1f3b;          /* індиго-чорнило */
+    --paper:#ece4d3;        /* пісок */
+    --paper-2:#e2d7bf;
+    --accent:#b7502e;       /* теракота-акцент */
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+    --sliver:12px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#0d1030;-webkit-font-smoothing:antialiased}
+  body{font-family:var(--sans);color:var(--ink)}
+  img{display:block;max-width:100%}
+
+  .pin-wrap{position:relative;height:calc(var(--vh,1vh)*300)} /* (N+1)*100vh, N=2 hold-екрани */
+  .stage{position:sticky;top:0;width:min(390px,100%);height:calc(var(--vh,1vh)*100);
+    margin:0 auto;overflow:hidden;background:#0d1030}
+
+  /* M2 backdrop (чужий: градієнтна «вежа» індиго→присмерк, БЕЗ springs-асета) */
+  .backdrop{position:absolute;inset:-2% 0;
+    background:
+      radial-gradient(120% 60% at 50% 8%, #5a6aa8 0%, #2b3566 42%, #171d43 100%),
+      linear-gradient(180deg,#12163a 0%,#232a58 55%,#0f1330 100%);
+    will-change:transform}
+  .backdrop::after{content:"";position:absolute;left:34%;right:34%;top:18%;bottom:0;
+    background:linear-gradient(180deg,rgba(183,80,46,.0),rgba(183,80,46,.28) 60%,rgba(183,80,46,.05));
+    filter:blur(2px)}
+  .bd-tower{position:absolute;left:40%;right:40%;top:22%;bottom:0;
+    background:linear-gradient(180deg,#8792c4,#3b4680);border-radius:8px 8px 0 0;
+    box-shadow:0 0 60px rgba(90,106,168,.4)}
+
+  /* M3 card (виїжджає знизу поверх; лишає слівер зліва) */
+  .card{position:absolute;top:0;right:0;width:calc(100% - var(--sliver));height:100%;
+    background:var(--paper);box-shadow:-14px 0 44px rgba(10,12,30,.5);
+    overflow:hidden;will-change:transform}
+  /* M4 masked-copy — ЗАПІНЕНА у верхній частині картки (край картки її маскує) */
+  .card-copy{position:absolute;left:26px;right:22px;top:52px}
+  .card-copy h2{font-family:var(--serif);font-weight:400;font-size:21px;line-height:1.2;
+    letter-spacing:-.2px;color:var(--ink)}
+  /* M5 anchor-row — прибитий до низу картки, поза reveal */
+  .card-anchor{position:absolute;left:26px;right:20px;bottom:64px}
+  .card-anchor .lbl{font-size:9px;font-weight:600;letter-spacing:1.4px;text-transform:uppercase;
+    color:var(--ink);opacity:.7;margin-bottom:14px}
+  .card-anchor .row{display:flex;align-items:flex-end;justify-content:space-between}
+  .card-anchor .meds{display:flex;gap:9px}
+  .card-anchor .med{width:46px;height:46px;border-radius:50%}
+  .med.m1{background:linear-gradient(135deg,#3f6f4a,#8ab27a)}
+  .med.m2{background:linear-gradient(135deg,#5a86a8,#cfe0ec)}
+  .med.m3{background:linear-gradient(135deg,#6a2a55,#c064a0)}
+  .card-anchor .mark{font-family:var(--sans);font-weight:700;font-size:32px;letter-spacing:-1px;
+    color:var(--accent);line-height:.8}
+
+  .badge{position:absolute;left:22px;bottom:18px;z-index:50;font-size:9px;font-weight:600;
+    letter-spacing:1.4px;text-transform:uppercase;color:rgba(236,228,211,.55);pointer-events:none}
+  .hint{position:absolute;right:20px;bottom:18px;z-index:50;font-size:9px;letter-spacing:1px;
+    text-transform:uppercase;color:rgba(236,228,211,.4);pointer-events:none}
+</style>
+</head>
+<body>
+<div class="scroller" style="height:calc(var(--vh,1vh)*100);overflow-y:auto;overflow-x:hidden;position:relative;-webkit-overflow-scrolling:touch">
+  <div class="pin-wrap">
+    <div class="stage">
+      <div class="backdrop"><div class="bd-tower"></div></div>
+      <div class="card">
+        <div class="card-copy">
+          <h2>MERIDIAN studio<br>reframes the skyline<br>of five northern<br>capitals with quiet,<br>load-bearing glass<br>and a single,<br>unbroken gesture.</h2>
+        </div>
+        <div class="card-anchor">
+          <div class="lbl">Selected works:</div>
+          <div class="row">
+            <div class="meds"><i class="med m1"></i><i class="med m2"></i><i class="med m3"></i></div>
+            <div class="mark">MR_</div>
+          </div>
+        </div>
+      </div>
+      <div class="badge">atom · card-overlap-reveal · dummy facade</div>
+      <div class="hint">scroll ↓</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var clamp=function(v,a,b){a=a==null?0:a;b=b==null?1:b;return v<a?a:v>b?b:v;};
+  var lerp=function(a,b,t){return a+(b-a)*t;};
+  // springs ease cubic-bezier(.25,.74,.22,.99) — cubic-bezier solver (мова руху лишається, фасад чужий)
+  function bezier(p1x,p1y,p2x,p2y){
+    function A(a,b){return 1-3*b+3*a;} function B(a,b){return 3*b-6*a;} function C(a){return 3*a;}
+    function calc(t,a,b){return ((A(a,b)*t+B(a,b))*t+C(a))*t;}
+    function slope(t,a,b){return 3*A(a,b)*t*t+2*B(a,b)*t+C(a);}
+    function tForX(x){var t=x;for(var i=0;i<8;i++){var xx=calc(t,p1x,p2x)-x;if(Math.abs(xx)<1e-4)return t;var d=slope(t,p1x,p2x);if(Math.abs(d)<1e-6)break;t-=xx/d;}return t;}
+    return function(x){if(x<=0)return 0;if(x>=1)return 1;return calc(tForX(x),p1y,p2y);};
+  }
+  var ease=bezier(.25,.74,.22,.99);
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  var scroller=document.querySelector('.scroller'),
+      pinWrap=document.querySelector('.pin-wrap'),
+      stage=document.querySelector('.stage'),
+      backdrop=document.querySelector('.backdrop'),
+      card=document.querySelector('.card');
+
+  var probe=document.createElement('div');
+  probe.style.cssText='position:fixed;top:0;left:0;height:100vh;width:1px;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  var vh=probe.offsetHeight||window.innerHeight||844;
+  function setVH(){ vh=probe.offsetHeight||window.innerHeight||844; document.documentElement.style.setProperty('--vh',(vh/100)+'px'); }
+  setVH();
+
+  // render(hold): hold 0..1 = локальний прогрес pin-band'у
+  function render(hold){
+    hold=clamp((typeof hold==='number'&&isFinite(hold))?hold:0,0,1);
+    window.__hold=hold;
+    if(reduce){
+      card.style.transform='translateY(0)';
+      backdrop.style.transform='scale(1) translateY(0)';
+      return;
+    }
+    // M2 backdrop-settle: завершується на hold 0.42, ДО наїзду картки
+    var th=clamp(hold/0.42,0,1);
+    var bScale=lerp(1.06,1.0,th), bY=lerp(-8,0,th);
+    backdrop.style.transform='scale('+bScale.toFixed(4)+') translateY('+bY.toFixed(2)+'px)';
+    // M3 card-overlap: наїзд лише у [0.42,1]
+    var cardProg=ease(clamp((hold-0.42)/0.58,0,1));
+    var yPct=(1-cardProg)*100;
+    card.style.transform='translateY('+yPct.toFixed(3)+'%)';
+    // M4 curtain-mask — НЕ рухаємо текст: overflow:hidden на .card + фіксований top тексту
+    //   означає, що рухомий верхній край картки сам відкриває рядки. Нуль JS на .card-copy.
+  }
+  window.__cardOverlapRender=render;
+
+  function onScroll(){
+    var span=pinWrap.offsetHeight - vh;
+    var top=-pinWrap.getBoundingClientRect().top + (scroller.scrollTop - scroller.scrollTop); // pin-wrap top у scroller-координатах
+    // прогрес = скільки проскролено всередині pin-band
+    var pwTop=pinWrap.offsetTop;
+    var prog = span>0 ? clamp((scroller.scrollTop - pwTop)/span,0,1) : 0;
+    render(prog);
+  }
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+  scroller.scrollTop=0;
+  scroller.addEventListener('scroll',onScroll,{passive:true});
+  var rsT; window.addEventListener('resize',function(){ clearTimeout(rsT); rsT=setTimeout(function(){ setVH(); onScroll(); },160); });
+  render(0);
+  window.__CARD_OVERLAP_OK__=true;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "id": "split-word-headline",
+  "title": "Split-word headline (Springs)",
+  "level": "L2-molecule",
+  "batch": "A (#2/17)",
+  "source": "springs.estate intro/hero title. Engine = library/components/split-word-headline (proven, trigger:'progress'). Dual wrapper adds the mobile auto-play branch.",
+  "engine": "A headline split into per-word clip rows; each WORD rises from under its own overflow:hidden clip (yPercent 120→0) + fades, staggered in a wave. Pure set(p) driver.",
+
+  "dual_platform": true,
+  "differs": "Same per-word reveal mechanic + same pure set(p) driver. TRIGGER differs: desktop scrubs set(p) from scroll progress (reversible, scroll-linked); mobile ramps set(p) 0→1 once over time on mount (auto-play, plays once). Springs mobile hero title animates in on load; desktop resolves it as you scroll in.",
+
+  "desktop": { "driver": "scrollReveal — p = scroll progress of the headline through the viewport (reversible scrub).", "knobs": ["stagger", "from", "ease"] },
+  "mobile":  { "driver": "autoReveal — p ramps 0→1 once over playMs on mount (ease-in-out), then rests.", "knobs": ["stagger", "playMs"] },
+
+  "knobs": {
+    "stagger": { "default": 0.09, "unit": "s", "what": "wave delay between words." },
+    "from": { "default": { "yPercent": 120, "opacity": 0 }, "what": "per-word start state." },
+    "ease": { "default": "air", "what": "reveal ease." },
+    "playMs": { "default": 1400, "unit": "ms", "platform": "mobile", "what": "auto-play duration of the one-shot cascade." }
+  },
+
+  "entry": "SplitWordHeadlineDual.init(target, opts) -> { platform, engine, driver }. Load engine.js THEN component.js. target = an element holding a headline (data-swh). opts.platform 'auto'|'desktop'|'mobile'.",
+  "law": "transform translateY(% via yPercent) + opacity on inner word spans + overflow:hidden per-word clip only. NO layout-prop animation. GPU; NO mix-blend / NO backdrop / NO WebGL. reduced-motion → all words shown (no travel) on both platforms.",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core)", "component.css", "stage.html", "demo.html", "meta.json", "README.md"]
+}

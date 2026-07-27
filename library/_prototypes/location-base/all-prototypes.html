@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LOCATION · база секції · 6 варіантів</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { height: 100vh; overflow: hidden; display: grid; grid-template-columns: 300px 1fr;
+    background: #16130f; color: #f3f1ec; font-family: 'Inter', system-ui, sans-serif; }
+  aside { border-right: 1px solid rgba(243,241,236,.12); padding: 22px 0 22px 22px; overflow-y: auto; }
+  h1 { font-family: 'Fraunces', Georgia, serif; font-weight: 300; font-size: 1.45rem; letter-spacing: -.02em; margin-bottom: .2rem; }
+  .sub { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(243,241,236,.45); margin-bottom: 1.2rem; }
+  button.it { display: block; width: calc(100% - 22px); text-align: left; appearance: none; background: none;
+    border: none; border-bottom: 1px solid rgba(243,241,236,.08); color: rgba(243,241,236,.8);
+    font: 500 .8rem/1.35 'Inter', sans-serif; padding: .55rem .5rem; cursor: pointer; border-radius: 4px 4px 0 0; }
+  button.it small { display: block; color: rgba(243,241,236,.42); font-size: .68rem; margin-top: .12rem; }
+  button.it:hover { background: rgba(243,241,236,.06); }
+  button.it.is-on { background: rgba(176,106,79,.22); color: #fff; }
+  button.it.is-on small { color: rgba(243,241,236,.6); }
+  main { position: relative; }
+  iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #100e0b; }
+</style>
+</head>
+<body>
+  <aside>
+    <h1>LOCATION · база секції</h1>
+    <p class="sub">с. Агрономічне · жива карта · копі-першою · 6 варіантів</p>
+    <button class="it" data-src="loc-2-pishky-chy-avtom.html"><b>2 · Пішки чи автом</b><small>ФЛАГМАН · камера-dolly, карта малюється до Вінниці</small></button>
+    <button class="it" data-src="loc-1-vse-poruch.html"><b>1 · Все поруч</b><small>постер · жива карта, 7 підписів, нуль кліків</small></button>
+    <button class="it" data-src="loc-3-spysok-i-marshrut.html"><b>3 · Список і маршрут</b><small>оригінал smarts · клік = маршрут по вулицях</small></button>
+    <button class="it" data-src="loc-4-do-samyh-dverei.html"><b>4 · Район, вулиця, ділянка</b><small>план-дрил · три кроки до дверей</small></button>
+    <button class="it" data-src="loc-6-kategorii.html"><b>6 · Категорії</b><small>агрегація · топ-3-4 + кластер «ще N»</small></button>
+    <button class="it" data-src="loc-9-akvarel.html"><b>9 · Акварель</b><small>hover-reveal · фото-віньєтки, жива акварель</small></button>
+  </aside>
+  <main><iframe data-frame src="loc-2-pishky-chy-avtom.html" title="Прототип"></iframe></main>
+  <script>
+    var btns = document.querySelectorAll('.it');
+    var frame = document.querySelector('[data-frame]');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        btns.forEach(function (x) { x.classList.remove('is-on'); });
+        b.classList.add('is-on');
+        frame.src = b.dataset.src;
+      });
+    });
+    btns[0].classList.add('is-on');
+  </script>
+</body>
+</html>

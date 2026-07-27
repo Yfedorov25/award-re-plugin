@@ -1,0 +1,64 @@
+/* ISOMETRIC-BUILDING-UNIT-SELECTOR · component.css
+   A pre-rendered iso building image + an SVG hotspot overlay + a filter bar + a hover info-card
+   + a live count. Filtering highlights matching hotspots, dims the rest; hover lights one.
+   SVG fill/opacity + DOM opacity/transform only. NO mix-blend over the render. NO WebGL. */
+.ibs-stage { position: relative; height: 100vh; overflow: hidden;
+  background: var(--ibs-bg, #2a2622); color: var(--ibs-ink, #e9e3db); }
+
+/* the pre-rendered building + the hotspot SVG, stacked */
+.ibs-render { position: absolute; inset: 0; }
+.ibs-render img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ibs-render::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(42,38,34,.25) 0%, rgba(42,38,34,.05) 40%, rgba(42,38,34,.55) 100%); }
+.ibs-hotspots { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* hotspot states */
+.ibs-unit { cursor: pointer; outline: none;
+  fill: var(--ibs-hot, #c98a5e); fill-opacity: 0;
+  stroke: var(--ibs-hot, #c98a5e); stroke-opacity: 0; stroke-width: 1.5;
+  transition: fill-opacity 300ms ease, stroke-opacity 300ms ease; }
+.ibs-reduced .ibs-unit { transition: none; }
+.ibs-unit.is-match { fill-opacity: .14; stroke-opacity: .55; }
+.ibs-unit.is-dim   { fill-opacity: 0;   stroke-opacity: 0; }
+.ibs-unit.is-hot   { fill-opacity: .34; stroke-opacity: 1; }
+/* sold/reserved tint */
+.ibs-unit[data-state="sold"]     { --ibs-hot: #8a8278; }
+.ibs-unit[data-state="reserved"] { --ibs-hot: #b8a36a; }
+
+/* hover info-card (collection / section / floor / unit) */
+.ibs-card { position: absolute; z-index: 5; min-width: 200px; padding: 1.4rem 1.6rem;
+  background: var(--ibs-card-bg, rgba(58,48,46,.92)); color: var(--ibs-ink, #e9e3db);
+  border-radius: 4px; pointer-events: none; opacity: 0; transform: translateY(6px);
+  transition: opacity 200ms ease, transform 200ms ease; }
+.ibs-card.is-shown { opacity: 1; transform: translateY(0); }
+.ibs-card .row { padding: .5rem 0; border-top: 1px solid rgba(233,227,219,.14); }
+.ibs-card .row:first-child { border-top: 0; }
+.ibs-card .v { font-family: var(--ibs-serif, Georgia, serif); font-size: 1.5rem; line-height: 1; }
+.ibs-card .k { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; opacity: .55; margin-top: .3rem; }
+
+/* live count + actions */
+.ibs-count { position: absolute; right: 4vw; top: 14vh; z-index: 4; text-align: right; }
+.ibs-count .num { font-family: var(--ibs-serif, Georgia, serif); font-size: 3rem; line-height: 1; }
+.ibs-count .lbl { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; opacity: .6; }
+.ibs-expand { position: absolute; left: 4vw; bottom: 14vh; z-index: 4; background: none; border: 0;
+  color: var(--ibs-ink, #e9e3db); cursor: pointer; font-size: .72rem; letter-spacing: .18em;
+  text-transform: uppercase; opacity: .8; display: inline-flex; gap: .5rem; align-items: center; }
+.ibs-apply { position: absolute; left: 50%; bottom: 13vh; transform: translateX(-50%); z-index: 4;
+  padding: .9rem 2rem; background: rgba(233,227,219,.06); border: 1px solid rgba(233,227,219,.4);
+  color: var(--ibs-ink, #e9e3db); cursor: pointer; font-size: .8rem; letter-spacing: .12em;
+  text-transform: uppercase; transition: background .24s; }
+.ibs-apply:hover { background: rgba(233,227,219,.16); }
+
+/* filter bar */
+.ibs-filters { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4;
+  display: flex; gap: 3vw; padding: 1.4rem 4vw; background: rgba(42,38,34,.78);
+  font-size: .78rem; flex-wrap: wrap; align-items: flex-start; }
+.ibs-fgroup { display: flex; flex-direction: column; gap: .6rem; }
+.ibs-fgroup .glabel { font-size: .58rem; letter-spacing: .22em; text-transform: uppercase; opacity: .5; }
+.ibs-fgroup .opts { display: flex; gap: 1rem; flex-wrap: wrap; }
+.ibs-f { background: none; border: 0; color: var(--ibs-ink, #e9e3db); cursor: pointer;
+  padding: .2rem 0; opacity: .8; position: relative; transition: opacity .2s; white-space: nowrap; }
+.ibs-f:hover { opacity: 1; }
+.ibs-f.is-on { opacity: 1; }
+.ibs-f.is-on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px;
+  background: var(--ibs-hot, #c98a5e); }

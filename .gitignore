@@ -1,0 +1,32 @@
+# OS
+.DS_Store
+
+# plugin runtime artifacts (created in the USER's project, not here — but ignore if present)
+.award-re/
+prototypes/
+
+# node (if any tooling added later)
+node_modules/
+
+# scratch
+*.log
+library/components/*/variants/*/renders
+library/components/*/renders
+
+# visual-parity / site-scan GENERATED output (screenshots, diffs, boards, reports).
+# The TOOLS (visual-parity.mjs, site-scan.mjs, ink-box.mjs) are versioned; their
+# per-run output is regenerated on demand and must not bloat the repo (scan alone ~96M).
+scripts/parity/
+scripts/scan/
+scripts/visual-parity-report.json
+scripts/anchor-parity/
+library/boards/
+extraction/*/.asset-cache/
+
+# S55: сирі live-записи не в git (є файли по 100+ МБ, це вище стелі GitHub).
+# Вони НЕ відтворювані, тому зберігати їх треба, але окремо від репо.
+library/techniques/atoms/**/reference/*.mov
+library/techniques/atoms/**/reference/*.mp4
+
+# S56 (COUNCIL-S55-PLAN крок 4): сирі live-записи в КОРЕНІ атома теж поза git (100+ МБ ламають push)
+library/techniques/atoms/*/reference-live.mov

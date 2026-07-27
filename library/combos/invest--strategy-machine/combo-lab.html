@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- D14: перший кадр керується інлайн-скриптом + ранній CLS-спостерігач -->
+<script>
+history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+window.__CLS = 0;
+try {
+  new PerformanceObserver(function (l) {
+    l.getEntries().forEach(function (e) { if (!e.hadRecentInput) window.__CLS += e.value; });
+  }).observe({ type: 'layout-shift', buffered: true });
+} catch (e) {}
+</script>
+<title>LAB · invest--strategy-machine · стратегічна машина AIR B3-B5: sticky-рейка + 2 моделі + budget-мости (T-416 + T-409 + T-M19)</title>
+
+<!--
+================================================================================
+  COMBO LAB · invest--strategy-machine · v1 (хвиля 2 за контрактом B3-B5)
+================================================================================
+  КОНТРАКТ D_AIR_invest_1to1: ліва STICKY-РЕЙКА 23vw (x 1.6->24.7vw; пункт =
+  «МОДЕЛЬ N» 10px + hairline + назва 20px; актив ЧОРНИЙ, неактив #8a8a88;
+  клік = anchor-скрол) + світла контент-панель #ececea 64vw (x 34.4->98.4vw):
+  МОДЕЛЬ 1 (шапка: титул 20px + параграф 13px CAPS праворуч + CASE-картка
+  case-tabs-table) -> BUDGET-МІСТ (повторюється після КОЖНОЇ моделі, §1 B4)
+  -> МОДЕЛЬ 2 (той самий атом, другий датасет) -> міст 2. Нуль пінів (§3.8);
+  єдиний sticky сторінки = рейка (§0).
+  МОБАЙЛ T-M19: рейка гине -> ЗАКРІПЛЕНА ЗНИЗУ пара «1. | 2.» = SCROLL-SPY
+  (підкреслення само переїжджає, коли скрол доходить до моделі 2) І
+  tap-навігація; калькулятор без слайдерів - таби свапають датасет.
+
+  ЧЕСНІСТЬ (F1/F7): нуль окупності й оренди. Датасети = лише канон:
+  МОДЕЛЬ 1 = smart (ЕТ-06 24/27 м², ЕТ-09 вхід 22 800, ЕТ-03 ключі 2027);
+  МОДЕЛЬ 2 = tauny-порівняння (ЕТ-07/08/13/18/19/29: квартира проти
+  таунхауса, 67 000, 82 м², 1,5 сотки, сусіди лише з одного боку).
+  Мости: CTA-формула канону («Обрати квартиру» / дослівний ЕТ-29 міст
+  «Обрати місце в ряду») + пілюлі з deep-link ?price[from]&price[to].
+
+  ЗАКОНИ КОЛА (всі з першої версії):
+  - PROBE_MODE: navigator.webdriver || ?probe - живий перегляд без автоскролів;
+  - D14 head-inline + overflow-anchor none;
+  - loadStability: CLS < 0.1 + дрейф якорів <= 4px;
+  - reveal = ОДИН blur-каскад (<=0.3s/елемент, лаг 0.18s) на секцію, once;
+    стрибок (delta > 0.45vh на подію) або мідскрол-прибуття = settled
+    МИТТЄВО (рейс-стійкий settle(): рішення відкладене на 1 кадр);
+  - контраст >= 4.5:1, bbox-гігієна, dead-band скан.
+
+  ГЕЙТ (B14/B15), десктоп:
+    1. loadStability (CLS + якорі model-1/model-2/рейка);
+    2. СТРИБОК у модель 1 -> 300ms -> нуль [data-brv] у проміжних станах;
+       модель 2 попереду чесно схована;
+    3. РЕЙКА: left ~1.6vw, ширина ~23vw; панель від ~34.4vw, luma 0.8-0.95;
+       sticky тримає (top 0 +-2px на 2 позиціях прогону; висота <= vh, B14);
+       актив: на моделі 1 пункт 1 темніший за пункт 2;
+    4. АТОМИ: своп моделі 1 (24->27) працює; таби моделі 2 = ІНШИЙ датасет
+       («Коробка...»/«Дім...»), своп на «Таунхаус 82 м²» працює;
+    5. МОСТИ: 2 екземпляри по 3 пілюлі, кожен href містить price[from]= і
+       price[to]=; титули = CTA-формули канону;
+    6. ПОВІЛЬНИЙ ПРОХІД (кроки 0.38vh) до моделі 2 -> ЧЕСНИЙ каскад
+       (midBlur > 0, лаги 0.1-0.35s, settled <= 2s), once; spy: пункт 2
+       рейки почорнів; клік пункту 1 -> smooth anchor до моделі 1;
+    7. КОНТРАСТ >= 4.5 (рейка, лід, лейбли/значення картки);
+       DEAD-BAND скан = 0 смуг; console errors == 0.
+  Мобільний гейт (<=768px): T-M19 spy-пара закріплена знизу (bottom ~vh),
+  2 пункти; підкреслення на моделі 1 під пунктом 1, після проходу до
+  моделі 2 - під пунктом 2; тап пункту = навігація; нуль input[type=range];
+  свопи табів працюють; jump -> нуль проміжних станів; сторінка без
+  x-переповнення; текст-ректи >= 16px; loadStability; errors == 0.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/case-tabs-table/component.css">
+<link rel="stylesheet" href="../../components/budget-pills-bridge/component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --paper:#f4f2ee; --ink:#111110; --panel:#ececea; --rail-gray:#8a8a88;
+    --sans:'Inter',system-ui,-apple-system,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html{overflow-anchor:none}   /* D14; smooth-anchor рейки робить JS, не глобальний CSS (інакше програмні стрибки теж стають плавними) */
+  html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+
+  .intro{background:var(--ink);color:var(--paper);padding:9vh clamp(20px,4vw,64px) 8vh}
+  .intro__kicker{font-size:.68rem;letter-spacing:.34em;text-transform:uppercase;opacity:.55;margin-bottom:2.2rem}
+  .intro__title{font-weight:300;font-size:clamp(22px,2.4vw,40px);line-height:1.25;max-width:26ch}
+  .intro__hint{margin-top:2.4rem;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  .media{position:relative;height:88vh;overflow:clip;background:var(--ink)}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .media__cap{position:absolute;left:clamp(20px,4vw,60px);bottom:5vh;color:#fff;
+    font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+    background:rgba(17,17,16,.5);padding:.7em 1.5em;border-radius:999px}
+
+  /* ============ СТРАТЕГІЧНА МАШИНА: рейка 23vw + панель 64vw ============ */
+  .sm{position:relative;background:#fff}
+  .sm__grid{display:grid;grid-template-columns:23vw 1fr;column-gap:0}
+  .sm__rail{padding-left:1.6vw}
+  .sm__rail-in{position:sticky;top:0;padding:12vh 2vw 6vh 0}   /* B14: висота << vh */
+  .sm__rail-item{display:block;text-decoration:none;color:var(--rail-gray);
+    padding:2.2vh 0 2.6vh;border-top:1px solid rgba(17,17,16,.16)}
+  .sm__rail-item:first-child{border-top:0}
+  .sm__rail-kicker{display:block;font-size:10px;letter-spacing:.22em;
+    text-transform:uppercase;margin-bottom:1.1vh}
+  .sm__rail-name{display:block;font-size:20px;line-height:1.2;
+    text-transform:uppercase;letter-spacing:.03em}
+  .sm__rail-item.is-active{color:var(--ink)}
+  .sm__rail-item.is-active .sm__rail-kicker{color:var(--ink)}
+
+  .sm__panel{background:var(--panel);
+    padding:10vh 1.6vw 10vh calc(34.4vw - 23vw)}  /* контент-колона від 34.4vw */
+  .sm__model{scroll-margin-top:8vh}
+  .sm__model + .sm__bridge, .sm__bridge + .sm__model{margin-top:12vh}
+  .sm__model-head{display:grid;grid-template-columns:1fr minmax(0,46%);
+    gap:2vw;margin:0 1.2vw 5vh}
+  .sm__model-title{font-size:20px;text-transform:uppercase;letter-spacing:.04em;font-weight:400}
+  .sm__model-lead{font-size:13px;line-height:1.7;letter-spacing:.08em;
+    text-transform:uppercase;color:#5c5c58}
+  .sm__model [data-ctt]{margin:0 1.2vw}
+
+  .sm__bridge{margin:0 1.2vw}
+  .sm__bridge-title{font-size:clamp(16px,1.55vw,22px);text-transform:uppercase;
+    letter-spacing:.08em;font-weight:400;margin-bottom:3.5vh}
+
+  .tail{padding:7vh 20px;text-align:center;font-size:.62rem;
+    letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  /* T-M19 spy-пара: закріплена знизу, підкреслення їде за секцією */
+  .spy{display:none}
+  @media (max-width:768px){
+    .media{height:64vh}
+    .sm__grid{grid-template-columns:minmax(0,1fr)}
+    .sm__rail{display:none}
+    .sm__panel{min-width:0;padding:8vh clamp(16px,5vw,28px) 16vh}
+    .sm__model-head{grid-template-columns:1fr;gap:3vw;margin:0 0 4vh}
+    .sm__model [data-ctt]{margin:0;min-width:0}
+    .ctt__res-value{white-space:normal}
+    .sm__bridge{margin:0}
+    .spy{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;
+      background:rgba(244,242,238,.96);border-top:1px solid rgba(17,17,16,.14)}
+    .spy__item{flex:1 1 0;position:relative;display:block;text-align:center;
+      padding:14px 8px 16px;text-decoration:none;color:var(--rail-gray);
+      font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+    .spy__item.is-active{color:var(--ink)}
+    .spy__line{position:absolute;left:0;bottom:0;height:2px;width:50%;
+      background:var(--ink);will-change:transform}
+  }
+</style>
+</head>
+<body>
+
+  <header class="intro">
+    <p class="intro__kicker">Lab · invest--strategy-machine · AIR B3-B5</p>
+    <h1 class="intro__title">Стратегічна машина. Дві моделі, кейси на табах і мости в каталог.</h1>
+    <p class="intro__hint">Гортайте вниз</p>
+  </header>
+
+  <section class="media">
+    <img src="renders/day-front.webp" alt="Квартал, фасад, день" id="mediaImg">
+    <div class="media__cap">Контекст-сусід · день</div>
+  </section>
+
+  <!-- МАШИНА: рейка (контракт B3) + панель з моделями і мостами -->
+  <section class="sm" id="sm">
+    <div class="sm__grid">
+      <aside class="sm__rail">
+        <nav class="sm__rail-in" id="railIn" aria-label="Моделі">
+          <a class="sm__rail-item is-active" id="railItem1" href="#model-1">
+            <span class="sm__rail-kicker">Модель 1</span>
+            <span class="sm__rail-name">Смарт-квартира</span>
+          </a>
+          <a class="sm__rail-item" id="railItem2" href="#model-2">
+            <span class="sm__rail-kicker">Модель 2</span>
+            <span class="sm__rail-name">Дім замість квартири</span>
+          </a>
+        </nav>
+      </aside>
+
+      <div class="sm__panel">
+        <!-- МОДЕЛЬ 1 · smart (ЕТ-06/09/03/25) -->
+        <div class="sm__model" id="model-1">
+          <div class="sm__model-head">
+            <h2 class="sm__model-title" data-brv data-brv-order="0">Смарт-квартира</h2>
+            <p class="sm__model-lead" data-brv data-brv-order="1">Маленька квартира на 24 або 27 метрів. У ній немає довгих коридорів і кутків, якими ніхто не користується.</p>
+          </div>
+          <div data-ctt id="ctt1" data-brv data-brv-order="2"></div>
+        </div>
+
+        <!-- МІСТ 1 (B4: після КОЖНОЇ моделі) -->
+        <div class="sm__bridge" id="bridge-1">
+          <h3 class="sm__bridge-title" data-brv data-brv-order="0">Обрати квартиру</h3>
+          <nav data-bpb data-bpb-base="#каталог" id="bpb1" aria-label="Бюджет" data-brv data-brv-order="1">
+            <a data-bpb-pill data-from="0" data-to="30000">До 30 000 доларів</a>
+            <a data-bpb-pill data-from="30000" data-to="70000">30 000 · 70 000 доларів</a>
+            <a data-bpb-pill data-from="70000" data-to="200000">Від 70 000 доларів</a>
+          </nav>
+        </div>
+
+        <!-- МОДЕЛЬ 2 · tauny-порівняння (ЕТ-07/08/13/18/19/29) -->
+        <div class="sm__model" id="model-2">
+          <div class="sm__model-head">
+            <h2 class="sm__model-title" data-brv data-brv-order="0">Дім замість квартири</h2>
+            <p class="sm__model-lead" data-brv data-brv-order="1">Однокімнатна у новобудові коштує від 60 до 65 тисяч доларів. Таунхаус тут починається з 67. Різниця у кілька тисяч, а життя інше: не одна кімната, а дім із двором.</p>
+          </div>
+          <div data-ctt id="ctt2" data-brv data-brv-order="2"></div>
+        </div>
+
+        <!-- МІСТ 2 (дослівний канон-міст ЕТ-29) -->
+        <div class="sm__bridge" id="bridge-2">
+          <h3 class="sm__bridge-title" data-brv data-brv-order="0">Обрати місце в ряду</h3>
+          <nav data-bpb data-bpb-base="#каталог" id="bpb2" aria-label="Бюджет" data-brv data-brv-order="1">
+            <a data-bpb-pill data-from="0" data-to="30000">До 30 000 доларів</a>
+            <a data-bpb-pill data-from="30000" data-to="70000">30 000 · 70 000 доларів</a>
+            <a data-bpb-pill data-from="70000" data-to="200000">Від 70 000 доларів</a>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- T-M19: закріплена знизу spy-пара (мобайл) -->
+  <nav class="spy" id="spy" aria-label="Моделі">
+    <a class="spy__item is-active" id="spyItem1" href="#model-1">1. Смарт-квартира</a>
+    <a class="spy__item" id="spyItem2" href="#model-2">2. Дім із двором</a>
+    <span class="spy__line" id="spyLine" aria-hidden="true"></span>
+  </nav>
+
+  <footer class="tail">invest--strategy-machine · кінець проби</footer>
+
+<script src="../../components/case-tabs-table/component.js"></script>
+<script src="../../components/budget-pills-bridge/component.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var errs = 0;
+  var NET_RE = /Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|ERR_INTERNET|ERR_NAME/;
+  var _e = console.error;
+  console.error = function () {
+    var s = Array.prototype.join.call(arguments, ' ');
+    if (!NET_RE.test(s)) errs++;
+    return _e.apply(console, arguments);
+  };
+  window.addEventListener('error', function (ev) {
+    var s = String((ev && ev.message) || '');
+    if (!NET_RE.test(s)) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  function raf2() { return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); }); }
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function rect(el) { return el.getBoundingClientRect(); }
+  function rangeRect(el) {
+    var rng = document.createRange();
+    rng.selectNodeContents(el);
+    return rng.getBoundingClientRect();
+  }
+  function parseColor(css) {
+    var m = css.match(/[\d.]+/g) || [0, 0, 0];
+    return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+  }
+  function relLum(c) {
+    function f(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  }
+  function wcag(fg, bg) {
+    var a = relLum(fg), b = relLum(bg);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+  function luma(css) { return relLum(parseColor(css)); }
+  function blurPx(el) {
+    var f = getComputedStyle(el).filter || '';
+    var m = f.match(/blur\((\d+(\.\d+)?)px\)/);
+    return m ? parseFloat(m[1]) : 0;
+  }
+  function vw(p) { return window.innerWidth * p / 100; }
+  function vh(p) { return window.innerHeight * p / 100; }
+
+  var mobileVP = window.innerWidth <= 768;
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGsap = !!window.gsap;
+  var PROBE_MODE = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  /* ================= АТОМИ: 2 моделі + 2 мости (канон-датасети) ============ */
+  var CASES_M1 = [
+    { tab: '24 метри', head: 'Квартира 24 м²',
+      rows: [
+        { label: 'Площа', value: '24 м²' },
+        { label: 'Ремонт', value: 'під ключ' },
+        { label: 'Ключі', value: '2027 рік' },
+        { label: 'Розтермінування', value: 'графік під ваш бюджет' },
+        { label: 'Коридори', value: 'немає зайвих' }
+      ],
+      result: [
+        { label: 'Вхід', value: 'від 22 800 доларів' },
+        { label: 'Ключі', value: '2027 рік' }
+      ] },
+    { tab: '27 метрів', head: 'Квартира 27 м²',
+      rows: [
+        { label: 'Площа', value: '27 м²' },
+        { label: 'Ремонт', value: 'під ключ' },
+        { label: 'Ключі', value: '2027 рік' },
+        { label: 'Розтермінування', value: 'графік під ваш бюджет' },
+        { label: 'Коридори', value: 'немає зайвих' }
+      ],
+      result: [
+        { label: 'Вхід', value: 'від 22 800 доларів' },
+        { label: 'Ключі', value: '2027 рік' }
+      ] }
+  ];
+  var CASES_M2 = [
+    { tab: 'Коробка з сусідами за стіною', head: 'Однокімнатна у новобудові',
+      rows: [
+        { label: 'Формат', value: 'одна кімната' },
+        { label: 'Ціна', value: 'від 60 до 65 тисяч доларів' },
+        { label: 'Двір', value: 'немає' },
+        { label: 'Тераса', value: 'квартира не дає' },
+        { label: 'Сусіди', value: 'за стіною' }
+      ],
+      result: [
+        { label: 'Ціна', value: 'до 65 000 доларів' },
+        { label: 'Двір', value: 'немає' }
+      ] },
+    { tab: 'Дім із двором і своїм входом', head: 'Таунхаус 82 м²',
+      rows: [
+        { label: 'Формат', value: 'дім на 2 поверхи' },
+        { label: 'Ціна', value: 'від 67 000 доларів' },
+        { label: 'Двір', value: '1,5 сотки власного' },
+        { label: 'Тераса', value: 'під перголою, місце під мангал' },
+        { label: 'Сусіди', value: 'лише з одного боку' }
+      ],
+      result: [
+        { label: 'Старт', value: 'від 67 000 доларів' },
+        { label: 'Двір', value: '1,5 сотки' }
+      ] }
+  ];
+  var ctt1 = CaseTabsTable.create('#ctt1', { cases: CASES_M1, duration: 0.3 });
+  var ctt2 = CaseTabsTable.create('#ctt2', { cases: CASES_M2, duration: 0.3 });
+  var bpb1 = BudgetPillsBridge.create('#bpb1');
+  var bpb2 = BudgetPillsBridge.create('#bpb2');
+
+  /* ========= РЕЙКА-SPY (десктоп) + T-M19 spy-пара (мобайл), D6-записи ====== */
+  var spyState = -1;
+  function setActiveModel(idx) {
+    if (idx === spyState) return;               /* пишемо DOM лише при зміні */
+    spyState = idx;
+    var r1 = document.getElementById('railItem1'), r2 = document.getElementById('railItem2');
+    r1.classList.toggle('is-active', idx === 0);
+    r2.classList.toggle('is-active', idx === 1);
+    var s1 = document.getElementById('spyItem1'), s2 = document.getElementById('spyItem2');
+    s1.classList.toggle('is-active', idx === 0);
+    s2.classList.toggle('is-active', idx === 1);
+    var line = document.getElementById('spyLine');
+    line.style.transform = 'translateX(' + (idx === 1 ? '100%' : '0%') + ')';
+  }
+  var spyTick = false;
+  function onSpyScroll() {
+    if (spyTick) return;
+    spyTick = true;
+    requestAnimationFrame(function () {
+      spyTick = false;
+      var m2 = document.getElementById('model-2').getBoundingClientRect();
+      setActiveModel(m2.top < window.innerHeight * 0.5 ? 1 : 0);
+    });
+  }
+  window.addEventListener('scroll', onSpyScroll, { passive: true });
+  setActiveModel(0);
+
+  /* плавний anchor-скрол ЛИШЕ на клік пунктів (контракт B3: клік = anchor) */
+  ['railItem1', 'railItem2', 'spyItem1', 'spyItem2'].forEach(function (id) {
+    var a = document.getElementById(id);
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var t = document.querySelector(a.getAttribute('href'));
+      var y = t.getBoundingClientRect().top + window.scrollY - window.innerHeight * 0.08;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+  /* ======== BLUR-REVEAL: секційний каскад + анти-стрибок (закон кола) ======
+     Той самий рейс-стійкий settle(), що в official invest--quiet-depth v3:
+     IO-колбек може прийти раніше scroll-події стрибка, тож рішення
+     каскад/instant відкладене на 1 кадр. Стеля доктрини D4: 0.3s/елемент. */
+  var BLUR_DUR = 0.3, BLUR_LAG = 0.18, BLUR_FROM = 10;
+  window.__REVEAL_LOG = [];
+  window.__GATE = { decodeT: -1, firstRevealT: -1, allCompleteAtFirstReveal: null,
+                    groupRuns: {}, instant: [] };
+
+  var groups = [];
+  ['model-1', 'bridge-1', 'model-2', 'bridge-2'].forEach(function (id) {
+    var root = document.getElementById(id);
+    groups.push({
+      id: id, root: root, runs: 0,
+      els: Array.prototype.slice.call(root.querySelectorAll('[data-brv]'))
+    });
+  });
+  groups.forEach(function (g) {
+    g.els.forEach(function (el) { el.__order = +el.getAttribute('data-brv-order') || 0; });
+  });
+
+  function hideAll() {
+    if (!hasGsap || reduced) return;
+    groups.forEach(function (g) {
+      g.els.forEach(function (el) {
+        gsap.set(el, { opacity: 0, filter: 'blur(' + BLUR_FROM + 'px)', willChange: 'filter,opacity' });
+      });
+    });
+  }
+  hideAll();
+
+  var keyImgs = [document.getElementById('mediaImg')];
+
+  function applyInstant(g) {
+    window.__GATE.instant.push(g.id);
+    g.els.forEach(function (el) {
+      gsap.set(el, { opacity: 1, filter: 'blur(0px)', clearProps: 'will-change' });
+    });
+  }
+  function applyCascade(g) {
+    g.els.forEach(function (el) {
+      gsap.to(el, {
+        opacity: 1, filter: 'blur(0px)', duration: BLUR_DUR,
+        delay: el.__order * BLUR_LAG, ease: 'power2.out',
+        onStart: function () {
+          var t = performance.now();
+          if (window.__GATE.firstRevealT < 0) {
+            window.__GATE.firstRevealT = t;
+            window.__GATE.allCompleteAtFirstReveal = keyImgs.every(function (im) { return !!(im && im.complete); });
+          }
+          window.__REVEAL_LOG.push({ g: g.id, order: el.__order, t: t });
+        },
+        onComplete: function () { gsap.set(el, { clearProps: 'will-change' }); }
+      });
+    });
+  }
+  var lastScrollY = 0, lastJumpT = -1;
+  function settle(g, mode) {
+    if (g.runs > 0) return;
+    g.runs++;
+    window.__GATE.groupRuns[g.id] = g.runs;
+    if (g.io) g.io.disconnect();
+    if (mode === 'instant') { applyInstant(g); return; }
+    requestAnimationFrame(function () {
+      if (lastJumpT > 0 && performance.now() - lastJumpT < 250) applyInstant(g);
+      else applyCascade(g);
+    });
+  }
+  function onScrollJump() {
+    var y = window.scrollY, delta = Math.abs(y - lastScrollY);
+    lastScrollY = y;
+    var vhpx = window.innerHeight;
+    if (delta > vhpx * 0.45) lastJumpT = performance.now();
+    else if (delta > 2) lastJumpT = -1;   /* звичайний скрол-крок скасовує стрибок-мітку */
+    var pending = groups.filter(function (g) { return g.runs === 0; });
+    if (!pending.length) { window.removeEventListener('scroll', onScrollJump); return; }
+    pending.forEach(function (g) {
+      var r = g.root.getBoundingClientRect();
+      if (r.bottom < 60) { settle(g, 'instant'); return; }
+      if (delta > vhpx * 0.45 && r.top < vhpx * 0.85 && r.bottom > 0) settle(g, 'instant');
+    });
+  }
+  function armReveals() {
+    if (!hasGsap || reduced) return;
+    var vhpx = window.innerHeight;
+    var midScrollArrival = window.scrollY > vhpx * 0.5;
+    groups.forEach(function (g) {
+      var r = g.root.getBoundingClientRect();
+      if (r.bottom < vhpx * 0.15) { settle(g, 'instant'); return; }
+      if (midScrollArrival && r.top < vhpx * 0.85 && r.bottom > 0) { settle(g, 'instant'); return; }
+      g.io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) settle(g, 'auto'); });
+      }, { threshold: 0.12 });
+      g.io.observe(g.root);
+    });
+    lastScrollY = window.scrollY;
+    window.addEventListener('scroll', onScrollJump, { passive: true });
+  }
+  Promise.all(keyImgs.map(function (im) {
+    return (im && im.decode) ? im.decode().catch(function () {}) : Promise.resolve();
+  })).then(function () {
+    window.__GATE.decodeT = performance.now();
+    armReveals();
+  });
+
+  /* =====================================================================
+     ПРОБИ (тільки PROBE_MODE)
+     ===================================================================== */
+  var report = { viewport: null, gate: null, stability: null, jump: null,
+                 rail: null, atoms: null, bridges: null, reveal: null,
+                 contrast: null, deadBands: null, mobile: null, errors: null };
+
+  function jumpTo(y) {
+    window.scrollTo(0, Math.max(0, y));
+    return raf2();
+  }
+  async function stepScrollTo(targetY) {
+    var stepPx = window.innerHeight * 0.38;
+    var y = window.scrollY;
+    while (Math.abs(targetY - y) > stepPx) {
+      y += Math.sign(targetY - y) * stepPx;
+      window.scrollTo(0, Math.max(0, y));
+      await raf2();
+    }
+    window.scrollTo(0, Math.max(0, targetY));
+    await raf2();
+  }
+  function elTargetY(el, bias) {
+    var r = el.getBoundingClientRect();
+    return r.top + window.scrollY - (window.innerHeight - r.height) * (bias == null ? 0.5 : bias);
+  }
+
+  async function probeStability() {
+    var out = { cls: -1, drift: -1, ok: false };
+    var anchors = [document.getElementById('model-1'), document.getElementById('model-2'),
+                   document.getElementById('railIn')];
+    var y0 = anchors.map(function (el) { return rect(el).top + window.scrollY; });
+    await delay(1000);
+    var drift = 0;
+    anchors.forEach(function (el, i) {
+      drift = Math.max(drift, Math.abs(rect(el).top + window.scrollY - y0[i]));
+    });
+    out.cls = +(window.__CLS || 0).toFixed(4);
+    out.drift = +drift.toFixed(1);
+    out.ok = out.cls < 0.1 && out.drift <= 4;
+    return out;
+  }
+
+  async function probeJump() {
+    var out = { settledVisible: 0, hiddenAhead: 0, intermediates: 0, ok: false };
+    await jumpTo(elTargetY(document.getElementById('model-1'), 0.1));
+    await delay(300);
+    var vhpx = window.innerHeight;
+    Array.prototype.slice.call(document.querySelectorAll('[data-brv]')).forEach(function (el) {
+      var op = parseFloat(getComputedStyle(el).opacity);
+      var bl = blurPx(el);
+      var r = el.getBoundingClientRect();
+      if ((op > 0.05 && op < 0.95) || (bl > 0.5 && bl < 9.5)) out.intermediates++;
+      if (r.top < vhpx && op >= 0.95 && bl <= 0.5) out.settledVisible++;
+      if (r.top >= vhpx && op <= 0.05) out.hiddenAhead++;
+    });
+    out.ok = out.intermediates === 0 && out.settledVisible >= 2 && out.hiddenAhead >= 3;
+    return out;
+  }
+
+  /* геометрія рейки/панелі + sticky-семпл + актив пункту 1 - все на позиції
+     моделі 1 (за модель 2 НЕ виходимо: її перший візит = чесний каскад у
+     probeReveal) */
+  function probeRailGeom() {
+    var out = { left_vw: 0, width_vw: 0, panelLeft_vw: 0, panelLuma: 0,
+                stickyTop1: -99, railH_vh: 0, activeAt1: false, ok: false };
+    var railIn = document.getElementById('railIn');
+    var railCol = document.querySelector('.sm__rail');
+    var i1 = document.getElementById('railItem1'), i2 = document.getElementById('railItem2');
+    var r = rect(railIn);
+    out.left_vw = +(r.left / vw(1)).toFixed(2);
+    out.width_vw = +(rect(railCol).width / vw(1)).toFixed(2);  /* грід-колонка 23vw */
+    out.railH_vh = +(r.height / vh(1)).toFixed(1);
+    out.stickyTop1 = +r.top.toFixed(1);
+    out.panelLeft_vw = +(rect(document.getElementById('ctt1')).left / vw(1)).toFixed(2);
+    out.panelLuma = +luma(getComputedStyle(document.querySelector('.sm__panel')).backgroundColor).toFixed(3);
+    out.activeAt1 = luma(getComputedStyle(i1).color) < luma(getComputedStyle(i2).color) - 0.05;
+    out.ok = Math.abs(out.left_vw - 1.6) <= 0.9 &&
+             Math.abs(out.width_vw - 23) <= 1.6 &&
+             Math.abs(out.panelLeft_vw - 34.4) <= 2.2 &&
+             out.panelLuma > 0.8 && out.panelLuma < 0.95 &&
+             out.stickyTop1 >= -2 && out.stickyTop1 <= 2 &&
+             out.railH_vh <= 100 && out.activeAt1;
+    return out;
+  }
+
+  async function probeAtoms() {
+    var out = { m1head2: '', m2tabs: [], m2head2: '', backOk: false, ok: false };
+    /* M1 своп (картка вже видима після jump-проби) */
+    await jumpTo(elTargetY(document.getElementById('ctt1'), 0.3));
+    document.querySelectorAll('#ctt1 .ctt__tab')[1].click();
+    await delay(410);
+    out.m1head2 = document.querySelector('#ctt1 .ctt__head .ctt-cur').textContent;
+    document.querySelectorAll('#ctt1 .ctt__tab')[0].click();
+    await delay(410);
+    out.backOk = document.querySelector('#ctt1 .ctt__head .ctt-cur').textContent === 'Квартира 24 м²';
+    /* M2 = ІНШИЙ датасет */
+    out.m2tabs = Array.prototype.map.call(
+      document.querySelectorAll('#ctt2 .ctt__tab-label'),
+      function (l) { return l.textContent; });
+    await jumpTo(elTargetY(document.getElementById('ctt2'), 0.3));
+    document.querySelectorAll('#ctt2 .ctt__tab')[1].click();
+    await delay(410);
+    out.m2head2 = document.querySelector('#ctt2 .ctt__head .ctt-cur').textContent;
+    out.ok = out.m1head2 === 'Квартира 27 м²' && out.backOk &&
+             out.m2tabs[0] === 'Коробка з сусідами за стіною' &&
+             out.m2tabs[1] === 'Дім із двором і своїм входом' &&
+             out.m2head2 === 'Таунхаус 82 м²';
+    return out;
+  }
+
+  function probeBridges() {
+    var out = { titles: [], links1: [], links2: [], ok: false };
+    out.titles = Array.prototype.map.call(
+      document.querySelectorAll('.sm__bridge-title'),
+      function (t) { return t.textContent; });
+    out.links1 = bpb1.links();
+    out.links2 = bpb2.links();
+    function linksOk(ls) {
+      return ls.length === 3 && ls.every(function (h) {
+        return h.indexOf('price[from]=') >= 0 && h.indexOf('price[to]=') >= 0;
+      });
+    }
+    out.ok = out.titles.length === 2 &&
+             out.titles[0] === 'Обрати квартиру' &&
+             out.titles[1] === 'Обрати місце в ряду' &&
+             linksOk(out.links1) && linksOk(out.links2);
+    return out;
+  }
+
+  var hiddenBeforeM2 = null;
+  async function probeReveal() {
+    var out = { hiddenBefore: hiddenBeforeM2 === true, cascade: false, midBlur: null,
+                settledBlur: -1, lags: [], settleMs: 0, gateOk: false, onceOk: false, ok: false };
+    /* модель 2 ще не запалена (перевірено на старті); повільний прохід */
+    var title2 = document.querySelector('#model-2 .sm__model-title');
+    var t0 = performance.now();
+    /* повільний прохід ВІД моделі 1 (де ми вже стоїмо) - перший крок скидає
+       jump-мітку, каскад чесний */
+    await stepScrollTo(elTargetY(document.getElementById('model-2'), 0.3));
+    out.cascade = window.__GATE.instant.indexOf('model-2') === -1;
+    await delay(120);
+    out.midBlur = +blurPx(title2).toFixed(2);
+    await delay(900);
+    out.settledBlur = +blurPx(title2).toFixed(2);
+    out.settleMs = Math.round(performance.now() - t0);
+    var log = window.__REVEAL_LOG.filter(function (x) { return x.g === 'model-2'; })
+      .sort(function (a, b) { return a.order - b.order; });
+    for (var i = 1; i < log.length; i++)
+      out.lags.push(+((log[i].t - log[i - 1].t) / 1000).toFixed(3));
+    var lagsOk = out.lags.length >= 2 && out.lags.every(function (l) { return l >= 0.1 && l <= 0.35; });
+    out.gateOk = window.__GATE.decodeT > 0 &&
+                 window.__GATE.firstRevealT >= window.__GATE.decodeT &&
+                 window.__GATE.allCompleteAtFirstReveal === true;
+
+    /* на моделі 2: sticky-семпл 2 + spy-актив пункту 2 + клік пункту 1 =
+       smooth anchor назад до моделі 1 */
+    out.stickyTop2 = +rect(document.getElementById('railIn')).top.toFixed(1);
+    var i1 = document.getElementById('railItem1'), i2 = document.getElementById('railItem2');
+    out.activeAt2 = luma(getComputedStyle(i2).color) < luma(getComputedStyle(i1).color) - 0.05;
+    i1.click();
+    await delay(820);
+    var m1top = rect(document.getElementById('model-1')).top;
+    out.clickBackOk = m1top > -vh(30) && m1top < vh(45);
+
+    await jumpTo(0);
+    await jumpTo(elTargetY(document.getElementById('model-2'), 0.3));
+    await delay(220);
+    out.onceOk = blurPx(title2) === 0 && (window.__GATE.groupRuns['model-2'] || 0) >= 1;
+    out.ok = out.hiddenBefore && out.cascade && out.midBlur !== null && out.midBlur > 0 &&
+             out.settledBlur === 0 && lagsOk && out.settleMs <= 2600 &&
+             out.stickyTop2 >= -2 && out.stickyTop2 <= 2 && out.activeAt2 &&
+             out.clickBackOk && out.gateOk && out.onceOk;
+    return out;
+  }
+
+  function probeContrast() {
+    var out = { minContrast: 99, ok: false };
+    var checks = [
+      ['.sm__rail-item.is-active .sm__rail-name', '.sm__rail'],
+      ['.sm__model-lead', '.sm__panel'],
+      ['#ctt1 .ctt__label', '#ctt1'],
+      ['#ctt1 .ctt__value .ctt-cur', '#ctt1'],
+      ['.bpb__pill', '.sm__panel']
+    ];
+    checks.forEach(function (pair) {
+      var el = document.querySelector(pair[0]);
+      var bgEl = document.querySelector(pair[1]);
+      if (!el || !bgEl) return;
+      var bg = parseColor(getComputedStyle(bgEl).backgroundColor);
+      if (bg.a < 0.99) {
+        var base = parseColor(getComputedStyle(document.querySelector('.sm__panel')).backgroundColor);
+        bg = { r: bg.a * bg.r + (1 - bg.a) * base.r, g: bg.a * bg.g + (1 - bg.a) * base.g,
+               b: bg.a * bg.b + (1 - bg.a) * base.b, a: 1 };
+      }
+      out.minContrast = Math.min(out.minContrast,
+        wcag(parseColor(getComputedStyle(el).color), bg));
+    });
+    out.minContrast = +out.minContrast.toFixed(2);
+    out.ok = out.minContrast >= 4.5;
+    return out;
+  }
+
+  async function probeDeadBands() {
+    var out = { scanned: 0, checked: 0, bands: [], ok: false };
+    var vhpx = window.innerHeight;
+    var act = document.getElementById('sm');
+    var content = Array.prototype.slice.call(document.querySelectorAll(
+      '.sm__rail-item, .sm__model-title, .sm__model-lead, .ctt__row, .ctt__head, .sm__bridge-title, .bpb__pill'));
+    var maxY = document.documentElement.scrollHeight - vhpx;
+    for (var y = 0; y <= maxY; y += 360) {
+      window.scrollTo(0, y);
+      await raf2();
+      out.scanned++;
+      var s = act.getBoundingClientRect();
+      var cover = Math.min(vhpx, s.bottom) - Math.max(0, s.top);
+      if (cover <= vhpx * 0.6) continue;
+      out.checked++;
+      var visible = content.some(function (el) {
+        var rr = el.getBoundingClientRect();
+        return rr.bottom > 60 && rr.top < vhpx - 60;
+      });
+      if (!visible) out.bands.push({ y: y });
+    }
+    out.ok = out.bands.length === 0 && out.checked > 0;
+    return out;
+  }
+
+  /* ================= МОБІЛЬНИЙ ПАКЕТ (T-M19) ================= */
+  async function probeMobile() {
+    var out = { spyFixed: false, spyItems: 0, lineAt1: false, lineAt2: false,
+                tapNavOk: false, noRange: false, swapOk: false, jump: null,
+                pageNoXScroll: false, minTextLeft: 9999, screens: 0, ok: false };
+    var vhpx = window.innerHeight, vwpx = window.innerWidth;
+    var spy = document.getElementById('spy');
+    var line = document.getElementById('spyLine');
+    var s1 = document.getElementById('spyItem1'), s2 = document.getElementById('spyItem2');
+
+    await jumpTo(elTargetY(document.getElementById('model-1'), 0.2));
+    await delay(250);
+    var sr = rect(spy);
+    out.spyFixed = getComputedStyle(spy).position === 'fixed' &&
+                   Math.abs(sr.bottom - vhpx) <= 2;
+    out.spyItems = document.querySelectorAll('.spy__item').length;
+    var lr = rect(line);
+    out.lineAt1 = lr.left < rect(s1).right && lr.right <= rect(s1).right + 2;
+
+    await stepScrollTo(elTargetY(document.getElementById('model-2'), 0.25));
+    await delay(300);
+    lr = rect(line);
+    out.lineAt2 = lr.left >= rect(s2).left - 2;
+
+    /* тап пункту 1 = навігація назад */
+    s1.click();
+    await delay(900);
+    out.tapNavOk = rect(document.getElementById('model-1')).top > -vhpx * 0.4 &&
+                   rect(document.getElementById('model-1')).top < vhpx * 0.5;
+
+    out.noRange = document.querySelectorAll('input[type=range]').length === 0;
+    document.querySelectorAll('#ctt1 .ctt__tab')[1].click();
+    await delay(450);
+    out.swapOk = document.querySelector('#ctt1 .ctt__head .ctt-cur').textContent === 'Квартира 27 м²';
+
+    /* стрибок: нуль проміжних станів */
+    await jumpTo(elTargetY(document.getElementById('bridge-2'), 0.3));
+    await delay(300);
+    var inter = 0;
+    Array.prototype.slice.call(document.querySelectorAll('[data-brv]')).forEach(function (el) {
+      var op = parseFloat(getComputedStyle(el).opacity);
+      var bl = blurPx(el);
+      if ((op > 0.05 && op < 0.95) || (bl > 0.5 && bl < 9.5)) inter++;
+    });
+    out.jump = { intermediates: inter };
+
+    out.pageNoXScroll = document.documentElement.scrollWidth <= vwpx + 1;
+    out.screens = +(document.documentElement.scrollHeight / vhpx).toFixed(2);
+    var minLeft = 9999;
+    ['.intro__title', '.sm__model-title', '.sm__model-lead', '.ctt__label', '.bpb__pill', '.spy__item'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      var r = rangeRect(el);
+      if (r.width > 0) minLeft = Math.min(minLeft, r.left);
+    });
+    out.minTextLeft = +minLeft.toFixed(1);
+
+    out.ok = out.spyFixed && out.spyItems === 2 && out.lineAt1 && out.lineAt2 &&
+             out.tapNavOk && out.noRange && out.swapOk &&
+             out.jump.intermediates === 0 && out.pageNoXScroll &&
+             out.minTextLeft >= 16 && out.screens <= 12;
+    return out;
+  }
+
+  async function runProbes() {
+    await Promise.all([ctt1.ready, ctt2.ready, bpb1.ready, bpb2.ready]);
+    await raf2();
+    report.viewport = window.innerWidth + 'x' + window.innerHeight;
+    var m2title = document.querySelector('#model-2 .sm__model-title');
+    hiddenBeforeM2 = blurPx(m2title) >= BLUR_FROM - 1 &&
+                     parseFloat(getComputedStyle(m2title).opacity) <= 0.05;
+
+    report.stability = await probeStability();
+
+    if (mobileVP) {
+      report.mobile = await probeMobile();
+      report.bridges = probeBridges();
+      report.contrast = probeContrast();
+      report.gate = window.__GATE;
+      report.errors = errs;
+      return report.stability.ok && report.mobile.ok && report.bridges.ok &&
+             report.contrast.ok && errs === 0;
+    }
+
+    report.jump = await probeJump();
+    report.rail = probeRailGeom();       /* на позиції моделі 1 */
+    report.reveal = await probeReveal(); /* ПЕРШИЙ візит моделі 2 = чесний каскад */
+    report.atoms = await probeAtoms();
+    report.bridges = probeBridges();
+    report.contrast = probeContrast();
+    report.deadBands = await probeDeadBands();
+    report.gate = window.__GATE;
+    report.errors = errs;
+    return report.stability.ok && report.jump.ok && report.rail.ok &&
+           report.atoms.ok && report.bridges.ok && report.contrast.ok &&
+           report.reveal.ok && report.deadBands.ok && errs === 0;
+  }
+
+  window.addEventListener('load', async function () {
+    if (!PROBE_MODE) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = false;
+    try { ok = await runProbes(); }
+    catch (e) { report.exception = String(e); ok = false; }
+    window.scrollTo(0, 0);
+    window.__PROBE = report;
+    window.__LAB_OK__ = !!ok;
+    if (!ok) console.log('[LAB invest--strategy-machine] probe report:', JSON.stringify(report));
+  });
+})();
+</script>
+</body>
+</html>

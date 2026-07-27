@@ -1,0 +1,97 @@
+/* PORTRAIT-VERTICAL-HERO · component.css
+   A composed PORTRAIT 9:16 hero PLATE: a 9:16 framed render (object-fit cover) inside a thin
+   coords/meta frame, an eyebrow, a serif title, a small bottom meta row — centred with generous
+   air. On enter the plate settles (scale 1.04 -> 1 + opacity) and the type staggers in. Motion is
+   transform scale/translateY + opacity ONLY (NO width/height/top/left/margin). NO mix-blend / NO
+   backdrop. NO WebGL. */
+
+.pvh-stage {
+  display: grid;
+  place-items: center;
+  min-height: var(--pvh-min-h, 100svh);
+  padding: var(--pvh-pad, 8vh 6vw);
+  background: var(--pvh-bg, #0e0d0a);
+  color: var(--pvh-ink, #f3efe6);
+}
+
+/* the composed plate — settles as one unit on enter */
+.pvh-plate {
+  width: min(var(--pvh-plate-w, 40vh), 86vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--pvh-gap, clamp(1.4rem, 3vh, 2.6rem));
+  transform-origin: 50% 50%;
+  opacity: 0;
+}
+
+/* figure = the 9:16 frame + decorative coords chrome */
+.pvh-figure {
+  position: relative;
+  width: 100%;
+  margin: 0;
+}
+.pvh-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--pvh-ratio, 9 / 16);
+  border-radius: var(--pvh-radius, 3px);
+  background: var(--pvh-frame-bg, #1a1813);
+}
+.pvh-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* thin coords/meta frame — stroke corners only, sits just outside the render */
+.pvh-chrome { position: absolute; inset: calc(-1 * var(--pvh-chrome-inset, 10px)); pointer-events: none; }
+.pvh-corner {
+  position: absolute; width: var(--pvh-corner, 16px); height: var(--pvh-corner, 16px);
+  border: 1px solid var(--pvh-line, rgba(243, 239, 230, 0.5));
+}
+.pvh-corner--tl { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.pvh-corner--tr { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.pvh-corner--bl { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.pvh-corner--br { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+/* the type block — centred, each child staggers in */
+.pvh-type { width: 100%; text-align: center; }
+.pvh-eyebrow {
+  font-family: var(--pvh-sans, system-ui, sans-serif);
+  font-size: var(--pvh-eyebrow-size, 0.72rem);
+  letter-spacing: var(--pvh-eyebrow-track, 0.34em);
+  text-transform: uppercase;
+  opacity: 0;
+  margin-bottom: 0.9rem;
+  color: var(--pvh-line, rgba(243, 239, 230, 0.7));
+}
+.pvh-title {
+  font-family: var(--pvh-serif, Georgia, serif);
+  font-weight: 400;
+  font-size: var(--pvh-title-size, clamp(1.7rem, 4.4vw, 2.6rem));
+  line-height: 1.08;
+  opacity: 0;
+  margin: 0 auto;
+  max-width: 18ch;
+}
+.pvh-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-top: 1.1rem;
+  opacity: 0;
+  font-family: var(--pvh-sans, system-ui, sans-serif);
+  font-size: var(--pvh-meta-size, 0.74rem);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pvh-line, rgba(243, 239, 230, 0.62));
+}
+.pvh-meta-dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: 0.7; }
+
+/* reduced-motion / no-gsap -> static composed plate (everything shown, no transform) */
+@media (prefers-reduced-motion: reduce) {
+  .pvh-plate, .pvh-eyebrow, .pvh-title, .pvh-meta { opacity: 1 !important; transform: none !important; }
+}

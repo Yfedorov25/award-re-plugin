@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · horizontal-spec-carousel · 11tanjung (translateX cards, vertical-pill arrows, spec-row swap, edge-peek)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · horizontal-spec-carousel
+================================================================================
+  11tanjung's plans carousel — landscape cards on a track translateX one step at a time
+  with edge-peek; a vertical-pill arrow in the gap; per-card CTA-pill; a spec-row
+  (title/sqft/rooms) that swaps synchronously with the active card. arrows / drag / wheel /
+  keyboard. Harvested from D_11tanjung (C5). OUR QUADRO renders. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --warm-black:#1e1a17; --warm-white:#f4f1ea; --brown:#6b5e4f; --cream:#e6e0d4;
+         --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--warm-black);color:var(--warm-white);font-family:var(--sans);
+    display:flex;flex-direction:column;justify-content:center;min-height:100vh;padding:6vh 7vw}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:2.4vh}
+  .head h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:3.2vw;line-height:1}
+  .head .kicker{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;opacity:.8}
+
+  .hsc-stage{ --hsc-ink:#f4f1ea; --hsc-serif:'Playfair Display',Georgia,serif;
+    --hsc-peek:0.16; --hsc-gap:24px; --hsc-radius:12px; }
+</style>
+</head>
+<body>
+
+  <div class="head">
+    <h2>Плани, що читаються<br>як життя</h2>
+    <div class="kicker">/ Plans — 04</div>
+  </div>
+
+  <section class="hsc-stage" id="plans">
+    <button class="hsc-prev" aria-label="попередній">‹</button>
+    <button class="hsc-next" aria-label="наступний">›</button>
+
+    <div class="hsc-viewport">
+      <div class="hsc-track">
+        <article class="hsc-card" data-title="Таунхаус A" data-sqft="82 м²" data-rooms="3 + тераса">
+          <img src="renders/terrace-02.webp" alt="">
+          <span class="hsc-cta">Дивитись план →</span>
+        </article>
+        <article class="hsc-card" data-title="Таунхаус B" data-sqft="94 м²" data-rooms="4 + двір">
+          <img src="renders/day-front.webp" alt="">
+          <span class="hsc-cta">Дивитись план →</span>
+        </article>
+        <article class="hsc-card" data-title="Кутова секція" data-sqft="108 м²" data-rooms="4 + кабінет">
+          <img src="renders/terrace-04.webp" alt="">
+          <span class="hsc-cta">Дивитись план →</span>
+        </article>
+        <article class="hsc-card" data-title="Пентхаус-рівень" data-sqft="126 м²" data-rooms="5 + дах">
+          <img src="renders/aerial.webp" alt="">
+          <span class="hsc-cta">Дивитись план →</span>
+        </article>
+      </div>
+    </div>
+
+    <div class="hsc-spec">
+      <div class="hsc-spec-title">Таунхаус A</div>
+      <dl>
+        <div class="cell"><span class="k">Площа</span><span class="v hsc-spec-sqft">82 м²</span></div>
+        <div class="cell"><span class="k">Планування</span><span class="v hsc-spec-rooms">3 + тераса</span></div>
+      </dl>
+    </div>
+
+    <div class="hsc-dots">
+      <button class="hsc-dot" aria-label="1"></button>
+      <button class="hsc-dot" aria-label="2"></button>
+      <button class="hsc-dot" aria-label="3"></button>
+      <button class="hsc-dot" aria-label="4"></button>
+    </div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  window.__hsc = HorizontalSpecCarousel.create('#plans', { peek:0.16, duration:520, ease:'cubic-bezier(.22,1,.36,1)', wheel:true, drag:true, index:0 });
+</script>
+</body>
+</html>

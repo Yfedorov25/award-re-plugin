@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>rotated-matrix-collage · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body)}
+  .rmc-bg{ background: radial-gradient(120% 100% at 50% 30%, var(--green) 0%, var(--green-deep) 100%); }
+  .rmc-wash{ background: var(--green); }
+  .rmc-content{ padding: 0 clamp(20px,5vw,90px) clamp(32px,8vh,90px); }
+  .rmc-eyebrow{ font-family:var(--body); font-size:.7rem; letter-spacing:.32em; text-transform:uppercase; color:var(--slate); align-self:flex-start; margin-top:clamp(60px,14vh,140px); }
+  .rmc-title{ margin-top:auto; align-self:flex-end; text-align:right; font-family:var(--serif); font-weight:400;
+    font-size:clamp(2.4rem,7vw,6rem); line-height:1.0; letter-spacing:-.01em; color:var(--cream); }
+
+  /* desktop needs scroll length to drift against; mobile drifts on time so needs none */
+  .after{ height:120vh; display:grid; place-items:center; color:var(--slate);
+    font-size:.72rem; letter-spacing:.2em; text-transform:uppercase; }
+
+  /* tiny live badge so the frame self-labels which branch it picked */
+  .badge{ position:fixed; top:10px; left:10px; z-index:9; font-family:ui-monospace,Menlo,monospace;
+    font-size:.62rem; letter-spacing:.06em; color:#7fd8b0; background:rgba(8,22,17,.72);
+    border:1px solid #26463c; border-radius:999px; padding:4px 10px; pointer-events:none; }
+</style>
+</head>
+<body>
+  <div class="badge" id="badge">…</div>
+  <section class="rmc-stage" id="collage">
+    <div class="rmc-bg"></div>
+    <div class="rmc-plane"><div class="rmc-grid"></div><div class="rmc-wash"></div></div>
+    <div class="rmc-content">
+      <div class="rmc-eyebrow">QUADRO · приватний квартал</div>
+      <div class="rmc-title">Власний<br>спокій</div>
+    </div>
+  </section>
+  <div class="after" id="after"></div>
+
+<script src="component.js"></script>
+<script>
+  var TILES = ['tiles/day-front.webp','tiles/dn-ext-day.webp','tiles/macro-roof.webp','tiles/terrace-02.webp',
+               'tiles/day-34.webp','tiles/macro-pergola.webp','tiles/dn-ext-night.webp','tiles/macro-table.webp',
+               'tiles/day-front.webp','tiles/terrace-02.webp','tiles/macro-roof.webp','tiles/day-34.webp'];
+
+  // platform:'auto' — the module reads matchMedia(min-width:1024px) inside THIS iframe,
+  // so a 390px phone-frame gets mobile auto-drift and a wide frame gets desktop scroll-drift.
+  var r = RotatedMatrixCollage.init('#collage', {
+    tiles: TILES, cols: 4, rows: 3, angle: -9, scale: 1.4, wash: 0.55, gutter: 8,
+    parallax: 20, autoMs: 12000, autoDrift: 240, platform: 'auto'
+  });
+
+  var badge = document.getElementById('badge');
+  badge.textContent = r.platform === 'desktop' ? 'desktop · scroll-drift' : 'mobile · auto-drift';
+
+  // desktop drifts against window scroll; mobile has no scroll need — collapse the spacer
+  if (r.platform === 'mobile') { document.getElementById('after').style.height = '0'; }
+
+  if (r.platform === 'desktop' && window.Lenis) {
+    var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); });
+  }
+</script>
+</body>
+</html>

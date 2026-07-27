@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--heritage-sepia · Спадок на теплому папері</title>
+<!--
+  SECTION VARIANT, location--heritage-sepia (role: location).
+  MAP-STYLE = SEPIA HERITAGE. The SAME dense real OSM district of с. Агрономічне as the
+  surveyed-route-map ideal (real road hierarchy by class, 823 building footprints, the site
+  parcel inside a true-scale 10-minute walking ring), re-rendered as an AGED WARM-PAPER heritage
+  survey: cream aged-paper field with a soft vignette, sepia-brown road hierarchy, warm umber
+  building footprints (NO lit windows in the daylight heritage register), the route draws in a deep
+  rust/oxblood with a live minute counter, brown dashed walking ring, ink-brown chrome. The realism
+  is identical to the ideal (same baked OSM, same Dijkstra routes); only the cartographic TREATMENT
+  differs (palette + line/fill). The warm member of the lane.
+
+  CONTROLLED-INTERACTIVE model (the smarts Агрономічне model): the dense aged-paper district
+  REVEALS on scroll-in ONCE. After that there is NO pin and NO forced stepping: the USER clicks
+  (or hovers) any of the 6 real POIs, on the map or in the VISIBLE side list, and THAT draws the
+  real rust Dijkstra route along the actual streets while a rust walking dot travels it and the
+  live minute counter shows the honest walk-time. Two-way hover (pin <-> list row). This is
+  locmap-engine's native interaction; no scroll-lock, the visitor drives.
+
+  asset-truth: streets/footprints from osm.js; POI names + minutes are the 6 real ones
+  (Траш! 9хв, Аврора 18хв, Грош Експрес 15хв, Нова Пошта 10хв, Подорожник 10хв, Школа·садок 9хв).
+  __LAB_OK__ passes only if: 0 pins (pin-less click section), the cited real atom ran, the
+  [data-render-surface] painted (the aged paper), 0 real console errors. NO WebGL/canvas/tiles.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin. */
+
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* SEPIA HERITAGE PALETTE: re-point every engine token to an aged warm-paper register, a deep
+     rust route accent. This is the whole "different map style", same engine, different paint. */
+  #combo.combo-stage,
+  .shp__field {
+    --lm-ink: #4a3a26;            /* warm ink-brown foreground */
+    --lm-bg-1: #e8dcc0;           /* aged paper */
+    --lm-bg-2: #efe6d1;           /* road casing = lighter paper halo so brown strokes separate */
+    --lm-accent: #8c3a26;         /* deep rust/oxblood, reserved for the active route + parcel */
+    --lm-accent-soft: #a85a3e;    /* warm terracotta soft */
+  }
+
+  /* the stage is a full-viewport map + a reading rail; the section is a normal-flow block (no pin) */
+  #combo.combo-stage { background: #e3d6b8; color: #4a3a26;
+    min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
+
+  /* the render surface = aged warm paper with a soft vignette. A real CSS background of stacked
+     paper washes + a corner vignette gradient, so the honest paint-probe sees a painted surface
+     AND the sheet reads like an old surveyed heritage chart. The SVG mounts inside it. */
+  .shp__field {
+    position: absolute; inset: 0;
+    background-color: #e8dcc0;
+    background-image:
+      /* corner vignette: the paper darkens warm toward the edges */
+      radial-gradient(135% 110% at 50% 42%, rgba(74,58,38,0) 56%, rgba(74,58,38,.16) 84%, rgba(58,42,24,.28)),
+      /* a warm patch low-right, like aged toning on old stock */
+      radial-gradient(60% 52% at 74% 78%, rgba(140,58,38,.07), rgba(140,58,38,0) 62%),
+      /* hairline paper grain so the sheet reads like printed cartographic stock */
+      radial-gradient(rgba(74,58,38,.05) 0.5px, transparent 0.6px),
+      radial-gradient(rgba(74,58,38,.035) 0.5px, transparent 0.6px),
+      /* the base aged-paper field gradient */
+      radial-gradient(120% 100% at 42% 30%, #ece2c8, #ddd0af);
+    background-size: 100% 100%, 100% 100%, 4px 4px, 7px 7px, 100% 100%;
+    background-position: 0 0, 0 0, 0 0, 2px 3px, 0 0;
+  }
+  .shp__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the engine's stage gradient would re-tint the field; force the flat aged paper under the SVG */
+  .shp__field.lm__stage, .shp__field.lm { background-color: #e8dcc0; }
+
+  /* ---- SEPIA MAP TREATMENT: redraw the engine's SVG classes warm-on-paper ---- */
+  /* green demoted to a soft sage wash, water a faint dusty blue, both muted into the paper */
+  .shp__field .lm-gw--green { fill: rgba(108,118,74,.16); }
+  .shp__field .lm-gw--water { fill: rgba(96,118,128,.14); }
+
+  /* buildings: warm umber footprints, hairline sepia stroke, an old printed cadastral plate.
+     NO lit windows in heritage daylight: the --lit class renders like every other footprint. */
+  .shp__field .lm-bld      { fill: rgba(120,86,52,.16); stroke: rgba(96,68,42,.3); stroke-width: 0.5; }
+  .shp__field .lm-bld--lit { fill: rgba(120,86,52,.16); stroke: rgba(96,68,42,.3); animation: none; }
+
+  /* road hierarchy: SEPIA-BROWN strokes over a LIGHTER-PAPER halo casing, so the grid reads warm
+     and crisp on the dense umber footprint field. Widths kept from the engine ranking. */
+  .shp__field .lm-rdc { stroke: #efe6d1; }
+  .shp__field .lm-rd--hwy   { stroke: rgba(74,52,30,.86); }
+  .shp__field .lm-rd--main  { stroke: rgba(140,74,46,.72); }
+  .shp__field .lm-rd--mid   { stroke: rgba(90,66,42,.5); }
+  .shp__field .lm-rd--minor { stroke: rgba(90,66,42,.32); }
+  .shp__field .lm-rd--faint { stroke: rgba(90,66,42,.16); }
+  .shp__field .lm-rdname { fill: rgba(74,58,38,.52); }
+
+  /* parcel: oxblood hatch + oxblood stroke; tag in ink-brown. (engine hatch uses brick rgba) */
+  .shp__field #lmHatch rect { fill: rgba(140,58,38,.1); }
+  .shp__field #lmHatch line { stroke: rgba(140,58,38,.7); }
+  .shp__field .lm-parcel { stroke: var(--lm-accent); stroke-width: 1.6; }
+  .shp__field .lm-pulse  { stroke: var(--lm-accent-soft); }
+  .shp__field .lm-sitetag { fill: #4a3a26; }
+
+  /* walking ring: warm brown dashed */
+  .shp__field .lm-ring  { stroke: rgba(90,66,42,.34); }
+  .shp__field .lm-ringt { fill: rgba(74,58,38,.5); }
+
+  /* numbered POIs: paper disc, sepia ring, ink numeral; active flips to the rust accent */
+  .shp__field .lm-pt circle { fill: #efe6d1; stroke: rgba(96,68,42,.78); stroke-width: 1.4; }
+  .shp__field .lm-pt text   { fill: #4a3a26; }
+  .shp__field .lm-pt:hover circle, .shp__field .lm-pt.is-on circle { fill: var(--lm-accent); stroke: #efe6d1; }
+
+  /* the rust moment: the active Dijkstra route + walker + live badge */
+  .shp__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.2; }
+  .shp__field .lm-walker { fill: var(--lm-accent); stroke: #efe6d1; }
+  .shp__field .lm-livet  { fill: #f4efe6; }
+  .shp__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* the standing section label top-left */
+  .shp__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
+    font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(74,58,38,.58); pointer-events: none;
+  }
+
+  /* ---- the reading rail (ink-brown on paper): eyebrow + serif title + hint + a VISIBLE
+     CLICKABLE list of the 6 real POIs. The visitor drives: click a row to draw its route. ---- */
+  .shp__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(22px, 6vh, 56px);
+    width: min(40ch, 88vw);
+  }
+  @media (min-width: 900px) {
+    .shp__rail { left: auto; right: clamp(24px, 4vw, 60px); top: 50%; bottom: auto;
+      transform: translateY(-50%); width: min(32ch, 34vw); }
+  }
+  .shp__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(74,58,38,.62); margin: 0 0 .5rem;
+  }
+  .shp__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.7rem, 3vw, 2.7rem); line-height: 1.0; letter-spacing: -.03em;
+    color: #3c2e1c; margin: 0 0 .4rem;
+    /* hairline paper highlight so the serif reads as ink ON the warm stock (material depth, dosed) */
+    text-shadow: 0 1px 0 rgba(247,242,230,.5);
+  }
+  .shp__hint {
+    font: 500 .76rem/1.45 var(--combo-sans); letter-spacing: .01em;
+    color: rgba(74,58,38,.6); margin: 0 0 clamp(.9rem, 2vh, 1.4rem);
+  }
+  .shp__coords {
+    display: block; margin-top: .4rem;
+    font: 500 .62rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(74,58,38,.44); text-transform: none;
+  }
+  /* the list the engine fills with .lm-row rows (click + hover drives the route) */
+  .shp__list { display: block; }
+
+  /* re-skin the engine's .lm-row rows for the CREAM field: sepia-ink text, a warm hairline rule,
+     the rust accent on hover/active. (the engine ships dark defaults; this re-paints them light.) */
+  .shp__rail .lm-row {
+    padding: .62rem 0; border-bottom: 1px solid rgba(90,66,42,.22);
+    color: #4a3a26; transition: background .25s, padding-left .25s;
+  }
+  .shp__rail .lm-row .n  { color: var(--lm-accent-soft); }
+  .shp__rail .lm-row .nm { color: #3c2e1c; }
+  .shp__rail .lm-row .tm { color: rgba(74,58,38,.66); opacity: 1; }
+  .shp__rail .lm-row:hover, .shp__rail .lm-row.is-on {
+    background: rgba(140,58,38,.07); padding-left: .5rem;
+  }
+  .shp__rail .lm-row.is-on .n  { color: var(--lm-accent); }
+  .shp__rail .lm-row.is-on .nm { color: var(--lm-accent); }
+
+  .combo-pre, .combo-post { background: #ddd0af; color: rgba(74,58,38,.5); }
+
+  @media (prefers-reduced-motion: reduce) { .shp__rail .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--heritage-sepia">
+
+    <!-- the aged-paper field. locmap-engine injects the SVG here. -->
+    <div class="shp__field lm" data-lm-stage data-render-surface></div>
+
+    <p class="shp__label">с. Агрономічне · за даними OpenStreetMap</p>
+
+    <div class="shp__rail">
+      <p class="shp__eyebrow">Спадок на теплому папері</p>
+      <h2 class="shp__title">Що поруч</h2>
+      <p class="shp__hint">Натисніть місце, щоб побачити шлях і час пішки.
+        <span class="shp__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+      <!-- the engine fills this with clickable rows (two-way synced with the map pins) -->
+      <div class="shp__list" data-lm-list></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (canon engine) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+
+    // ---- ENGINE: the dense real map, re-themed sepia heritage via CSS. owns_pin FALSE;
+    //      reveal on scroll-in once; CLICK/HOVER (map or list row) draws the rust route. ----
+    SectionHarness.ranOK('locmap-engine', function () {
+      var map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true,
+        flicker: { rate: 1e9 },    // heritage daylight: NO lit windows (rate huge -> none light)
+        reveal: { start: 'top 70%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award'
+      });
+      window.__shpMap = map;
+    });
+
+    // pin-less, controlled-interactive section: the visitor clicks to draw routes. 0 pins.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>

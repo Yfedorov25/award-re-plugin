@@ -1,0 +1,58 @@
+# PB_motion_score — МОТИОН-ПАРТИТУРА сайту (щоб усе було ПОВʼЯЗАНО, як Vide Infra) ★★★
+> ФІЛОСОФІЯ ПЛАГІНА: ми не «робимо сайт», ми СТАЄМО Clone Vide Infra. Кожна секція продумана до дрібниць, ВСІ секції повʼязані в одну систему. Vide Infra = ЄДИНИЙ референс РІВНЯ й прийомів.
+> Проблема яку це лікує: на Quadro/Nahirna кожна секція будувалась по-своєму → неузгодженість. Vide Infra так НЕ роблять.
+> Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_color](../../re-color/references/PB_color.md) [PB_media](../../re-media/references/PB_media) [PB_motion_system](../../motion-engine/references/PB_motion_system.md) [PB_scroll_choreography](../../motion-engine/references/PB_scroll_choreography.md) [D_ERA_architecture](../../re-architecture/references/D_ERA_architecture.md) [PB_discovery_strategy](../../discovery-strategy/references/PB_discovery_strategy).
+> Це КРОК між архітектурою і побудовою секцій у плагіні award-re («director's pass»).
+
+## 0. ДВА ДЖЕРЕЛА (не плутати — це критично)
+- **КОНКУРЕНТИ клієнта = тільки СЕНСИ.** З них беремо: ЦА, болі, позиціонування, чим відрізнятись. НІКОЛИ не копіюємо їхній візуал/прийоми/рівень. (Фаза 0, [PB_discovery_strategy](../../discovery-strategy/references/PB_discovery_strategy).)
+- **VIDE INFRA = ЄДИНИЙ референс РІВНЯ Й ПРИЙОМІВ.** Будуємо настільки ж award, продумано до дрібниць. Кожен прийом — з нашої VI-бази (D_*, PB_*). Орієнтир якості — завжди VI, не конкуренти.
+
+## 1. ЩО ТАКЕ МОТИОН-ПАРТИТУРА
+Як партитура для оркестру: ПЕРЕД побудовою плагін проектує ЄДИНИЙ план усіх секцій — який прийом на якій секції, як вони передають естафету, як перетікає тема/ритм. Секції будуються ЗА партитурою, не імпровізуються. Це робить сайт ЦІЛІСНИМ, а не «набором гарних секцій».
+
+## 2. ЄДИНІ КОНСТАНТИ НА ВЕСЬ САЙТ (фіксуються РАЗ, діють скрізь)
+Vide Infra: один движок на все. Наш аналог фіксуємо в config.yaml + globals:
+- **ОДИН ease НА ПРОЄКТ** (обрати, НЕ глобальна константа — sweep довів: ERA/AIR/Ever = `cubic-bezier(.25,.74,.22,.99)` "air"; Silver Pinewood = `cubic-bezier(.25,.46,.45,.94)` easeOutQuad). Обери ОДИН під тон бренду й тримай скрізь. + вторинний `.55,0,.1,1` для повільних morph, `.47,.04,.5,-.06` для anticipation. 0.4-0.8s (block 1.6s). → [_TECHNIQUE_REGISTRY](../../variants-prototyping/references/_TECHNIQUE_REGISTRY.md) §1.
+- **ОДНА токен-система:** --c-* + --t-*, тема=клас (тепла база + темна контра + 1 земляний акцент). → [PB_color](../../re-color/references/PB_color.md)
+- **ОДИН scroll-движок:** Lenis lerp фіксований, dual-rate parallax. → [PB_scroll_smoothness](../../motion-engine/references/PB_scroll_smoothness.md)
+- **ОДИН reveal-патерн:** плавний fade-rise (НЕ slideshow), однаковий стагер.
+- **ОДНА медіа-обробка:** parallax-zoom (img@120%) + Ken-Burns scale на КОЖНОМУ стілі. → [PB_media](../../re-media/references/PB_media)
+- **ОДНА типографіка:** шкала, шрифти, UA-мікротипографіка скрізь. → [PB_typography](../../re-typography/references/PB_typography.md)
+- **ОДИН курсор, ОДИН прелоадер, ОДИН футер-патерн.**
+→ Якщо хоч одна секція відступає від констант без причини — це баг узгодженості (perf/eval-guard ловить).
+
+## 3. ПАРТИТУРА ПРИЙОМІВ (хореографія — який прийом де, щоб НЕ повторювати поспіль)
+Vide Infra розкладають прийоми як кадри фільму, чергуючи важке/легке. Наш канон (під канон-арку [PB_site_architecture](../../re-architecture/references/PB_site_architecture)):
+| Секція | Прийом (з VI-бази) | Тема | Темп |
+|---|---|---|---|
+| Hero | full-bleed + frame-sequence canvas-2D АБО відео-луп + clip-in + багатошар parallax | DARK | повільний, reveal-delay |
+| Manifesto | одне велике речення, text-reveal, багато повітря | LIGHT (breath) | дуже повільний |
+| Architecture | pinned window-reveal / 149-frame scrub + cutout-PNG parallax + named-архітектор цитата | DARK | scrub |
+| Lifestyle/Amenities | carousel (+cursor) / horizontal "1/N" слайдер | LIGHT | середній |
+| Nature/Landscape | crossfade day→evening (CrossfadeMedia) + light-leak | МІД-тон | scrub |
+| Location | inline-SVG карта + POI + категорійний фільтр (palette-cleanser, клік) | DARK | інтерактив |
+| Interiors/Lobby | clip-reveal пара / vertical stack / Ken-Burns | LIGHT | середній |
+| Trust/Engineering | stat-strip count-up + self-draw lines | LIGHT | пунктуація |
+| Units handoff | visual-search SVG (available/sold/reserved) | DARK | інтерактив |
+| CTA | solid warm button + форма, ехо hero-копі | DARK | фінал |
+**Правила хореографії:** 1 hero-момент на сайт · ніколи 2 важких інтерактиви поспіль (між ними text-breath) · тема фліп dark↔light кожні 1-2 секції · 1 «named-expert» pull-quote у середині · stat-strip як ритм-пунктуація.
+
+## 4. ЗВʼЯЗОК МІЖ СЕКЦІЯМИ (естафета, не стоп-кадри)
+- **Тема перетікає:** фон/акцент одної секції готує наступну (overlap, не різкий стрибок). День→ніч як наскрізна нитка (Quadro/ERA).
+- **Прийом-рима:** якщо hero = frame-scrub, architecture теж може scrub (родинність), але lifestyle — carousel (контраст). Свідоме чергування.
+- **Крос-лінк-спина:** кожна story-сторінка завершується меню до сусідніх (ERA visualizationLinesMenu) — сторінки = кільце.
+- **Передача до конверсії:** units-handoff завжди готує CTA; CTA ехоїть hero (рамка наративу).
+
+## 5. ЯК ПЛАГІН ЦЕ РОБИТЬ (director's pass — крок у потоці)
+```
+ПІСЛЯ re-architecture (page-map+арка), ПЕРЕД побудовою секцій:
+1. Зафіксувати ЄДИНІ КОНСТАНТИ (§2) у config.yaml: ease, токени-бренду, scroll, reveal, медіа-обробка, типо.
+2. Розкласти ПАРТИТУРУ (§3) під обрану арку: для КОЖНОЇ секції → {прийом з VI-бази, тема, темп, звʼязок з попередньою/наступною}.
+3. Записати artefact `motion-score.md` (партитура всього сайту).
+4. ТІЛЬКИ ПОТІМ section-builder будує кожну секцію СТРОГО за рядком партитури + констант.
+5. eval-guard перевіряє: чи всі секції в межах констант? чи прийоми не повторюються монотонно? чи тема перетікає?
+```
+
+## 6. ЧЕК (узгодженість рівня Vide Infra)
+☐ ЄДИНІ константи зафіксовані раз, діють на ВСІХ секціях (ease/токени/scroll/reveal/медіа/типо) ☐ motion-score.md складено ПЕРЕД побудовою секцій ☐ кожна секція має призначений прийом із VI-бази (не імпровізація) ☐ тема фліп dark↔light, перетікає (не стрибає) ☐ ніколи 2 важких інтерактиви поспіль ☐ 1 hero-момент ☐ прийоми чергуються (важке/легке), не монотонні ☐ units-handoff→CTA, CTA ехоїть hero ☐ крос-лінк-спина між сторінками ☐ конкуренти НЕ вплинули на візуал (тільки на сенси) ☐ рівень = Vide Infra, перевірено eval-brain за 50 критеріями.

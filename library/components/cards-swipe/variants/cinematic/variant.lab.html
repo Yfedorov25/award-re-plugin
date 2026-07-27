@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>cards-swipe / fullbleed cinematic — variant lab</title>
+
+<!-- GSAP + the SHARED base engine (NOT forked) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<!-- the CINEMATIC skin (variant delta) — dark full-bleed, gold accent, Times serif -->
+<style>
+  :root{ --ink:#0d0c0a; --cream:#f4efe7; --gold:#c8a96a; --gut:clamp(20px,4.5vw,84px); }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:#0a0908;color:var(--cream);font-family:"Helvetica Neue",Arial,sans-serif;}
+  .serif{font-family:"Times New Roman","Georgia",ui-serif,serif;font-weight:400;letter-spacing:-.015em;}
+  #cards{position:relative;height:100vh;width:100%;overflow:hidden;
+    background:radial-gradient(120% 90% at 50% 0%, #181410 0%, #0a0908 70%);}
+  .cs-track{display:flex;height:100vh;will-change:transform;}
+  .cs-card{position:relative;flex:0 0 100vw;height:100vh;overflow:hidden;}
+  .cs-media{position:absolute;inset:0;}
+  .cs-media img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.72);}
+  .cs-body{position:absolute;left:var(--gut);bottom:var(--gut);max-width:46ch;z-index:2;
+    display:flex;flex-direction:column;gap:16px;}
+  .card__eyebrow{text-transform:uppercase;letter-spacing:.24em;font-size:12px;opacity:.8;}
+  .card__head{font-size:clamp(40px,6vw,84px);line-height:1.02;overflow:hidden;}
+  .card__head .line{overflow:hidden;}
+  .card__head em{font-style:italic;color:var(--gold);}
+  .card__desc{font-size:clamp(15px,1.1vw,18px);opacity:.82;line-height:1.5;max-width:42ch;}
+  .cs-seam{position:fixed;top:0;bottom:0;width:34px;pointer-events:none;z-index:60;}
+  .cs-seam svg{height:120px;position:absolute;top:50%;transform:translateY(-50%);}
+  .cs-seam path{fill:none;stroke:var(--gold);stroke-width:1.4;opacity:.8;}
+  .hero__hint{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:61;
+    font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.7;}
+  .cs-static .cs-track{flex-direction:column;height:auto;}
+  .cs-static .cs-card{flex:none;height:auto;}
+</style>
+</head>
+<body>
+
+<section id="cards" aria-label="Cinematic fullbleed deck">
+  <div class="cs-track">
+    <article class="cs-card">
+      <div class="cs-media"><img alt="render 1" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=70" /></div>
+      <div class="cs-body">
+        <p class="card__eyebrow">01 / Фундамент</p>
+        <h2 class="card__head serif"><span class="line"><span>Дім, що <em>старшає</em></span></span><span class="line"><span>гарно</span></span></h2>
+        <p class="card__desc">Клінкер, покладений руками. Фасад на покоління, не на сезон.</p>
+      </div>
+    </article>
+    <article class="cs-card">
+      <div class="cs-media"><img alt="render 2" src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200&q=70" /></div>
+      <div class="cs-body">
+        <p class="card__eyebrow">02 / Життя</p>
+        <h2 class="card__head serif"><span class="line"><span>Кава на <em>власній</em></span></span><span class="line"><span>терасі</span></span></h2>
+        <p class="card__desc">Свій вхід, свій двір, своє небо. Не коробка з сусідами за стіною.</p>
+      </div>
+    </article>
+    <article class="cs-card">
+      <div class="cs-media"><img alt="render 3" src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200&q=70" /></div>
+      <div class="cs-body">
+        <p class="card__eyebrow">03 / Фінал</p>
+        <h2 class="card__head serif"><span class="line"><span>Світло, що <em>лишається</em></span></span><span class="line"><span>з тобою</span></span></h2>
+        <p class="card__desc">Кухня-вітальня, залита сонцем. Готова до життя в день ключів.</p>
+      </div>
+    </article>
+  </div>
+  <div class="cs-seam" aria-hidden="true">
+    <svg viewBox="0 0 34 120" preserveAspectRatio="none">
+      <path d="M11 4 C2 36, 2 84, 11 116"/><path d="M23 4 C32 36, 32 84, 23 116"/>
+    </svg>
+  </div>
+</section>
+<p class="hero__hint">Гортай ↓</p>
+
+<!-- the BASE engine, called with MERGED params (base defaults + cinematic params.json) -->
+<script src="../../component.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, CustomEase);
+  if (window.CustomEase && !gsap.parseEase('air')) CustomEase.create('air','0.25,0.74,0.22,0.99');
+
+  // cinematic params.json delta merged over base defaults:
+  var CINEMATIC = { root:'#cards', track:'.cs-track', cards:'.cs-card', seam:'.cs-seam',
+                    gap:0, scrubPerCard:1.0, snap:true, drag:true, parallax:0.12, ease:'air',
+                    onCard:function(){ gsap.to('.hero__hint',{opacity:0,duration:.5}); } };
+  var ctrl = window.CardsSwipe && CardsSwipe.init(CINEMATIC);
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (variant) ── -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  var tries=0;
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+      var ok = errs===0 && !!window.CardsSwipe && (reduce || stCount>0 || document.querySelector('.cs-static'));
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · panel-rise-over · 11tanjung (a rounded coloured panel rises from below over the previous section + theme-flip)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · panel-rise-over
+================================================================================
+  11tanjung's section hand-off — the next section is a coloured PANEL with a big rounded
+  top edge that RISES from below (translateY 100%->0) and slides OVER the previous section,
+  flipping the theme (brown<->cream); the panel content fades + lifts in during the rise
+  (readable ~70%). Harvested from D_11tanjung (C4, ~2.1s). OUR QUADRO render behind. NO WebGL.
+  window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --warm-black:#1e1a17; --warm-white:#f4f1ea; --brown:#6b5e4f; --cream:#e6e0d4;
+         --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--brown);color:var(--warm-white);font-family:var(--sans)}
+  .spacer{height:120vh;display:grid;place-items:center;opacity:.5;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .spacer.top{background:var(--brown);color:var(--warm-white)}
+  .spacer.bot{background:var(--cream);color:var(--warm-black)}
+
+  .pro-stage{ --pro-prev-bg:#6b5e4f; --pro-prev-ink:#f4f1ea; --pro-panel-bg:#e6e0d4; --pro-panel-ink:#1e1a17; }
+
+  /* outgoing (brown) section — a render with a caption */
+  .prev-wrap{position:absolute;inset:0}
+  .prev-wrap img{width:100%;height:100%;object-fit:cover;display:block;opacity:.92}
+  .prev-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(107,94,79,.25),rgba(107,94,79,.7))}
+  .prev-cap{position:absolute;left:6vw;bottom:9vh;z-index:2;font-family:var(--serif);font-style:italic;font-size:3vw;color:var(--warm-white)}
+
+  /* rising (cream) panel content */
+  .panel-inner{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:0 8vw}
+  .panel-inner .top{position:absolute;top:8vh;left:0;right:0;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--warm-black)}
+  .panel-inner h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:5vw;line-height:1.05;color:var(--warm-black)}
+  .panel-inner p{margin-top:1.4rem;max-width:46ch;font-size:1.05rem;line-height:1.65;color:#4a443c}
+</style>
+</head>
+<body>
+
+  <div class="spacer top">скрол ↓ — кремова панель з заокругленим верхом виїде знизу over коричневу</div>
+
+  <section class="pro-stage" id="rise">
+    <!-- OUTGOING: brown section with a QUADRO render -->
+    <div class="pro-prev">
+      <div class="prev-wrap"><img src="renders/aerial.webp" alt="QUADRO"></div>
+      <div class="prev-cap">район, що тримає тишу</div>
+    </div>
+    <!-- RISING: cream panel, rounded top, theme-flip -->
+    <div class="pro-panel">
+      <div class="panel-inner">
+        <div class="pro-rise top">/ 04 — The Plans</div>
+        <div>
+          <h2 class="pro-rise">Простір, прорахований<br>до сантиметра</h2>
+          <p class="pro-rise">Кожен план починається з того, як ви живете, а не з того, скільки кімнат вмістити. Світло, тиша, маршрут дня — спершу вони, потім стіни.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="spacer bot">панель сіла — нова (кремова) тема активна</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__pro = PanelRiseOver.create('#rise', { radius:52, pinFactor:1.2, contentFrom:0.45, prevParallax:40, ease:'power3.out', manageLenis:false });
+  })();
+</script>
+</body>
+</html>

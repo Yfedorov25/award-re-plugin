@@ -1,0 +1,224 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AIR hero B0→B1 motion organism (VIK) · S41-d чистий рушій (один драйвер)</title>
+<script>window.__ATOM_OK__=false;</script>
+<link rel="stylesheet" href="_air-tokens.css">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#ffffff;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  body{font-family:'Onest','Helvetica Neue',Helvetica,Arial,sans-serif;overflow-x:hidden;}
+
+  /* ── B0 = PIN-контейнер 220vh: sticky-сцена тримається, скрол через неї = прогрес колапсу.
+     Розтягнуто щоб рух був ПЛАВНИЙ по всьому скролу (не «стоїть-ривок» у 22% однієї сцени). ── */
+  #b0pin{position:relative;width:100vw;height:175vh;background:#fff;}
+  #b0stage{position:sticky;top:0;width:100vw;height:100dvh;overflow:hidden;background:#fff;}
+
+  /* B0 layers всередині sticky-сцени (не fixed — щоб не воювати з B1 нижче) */
+  #b0arcs{position:absolute;inset:0;z-index:8;width:100vw;height:100dvh;will-change:transform,opacity;pointer-events:none;}
+  #b0arcs svg{width:100vw;height:100dvh;}
+  #b0chrome{position:absolute;left:0;right:0;top:0;z-index:14;will-change:opacity;}
+  #b0chrome .sb{position:absolute;top:0;left:0;right:0;height:46px;padding:0 6vw;display:flex;align-items:center;justify-content:space-between;}
+  #b0chrome .sb .t{font-family:'Onest';font-weight:600;font-size:15px;color:#0a0a0a;letter-spacing:0.01em;}
+  #b0chrome .burg{position:absolute;top:58px;right:4.6vw;width:40px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+  #b0chrome .burg span{display:block;width:22px;height:1.7px;background:#0a0a0a;}
+  #b0kicker{position:absolute;left:0;right:0;top:23.5%;text-align:center;font-weight:400;font-size:21px;line-height:1.16;
+    letter-spacing:-0.21px;text-transform:uppercase;color:#0a0a0a;z-index:12;will-change:opacity,transform;}
+  #b0cap{position:absolute;left:0;right:0;top:65%;text-align:center;font-weight:500;font-size:13px;line-height:1.5;
+    letter-spacing:0.15px;text-transform:uppercase;color:#8d8d8d;z-index:12;will-change:opacity,transform;}
+
+  /* ── wordmark: ЄДИНИЙ шар у sticky-сцені, per-letter absolute, transform-origin 0 0.
+     ОДИН драйвер (scroll→progress→renderWM). НУЛЬ flex. font fluid. ── */
+  #wordmark{position:absolute;left:0;top:0;width:100vw;height:100dvh;z-index:20;pointer-events:none;}
+  #wordmark .l{position:absolute;left:0;top:0;display:block;color:#0a0a0a;text-transform:uppercase;
+    font-family:'Onest';font-weight:400;font-size:30.5vw;line-height:1;transform-origin:0 0;will-change:transform;}
+
+  /* ── B1 = flow-секція нижче pin (природний скрол після колапсу) ── */
+  /* B1 накладається на хвіст pin (margin-top негативний) → вежа виринає поки лого завершує колапс,
+     нема білої діри в шві S1. z нижче wordmark/b1logo. */
+  #b1{position:relative;width:100vw;min-height:100dvh;background:#fff;overflow:hidden;margin-top:-30vh;z-index:2;}
+  #b1towerWrap{position:absolute;left:0;right:0;top:0;height:37vh;overflow:hidden;will-change:transform;}
+  #b1tower{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+  #b1head{position:absolute;left:5.4vw;top:42%;margin:0;font-size:clamp(34px,10.8vw,46px);font-weight:400;line-height:1.06;
+    letter-spacing:-.84px;color:#0a0a0a;text-transform:uppercase;will-change:transform,opacity;}
+  #b1cap{position:absolute;left:7.7vw;right:7.7vw;top:66%;text-align:center;font-size:13px;font-weight:500;
+    line-height:1.5;letter-spacing:0;color:#8d8d8d;text-transform:uppercase;}
+  #b1cap .rv-w{display:inline-block;margin-right:.26em;}
+  /* B1 corner logo — статичне лого що ЛИШАЄТЬСЯ у лівому куті B1 (рух передав естафету сюди) */
+  #b1logo{position:absolute;left:6.1vw;top:5.2vh;font-size:34px;font-weight:400;line-height:1;color:#0a0a0a;text-transform:uppercase;z-index:6;opacity:0;}
+</style>
+</head><body>
+
+<!-- B0 pin -->
+<div id="b0pin">
+  <div id="b0stage">
+    <div id="b0arcs" data-arcs data-arcset="A">
+      <svg viewBox="0 0 390 844" preserveAspectRatio="xMidYMid slice" style="display:block;width:100vw;height:100dvh;">
+        <g data-arc-shadows style="filter:blur(16px);opacity:0.44;transform:translateY(10px);"></g>
+        <g data-arc-blades></g>
+        <g data-arc-creases></g>
+      </svg>
+    </div>
+    <div id="b0chrome">
+      <div class="sb"><span class="t">9:41</span>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7.5" width="3" height="3.5" rx="0.8" fill="#0a0a0a"></rect><rect x="5" y="5" width="3" height="6" rx="0.8" fill="#0a0a0a"></rect><rect x="10" y="2.5" width="3" height="8.5" rx="0.8" fill="#0a0a0a"></rect><rect x="15" y="0" width="3" height="11" rx="0.8" fill="#0a0a0a"></rect></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12"><rect x="0.6" y="0.6" width="21" height="10.8" rx="3" fill="none" stroke="#b6b6ba"></rect><rect x="2.2" y="2.2" width="15.5" height="7.6" rx="1.6" fill="#0a0a0a"></rect><rect x="23" y="3.6" width="2" height="4.8" rx="1" fill="#b6b6ba"></rect></svg>
+        </div>
+      </div>
+      <div class="burg"><span></span><span></span></div>
+    </div>
+    <div id="b0kicker">THE SHAPE OF<br>OPEN GROUND</div>
+    <div id="b0cap">LANDSCAPE<br>ARCHITECTURE<br>STUDIO</div>
+    <div id="wordmark"><span class="l">V</span><span class="l">I</span><span class="l">K</span></div>
+  </div>
+</div>
+
+<!-- B1 flow -->
+<section id="b1">
+  <div id="b1logo">VIK</div>
+  <div id="b1towerWrap"><img id="b1tower" src="assets/tower.jpg" alt="Glass tower, blue sky"></div>
+  <h2 id="b1head">The momentum<br>to rise higher</h2>
+  <div id="b1cap" class="reveal-text"></div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var SVGNS='http://www.w3.org/2000/svg', D=Math.PI/180;
+
+  /* ---- arcs: verbatim accepted B0-1a config A ---- */
+  var CFG={A:[{cx:388,cy:14,r0:96,r1:250,a0:98,a1:172},{cx:-8,cy:330,r0:48,r1:178,a0:-40,a1:42}]};
+  var contrast=0.42, count=41;
+  function makeFan(cfg){var cx=cfg.cx,cy=cfg.cy,r0=cfg.r0,r1=cfg.r1,a0=cfg.a0,a1=cfg.a1,gap=0.30;
+    var span=a1-a0,step=span/count,half=(step*(1-gap))/2;function P(r,a){return[cx+Math.cos(a*D)*r,cy+Math.sin(a*D)*r];}
+    var bl=[],cr=[];for(var i=0;i<count;i++){var c=a0+step*(i+0.5),t=i/(count-1),bell=Math.sin(Math.PI*t);
+      var p1=P(r0,c-half),p2=P(r0,c+half),p3=P(r1,c+half),p4=P(r1,c-half);
+      var pts=[p1,p2,p3,p4].map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');
+      var L=100-(2.0+7*contrast*(0.55*bell+0.45*t));bl.push({points:pts,fill:'hsl(220 8% '+L.toFixed(1)+'%)'});
+      var g=a0+step*(i+1),aa=P(r0+2,g),bb=P(r1-4,g),op=(0.09+0.34*contrast)*(0.32+0.68*bell);
+      cr.push({x1:aa[0].toFixed(1),y1:aa[1].toFixed(1),x2:bb[0].toFixed(1),y2:bb[1].toFixed(1),op:op.toFixed(3)});}
+    var N=22,sh=[];for(var i2=0;i2<=N;i2++){var p=P(r1,a0+span*i2/N);sh.push(p[0].toFixed(1)+','+p[1].toFixed(1));}
+    for(var i3=N;i3>=0;i3--){var p2=P(r0,a0+span*i3/N);sh.push(p2[0].toFixed(1)+','+p2[1].toFixed(1));}
+    return{blades:bl,creases:cr,shadow:{points:sh.join(' ')}};}
+  function poly(pts,f){var e=document.createElementNS(SVGNS,'polygon');e.setAttribute('points',pts);e.setAttribute('fill',f);return e;}
+  function ln(c){var e=document.createElementNS(SVGNS,'line');e.setAttribute('x1',c.x1);e.setAttribute('y1',c.y1);e.setAttribute('x2',c.x2);e.setAttribute('y2',c.y2);e.setAttribute('stroke','#99a0aa');e.setAttribute('opacity',c.op);e.setAttribute('style','stroke-width:0.9px;');return e;}
+  var holder=document.querySelector('[data-arcs]');
+  CFG.A.forEach(function(cfg){var f=makeFan(cfg);
+    holder.querySelector('[data-arc-shadows]').appendChild(poly(f.shadow.points,'#b6bbc4'));
+    f.blades.forEach(function(b){holder.querySelector('[data-arc-blades]').appendChild(poly(b.points,b.fill));});
+    f.creases.forEach(function(c){holder.querySelector('[data-arc-creases]').appendChild(ln(c));});});
+
+  /* ============================================================
+     WORDMARK ENGINE — ОДИН драйвер (модель робочого component.js).
+     render(p) чиста ф-я. scroll→progress()→render. НУЛЬ GSAP scrub на wordmark (=нуль гонки/дубля).
+     collapse крива: hold p<0.15, плавний inOut 0.15..0.85 (розтягнуто по pin) → фінал ЛІВИЙ кут.
+     ============================================================ */
+  function inOutQuad(t){return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;}
+  var HOLD=0.15, COLLAPSE_END=0.85; // колапс займає більшу частину pin-скролу → плавно, без ривка
+  function collapseT(p){ if(p<=HOLD) return 0; if(p>=COLLAPSE_END) return 1;
+    return inOutQuad((p-HOLD)/(COLLAPSE_END-HOLD)); }
+
+  var TARGET_H_FRAC=0.075, PAD_FRAC=0.061, Y0_FRAC=0.368, Y1_FRAC=0.052, TARGET_LEFT_FRAC=0.061;
+  var wm=document.getElementById('wordmark');
+  var ls=[].slice.call(wm.querySelectorAll('.l'));
+  var kicker=document.getElementById('b0kicker'), b0cap=document.getElementById('b0cap');
+  var chrome=document.getElementById('b0chrome'), b1logo=document.getElementById('b1logo');
+  var geom={startX:[],targetX:[],w:[],Y0:0,Y1:0,HEADER_SCALE:1};
+
+  function measure(){
+    var W=window.innerWidth, H=window.innerHeight;
+    ls.forEach(function(s){ s.style.transform='translate(0px,0px) scale(1)'; });
+    var box0=ls[0].getBoundingClientRect();
+    geom.w = ls.map(function(s){ return s.getBoundingClientRect().width; });
+    var h0 = box0.height || (W*0.305);
+    geom.HEADER_SCALE = (TARGET_H_FRAC*H)/h0;
+    geom.Y0=Y0_FRAC*H; geom.Y1=Y1_FRAC*H;
+    var PAD=PAD_FRAC*W, innerL=PAD, innerR=W-PAD, n=ls.length;
+    geom.startX = ls.map(function(s,i){ if(n===1) return innerL; var frac=i/(n-1);
+      return innerL + frac*((innerR-geom.w[i]) - innerL); });
+    var packGap=h0*geom.HEADER_SCALE*0.06, scaledW=geom.w.map(function(w){return w*geom.HEADER_SCALE;});
+    var cursor=TARGET_LEFT_FRAC*W;
+    geom.targetX = ls.map(function(s,i){ var x=cursor; cursor+=scaledW[i]+packGap; return x; });
+  }
+
+  function render(p){
+    p=Math.max(0,Math.min(1,p));
+    var t=collapseT(p);
+    var s=1+(geom.HEADER_SCALE-1)*t;
+    var y=geom.Y0+(geom.Y1-geom.Y0)*t;
+    ls.forEach(function(sp,i){
+      var x=geom.startX[i]+(geom.targetX[i]-geom.startX[i])*t;
+      sp.style.transform='translate('+x.toFixed(2)+'px,'+y.toFixed(2)+'px) scale('+s.toFixed(4)+')';
+    });
+    // seam fade coupled до колапсу t (не сирого p) → синхронно з рухом
+    var fade=1-Math.min(1,t*1.4);
+    kicker.style.opacity=fade; kicker.style.transform='translateY('+(-t*40).toFixed(1)+'px)';
+    b0cap.style.opacity=fade;  b0cap.style.transform='translateY('+(-t*30).toFixed(1)+'px)';
+    chrome.style.opacity=1-Math.min(1,t*1.8);
+    holder.style.transform='translateY('+(-t*70).toFixed(1)+'px) scale('+(1-t*0.04).toFixed(3)+')';
+    holder.style.opacity=1-Math.min(1,t*1.2);
+    // коли колапс завершився (t=1) — показати статичне B1 corner-лого, сховати рухоме wordmark
+    var handedOff = t>=0.999;
+    wm.style.opacity = handedOff ? '0' : '1';
+    b1logo.style.opacity = handedOff ? '1' : '0';
+  }
+
+  /* ---- B1 caption blur-reveal split ---- */
+  var capText='VIK IS A NEW GENERATION OF WORKSPACE THAT PUTS LIGHT, AIR AND THE CITY AT THE CENTRE OF EVERY FLOOR.';
+  var cap=document.getElementById('b1cap');
+  capText.split(' ').forEach(function(w,i){var s=document.createElement('span');s.className='rv-w';s.textContent=w;
+    s.style.filter=rm?'none':'blur(10px)';s.style.opacity=rm?'1':'0';
+    s.style.transition='filter 1s cubic-bezier(.25,.74,.22,.99), opacity 1s cubic-bezier(.25,.74,.22,.99)';
+    s.style.transitionDelay=(i*60)+'ms';cap.appendChild(s);cap.appendChild(document.createTextNode(' '));});
+
+  var b0pin=document.getElementById('b0pin');
+  function progress(){
+    var r=b0pin.getBoundingClientRect();
+    var span=b0pin.offsetHeight - window.innerHeight;
+    return span>0 ? Math.max(0,Math.min(1, -r.top/span)) : 0;
+  }
+
+  measure();
+  render(progress());
+
+  if(rm){
+    render(1);
+    cap.querySelectorAll('.rv-w').forEach(function(s){s.style.filter='none';s.style.opacity='1';});
+    window.__ATOM_OK__=true; window.render=render; window.__WM={render:render,geom:geom,letters:ls,
+      remeasure:measure,get HEADER_SCALE(){return geom.HEADER_SCALE;}}; return;
+  }
+
+  /* ---- ОДИН scroll-драйвер (rAF-квантований), НУЛЬ GSAP на wordmark ---- */
+  var ticking=false;
+  function onScroll(){ if(ticking) return; ticking=true;
+    requestAnimationFrame(function(){ ticking=false; render(progress()); }); }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  function onResize(){ measure(); render(progress()); }
+  window.addEventListener('resize', onResize);
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(onResize); }
+  window.addEventListener('load', onResize);
+
+  /* ---- GSAP лише для B1 (окремі елементи, НЕ конфліктують з wordmark) ---- */
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.fromTo('#b1towerWrap',{yPercent:14},{yPercent:-10,ease:'none',
+    scrollTrigger:{trigger:'#b1',start:'top bottom',end:'bottom top',scrub:true}});
+  gsap.fromTo('#b1head',{yPercent:8,opacity:0.0},{yPercent:0,opacity:1,ease:'none',
+    scrollTrigger:{trigger:'#b1',start:'top 75%',end:'top 35%',scrub:true}});
+  ScrollTrigger.create({trigger:'#b1cap',start:'top 82%',once:true,onEnter:function(){
+    cap.querySelectorAll('.rv-w').forEach(function(s){s.style.filter='blur(0px)';s.style.opacity='1';});
+  }});
+
+  /* ---- хуки ---- */
+  window.render=function(p){ p=Math.max(0,Math.min(1,p));
+    window.scrollTo(0, p*(document.documentElement.scrollHeight-window.innerHeight));
+    render(progress()); };
+  window.__WM={render:render, geom:geom, letters:ls, remeasure:measure,
+    get HEADER_SCALE(){return geom.HEADER_SCALE;},
+    // гейт драйвить кінематику напряму на p-сітці pin-сцени (без scroll-mapping)
+    renderWM:render};
+  window.__ATOM_OK__=true;
+})();
+</script>
+</body></html>

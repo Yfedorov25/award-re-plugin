@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATOM SCAFFOLD — blank-page motion-law template</title>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     ATOM SCAFFOLD (atom-first method, council #3).
+     Every atom is built here FIRST, on a blank page, with a DUMMY facade
+     (abstract roles: bg-media / card / counter / label — NOT springs' content).
+     The atom = a MOTION LAW, proven by transfer: same mechanic, different facade.
+
+     Pattern (Master Practitioner): ONE pinned ScrollTrigger drives ONE scrubbed
+     master GSAP timeline. Simultaneity = same `position` on the timeline (all at ,0).
+     Sequences = position parameter + overlap ('<0.15','+=0.2') read from narration.
+
+     Stack: Lenis (smooth scroll) + GSAP + ScrollTrigger. No three.js/barba/locomotive.
+     Exposes window.render(p) (p∈[0..1]) + window.__ATOM_OK__ for the verify harness.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#0e241d;color:#eae0cc;font-family:system-ui,sans-serif}
+  .stage{position:relative;height:100vh}
+  .pin{position:relative;height:100vh;overflow:hidden;background:#0e241d}
+  /* ── DUMMY FACADE (abstract roles — replace visually per atom, NEVER springs content) ── */
+  .role{position:absolute;will-change:transform,clip-path,opacity}
+  #bgMedia{inset:0;background:linear-gradient(135deg,#2b4d2c,#16302a);opacity:0;} /* bg-media role */
+  #card{right:9%;bottom:8%;width:24vw;height:52vh;background:#0f2b28;opacity:0;
+    display:flex;flex-direction:column;justify-content:flex-end;padding:18px;}
+  #cardPhoto{position:absolute;left:0;top:0;right:0;height:62%;background:linear-gradient(160deg,#3a5a3a,#1c3a2b);clip-path:inset(100% 0 0 0);}
+  #counter{font-size:5rem;line-height:1;font-family:Georgia,serif;} /* counter role */
+  #label{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;opacity:.8;margin-top:.4em;} /* label role */
+  .hint{position:fixed;left:12px;bottom:12px;font-size:.7rem;opacity:.5;z-index:99;}
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="pin" id="pin">
+      <div class="role" id="bgMedia"></div>
+      <div class="role" id="card">
+        <div id="cardPhoto"></div>
+        <div id="counter">0</div>
+        <div id="label">DUMMY LABEL</div>
+      </div>
+    </div>
+  </div>
+  <div class="hint">ATOM SCAFFOLD — dummy facade. Replace roles' visuals per atom; keep the MOTION LAW.</div>
+
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger);
+  var EASE='cubic-bezier(0.25,0.74,0.22,0.99)';
+  gsap.defaults({ease:EASE});
+
+  // ── the atom's MOTION LAW lives in this master timeline (paused; driven by scrub) ──
+  var tl=gsap.timeline({paused:true});
+
+  // EXAMPLE law (replace with the atom's real spec): reveal card, then counter runs while bg flows.
+  tl.set(['#bgMedia','#card','#cardPhoto'],{opacity:0},0);
+  tl.fromTo('#bgMedia',{opacity:0,yPercent:6},{opacity:1,yPercent:0,duration:1.2},0.4);
+  tl.fromTo('#card',{opacity:0,y:30},{opacity:1,y:0,duration:1.0},0.8);
+  tl.fromTo('#cardPhoto',{clipPath:'inset(100% 0 0 0)'},{clipPath:'inset(0% 0 0 0)',duration:1.0},1.0);
+  // counter + bg driven off the SAME clock (simultaneity = same position) — the coupling
+  var cObj={v:0};
+  tl.to(cObj,{v:16,duration:3.0,ease:'none',onUpdate:function(){document.getElementById('counter').textContent=Math.round(cObj.v);}},1.4);
+  tl.to('#bgMedia',{yPercent:-8,duration:3.0,ease:'none'},1.4);
+
+  var TL_END=tl.duration();
+  tl.set({},{},10); // lock clock (optional)
+
+  // ── verify hooks (for video-parity / real-scroll-record harness) ──
+  window.render=function(p){ p=Math.max(0,Math.min(1,p)); tl.progress(p); };
+  window.__ATOM_OK__=true;
+
+  // ── real driver: Lenis smooth scroll → ScrollTrigger pin+scrub (never fight the lib, feed it) ──
+  if(window.Lenis){
+    var lenis=new Lenis({lerp:0.1});
+    lenis.on('scroll',ScrollTrigger.update);
+    gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+    gsap.ticker.lagSmoothing(0);
+  }
+  ScrollTrigger.create({ trigger:'#stage', start:'top top', end:'+=400%', pin:'#pin', scrub:1,
+    onUpdate:function(self){ tl.progress(self.progress); } });
+
+  tl.progress(0);
+})();
+</script>
+</body>
+</html>

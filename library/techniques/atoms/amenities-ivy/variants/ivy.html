@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>amenities-ivy · cream-pin-swap-stack (v3, конвеєр ради S47)</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:auto;}
+  body{font-family:var(--spr-sans,"TT Commons Pro",sans-serif);background:#f5e8d1;}
+
+  /* scroll driver: PIN-стейдж (SPEC M1; ~3 екрани під 2 cover + 3 swap) */
+  .wrap{height:340vh;position:relative;}
+  .stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#f5e8d1;}
+
+  /* M3 title-swap: ОДИН блок на місці, міняється лише opacity+текст (інваріант: позиція не рухається) */
+  #title{position:absolute;left:6%;right:6%;top:13dvh;text-align:center;z-index:10;
+    font-family:"Victor Serif",var(--spr-serif,serif);font-weight:400;color:#162d24;
+    font-size:22px;line-height:1.3;} /* кегль src: вимір S47 brightness 5.8% ≈ 22px = 5.6% */
+  .tt{position:absolute;left:0;right:0;top:0;opacity:0;} /* 4 тексти в стосі: жодних DOM-мутацій, лише opacity */
+
+  /* M2 стос карток: 3 картки в одному слоті, z 2<3<4, старі НЕ рухаються */
+  #cards{position:absolute;left:7.7%;right:7.7%;top:0;height:100dvh;z-index:2;} /* поля src: live f200 краї картки 7.7..92.2% */
+  .card{position:absolute;left:0;right:0;will-change:transform;transform-origin:top center;}
+  .card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;} /* live ratio 0.93 ≈ квадрат (вимір f200); Єгор: не вертикальні */
+  .cap{position:absolute;left:14px;bottom:12px;color:#fff;font-size:10px;line-height:1.5;
+    letter-spacing:.08em;text-transform:uppercase;max-width:60%;}
+  #card1{z-index:2;}
+  #card2{z-index:3;}
+  #card3{z-index:4;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="stage" aria-label="ivy amenities">
+    <h2 id="title">
+      <span class="tt" id="t1">Sit down to read<br>under ivy-covered awning</span>
+      <span class="tt" id="t2">Bring the little ones<br>to a landscaped<br>playground</span>
+      <span class="tt" id="t3">Meditate on our softest<br>lawns</span>
+      <span class="tt" id="t4">Springs creates a mosaic<br>of beautiful reality.</span>
+    </h2>
+    <div id="cards">
+      <figure class="card" id="card1">
+        <img src="assets/ivy-pod.webp" alt="pod daybed">
+        <figcaption class="cap">Permanent outdoor recreation spaces</figcaption>
+      </figure>
+      <figure class="card" id="card2">
+        <img src="assets/ivy-playground.webp" alt="playground">
+        <figcaption class="cap">Video-monitored playgrounds</figcaption>
+      </figure>
+      <figure class="card" id="card3">
+        <img src="assets/ivy-yoga.webp" alt="yoga lawn">
+        <figcaption class="cap">Portable outdoor furniture</figcaption>
+      </figure>
+    </div>
+  </section>
+</div>
+
+<script>
+/* render(p) = ЧИСТА функція p (закон purity). ТЗ = ГУСТИЙ покадровий вимір S49-b
+   (324 кадри, траєкторії top/width КОЖНОГО шару стосу, KAI/IVY-CHOREO-PLAN + CHOREO v4):
+   Ф1 0.00-0.26 стенд-1 (pod з 0.21 вже тане) · Ф2 0.26-0.38 в'їзд playground ОДНИМ ходом до
+   слота, ПАРАЛЕЛЬНО pod тане · Ф4 0.49-0.57 swap№2 · Ф5 0.58-0.70 в'їзд yoga, ПАРАЛЕЛЬНО
+   двоє старших тануть · далі ВСІ ТРИ тануть разом до кінця · Ф7 0.78-0.90 swap№3 (шов mosaic).
+   ЖОДНИХ докруток/статичних доводок: «докрутки» у zonetrack були хвостами в'їзду,
+   розрізаними паузами руки (доведено виміром: playground f180-190 62.8%→42.7% = в'їзд). */
+(function () {
+  var C = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+  var L = function (a, b, t) { return a + (b - a) * t; };
+  var ease = function (t) { return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }; /* easeInOutCubic (Єгор: плавні старт/фініш) */
+
+  var titles = ['t1','t2','t3','t4'].map(function(i){ return document.getElementById(i); });
+  var card1 = document.getElementById('card1');
+  var card2 = document.getElementById('card2');
+  var card3 = document.getElementById('card3');
+
+  /* PERSPECTIVE-DRIFT v2 (густий вимір S49-b, спільна крива трьох карток):
+     кожна картка після посадки (beat ~0.06) отримує ВЛАСНИЙ БЕЗПЕРЕРВНИЙ recede-у-даль
+     до КІНЦЯ атома: вгору dy = 10.9·τ^1.35 dvh, вужчання ds = 0.33·τ^1.45 (power-law
+     ease-in: НАРОДЖУЄТЬСЯ повільно, набирає хід; фіт трьох live-кінцівок: pod Δ7.8dvh/
+     Δs0.226 @τ0.79 · playground Δ4.8/0.13 @τ0.56 · yoga Δ1.6/0.036 @τ0.24 → одна крива).
+     Recede стартує ЩЕ ДО приходу наступної (live: pod тане з f130, playground з f212).
+     Нова картка їде знизу ОДНИМ безперервним ходом прямо в слот, ПАРАЛЕЛЬНО з recede
+     старших; після посадки третьої всі три тануть РАЗОМ (слова Єгора S49 = закон). */
+  var SLOT = 43, ENTER_FROM = 108;      /* фронтальне місце (live 42.2-43.8; плато card3 43±3) */
+  var REC1 = 0.21, REC2 = 0.44, REC3 = 0.76;   /* старти recede: посадка+beat 0.06 (0.38→0.44, 0.70→0.76); pod ще з прологу */
+
+  /* переноси ПО ФРАЗАХ як live вшиті в розмітку (урок borges S47; live 2/3/2/2 рядки) */
+  var SWAPS = [[0.30, 0.38], [0.49, 0.57], [0.78, 0.90]]; /* №3 ширше = ink-мінімум на сітці свіпу */ /* src CHOREO: f147-150/f222-227/f282-286 */
+
+  function rec (p, start) {                        /* власний recede картки від свого старту */
+    var t = p > start ? p - start : 0;
+    return { dy: 10.9 * Math.pow(t, 1.35), ds: 0.33 * Math.pow(t, 1.45) };
+  }
+
+  window.render = function (p) {
+    p = C(p);
+
+    /* в'їзд нової знизу ОДНИМ ходом (без проміжних посадок) */
+    var IN2 = 0.26, IN3 = 0.58, IN_SPAN = 0.12;   /* src CHOREO: f148-190 / f234-263 */
+    var t2 = ease(C((p - IN2) / IN_SPAN));
+    var t3 = ease(C((p - IN3) / IN_SPAN));
+
+    var r1 = rec(p, REC1), r2 = rec(p, REC2), r3 = rec(p, REC3);
+
+    function place (card, tin, r) {
+      var y = L(ENTER_FROM, SLOT, tin) - r.dy;
+      card.style.transform = 'translateY(' + y.toFixed(2) + 'dvh) scale(' + (1 - r.ds).toFixed(4) + ')';
+    }
+    place(card1, 1,  r1);                          /* найстарша: найглибше в далі */
+    place(card2, t2, r2);
+    place(card3, t3, r3);                          /* фронтальна: плато 43, її recede щойно народився */
+
+    /* title-swap: fade-out → ПЛАТО-НУЛЬ → fade-in, позиція НЕ рухається (плато гарантує
+       що ink-мінімум лягає на стани свіпу і читається як окремий SWAP, не зливається) */
+    var idx = 0, op = 1, HOLD = 0.18; /* частка вікна на нулі посередині */
+    for (var i = 0; i < SWAPS.length; i++) {
+      var a = SWAPS[i][0], b = SWAPS[i][1], mid = (a + b) / 2;
+      var h = (b - a) * HOLD / 2;
+      if (p >= mid) idx = i + 1;
+      if (p >= a && p < b) {
+        if (p < mid - h) op = 1 - (p - a) / (mid - h - a);
+        else if (p > mid + h) op = (p - (mid + h)) / (b - (mid + h));
+        else op = 0;
+      }
+    }
+    for (var k = 0; k < 4; k++) titles[k].style.opacity = (k === idx ? op : 0).toFixed(3);
+  };
+
+  /* scroll-драйвер (поза render: purity) */
+  function drive () {
+    var wrap = document.querySelector('.wrap');
+    var span = wrap.offsetHeight - window.innerHeight;
+    var p = span > 0 ? C((window.scrollY - wrap.offsetTop) / span) : 0;
+    window.render(p);
+  }
+  window.addEventListener('scroll', drive, { passive: true });
+  window.addEventListener('resize', drive);
+  window.render(0);
+})();
+</script>
+</body>
+</html>

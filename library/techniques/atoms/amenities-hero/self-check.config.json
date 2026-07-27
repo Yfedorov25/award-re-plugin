@@ -1,0 +1,43 @@
+{
+ "_note": "config hero (S54): scroll-атом з ЧИСТОЮ render(p) — єдиний із шести, кого можна гейтити як є. Механіка ПРИЙНЯТА оком Єгора в S45 («так супер»). Гейт-обвʼязка додана заднім числом, бо харнес зʼявився з S48.",
+ "url": "variants/hero.html",
+ "mechanicClass": "stack+cover",
+ "_mechanicClass_src": "reference/hero-live.zonetrack.json — клас З LIVE (stack+cover тримається на токені photo COVERED-BY:top). ⚠️ S55: цей токен ДОВЕДЕНО артефактом — на вікні f88→f102 всі 11 бендів зони знаходять свій f88-вміст (NCC 0.78-0.98), накриття НЕМА, там ЗУМ-АУТ медіа. Клас лишено як є, бо його рахує вимірник, а не я; але знати треба: вимір цієї осі сліпий доти, доки в віконний шлях не підключено браму Z. Деталі й таблиця — CHOREO §S55.",
+ "targets": [
+  {
+   "id": "facade",
+   "sel": "#facade",
+   "channel": "bh",
+   "mechanism": "scale",
+   "role": "media",
+   "_note": "S55: ЗУМ-АУТ ×1.96→×1.00, transform-origin 50% 39.9%, s = 1 − 1.568·rise з насиченням на 0.51. Виміряно з live трьома незалежними шляхами — CHOREO §S55.",
+   "_note_pre_s55": "стояло channel:ty mechanism:translate «parallax-drift угору −14%» — закон був ПРОТИЛЕЖНИЙ живому: у live медіа зменшується і сповзає вниз, у нас не масштабувалось і їхало вгору"
+  },
+  {
+   "id": "titleblock",
+   "sel": "#titleblock",
+   "channel": "opacity",
+   "role": "text",
+   "_note": "«Amenities» + kicker: fade 1→0 до p0.62 + травел −40px"
+  },
+  {
+   "id": "cream",
+   "sel": "#cream",
+   "channel": "ty",
+   "mechanism": "translate",
+   "role": "text",
+   "wipe": "up",
+   "_note": "cream-панель wipe-up знизу: старт p0.32, завершення p0.98"
+  }
+ ],
+ "ignore": [
+  {
+   "sel": "#hint",
+   "reason": "scroll-hint ⊘: гасне разом з titleblock тим самим fade, окремого закону не несе (SPEC M3)"
+  }
+ ],
+ "media": {
+  "declared": "photo-placeholder",
+  "waiverSrc": "фасад = наш higgsfield-рендер (dummy-фасад за задумом атома), не той самий кадр що в live. Ідентичність медіа судить око Єгора на компараторі; механіку прийнято S45."
+ }
+}

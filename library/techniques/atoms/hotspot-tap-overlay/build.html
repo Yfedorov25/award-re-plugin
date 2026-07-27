@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>hotspot-tap-overlay — atom (dummy facade)</title>
+<script>window.__HOTSPOT_OK__=false;</script>
+<style>
+  /* ── DUMMY FACADE (навмисне НЕ springs) ── */
+  :root{
+    --ease:cubic-bezier(.25,.74,.22,.99);
+    --panel:#20242e;
+    --tint:rgba(14,17,24,.62);
+    --cream:#e9e3d2;
+    --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;-webkit-font-smoothing:antialiased}
+  body{font-family:var(--sans);background:#0f1116}
+  .frame{position:relative;width:min(390px,100%);margin:0 auto;min-height:100vh;background:#0f1116;overflow:hidden}
+
+  /* фото (чужий: градієнт-«об'єкт», не springs-вежа) */
+  .photo{position:relative;margin:64px 48px 20px;height:52vh;border-radius:2px;overflow:hidden;
+    background:
+      radial-gradient(90% 70% at 50% 30%, #6f7f9a 0%, #3d4a63 55%, #222b3d 100%),
+      linear-gradient(180deg,#8a9ab4,#2a3550);}
+  .photo::after{content:"";position:absolute;left:38%;right:38%;top:0;bottom:0;
+    background:linear-gradient(180deg,#c9b48f66,#4a3a2266)}
+  .mk{position:absolute;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.85);background:rgba(200,210,220,.26);
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);color:#fff;
+    font-family:var(--sans);font-size:15px;display:grid;place-items:center;cursor:pointer;z-index:5}
+  .qlabel{margin:0 48px;font-size:11px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:#cbd3de}
+
+  /* overlay (USER-driven, поза scroll) */
+  .overlay{position:absolute;inset:0;z-index:200;opacity:0;pointer-events:none;
+    transition:opacity .36s var(--ease)}
+  .tint{position:absolute;inset:0;background:var(--tint)} /* БЕЗ blur */
+  .panel{position:absolute;left:0;right:0;bottom:0;height:55%;background:var(--panel);overflow:hidden}
+  .close{position:absolute;right:22px;top:26px;width:40px;height:40px;border-radius:50%;
+    background:var(--cream);border:0;display:grid;place-items:center;cursor:pointer}
+  .chip{position:absolute;left:22px;bottom:150px;width:44px;height:44px;border-radius:50%;
+    border:1px solid rgba(233,227,210,.6);display:grid;place-items:center;
+    font-family:var(--sans);font-size:15px;color:var(--cream)}
+  .otext{position:absolute;left:22px;right:20px;bottom:38px;font-family:var(--sans);font-weight:500;
+    font-size:10px;line-height:1.95;letter-spacing:.9px;text-transform:uppercase;color:#ded8c6}
+
+  .badge{position:absolute;left:48px;bottom:16px;font-size:9px;font-weight:600;letter-spacing:1.4px;
+    text-transform:uppercase;color:rgba(203,211,222,.5)}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="photo">
+    <button class="mk" data-key="1" style="left:40%;top:28%">1</button>
+    <button class="mk" data-key="2" style="left:56%;top:57%">2</button>
+  </div>
+  <div class="qlabel">CANTILEVER OBSERVATORY</div>
+  <div class="badge">atom · hotspot-tap-overlay · dummy facade</div>
+
+  <div class="overlay" id="ov">
+    <div class="tint" id="tint"></div>
+    <div class="panel" id="panel">
+      <button class="close" id="close" aria-label="Close"><svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="#20242e" stroke-width="1.7"/></svg></button>
+      <div class="chip" id="chip">1</div>
+      <p class="otext" id="otext"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var ov=document.getElementById('ov'), panel=document.getElementById('panel'),
+      chip=document.getElementById('chip'), otext=document.getElementById('otext'),
+      closeb=document.getElementById('close'), tint=document.getElementById('tint');
+  if(reduce) ov.style.transition='none';
+
+  var TX={
+    '1':'THE CANTILEVER EXTENDS ELEVEN METRES BEYOND ITS LAST SUPPORT. A COUNTERWEIGHT BURIED IN THE HILL HOLDS IT IN QUIET TENSION.',
+    '2':'THE OBSERVATORY SHELL IS A DOUBLE-CURVED TITANIUM SKIN, SEAMLESS BUT FOR TWO VERTICAL JOINTS THAT DRAIN RAIN INTO THE FOUNDATION CISTERN.'
+  };
+  var _t;
+  function open(k){
+    var d=TX[k]; if(!d) return; clearTimeout(_t);
+    chip.textContent=k; otext.textContent=d;
+    ov.style.pointerEvents='auto'; ov.style.opacity='1';
+  }
+  function close(){
+    ov.style.opacity='0';
+    _t=setTimeout(function(){ ov.style.pointerEvents='none'; }, reduce?0:360);
+  }
+  window.__hotspotOpen=open; window.__hotspotClose=close;
+
+  [].slice.call(document.querySelectorAll('.mk')).forEach(function(m){
+    m.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); open(m.getAttribute('data-key')); });
+  });
+  closeb.addEventListener('click',close);
+  ov.addEventListener('click',function(e){ if(!panel.contains(e.target)) close(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+
+  window.__HOTSPOT_OK__=true;
+})();
+</script>
+</body>
+</html>

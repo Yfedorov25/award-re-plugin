@@ -1,0 +1,28 @@
+{
+  "id": "portrait-carousel",
+  "title": "Arrow portrait carousel (Springs)",
+  "level": "L2-molecule",
+  "batch": "B (#7/17)",
+  "source": "springs.estate residences carousel. Engine = library/components/portrait-carousel (proven, imperative go/current). NO engine patch needed.",
+  "engine": "A vertical push-slice of portrait cards + copy-lag + ken-burns. Imperative: go(dir) steps ±1, current(), wires the ← → buttons.",
+
+  "dual_platform": true,
+  "differs": "Same push-slice mechanic + same go(dir). INTERACTION differs (not the driver source but the INPUT): desktop uses the ← → outline buttons (click/arrow keys); mobile uses touch-swipe on the frame AND an ambient auto-advance timer so the slider lives without a tap. Springs mobile is a swipeable, self-advancing slider; desktop is arrow-paged.",
+
+  "desktop": { "driver": "arrowNav — the engine already wired .pc-prev/.pc-next; nothing extra.", "knobs": ["loop", "pushMs", "copyLagMs", "kenBurns"] },
+  "mobile":  { "driver": "swipeAuto — touch-swipe left/right → go(±1); + setInterval auto-advance that pauses briefly after a manual swipe.", "knobs": ["loop", "autoMs"] },
+
+  "knobs": {
+    "slides": { "default": "from .pc-slide data-image/data-copy children", "what": "the portrait cards + captions." },
+    "loop": { "default": true, "what": "wrap past the ends." },
+    "pushMs": { "default": "engine", "what": "push-slice duration." },
+    "copyLagMs": { "default": "engine", "what": "how far the copy lags the image." },
+    "kenBurns": { "default": true, "what": "slow scale drift on the active image." },
+    "autoMs": { "default": 3200, "unit": "ms", "platform": "mobile", "what": "ambient auto-advance interval." }
+  },
+
+  "engine_patch": "NONE — imperative engine, no scroll driver, no narrow-guard (already responsive: grid collapses at 820px). The wrapper only adds mobile touch-swipe + auto-advance; desktop uses the engine's own arrow wiring.",
+  "entry": "PortraitCarouselDual.init(target, opts) -> { platform, engine, driver }. Load engine.js THEN component.js. Markup: .pc-stage > .pc-frame + .pc-copy + .pc-prev/.pc-next + .pc-slide[data-image,data-copy] children.",
+  "law": "transform (image push + ken-burns) + opacity (copy crossfade) only; GPU layers; NO mix-blend / NO backdrop over the moving image; NO WebGL. reduced-motion → hard cut (no push/ken-burns).",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core, unpatched)", "component.css", "img/p1..p4.webp", "stage.html", "demo.html", "meta.json", "README.md"]
+}

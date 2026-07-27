@@ -1,0 +1,26 @@
+{
+  "$extends": "stacked-pairs",
+  "$variant": "slice-lr",
+  "mode": "pinned-slice",
+  "dir": "lr",
+  "note": "NOT a pure knob diff over the base. The stacked-pairs BASE is a NON-pinned fade+rise reveal (each .pair rises+fades in-view, two scrub:true triggers, owns_pin:false). This variant keeps the SAME text-left / render-right composition and the SAME ONE-Lenis engine, but swaps the reveal MOTION MODEL: each .pair is PINNED and its reveal is SCRUBBED over a long pinned scroll (controlled SAISEI timing) and the render is revealed by a CLIP-PATH WIPE (a new clip phase the base does not have). Per CONTRACT, a new pin + a new clip phase is a different motion model, not a base data knob, so this variant ships its OWN self-contained variant.lab.html carrying the pinned-slice engine (params.json documents the mode + axis; there is no shared base engine parameterized over `mode`). Byte-faithful to frs12-stacked-slice-lr.html (owner-approved, gate-clean).",
+  "params": {
+    "pinEndVh": 135,
+    "scrub": 1,
+    "textRevealEnd": 0.20,
+    "pauseStart": 0.26,
+    "renderRevealStart": 0.46,
+    "renderRevealSpan": 0.50,
+    "kenFrom": 1.05,
+    "kenTo": 1.12,
+    "ease": "air = 0.25,0.74,0.22,0.99"
+  },
+  "engine": {
+    "model": "pinned SAISEI slice reveal — each .pair is pinned and scrubbed; text first -> clear pause -> render clip-wipes open slowly -> holds -> pin releases. SAME composition + SAME Lenis engine as the base; DIFFERENT reveal motion model (base = non-pinned fade+rise).",
+    "pin": "ScrollTrigger.create({ trigger:sec, start:'top top', end:'+='+Math.round(innerHeight*1.35), pin:true, pinSpacing:true, scrub:1, onUpdate:self=>render(self.progress) }) + render(0) at init",
+    "phaseMap": "0.00->0.20 TEXT reveal (bar+idx+title+sub air stagger);  ~0.26->0.46 PAUSE (text alone, render fully hidden);  0.46->0.96 RENDER clip-wipes open (air-eased);  0.96->1.00 settled hold before pin release",
+    "clipAxis": "LEFT->RIGHT — clip the RIGHT: inset(0 R% 0 0), R 100->0, so the visible region starts at the LEFT edge and grows RIGHTWARD",
+    "kenBurns": "monotonic img scale 1.05 -> 1.12 across the whole pinned p (no reset, image-only)",
+    "shared": "text-left ~38% / render-right ~62% (84vh, rounded-left frame, ~2cm gap, far-left bronze rule, index eyebrow + Fraunces italic-bronze heading + sub, tag bottom-right); ONE Lenis lerp:0.1 smoothWheel -> gsap.ticker -> ScrollTrigger.update, lagSmoothing(0); transform/opacity/clip-path only; no WebGL; no mix-blend/backdrop over the scrubbed surface; no video.currentTime; reduced-motion / <=820px -> static legible stack"
+  }
+}

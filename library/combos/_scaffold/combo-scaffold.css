@@ -1,0 +1,35 @@
+/* combo-scaffold.css — shared RAILS for section-variant labs. NOT a skin: each variant adds its own
+   <style>. Provides the full-bleed stage box, render-surface defaults, spacers, theme tokens,
+   reduced-motion baseline. opacity/transform/clip-path/filter only — NO mix-blend, NO backdrop-filter. */
+
+:root {
+  --combo-ink: #f3f1ec;       /* cream foreground */
+  --combo-bg: #16130f;        /* dark field */
+  --combo-cream: #f4efe6;     /* light field */
+  --combo-accent: #b56a4a;    /* terracotta */
+  --combo-serif: 'Fraunces', Georgia, serif;
+  --combo-sans: 'Inter', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--combo-bg); color: var(--combo-ink); font-family: var(--combo-sans); }
+
+/* lead/trail spacers so a pinned section has scroll room in the lab */
+.combo-pre { height: 60vh; display: grid; place-items: center;
+  color: rgba(243,241,236,.4); font: 600 .7rem/1 var(--combo-sans); letter-spacing: .24em; text-transform: uppercase; }
+.combo-post { height: 40vh; display: grid; place-items: center;
+  color: rgba(243,241,236,.3); font: 600 .7rem/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase; }
+
+/* the section stage: full viewport, the variant fills it */
+.combo-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+
+/* the render surface default — the element the render atom paints into.
+   author marks it [data-render-surface]; the probe asserts it painted non-zero. */
+[data-render-surface] { position: absolute; inset: 0; }
+[data-render-surface] img, [data-render-surface] video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .combo-stage * { animation: none !important; }
+}

@@ -1,0 +1,57 @@
+/* CENTER-FOCUS-CAROUSEL · component.css
+   r1864 /comfort feature carousel: a row of vertical panels, the centre one in focus (larger +
+   bright + caption lit), sides dimmed peek-insets; ‹ › rotates which is centred.
+   transform + opacity + filter(brightness) only. NO mix-blend. NO WebGL. */
+
+.cfc-stage { position: relative; background: var(--cfc-ground, #1f2520); color: var(--cfc-ink, #efe9df);
+  padding: 9vh 0 7vh; overflow: hidden; }
+
+.cfc-viewport { overflow: hidden; cursor: grab; touch-action: pan-y; }
+.cfc-viewport:active { cursor: grabbing; }
+.cfc-rail { display: flex; gap: var(--cfc-gap, 1.2rem); padding: 2vh 0; will-change: transform; }
+
+.cfc-panel {
+  flex: 0 0 var(--cfc-panel-w, 30vw); position: relative; overflow: hidden;
+  aspect-ratio: var(--cfc-aspect, 3 / 4); transform-origin: 50% 50%;
+  will-change: transform, opacity, filter; border-radius: 2px; user-select: none;
+}
+.cfc-panel-img { position: absolute; inset: 0; }
+.cfc-panel-img img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; }
+/* a bottom scrim so the caption always reads */
+.cfc-panel::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(18,20,17,0) 55%, rgba(18,20,17,.72) 100%); }
+.cfc-panel-cap {
+  position: absolute; left: 1.6vw; bottom: 1.8vh; z-index: 2;
+  font-family: var(--cfc-serif, 'Playfair Display', Georgia, serif); font-weight: 400;
+  text-transform: uppercase; font-size: var(--cfc-cap, 1.2vw); letter-spacing: .08em;
+  color: var(--cfc-ink, #efe9df); will-change: opacity;
+}
+
+/* nav: ‹ counter › bottom-right */
+.cfc-nav {
+  position: relative; z-index: 3; display: inline-flex; align-items: center; gap: 1.2rem;
+  margin: 3vh 5vw 0; float: right;
+}
+.cfc-counter {
+  font-family: var(--cfc-sans, 'Inter', system-ui, sans-serif); font-size: .76rem;
+  letter-spacing: .22em; color: var(--cfc-ink, #efe9df); font-variant-numeric: tabular-nums; min-width: 5ch; text-align: center;
+}
+.cfc-prev, .cfc-next {
+  width: 50px; height: 50px; border-radius: 50%; border: 1px solid var(--cfc-line, #8d8a82);
+  background: none; color: var(--cfc-ink, #efe9df); cursor: pointer; display: inline-flex;
+  align-items: center; justify-content: center; font-size: 1.1rem; line-height: 1; padding: 0;
+  transition: background .24s, color .24s, border-color .24s;
+}
+.cfc-prev:hover, .cfc-next:hover { background: var(--cfc-ink, #efe9df); color: var(--cfc-ground, #1f2520); border-color: var(--cfc-ink, #efe9df); }
+
+/* static fallback */
+.cfc-static .cfc-panel { opacity: 1 !important; transform: none !important; }
+.cfc-static .cfc-panel-cap { opacity: 1 !important; }
+.cfc-static .cfc-viewport { overflow-x: auto; }
+
+@media (max-width: 820px) {
+  .cfc-panel { flex-basis: 72vw; }
+  .cfc-cap { font-size: 4vw; }
+  .cfc-nav { display: none; }
+  .cfc-viewport { overflow-x: auto; }
+}

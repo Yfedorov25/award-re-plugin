@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>springs · Design — A / B / C board</title>
+<style>
+  @font-face{font-display:swap;font-family:"Victor Serif";font-weight:400;src:url(assets/fonts/VictorSerif-40Regular.woff2) format("woff2");}
+  @font-face{font-display:swap;font-family:"TT Commons Pro";font-weight:400;src:url(assets/fonts/TT_Commons_Pro_Regular.woff2) format("woff2");}
+  @font-face{font-display:swap;font-family:"TT Commons Pro";font-weight:500;src:url(assets/fonts/TTCommonsPro-Md.woff2) format("woff2");}
+  :root{--serif:"Victor Serif",Georgia,serif;--sans:"TT Commons Pro",Helvetica,Arial,sans-serif;
+    --cream:#e0d1b6;--cream-lite:#f5e8d1;--green-deep:#0e241d;--green:#16322a;--line:rgba(224,209,182,.16);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:radial-gradient(120% 90% at 50% 0%,#123128 0%,var(--green-deep) 60%);color:var(--cream);
+    font-family:var(--sans);min-height:100vh;padding:26px 24px 60px;}
+  .top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0 auto 22px;max-width:1230px;}
+  .top h1{font-family:var(--serif);font-weight:400;font-size:30px;letter-spacing:.2px;color:var(--cream-lite);}
+  .top p{font-size:14px;color:rgba(224,209,182,.66);letter-spacing:.2px;}
+  .top .legend{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(224,209,182,.6);}
+  .top .legend i{width:9px;height:9px;border-radius:50%;background:#8fd39a;box-shadow:0 0 10px rgba(143,211,154,.7);}
+  .board{display:flex;gap:26px;justify-content:flex-start;align-items:flex-start;flex-wrap:nowrap;width:max-content;max-width:100%;overflow-x:auto;padding-bottom:10px;margin:0 auto;}
+  .card{flex:0 0 auto;width:390px;}
+  .bar{display:flex;align-items:center;gap:9px;padding:0 2px 11px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:#caa14a;transition:background .3s,box-shadow .3s;flex:0 0 auto;}
+  .dot.ok{background:#8fd39a;box-shadow:0 0 10px rgba(143,211,154,.7);}
+  .lbl{font-family:var(--serif);font-size:19px;color:var(--cream-lite);line-height:1;}
+  .sub{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(224,209,182,.6);}
+  .pv{margin-left:auto;font-variant-numeric:tabular-nums;font-size:12.5px;letter-spacing:.08em;color:rgba(224,209,182,.85);
+    background:rgba(224,209,182,.08);border:1px solid var(--line);border-radius:20px;padding:3px 10px;}
+  .frame{width:390px;height:844px;border:1px solid var(--line);border-radius:30px;overflow:hidden;background:var(--green-deep);
+    box-shadow:0 30px 70px -30px rgba(0,0,0,.7);display:block;}
+  .ctl{display:flex;align-items:center;gap:12px;padding:14px 4px 0;}
+  input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:3px;
+    background:linear-gradient(90deg,var(--cream) var(--f,0%),rgba(224,209,182,.2) var(--f,0%));outline:none;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--cream-lite);
+    border:2px solid var(--green-deep);box-shadow:0 1px 6px rgba(0,0,0,.5);cursor:pointer;}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--cream-lite);border:2px solid var(--green-deep);cursor:pointer;}
+  .replay{font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream);
+    background:transparent;border:1px solid var(--line);border-radius:22px;padding:7px 15px;cursor:pointer;transition:.2s;white-space:nowrap;}
+  .replay:hover{background:rgba(224,209,182,.1);border-color:rgba(224,209,182,.4);}
+  .hint{max-width:1230px;margin:20px auto 0;font-size:12.5px;color:rgba(224,209,182,.45);letter-spacing:.2px;}
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>Design</h1>
+    <p>springs.estate — 4-beat scroll narrative, three cuts of the choreography</p>
+    <span class="legend"><i></i> render(p) ready</span>
+  </div>
+  <div class="board" id="board"></div>
+  <p class="hint">Drag a scrubber to drive <code>render(0 → 1)</code> across all four beats · Replay plays the full pass · each frame runs at 390 × 844.</p>
+
+<script>
+(function(){
+  var VARIANTS=[
+    {src:'design-a.html', lbl:'A', sub:'editorial calm'},
+    {src:'design-b.html', lbl:'B', sub:'crossfade drift'},
+    {src:'design-c.html', lbl:'C', sub:'pinned reveal'}
+  ];
+  var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
+  var board=document.getElementById('board');
+
+  VARIANTS.forEach(function(v){
+    var card=document.createElement('section'); card.className='card';
+    card.innerHTML=
+      '<div class="bar"><span class="dot"></span><span class="lbl">'+v.lbl+'</span>'+
+      '<span class="sub">'+v.sub+'</span><span class="pv">0.00</span></div>'+
+      '<iframe class="frame" src="'+v.src+'" scrolling="no" title="springs Design — variant '+v.lbl+'"></iframe>'+
+      '<div class="ctl"><input type="range" min="0" max="1000" value="0" aria-label="scrub variant '+v.lbl+'">'+
+      '<button class="replay">Replay</button></div>';
+    board.appendChild(card);
+
+    var frame=card.querySelector('iframe'),
+        dot=card.querySelector('.dot'),
+        slider=card.querySelector('input'),
+        pv=card.querySelector('.pv'),
+        replay=card.querySelector('.replay');
+    var raf=0;
+
+    function win(){ try{ return frame.contentWindow; }catch(e){ return null; } }
+    function drive(p){
+      p=clamp(p,0,1); var w=win();
+      if(w && typeof w.render==='function'){ try{ w.render(p); }catch(e){} }
+      slider.value=Math.round(p*1000);
+      slider.style.setProperty('--f',(p*100).toFixed(1)+'%');
+      pv.textContent=p.toFixed(2);
+    }
+    slider.addEventListener('input',function(){ cancelAnimationFrame(raf); drive(slider.value/1000); });
+    replay.addEventListener('click',function(){
+      cancelAnimationFrame(raf); var start=performance.now(), dur=7200;
+      (function step(now){
+        var t=clamp((now-start)/dur,0,1);
+        var p=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; // easeInOut
+        drive(p);
+        if(t<1) raf=requestAnimationFrame(step);
+      })(performance.now());
+    });
+
+    setInterval(function(){
+      var w=win(), ok=false;
+      try{ ok=!!(w && w.__ATOM_OK__ && typeof w.render==='function'); }catch(e){ ok=false; }
+      dot.classList.toggle('ok',ok);
+    },350);
+  });
+})();
+</script>
+</body>
+</html>

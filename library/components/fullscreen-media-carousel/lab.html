@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · fullscreen-media-carousel · finest (edge-to-edge full-bleed slides, video + images, swipe ‹ ›)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · fullscreen-media-carousel
+================================================================================
+  crownd/finest's interior gallery — a FULL-BLEED carousel where each slide fills the whole
+  viewport EDGE-TO-EDGE (no card chrome), swiping one full width at a time via ‹ › / drag /
+  keyboard. Slides can be IMAGE or VIDEO; a video slide plays only while active + on-screen.
+  Harvested from D_finest (F2: "several photos, swipe, one fills the screen, with video").
+  OUR QUADRO renders + clip. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#0c0c0a;color:#fff;font-family:'Inter',system-ui,sans-serif}
+  .fmc-stage{ --fmc-h:100vh; }
+</style>
+</head>
+<body>
+
+  <section class="fmc-stage" id="gallery">
+    <div class="fmc-track">
+      <div class="fmc-slide"><img src="renders/terrace.webp" alt=""></div>
+      <div class="fmc-slide"><video src="renders/clip-river-lite.webm" muted loop playsinline></video></div>
+      <div class="fmc-slide"><img src="renders/day-front.webp" alt=""></div>
+      <div class="fmc-slide"><img src="renders/macro-table.webp" alt=""></div>
+      <div class="fmc-slide"><img src="renders/night.webp" alt=""></div>
+    </div>
+
+    <button class="fmc-prev" aria-label="попередній">‹</button>
+    <button class="fmc-next" aria-label="наступний">›</button>
+
+    <div class="fmc-counter"><span class="fmc-cur">01</span><span class="sep">/</span><span class="fmc-total">05</span></div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  window.__fmc = FullscreenMediaCarousel.create('#gallery', { duration:700, ease:'cubic-bezier(.22,1,.36,1)', loop:false, drag:true, wheel:false, index:0 });
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "id": "render-scroll-scale",
+  "title": "Render scroll-scale (Springs hero breathe)",
+  "level": "L1-atom",
+  "batch": "C (#10/17)",
+  "source": "springs.estate hero/place. Engine = library/components/render-scroll-scale (proven, owns_pin:false, pure set(p)).",
+  "engine": "One full-bleed render in a fixed clipping frame that scales up (the reusable 'the hero image breathes/pushes' primitive). Pure set(p) scrub of the scale (+drift).",
+  "dual_platform": true,
+  "differs": "Same scale mechanic + same pure set(p). TRIGGER differs: desktop scrubs the scale from scroll while the frame pins (reversible); mobile breathes the scale 0→1→0 over time on its own (ambient). Springs mobile has the hero breathe as a living background; desktop ties it to scroll.",
+  "desktop": { "driver": "scrollScale — set(p) = scroll progress across the pin span (frame pinned).", "knobs": ["scaleFrom","scaleTo","drift"] },
+  "mobile": { "driver": "autoScale — set(p) breathes 0→1→0 over cycleMs, eased, looped.", "knobs": ["scaleFrom","scaleTo","cycleMs"] },
+  "knobs": {
+    "scaleFrom": { "default": 1.0, "what": "start scale." },
+    "scaleTo": { "default": 1.35, "what": "end scale." },
+    "drift": { "default": "engine", "what": "translateY drift with the scale." },
+    "cycleMs": { "default": 2600, "unit": "ms", "platform": "mobile", "what": "one breathe half-cycle." }
+  },
+  "engine_patch": "forceMotion (skip <=820px static-lock; wrapper drives set(p) itself). owns_pin:false so no ScrollTrigger to bypass. See memory dual-platform-forcemotion.",
+  "entry": "RenderScrollScaleDual.init(target, opts). Load engine.js THEN component.js. target = .rss-frame > img.rss-render. Desktop wraps in .pin-wrap for the pin.",
+  "law": "transform (scale + translateY) only; frame overflow:hidden clips; GPU; NO width/height/top/left; NO WebGL. reduced-motion → static at scaleFrom.",
+  "files": ["component.js","engine.js (+forceMotion)","component.css","img/a.webp","stage.html","demo.html","meta.json","README.md"]
+}

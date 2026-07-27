@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: hero-puzzle-monument — assembled section (harness proof)</title>
+<!--
+  PROOF that the section-variant harness works end to end: a REAL section, not an <h1>.
+  Shape = MANUAL-ATOM (architect design §4B): the harness owns ONE pin; daynight-center-seam
+  is a PURE set(t) atom driven by that pin, painting a real QUADRO render that crosses day->night
+  down a centre seam, with a serif caption riding the same progress (transform/opacity only).
+  The extended __LAB_OK__ (in combo-scaffold.js) passes only if: 1 pin, the cited real atom ran,
+  a [data-render-surface] painted a decoded image, 0 real console errors.
+  (RECIPE's literal owner is puzzle-image; this proves the load-bearing MANUAL path on a fully-
+  verified atom, per the architect's honest substitution note. puzzle-image ports via the engine shape.)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/daynight-engine/component.css">
+<link rel="stylesheet" href="../../components/daynight-center-seam/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the rails) */
+  .hpm__cap { position: absolute; z-index: 6; left: clamp(20px,4vw,64px); bottom: clamp(24px,7vh,72px);
+    max-width: 22ch; pointer-events: none; color: var(--combo-cream); text-shadow: 0 2px 22px rgba(0,0,0,.5); }
+  .hpm__eyebrow { font: 600 .68rem/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase; opacity: .7; }
+  .hpm__title { font-family: var(--combo-serif); font-weight: 300; font-size: clamp(2.4rem,6vw,5rem);
+    line-height: .98; letter-spacing: -.02em; margin-top: .6rem; }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="hero-puzzle-monument">
+    <div id="seamHost" data-render-surface></div>   <!-- daynight-center-seam injects .dn + a real <img> here -->
+    <div class="hpm__cap" data-spine>
+      <div class="hpm__eyebrow">вул. Замкова</div>
+      <div class="hpm__title">Дім, що зустрічає ніч</div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/daynight-engine/component.js"></script>
+  <script src="../../components/daynight-center-seam/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var seam;
+      // RENDER + SEAM job: a real day/night QUADRO render, manual (PURE set(t))
+      SectionHarness.ranOK('daynight-center-seam', function () {
+        seam = window.DayNightCenterSeam.create('#seamHost', {
+          dayMedia: 'renders/a1-r1-day.webp',
+          nightMedia: 'renders/a1-r1-night.webp',
+          labels: ['Вдень', 'Ввечері']
+        });
+        window.__seam = seam;
+      });
+      // ONE section pin (harness). seam.set(p) rides it; the caption drifts on the same bus.
+      var st = SectionHarness.pin('#combo', { length: '+=130%', scrub: 0.8 });
+      if (st) st.onUpdate = function (p) {
+        if (seam && seam.set) seam.set(p);
+        if (window.gsap) window.gsap.set('[data-spine]', { y: (0.5 - p) * 40, opacity: 0.55 + p * 0.45 });
+      };
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['daynight-center-seam', 'parallax-depth', 'scroll-indicator']
+      });
+    })();
+  </script>
+</body>
+</html>

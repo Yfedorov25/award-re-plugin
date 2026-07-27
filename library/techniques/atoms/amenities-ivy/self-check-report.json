@@ -1,0 +1,241 @@
+{
+  "atomId": "amenities-ivy",
+  "ts": "2026-07-24T11:46:42.024Z",
+  "pass": true,
+  "url": "http://localhost:8879/atoms/amenities-ivy/variants/ivy.html",
+  "tool": "self-check.mjs",
+  "version": 2,
+  "thresholdsVersion": 5,
+  "thresholdsSha": "89c59b1d7c5f922a82767cef29207d3a08db3f446f4f8274d8cf5536739a25d8",
+  "harnessHash": "bd32e3c2b88498d9c82b8207d4583c4151da5ece759baf31ac0c28068abe0804",
+  "configSha": "3f321ac4738a1fd576a377b25438c9756a7c0ae934fc4ec584e44770c7489b93",
+  "expectationsSha": "32fd765b5b7a028b74e7d1d0d796e838ea994b9960148c1675d620c227e3d8b9",
+  "inputsHash": "3fb25cf7a7f90cbac836ee949211cdb72b347e3cba1786538a8768df0a7259fa",
+  "calibration": {
+    "ok": true,
+    "ts": "2026-07-24T11:45:53.074Z"
+  },
+  "coverage": {
+    "dimensionsRun": [
+      "render-api",
+      "purity",
+      "census",
+      "geometry",
+      "channel-identity",
+      "timing",
+      "ordering",
+      "plateau",
+      "composition-overlap",
+      "fade",
+      "surface-parity",
+      "structure-parity",
+      "mechanic-class",
+      "console-errors",
+      "http-status"
+    ],
+    "movers": 7,
+    "declared": 7,
+    "basisSelf": 0
+  },
+  "summary": "green (live:27 / self-regression:0); unchecked:1 — нове судить око Єгора",
+  "checks": [
+    {
+      "dimension": "render-api",
+      "name": "render-api",
+      "pass": true,
+      "detail": "window.render(p) присутній",
+      "basis": "live"
+    },
+    {
+      "dimension": "purity",
+      "name": "render-p-pure",
+      "pass": true,
+      "detail": "render(p) чиста (снапшоти збігаються після стрибків; transition=0 на 7 мōверах)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "census-movers",
+      "pass": true,
+      "detail": "7 рухомих елементів, усі задекларовані (targets/ignore)",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:card1",
+      "pass": true,
+      "detail": "горизонтальні межі на всьому треку: left 30px (≥-2), right 360px (≤392)",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:card2",
+      "pass": true,
+      "detail": "горизонтальні межі на всьому треку: left 30px (≥-2), right 360px (≤392)",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:card3",
+      "pass": true,
+      "detail": "горизонтальні межі на всьому треку: left 30px (≥-2), right 360px (≤392)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:card2",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=591px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:card3",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=562px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:card2.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.268 vs очікуване 0.26 ±0.02 [CHOREO Ф2: cover№1 старт (live f128 @12fps, zonetrack COVERED-BY f128-169)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:card3.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.588 vs очікуване 0.58 ±0.02 [CHOREO Ф5: cover№2 старт (live f232, zonetrack COVERED-BY f232-246)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:card3.motion.end",
+      "pass": true,
+      "detail": "виміряно 0.692 vs очікуване 0.7 ±0.02 [CHOREO Ф5: кінець в'їзду yoga (live f232-263 один хід, наш номінал 0.58-0.70); власний recede yoga народжується підпорогово (τ^1.35, v < stepEps)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "ordering",
+      "name": "ord:card3-after-card2@50dvh",
+      "pass": true,
+      "detail": "card3.start=0.588 vs перетин=0.346 (gap 0.242, ліміт −0.02) [CHOREO: cover№2 після посадки card2 у слот (live f232 після f169); поріг 50dvh = card2 майже сіла]",
+      "basis": "live"
+    },
+    {
+      "dimension": "plateau",
+      "name": "pin-плато",
+      "pass": true,
+      "detail": "плато 43.1dvh на [0.69,0.85] (довж 0.16≥0.1) [SPEC M2 STACK-RECEDE: фронтальна картка у слоті 40dvh (нова входить повним розміром; вимір live pod-top)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-overlap",
+      "name": "card-pin-top",
+      "pass": true,
+      "detail": "pin=43.1dvh vs 43±3 [SPEC M2 STACK-RECEDE: фронтальна картка у слоті 40dvh (нова входить повним розміром; вимір live pod-top)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "fade",
+      "name": "fade:t1",
+      "pass": true,
+      "detail": "opacity fade [0.302,0.334] vs очікуване [0.3,0.34] ±0.02 [CHOREO swap№1: fade-out тексту №1 до середини вікна 0.30-0.38 (live f147-150, ink 19→0)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.15",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.45",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.7",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.85",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:card",
+      "pass": true,
+      "detail": "послідовність подій збігається: [COVERED-BY]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:card.COVERED-BY",
+      "pass": true,
+      "detail": "COVERED-BY у зоні card: live=1 vs наш=1",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:title",
+      "pass": true,
+      "detail": "послідовність подій збігається: [SWAPS-CONTENT, SWAPS-CONTENT, SWAPS-CONTENT]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:title.SWAPS-CONTENT",
+      "pass": true,
+      "detail": "SWAPS-CONTENT у зоні title: live=3 vs наш=3",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "mechanic-class-parity",
+      "pass": true,
+      "detail": "клас механіки збігається: pin+swap",
+      "basis": "live"
+    },
+    {
+      "dimension": "mechanic-class",
+      "name": "class-vs-live",
+      "pass": true,
+      "detail": "config.mechanicClass=\"pin+swap\" = клас з live",
+      "basis": "live"
+    },
+    {
+      "dimension": "console-errors",
+      "name": "console-errors",
+      "pass": true,
+      "detail": "0 console-error",
+      "basis": "live"
+    },
+    {
+      "dimension": "http-status",
+      "name": "http-status",
+      "pass": true,
+      "detail": "0 HTTP>=400",
+      "basis": "live"
+    }
+  ],
+  "unchecked": [
+    {
+      "dimension": "media-type",
+      "target": "media",
+      "reason": "waived",
+      "detail": "photo-first плейсхолдер до заміни на відео [live = статичний рендер (не відео); наші higgsfield-асети (pod/playground/yoga) фінальні, звірені оком S47. media-type не застосовний.]"
+    }
+  ],
+  "uncheckedCount": 1
+}

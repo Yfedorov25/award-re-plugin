@@ -1,0 +1,30 @@
+/* FLOATING-PRODUCT-ORBIT · component.css
+   A staged object floating above a red plinth: idle float + pointer-tilt parallax in a CSS
+   perspective scene (NO WebGL — an approximation of an orbiting 3D product). transform:
+   perspective rotateX/rotateY/translateY only. NO mix-blend over the object. NO WebGL. */
+.fpo-stage { position: relative; display: grid; place-items: center;
+  min-height: var(--fpo-h, 64vh); perspective: var(--fpo-persp, 1100px);
+  background: var(--fpo-bg, #e9e9e6); border-radius: var(--fpo-radius, 14px); overflow: hidden; }
+
+.fpo-scene { position: relative; width: min(64%, 460px); aspect-ratio: 1 / 1;
+  transform-style: preserve-3d; display: grid; place-items: center; }
+
+/* the red stacked pedestal (two rounded slabs) */
+.fpo-pedestal { position: absolute; bottom: 8%; left: 50%; width: 62%; height: 26%;
+  transform-style: preserve-3d; translate: -50% 0; will-change: transform;
+  background: linear-gradient(180deg, #f0473e, #cf392f);
+  border-radius: 18px; box-shadow: 0 26px 40px rgba(207,57,47,.28); }
+.fpo-pedestal::before { content: ''; position: absolute; left: 8%; right: 8%; top: -34%; height: 56%;
+  background: linear-gradient(180deg, #f4544b, #e0463d); border-radius: 50%/40%;
+  box-shadow: inset 0 4px 10px rgba(255,255,255,.25); }
+
+/* a chrome/glass ring around the object */
+.fpo-ring { position: absolute; top: 34%; left: 50%; width: 78%; height: 20%; translate: -50% 0;
+  border: 2px solid rgba(180,180,185,.7); border-radius: 50%;
+  transform-style: preserve-3d; will-change: transform;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+
+/* the floating object (the product image / glass card) */
+.fpo-object { position: relative; z-index: 3; width: 70%; will-change: transform;
+  filter: drop-shadow(0 24px 30px rgba(30,26,23,.22)); }
+.fpo-object img { width: 100%; height: auto; display: block; border-radius: 12px; }

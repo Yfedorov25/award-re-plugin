@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-6 seam</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* ── SO-6 Residences → Interiors. LIVE-verified (CDP, S25): the cream architecture block gives
+     way to a FULL-BLEED warm interior photo (muted palette — boucle chair, wood table, blinds)
+     with a big serif act-word "Interiors" + subtitle "BEAUTY IN THE ESSENCE OF THINGS" and bottom-
+     left body copy. Same full-bleed-photo+act-word grammar as SO-1/SO-2, but WARM neutral palette
+     (not dark green, not cream). Self-floor 0.3% (nearly still) → strict parity. */
+  :root{ --green-deep:#0e241d; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#2b2620;color:var(--cream);font-family:var(--body);overflow-x:clip}
+  .track{ height:300vh; position:relative; }
+  .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+
+  /* Residences cream tail (a warm architecture card exits as the interior photo arrives) */
+  .resTail{ position:absolute; inset:0; background:var(--cream-lite); opacity:calc(1 - var(--photo,0)); }
+  .resTail__card{ position:absolute; top:0; right:0; width:33%; height:42%;
+    background:url('media/res-card.webp') center 62%/cover no-repeat; box-shadow:0 30px 80px rgba(20,40,30,.28); }
+
+  /* Interiors — full-bleed warm interior photo */
+  /* live springs zooms the bg ~112% past the full asset frame (measured: baseline shows a tighter
+     crop than the 2016×1260 asset). So size 112% + settle to that (not 100%). */
+  .photo{ position:absolute; inset:0; background:url('media/interiors-bg.webp') center 46%/112% auto no-repeat;
+    background-color:#8a8378; opacity:var(--photo,0); transform:scale(calc(1.05 - var(--photo,0)*0.05)); }
+  .photo::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(30,26,20,.14) 0%, rgba(30,26,20,.02) 34%, rgba(30,26,20,.30) 100%); }
+
+  .head{ position:absolute; top:0; left:0; right:0; z-index:8; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#e6ded0; }
+  .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+  @media (max-width:700px){ .head .nav,.head .r span{ display:none; } }
+
+  /* act-word "Interiors" — right-centre, big serif cream */
+  .act{ position:absolute; right:clamp(20px,3vw,50px); top:50%; transform:translateY(-50%);
+    text-align:right; z-index:5; }
+  .act .word{ --r:0; font-family:var(--serif); font-weight:400; line-height:.9; letter-spacing:-.02em;
+    font-size:clamp(3.6rem,11vw,9rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.4);
+    opacity:var(--r); transform:translateY(calc((1 - var(--r)) * 0.5em));
+    clip-path:inset(calc((1 - var(--r)) * 100%) 0 0 0); will-change:transform,clip-path,opacity; }
+  .act .sub{ font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color:#e6ded0;
+    margin-top:1.1em; opacity:var(--subO,0); text-shadow:0 2px 16px rgba(0,0,0,.5); }
+
+  /* bottom-left body copy */
+  .copy{ position:absolute; left:clamp(28px,5vw,80px); bottom:clamp(48px,10vh,90px); max-width:34ch;
+    z-index:5; color:#f2ece0; font-size:clamp(.95rem,1.25vw,1.1rem); line-height:1.62;
+    opacity:var(--copyO,0); transform:translateY(calc((1 - var(--copyO,0)) * 0.6em));
+    text-shadow:0 2px 20px rgba(0,0,0,.5); }
+
+  .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#cfc6b6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+  @media (max-width:700px){ .resTail__card{ width:64%; height:34%; } .copy{ max-width:26ch; } }
+</style>
+</head>
+<body>
+  <div class="track" id="track">
+    <div class="pin">
+      <div class="resTail" id="resTail"><div class="resTail__card"></div></div>
+      <div class="photo" id="photo"></div>
+      <header class="head"><div class="nav">Menu · Residences</div><div class="mark">Springs</div><div class="r"><span>Contact us</span> ♥</div></header>
+
+      <div class="act" id="act">
+        <div class="word" id="word">Interiors</div>
+        <div class="sub" id="sub">Beauty in the essence of things</div>
+      </div>
+      <div class="copy" id="copy">Our designs are chosen with a delicate treatment of materials and time; time that will soon become history, a story of family generations. Natural stone, warm wood, aged metal, and textured textiles. This is how we create a visual and tactile space for authentically high-class comfort.</div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Residences → Interiors</div>
+
+  <script>
+  var track=document.getElementById('track');
+  var resTail=document.getElementById('resTail'), photo=document.getElementById('photo'),
+      word=document.getElementById('word'), sub=document.getElementById('sub'),
+      copy=document.getElementById('copy'), cue=document.getElementById('cue');
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function set(el,k,v){el.style.setProperty(k,v);}
+  var smooth=0;
+  function render(p){
+    // interior photo crossfades in over the cream residences tail (0.08→0.34)
+    set(photo,'--photo', eo(seg(p,0.08,0.34)).toFixed(3));
+    // act-word Interiors rises+wipes in (0.34→0.54), subtitle after (0.50→0.62)
+    set(word,'--r', eo(seg(p,0.34,0.56)).toFixed(3));
+    set(sub,'--subO', eo(seg(p,0.52,0.66)).toFixed(3));
+    // bottom-left body copy (0.44→0.66)
+    set(copy,'--copyO', eo(seg(p,0.44,0.66)).toFixed(3));
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  function frame(){
+    var r=track.getBoundingClientRect(), total=track.offsetHeight-window.innerHeight;
+    var target=clamp((-r.top)/total,0,1);
+    smooth += (target-smooth)*0.09; if(Math.abs(target-smooth)<0.0002) smooth=target;
+    render(smooth); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  var qs=new URLSearchParams(location.search), sQ=parseFloat(qs.get('s'));
+  if(!isNaN(sQ)){ var jump=function(){var t=document.getElementById('track');window.scrollTo(0,Math.round((t.offsetHeight-window.innerHeight)*sQ));smooth=sQ;render(sQ);};
+    jump(); setTimeout(jump,300); setTimeout(jump,900);
+  } else if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__SO6_SEAM_OK__=true;
+</script>
+</body>
+</html>

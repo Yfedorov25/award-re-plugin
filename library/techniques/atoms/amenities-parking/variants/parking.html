@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>amenities-parking · pin + camera-move scrub (v2, S52-b: секвенція; інструмент-клас strip)</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:auto;}
+  body{font-family:var(--spr-sans,"TT Commons Pro",sans-serif);background:#f4e5ca;}
+
+  /* scroll driver: тіло атома = 108.3dvh page-ходу (dense-zoom: 1135px @1266-кадру,
+     live-КОНТЕНТ 1048px = наші 100dvh — Safari-хром вирізано з мапи) */
+  .wrap{height:209vh;position:relative;}
+  .stage{position:sticky;top:0;height:100dvh;overflow:hidden;background:#1c1a16;}
+
+  /* ФОТО: ОДИН рендер (вердикт Єгора S50), зум-аут кропа скрабом.
+     🔴 S51-e ORIGIN ПЕРЕМІРЯНО (око Єгора: «в них панорама, далі скролиш і видно стає ПРАВУ
+     частину паркінгу; ти зробив набагато простіше»). Вимір: горизонтальний зсув контенту за
+     зум = cross-correlation КОЛОНКОВОГО профілю фото-смуги по сусідніх кадрах, накопичено:
+     **−776px = −66.3%% ширини**, монотонно, піки 0.65-0.96, нулі точно на паузах руки
+     (f12-28, f56-68) — тобто вимір чистий (src: scratchpad S51 pan-x.json).
+     Панорама НЕ окремий прийом: при зумі-ауті ×2.65 про origin ox фіча з правого краю
+     стартового вікна їде на −0.622·(1−ox): ox=0 → −62.2%% (виміряне −66.3%%), ox=0.10 → −56%%,
+     ox=0.16 → −52%% (було в коді, тому права частина майже не входила). Отже origin живого зума
+     прикріплений до ЛІВОГО краю. oy=20%% з двох незалежних ранніх кадрів (window-центр 0.289
+     при w0.30 і 0.302 при w0.34 дають oy 0.199 і 0.200). */
+  /* S52: transform-origin більше не потрібен (scale прибрано, рух несе сама секвенція) */
+  #photo{position:absolute;inset:0;z-index:1;will-change:transform;}
+  #photo img{display:block;width:100%;height:100dvh;object-fit:cover;object-position:50% 50%;}
+
+  /* NAMEPLATE: пін ~79dvh → їде ×1.1 сторінки → скраб-fade (вердикт Єгора S50: скраб) */
+  #plate{position:absolute;left:6.2%;right:2%;top:0;z-index:3;will-change:transform,opacity;
+    font-family:"Victor Serif",var(--spr-serif,serif);font-weight:400;color:#e6d5b3;
+    font-size:44px;line-height:1.08;letter-spacing:.005em;white-space:nowrap;}
+    /* кегль src: live f110 рядок спанить x36-549 @585 = 88% ширини → ~44px @390 (звірка оком) */
+
+  /* ПАНЕЛЬ: суцільний cream-лист ПОВЕРХ фото (клас stack+cover: слайд-овер знизу),
+     жорсткий блок: параграф + 3 спекс-рядки з hairline; НУЛЬ власних анімацій */
+  #panel{position:absolute;left:0;top:0;width:100%;height:150dvh;z-index:4;
+    background:#f4e5ca;will-change:transform;}
+  /* ЖОРСТКІ офсети абсолютом (нуль margin-дрейфу): параграф 10.8dvh від краю панелі
+     (боундарі→параграф 113px @1266 = 10.8% контенту); спекс від ТОПУ параграфа
+     330/458/569px @1266 = 31.5/43.7/54.3dvh (4tmpl S50, const з першого кадру) */
+  #para{position:absolute;left:6.2%;right:4.5%;top:10.8dvh;
+    font-size:15px;line-height:3.05dvh;color:#3f3a32;}
+    /* кегль width-locked: 585→390 ÷1.5; пітч content-locked: 32px @1266 = 3.05dvh */
+  /* S51-d ФІКС ОКА ЄГОРА (три розбіжності, усі проміряні на live f158 у %% КОНТЕНТУ):
+     (1) КІЛЬКІСТЬ: було border-top на КОЖНОМУ .spec = 3 лінії; live має 2 (лише МІЖ рядками,
+         над «Designed interior» лінії НЕМА) → border-top лишається тільки на spec2/spec3;
+     (2) ВИРІВНЮВАННЯ: текст був притиснутий до лінії (наш зазор над 53px проти 104 під);
+         live тримає текст ПО ЦЕНТРУ смуги (зазор над 109 проти 92) → padding-top ≈ половина
+         вільної смуги: між spec2 і spec3 10.6dvh, ink ~2.7dvh → (10.6−2.7)/2 ≈ 3.9dvh;
+     (3) ВАГА: наша лінія глибина 67 проти live 42 (у 1.6 раза темніша) → alpha .35 → .22.
+     Позиції ліній live: 44.4%% і 55.9%% контенту; текст-центри ~38.3 / 50.5 / 61.5. */
+  .spec{position:absolute;left:6.2%;right:4.5%;
+    font-family:"Victor Serif",var(--spr-serif,serif);font-weight:400;color:#162d24;
+    font-size:20px;line-height:1.15;}
+  /* tops компенсовані на padding: старі 42.3/54.5/65.1 задавали ТЕКСТ, а тепер елемент
+     починається лінією, тому −0.5 / −4.8 / −4.2dvh, щоб і лінії, і текст сіли на live-позиції
+     (перевірено замірами: лінії 44.4/55.9 та текст-центри 38.3/50.5/61.5 %% контенту) */
+  #spec1{top:41.8dvh;}  /* БЕЗ лінії, як live */
+  #spec2{top:49.7dvh;border-top:1px solid rgba(22,45,36,.22);padding-top:3.9dvh;}
+  #spec3{top:60.9dvh;border-top:1px solid rgba(22,45,36,.22);padding-top:3.9dvh;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="stage" aria-label="Park-like Parking">
+    <figure id="photo">
+      <!-- S52: МЕХАНІЗМ ЗМІНЕНО. Раніше тут було ОДНЕ фото + CSS scale про origin, і це був
+           НЕ той прийом: у live паралакс (близький план міняється ×3.33, далекий лише ×1.22,
+           відношення 2.8), а будь-який зум статики дає це відношення рівно 1.00.
+           Тепер це СЕКВЕНЦІЯ кадрів відʼїзду камери (43 кадри, R3 v3 → kling3_0_turbo dolly-back,
+           обрізано по виміряній точці f43@24fps, де близький план досягає ×3.85 при цілі ×3.33).
+           Кадри вже несуть cover-кроп (513×1108 з 828×1108) і йдуть 585×1266, ~26KB кожен.
+           R1/R2 лишено в assets/ як історію: ними цей закон не відтворюється в принципі. -->
+      <img id="seq" src="assets/seq/p00.webp" alt="дворівневий дизайнерський паркінг Springs">
+    </figure>
+    <h2 id="plate">Park-like Parking</h2>
+    <div id="panel">
+      <p id="para">At Springs, everything has been marked by designer's<br>
+hand that turned utility spaces aesthetic objects. Our<br>
+two-level designer car park is framed with a natural<br>
+stone fence, its textures subtly accentuated<br>
+by a chain of opalescent sconces. Encircled by trees<br>
+and dramatic silhouettes of flowerbeds, this parking<br>
+will make your car sparkle like a jewel meant<br>
+for the opulent lifestyle.</p>
+      <div class="spec" id="spec1">Designed interior</div>
+      <div class="spec" id="spec2">Two levels</div>
+      <div class="spec" id="spec3">176 parking spaces</div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* render(p) = ЧИСТА функція p (закон purity). ТЗ = dense-zoom.json (густа серія scale(f)
+   + пейдж-рулер з ПОТОКОВИХ елементів; cum у вікні релізу контамінований зумом) + CHOREO v1
+   + вердикти Єгора S50 (борд: клас pin+zoom-out; fade=СКРАБ; diffs=верифікатор).
+   ЖОДНИХ дискретних кроків: зум = одна безперервна крива, паузи руки в live ≠ закон
+   (hand-tempo-is-not-design-law); спекс-блок ЖОРСТКИЙ (офсети 330/458/569 @1266 const). */
+(function () {
+  var C = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+  var L = function (a, b, t) { return a + (b - a) * t; };
+  var ss = function (t) { return t * t * (3 - 2 * t); }; /* smoothstep: лягає на чекпоінти w=1/s (5/7 точно, 2 в зоні ncc<0.7) */
+
+  var photo = document.getElementById('photo');
+  var seq = document.getElementById('seq');
+  /* передзавантаження всіх кадрів: без нього скраб показує білі проміжки на першому проході */
+  for (var _i = 0; _i < 44; _i++) { var _im = new Image(); _im.src = 'assets/seq/p' + (_i < 10 ? '0' + _i : _i) + '.webp'; }
+  var plate = document.getElementById('plate');
+  var panel = document.getElementById('panel');
+
+  /* p-мапа: тіло атома = 89.7dvh page-ходу (1135px @1266).
+     🔴 ЗУМ ПЕРЕМІРЯНО S51 (стара крива йшла з ділянки dense-zoom, де матчер мав ncc 0.44-0.52,
+     тобто з шуму; моє око зловило надто глибокий і темний старт). Новий вимір: ЛАНЦЮЖОК
+     коротких пар (bestZoomFit, гомотетія на 12×12 zone-grid) з перемноженням, УСІ 19 пар мають
+     резидуал dScale 0-7 < ztGridLow=12, тобто кожен крок це справжній геометричний збіг:
+       p0.014 w0.377 · 0.044/0.416 · 0.078/0.473 · 0.139/0.537 · 0.173/0.593 · (пауза p0.194)
+       · 0.230/0.654 · 0.253/0.722 · 0.307/0.821 · 0.332/0.906 · 0.367/1.000
+     Живий зум-аут = ×2.65 (а не 3.2-3.45), старт p0.014 (до нього page стоїть на -16px, зума
+     НЕМА), фініш p0.367. Форма: майже ЛІНІЙНА по page (це і був первісний висновок SPEC
+     «1/scale ≈ лінійно по page-px»); smoothstep відходить сильно (на t0.61 вимір 0.445 проти
+     ss 0.643), тому крива = лінійна. Джерело: scratchpad S51 zoom-curve.json.
+     Панель: top 89.7·(1-p) dvh (page-locked слайд-овер, боундарі-анкери: f130 87% · f244 16.4%).
+     Plate: 79dvh − 1.1·page (верифікатор: 349px/318px = ×1.1), скраб-fade p∈[0.20, 0.33]. */
+  var PAGE_DVH = 108.3;                           /* 1135px @1266-кадру × 100/1048 контенту */
+  /* 🔴 S53 ВІКНО ПЕРЕМІРЯНО НАДІЙНИМ ІНСТРУМЕНТОМ (патч-матчер бреше на повторюваних решітках —
+     контроль показав похибку до 32%; новий вимір = ІНТЕГРАЛ ПОКРОКОВОГО РУХУ КРАЇВ S(t),
+     синтетичний контроль: монотонний, S/(−ln k) стабільне ±15%, на паузі руки ПЛАТО = нуль шуму).
+     ZOOM_T0 0.014 → 0: камера live рушає РАЗОМ зі сторінкою (S 0→2.15 поки page 0→−1.2%).
+     ZOOM_T1 0.367 → 0.349: S виходить на плато 50.11 на page −36.5% (= p 0.349 при 104.6%/p).
+     РОЗПОДІЛ кадрів НЕ рівномірний по кліпу: кожен кадр секвенції обрано так, щоб його S
+     дорівнював S live на ТІЙ САМІЙ позиції сторінки (scratchpad seqmap.json). */
+  var ZOOM_T0 = 0.0, ZOOM_T1 = 0.349;
+  /* S53: секвенція 44 кадри (p00..p43) з нового кліпу-dolly (старий ніс лише 26% ходу: S 13.15 проти 50.11)
+     🔴 S54 ГОРИЗОНТАЛЬНИЙ ЗАКОН (вердикт Єгора на борді S54: варіант C).
+     У live за хід камери ЗАЛА ВІДКРИВАЄТЬСЯ: ширина сцени в кадрі ×1.51, лівий край екрана
+     доїжджає до 0.65, правий до 2.16 стартових ширин (вимір scene.mjs, контроль 3/3 на
+     синтетичних вікнах з відомим ходом). Кліп САМ по собі зали не відкриває (власний зиск ×0.99),
+     тому відкриття взято з ВІКНА КРОПУ: воно і ШИРШАЄ 504→766px кліпу (×1.53), і ДОЇЖДЖАЄ
+     вправо x 122→476. Обидві складові ЗАПЕЧЕНІ в кадри секвенції (build-c.mjs).
+     ⚠️ Закон живе не лише тут: CLAIMS-рядок PAN у CHOREO + гейт pan-parity у self-check.
+     НЕ замінювати механізм, не перевіривши, де кожна з цих складових живе в новому. */
+  var SEQ_N = 44;
+  var SEQ_SRC = function (i) { return 'assets/seq/p' + (i < 10 ? '0' + i : i) + '.webp'; };
+  var seqIdx = -1;
+  var PLATE_TOP = 88.3, PLATE_K = 1.1;            /* пін: (995-70)/1048 контенту */
+  var FADE_A = 0.20, FADE_B = 0.34;               /* live: fade у вікні f168-189 повного ролика = page -234..-409 = p 0.21-0.36; plate 66.4→~50dvh */
+  var PANEL_Y0 = 103.2;                           /* анкер f244: боундарі 13.2dvh при p=0.831 (вхід ~p0.03) */
+
+  window.render = function (p) {
+    p = C(p);
+
+    /* ФОТО (S52): СКРАБ ПО СЕКВЕНЦІЇ відʼїзду камери, НЕ scale про origin.
+       Кадр обирається лінійно по p у вікні [ZOOM_T0, ZOOM_T1] (те саме вікно, що й раніше:
+       старт = коли page зійшла з -16px, фініш = кінець ходу). Після ZOOM_T1 кадр ЗАМОРОЖЕНО
+       на останньому і фото йде вгору page-locked ЗА панеллю. */
+    var t = C((p - ZOOM_T0) / (ZOOM_T1 - ZOOM_T0));
+    var idx = Math.min(SEQ_N - 1, Math.round(t * (SEQ_N - 1)));
+    if (idx !== seqIdx) { seqIdx = idx; seq.src = SEQ_SRC(idx); }
+    var dyPhoto = p > ZOOM_T1 ? -(p - ZOOM_T1) * PAGE_DVH : 0;
+    photo.style.transform = 'translateY(' + dyPhoto.toFixed(2) + 'dvh)';
+
+    /* nameplate: пін → travel ×1.1 сторінки → скраб-fade; після op=0 позиція ЗАМОРОЖЕНА
+       (рух невидимого елемента = фантомний трейс; live-еквівалент невідрізненний) */
+    var pf = Math.min(p, FADE_B);
+    var plateY = PLATE_TOP - PLATE_K * pf * PAGE_DVH;
+    var op = 1 - C((p - FADE_A) / (FADE_B - FADE_A));
+    plate.style.transform = 'translateY(' + plateY.toFixed(2) + 'dvh)';
+    plate.style.opacity = op.toFixed(3);
+
+    /* панель: суцільний лист слайд-овер знизу, лінійно по p (page-locked;
+       анкери: f130 вхід 98.4dvh контенту · f244 13.2dvh) */
+    var panelY = PANEL_Y0 - PAGE_DVH * p;
+    panel.style.transform = 'translateY(' + panelY.toFixed(2) + 'dvh)';
+  };
+
+  /* scroll-драйвер (поза render: purity) */
+  function drive () {
+    var wrap = document.querySelector('.wrap');
+    var span = wrap.offsetHeight - window.innerHeight;
+    var p = span > 0 ? C((window.scrollY - wrap.offsetTop) / span) : 0;
+    window.render(p);
+  }
+  window.addEventListener('scroll', drive, { passive: true });
+  window.addEventListener('resize', drive);
+  window.render(0);
+})();
+</script>
+</body>
+</html>

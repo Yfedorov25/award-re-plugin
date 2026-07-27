@@ -1,0 +1,231 @@
+{
+  "atomId": "amenities-carousel",
+  "ts": "2026-07-26T19:55:44.401Z",
+  "pass": false,
+  "url": "http://localhost:8879/atoms/amenities-carousel/variants/carousel.html",
+  "tool": "self-check.mjs",
+  "version": 2,
+  "thresholdsVersion": 10,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "harnessHash": "cdbc515d38ec4ae5803bee15b3699f962899a9dd844b705f72493c2d69107dcf",
+  "configSha": "f3d05c754ad3b48d96313c86ea763e6076e9e1938ebff9c9d79577cee802c4da",
+  "expectationsSha": null,
+  "inputsHash": "c77c805da7d2317faeafabbb1247cdfd3ec0181d9118a30ceb25e54e56953526",
+  "calibration": {
+    "ok": true,
+    "ts": "2026-07-26T19:51:59.212Z"
+  },
+  "coverage": {
+    "dimensionsRun": [
+      "render-api",
+      "purity",
+      "census",
+      "motion-direction",
+      "geometry",
+      "channel-identity",
+      "surface-parity",
+      "structure-parity",
+      "mechanic-class",
+      "composition-static",
+      "console-errors",
+      "http-status"
+    ],
+    "movers": 11,
+    "declared": 1,
+    "basisSelf": 0
+  },
+  "summary": "є провалені виміри — НЕ показувати compare-URL",
+  "checks": [
+    {
+      "dimension": "render-api",
+      "name": "render-api",
+      "pass": true,
+      "detail": "window.render(p) присутній",
+      "basis": "live"
+    },
+    {
+      "dimension": "purity",
+      "name": "render-p-pure",
+      "pass": false,
+      "detail": "НЕ чиста: snapEqual=true, transition на [m3,m4,m5,m6,m7,m8,m9,m10] — семпли брехатимуть",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "undeclared-mover:span.ul",
+      "pass": false,
+      "detail": "рухомий елемент span.ul не задекларований ні targets ні ignore (зайвий слайсер? забутий шар?)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "undeclared-mover:span.ul",
+      "pass": false,
+      "detail": "рухомий елемент span.ul не задекларований ні targets ні ignore (зайвий слайсер? забутий шар?)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "undeclared-mover:span.ul",
+      "pass": false,
+      "detail": "рухомий елемент span.ul не задекларований ні targets ні ignore (зайвий слайсер? забутий шар?)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "undeclared-mover:div.capset",
+      "pass": false,
+      "detail": "рухомий елемент div.capset не задекларований ні targets ні ignore (зайвий слайсер? забутий шар?)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "undeclared-mover:div.capset",
+      "pass": false,
+      "detail": "рухомий елемент div.capset не задекларований ні targets ні ignore (зайвий слайсер? забутий шар?)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "undeclared-mover:div.capset",
+      "pass": false,
+      "detail": "рухомий елемент div.capset не задекларований ні targets ні ignore (зайвий слайсер? забутий шар?)",
+      "basis": "live"
+    },
+    {
+      "dimension": "motion-direction",
+      "name": "wipe:slide1",
+      "pass": false,
+      "detail": "невідомий wipe=\"left\"",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:none",
+      "pass": true,
+      "detail": "card-таргетів нема (атом без картки)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:slide1",
+      "pass": true,
+      "detail": "clip-механізм: Δclip=390px (≥100), Δtranslate=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.25",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.5",
+      "pass": false,
+      "detail": "live має панель (верх @60.5%), у нас ПАНЕЛІ НЕМА — текст на фото/скримі?",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.75",
+      "pass": false,
+      "detail": "live має панель (верх @60.5%), у нас ПАНЕЛІ НЕМА — текст на фото/скримі?",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.95",
+      "pass": false,
+      "detail": "live має панель (верх @88.5%), у нас ПАНЕЛІ НЕМА — текст на фото/скримі?",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:slide",
+      "pass": false,
+      "detail": "механіка РОЗІЙШЛАСЬ: live=[COVERED-BY, TRAVELS:down, COVERED-BY] vs наш=[]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:slide.COVERED-BY",
+      "pass": false,
+      "detail": "COVERED-BY у зоні slide: live=2 vs наш=0",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:caption",
+      "pass": false,
+      "detail": "механіка РОЗІЙШЛАСЬ: live=[] vs наш=[COVERED-BY, SWAPS-CONTENT]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:caption.SWAPS-CONTENT",
+      "pass": false,
+      "detail": "SWAPS-CONTENT у зоні caption: live=0 vs наш=1",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:caption.COVERED-BY",
+      "pass": false,
+      "detail": "COVERED-BY у зоні caption: live=0 vs наш=1",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "mechanic-class-parity",
+      "pass": false,
+      "detail": "КЛАС РОЗІЙШОВСЯ: live=stack+cover (зона COVERED-BY/ENTERS без swap-тексту) vs наш=pin+swap",
+      "basis": "live"
+    },
+    {
+      "dimension": "mechanic-class",
+      "name": "class-vs-live",
+      "pass": true,
+      "detail": "config.mechanicClass=\"stack+cover\" = клас з live",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-static",
+      "name": "comp:caption@p1:line-count",
+      "pass": false,
+      "detail": "розділювачів (hairline): live=0 vs наш=1 [live — · наш 66.43%]",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-static",
+      "name": "comp:caption@p1:row-pos",
+      "pass": false,
+      "detail": "текст-рядок №1: live 71.96% vs наш 74.25% (Δ2.29 > 1)",
+      "basis": "live"
+    },
+    {
+      "dimension": "console-errors",
+      "name": "console-errors",
+      "pass": true,
+      "detail": "0 console-error",
+      "basis": "live"
+    },
+    {
+      "dimension": "http-status",
+      "name": "http-status",
+      "pass": true,
+      "detail": "0 HTTP>=400",
+      "basis": "live"
+    }
+  ],
+  "unchecked": [
+    {
+      "dimension": "media-type",
+      "target": "media",
+      "reason": "waived",
+      "detail": "photo-first плейсхолдер до заміни на відео [🔴 у live у слайдах ВІДЕО (atom-probe: 22 часові клітинки, вміст живе при нерухомій сторінці). У нас статичні фото-плейсхолдери, тому ідентичність медіа судить ОКО. Закон вайпу від цього не залежить.]"
+    }
+  ],
+  "uncheckedCount": 1
+}

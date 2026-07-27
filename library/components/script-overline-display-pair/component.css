@@ -1,0 +1,36 @@
+/* SCRIPT-OVERLINE-DISPLAY-PAIR · component.css
+   A handwritten script overline (in quotes) above a huge condensed display title; on
+   scroll-into-view the script fades+lifts, the display reveals line-by-line from a bottom
+   mask, then body+CTA fade-rise. Anchors one side of an alternating L/R section.
+   transform(translateY) + opacity + clip(line mask) only. NO mix-blend / NO backdrop. NO WebGL. */
+.sodp-stage { display: grid; grid-template-columns: 1fr 1fr; align-items: center;
+  gap: var(--sodp-gap, 4vw); min-height: 80vh; padding: var(--sodp-pad, 8vh 7vw);
+  background: var(--sodp-bg, #f2f2f0); color: var(--sodp-ink, #16150f); }
+.sodp--rtl .sodp-copy { order: 2; }    /* swap: text to the right, visual to the left */
+.sodp--rtl .sodp-visual { order: 1; }
+
+.sodp-copy { max-width: 40ch; }
+
+/* handwritten script overline (in quotes) */
+.sodp-script { font-family: var(--sodp-script, 'Caveat', cursive); font-size: var(--sodp-script-size, 1.5rem);
+  line-height: 1.15; color: var(--sodp-ink, #16150f); margin-bottom: .6rem; will-change: transform, opacity; }
+
+/* huge condensed display title — each line in a bottom mask */
+.sodp-title { font-family: var(--sodp-display, 'Anton', system-ui, sans-serif);
+  font-weight: 400; font-size: var(--sodp-display-size, 6vw); line-height: .98;
+  letter-spacing: -0.01em; text-transform: none; margin: 0 0 1.6rem; }
+.sodp-line { display: block; overflow: hidden; }     /* the mask */
+.sodp-line-in { display: block; will-change: transform, opacity; }
+
+.sodp-body { font-family: var(--sodp-sans, system-ui, sans-serif); font-size: 1rem;
+  line-height: 1.65; max-width: 34ch; margin-bottom: 1.8rem; will-change: transform, opacity; }
+
+.sodp-cta { display: inline-flex; align-items: center; gap: .5rem;
+  padding: .8rem 1.4rem; border: 1px solid var(--sodp-ink, #16150f); border-radius: 8px;
+  font-size: .92rem; color: var(--sodp-ink, #16150f); text-decoration: none;
+  will-change: transform, opacity; transition: background 240ms ease, color 240ms ease; }
+.sodp-cta:hover { background: var(--sodp-ink, #16150f); color: var(--sodp-bg, #f2f2f0); }
+
+/* the visual aside (e.g. a product render / pedestal); the engine doesn't animate it */
+.sodp-visual { align-self: stretch; min-height: 60vh; display: grid; place-items: center; }
+.sodp-visual img { width: 100%; height: 100%; object-fit: contain; display: block; }

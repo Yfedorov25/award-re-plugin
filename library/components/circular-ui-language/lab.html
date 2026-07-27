@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · circular-ui-language · EVER/Springs circular vocabulary</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · circular-ui-language
+================================================================================
+  The one CIRCULAR UI vocabulary EVER + Springs share: ring buttons, <- -> arrows,
+  a "+" that rotates to ×, a teardrop pin, POI chips, and a wordmark->monogram
+  collapse on scroll. All from border-radius:50% + 1px stroke + currentColor, so it
+  inherits the section ink (pairs with theme-tween).
+
+  ASSET-SUBSTITUTION GATE: OUR brand QUADRO -> monogram on scroll; the same controls
+  in our ink. Click the "+", scroll to collapse the brand. NO WebGL. __LAB_OK__ set.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --cream:#DCC5B7; --panel:#313E48; --wm:'Jost',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{background:var(--panel);color:var(--cream);font-family:'Inter',system-ui,sans-serif}
+  .hdr{position:fixed;top:0;left:0;right:0;height:74px;display:flex;align-items:center;justify-content:space-between;
+    padding:0 clamp(24px,4vw,56px);z-index:30}
+  .cui-brand__full{font-family:var(--wm);font-weight:500;font-size:1.5rem;color:var(--cream)}
+  .cui-brand__mono{font-family:var(--wm);font-weight:600;font-size:.9rem;color:var(--cream)}
+  .stage{min-height:240vh;padding:120px clamp(24px,4vw,56px) 80px}
+  .row{display:flex;align-items:center;gap:24px;margin-bottom:48px;color:var(--cream)}
+  .row__label{width:200px;font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .scrollnote{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;opacity:.5}
+</style>
+</head>
+<body>
+
+  <div class="hdr">
+    <!-- wordmark -> monogram on scroll -->
+    <div class="cui-brand">
+      <span class="cui-brand__full">QUADRO</span>
+      <span class="cui-brand__mono">Q</span>
+    </div>
+    <span style="font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;opacity:.6">зворотний дзвінок</span>
+  </div>
+
+  <div class="stage">
+    <div class="row"><span class="row__label">ring button</span>
+      <button class="cui-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+      <button class="cui-ring cui-ring--lg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+    </div>
+
+    <div class="row"><span class="row__label">arrows ← →</span>
+      <div class="cui-arrows">
+        <button class="cui-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 19l-7-7 7-7"/></svg></button>
+        <button class="cui-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <div class="row"><span class="row__label">+ → × expander</span>
+      <button class="cui-ring cui-plus" aria-label="розгорнути"></button>
+      <span style="opacity:.6;font-size:.9rem">клік → стає ×</span>
+    </div>
+
+    <div class="row"><span class="row__label">teardrop pin</span>
+      <span class="cui-pin"><span style="font-size:11px;font-family:var(--wm)">Q</span></span>
+      <span class="cui-pin cui-pin--ghost"></span>
+    </div>
+
+    <div class="row"><span class="row__label">POI chips</span>
+      <span class="cui-poi">П</span><span class="cui-poi">Ш</span><span class="cui-poi">К</span>
+    </div>
+
+    <div class="scrollnote">скрол — QUADRO згортається в монограму ↓</div>
+  </div>
+
+<script src="component.js"></script>
+<script>
+  CircularUI.init({ plus: '.cui-plus', brand: '.cui-brand', monoAt: 40 });
+</script>
+</body>
+</html>

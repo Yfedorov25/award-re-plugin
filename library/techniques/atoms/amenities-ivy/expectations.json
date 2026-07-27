@@ -1,0 +1,52 @@
+{
+  "_note": "expectations ivy v3: КОЖНЕ число з src (закон B22). Фази = шлях через live-чекпоінти (темп руки не копіюємо).",
+  "events": [
+    {
+      "key": "card2.motion.start",
+      "p": 0.26,
+      "tol": 0.02,
+      "src": "CHOREO Ф2: cover№1 старт (live f128 @12fps, zonetrack COVERED-BY f128-169)"
+    },
+    {
+      "key": "card3.motion.start",
+      "p": 0.58,
+      "tol": 0.02,
+      "src": "CHOREO Ф5: cover№2 старт (live f232, zonetrack COVERED-BY f232-246)"
+    },
+    {
+      "key": "card3.motion.end",
+      "p": 0.7,
+      "tol": 0.02,
+      "src": "CHOREO Ф5: кінець в'їзду yoga (live f232-263 один хід, наш номінал 0.58-0.70); власний recede yoga народжується підпорогово (τ^1.35, v < stepEps)"
+    }
+  ],
+  "ordering": [
+    {
+      "later": "card3",
+      "notBefore": {
+        "target": "card2",
+        "value": 50,
+        "unit": "dvh"
+      },
+      "src": "CHOREO: cover№2 після посадки card2 у слот (live f232 після f169); поріг 50dvh = card2 майже сіла"
+    }
+  ],
+  "overlap": [],
+  "composition": {
+    "cardPin": {
+      "target": "card3",
+      "valueDvh": 43,
+      "tolDvh": 3,
+      "src": "SPEC M2 STACK-RECEDE: фронтальна картка у слоті 40dvh (нова входить повним розміром; вимір live pod-top)"
+    }
+  },
+  "typography": {},
+  "fade": {
+    "title": {
+      "target": "t1",
+      "startP": 0.3,
+      "endP": 0.34,
+      "src": "CHOREO swap№1: fade-out тексту №1 до середини вікна 0.30-0.38 (live f147-150, ink 19→0)"
+    }
+  }
+}

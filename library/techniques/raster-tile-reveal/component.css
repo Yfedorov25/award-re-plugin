@@ -1,0 +1,105 @@
+/* RASTER-TILE-REVEAL · component.css
+   A pre-baked STATIC mosaic of raster map tiles (plain <img>, NO canvas) laid out as a grid;
+   on reveal the decoded tiles fade + scale in with a stagger, then real POI dots drop on real
+   positions. transform (scale/translateY) + opacity + filter only. NO mix-blend / NO backdrop.
+   NO WebGL. NO width/height/top/left animation. */
+
+.rtr-stage {
+  position: relative;
+  width: 100%;
+  background: var(--rtr-bg, #0e0d0b);
+  color: var(--rtr-ink, #f3efe6);
+  padding: var(--rtr-pad, 0);
+}
+
+/* the frozen mosaic — a grid of raster tiles. The box never animates (no pan engine). */
+.rtr-mosaic {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--rtr-cols, 4), 1fr);
+  grid-template-rows: repeat(var(--rtr-rows, 4), 1fr);
+  gap: 0;
+  aspect-ratio: var(--rtr-ratio, 3 / 4);
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--rtr-radius, 0);
+  background: var(--rtr-bg, #0e0d0b);
+}
+
+/* one tile cell — opacity is the reveal channel; the inner img carries the scale */
+.rtr-tile {
+  position: relative;
+  overflow: hidden;
+  opacity: 0;            /* hidden until decoded + revealed — never paints an undecoded tile */
+}
+.rtr-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* slight overlap kills hairline seams between tiles without animating size */
+  transform-origin: 50% 50%;
+  transform: scale(1.04);
+  backface-visibility: hidden;
+}
+
+/* real POI dot, positioned by left/top (set once, never animated) */
+.rtr-dot {
+  position: absolute;
+  width: var(--rtr-dot, 11px);
+  height: var(--rtr-dot, 11px);
+  margin: 0;
+  border-radius: 50%;
+  background: var(--rtr-accent, #e8c98a);
+  box-shadow: 0 0 0 4px rgba(232, 201, 138, .22), 0 2px 10px rgba(0, 0, 0, .45);
+  opacity: 0;
+  transform: translate(-50%, -100%) scale(.4);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+.rtr-dot::after {
+  /* the little stem from the dot down to the point it marks */
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 8px;
+  transform: translateX(-50%);
+  background: linear-gradient(var(--rtr-accent, #e8c98a), transparent);
+  opacity: .7;
+}
+.rtr-dot-label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--rtr-sans, system-ui, sans-serif);
+  font-size: .68rem;
+  letter-spacing: .01em;
+  color: var(--rtr-ink, #f3efe6);
+  background: rgba(14, 13, 11, .72);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+/* static fallback (reduced-motion) — everything shown, no motion */
+.rtr-static .rtr-tile { opacity: 1; }
+.rtr-static .rtr-tile img { transform: none; }
+.rtr-static .rtr-dot { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+
+/* ============================================================
+   DUAL-PLATFORM PIN (technique module) — BOTH platforms scroll-pin.
+   The .pin-wrap gives the scroll length; the stage sticks full-height so the
+   frozen mosaic holds on screen while scroll drives set(p) (tiles + dots).
+   Mobile keeps the pin (MOBILE=PINNED-SCROLL law) — only layout differs. */
+.pin-wrap { position: relative; }
+.rtr-stage.rtr-pinned { position: sticky; top: 0; height: 100vh !important;
+  display: grid; place-items: center; overflow: hidden; }
+/* full-bleed single-column mosaic on phone width (layout is the only difference) */
+@media (max-width: 1023px) {
+  .rtr-stage.rtr-pinned { padding: 0; }
+  .rtr-stage.rtr-pinned .rtr-mosaic { max-width: 100%; height: 100%;
+    aspect-ratio: auto; }
+}

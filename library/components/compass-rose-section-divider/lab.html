@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · compass-rose-section-divider · r1864 (line-art compass-rose ornament draws + scales in, section announces itself)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · compass-rose-section-divider
+================================================================================
+  r1864's section-announce — a thin line-art compass-rose / quatrefoil ornament that DRAWS +
+  scales + fades in as a section announces itself, above a kicker + giant serif title + body +
+  framed CTA. Harvested from D_r1864 (В САМОМ СЕРДЦЕ МОСКВЫ; /history). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#e9e3db; --ink:#2a2622; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--paper);opacity:.4;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .crd-stage{ --crd-bg:#e9e3db; --crd-ink:#2a2622; --crd-serif:'Playfair Display',serif; --crd-sans:'Inter',sans-serif;
+    --crd-rose-size:120px; --crd-title:4.4vw; }
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — компас-роза малюється + масштабується, секція оголошується</div>
+
+  <section class="crd-stage" id="divider">
+    <!-- the line-art compass-rose / quatrefoil ornament -->
+    <svg class="crd-rose" viewBox="0 0 100 100">
+      <!-- N/S/E/W rays -->
+      <line data-draw x1="50" y1="2" x2="50" y2="22"/>
+      <line data-draw x1="50" y1="78" x2="50" y2="98"/>
+      <line data-draw x1="2" y1="50" x2="22" y2="50"/>
+      <line data-draw x1="78" y1="50" x2="98" y2="50"/>
+      <!-- the 4-petal quatrefoil (4 overlapping circles) -->
+      <circle data-draw cx="50" cy="38" r="13"/>
+      <circle data-draw cx="50" cy="62" r="13"/>
+      <circle data-draw cx="38" cy="50" r="13"/>
+      <circle data-draw cx="62" cy="50" r="13"/>
+      <!-- centre dot + a tiny ring -->
+      <circle data-draw cx="50" cy="50" r="3"/>
+    </svg>
+
+    <div class="crd-kicker">На золотом острове напротив Кремля</div>
+    <h2 class="crd-title">В самом сердце<br>Москвы</h2>
+    <div class="crd-body">Проект обладает 5 исключительными особенностями, делающими комплекс действительно эксклюзивным, а апартаменты — коллекционными</div>
+    <a class="crd-cta" href="#">Подробнее →</a>
+  </section>
+
+  <div class="spacer">секція оголошена</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__crd = CompassRoseSectionDivider.create('#divider', { draw:true, scaleFrom:0.55, duration:1.1, ease:'power3.out', start:'top 78%', once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

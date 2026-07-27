@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>amenities-forest · tap-arrow-cycle</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{background:#183023;}
+  body{
+    font-family:var(--spr-sans,"TT Commons Pro",sans-serif);
+    color:var(--spr-cream,#e0d1b6);
+    min-height:100dvh;
+    background:#183023;
+  }
+
+  .section{
+    position:relative;
+    min-height:100dvh;
+    padding-top:34.9dvh;      /* card top at live 34.9% viewport (measured f_168) */
+    overflow:hidden;
+  }
+  .section::before{
+    content:"";
+    position:absolute; inset:0 0 auto 0; height:22dvh;
+    background:linear-gradient(180deg,#22432f 0%,#183023 100%);
+    z-index:0;
+  }
+
+  /* ---- ONE cream card, fixed slot. measured @390: W349.3 H449.7 ratio 0.777 ---- */
+  .card{
+    position:relative;
+    z-index:2;
+    width:349px;
+    margin:0 auto;
+    height:450px;             /* measured H449.7 */
+    background:#f3e5cb;       /* measured cream */
+    border-radius:2px;
+    box-shadow:0 22px 60px rgba(0,0,0,.28);
+    touch-action:pan-y;
+  }
+
+  /* framed photo: inset L19.7 R23 top19.7, W306.7 ratio 0.842 (measured).
+     height reduced so the caption+arrows band below has real room (no overlap). */
+  .photo{
+    position:absolute;
+    left:20px; top:20px;
+    width:307px; height:358px;   /* ratio 0.857 ≈ live 0.842; leaves 72px band below */
+    overflow:hidden;
+  }
+  .slide{
+    position:absolute; inset:0;
+    background-size:cover; background-position:center;
+    will-change:clip-path;
+  }
+  /* WIPE bottom→up: incoming slide revealed from bottom edge upward.
+     hidden = clipped to zero height at bottom; shown = full. */
+  .slide.below{ clip-path:inset(100% 0 0 0); }         /* fully hidden (from bottom) */
+  .slide.entering{
+    clip-path:inset(0 0 0 0);
+    transition:clip-path .62s cubic-bezier(.33,.9,.28,1);   /* smoother, slower rise */
+  }
+  .slide.current{ clip-path:inset(0 0 0 0); z-index:1; }
+  .slide.incoming{ z-index:2; }                         /* new image rises OVER the old */
+  .slide.s0{background-image:url(assets/park.webp);}
+  .slide.s1{background-image:url(assets/pine.webp);}
+  .slide.s2{background-image:url(assets/blossom.webp);}
+
+  /* caption lower-left. font 11px, pitch 14px. vertically centered in the band
+     (band = 384..450 = 66px). caption baseline aligns with arrows center. */
+  .cap{
+    position:absolute;
+    left:20px; bottom:24px;
+    width:190px; height:30px;
+  }
+  .capset{
+    position:absolute; left:0; bottom:0;
+    opacity:0;
+    transition:opacity .34s ease .18s;   /* swaps near end of wipe */
+    font-family:var(--spr-sans,"TT Commons Pro",sans-serif);
+    font-weight:500;
+    font-size:11px;
+    letter-spacing:.11em;
+    line-height:1.28;                    /* pitch ~14px */
+    text-transform:uppercase;
+    color:#1c3527;
+    white-space:nowrap;
+    pointer-events:none;
+  }
+  .capset.is-active{opacity:1;}
+
+  /* arrows lower-right. smaller (Egor), inside cream band, NO overlap with photo.
+     photo bottom = 20+352 = 372; arrows top must be > 372. */
+  .arrows{
+    position:absolute;
+    right:20px; bottom:14px;             /* 42px circle bottom14 → top 394 > photo 378, gap 16 */
+    display:flex; gap:8px;
+  }
+  .arrows button{
+    width:42px; height:42px; border-radius:50%;
+    border:1px solid rgba(28,53,39,.42);
+    background:transparent;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:background .18s ease;
+    color:#1c3527;
+  }
+  .arrows button:active{background:rgba(28,53,39,.12);}
+  .arrows svg{width:16px; height:16px; display:block;}
+
+  /* prose under the card */
+  .prose{
+    position:relative; z-index:1;
+    color:var(--spr-cream,#e0d1b6);
+    font-family:var(--spr-serif,"Victor Serif",serif);
+    font-weight:400;
+    font-size:33px;
+    line-height:1.14;
+    letter-spacing:-.4px;
+    padding:44px 20px 120px;
+    max-width:640px;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .slide.entering{transition:none;}
+    .capset{transition:none;}
+  }
+</style>
+</head>
+<body>
+  <section class="section" aria-label="Forest carousel">
+    <div class="card" id="card">
+      <div class="photo" id="photo">
+        <div class="slide s0 current" data-i="0"></div>
+        <div class="slide s1 below" data-i="1"></div>
+        <div class="slide s2 below" data-i="2"></div>
+      </div>
+      <div class="cap" id="cap">
+        <div class="capset is-active" data-i="0">PRIVATE<br>FOREST PARK</div>
+        <div class="capset" data-i="1">MULTIPLE<br>FOREST LAYERS</div>
+        <div class="capset" data-i="2">NEUTRAL PALETTE<br>OF BLOSSOMS</div>
+      </div>
+      <div class="arrows">
+        <button id="prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <button id="next" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="prose">Man-made forest garden features towering pine trees adorned with bushy crowns, verdant juniper, and delicate clusters of fieldfares. Step out of the shimmering shade into a forest clearing and hold the sunshine in your hands.</p>
+  </section>
+
+<script>
+(function(){
+  var N=3, idx=0, busy=false;
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var caps=[].slice.call(document.querySelectorAll('.capset'));
+
+  function setActiveCap(i){ caps.forEach(function(c,k){ c.classList.toggle('is-active', k===i); }); }
+
+  // WIPE bottom→up: new slide starts clipped at bottom, rises to full over the old one.
+  function go(dir){
+    if(busy) return;
+    var from=idx, to=(idx+dir+N)%N;
+    if(to===from) return;
+    busy=true;
+    var elFrom=slides[from], elTo=slides[to];
+
+    // stack: old = current (under), new = incoming (over), start hidden from bottom
+    slides.forEach(function(s){ s.classList.remove('current','incoming','entering'); });
+    elFrom.classList.add('current');
+    elTo.classList.remove('below');
+    elTo.classList.add('incoming','below');   // over, but clipped to zero at bottom
+
+    // caption swaps toward end of wipe
+    setActiveCap(to);
+
+    // next frame: trigger the rise
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      elTo.classList.remove('below');
+      elTo.classList.add('entering');
+    });});
+
+    var done=function(){
+      elTo.removeEventListener('transitionend', done);
+      // settle: new becomes the sole current, old goes below
+      slides.forEach(function(s,k){
+        s.classList.remove('current','incoming','entering','below');
+        if(k===to){ s.classList.add('current'); s.style.clipPath='inset(0 0 0 0)'; }
+        else{ s.classList.add('below'); s.style.clipPath=''; }
+      });
+      elTo.style.clipPath='';
+      idx=to; window.__FOREST_IDX__=idx; busy=false;
+    };
+    elTo.addEventListener('transitionend', done);
+    // safety timeout in case transitionend misses
+    setTimeout(function(){ if(busy && idx!==to) done(); }, 850);
+  }
+
+  document.getElementById('next').addEventListener('click', function(){ go(1); });
+  document.getElementById('prev').addEventListener('click', function(){ go(-1); });
+
+  // horizontal drag also advances (finger drag), arrows primary
+  var card=document.getElementById('card'), sx=null, drag=false;
+  card.addEventListener('pointerdown', function(e){ if(e.target.closest('.arrows'))return; sx=e.clientX; drag=true; });
+  card.addEventListener('pointerup', function(e){ if(!drag||sx===null)return; var dx=e.clientX-sx; if(Math.abs(dx)>45) go(dx<0?1:-1); drag=false; sx=null; });
+  card.addEventListener('pointercancel', function(){ drag=false; sx=null; });
+
+  // video-parity hook: phase 0..1 → discrete slide (jump, for state board only)
+  window.render=function(p){
+    var t=p<0.34?0:(p<0.67?1:2);
+    if(t!==idx && !busy){
+      slides.forEach(function(s,k){ s.classList.remove('current','incoming','entering','below'); s.style.clipPath=''; if(k===t)s.classList.add('current'); else s.classList.add('below'); });
+      setActiveCap(t); idx=t; window.__FOREST_IDX__=idx;
+    }
+  };
+
+  window.__FOREST_API__={ go:go, get:function(){return idx;}, N:N };
+  window.__FOREST_IDX__=0;
+})();
+</script>
+</body>
+</html>

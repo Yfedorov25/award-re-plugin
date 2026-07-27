@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>amenities-borges · render-scroll-hero-hold</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:auto;}
+  body{ font-family:var(--spr-sans,"TT Commons Pro",sans-serif); background:#0b1a14; }
+
+  /* scroll driver: tall page, borges pinned as sticky stage */
+  .wrap{ height:240vh; position:relative; }
+  .stage{
+    position:sticky; top:0;
+    height:100dvh; width:100%;
+    overflow:hidden;
+    background:#0b1a14;
+  }
+
+  /* full-bleed 3:4 фото ТЕМНОГО ЛИСТЯ; parallax-drift вгору на вході потім hold (вимір bgtrack) */
+  .leaf{
+    position:absolute; left:0; top:0;
+    width:100%; height:114%;
+    background:url(assets/borges-leaves.webp) center 40% / cover no-repeat;
+    will-change:transform;
+  }
+  /* легке затемнення низу щоб serif borges-текст читався на фото (live: текст на затемненні) */
+  .vig{
+    position:absolute; left:0; bottom:0; width:100%; height:62%;
+    background:linear-gradient(180deg,rgba(8,20,15,0) 0%,rgba(8,20,15,.35) 45%,rgba(8,20,15,.72) 100%);
+    z-index:1; pointer-events:none;
+  }
+  /* top scrim for header legibility */
+  .scrim{
+    position:absolute; left:0; top:0; width:100%; height:120px;
+    background:linear-gradient(180deg,rgba(8,20,15,.5),rgba(8,20,15,0));
+    z-index:3; pointer-events:none;
+  }
+
+  .hdr{
+    position:absolute; left:0; top:0; width:100%;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; z-index:4;
+    color:var(--spr-cream-lite,#f5e8d1);
+  }
+  .hdr .logo{ font-family:var(--spr-serif,"Victor Serif",serif); font-size:22px; letter-spacing:.5px; }
+  .hdr .nav{ display:flex; gap:16px; align-items:center; opacity:.92; }
+  .hdr .burger{ width:22px; height:12px; display:flex; flex-direction:column; justify-content:space-between; }
+  .hdr .burger i{ display:block; height:1.4px; background:currentColor; }
+  .hdr .heart{ width:20px; height:20px; }
+
+  /* borges serif-параграф внизу-ліворуч: ТРИМАЄТЬСЯ непрозорий весь блок (HOLD, НЕ fade) */
+  .copyblock{
+    position:absolute; left:20px; right:20px; bottom:64px;
+    z-index:2; color:var(--spr-cream-lite,#f5e8d1);
+    will-change:transform;
+  }
+  .copy{
+    font-family:var(--spr-serif,"Victor Serif",serif);
+    font-weight:400;
+    /* 🔴 ВИМІР (не око, 2 ітерації): live-текст = 35% висоти, топ 58%. 28px+lh1.24 = ~35% при 9 рядках.
+       32px давало 41.6% (завелико). Ціль: heightPct~35, topPct~58. */
+    /* 26px: довгі фрази «In The Garden of Forking Paths,» і «design bureau WowHouse paved» влазять
+       в 1 рядок як live; heightPct~35, topPct~58. */
+    font-size:26px;
+    line-height:1.26;
+    letter-spacing:-.3px;
+    text-shadow:0 1px 14px rgba(0,0,0,.35);
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .leaf,.copyblock{ transition:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage" id="stage">
+      <div class="leaf" id="leaf"></div>
+      <div class="vig"></div>
+      <div class="scrim"></div>
+      <header class="hdr">
+        <span class="logo">Springs</span>
+        <span class="nav">
+          <svg class="heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s-7-4.6-9.3-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.3 6.5C19 16.4 12 21 12 21z"/></svg>
+          <span class="burger"><i></i><i></i></span>
+        </span>
+      </header>
+
+      <div class="copyblock" id="copyblock">
+        <!-- переноси ПО ФРАЗАХ як у live (не auto-wrap): кожна синтагма з нового рядка -->
+        <p class="copy">In The Garden of Forking Paths,<br>a short story by Borges,<br>the author created a world<br>of endless possibilities.<br>At Springs, the acclaimed<br>design bureau WowHouse paved<br>artistic paths towards your<br>goals.</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var wrap=document.querySelector('.wrap');
+  var leaf=document.getElementById('leaf');
+  var copyblock=document.getElementById('copyblock');
+
+  function clamp(v){ return v<0?0:v>1?1:v; }
+
+  function render(p){                       // p = scroll progress 0..1
+    // leaf: ДУЖЕ малий parallax-drift (вимір cleantrack на чистому borges: vShift≈0 весь блок).
+    // Ледь помітне «дихання» -4% для живості, не великий рух (шов promenade→borges = інший атом).
+    leaf.style.transform = 'translateY(' + (-p*4) + '%)';
+    // borges-текст: ТРИМАЄТЬСЯ непрозорий (HOLD, не fade), легкий lift по скролу як hero title
+    copyblock.style.transform = 'translateY(' + (-p*16) + 'px)';
+    window.__BORGES_P__ = p;
+  }
+
+  function onScroll(){
+    var rect=wrap.getBoundingClientRect();
+    var total=wrap.offsetHeight - window.innerHeight;
+    var p=clamp((-rect.top)/total);
+    render(p);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+
+  window.render = render;
+  window.__BORGES_API__ = { get:function(){return window.__BORGES_P__||0;} };
+  render(0);
+})();
+</script>
+</body>
+</html>

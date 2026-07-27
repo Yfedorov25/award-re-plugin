@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>brand-overlay-crossfade · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --boc-wash:#16322a; --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);min-height:100%}
+  /* desktop PIN: the photo sticks on screen while the scroll drains the tint (it does
+     NOT scroll away). mobile: no pin, auto-drain fills the viewport. */
+  .pin-wrap{ position:relative; }
+  .boc-stage{ position:sticky; top:0; }
+  @media (max-width:1023px){ .pin-wrap{ height:auto !important; } .boc-stage{ position:relative; } }
+  .boc-content{ position:absolute; inset:0; z-index:3; display:flex; flex-direction:column;
+    justify-content:flex-end; padding:clamp(24px,6vw,90px); pointer-events:none; }
+  .boc-eyebrow{ font-size:.7rem; letter-spacing:.32em; text-transform:uppercase; color:var(--cream); opacity:.85; }
+  .boc-title{ margin-top:.3em; font-family:var(--serif); font-weight:400; font-size:clamp(2rem,6.5vw,5.4rem);
+    line-height:1.02; letter-spacing:-.01em; color:var(--cream); max-width:100%; overflow-wrap:break-word; }
+  .badge{ position:fixed; top:10px; left:10px; z-index:9; font-family:ui-monospace,Menlo,monospace;
+    font-size:.62rem; letter-spacing:.06em; color:#7fd8b0; background:rgba(8,22,17,.72);
+    border:1px solid #26463c; border-radius:999px; padding:4px 10px; pointer-events:none; }
+</style>
+</head>
+<body>
+  <div class="badge" id="badge">…</div>
+  <div class="pin-wrap" id="pinwrap">
+    <section class="boc-stage" id="stage">
+      <div class="boc-img"><img src="img/photo.webp" alt=""></div>
+      <div class="boc-img--next"><img src="img/photo-next.webp" alt=""></div>
+      <div class="boc-wash"></div>
+      <div class="boc-content">
+        <div class="boc-eyebrow">SPRINGS · місце</div>
+        <div class="boc-title">Зелень,<br>що обіймає</div>
+      </div>
+    </section>
+  </div>
+
+<script src="engine.js"></script>
+<script src="component.js"></script>
+<script>
+  var r = BrandOverlayCrossfadeDual.init('#stage', { platform: 'auto', wash: 1.0, drainMs: 1600 });
+  var badge = document.getElementById('badge');
+  badge.textContent = r.platform === 'desktop' ? 'desktop · push-over + settle' : 'mobile · crossfade (wash-drain)';
+  if (r.platform === 'desktop') { document.getElementById('pinwrap').style.height = '210vh'; }
+  if (r.platform === 'desktop' && window.Lenis) {
+    var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); });
+  }
+</script>
+</body>
+</html>

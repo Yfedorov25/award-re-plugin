@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--panel-left-survey · Локація (панель зліва)</title>
+<!--
+  SECTION VARIANT, location--panel-left-survey (role: location). MAP-STYLE = DARK DUSK.
+  COMPOSITION = the SMARTS proportion, RE-PLANNED: a reading PANEL on the LEFT (eyebrow + title that
+  rises line by line + intro + the VISIBLE list of the 6 real POIs with their walk-times + a highway
+  sign-guide + a legal line) and the real dense DUSK map on the RIGHT taking the rest. The map carries
+  the property parcel with a dimension line «22,5 сотки» and a «≈10 хв» walking ring, exactly the
+  smarts geometry (how much space it takes, the metres written on the plate). Elements appear ONE BY
+  ONE on scroll-in (the staggered birth). CONTROLLED-CLICK (the smarts model): the visitor clicks a
+  list row or a map pin and the real Dijkstra route draws + an honest minute badge. Same content as
+  the smarts reference, a fresh layout. Pin-less; nothing floats.
+
+  asset-truth: streets/footprints/green + 6 real POIs verbatim from osm.js (Школа·садок 9хв, Нова
+  Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв). Real facts: вул. Перемоги,
+  22,5 сотки, Гніванське шосе, 5 хвилин від Вінниці. Coords 49.18N 28.33E.
+  __LAB_OK__: 0 pins, the cited atom ran, [data-render-surface] painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only. */
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* the SMARTS grid, INVERTED: panel LEFT, map RIGHT */
+  #combo.combo-stage { background: #0b0a08; min-height: 100vh; height: 100vh; position: relative;
+    display: grid; grid-template-columns: minmax(320px, 33%) 1fr; }
+  @media (max-width: 900px) { #combo.combo-stage { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } }
+
+  /* DARK DUSK palette + treatment (the ideal's tokens) */
+  #combo.combo-stage, .pls__field {
+    --lm-ink: #f3f1ec; --lm-bg-1: #161410; --lm-bg-2: #0b0a08;
+    --lm-accent: #b06a4f; --lm-accent-soft: #c98a72; --lm-lit: 236,178,118;
+  }
+
+  /* ---- the LEFT panel ---- */
+  .pls__panel { position: relative; z-index: 6; border-right: 1px solid rgba(243,241,236,.1);
+    padding: clamp(1.4rem, 4vh, 3rem) clamp(1.3rem, 2.4vw, 2.4rem);
+    display: flex; flex-direction: column; gap: clamp(.8rem, 1.6vh, 1.2rem); overflow: auto; }
+  @media (max-width: 900px) { .pls__panel { border-right: 0; border-bottom: 1px solid rgba(243,241,236,.1); } }
+  .pls__eyebrow { font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: var(--lm-accent-soft); margin: 0; }
+  .pls__h { margin: .1rem 0 0; font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.7rem, 2.4vw, 2.5rem); line-height: 1.04; letter-spacing: -.025em; color: #f3f1ec; }
+  .pls__h .ln { display: block; overflow: hidden; }
+  .pls__h .ln > span { display: block; }
+  .pls__h em { font-style: italic; color: var(--lm-accent-soft); }
+  .pls__intro { margin: .2rem 0 .2rem; font: 400 .86rem/1.5 var(--combo-sans); color: rgba(243,241,236,.7); max-width: 38ch; }
+  .pls__coords { font: 500 .62rem/1.4 var(--combo-sans); letter-spacing: .12em; color: rgba(243,241,236,.4); }
+
+  /* the VISIBLE POI list (engine fills it) */
+  .pls__list { display: block; margin-top: .2rem; }
+  .pls__panel .lm-row { padding: .58rem 0; border-bottom: 1px solid rgba(243,241,236,.1);
+    transition: background .25s, padding-left .25s; }
+  .pls__panel .lm-row:hover, .pls__panel .lm-row.is-on { background: rgba(243,241,236,.05); padding-left: .4rem; }
+
+  /* the highway sign-guide (smarts loc__sign) */
+  .pls__sign { margin-top: .4rem; border: 1px solid rgba(243,241,236,.16); background: rgba(30,26,21,.5);
+    border-radius: 8px; padding: .7rem .8rem; }
+  .pls__sign .tt { margin: 0; font: 600 .6rem/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase;
+    color: rgba(243,241,236,.7); }
+  .pls__sign .tt::after { content: " \2192"; color: var(--lm-accent-soft); }
+  .pls__sign ul { margin: .55rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .42rem; }
+  .pls__sign li { list-style: none; display: flex; justify-content: space-between; gap: 1rem;
+    font: 500 .78rem/1 var(--combo-sans); color: rgba(243,241,236,.78); }
+  .pls__sign li b { font-weight: 600; color: #f3f1ec; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pls__legal { margin-top: auto; font: 500 .6rem/1.4 var(--combo-sans); letter-spacing: .04em; color: rgba(243,241,236,.5); }
+
+  /* ---- the RIGHT map field ---- */
+  .pls__field {
+    position: relative; overflow: clip; background-color: #0b0a08;
+    background-image:
+      radial-gradient(125% 95% at 38% 26%, rgba(34,28,20,.0), rgba(11,10,8,.92) 78%),
+      radial-gradient(70% 60% at 72% 78%, rgba(176,106,79,.10), rgba(176,106,79,0) 60%),
+      radial-gradient(120% 100% at 40% 30%, #1a160f, #0b0a08);
+  }
+  .pls__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pls__field.lm__stage, .pls__field.lm { background-color: #0b0a08; }
+  .pls__field .lm-bld--lit { animation: none; }   /* a calmer dusk; lit windows steady */
+  /* dual casing+stroke road hierarchy + parcel + ring + pins all come from the engine + component.css */
+
+  /* the dimension line + «22,5 сотки» metric over the parcel (authored, the smarts loc-dim) */
+  .pls__field .pls-dim   { stroke: rgba(201,138,114,.7); stroke-width: 1; }
+  .pls__field .pls-dimt  { fill: var(--lm-accent-soft); font: 600 11px var(--combo-sans); letter-spacing: .1em;
+    text-transform: uppercase; text-anchor: middle; }
+
+  /* a small corner stamp on the map (smarts loc__stamp) */
+  .pls__stamp { position: absolute; right: clamp(.9rem,2vw,1.4rem); bottom: clamp(.9rem,2vh,1.3rem); z-index: 4;
+    text-align: right; pointer-events: none; }
+  .pls__stamp b { display: block; font: 500 .68rem/1.3 var(--combo-sans); color: rgba(243,241,236,.75); }
+  .pls__stamp span { font: 500 .6rem/1.4 var(--combo-sans); color: rgba(243,241,236,.45); letter-spacing: .04em; }
+
+  .combo-pre, .combo-post { background: #100e0b; color: rgba(243,241,236,.4); }
+  @media (prefers-reduced-motion: reduce) { .pls__panel .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--panel-left-survey">
+
+    <!-- LEFT: the reading panel -->
+    <aside class="pls__panel">
+      <p class="pls__eyebrow" data-pls-fade>Локація · с. Агрономічне</p>
+      <h2 class="pls__h">
+        <span class="ln"><span>Пʼять хвилин</span></span>
+        <span class="ln"><span>від Вінниці,</span></span>
+        <span class="ln"><span><em>усе інше пішки.</em></span></span>
+      </h2>
+      <p class="pls__intro" data-pls-fade>Власна ділянка на фасаді вулиці Перемоги. Натисніть місце, щоб побачити шлях по справжніх вулицях і час пішки.
+        <span class="pls__coords">49.18° Пн · 28.33° Сх</span>
+      </p>
+
+      <div class="pls__list" data-lm-list></div>
+
+      <div class="pls__sign" data-pls-fade>
+        <p class="tt">По Гніванському шосе</p>
+        <ul>
+          <li data-loc-hwy><span>До Вінниці</span><b>12 хв</b></li>
+          <li data-loc-hwy><span>До обʼїзної</span><b>4 хв</b></li>
+        </ul>
+      </div>
+
+      <p class="pls__legal" data-pls-fade>Карта за даними OpenStreetMap. Хвилини орієнтовні.</p>
+    </aside>
+
+    <!-- RIGHT: the dusk map -->
+    <div class="pls__field lm" data-lm-stage data-render-surface>
+      <p class="pls__stamp" data-pls-fade><b>22,5 сотки</b><span>вул. Перемоги · фасад шосе</span></p>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+    var gsap = window.gsap;
+
+    // ---- ENGINE: the dusk map. owns_pin FALSE; reveal on scroll-in; CLICK/HOVER drives route ----
+    var map;
+    SectionHarness.ranOK('locmap-engine', function () {
+      map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true, flicker: { rate: 9 },
+        reveal: { start: 'top 72%', once: true },
+        parallax: { green: 1.0, buildings: 1.6, pins: 2.4 },
+        ease: 'award'
+      });
+      window.__plsMap = map;
+
+      // authored dimension line + «22,5 сотки» over the real parcel (the smarts loc-dim geometry)
+      var S = OSM.site, svg = map.svg, NS = 'http://www.w3.org/2000/svg';
+      var g = document.createElementNS(NS, 'g'); g.setAttribute('data-pls-dim', '');
+      function ln(x1, y1, x2, y2) { var e = document.createElementNS(NS, 'line');
+        e.setAttribute('x1', x1); e.setAttribute('y1', y1); e.setAttribute('x2', x2); e.setAttribute('y2', y2);
+        e.setAttribute('class', 'pls-dim'); g.appendChild(e); }
+      ln(S.x - 15, S.y + 22, S.x + 14, S.y + 22);
+      ln(S.x - 15, S.y + 18, S.x - 15, S.y + 26);
+      ln(S.x + 14, S.y + 18, S.x + 14, S.y + 26);
+      var t = document.createElementNS(NS, 'text'); t.setAttribute('x', S.x); t.setAttribute('y', S.y + 38);
+      t.setAttribute('class', 'pls-dimt'); t.textContent = '22,5 сотки'; g.appendChild(t);
+      svg.appendChild(g);
+    });
+
+    // ---- staggered birth of the LEFT panel: title lines rise, fades fade (the smarts reveal) ----
+    if (gsap) {
+      var hLines = gsap.utils.toArray('.pls__h .ln > span');
+      var fades = gsap.utils.toArray('[data-pls-fade]');
+      gsap.set(hLines, { yPercent: 115 });
+      gsap.set(fades, { opacity: 0, y: 8 });
+      ScrollTrigger.create({ trigger: '#combo', start: 'top 70%', once: true, onEnter: function () {
+        var tl = gsap.timeline();
+        tl.to(hLines, { yPercent: 0, duration: .9, ease: 'air', stagger: .1 }, 0)
+          .to(fades, { opacity: 1, y: 0, duration: .7, ease: 'power2.out', stagger: .12 }, .3);
+      } });
+    }
+
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>

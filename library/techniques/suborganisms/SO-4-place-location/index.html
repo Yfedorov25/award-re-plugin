@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-4 · Place → Location · під-організм</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* ── SO-4 Place → Location. THE colour-flip: 🟢→🟡 cream ("дихання ритму"). Architecture
+     inherited from SO-1/2/3 (one pin, full-bleed bg always on screen), BUT this is the FIRST
+     LIGHT-THEME section: text is DARK on cream (inversion of SO-1/2/3). LIVE (CDP-gestures):
+     Place-side luma 54 → Location-side luma 141 = a SHARP crossfade flip, same sticky--under
+     pin. Location = a cream watercolor map that reveals diagonally over a dark leaf edge. */
+  :root{
+    --green-deep:#0e241d; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --ink:#20362c;              /* dark green ink — the map's TEXT colour on cream */
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);overflow-x:clip}
+  .track{ height:420vh; position:relative; }         /* place-tail + flip + location dwell */
+  .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+
+  /* PLACE tail bg — the running lane (dark, luma ~54), always covers until the flip */
+  .bg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+  .bg-place{ opacity:var(--bgPlace,1); background-image:url('media/place-bg.webp'); background-color:#12201a;
+    transform: translateY(var(--placeDrift,0px)) scale(1.06); }
+  .bg-place::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,26,20,.55) 0%, rgba(10,26,20,.2) 40%, rgba(10,26,20,.66) 100%); }
+
+  /* LOCATION — 1:1 with live springs (parity-verified S24 board /tmp/so4-parity.png):
+     the map is a CREAM PANEL on the RIGHT (~78% width), NOT full-bleed. A vertical strip of
+     the dark WebGL leaf edge stays on the LEFT (~22%). The panel's left edge is STRAIGHT
+     (a vertical seam with the leaf), not diagonal. The copy sits INSIDE the panel, top-left
+     ON the map. At the bottom a thin strip previews the next section (Design, dark interiors). */
+  .loc{ position:absolute; inset:0; opacity:var(--locO,0); }
+  /* dark leaf edge — the left strip that stays behind the panel (real springs leaf media) */
+  .loc__leaf{ position:absolute; inset:0; background:url('media/nature-video.webp') left center/cover no-repeat;
+    background-color:#0e241d; filter:brightness(.85) saturate(1.1); }
+  .loc__leaf::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(10,26,20,.4), rgba(10,26,20,.7)); }
+  /* the cream map PANEL — right ~78%, straight left edge, slides in from the right on the flip */
+  /* panel = live baseline measured EXACTLY: cream left edge at frac 0.250 (right 75%), and the
+     panel TOP starts at y≈0.158 (a dark leaf band stays ABOVE it) — not from the top. */
+  .loc__panel{ position:absolute; top:15.8%; bottom:0; right:0; width:75%;
+    background:var(--cream-lite);
+    transform: translateX(calc((1 - var(--panel,0)) * 12%));
+    box-shadow:-30px 0 80px rgba(10,26,20,.4); overflow:hidden; }
+  /* map scale: live park-mass ≈ 2× ours at cover, so enlarge the map (~135% panel width) and
+     position so the Springs pin lands at live x≈0.63 y≈0.68 (measured from baseline). */
+  .loc__map{ position:absolute; inset:0; background:url('media/map.webp') 52% 62%/135% auto no-repeat;
+    transform: scale(calc(1.03 - var(--rev,0)*0.03));
+    opacity:var(--rev,0); will-change:transform,opacity; }
+  /* copy — DARK serif ink, INSIDE the panel top-left, ON the map (inverted theme).
+     left is relative to the panel (which starts at 25%), so a small pad hugs the panel edge
+     like live (text left-start ≈ panel edge, measured frac 0.25). */
+  /* copy sits just inside the panel top-left; left pad ~10px hugs the panel edge (live text
+     left = frac 0.26 ≈ panel edge 0.25). max-width lets it wrap to ~4 lines like live. */
+  .loc__copy{ position:absolute; top:clamp(22px,3.6vh,40px); left:clamp(14px,1.6vw,26px);
+    max-width:30ch; z-index:3; opacity:var(--copyO,0);
+    transform: translateY(calc((1 - var(--copyO,0)) * 0.7em)); }
+  .loc__kick{ font-size:.68rem; letter-spacing:.28em; text-transform:uppercase; color:#5c7266; margin-bottom:.9em; display:none; }
+  /* ── INTERACTIVE PIN LABELS (S28): HOVER-ONLY callouts over the real baked map pins (Nature Park /
+     Embankment / MIBC). At REST the map is byte-identical to the live baseline (no labels shown — live
+     springs shows the callout only on hover), so pixel-parity is preserved; the label box + a soft
+     ring appear only when the user hovers the pin. Minutes match the SO-3 odometer (3 · 9 · 16).
+     The whole layer only accepts hover once the map has settled (--pinsReady gates pointer-events). */
+  .loc__pins{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+  .loc__pins.ready{ pointer-events:auto; }
+  .pin-lbl{ position:absolute; transform:translate(-50%,-50%); width:34px; height:34px;
+    border-radius:50%; cursor:pointer; }
+  /* soft hover ring around the baked pin (invisible at rest) */
+  .pin-lbl::before{ content:''; position:absolute; inset:2px; border-radius:50%;
+    box-shadow:0 0 0 0 rgba(32,54,44,0); transition:box-shadow .25s; }
+  .pin-lbl:hover::before{ box-shadow:0 0 0 6px rgba(32,54,44,.18); }
+  .pin-lbl__box{ position:absolute; left:50%; top:50%; transform:translate(14px,-50%) translateX(-4px);
+    background:rgba(247,243,232,.96); border:1px solid rgba(32,54,44,.2); border-radius:3px;
+    padding:.42em .72em; white-space:nowrap; box-shadow:0 8px 24px rgba(20,40,30,.2);
+    display:flex; align-items:center; opacity:0; pointer-events:none;
+    transition:opacity .22s, transform .22s; }
+  .pin-lbl:hover .pin-lbl__box{ opacity:1; transform:translate(14px,-50%); }
+  .pin-lbl__name{ font-size:.74rem; letter-spacing:.02em; color:var(--ink); font-weight:500; }
+  .pin-lbl__min{ font-family:var(--serif); font-size:.92rem; color:var(--ink); margin-left:.6em; }
+  .pin-lbl__min b{ font-weight:400; }
+  @media (max-width:700px){ .pin-lbl__box{ padding:.36em .6em; } .pin-lbl__name{ font-size:.68rem; } }
+  .loc__h{ font-family:var(--serif); font-weight:400; font-size:clamp(1.5rem,2.35vw,2.05rem);
+    line-height:1.28; color:var(--ink); letter-spacing:-.01em; }
+  /* next-section preview strip at the bottom (Design — dark interiors + its copy) */
+  .loc__next{ position:absolute; left:0; right:0; bottom:0; height:12%; z-index:4;
+    background:linear-gradient(180deg, rgba(14,28,22,.75), rgba(14,28,22,.95)),
+      url('media/place-bg.webp') center 70%/cover no-repeat;
+    display:flex; align-items:center; padding:0 clamp(28px,6vw,90px); opacity:var(--nextO,0); }
+  .loc__next span{ font-size:clamp(.72rem,1vw,.86rem); color:#cbd8cf; line-height:1.4; max-width:34ch; }
+  @media (max-width:700px){
+    .loc__panel{ width:100%; }                 /* mobile: panel is full-width (leaf strip drops) */
+    .loc__leaf{ display:none; }
+    .loc__copy{ max-width:20ch; }
+  }
+
+  .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:var(--headC,#cfe0d6); transition:color .2s; }
+  .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; }
+  @media (max-width:700px){ .head .nav,.head .r span{ display:none; } }
+
+  /* PLACE tail text block — cream on dark (same as SO-3) */
+  .block{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:0 clamp(28px,7vw,110px); z-index:4; pointer-events:none; }  /* text only — never intercept the map pins */
+  .block.right{ align-items:flex-end; text-align:right; }
+  .ln{ --r:0; opacity: var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.9em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0);
+    will-change: transform, clip-path, opacity; }
+  .title{ font-family:var(--serif); font-weight:400; line-height:.96; letter-spacing:-.02em;
+    font-size:clamp(3.4rem,10vw,8rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.45); }
+  .sub{ font-family:var(--serif); font-size:clamp(1.1rem,2.2vw,1.7rem); color:#eaf2ec; margin-top:.35em; text-shadow:0 2px 24px rgba(0,0,0,.5); }
+  .body{ color:#e4ede7; font-size:clamp(1rem,1.4vw,1.15rem); line-height:1.6; margin-top:1.2em; max-width:40ch; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+  .block.right .body{ margin-left:auto; }
+  .kicker{ font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#cfe0d6; margin-bottom:1.1em; text-shadow:0 2px 16px rgba(0,0,0,.5); }
+
+  .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:var(--cueC,#9fb0a6);
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); transition:color .2s; }
+  @media (max-width:700px){
+    .loc__copy{ top:clamp(80px,12vh,120px); max-width:24ch; }
+    .block{ padding:0 clamp(20px,7vw,40px); }
+  }
+</style>
+</head>
+<body>
+  <div class="track" id="track">
+    <div class="pin">
+      <div class="bg bg-place" id="bgPlace"></div>
+
+      <!-- LOCATION — cream map PANEL on the right over a dark leaf strip (1:1 live springs) -->
+      <div class="loc" id="loc">
+        <div class="loc__leaf"></div>
+        <div class="loc__panel" id="locPanel">
+          <div class="loc__map" id="locMap"></div>
+          <!-- interactive pin labels anchored to the real baked pins (measured panel fractions) -->
+          <div class="loc__pins" id="locPins">
+            <div class="pin-lbl" style="left:41%;top:44%">
+              <div class="pin-lbl__box"><span class="pin-lbl__name">Nature Park</span><span class="pin-lbl__min"><b>3</b> min</span></div>
+            </div>
+            <div class="pin-lbl" style="left:67%;top:43%">
+              <div class="pin-lbl__box"><span class="pin-lbl__name">Embankment</span><span class="pin-lbl__min"><b>9</b> min</span></div>
+            </div>
+            <div class="pin-lbl" style="left:76%;top:57%">
+              <div class="pin-lbl__box"><span class="pin-lbl__name">Business core · MIBC</span><span class="pin-lbl__min"><b>16</b> min</span></div>
+            </div>
+          </div>
+          <div class="loc__copy" id="locCopy">
+            <div class="loc__kick">Location</div>
+            <div class="loc__h">Easy access to Nature Park. Landscapes of watercolor tenderness that belong only to you.</div>
+          </div>
+        </div>
+        <div class="loc__next" id="locNext"><span>Design — a glassy waterfall with flowing cascades of greenery-framed loggia.</span></div>
+      </div>
+
+      <header class="head" id="head">
+        <div class="nav">Menu · Residences</div><div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+
+      <!-- PLACE tail — the running scene beat that Location maps -->
+      <div class="block right" id="placeB" data-grp="place">
+        <div class="ln kicker">Minutes from everything</div>
+        <div class="ln title">Place</div>
+        <div class="ln sub">3 · 9 · 16</div>
+        <div class="ln body">Nature Park, the embankment, the business core — each one is minutes away.</div>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Place → Location · the map</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Place → Location — ЄДИНИЙ повний КОЛІР-ФЛИП (звірено з LIVE)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Найхарактерніший springs-шов — <b style="color:#eaf2ec">«дихання ритму»</b>. Після 4 темних
+        емоційних секцій — <b style="color:#eaf2ec">кремовий видих</b>: акварельна карта на світлому полі,
+        текст ТЕМНИМ серіфом (інверсія теми). Флип виміряний luma: Place-бік <b style="color:#eaf2ec">54</b>
+        → Location-бік <b style="color:#eaf2ec">141</b> (+87 за одне вікно жестів = різкий crossfade, той
+        самий sticky--under-previous pin). Карта «росте» діагонально з кута (springs-акварель).
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        Джерело руху: <code>extraction/live-ref/SO-4-{flip-cdp,flip2-cdp,place-location-cdp2}/</code>
+        (CDP synthesizeScrollGesture — scrollTo/wheel springs НЕ рухають) + <code>animation-map-map.json</code>
+        (<code>l-map sticky--under-previous</code>, <code>ui-light</code>). Карта — <b>реальний springs-асет</b>
+        (map-eng@xxl), не генерована. Дослідження «чому так» — <code>RESEARCH.md</code>. Пам'ять: live-first-before-visual.
+      </div>
+    </div>
+  </div>
+
+<script>
+  var track=document.getElementById('track');
+  var bgPlace=document.getElementById('bgPlace');
+  var loc=document.getElementById('loc'), locPanel=document.getElementById('locPanel'),
+      locMap=document.getElementById('locMap'), locCopy=document.getElementById('locCopy'),
+      locNext=document.getElementById('locNext');
+  var placeLines=[].slice.call(document.querySelectorAll('#placeB .ln'));
+  var head=document.getElementById('head'), cue=document.getElementById('cue');
+  var locPins=document.getElementById('locPins');
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function set(el,k,v){el.style.setProperty(k,v);}
+  function revealLines(lines,p,start,end,stag,dir){
+    var span=(end-start);
+    lines.forEach(function(el,i){
+      var a=start+i*stag, b=a+(span-(lines.length-1)*stag);
+      var r=eo(seg(p,a,b)); if(dir<0)r=1-r;
+      el.style.setProperty('--r', r.toFixed(3));
+    });
+  }
+  var smooth=0;
+  function render(p){
+    // PLACE tail rises in (0.03→0.24), rises out on the flip (0.32→0.44)
+    if(p<0.32) revealLines(placeLines,p,0.03,0.24,0.05,+1);
+    else       revealLines(placeLines,p,0.32,0.44,0.02,-1);
+    set(bgPlace,'--placeDrift',(-40*seg(p,0,0.5)).toFixed(1)+'px');
+
+    // THE FLIP — the whole Location layer fades in over [0.40,0.54] (live: sharp, one gesture window)
+    var flip=eo(seg(p,0.40,0.54));
+    set(loc,'--locO',flip.toFixed(3));
+    // Place bg dims but the LEFT leaf strip stays visible behind the panel (panel is 78%, not full-bleed)
+    set(bgPlace,'--bgPlace',(1-0.9*flip).toFixed(3));
+    // header + cue ink flips to dark (panel is on the right; header still reads over cream)
+    var light = flip>0.5;
+    head.style.setProperty('--headC', light? '#4a5f54':'#cfe0d6');
+    cue.style.setProperty('--cueC', light? '#5c7266':'#9fb0a6');
+
+    // cream PANEL slides in from the right (0.42→0.58)
+    set(locPanel,'--panel', eo(seg(p,0.42,0.58)).toFixed(3));
+    // watercolor map settles (scale-in + fade) inside the panel (0.48→0.80)
+    set(locMap,'--rev', eo(seg(p,0.48,0.80)).toFixed(3));
+    // dark-ink copy rises in ON the map (0.56→0.72)
+    set(locCopy,'--copyO', eo(seg(p,0.56,0.72)).toFixed(3));
+    // pin labels are HOVER-ONLY (map at rest = live baseline). Enable hover once the map has settled
+    // so the callouts can't fire mid-flip; at rest nothing is drawn, so parity is untouched.
+    locPins.classList.toggle('ready', p>0.80);
+    // next-section (Design) preview strip fades in near the end (0.80→0.96)
+    set(locNext,'--nextO', eo(seg(p,0.80,0.96)).toFixed(3));
+
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  function frame(){
+    if(window.__SCAN__){ requestAnimationFrame(frame); return; }   // scan mode drives render() itself
+    var r=track.getBoundingClientRect(), total=track.offsetHeight-window.innerHeight;
+    var target=clamp((-r.top)/total,0,1);
+    smooth += (target-smooth)*0.09; if(Math.abs(target-smooth)<0.0002) smooth=target;
+    render(smooth); requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  // ?s=<0..1> — jump to a scroll phase on load (springs ?s=N pattern) so the pixel-parity
+  // shot can capture the Location phase (a plain load only shows the Place tail at s=0).
+  var qs=new URLSearchParams(location.search), sQ=parseFloat(qs.get('s'));
+  if(!isNaN(sQ)){
+    var toY=function(){var t=document.getElementById('track');return Math.round((t.offsetHeight-window.innerHeight)*sQ);};
+    var jump=function(){window.scrollTo(0,toY()); smooth=sQ; render(sQ);};
+    jump(); setTimeout(jump,300); setTimeout(jump,900);   // re-assert after layout/lenis settle
+  } else if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__SO4_OK__=true;
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-variant="B">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mobile-hero · B · tile-cascade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script>window.__ATOM_OK__=false;window.render=function(){};</script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --ink:#0a1913; --deep:#0e2419; --cream:#ece7d9;
+  }
+  html,body{background:var(--ink);color:var(--cream);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  html{scrollbar-width:none}
+  body{font-family:'Jost',system-ui,-apple-system,sans-serif;overscroll-behavior:none}
+  body::-webkit-scrollbar{display:none}
+  a{color:var(--cream);text-decoration:none}
+  a:hover{color:#fff}
+
+  .page{position:relative;height:142vh;width:100%}
+  .hero{position:fixed;inset:0;height:100vh;overflow:hidden;background:var(--ink)}
+  .reveal{position:absolute;inset:0}
+
+  /* ---- mosaic: static CSS rotate + overscan ; GSAP owns the inner wrappers ---- */
+  .mosaic-rotate{position:absolute;inset:0;transform:rotate(-6deg)}
+  .mosaic-parallax{position:absolute;inset:0}
+  .kenburns{position:absolute;inset:0}
+  .grid{position:absolute;left:50%;top:50%;width:152%;height:162%;transform:translate(-50%,-50%);
+        display:flex;gap:8px}
+  .col{flex:1;display:flex;flex-direction:column;gap:8px;min-height:0}
+  .tile{position:relative;overflow:hidden;border-radius:1px;min-height:0}
+  .tile-inner{position:absolute;inset:-8%;background-size:cover;background-position:center}
+  .tile-inner::after{content:"";position:absolute;inset:0;mix-blend-mode:overlay;opacity:.13;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  .t1{background:radial-gradient(120% 100% at 35% 25%,#345039 0%,#16291d 72%),linear-gradient(160deg,rgba(185,201,180,.18),transparent 55%)}
+  .t2{background:radial-gradient(120% 120% at 65% 75%,#1f3f3b 0%,#0c1e1c 76%),linear-gradient(200deg,rgba(159,182,168,.22),transparent 60%)}
+  .t3{background:radial-gradient(100% 90% at 40% 35%,#4a6b3e 0%,#1c3421 78%),linear-gradient(140deg,rgba(210,222,190,.20),transparent 55%)}
+  .t4{background:radial-gradient(110% 100% at 55% 40%,#47514a 0%,#1f2823 80%),linear-gradient(180deg,rgba(200,208,196,.15),transparent 60%)}
+  .t5{background:linear-gradient(180deg,#aebfae 0%,#6f8a79 58%,#3f5748 100%),radial-gradient(80% 60% at 30% 20%,rgba(255,255,255,.25),transparent 60%)}
+  .t6{background:radial-gradient(120% 110% at 45% 30%,#3a5834 0%,#142518 82%),linear-gradient(160deg,rgba(175,196,160,.16),transparent 55%)}
+  .t7{background:radial-gradient(120% 120% at 60% 20%,#24402c 0%,#0a1710 82%),linear-gradient(200deg,rgba(150,175,158,.14),transparent 55%)}
+  .t8{background:linear-gradient(190deg,#6f9088 0%,#2c4a45 55%,#12201e 100%),radial-gradient(70% 50% at 65% 25%,rgba(255,255,255,.22),transparent 60%)}
+
+  /* ---- overlays ---- */
+  .tint{position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:
+      linear-gradient(180deg,rgba(8,20,14,.60) 0%,rgba(8,20,14,.10) 26%,rgba(8,20,14,.04) 48%,rgba(8,20,14,.28) 72%,rgba(8,20,14,.80) 100%),
+      radial-gradient(120% 78% at 88% 100%,rgba(8,20,14,.55),transparent 55%),
+      radial-gradient(120% 90% at 8% 46%,rgba(8,20,14,.34),transparent 58%),
+      linear-gradient(0deg,rgba(14,36,25,.34),rgba(14,36,25,.34))}
+  .light{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;
+    background:linear-gradient(115deg,transparent 32%,rgba(232,240,222,.12) 50%,transparent 68%);
+    background-size:260% 260%;background-position:0% 0%;mix-blend-mode:screen}
+
+  /* ---- header ---- */
+  .header{position:absolute;top:0;left:0;right:0;z-index:7;display:flex;align-items:center;justify-content:space-between;
+    padding:calc(16px + env(safe-area-inset-top)) 20px 0}
+  .wordmark{font-family:'Cormorant Garamond',Georgia,serif;font-size:27px;font-weight:600;letter-spacing:.4px;line-height:1;display:flex;align-items:center;gap:6px}
+  .wordmark .mk{width:16px;height:16px;opacity:.85}
+  .nav{display:flex;align-items:center;gap:17px}
+  .caps{font-size:10.5px;font-weight:400;letter-spacing:2.6px}
+  .icon{width:21px;height:21px;color:var(--cream);display:block}
+  .burger{display:flex;flex-direction:column;gap:5px;cursor:pointer}
+  .burger i{width:26px;height:1.5px;background:currentColor;display:block;border-radius:2px}
+
+  /* ---- paragraph mid-left ---- */
+  .para{position:absolute;left:24px;top:39%;width:62%;max-width:250px;z-index:4;
+    font-size:13px;font-weight:300;line-height:1.5;letter-spacing:.2px;color:#eef2ea;
+    text-shadow:0 1px 14px rgba(5,14,9,.65)}
+  .para::before{content:"";position:absolute;inset:-16px -22px -16px -30px;z-index:-1;
+    background:radial-gradient(120% 120% at 22% 50%,rgba(7,18,12,.52),transparent 72%);filter:blur(7px)}
+
+  /* ---- title bottom-right ---- */
+  .title{position:absolute;right:20px;bottom:94px;z-index:5;text-align:right;
+    font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;font-size:60px;line-height:.9;letter-spacing:.5px;
+    text-shadow:0 3px 28px rgba(5,14,9,.5)}
+  .title .line{display:block;overflow:hidden}
+  .title .line>span{display:block}
+
+  /* ---- scroll hint bottom-left ---- */
+  .hint{position:absolute;left:24px;bottom:40px;z-index:5;width:46px;height:46px;border-radius:50%;
+    border:1px solid rgba(236,231,217,.55);display:grid;place-items:center}
+  .hint-arrow{width:17px;height:17px;color:var(--cream)}
+
+  /* ---- next-section peek ---- */
+  .next{position:absolute;left:0;right:0;bottom:0;height:40%;z-index:6;
+    background:linear-gradient(180deg,#0c2318 0%,#081711 100%);
+    box-shadow:0 -18px 40px rgba(6,16,11,.5);
+    display:flex;align-items:flex-start;justify-content:space-between;
+    padding:calc(30px) 24px 0}
+  .next .nlabel{font-family:'Cormorant Garamond',Georgia,serif;font-size:30px;font-weight:500;color:var(--cream)}
+  .next .ncaps{font-size:10px;letter-spacing:2.6px;color:#9fb6a8;padding-top:8px}
+  .next::before{content:"";position:absolute;left:24px;right:24px;top:20px;height:1px;background:rgba(159,182,168,.28)}
+</style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div class="reveal">
+        <div class="mosaic-rotate">
+          <div class="mosaic-parallax">
+            <div class="kenburns">
+              <div class="grid">
+                <div class="col">
+                  <div class="tile" style="flex:1.25"><div class="tile-inner t1"></div></div>
+                  <div class="tile" style="flex:.82"><div class="tile-inner t4"></div></div>
+                  <div class="tile" style="flex:1.15"><div class="tile-inner t6"></div></div>
+                  <div class="tile" style="flex:.86"><div class="tile-inner t8"></div></div>
+                </div>
+                <div class="col">
+                  <div class="tile" style="flex:.9"><div class="tile-inner t2"></div></div>
+                  <div class="tile" style="flex:1.22"><div class="tile-inner t5"></div></div>
+                  <div class="tile" style="flex:.85"><div class="tile-inner t3"></div></div>
+                  <div class="tile" style="flex:1.16"><div class="tile-inner t7"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tint"></div>
+        <div class="light"></div>
+
+        <header class="header">
+          <div class="wordmark">Everlea
+            <svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="9.2"/><path d="M8.4 15.6c0-4.1 2.9-7 7.2-7.2-.2 4.3-3.1 7.2-7.2 7.2Z"/></svg>
+          </div>
+          <nav class="nav">
+            <span class="caps">RESIDENCES</span>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.35"><path d="M12 20s-7-4.5-9.2-9C1.1 8 2.5 4.9 5.7 4.9c2 0 3.3 1.3 4.3 2.7 1-1.4 2.3-2.7 4.3-2.7 3.2 0 4.6 3.1 3 6.1C19 15.5 12 20 12 20Z"/></svg>
+            <span class="burger"><i></i><i></i><i></i></span>
+          </nav>
+        </header>
+
+        <p class="para">An exclusive residence woven into ancient woodland, with a rich wellness sanctuary beside the Nature Park.</p>
+
+        <div class="title">
+          <span class="line l1"><span>Verdant</span></span>
+          <span class="line l2"><span>Repose</span></span>
+        </div>
+
+        <a class="hint" href="#" aria-label="Scroll">
+          <svg class="hint-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 5v13M6 12l6 6 6-6"/></svg>
+        </a>
+
+        <div class="next">
+          <span class="nlabel">The Grounds</span>
+          <span class="ncaps">01 / 04</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+window.addEventListener('load', function init(){
+  if(!(window.gsap && window.ScrollTrigger && window.CustomEase && window.Lenis)){
+    console.warn('[atom] libraries not available'); return;
+  }
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  var smooth = CustomEase.create('smooth','M0,0 C0.16,1 0.3,1 1,1');
+  var R = function(a,b){return gsap.utils.random(a,b);};
+
+  // ---- Lenis smooth scroll wired to GSAP ticker ----
+  var lenis = new Lenis({ duration:1.15, smoothWheel:true, syncTouch:true, touchMultiplier:1.4 });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+  gsap.ticker.lagSmoothing(0);
+
+  var introTl, scrollTl;
+
+  /*VARIANT_START*/
+  // ===== VARIANT B — tile cascade (the mosaic assembles) =====
+  gsap.set('.reveal',{autoAlpha:1});
+  gsap.set('.tile',{autoAlpha:0, scale:0.78, yPercent:8, transformOrigin:'50% 50%'});
+  gsap.set(['.para','.title','.hint'],{autoAlpha:0, y:24});
+  gsap.set('.next',{yPercent:100});
+
+  introTl = gsap.timeline({paused:true, defaults:{ease:smooth}});
+  introTl
+    .to('.tile',{autoAlpha:1, scale:1, yPercent:0, duration:0.85, ease:'back.out(1.5)',
+        stagger:{each:0.06, from:'random'}},0)
+    .to('.para',{autoAlpha:1, y:0, duration:0.9},0.78)
+    .to('.title',{autoAlpha:1, y:0, duration:1.0},0.92)
+    .to('.hint',{autoAlpha:1, y:0, duration:0.7},1.18);
+
+  // idle: stronger, per-tile off-clock drift
+  gsap.utils.toArray('.tile-inner').forEach(function(el,i){
+    gsap.to(el,{ yPercent:R(-5,5), xPercent:R(-2.6,2.6), scale:R(1.04,1.09), rotation:R(-0.8,0.8),
+      duration:R(5,8), ease:'sine.inOut', yoyo:true, repeat:-1, delay:i*0.12 });
+  });
+  gsap.to('.hint-arrow',{y:5, duration:1.1, ease:'sine.inOut', yoyo:true, repeat:-1});
+
+  // scroll: bigger parallax + a column split
+  scrollTl = gsap.timeline({paused:true, defaults:{ease:'none'}});
+  scrollTl
+    .to('.mosaic-parallax',{y:-150, duration:1},0)
+    .to('.col:nth-child(1)',{y:-40, duration:1},0)
+    .to('.col:nth-child(2)',{y:34, duration:1},0)
+    .to('.para',{y:-52, autoAlpha:0, duration:0.55},0)
+    .to('.title',{y:-64, autoAlpha:0, duration:0.7},0.08)
+    .to('.hint',{autoAlpha:0, duration:0.3},0)
+    .to('.header',{y:-26, autoAlpha:0, duration:0.6},0.2)
+    .to('.next',{yPercent:0, duration:0.92},0.06);
+  /*VARIANT_END*/
+
+  ScrollTrigger.create({ trigger:'.page', start:'top top', end:'bottom bottom', scrub:true,
+    onUpdate:function(s){ scrollTl.progress(s.progress); } });
+
+  introTl.play(0);
+
+  var SPLIT = 0.42;
+  var clamp01 = function(v){ v = (typeof v==='number' && isFinite(v)) ? v : 0; return v<0?0:(v>1?1:v); };
+  window.render = function(p){
+    p = clamp01(p);
+    if(p <= SPLIT){ introTl.pause(); introTl.progress(p/SPLIT); scrollTl.progress(0); }
+    else { introTl.progress(1); scrollTl.progress((p-SPLIT)/(1-SPLIT)); }
+  };
+
+  ScrollTrigger.refresh();
+  window.__ATOM_OK__ = true;
+});
+</script>
+</body>
+</html>

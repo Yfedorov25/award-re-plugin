@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- D14: перший кадр керується інлайн-скриптом + ранній CLS-спостерігач -->
+<script>
+history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+window.__CLS = 0;
+try {
+  new PerformanceObserver(function (l) {
+    l.getEntries().forEach(function (e) { if (!e.hadRecentInput) window.__CLS += e.value; });
+  }).observe({ type: 'layout-shift', buffered: true });
+} catch (e) {}
+</script>
+<title>LAB · case-tabs-table · CASE-таби свапають цілий датасет кросфейдом (AIR B3 + T-M19)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · case-tabs-table · v1 (хвиля 2 стратегічної машини)
+================================================================================
+  Контракт D_AIR_invest_1to1 §1 B3 + §3.3: біла CASE-картка - таби-клітинки
+  (актив = чорний border-bottom 2px), head 1.9vw + таблиця 5 рядків
+  (10px сірий / 12px чорний right-aligned, крок ~5.6vh) + результат-пари
+  1.9vw. Клік таба = кросфейд ЦІЛОГО датасета 0.3s: старе й нове значення
+  НАКЛАДЕНІ мід-флайт (привид), нуль layout-зсуву. T-M19 (моб): слайдерів
+  НЕМА, read-only пресети, таблиця full-width числа справа.
+  ЧЕСНІСТЬ (F1/F7): нуль окупності/оренди - лише канон-датасет smart
+  (ЕТ-06 «24 або 27 метрів», ЕТ-09 «вхід від 22 800», ЕТ-03 «Ключі 2027»,
+  ЕТ-25 розтермінування). «Ви», нуль тире (E1/B16).
+
+  ЗАКОНИ ЦЬОГО КОЛА:
+  - PROBE_MODE: сценарні проби ТІЛЬКИ при navigator.webdriver або ?probe -
+    живий перегляд без автоскролів;
+  - D14 head-inline: scrollRestoration manual + top + overflow-anchor none;
+  - loadStability: CLS < 0.1 + дрейф якорів <= 4px за 1s.
+
+  ГЕЙТ (B14/B15), десктоп:
+    1. loadStability (CLS + якорі);
+    2. ГЕОМЕТРІЯ: 2 таби рівної ширини; актив border-bottom 2px темний /
+       неактив hairline 1px; head ~1.9vw; 5 рядків, крок ~5.6vh; значення
+       right-aligned (праві кромки +-2px); результат ~1.9vw;
+    3. КОНТРАСТ >= 4.5:1 (лейбли І значення проти білої картки);
+    4. СВОП-ДРАЙВ: клік «27 метрів» -> на 120ms привиди НАКЛАДЕНІ (>=1
+       .ctt-ghost, live-opacity < 0.95) -> на 450ms head == «Квартира
+       27 м²», Площа == «27 м²», привидів 0, ряди НЕ зсунулись (+-1px),
+       aria-selected переїхав; своп назад працює;
+    5. D6-дисципліна: привидяться ЛИШЕ змінені слоти (head + Площа = 2);
+    6. console errors == 0.
+  Мобільний гейт (<=768px) - T-M19: нуль input[type=range]; таби на всю
+  ширину; tap-своп працює; числа right-aligned у кадрі; сторінка без
+  x-переповнення; текст-ректи >= 16px; loadStability; errors == 0.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --paper:#f4f2ee; --ink:#111110; --panel:#ececea;
+    --sans:'Inter',system-ui,-apple-system,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html{overflow-anchor:none}   /* D14 */
+  html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+
+  .intro{background:var(--ink);color:var(--paper);padding:9vh clamp(20px,4vw,64px) 8vh}
+  .intro__kicker{font-size:.68rem;letter-spacing:.34em;text-transform:uppercase;opacity:.55;margin-bottom:2.2rem}
+  .intro__title{font-weight:300;font-size:clamp(22px,2.4vw,40px);line-height:1.25;max-width:26ch}
+  .intro__hint{margin-top:2.4rem;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  .media{position:relative;height:88vh;overflow:clip;background:var(--ink)}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .media__cap{position:absolute;left:clamp(20px,4vw,60px);bottom:5vh;color:#fff;
+    font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+    background:rgba(17,17,16,.5);padding:.7em 1.5em;border-radius:999px}
+
+  /* світла панель-контекст (B3): картка живе на #ececea */
+  .panel{background:var(--panel);padding:12vh 1.6vw}
+  .panel__head{display:grid;grid-template-columns:1fr minmax(0,44%);gap:2vw;
+    margin:0 1.2vw 6vh}
+  .panel__title{font-size:20px;text-transform:uppercase;letter-spacing:.04em;font-weight:400}
+  .panel__lead{font-size:13px;line-height:1.7;letter-spacing:.08em;
+    text-transform:uppercase;color:#5c5c58}
+  .panel [data-ctt]{margin:0 1.2vw}
+
+  .tail{padding:7vh 20px;text-align:center;font-size:.62rem;
+    letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  @media (max-width:768px){
+    .media{height:64vh}
+    .panel{padding:9vh clamp(16px,5vw,28px)}
+    .panel__head{grid-template-columns:1fr;gap:3vw;margin:0 0 5vh}
+    .panel [data-ctt]{margin:0}
+  }
+</style>
+</head>
+<body>
+
+  <header class="intro">
+    <p class="intro__kicker">Lab · case-tabs-table · AIR B3 + T-M19</p>
+    <h1 class="intro__title">CASE-таби. Один тап свапає цілий датасет без зсуву.</h1>
+    <p class="intro__hint">Гортайте вниз</p>
+  </header>
+
+  <section class="media">
+    <img src="renders/day-front.webp" alt="Квартал, фасад, день" id="mediaImg">
+    <div class="media__cap">Контекст-сусід · день</div>
+  </section>
+
+  <!-- B3-панель: шапка (ЕТ-06 дослівно) + CASE-картка (канон-датасет smart) -->
+  <section class="panel" id="panel">
+    <div class="panel__head">
+      <h2 class="panel__title" id="anchorTitle">Смарт-квартира</h2>
+      <p class="panel__lead">Маленька квартира на 24 або 27 метрів. У ній немає довгих коридорів і кутків, якими ніхто не користується.</p>
+    </div>
+    <div data-ctt id="ctt"></div>
+  </section>
+
+  <footer class="tail">case-tabs-table · кінець проби</footer>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var errs = 0;
+  var NET_RE = /Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|ERR_INTERNET|ERR_NAME/;
+  var _e = console.error;
+  console.error = function () {
+    var s = Array.prototype.join.call(arguments, ' ');
+    if (!NET_RE.test(s)) errs++;
+    return _e.apply(console, arguments);
+  };
+  window.addEventListener('error', function (ev) {
+    var s = String((ev && ev.message) || '');
+    if (!NET_RE.test(s)) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  function raf2() { return new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); }); }
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function rect(el) { return el.getBoundingClientRect(); }
+  function parseColor(css) {
+    var m = css.match(/[\d.]+/g) || [0, 0, 0];
+    return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+  }
+  function relLum(c) {
+    function f(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  }
+  function wcag(fg, bg) {
+    var a = relLum(fg), b = relLum(bg);
+    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+  }
+  function vw(p) { return window.innerWidth * p / 100; }
+  function vh(p) { return window.innerHeight * p / 100; }
+
+  /* ---- канон-датасет smart (ЕТ-06/09/03/25): нуль окупності (F7) ---- */
+  var CASES = [
+    { tab: '24 метри', head: 'Квартира 24 м²',
+      rows: [
+        { label: 'Площа', value: '24 м²' },
+        { label: 'Ремонт', value: 'під ключ' },
+        { label: 'Ключі', value: '2027 рік' },
+        { label: 'Розтермінування', value: 'графік під ваш бюджет' },
+        { label: 'Коридори', value: 'немає зайвих' }
+      ],
+      result: [
+        { label: 'Вхід', value: 'від 22 800 доларів' },
+        { label: 'Ключі', value: '2027 рік' }
+      ] },
+    { tab: '27 метрів', head: 'Квартира 27 м²',
+      rows: [
+        { label: 'Площа', value: '27 м²' },
+        { label: 'Ремонт', value: 'під ключ' },
+        { label: 'Ключі', value: '2027 рік' },
+        { label: 'Розтермінування', value: 'графік під ваш бюджет' },
+        { label: 'Коридори', value: 'немає зайвих' }
+      ],
+      result: [
+        { label: 'Вхід', value: 'від 22 800 доларів' },
+        { label: 'Ключі', value: '2027 рік' }
+      ] }
+  ];
+  var ctt = CaseTabsTable.create('#ctt', { cases: CASES, duration: 0.3 });
+
+  /* PROBE_MODE (закон кола): живий перегляд БЕЗ автоскролів */
+  var PROBE_MODE = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var report = { viewport: null, stability: null, geometry: null, contrast: null,
+                 swap: null, mobile: null, errors: null };
+
+  /* loadStability: CLS < 0.1 + дрейф якорів <= 4px за 1s */
+  async function probeStability() {
+    var out = { cls: -1, drift: -1, ok: false };
+    var anchors = [document.getElementById('anchorTitle'), document.getElementById('ctt')];
+    var y0 = anchors.map(function (el) { return rect(el).top + window.scrollY; });
+    await delay(1000);
+    var drift = 0;
+    anchors.forEach(function (el, i) {
+      drift = Math.max(drift, Math.abs(rect(el).top + window.scrollY - y0[i]));
+    });
+    out.cls = +(window.__CLS || 0).toFixed(4);
+    out.drift = +drift.toFixed(1);
+    out.ok = out.cls < 0.1 && out.drift <= 4;
+    return out;
+  }
+
+  function probeGeometry() {
+    var out = { tabsEqual: false, activeBorder: 0, inactiveBorder: 0,
+                headVw: 0, rows: 0, rowStepVh: 0, rightAligned: false,
+                resVw: 0, ok: false };
+    var tabs = document.querySelectorAll('.ctt__tab');
+    var t0 = rect(tabs[0]), t1 = rect(tabs[1]);
+    out.tabsEqual = Math.abs(t0.width - t1.width) <= 2;
+    var csA = getComputedStyle(tabs[0]), csI = getComputedStyle(tabs[1]);
+    out.activeBorder = parseFloat(csA.borderBottomWidth);
+    out.inactiveBorder = parseFloat(csI.borderBottomWidth);
+    var activeDark = relLum(parseColor(csA.borderBottomColor)) < 0.2;
+    out.headVw = +(parseFloat(getComputedStyle(document.querySelector('.ctt__head')).fontSize) / vw(1)).toFixed(2);
+    var rows = document.querySelectorAll('.ctt__row');
+    out.rows = rows.length;
+    var steps = [];
+    for (var i = 1; i < rows.length; i++) steps.push(rect(rows[i]).top - rect(rows[i - 1]).top);
+    out.rowStepVh = +(steps.reduce(function (a, b) { return a + b; }, 0) / steps.length / vh(1)).toFixed(2);
+    var rights = Array.prototype.map.call(document.querySelectorAll('.ctt__value'), function (v) { return rect(v).right; });
+    out.rightAligned = rights.every(function (r) { return Math.abs(r - rights[0]) <= 2; });
+    out.resVw = +(parseFloat(getComputedStyle(document.querySelector('.ctt__res-value')).fontSize) / vw(1)).toFixed(2);
+    var mobile = window.innerWidth <= 768;
+    out.ok = out.tabsEqual && out.activeBorder === 2 && activeDark &&
+             out.inactiveBorder === 1 && out.rows === 5 && out.rightAligned &&
+             (mobile || (Math.abs(out.headVw - 1.9) <= 0.3 &&
+                         Math.abs(out.rowStepVh - 5.6) <= 1.5 &&
+                         Math.abs(out.resVw - 1.9) <= 0.3));
+    return out;
+  }
+
+  function probeContrast() {
+    var out = { minContrast: 99, ok: false };
+    var card = document.querySelector('.ctt');
+    var bg = parseColor(getComputedStyle(card).backgroundColor);
+    ['.ctt__label', '.ctt__value .ctt-cur', '.ctt__tab-label', '.ctt__res-value .ctt-cur']
+      .forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el) out.minContrast = Math.min(out.minContrast,
+          wcag(parseColor(getComputedStyle(el).color), bg));
+      });
+    out.minContrast = +out.minContrast.toFixed(2);
+    out.ok = out.minContrast >= 4.5;
+    return out;
+  }
+
+  async function probeSwap() {
+    var out = { midGhosts: 0, midOpacity: 1, head2: '', area2: '', ghostsAfter: -1,
+                rowTopShift: 0, aria2: '', head1back: '', changedSlots: 0, ok: false };
+    var headCur = document.querySelector('.ctt__head .ctt-cur');
+    var rows = document.querySelectorAll('.ctt__row');
+    var rowTops = Array.prototype.map.call(rows, function (r) { return rect(r).top; });
+    var tabs = document.querySelectorAll('.ctt__tab');
+
+    tabs[1].click();
+    await delay(120);
+    var ghosts = document.querySelectorAll('.ctt-ghost');
+    out.midGhosts = ghosts.length;
+    out.changedSlots = out.midGhosts; /* D6: привидяться лише змінені слоти */
+    out.midOpacity = +parseFloat(getComputedStyle(headCur).opacity).toFixed(2);
+    await delay(330);
+    out.head2 = headCur.textContent;
+    out.area2 = document.querySelector('.ctt__value .ctt-cur').textContent;
+    out.ghostsAfter = document.querySelectorAll('.ctt-ghost').length;
+    var maxShift = 0;
+    Array.prototype.forEach.call(rows, function (r, i) {
+      maxShift = Math.max(maxShift, Math.abs(rect(r).top - rowTops[i]));
+    });
+    out.rowTopShift = +maxShift.toFixed(1);
+    out.aria2 = tabs[1].getAttribute('aria-selected');
+
+    tabs[0].click();
+    await delay(430);
+    out.head1back = headCur.textContent;
+
+    out.ok = out.midGhosts === 2 && out.midOpacity < 0.95 &&
+             out.head2 === 'Квартира 27 м²' && out.area2 === '27 м²' &&
+             out.ghostsAfter === 0 && out.rowTopShift <= 1 &&
+             out.aria2 === 'true' && out.head1back === 'Квартира 24 м²';
+    return out;
+  }
+
+  async function probeMobileExtras() {
+    var out = { noRangeInputs: false, tabsFullWidth: false, pageNoXScroll: false,
+                minTextLeft: 9999, tapTargets: false, ok: false };
+    var vwpx = window.innerWidth;
+    out.noRangeInputs = document.querySelectorAll('input[type=range]').length === 0;
+    var tabs = document.querySelectorAll('.ctt__tab');
+    var host = document.getElementById('ctt');
+    out.tabsFullWidth = Math.abs((rect(tabs[0]).width + rect(tabs[1]).width) - rect(host).width) <= 4;
+    out.pageNoXScroll = document.documentElement.scrollWidth <= vwpx + 1;
+    out.tapTargets = Array.prototype.every.call(tabs, function (t) { return rect(t).height >= 44; });
+    var minLeft = 9999;
+    ['.intro__title', '.panel__lead', '.ctt__label', '.ctt__tab-label'].forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      var rng = document.createRange();
+      rng.selectNodeContents(el);
+      var r = rng.getBoundingClientRect();
+      if (r.width > 0) minLeft = Math.min(minLeft, r.left);
+    });
+    out.minTextLeft = +minLeft.toFixed(1);
+    out.ok = out.noRangeInputs && out.tabsFullWidth && out.pageNoXScroll &&
+             out.tapTargets && out.minTextLeft >= 16;
+    return out;
+  }
+
+  async function runProbes() {
+    await ctt.ready;
+    await raf2();
+    report.viewport = window.innerWidth + 'x' + window.innerHeight;
+    report.stability = await probeStability();
+    /* картку в кадр - і геометрія, і драйв на видимому елементі */
+    var y = rect(document.getElementById('ctt')).top + window.scrollY - vh(15);
+    window.scrollTo(0, Math.max(0, y));
+    await raf2();
+    report.geometry = probeGeometry();
+    report.contrast = probeContrast();
+    report.swap = await probeSwap();
+    if (window.innerWidth <= 768) report.mobile = await probeMobileExtras();
+    report.errors = errs;
+    var mobOk = window.innerWidth > 768 || report.mobile.ok;
+    return report.stability.ok && report.geometry.ok && report.contrast.ok &&
+           report.swap.ok && mobOk && errs === 0;
+  }
+
+  var PM = PROBE_MODE;
+  window.addEventListener('load', async function () {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }   /* без автоскролів */
+    var ok = false;
+    try { ok = await runProbes(); }
+    catch (e) { report.exception = String(e); ok = false; }
+    window.scrollTo(0, 0);
+    window.__PROBE = report;
+    window.__LAB_OK__ = !!ok;
+    if (!ok) console.log('[LAB case-tabs-table] probe report:', JSON.stringify(report));
+  });
+})();
+</script>
+</body>
+</html>

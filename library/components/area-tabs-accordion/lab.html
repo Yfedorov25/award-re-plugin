@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · area-tabs-accordion · T-M25 (площі: таби md-up / акордеон sm-down)</title>
+<!--
+================================================================================
+  LAB: area-tabs-accordion — живий дуальний блок площ /about
+  (data-plugin="tabs accordion"): md-up ТАБИ (живі площі 79/136.1/
+  220.4/340 м²), sm-down АКОРДЕОН (animate-height 0.45s air, press-
+  state, ✛→45°, auto-scroll). Панель: живий план + гігант-число + CTA.
+  Авто-закриття сусідів живим НЕ ЗНЯТЕ — multi-open (не вигадуємо).
+
+  ГЕЙТ (PROBE_MODE):
+  desktop: 1. loadStability; 2. 4 таби з живими площами, панель 1
+  видима; 3. клік табу 3 → aria-selected, панель 3 видима, решта
+  сховані; errors 0.
+  mobile: 1. стабільність; 2. акордеон: 4 голови, всі панелі height 0;
+  3. тап голови 2 → height > 100, ✛ обернувся; тап голови 4 → ОБИДВІ
+  відкриті (multi-open чесний); повторний тап 2 → height 0; errors 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .wrap { max-width: 1100px; margin: 6vh auto 12vh; padding: 0 3vw; }
+  h1 { font-size: clamp(26px, 3.4vw, 44px); font-weight: 300; margin-bottom: 3vh; }
+  [data-ata-panel] .inner { display: grid; grid-template-columns: 1fr auto; gap: 3vw;
+    align-items: center; padding: 3vh 0; }
+  [data-ata-panel] img { width: min(440px, 100%); background: #fff; border-radius: 4px; }
+  .giant { font-size: clamp(44px, 6vw, 96px); font-weight: 300; line-height: 1; }
+  .giant small { display: block; font-size: 12px; letter-spacing: .1em;
+    text-transform: uppercase; color: #8b8a86; margin-top: 10px; }
+  .cta { display: inline-flex; gap: 1.8em; margin-top: 3vh; font-size: 11px;
+    letter-spacing: .1em; text-transform: uppercase; padding: 13px 16px;
+    border-radius: 4px; background: #111110; color: #f4f2ee; text-decoration: none; }
+  @media (max-width: 768px) { [data-ata-panel] .inner { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · area-tabs-accordion · t-m25 · клікай площі</div>
+
+<div class="wrap">
+  <h1>Optimal office solutions</h1>
+  <div data-ata id="ata">
+    <nav data-ata-tabs role="tablist"></nav>
+    <section data-ata-panel data-ata-label="79 м²"><div class="inner">
+      <img loading="lazy" alt="план 79" src="https://aircenter.space/assets/images/offices/plans/k1/floor_9/1_9_18.svg">
+      <div><div class="giant">79<small>м² · компакт</small></div><a class="cta" href="#офіси">Choose an office ✛</a></div>
+    </div></section>
+    <section data-ata-panel data-ata-label="136.1 м²"><div class="inner">
+      <img loading="lazy" alt="план 136" src="https://aircenter.space/assets/images/offices/plans/k1/floor_9/1_9_20.svg">
+      <div><div class="giant">136.1<small>м² · команда</small></div><a class="cta" href="#офіси">Choose an office ✛</a></div>
+    </div></section>
+    <section data-ata-panel data-ata-label="220.4 м²"><div class="inner">
+      <img loading="lazy" alt="план 220" src="https://aircenter.space/assets/images/offices/plans/k1/floor_11/1_11_46.svg">
+      <div><div class="giant">220.4<small>м² · департамент</small></div><a class="cta" href="#офіси">Choose an office ✛</a></div>
+    </div></section>
+    <section data-ata-panel data-ata-label="340 м²"><div class="inner">
+      <img loading="lazy" alt="план 340" src="https://aircenter.space/assets/images/offices/plans/k1/floor_7/1_7_3.svg">
+      <div><div class="giant">340<small>м² · штаб</small></div><a class="cta" href="#офіси">Choose an office ✛</a></div>
+    </div></section>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  var ata = window.AreaTabsAccordion.create('#ata', {});
+  window.__ATA = ata;
+
+  var panels = document.querySelectorAll('[data-ata-panel]');
+  var report = { stability: null, mode: null, action: null, multi: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(120);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('h1');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    if (!touch) {
+      var tabs = document.querySelectorAll('[data-ata-tabs] a');
+      report.mode = { mode: ata.mode(), tabs: tabs.length,
+                      first: tabs[0].textContent,
+                      p1visible: !panels[0].classList.contains('ata-off') };
+      report.mode.ok = ata.mode() === 'tabs' && tabs.length === 4 &&
+                       /79/.test(report.mode.first) && report.mode.p1visible;
+      ok = report.mode.ok && ok;
+
+      tabs[2].click();
+      await delay(150);
+      report.action = { sel: tabs[2].getAttribute('aria-selected'),
+                        p3visible: !panels[2].classList.contains('ata-off'),
+                        p1hidden: panels[0].classList.contains('ata-off') };
+      report.action.ok = report.action.sel === 'true' && report.action.p3visible &&
+                         report.action.p1hidden;
+      ok = report.action.ok && ok;
+      report.multi = { ok: true, skipped: 'desktop' };
+    } else {
+      var heads = document.querySelectorAll('.ata-acc-head');
+      var h0 = Array.prototype.every.call(panels, function (p) {
+        return parseFloat(p.style.height) === 0;
+      });
+      report.mode = { mode: ata.mode(), heads: heads.length, allClosed: h0 };
+      report.mode.ok = ata.mode() === 'accordion' && heads.length === 4 && h0;
+      ok = report.mode.ok && ok;
+
+      heads[1].click();
+      await delay(600);
+      var h2open = parseFloat(panels[1].style.height) > 100;
+      var plusRot = getComputedStyle(heads[1].querySelector('.ata-acc-plus')).transform !== 'none';
+      heads[3].click();
+      await delay(600);
+      report.action = { h2open: h2open, plusRot: plusRot,
+                        h4open: parseFloat(panels[3].style.height) > 100 };
+      report.action.ok = h2open && plusRot && report.action.h4open;
+      ok = report.action.ok && ok;
+
+      /* multi-open чесний + повторний тап закриває */
+      var bothOpen = parseFloat(panels[1].style.height) > 100 &&
+                     parseFloat(panels[3].style.height) > 100;
+      heads[1].click();
+      await delay(600);
+      report.multi = { bothOpen: bothOpen,
+                       p2closed: parseFloat(panels[1].style.height) === 0 };
+      report.multi.ok = bothOpen && report.multi.p2closed;
+      ok = report.multi.ok && ok;
+    }
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:area-tabs-accordion]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

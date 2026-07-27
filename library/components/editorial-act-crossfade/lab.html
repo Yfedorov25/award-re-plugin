@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · editorial-act-crossfade · 11tanjung (3 acts crossfade + push-zoom, split-word headline centre-swap)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · editorial-act-crossfade (+ split-word-headline)
+================================================================================
+  11tanjung's editorial acts — ONE pinned scroll-progress drives 3 acts that crossfade
+  through 4 synced layers: full-bleed image push-zoom scale(1->1.12) + crossfade; a
+  split-word headline (Live / with fixed, centre word SWAPS Standard->Style->Uncompromised);
+  a topline label swap; a body crossfade. Harvested from D_11tanjung (C2+C3). OUR QUADRO
+  renders. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --warm-black:#1e1a17; --warm-white:#f4f1ea; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--warm-black);color:var(--warm-white);font-family:var(--sans)}
+  .spacer{height:120vh;display:grid;place-items:center;background:var(--warm-black);color:var(--warm-white);opacity:.5;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+
+  .eac-stage{ --eac-bg:#1e1a17; --eac-ink:#f4f1ea; --eac-serif:'Playfair Display',Georgia,serif; --eac-sans:'Inter',system-ui,sans-serif; }
+  .eac-fixed--l, .eac-fixed--r { font-weight: 400; }
+  .eac-word { font-weight: 500; }
+  .eac-topline { color: var(--warm-white); }
+</style>
+</head>
+<body>
+
+  <section class="eac-stage" id="acts">
+    <div class="eac-images">
+      <div class="eac-img" data-act="0"><img src="renders/terrace.webp" alt="QUADRO"></div>
+      <div class="eac-img" data-act="1"><img src="renders/day-front.webp" alt="QUADRO"></div>
+      <div class="eac-img" data-act="2"><img src="renders/night.webp" alt="QUADRO"></div>
+    </div>
+
+    <div class="eac-headline">
+      <div class="eac-fixed--l">Live</div>
+      <div class="eac-centre">
+        <div class="eac-word" data-act="0">Standard</div>
+        <div class="eac-word" data-act="1">Style</div>
+        <div class="eac-word" data-act="2">Uncompromised</div>
+      </div>
+      <div class="eac-fixed--r">with</div>
+    </div>
+
+    <div class="eac-toplines">
+      <div class="eac-topline" data-act="0">/ 01 — The Address</div>
+      <div class="eac-topline" data-act="1">/ 02 — The Form</div>
+      <div class="eac-topline" data-act="2">/ 03 — The Life</div>
+    </div>
+
+    <div class="eac-bodies">
+      <div class="eac-body" data-act="0">A standard set, not followed. Every line drawn to be lived in, not looked at.</div>
+      <div class="eac-body" data-act="1">Style that holds its quiet. Materials that age into the address, not out of it.</div>
+      <div class="eac-body" data-act="2">No compromise between the home you want and the one you can keep.</div>
+    </div>
+  </section>
+
+  <div class="spacer">скрол ↓ — 3 акти: рендер push-zoom + crossfade, центр-слово свопиться</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__eac = EditorialActCrossfade.create('#acts', { xfade:0.28, zoom:0.12, pinFactor:3.0, ease:'power2.out', manageLenis:false });
+  })();
+</script>
+</body>
+</html>

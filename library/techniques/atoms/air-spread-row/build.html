@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VELA — Working on the Waterfront</title>
+<style>
+  :root{
+    --bg:#11161c; --ink:#edeae3; --accent:#c8a15e;
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--grot);
+    font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:var(--ink); text-decoration:none; transition:color .3s cubic-bezier(0.25,0.74,0.22,0.99)}
+  a:hover{color:var(--accent)}
+  .caps{font-family:var(--grot); text-transform:uppercase; letter-spacing:.3em; font-size:10.5px; font-weight:400}
+  /* grain over everything */
+  body::after{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:60; opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+  /* ---------- header ---------- */
+  header{
+    position:relative; z-index:5; height:64px; display:flex; align-items:center;
+    justify-content:space-between; padding:0 4vw;
+    border-bottom:1px solid rgba(237,234,227,.08);
+  }
+  .brand{font-family:var(--serif); font-size:22px; letter-spacing:.14em; font-weight:400}
+  nav.hnav{display:flex; gap:34px}
+  nav.hnav a{font-size:10.5px; letter-spacing:.3em; text-transform:uppercase}
+  /* ---------- intro ---------- */
+  .intro{
+    position:relative; min-height:40vh; display:flex; align-items:center;
+    padding:9vh 4vw 7vh;
+  }
+  .intro-col{
+    margin-left:auto; width:38%; min-width:320px; text-align:right;
+  }
+  .intro-col .caps{color:var(--accent); display:block; margin-bottom:22px}
+  .intro-col p{font-size:15px; line-height:1.7; color:rgba(237,234,227,.82); text-wrap:pretty}
+  .intro-rule{
+    position:absolute; left:4vw; bottom:0; width:24vw; height:1px;
+    background:rgba(237,234,227,.08);
+  }
+  .intro-index{
+    position:absolute; left:4vw; top:9vh; font-family:var(--serif);
+    font-size:13px; color:rgba(237,234,227,.35); letter-spacing:.1em;
+    font-variant-numeric:tabular-nums;
+  }
+  /* ---------- act ---------- */
+  .track{position:relative; height:260vh}
+  .stage{
+    position:sticky; top:0; height:100vh; overflow:hidden;
+    background:
+      radial-gradient(120% 90% at 78% 12%, rgba(200,161,94,.07), transparent 55%),
+      radial-gradient(140% 100% at 12% 92%, rgba(38,52,66,.55), transparent 60%),
+      linear-gradient(180deg, #11161c 0%, #131a21 48%, #10151b 100%);
+  }
+  .stage .contours{position:absolute; inset:0; width:100%; height:100%; display:block}
+  .ghost-num{
+    position:absolute; left:-2vw; bottom:-6vh; font-family:var(--serif);
+    font-size:56vh; line-height:1; color:var(--ink); opacity:.045;
+    letter-spacing:-.03em; user-select:none; pointer-events:none;
+    font-variant-numeric:tabular-nums;
+  }
+  .stage-edge-caps{
+    position:absolute; top:8vh; left:4vw; color:rgba(237,234,227,.4);
+  }
+  .stage-edge-caps em{font-style:normal; color:var(--accent)}
+  .hairline{
+    position:absolute; top:58vh; left:0; width:100%; height:1px;
+    background:var(--ink); opacity:.12;
+  }
+  /* title: outer wrapper = static baseline placement (CSS, never animated);
+     .drift = JS-driven release transform; spans = JS-driven translateX only */
+  .title-anchor{position:absolute; left:0; right:0; bottom:54vh; pointer-events:none}
+  .drift{will-change:transform}
+  .title-line{
+    text-align:center; white-space:nowrap;
+    font-family:var(--serif); font-weight:400;
+    font-size:clamp(48px,7.5vw,110px); line-height:.96; letter-spacing:.01em;
+    color:var(--ink);
+  }
+  .title-line .wg{display:inline-block; will-change:transform}
+  .sub-label{
+    position:absolute; top:66vh; left:0; right:0; text-align:center;
+    color:rgba(237,234,227,.85); font-variant-numeric:tabular-nums;
+    opacity:0; will-change:transform,opacity;
+  }
+  /* ---------- outro ---------- */
+  .outro{
+    position:relative; z-index:5; min-height:35vh; padding:10vh 4vw 6vh;
+    display:grid; grid-template-columns:1fr auto; grid-template-rows:1fr auto;
+    gap:6vh 4vw; border-top:1px solid rgba(237,234,227,.08);
+    background:linear-gradient(180deg,#11161c, #0e1318);
+  }
+  .takeaway{
+    font-family:var(--serif); font-style:italic; font-size:clamp(24px,2.6vw,38px);
+    line-height:1.25; max-width:56%; min-width:300px; text-wrap:pretty;
+  }
+  nav.onav{display:flex; gap:30px; align-self:start; justify-self:end}
+  nav.onav a{font-size:10.5px; letter-spacing:.3em; text-transform:uppercase}
+  .legal{
+    grid-column:1 / -1; display:flex; justify-content:space-between; align-items:baseline;
+    font-size:11px; letter-spacing:.04em; color:rgba(237,234,227,.45);
+    border-top:1px solid rgba(237,234,227,.06); padding-top:22px;
+  }
+  .legal .mark{font-family:var(--serif); letter-spacing:.14em; color:rgba(237,234,227,.6)}
+  @media (max-width:760px){
+    .intro-col{width:80%}
+    .takeaway{max-width:100%}
+    nav.hnav{gap:18px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">VELA</div>
+  <nav class="hnav">
+    <a href="#pier">The Pier</a><a href="#workspaces">Workspaces</a><a href="#waterline">Waterline</a><a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="intro">
+  <div class="intro-index">01 / 04</div>
+  <div class="intro-col">
+    <span class="caps">VELA · THE PIER DISTRICT</span>
+    <p>Nine floors of workspace stand where the old pier cranes used to load timber. The water is not a view here — it is the schedule: ferries mark the hours, gulls mark the lunch break.</p>
+  </div>
+  <div class="intro-rule"></div>
+</section>
+
+<div class="track" id="track">
+  <div class="stage">
+    <svg class="contours" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0,640 C220,600 380,690 620,660 C860,630 1020,700 1240,668 C1330,655 1400,662 1440,650" fill="none" stroke="#edeae3" stroke-opacity="0.06" stroke-width="1"/>
+      <path d="M0,690 C240,660 420,730 660,706 C900,682 1060,742 1280,714 C1350,705 1410,710 1440,702" fill="none" stroke="#edeae3" stroke-opacity="0.055" stroke-width="1"/>
+      <path d="M0,742 C260,716 460,776 700,754 C940,732 1100,786 1320,760 C1380,753 1420,756 1440,750" fill="none" stroke="#edeae3" stroke-opacity="0.05" stroke-width="1"/>
+      <path d="M0,796 C280,774 500,824 740,806 C980,788 1140,834 1360,810 C1400,806 1430,807 1440,804" fill="none" stroke="#edeae3" stroke-opacity="0.05" stroke-width="1"/>
+      <path d="M0,850 C300,832 540,872 780,858 C1020,844 1180,880 1440,858" fill="none" stroke="#edeae3" stroke-opacity="0.045" stroke-width="1"/>
+    </svg>
+    <div class="ghost-num" aria-hidden="true">9</div>
+    <div class="stage-edge-caps caps">Act I <em>·</em> Assembly</div>
+    <div class="hairline"></div>
+    <div class="title-anchor">
+      <div class="drift" id="drift">
+        <h1 class="title-line" id="titleLine"><span class="wg" id="wgL">WORKING</span> <span class="wg" id="wgC">ON THE</span> <span class="wg" id="wgR">WATERFRONT</span></h1>
+      </div>
+    </div>
+    <div class="sub-label caps" id="subLabel">PIER 9 · 24 000 M² · OPENING SPRING 2027</div>
+  </div>
+</div>
+
+<footer class="outro">
+  <p class="takeaway">A title that gathers itself — the way a working day does.</p>
+  <nav class="onav">
+    <a href="#pier">The Pier</a><a href="#workspaces">Workspaces</a><a href="#waterline">Waterline</a><a href="#contact">Contact</a>
+  </nav>
+  <div class="legal">
+    <span class="mark">VELA</span>
+    <span>© 2027 Vela Pier Offices. Tidal data courtesy of the harbour office.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var track = document.getElementById("track");
+  var drift = document.getElementById("drift");
+  var subLabel = document.getElementById("subLabel");
+  var wgL = document.getElementById("wgL");
+  var wgR = document.getElementById("wgR");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  /* cubic-bezier(0.25,0.74,0.22,0.99) evaluated as easing on progress */
+  function makeBezier(p1x,p1y,p2x,p2y){
+    var cx=3*p1x, bx=3*(p2x-p1x)-cx, ax=1-cx-bx;
+    var cy=3*p1y, by=3*(p2y-p1y)-cy, ay=1-cy-by;
+    function sx(t){return ((ax*t+bx)*t+cx)*t}
+    function sy(t){return ((ay*t+by)*t+cy)*t}
+    function dx(t){return (3*ax*t+2*bx)*t+cx}
+    return function(x){
+      if(x<=0) return 0;
+      if(x>=1) return 1;
+      var t=x,i,d,e;
+      for(i=0;i<10;i++){ e=sx(t)-x; if(Math.abs(e)<1e-6) break; d=dx(t); if(Math.abs(d)<1e-6) break; t-=e/d; }
+      if(t<0)t=0; if(t>1)t=1;
+      return sy(t);
+    };
+  }
+  var E = makeBezier(0.25,0.74,0.22,0.99);
+  function lerp(a,b,t){ return a+(b-a)*t }
+  function clamp01(v){ return v<0?0:(v>1?1:v) }
+
+  var p = 0;
+  var xStartL = 0, xStartR = 0;
+  var titleLine = document.getElementById("titleLine");
+
+  /* fit the assembled title to ~86vw so the spread choreography has room to read */
+  function fitTitle(){
+    titleLine.style.fontSize = "";               /* back to the CSS clamp (upper bound) */
+    var vw = document.documentElement.clientWidth;
+    var budget = 0.86 * vw;
+    var w = titleLine.scrollWidth;
+    if(w > budget){
+      var base = parseFloat(getComputedStyle(titleLine).fontSize);
+      titleLine.style.fontSize = Math.max(28, base * budget / w) + "px";
+    }
+  }
+
+  /* measure final (natural-flow) rects with transforms cleared — teleport/resize safe */
+  function measure(){
+    var prevL = wgL.style.transform, prevR = wgR.style.transform;
+    wgL.style.transform = "none"; wgR.style.transform = "none";
+    fitTitle();
+    var vw = document.documentElement.clientWidth;
+    var rL = wgL.getBoundingClientRect();
+    var rR = wgR.getBoundingClientRect();
+    /* left group's LEFT edge starts at 4vw; right group's RIGHT edge at 96vw */
+    xStartL = (0.04 * vw) - rL.left;
+    xStartR = (0.96 * vw) - rR.right;
+    wgL.style.transform = prevL; wgR.style.transform = prevR;
+  }
+
+  function computeP(){
+    var vh = window.innerHeight;
+    var range = track.offsetHeight - vh;
+    if(range <= 0){ return 1; }
+    var rect = track.getBoundingClientRect();
+    var scrolled = -rect.top;
+    return clamp01(scrolled / range);
+  }
+
+  function apply(){
+    p = computeP();
+    if(reduced.matches){
+      wgL.style.transform = "none";
+      wgR.style.transform = "none";
+      drift.style.transform = "none";
+      drift.style.opacity = "1";
+      subLabel.style.opacity = "1";
+      subLabel.style.transform = "none";
+      return;
+    }
+    /* 1) word-group assembly, p in [0, .55] */
+    var e = E(clamp01(p / 0.55));
+    wgL.style.transform = "translateX(" + lerp(xStartL, 0, e) + "px)";
+    wgR.style.transform = "translateX(" + lerp(xStartR, 0, e) + "px)";
+    /* 2) sub-label, p in [.45, .6] */
+    var s = clamp01((p - 0.45) / 0.15);
+    var se = E(s);
+    subLabel.style.opacity = String(se);
+    subLabel.style.transform = "translateY(" + lerp(12, 0, se) + "px)";
+    /* 3) hold [.55,.78]; release [.78,1]: drift up -6vh, opacity -> .9 */
+    var r = clamp01((p - 0.78) / 0.22);
+    var re = E(r);
+    var vh = window.innerHeight;
+    drift.style.transform = "translateY(" + (-0.06 * vh * re) + "px)";
+    drift.style.opacity = String(lerp(1, 0.9, re));
+  }
+
+  var ticking = false;
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){ ticking = false; apply(); });
+  }
+  function onResize(){ measure(); apply(); }
+
+  window.addEventListener("scroll", onScroll, {passive:true});
+  window.addEventListener("resize", onResize);
+  if(reduced.addEventListener) reduced.addEventListener("change", function(){ measure(); apply(); });
+
+  measure(); apply();
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ measure(); apply(); });
+  window.addEventListener("load", function(){ measure(); apply(); });
+
+  window.__SPREAD = { p: function(){ return p; }, converged: function(){ return p >= 0.55; } };
+})();
+</script>
+</body>
+</html>

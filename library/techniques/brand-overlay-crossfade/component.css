@@ -1,0 +1,27 @@
+/* ============================================================
+   BRAND-OVERLAY-CROSSFADE · component.css
+   A full-bleed image that arrives under a brand-colour wash which clears to 0.
+   The wash colour + image + any copy are composition; the engine drives the opacities.
+   ============================================================ */
+
+.boc-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+
+.boc-img { position: absolute; inset: 0; z-index: 1; will-change: opacity; }
+.boc-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* PUSH mode (desktop доводчик): a second full-bleed photo that slides up from below
+   over the first, with a magnetic overshoot, then settles. z-index above .boc-img,
+   below the wash/content. The engine drives translateY (transform only, GPU). */
+.boc-img--next { position: absolute; inset: 0; z-index: 1; will-change: transform;
+  transform: translateY(100%); }
+.boc-img--next img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* the brand-colour wash over the image; its opacity is animated to 0 by the engine.
+   Set its background to the brand/section colour (var --boc-wash or a value). */
+.boc-wash { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: var(--boc-wash, #16302a); will-change: opacity; }
+
+/* content above the wash (copy/title) */
+.boc-content { position: absolute; inset: 0; z-index: 3; }
+
+/* NO mix-blend / NO backdrop. opacity only on the wash + image. */

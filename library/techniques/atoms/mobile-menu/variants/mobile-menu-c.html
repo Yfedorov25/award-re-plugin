@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Verdure — Mobile Menu · C (designer's cut)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --conifer:#0e2018;
+    --deep:#173a27;
+    --mid:#356b2f;
+    --bright:#63a336;
+    --glow:#a4dd4b;
+    --glow2:#c7ef6c;
+    --cream:#ece5d4;
+    --cream-dim:rgba(236,229,212,.40);
+    --stem:#6f9a3e;
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:#0b1712;color:var(--cream);
+    font-family:'Manrope',system-ui,sans-serif;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  }
+  a{color:var(--glow);text-decoration:none;}
+  a:hover{color:var(--glow2);}
+
+  .atom{position:fixed;top:0;left:0;width:390px;height:844px;overflow:hidden;isolation:isolate;
+    transform-origin:top left;}
+
+  .grain{position:absolute;inset:0;background-image:var(--grain);background-size:180px 180px;
+    opacity:.06;mix-blend-mode:overlay;pointer-events:none;z-index:1;}
+
+  .hero{position:absolute;inset:0;z-index:2;}
+  .mosaic{position:absolute;inset:-14% -10%;display:grid;grid-template-columns:1fr 1fr;
+    grid-auto-rows:1fr;gap:5px;transform:rotate(-6deg) scale(1.16);}
+  .tile{position:relative;overflow:hidden;}
+  .tile::after{content:"";position:absolute;inset:0;background-image:var(--grain);
+    background-size:150px 150px;opacity:.10;mix-blend-mode:overlay;}
+  .t1{background:linear-gradient(150deg,#22483a,#0f2a22 70%);grid-row:span 3;}
+  .t2{background:linear-gradient(160deg,#1c3b2c,#274d33);grid-row:span 2;}
+  .t3{background:linear-gradient(200deg,#31573a,#16362a);grid-row:span 2;}
+  .t4{background:linear-gradient(140deg,#0e2c22,#20402f);grid-row:span 3;}
+  .t5{background:linear-gradient(170deg,#294f34,#13342a);grid-row:span 2;}
+  .t6{background:linear-gradient(190deg,#356b3a,#1a3c2b);grid-row:span 3;}
+  .hero-tint{position:absolute;inset:0;
+    background:
+      radial-gradient(120% 80% at 20% 0%,rgba(11,25,20,.15),rgba(11,25,20,.55) 90%),
+      linear-gradient(180deg,rgba(9,20,16,.30) 0%,rgba(9,20,16,.05) 40%,rgba(9,20,16,.72) 100%);}
+  .hero-copy{position:absolute;left:22px;top:38%;max-width:60%;font-family:'Manrope';
+    font-weight:300;font-size:15px;line-height:1.5;color:rgba(236,229,212,.92);
+    text-shadow:0 1px 12px rgba(0,0,0,.4);}
+  .hero-title{position:absolute;right:20px;bottom:104px;text-align:right;
+    font-family:'Cormorant Garamond';font-weight:500;font-size:52px;line-height:.96;
+    color:var(--cream);letter-spacing:.5px;text-shadow:0 2px 22px rgba(0,0,0,.35);}
+  .scroll-dot{position:absolute;left:22px;bottom:46px;width:46px;height:46px;border-radius:50%;
+    border:1px solid rgba(236,229,212,.5);display:grid;place-items:center;color:var(--cream);}
+  .scroll-dot svg{width:16px;height:16px;}
+
+  .menu{position:absolute;inset:0;z-index:3;visibility:hidden;
+    background:
+      radial-gradient(120% 62% at 82% 112%,var(--glow2) 0%,rgba(199,239,108,0) 52%),
+      radial-gradient(95% 55% at 104% -4%,rgba(41,96,88,.55) 0%,rgba(0,0,0,0) 58%),
+      linear-gradient(178deg,var(--conifer) 0%,var(--deep) 33%,var(--mid) 60%,var(--bright) 86%,var(--glow) 100%);}
+  .menu .grain{opacity:.05;z-index:6;}
+
+  .floor{position:absolute;left:-10%;right:-10%;bottom:0;height:36%;z-index:2;
+    background:
+      radial-gradient(70% 120% at 72% 118%,var(--glow2) 0%,rgba(199,239,108,.55) 26%,rgba(164,221,75,0) 62%),
+      radial-gradient(120% 90% at 50% 130%,rgba(164,221,75,.5),rgba(164,221,75,0) 70%);
+    filter:blur(2px);}
+
+  .sweep{position:absolute;inset:0;z-index:5;pointer-events:none;opacity:0;
+    background:linear-gradient(115deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.10) 50%,rgba(255,255,255,0) 62%);}
+
+  .list{position:absolute;left:22px;z-index:7;
+    top:calc(env(safe-area-inset-top,0px) + 96px);display:flex;flex-direction:column;}
+  .item-wrap{overflow:hidden;display:block;}
+  .item{display:block;background:none;border:0;cursor:pointer;font-family:'Cormorant Garamond';
+    font-weight:500;font-size:clamp(31px,8.6vw,37px);line-height:1;color:var(--cream);
+    padding:9px 2px;letter-spacing:.3px;position:relative;text-align:left;
+    min-height:44px;transition:color .5s ease,opacity .5s ease;}
+  .list.has-active .item{opacity:.42;}
+  .list.has-active .item.active{opacity:1;color:#fff;}
+  .item .mk{position:absolute;left:2px;bottom:8px;height:2px;width:0;background:var(--glow2);
+    box-shadow:0 0 12px var(--glow2),0 0 4px var(--glow2);border-radius:2px;}
+
+  .orchid{position:absolute;right:-6px;bottom:70px;width:264px;height:560px;z-index:4;
+    pointer-events:none;}
+  .orchid svg{width:100%;height:100%;display:block;overflow:visible;}
+
+  .header{position:absolute;top:0;left:0;right:0;z-index:20;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:calc(env(safe-area-inset-top,0px) + 18px) 18px 12px;}
+  .brand{display:flex;align-items:center;gap:9px;}
+  .brand .wm{font-family:'Cormorant Garamond';font-weight:600;font-size:25px;letter-spacing:.4px;
+    color:var(--cream);}
+  .brand .mono{width:22px;height:22px;color:var(--cream);opacity:.9;}
+  .nav-right{display:flex;align-items:center;gap:16px;}
+  .nav-caps{font-family:'Manrope';font-weight:400;font-size:10.5px;letter-spacing:2.4px;
+    color:var(--cream);opacity:.9;}
+  .icon-btn{width:22px;height:22px;color:var(--cream);display:grid;place-items:center;}
+  .icon-btn svg{width:20px;height:20px;}
+  .toggle{position:relative;width:44px;height:44px;border:0;background:none;cursor:pointer;
+    color:var(--cream);}
+  .toggle .ic{position:absolute;inset:0;display:grid;place-items:center;}
+  .toggle .burger span{display:block;width:22px;height:1.6px;background:currentColor;margin:3.4px 0;
+    border-radius:2px;}
+  .toggle .close svg{width:22px;height:22px;}
+</style>
+</head>
+<body>
+  <div class="atom" id="atom">
+    <div class="hero" id="hero">
+      <div class="mosaic">
+        <div class="tile t1"></div><div class="tile t2"></div>
+        <div class="tile t3"></div><div class="tile t4"></div>
+        <div class="tile t5"></div><div class="tile t6"></div>
+      </div>
+      <div class="hero-tint"></div>
+      <div class="grain"></div>
+      <p class="hero-copy">A private residence set within restored wetland gardens, minutes from the old-growth reserve.</p>
+      <h1 class="hero-title">Rooted in<br />Renewal</h1>
+      <div class="scroll-dot" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 4v15M6 13l6 6 6-6"/></svg>
+      </div>
+    </div>
+
+    <div class="menu" id="menu" aria-hidden="true">
+      <div class="floor" id="floor"></div>
+      <div class="sweep" id="sweep"></div>
+      <div class="grain"></div>
+
+      <nav class="list" id="list" aria-label="Sections">
+        <span class="item-wrap"><button class="item">Residences<span class="mk"></span></button></span>
+        <span class="item-wrap"><button class="item">Design<span class="mk"></span></button></span>
+        <span class="item-wrap"><button class="item">Location<span class="mk"></span></button></span>
+        <span class="item-wrap"><button class="item">Amenities<span class="mk"></span></button></span>
+        <span class="item-wrap"><button class="item">Gallery<span class="mk"></span></button></span>
+        <span class="item-wrap"><button class="item">About<span class="mk"></span></button></span>
+      </nav>
+
+      <div class="orchid" id="orchid">
+        <svg viewBox="0 0 264 560" id="orchidSvg" aria-hidden="true">
+          <defs>
+            <radialGradient id="petal" cx="42%" cy="34%" r="72%">
+              <stop offset="0%" stop-color="#fdf4a8"/>
+              <stop offset="46%" stop-color="#eed961"/>
+              <stop offset="82%" stop-color="#ceb63f"/>
+              <stop offset="100%" stop-color="#a88f31" stop-opacity=".85"/>
+            </radialGradient>
+            <radialGradient id="center" cx="50%" cy="50%" r="60%">
+              <stop offset="0%" stop-color="#e6a53b"/>
+              <stop offset="100%" stop-color="#9c6a26"/>
+            </radialGradient>
+            <radialGradient id="aura" cx="50%" cy="46%" r="55%">
+              <stop offset="0%" stop-color="#efe07a" stop-opacity=".40"/>
+              <stop offset="52%" stop-color="#c9e070" stop-opacity=".15"/>
+              <stop offset="100%" stop-color="#a4dd4b" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="bud" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#d8e084"/>
+              <stop offset="100%" stop-color="#83a53f"/>
+            </linearGradient>
+            <linearGradient id="stemG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7fa646"/>
+              <stop offset="100%" stop-color="#557a33"/>
+            </linearGradient>
+            <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity=".05"/>
+              <stop offset="28%" stop-color="#ffffff" stop-opacity=".20"/>
+              <stop offset="55%" stop-color="#dfeecd" stop-opacity=".06"/>
+              <stop offset="100%" stop-color="#ffffff" stop-opacity=".12"/>
+            </linearGradient>
+            <radialGradient id="shadowG" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#0b2412" stop-opacity=".55"/>
+              <stop offset="70%" stop-color="#0b2412" stop-opacity=".18"/>
+              <stop offset="100%" stop-color="#0b2412" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="0.5"/>
+            </filter>
+            <filter id="softsh" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="7"/>
+            </filter>
+          </defs>
+
+          <g id="floorShadow">
+            <ellipse cx="138" cy="524" rx="152" ry="15" fill="url(#shadowG)" filter="url(#softsh)"/>
+            <ellipse cx="162" cy="527" rx="76" ry="8" fill="url(#shadowG)" filter="url(#softsh)"/>
+          </g>
+
+          <ellipse id="aura" cx="180" cy="352" rx="86" ry="130" fill="url(#aura)"/>
+
+          <path class="leaf" d="M176 466 C154 450 136 454 127 472 C149 476 168 482 176 466 Z" fill="url(#stemG)" opacity=".85"/>
+          <path class="leaf" d="M176 460 C200 440 222 442 230 460 C207 468 189 476 176 460 Z" fill="url(#stemG)" opacity=".75"/>
+
+          <path id="stem" d="M176 508 L176 474 C172 400 182 330 184 262 C186 210 180 178 179 150"
+                fill="none" stroke="url(#stemG)" stroke-width="3.4" stroke-linecap="round"/>
+
+          <g id="florets" filter="url(#soft)"></g>
+
+          <g id="vase">
+            <path d="M163 460 C162 460 161 462 161 466 L160 520 C160 530 167 536 176 536 C185 536 192 530 192 520 L191 466 C191 462 190 460 189 460 Z"
+                  fill="url(#glass)" stroke="rgba(255,255,255,.26)" stroke-width="1"/>
+            <ellipse cx="176" cy="460" rx="14.5" ry="3.6" fill="none" stroke="rgba(255,255,255,.34)" stroke-width="1"/>
+            <ellipse cx="176" cy="500" rx="12" ry="3" fill="rgba(170,210,150,.16)"/>
+            <path d="M167 466 C164 484 165 512 172 530" fill="none" stroke="rgba(255,255,255,.32)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M186 468 C189 486 188 510 183 528" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <header class="header">
+      <div class="brand">
+        <span class="mono" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+            <circle cx="12" cy="12" r="10.4"/>
+            <path d="M8.5 14.5c1.6 1.8 5.4 1.8 7 0-1.2 .3-2.6-.4-3.5-1.6-.9 1.2-2.3 1.9-3.5 1.6Z" fill="currentColor" stroke="none"/>
+            <path d="M12 12.9c-1.4-1-2-2.8-1.3-4.4.9 1 2.7 1 3.6 2.2.5.8.4 1.6-.3 2.2" />
+          </svg>
+        </span>
+        <span class="wm">Verdure</span>
+      </div>
+      <nav class="nav-right">
+        <span class="nav-caps">RESIDENCES</span>
+        <span class="icon-btn" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 20.5S3.5 14.7 3.5 8.9C3.5 6.2 5.6 4.2 8.1 4.2c1.7 0 3.1.9 3.9 2.3.8-1.4 2.2-2.3 3.9-2.3 2.5 0 4.6 2 4.6 4.7 0 5.8-8.5 11.6-8.5 11.6Z"/></svg>
+        </span>
+        <button class="toggle" id="toggle" aria-label="Open menu" aria-expanded="false">
+          <span class="ic burger" id="icBurger"><span class="burger"><span></span><span></span><span></span></span></span>
+          <span class="ic close" id="icClose" style="opacity:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </span>
+        </button>
+      </nav>
+    </header>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+  <script>
+  (function(){
+    "use strict";
+    var SVGNS="http://www.w3.org/2000/svg";
+    function el(tag,attrs){var n=document.createElementNS(SVGNS,tag);for(var k in attrs)n.setAttribute(k,attrs[k]);return n;}
+
+    function buildFlorets(){
+      var g=document.getElementById("florets");
+      var blooms=[
+        [168,432,1.18],[196,414,1.02],[150,406,1.0],[186,384,1.12],[158,372,.96],
+        [200,356,.92],[168,346,1.04],[150,330,.86],[190,318,.94],[166,300,.86],
+        [150,284,.78],[184,272,.8]
+      ];
+      blooms.forEach(function(b){
+        var outer=el("g",{transform:"translate("+b[0]+" "+b[1]+") scale("+b[2]+")"});
+        var inner=el("g",{class:"blossom"});
+        for(var i=0;i<5;i++){
+          var a=i*72-90;
+          var p=el("ellipse",{cx:0,cy:-10,rx:7.4,ry:11.5,fill:"url(#petal)",
+            transform:"rotate("+a+")"});
+          inner.appendChild(p);
+        }
+        inner.appendChild(el("circle",{cx:0,cy:0,r:4.6,fill:"url(#center)"}));
+        inner.appendChild(el("circle",{cx:-1.4,cy:-1.4,r:1.4,fill:"#f6d98e",opacity:".8"}));
+        outer.appendChild(inner);
+        g.appendChild(outer);
+      });
+      var buds=[[188,244,.8],[168,232,.72],[196,214,.66],[176,200,.6],[188,182,.52],[178,166,.44]];
+      buds.forEach(function(b){
+        var outer=el("g",{transform:"translate("+b[0]+" "+b[1]+") scale("+b[2]+")"});
+        var inner=el("g",{class:"bud"});
+        inner.appendChild(el("path",{d:"M0 -13 C7 -9 7 4 0 9 C-7 4 -7 -9 0 -13 Z",fill:"url(#bud)"}));
+        inner.appendChild(el("path",{d:"M0 -11 L0 8",stroke:"#6f9a3e","stroke-width":.8,opacity:.5}));
+        outer.appendChild(inner);
+        g.appendChild(outer);
+      });
+    }
+
+    function init(){
+      buildFlorets();
+
+      var lenis=null;
+      try{
+        lenis=new Lenis({duration:1.05,smoothWheel:true});
+        function raf(t){lenis.raf(t);requestAnimationFrame(raf);}
+        requestAnimationFrame(raf);
+        lenis.stop(); lenis.start();
+      }catch(e){}
+
+      if(window.CustomEase){CustomEase.create("silk","M0,0 C0.2,1 0.3,1 1,1");}
+      var EASE=window.CustomEase?"silk":"power3.out";
+
+      var menu=document.getElementById("menu");
+      var floor=document.getElementById("floor");
+      var orchid=document.getElementById("orchid");
+      var items=Array.prototype.slice.call(document.querySelectorAll(".item"));
+      var list=document.getElementById("list");
+      var toggle=document.getElementById("toggle");
+      var icBurger=document.getElementById("icBurger");
+      var icClose=document.getElementById("icClose");
+      var floorShadow=document.getElementById("floorShadow");
+
+      var sweep=document.getElementById("sweep");
+      var orchidSway=null;
+
+      gsap.set(menu,{autoAlpha:0,scale:1.06,transformOrigin:"50% 42%"});
+      gsap.set(items,{yPercent:120,opacity:0});
+      gsap.set(orchid,{autoAlpha:0,y:26,scale:.9,transformOrigin:"60% 100%"});
+      gsap.set(floorShadow,{autoAlpha:0});
+      gsap.set(floor,{autoAlpha:0});
+      gsap.set(sweep,{autoAlpha:0,xPercent:-55});
+
+      var isOpen=false;
+
+      function startSway(){
+        if(orchidSway){orchidSway.play();return;}
+        orchidSway=gsap.to(orchid,{rotation:1.7,duration:4.4,transformOrigin:"58% 100%",
+          yoyo:true,repeat:-1,ease:"sine.inOut"});
+      }
+      function stopSway(){
+        if(orchidSway)orchidSway.pause();
+        gsap.to(orchid,{rotation:0,duration:.6,ease:"power2.out"});
+      }
+
+      var tl=gsap.timeline({paused:true,
+        onStart:function(){menu.setAttribute("aria-hidden","false");if(lenis)lenis.stop();},
+        onComplete:function(){startSway();},
+        onReverseComplete:function(){menu.setAttribute("aria-hidden","true");if(lenis)lenis.start();}
+      });
+      tl.to(menu,{autoAlpha:1,scale:1,duration:.9,ease:EASE},0)
+        .to(floor,{autoAlpha:1,duration:.7,ease:"power2.out"},.12)
+        .to(orchid,{autoAlpha:1,y:0,scale:1,duration:.95,ease:"power3.out"},.24)
+        .to(floorShadow,{autoAlpha:1,duration:.8,ease:"power2.out"},.4)
+        .to(items,{yPercent:0,opacity:1,duration:.66,stagger:.07,ease:"power3.out"},.3)
+        .to(sweep,{xPercent:70,duration:.95,ease:"power1.inOut"},.16)
+        .to(sweep,{autoAlpha:.75,duration:.4,ease:"power1.in"},.16)
+        .to(sweep,{autoAlpha:0,duration:.55,ease:"power1.out"},.56);
+
+      function openMenu(){
+        if(isOpen)return;isOpen=true;
+        toggle.setAttribute("aria-label","Close menu");
+        toggle.setAttribute("aria-expanded","true");
+        gsap.to(icBurger,{autoAlpha:0,duration:.2});
+        gsap.to(icClose,{autoAlpha:1,duration:.25,delay:.1});
+        tl.play();
+      }
+      function closeMenu(){
+        if(!isOpen)return;isOpen=false;
+        toggle.setAttribute("aria-label","Open menu");
+        toggle.setAttribute("aria-expanded","false");
+        gsap.to(icClose,{autoAlpha:0,duration:.2});
+        gsap.to(icBurger,{autoAlpha:1,duration:.25,delay:.1});
+        stopSway();
+        tl.reverse();
+      }
+      toggle.addEventListener("click",function(){isOpen?closeMenu():openMenu();});
+
+      items.forEach(function(btn){
+        btn.addEventListener("click",function(){
+          list.classList.add("has-active");
+          items.forEach(function(b){b.classList.remove("active");});
+          btn.classList.add("active");
+          var mk=btn.querySelector(".mk");
+          gsap.to(".item .mk",{width:0,duration:.3,ease:"power2.out"});
+          gsap.to(mk,{width:Math.min(btn.scrollWidth-4,150),duration:.5,ease:"power3.out"});
+          console.log("[menu] selected:",btn.textContent.trim());
+        });
+      });
+
+      window.openMenu=openMenu;
+      window.closeMenu=closeMenu;
+      window.__ATOM_OK__=true;
+    }
+
+    if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+    else init();
+  })();
+  </script>
+</body>
+</html>

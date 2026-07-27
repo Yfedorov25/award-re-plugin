@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Springs · Where Change Becomes Art · scroll-scale-morph-video</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--spr-green,#16322a);font-family:var(--spr-sans);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  :root{--spr-green:#16322a;--spr-green2:#0e241d;}
+  .pad{height:40vh;}
+  .pinwrap{position:relative;height:420vh;background:var(--spr-green);}
+  .stage{position:sticky;top:0;height:100dvh;min-height:640px;overflow:hidden;background:var(--spr-green);}
+  /* faint bare-branch line-art left (live has this) */
+  .branch{position:absolute;left:2%;top:26%;width:22%;height:60%;opacity:.5;z-index:1;pointer-events:none;}
+  .branch svg{width:100%;height:100%;}
+  .hdr{position:absolute;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:15px 20px 12px;color:var(--spr-cream);}
+  .hdr .wm{font-family:var(--spr-serif);font-size:23px;letter-spacing:-.6px;line-height:1;}
+  .hdr .r{display:flex;gap:15px;align-items:center;}
+  /* title behind the card, upper area */
+  .title{position:absolute;left:22px;right:22px;top:15%;z-index:2;font-family:var(--spr-serif);font-weight:400;
+    font-size:clamp(48px,14vw,64px);line-height:1.0;letter-spacing:-1.6px;color:var(--spr-cream);}
+  /* body ghosted, lower */
+  .body{position:absolute;left:24px;right:24px;bottom:8%;z-index:2;font-family:var(--spr-sans);font-size:18px;line-height:25px;
+    letter-spacing:-.35px;color:var(--spr-cream);opacity:.9;max-width:34ch;}
+  /* the morphing media card — scroll scrubs its size from landscape thumb → full-bleed */
+  .card{position:absolute;z-index:20;overflow:hidden;background:#0b201d;border-radius:2px;
+    left:50%;top:50%;transform:translate(-50%,-50%);
+    box-shadow:0 30px 70px rgba(0,0,0,.4);will-change:width,height;}
+  .card img, .card video{width:100%;height:100%;object-fit:cover;display:block;}
+</style>
+</head>
+<body>
+<div class="pad"></div>
+<div class="pinwrap" data-pin>
+  <div class="stage" data-stage>
+    <div class="branch">
+      <svg viewBox="0 0 100 300" fill="none" stroke="rgba(180,200,175,.5)" stroke-width="0.8">
+        <path d="M40 300 Q38 180 44 90 Q46 40 42 0 M44 90 Q60 78 78 60 M42 150 Q26 138 8 120 M43 60 Q58 52 70 36"/>
+      </svg>
+    </div>
+    <header class="hdr">
+      <span class="wm">Springs</span>
+      <span class="r">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 20s-6.8-4.2-6.8-9.1C5.2 8.1 7.1 6.3 9.3 6.3c1.5 0 2.3.8 2.7 1.4.4-.6 1.2-1.4 2.7-1.4 2.2 0 4.1 1.8 4.1 4.6C18.8 15.8 12 20 12 20z"/></svg>
+        <span style="display:flex;flex-direction:column;gap:5px;"><span style="display:block;width:21px;height:1.5px;background:currentColor;"></span><span style="display:block;width:21px;height:1.5px;background:currentColor;"></span></span>
+      </span>
+    </header>
+
+    <h2 class="title">Where Change<br>Becomes Art</h2>
+
+    <div class="card" data-card>
+      <!-- looping video (image-to-video from our swim render), decoupled from scroll -->
+      <video src="assets/swim.mp4" autoplay muted loop playsinline poster="assets/swim.webp"></video>
+    </div>
+
+    <p class="body">The capital feels smaller when you look at it from a distance and even slightly from above. Simultaneously, it grows closer when you are heading to a cafe, to a fitness center, or going for a walk with your family. What will you choose today?</p>
+  </div>
+</div>
+<div class="pad"></div>
+
+<script>
+(function(){
+  window.__PAGE_OK__=false;
+  var pin=document.querySelector('[data-pin]');
+  var card=document.querySelector('[data-card]');
+  var title=document.querySelector('.title');
+  var bodyEl=document.querySelector('.body');
+  var reduced=false; try{reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){}
+  function clamp01(x){return x<0?0:x>1?1:x;}
+  var vw=function(){return document.querySelector('[data-stage]').clientWidth;};
+  var vh=function(){return document.querySelector('[data-stage]').clientHeight;};
+
+  // scale-morph keyframes (fractions of viewport). scroll p 0..1 scrubs card w/h through them.
+  // entry: landscape thumb (~66% w, ~1.45:1) → square (~78% w) → portrait (~86% w) → full-bleed (100%).
+  var KF=[
+    {p:0.00, w:0.66, ar:1.45},   // landscape thumb
+    {p:0.34, w:0.80, ar:1.10},   // squarish
+    {p:0.64, w:0.90, ar:0.82},   // portrait
+    {p:1.00, w:1.00, ar:0.462}   // full-bleed (390x844 ratio)
+  ];
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function morph(p){
+    var W=vw(), H=vh();
+    // find segment
+    var i=0; while(i<KF.length-2 && p>KF[i+1].p) i++;
+    var a=KF[i], b=KF[i+1];
+    var t=(p-a.p)/(b.p-a.p); t=Math.max(0,Math.min(1,t));
+    var wFrac=lerp(a.w,b.w,t);
+    var ar=lerp(a.ar,b.ar,t); // width/height
+    var cw=W*wFrac;
+    var ch=cw/ar;
+    ch=Math.min(ch, H);           // never taller than viewport
+    card.style.width=cw+'px';
+    card.style.height=ch+'px';
+    card.style.borderRadius = wFrac>0.985 ? '0px' : '2px';
+    // 🔴 title + body DISSOLVE (opacity 1→0) coupled to card growth (live: fade as card grows).
+    // title fades over p 0.06→0.42 (front-loaded — gone by the square stage); body a touch later 0.10→0.52.
+    var tOp=1-clamp01((p-0.06)/(0.42-0.06));
+    var bOp=1-clamp01((p-0.10)/(0.52-0.10));
+    title.style.opacity=tOp.toFixed(3);
+    bodyEl.style.opacity=(bOp*0.9).toFixed(3);
+  }
+  function onScroll(){
+    var r=pin.getBoundingClientRect();
+    var total=pin.offsetHeight - window.innerHeight;
+    var scrolled=Math.min(Math.max(-r.top,0),total);
+    var p=total>0?scrolled/total:0;
+    morph(p);
+  }
+  if(reduced){ morph(1); }
+  else{
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    onScroll();
+  }
+  // S55: гейт-хук. morph(p) УЖЕ чиста функція p (читає лише розміри стейджа, пише
+  // width/height/radius/opacity), тому render це вона сама, а не окрема копія закону.
+  // Копія розійшлась би з тим, що шипиться, і гейт судив би не той код.
+  window.render = morph;
+  window.__PAGE_OK__=true;
+})();
+</script>
+</body>
+</html>

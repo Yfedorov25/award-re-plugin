@@ -1,0 +1,24 @@
+{
+  "id": "raster-tile-reveal",
+  "title": "Raster tile reveal (Springs aerial-map assemble)",
+  "level": "L2-molecule",
+  "batch": "D (#11/17)",
+  "source": "springs.estate l-gallery (section-entry aerial map). Engine = library/components/raster-tile-reveal (proven, owns_pin:false, owns_scroll:false, pure set(p); a frozen mosaic of plain <img> tiles, decode-guarded staggered reveal + real POI dots).",
+  "engine": "A frozen mosaic of raster map tiles that force-decode up front, then fade + scale in tile-by-tile along a diagonal stagger; then real POI dots drop onto their spots. Pure set(p) scrub of the whole reveal: tiles finish by p~0.62, dots land by p=1 (reversible).",
+  "dual_platform": true,
+  "differs": "Same tile-reveal mechanic + same pure set(p); BOTH platforms scroll-pin the reveal (scroll-scrub in a pin). Difference is LAYOUT (mobile full-bleed single-column sticky mosaic; desktop centred max-width mosaic) + pin-length, NOT scroll-vs-time. Springs mobile pins the section and scrubs the reveal by scroll (T-PIN-RUNSCENE), same as desktop.",
+  "desktop": { "driver": "scrollReveal — set(p) = scroll progress across the pin span (mosaic pinned).", "knobs": ["tiles","pois","cols","rows","stagger","scaleFrom"] },
+  "mobile": { "driver": "scrollReveal — same set(p) = scroll progress across the pin span; mosaic sticks full-bleed single-column.", "knobs": ["tiles","pois","cols","rows","stagger","scaleFrom"] },
+  "knobs": {
+    "tiles": { "what": "[{src,col,row}] — the mosaic tiles (real baked satellite tiles in production; one render sliced via object-position in the lab)." },
+    "pois": { "what": "[{x,y,label}] — real OSM POIs in % of the mosaic box; dots drop in the last 0.38 of the timeline." },
+    "cols": { "default": 3, "what": "mosaic columns." },
+    "rows": { "default": 4, "what": "mosaic rows." },
+    "stagger": { "default": 0.04, "what": "per-tile diagonal (row+col) stagger of the reveal." },
+    "scaleFrom": { "default": 1.04, "what": "tile img start scale (settles to 1)." }
+  },
+  "engine_patch": "NONE. The engine has NO narrow-guard (no max-width matchMedia static-lock), so no forceMotion patch is needed. The wrapper passes auto:false so the engine's own ScrollTrigger one-shot does NOT fire and steal control — the wrapper owns the scroll-pin driver on both platforms and drives set(p). engine.js is a verbatim copy of library/components/raster-tile-reveal/component.js.",
+  "entry": "RasterTileRevealDual.init(target, opts). Load engine.js THEN component.js. target = .rtr-stage (the .rtr-mosaic + tiles + dots are injected). Both platforms wrap in .pin-wrap for the pin; the wrapper adds .rtr-pinned to the stage.",
+  "law": "transform (scale + translateY) + opacity + filter only; frozen mosaic (no pan/zoom engine); decode-guard before paint; GPU; NO width/height/top/left, NO mix-blend, NO backdrop, NO WebGL, NO canvas. reduced-motion → static (fully shown). Both platforms scroll-pin (MOBILE=PINNED-SCROLL law).",
+  "files": ["component.js","engine.js","component.css","img/photo.webp","stage.html","demo.html","meta.json","README.md"]
+}

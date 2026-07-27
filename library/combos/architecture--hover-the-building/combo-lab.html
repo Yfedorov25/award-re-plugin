@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--hover-the-building / Будинок реагує</title>
+<!--
+  SECTION VARIANT · architecture--hover-the-building   (role: architecture · status: candidate)
+  ----------------------------------------------------------------------------
+  Title: "Будинок реагує". MODE: pure INTERACTIVE (hover / click / focus). NO scroll pin.
+  THE IDEA: you hover the BUILDING ITSELF. No number markers stuck on the wall (that is the
+  move that failed). Invisible perspective zones are hand-traced over the REAL parts of the
+  day-34 facade (roof parapet / upper glazing / lower terrace glazing / entrance / plinth).
+  On hover of a zone: the WHOLE render dims + softly blurs, while THAT element stays crisp and
+  lit IN PLACE, and a label grows FROM the element naming it + a one-line material spec.
+
+  CORRESPONDENCE GUARANTEE (the hard lesson). The lit, crisp region is NOT a separate crop and
+  NOT a duplicate image. It is a SECOND copy of the SAME render, clipped to the hovered zone's
+  own polygon via an SVG clipPath built from the very points the atom highlights. So hovering
+  the ROOF lights the ROOF's own pixels and the label says ДАХ; hovering the GLAZING lights the
+  GLAZING's own pixels and the label says СКЛІННЯ. The lit element is literally that element of
+  the building, by construction. There is no way for a marker to reveal the wrong part.
+
+  THE ATOM · clean-floor-hover-select is the perspective-LOCKED engine: one <svg> over the
+  <img>, viewBox LOCKED to the render's intrinsic 1920x1080 px + preserveAspectRatio MATCHING
+  the img fit (contain / meet), so SVG user-units == image pixels at every screen size and the
+  highlight RIDES the building instead of floating. Its bands[] are RE-AIMED here from floors to
+  ARCHITECTURAL ELEMENTS, each hand-traced over day-34 by a PIL luminance scan of the render:
+    ДАХ     , white roof parapet band      y 90..178   (cap reads 252,251,252)
+    СКЛІННЯ , upper-storey glazing strip    y 180..426  (dark glass ~52..63)
+    ТЕРАСА  , lower glazing + balconies      y 478..712  (windows + glass balustrade)
+    ВХІД    , recessed central entrance      x 868..986, y 488..836 (the dark central recess)
+    ЦОКОЛЬ  , grey plinth base wall           y 712..836  (mid grey ~160, sides of the entrance)
+  The atom owns NO ScrollTrigger; it is a pointer/GSAP-tween engine. The interaction IS the
+  section -> pinOwner:'none', expectPins:0.
+
+  WHY THIS LANDS (award lineage). Silver Pinewood #architecture is a perspective-locked SELECT
+  built as a hand-traced inline-SVG overlay, no map provider, no WebGL, where the highlight obeys
+  the building's geometry. EVER visual-search Level 1 is the razor-clean per-element pick our
+  smarts lacked. Here that grammar is turned on a SINGLE house and inverted into a REVEAL: not
+  "pick a flat", but "the building answers when you point at it", each real element steps out of
+  a dimmed, softened whole and names its own material. The whole render stays the hero.
+
+  MOTION: dim/blur is a CSS filter transition on the base (.34s, content-class). The lit clip is
+  driven by the atom hover + a GSAP scale-in label that grows FROM the element's anchor (.42s,
+  air ease). SVG fill/stroke for the affordance edge. transform / opacity / clip-path / filter
+  ONLY. NO WebGL. NO mix-blend. NO backdrop-filter. will-change cleared after the label settles.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="renders/day-34.webp">
+
+<!-- cited atom's component.css + the shared rails -->
+<link rel="stylesheet" href="../../components/clean-floor-hover-select/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ============ variant SKIN only (scaffold owns the rails) ============ */
+
+  :root {
+    --ease-air: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --t-ui: .22s;                 /* affordance edge flick (block 4) */
+    --t-dim: .34s;                /* the base dim + blur (content-class) */
+    --t-label: .42s;             /* the label grow (block 4) */
+    --hair: rgba(220, 197, 183, .24);
+    --accent: var(--combo-accent);          /* terracotta #b56a4a */
+    --accent-deep: #8c3f2a;
+  }
+
+  /* the stage is a dark gallery field; the render is centred + letterboxed (contain),
+     so the WHOLE facade is always the hero, never cover-cropped. */
+  #combo { background: radial-gradient(120% 92% at 50% 8%, #1d1a15 0%, var(--combo-bg) 74%); }
+
+  /* the atom's stage fills the combo box; re-skinned to the warm-dark terracotta system (block 2) */
+  .cfh-stage {
+    position: absolute; inset: 0; min-height: 0; background: transparent;
+    --cfh-bg: transparent;
+    --cfh-ink: var(--combo-ink);
+    --cfh-accent: var(--accent);
+    --cfh-accent-deep: var(--accent-deep);
+    --cfh-card-bg: var(--combo-cream);
+    --cfh-card-ink: #2a2521;
+    --cfh-fill-on: .14;                 /* a quiet wash; the LIT CLIP does the heavy lifting */
+    --cfh-serif: var(--combo-serif);
+    --cfh-sans: var(--combo-sans);
+    --cfh-card-w: 0px;                  /* atom card is unused here; the label is bespoke */
+    --cfh-card-x: 0;
+  }
+  .cfh-card { display: none; }          /* we drive a bespoke label that grows FROM the element */
+
+  /* the render surface holds the base render + a dimming scrim + a lit clip + the overlay svg.
+     PERF (the gate-B fix): the "rest recedes" is a single OPACITY fade of a flat dark scrim
+     (GPU-composited, one cheap layer), NOT an animated filter()/blur() over the full 1920px
+     frame (which forces a per-frame blur recompute and halved the framerate). transform/opacity
+     only on the hot path -> the base holds 60fps under rapid cross-element hover sweeps. */
+  .htb-base, .htb-lit {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; display: block;
+  }
+  /* the sharp building: always visible; the scrim above it darkens the un-chosen rest */
+  .htb-base {
+    z-index: 1;
+    filter: saturate(.98) contrast(1.02);
+  }
+  /* the dimming scrim: a flat warm-dark wash, fades in on hover (opacity ONLY). it sits ABOVE
+     the base and BELOW the lit clip, so the chosen element (lit) stays bright while the rest
+     of the facade reads as receded into shadow. matches the gallery field tone. */
+  .htb-scrim {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: radial-gradient(120% 100% at 50% 42%, rgba(13,11,9,.46) 0%, rgba(13,11,9,.66) 100%);
+    opacity: 0; transition: opacity var(--t-dim) ease;
+    will-change: opacity;
+  }
+  .htb-render.is-armed .htb-scrim { opacity: 1; }
+
+  /* the lit copy is hidden until a zone is hovered; clip-path is rebuilt to that zone's polygon.
+     it sits above the scrim, a touch brighter + crisper, so the chosen element steps forward. */
+  .htb-lit {
+    z-index: 3; opacity: 0;
+    clip-path: inset(100% 100% 100% 100%);   /* nothing shown at rest */
+    filter: saturate(1.08) contrast(1.06) brightness(1.06);
+    transition: opacity var(--t-ui) ease;
+    will-change: opacity;
+  }
+  .htb-render.is-armed .htb-lit { opacity: 1; }
+
+  /* the atom's locked-viewBox overlay sits on top; its bands are the invisible hit zones +
+     a crisp terracotta edge that traces the lit element (the affordance, riding the building). */
+  .cfh-floors { z-index: 4; }
+  .cfh-band {
+    stroke-width: 1.6; stroke-opacity: 0;
+    transition: fill-opacity var(--t-ui) ease, stroke-opacity var(--t-ui) ease;
+  }
+  .cfh-band.is-hover { stroke-opacity: 1; }
+
+  /* ---- the bespoke LABEL that grows FROM the hovered element ---- */
+  .htb-label {
+    position: absolute; z-index: 6; left: 0; top: 0; pointer-events: none;
+    width: clamp(190px, 19vw, 260px);
+    padding: .95rem 1.15rem 1.05rem;
+    background: var(--combo-cream); color: #2a2521; border-radius: 2px;
+    box-shadow: 0 26px 64px -30px rgba(0,0,0,.72);
+    opacity: 0; transform-origin: left center;
+    will-change: transform, opacity;
+  }
+  /* a hairline stem from the element edge to the label (grows with it) */
+  .htb-label::before {
+    content: ''; position: absolute; left: -22px; top: 50%; width: 22px; height: 1px;
+    background: var(--accent); transform: scaleX(0); transform-origin: right center;
+  }
+  .htb-label::after {  /* a small terracotta node where the stem meets the element */
+    content: ''; position: absolute; left: -25px; top: 50%; width: 6px; height: 6px;
+    margin-top: -3px; border-radius: 50%; background: var(--accent); opacity: 0;
+  }
+  .htb-label__name {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.5rem, 2.3vw, 2.1rem); line-height: 1; letter-spacing: -.02em;
+  }
+  .htb-label__tag {
+    font: 600 .58rem/1 var(--combo-sans); letter-spacing: .22em; text-transform: uppercase;
+    color: var(--accent-deep); opacity: .8; margin-bottom: .5rem;
+  }
+  .htb-label__spec {
+    font: 400 .8rem/1.5 var(--combo-sans); color: rgba(42,37,33,.78); margin-top: .55rem;
+  }
+
+  /* ---- section chrome, generous air (block 3) ---- */
+  .htb-eyebrow {
+    position: absolute; left: clamp(20px,5vw,80px); top: clamp(72px,11vh,180px); z-index: 5;
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .24em; text-transform: uppercase;
+    color: var(--accent); margin: 0;
+  }
+  .htb-title {
+    position: absolute; left: clamp(20px,5vw,80px); top: calc(clamp(72px,11vh,180px) + 1.5rem); z-index: 5;
+    margin: 0; max-width: 8ch;
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(40px, 7vw, 116px); line-height: .9; letter-spacing: -.03em;
+    color: var(--combo-ink);
+    /* a soft scrim so the title reads over the bright render top, with the building still hero */
+    text-shadow: 0 2px 30px rgba(0,0,0,.45);
+  }
+  .htb-hint {
+    position: absolute; left: clamp(20px,5vw,80px); bottom: clamp(72px,11vh,180px); z-index: 5;
+    margin: 0; max-width: 26ch;
+    font: 400 clamp(.82rem,1vw,.95rem)/1.62 var(--combo-sans); color: rgba(244,239,230,.6);
+  }
+  .htb-hint__dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent); margin-right: .55rem; transform: translateY(-1px); }
+
+  /* the right RAIL index of the five elements; mirrors + drives the zones (block 5 cross-feedback) */
+  .htb-rail {
+    position: absolute; right: clamp(20px,5vw,80px); top: 50%; transform: translateY(-50%); z-index: 5;
+    display: flex; flex-direction: column; gap: 0; text-align: right;
+  }
+  .htb-tick {
+    display: grid; grid-template-columns: auto 30px; align-items: center; gap: .9rem;
+    padding: .72rem 0; cursor: pointer;
+  }
+  .htb-tick__lab {
+    font: 600 .64rem/1 var(--combo-sans); letter-spacing: .18em; text-transform: uppercase;
+    color: rgba(244,239,230,.5); transition: color var(--t-ui) ease;
+  }
+  .htb-tick__line { height: 1px; background: var(--hair); transform-origin: right;
+    transition: background-color var(--t-ui) ease, transform var(--t-ui) ease; }
+  .htb-tick.is-on .htb-tick__lab { color: var(--combo-ink); }
+  .htb-tick.is-on .htb-tick__line { background: var(--accent); transform: scaleX(1.7); }
+
+  /* reduced-motion: kill transitions; the building stays a clean full visual */
+  @media (prefers-reduced-motion: reduce) {
+    .htb-base, .htb-lit, .cfh-band, .htb-tick__lab, .htb-tick__line, .htb-label { transition: none !important; }
+  }
+
+  /* ============ mobile (<=820px): a bespoke, Ukrainian-only experience ============
+     The atom drops to its built-in static fallback and AUTO-GENERATES a button list whose
+     number badge is the engine's internal key (roof/glaze/...). That is developer-key leakage
+     into user-facing copy, so we SUPPRESS the atom's list entirely and render our own panel
+     whose only visible strings are the Ukrainian names + specs. We do NOT touch the atom. */
+  .cfh-static .cfh-list { display: none !important; }       /* kill the dev-key list at the source */
+  .cfh-static ~ .htb-rail, .cfh-static ~ .htb-hint { display: none; }
+
+  .htb-mobile { display: none; }
+  @media (max-width: 820px) {
+    .htb-rail, .htb-label, .htb-hint { display: none; }
+    /* on mobile the render is letterboxed into the upper area; the panel reads below it */
+    .cfh-stage { min-height: 100svh; }
+    .htb-render { bottom: auto; height: 56svh; }
+    .htb-title { font-size: clamp(34px, 11vw, 64px); }
+    .htb-eyebrow { top: clamp(20px, 5vh, 40px); }
+
+    .htb-mobile {
+      display: block; position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
+      padding: clamp(16px,5vw,28px) clamp(20px,5vw,32px) clamp(24px,6vh,40px);
+      background: linear-gradient(180deg, rgba(15,13,11,0) 0%, var(--combo-bg) 22%);
+    }
+    .htb-mlist { list-style: none; margin: 0; padding: 0; }
+    .htb-mrow {
+      display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: .15rem 1rem;
+      padding: 1rem 0; border-top: 1px solid var(--hair); min-height: 44px;
+    }
+    .htb-mrow:first-child { border-top: 0; }
+    .htb-mname {
+      grid-column: 1; font-family: var(--combo-serif); font-weight: 300;
+      font-size: clamp(1.5rem, 7vw, 2rem); line-height: 1; letter-spacing: -.02em; color: var(--combo-ink);
+    }
+    .htb-mtag {
+      grid-column: 2; justify-self: end; align-self: center;
+      font: 600 .58rem/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase; color: var(--accent);
+    }
+    .htb-mspec {
+      grid-column: 1 / -1; margin-top: .45rem;
+      font: 400 .82rem/1.5 var(--combo-sans); color: rgba(244,239,230,.62); max-width: 42ch;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--hover-the-building">
+
+    <!-- the atom stage. .cfh-render (here .htb-render too) carries [data-render-surface]. -->
+    <section class="cfh-stage" id="htb">
+      <div class="cfh-render htb-render" data-render-surface>
+        <!-- base render: the sharp whole building; always visible (the scrim above dims the rest) -->
+        <img class="htb-base cfh-img" src="renders/day-34.webp" width="1920" height="1080"
+             alt="Фасад будинку QUADRO, денний ракурс">
+        <!-- dimming scrim: a flat dark wash, fades in on hover (OPACITY ONLY, GPU-cheap) -->
+        <div class="htb-scrim" aria-hidden="true"></div>
+        <!-- lit copy: the SAME render, clipped to the hovered element; sits ABOVE the scrim,
+             so the touched element stays bright while the rest reads as receded -->
+        <img class="htb-lit" src="renders/day-34.webp" width="1920" height="1080" aria-hidden="true">
+        <!-- THE BRICK: the locked-viewBox element overlay (engine fills polygons from bands[]) -->
+        <svg class="cfh-floors" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <!-- atom's own card kept in DOM for its API; hidden, replaced by .htb-label below -->
+      <div class="cfh-card"><div class="cfh-card__num"></div><div class="cfh-card__lab"></div><div class="cfh-card__sub"></div></div>
+    </section>
+
+    <!-- the bespoke label that grows FROM the hovered element -->
+    <div class="htb-label" aria-hidden="true">
+      <div class="htb-label__tag">Елемент</div>
+      <div class="htb-label__name">Дах</div>
+      <div class="htb-label__spec">&nbsp;</div>
+    </div>
+
+    <!-- section chrome (sparse, premium, on the rails) -->
+    <p class="htb-eyebrow">QUADRO · Архітектура</p>
+    <h2 class="htb-title">Будинок<br>реагує</h2>
+
+    <!-- the right rail index of the five elements; mirrors + drives the zones -->
+    <div class="htb-rail">
+      <div class="htb-tick" data-el="roof"><span class="htb-tick__lab">Дах</span><span class="htb-tick__line"></span></div>
+      <div class="htb-tick" data-el="glaze"><span class="htb-tick__lab">Скління</span><span class="htb-tick__line"></span></div>
+      <div class="htb-tick" data-el="terrace"><span class="htb-tick__lab">Тераса</span><span class="htb-tick__line"></span></div>
+      <div class="htb-tick" data-el="entrance"><span class="htb-tick__lab">Вхід</span><span class="htb-tick__line"></span></div>
+      <div class="htb-tick" data-el="plinth"><span class="htb-tick__lab">Цоколь</span><span class="htb-tick__line"></span></div>
+    </div>
+
+    <p class="htb-hint"><span class="htb-hint__dot"></span>Наведіть на частину будинку. Решта стихне, ця лишиться чіткою.</p>
+
+    <!-- bespoke MOBILE panel (<=820px). Populated from the SAME element data as the zones,
+         so every visible string is the Ukrainian name + spec, never an internal key. -->
+    <nav class="htb-mobile" aria-label="Елементи будинку">
+      <ul class="htb-mlist"></ul>
+    </nav>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (standalone, no canon deps) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/clean-floor-hover-select/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // ============================================================
+      // FIVE ARCHITECTURAL ELEMENTS, hand-traced over day-34.webp (1920x1080).
+      // The facade is near-orthographic frontal; a PIL luminance scan fixed every edge:
+      //   roof white parapet  y 92..168  (cap reads 253,253,253)
+      //   upper glazing        y 182..424 (dark glass ~60,89,118)
+      //   white inter-floor slab y 428..474 (NOT a zone)
+      //   lower terrace glazing y 480..710 (glass + balustrade balconies)
+      //   plinth grey wall     y 714..904 (matte grey ~159,155,152) extends to grass ~905
+      //   central entrance recess  x 832..972, y 758..904 (dark slot 0..12, sits IN the plinth)
+      // points order = clockwise. `floor` is the element key; the label/spec/clip all key off the
+      // SAME points -> the lit region IS that element, never another part (the correspondence law).
+      //
+      // PLINTH IS NOTCHED around the entrance recess (a single concave ring that dips up into the
+      // doorway from the bottom edge), so the plinth's own pixels are grey-only and the entrance's
+      // dark recess belongs solely to the entrance zone. Entrance is declared LAST -> painted on
+      // top -> it always wins the pointer over the plinth where they meet. No shared pixels, ever.
+      // ============================================================
+      var EL = {
+        roof:     { floor: 'roof',     name: 'Дах',     spec: 'Плаский дах, прихований парапет. Лінія покрівлі лишається чистою.',
+                    points: '124,168 1736,168 1736,92 124,92', anchor: { x: 124, y: 130 } },
+        glaze:    { floor: 'glaze',    name: 'Скління', spec: 'Панорамне скління верхнього рівня. Темне скло, рама в колір.',
+                    points: '134,182 1712,182 1712,424 134,424', anchor: { x: 134, y: 303 } },
+        terrace:  { floor: 'terrace',  name: 'Тераса',  spec: 'Нижній рівень з виходом на терасу. Скляна балюстрада на балконах.',
+                    points: '150,480 1712,480 1712,710 150,710', anchor: { x: 150, y: 595 } },
+        // notched grey wall: TL, TR, BR, up-into-notch (right wall), across notch top, down notch left wall, BL
+        plinth:   { floor: 'plinth',   name: 'Цоколь',  spec: 'Суцільний бетонний цоколь. Матова сіра поверхня тримає весь обʼєм.',
+                    points: '124,714 1736,714 1736,904 972,904 972,758 832,758 832,904 124,904', anchor: { x: 360, y: 809 } },
+        entrance: { floor: 'entrance', name: 'Вхід',    spec: 'Заглиблений центральний вхід. Тінь у нішу, без зайвих деталей.',
+                    points: '832,758 972,758 972,904 832,904', anchor: { x: 832, y: 831 } }
+      };
+      // z-order: roof, glaze, terrace, PLINTH, then ENTRANCE last (on top of the plinth notch).
+      var ORDER = ['roof', 'glaze', 'terrace', 'plinth', 'entrance'];
+      var BANDS = ORDER.map(function (k) {
+        var e = EL[k];
+        return { floor: e.floor, label: e.name, sub: e.spec, status: 'live', points: e.points, anchor: e.anchor };
+      });
+
+      // ---- MOBILE panel: build it from the SAME element data (top-to-bottom of the building),
+      // so the only visible strings are the Ukrainian name + spec. Never the internal key. ----
+      (function buildMobile() {
+        var ul = document.querySelector('.htb-mlist');
+        if (!ul) return;
+        ['roof', 'glaze', 'terrace', 'entrance', 'plinth'].forEach(function (k) {
+          var e = EL[k];
+          var li = document.createElement('li');
+          li.className = 'htb-mrow';
+          li.innerHTML =
+            '<span class="htb-mname">' + e.name + '</span>' +
+            '<span class="htb-mtag">Елемент</span>' +
+            '<span class="htb-mspec">' + e.spec + '</span>';
+          ul.appendChild(li);
+        });
+      })();
+
+      var IMGW = 1920, IMGH = 1080;
+      var render = document.querySelector('.htb-render');
+      var litImg = document.querySelector('.htb-lit');
+      var label = document.querySelector('.htb-label');
+      var labelTag = label.querySelector('.htb-label__tag');
+      var labelName = label.querySelector('.htb-label__name');
+      var labelSpec = label.querySelector('.htb-label__spec');
+      var gsap = window.gsap;
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // ---- map an image-space point to a stage-px point, honouring object-fit:contain (meet) ----
+      function imgToStage(xImg, yImg) {
+        var rb = render.getBoundingClientRect();
+        var scale = Math.min(rb.width / IMGW, rb.height / IMGH);   // contain / meet
+        var drawnW = IMGW * scale, drawnH = IMGH * scale;
+        var offX = (rb.width - drawnW) / 2, offY = (rb.height - drawnH) / 2;
+        return { x: offX + xImg * scale, y: offY + yImg * scale };
+      }
+
+      // ---- build the lit clip-path for an element, in stage px (CSS clip-path polygon).
+      // points come from the SAME element data -> the lit pixels are exactly that element. ----
+      function clipFor(key) {
+        var pts = EL[key].points.trim().split(/\s+/).map(function (p) {
+          var xy = p.split(',');
+          var s = imgToStage(+xy[0], +xy[1]);
+          var rb = render.getBoundingClientRect();
+          return (s.x / rb.width * 100).toFixed(3) + '% ' + (s.y / rb.height * 100).toFixed(3) + '%';
+        });
+        return 'polygon(' + pts.join(', ') + ')';
+      }
+
+      var cfh = null, current = null, settleT = null;
+
+      // ---- the SELECT engine: paints the (atom) overlay, builds the locked-viewBox SVG bands,
+      // runs the hover light. It owns NO pin. We layer the dim/blur + lit-clip + label on top. ----
+      SectionHarness.ranOK('clean-floor-hover-select', function () {
+        cfh = window.CleanFloorHoverSelect.create('#htb', {
+          imgW: IMGW, imgH: IMGH, fit: 'contain',
+          bands: BANDS,
+          fillOn: 0.14, hoverDur: 0.16, cardDur: 0.18, ease: 'power3.out',
+          onSelect: function (key) {
+            // quiet confirm: a short edge pulse on the chosen element's band (no nav in the lab)
+            var band = document.querySelector('.cfh-band[data-floor="' + key + '"]');
+            if (band && gsap) gsap.fromTo(band, { 'stroke-opacity': 1 }, { 'stroke-opacity': .4, duration: .5, ease: 'air', yoyo: true, repeat: 1 });
+          }
+        });
+        window.__cfh = cfh;
+      });
+
+      // ---- reveal an element: dim+blur the whole render, light THIS element's own pixels in
+      // place, grow the label FROM the element's left edge. ----
+      function reveal(key) {
+        if (!EL[key]) return;
+        current = key;
+        if (settleT) { clearTimeout(settleT); settleT = null; }
+        render.classList.add('is-armed');
+
+        if (litImg) litImg.style.clipPath = clipFor(key);
+
+        // light the right-rail tick
+        ticks.forEach(function (t) { t.classList.toggle('is-on', t.getAttribute('data-el') === key); });
+
+        // label content + position: anchor at the element's left edge, grow FROM there
+        labelTag.textContent = 'Елемент';
+        labelName.textContent = EL[key].name;
+        labelSpec.textContent = EL[key].spec;
+
+        var a = imgToStage(EL[key].anchor.x, EL[key].anchor.y);
+        var lw = label.offsetWidth || 230;
+        var lh = label.offsetHeight || 120;
+        // sit the label just RIGHT of the element's left edge, vertically centred on the anchor
+        var lx = a.x + 34;
+        var ly = a.y;
+        var rb = render.getBoundingClientRect();
+        // keep the entrance label (centre of facade) from colliding with the right rail
+        if (lx + lw > rb.width - 120) lx = a.x - lw - 34;
+        // avoid the big top-left title: if the label box would overlap it, drop the label
+        // down to just below the title (still anchored to its element via the stem).
+        var titleEl = document.querySelector('.htb-title');
+        if (titleEl) {
+          var tr = titleEl.getBoundingClientRect();
+          var box = { l: lx, r: lx + lw, t: ly - lh / 2, b: ly + lh / 2 };
+          var hit = box.l < tr.right + 14 && box.r > tr.left - 14 && box.t < tr.bottom + 14 && box.b > tr.top - 14;
+          if (hit) ly = tr.bottom + 14 + lh / 2;
+        }
+        // clamp inside the stage so the label never clips off-screen
+        ly = Math.max(lh / 2 + 8, Math.min(ly, rb.height - lh / 2 - 8));
+
+        // position PURELY via transform (translate), never left/top: label stays at 0,0 and is
+        // moved with x/y; yPercent -50 centres it on the anchor; transformOrigin left-center
+        // pins the left edge so the scaleX grow reads as "growing out of the element".
+        if (gsap && !reduced) {
+          gsap.set(label, { xPercent: 0, yPercent: -50, transformOrigin: 'left center' });
+          gsap.fromTo(label,
+            { opacity: 0, x: lx - 10, y: ly, scaleX: 0.72, scaleY: 0.86 },
+            { opacity: 1, x: lx, y: ly, scaleX: 1, scaleY: 1, duration: 0.42, ease: 'air', overwrite: 'auto' });
+        } else {
+          label.style.transform = 'translate(' + lx + 'px,' + ly + 'px) translateY(-50%)';
+          label.style.opacity = '1';
+        }
+        // animate the pseudo stem + node via a class (transition handled in CSS-in-JS sheet)
+        label.classList.add('is-on');
+      }
+
+      function clearReveal() {
+        current = null;
+        render.classList.remove('is-armed');
+        ticks.forEach(function (t) { t.classList.remove('is-on'); });
+        label.classList.remove('is-on');
+        if (gsap && !reduced) {
+          gsap.to(label, { opacity: 0, scaleX: 0.82, duration: 0.2, ease: 'power2.out', overwrite: 'auto',
+            onComplete: function () { label.style.willChange = 'auto'; } });
+        } else { label.style.opacity = '0'; }
+        if (litImg) {
+          if (settleT) clearTimeout(settleT);
+          settleT = setTimeout(function () { if (!current) litImg.style.clipPath = 'inset(100% 100% 100% 100%)'; }, 240);
+        }
+      }
+
+      // a tiny dynamic sheet to animate the label's stem + node with the grow (kept off the
+      // hot path; transform/opacity only). Driven by .htb-label.is-on.
+      (function () {
+        var s = document.createElement('style');
+        s.textContent =
+          '.htb-label.is-on::before{ transition: transform var(--t-label) var(--ease-air) .04s; transform: scaleX(1); }' +
+          '.htb-label::before{ transition: transform .14s ease; }' +
+          '.htb-label.is-on::after{ transition: opacity var(--t-label) ease .08s; opacity: 1; }';
+        document.head.appendChild(s);
+      })();
+
+      // ---- wire hover/leave on the atom's bands -> reveal/clear ----
+      var ticks = Array.prototype.slice.call(document.querySelectorAll('.htb-tick'));
+      if (cfh && cfh.bands) {
+        cfh.bands.forEach(function (b) {
+          b.el.addEventListener('mouseenter', function () { reveal(b.data.floor); });
+        });
+        var svg = document.querySelector('.cfh-floors');
+        if (svg) svg.addEventListener('mouseleave', clearReveal);
+      }
+
+      // ---- right-rail ticks drive the same element (block 5: reciprocal feedback) ----
+      ticks.forEach(function (t) {
+        var key = t.getAttribute('data-el');
+        t.addEventListener('mouseenter', function () { if (cfh && cfh.set) cfh.set(key); reveal(key); });
+        t.addEventListener('mouseleave', function () { if (cfh && cfh.clear) cfh.clear(); clearReveal(); });
+        t.addEventListener('click', function () { if (cfh && cfh.select) cfh.select(key); });
+      });
+
+      // re-fit the lit clip on resize (the contain math depends on the box) ----
+      window.addEventListener('resize', function () { if (current && litImg) litImg.style.clipPath = clipFor(current); });
+
+      // ---- a ONE-TIME affordance cue so the interaction is discoverable on a still screen:
+      // sweep the upper-glazing element in, hold, out, once, gated by reduced-motion. ----
+      if (!reduced && gsap) {
+        setTimeout(function () {
+          if (current) return;                 // user already engaged
+          reveal('glaze');
+          setTimeout(function () { if (current === 'glaze') clearReveal(); }, 1150);
+        }, 900);
+      }
+
+      // PIN BUDGET: pure interaction; this section owns NO scroll pin.
+      SectionHarness.declare({
+        pinOwner: 'none', expectPins: 0,
+        atomsCited: ['clean-floor-hover-select']
+      });
+    })();
+  </script>
+</body>
+</html>

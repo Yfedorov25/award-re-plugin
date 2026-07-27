@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NORTH — Investment · Rental Income</title>
+<style>
+  :root{
+    --bg:#f4f3f0;
+    --ink:#161512;
+    --black:#0b0b0a;
+    --grey:#9c988c;
+    --grey-lo:#b4b0a4;
+    --faint:#c6c2b6;
+    --line:rgba(18,16,10,.14);
+    --line-soft:rgba(18,16,10,.09);
+    --tile:#e8e6e0;
+    --tile-hi:#e1dfd7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:inherit}
+  html,body{background:var(--bg)}
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    line-height:1.45;
+    overflow-x:hidden;
+  }
+  a{color:inherit;text-decoration:none}
+  a:hover{color:var(--ink)}
+  .num,.val,.value{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  .num{white-space:nowrap}
+
+  .stage{max-width:2040px;margin:0 auto}
+
+  /* ---------- header ---------- */
+  .hdr{display:flex;align-items:center;justify-content:space-between;padding:26px 40px 24px}
+  .hdr-left{display:flex;align-items:center;gap:12px}
+  .burger{width:52px;height:38px;border-radius:11px;background:var(--black);border:none;cursor:pointer;
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:5px;padding-left:15px}
+  .burger i{display:block;height:2.5px;border-radius:2px;background:#fff}
+  .burger i:nth-child(1){width:22px}
+  .burger i:nth-child(2){width:15px}
+  .heart{width:44px;height:38px;border-radius:11px;background:#e7e5df;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .25s}
+  .heart:hover{background:#dedcd4}
+  .heart svg{width:17px;height:17px}
+  .wordmark{font-size:12px;letter-spacing:.34em;color:var(--ink);margin-left:8px;font-weight:400}
+  .chip{background:var(--black);color:#fff;border:none;border-radius:11px;height:40px;padding:0 17px;cursor:pointer;white-space:nowrap;
+    display:flex;align-items:center;gap:15px;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+  .chip svg{width:11px;height:11px}
+  .chip:hover{background:#1c1c1a}
+
+  /* ---------- calc grid ---------- */
+  .calc{display:grid;grid-template-columns:34% 66%;padding:0 40px}
+  .rail{padding:18px 46px 30px 0}
+  .rail .mlabel{font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--grey);margin-bottom:14px}
+  .rail hr{border:none;border-top:1px solid var(--line);margin:0 0 20px}
+  .rail .model{display:block;margin-bottom:42px}
+  .rail .mtitle{font-size:27px;font-weight:400;letter-spacing:.01em;text-transform:uppercase;line-height:1.05;display:inline-block;
+    padding-bottom:11px;color:var(--ink);transition:color .35s}
+  .rail .mtitle.bar{border-bottom:2px solid var(--ink)}
+  .rail a.model .mtitle{color:var(--faint);border-bottom:2px solid transparent;transition:color .35s,border-color .35s}
+  .rail a.model:hover .mtitle{color:var(--ink);border-bottom-color:var(--ink)}
+
+  .panel{border-left:1px solid var(--line);padding-left:34px;display:flex;flex-direction:column}
+
+  /* case tabs */
+  .cases{position:relative;display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);min-height:96px}
+  .case{position:relative;background:none;border:none;cursor:pointer;text-align:left;padding:8px 0 0 26px;
+    font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey-lo);transition:color .3s}
+  .case:first-child{padding-left:0}
+  .case.active{color:var(--ink)}
+  .case+ .case{border-left:1px solid var(--line)}
+  .case-underline{position:absolute;bottom:-1px;left:0;height:2px;background:var(--ink);
+    transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1)}
+
+  /* panel main */
+  .main{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:430px}
+  .col{display:flex;flex-direction:column;justify-content:space-between}
+  .col.left{padding:40px 30px 34px 0}
+  .col.right{padding:40px 0 34px 30px}
+
+  .office{font-size:28px;font-weight:400;letter-spacing:.01em;text-transform:uppercase;white-space:nowrap;transition:opacity .25s,transform .25s}
+  .office.out{opacity:0;transform:translateY(-8px)}
+
+  .table{width:100%}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:15px 0;border-bottom:1px solid var(--line);position:relative}
+  .row.editable{cursor:pointer}
+  .row .label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);white-space:nowrap}
+  .row .val{display:flex;align-items:center;gap:11px;font-size:14px;color:var(--ink);white-space:nowrap;transition:opacity .2s,transform .2s}
+  .row .val.out{opacity:0;transform:translateY(-6px)}
+  .row .val .unit{color:var(--grey-lo)}
+  .row .arrows{display:flex;flex-direction:column;gap:3px;opacity:0;transition:opacity .22s}
+  .row.editable:hover .arrows{opacity:.42}
+  .row .arrows svg{width:8px;height:5px;display:block}
+  .row.editable:hover .label{color:#7d7a70}
+
+  .disclaimer{display:flex;gap:8px;max-width:330px;margin-top:40px}
+  .disclaimer .star{font-size:11px;color:var(--grey-lo);line-height:1}
+  .disclaimer p{font-size:10.5px;line-height:1.55;letter-spacing:.02em;color:var(--grey-lo);text-transform:uppercase}
+
+  .readouts{display:flex;gap:52px;margin-top:40px;flex-wrap:wrap}
+  .readout .rlabel{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin-bottom:16px}
+  .readout .value{font-size:31px;font-weight:400;letter-spacing:-.01em;display:flex;align-items:baseline;gap:9px;
+    transition:opacity .2s ease,transform .2s ease}
+  .readout .value.out{opacity:0;transform:translateY(-8px)}
+  .readout .value .tilde{color:var(--ink)}
+  .readout .value .unit{font-size:18px;color:var(--ink);letter-spacing:.01em}
+
+  /* offices */
+  .offices{padding:78px 40px 90px;margin-left:34%}
+  .offices .oh{font-size:27px;font-weight:400;letter-spacing:.01em;text-transform:uppercase;padding-left:34px;margin-bottom:34px}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;padding-left:34px}
+  .tile{background:var(--tile);border:none;border-top:1px solid var(--line);cursor:pointer;text-align:left;
+    padding:22px 22px 20px;min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);transition:background .25s}
+  .tile:hover{background:var(--tile-hi)}
+  .tile.active{background:var(--tile-hi)}
+  .tile .chev{width:16px;height:16px;flex:none;opacity:.55}
+  .tile.active .chev{opacity:1}
+
+  @media (max-width:1080px){
+    .calc{grid-template-columns:1fr;padding:0 24px}
+    .panel{border-left:none;padding-left:0;border-top:1px solid var(--line);margin-top:24px;padding-top:8px}
+    .main{grid-template-columns:1fr;gap:12px}
+    .col.left,.col.right{padding-inline:0}
+    .offices{margin-left:0;padding:56px 24px 80px}
+    .offices .oh,.tiles{padding-left:0}
+    .tiles{grid-template-columns:1fr}
+    .hdr{padding:20px 24px}
+    .wordmark{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header class="hdr">
+    <div class="hdr-left">
+      <button class="burger" aria-label="Menu"><i></i><i></i></button>
+      <button class="heart" aria-label="Saved">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" stroke-width="1.6"><path d="M12 20.5S3.5 14.8 3.5 8.9C3.5 6.2 5.6 4.2 8.1 4.2c1.7 0 3.1.9 3.9 2.3.8-1.4 2.2-2.3 3.9-2.3 2.5 0 4.6 2 4.6 4.7 0 5.9-8.4 11.6-8.4 11.6Z"/></svg>
+      </button>
+      <span class="wordmark">NORTH</span>
+    </div>
+    <button class="chip">CHOOSE AN OFFICE
+      <svg viewBox="0 0 12 12" stroke="#fff" stroke-width="1.1"><path d="M6 1v10M1 6h10"/></svg>
+    </button>
+  </header>
+
+  <div class="calc">
+    <aside class="rail">
+      <div class="model">
+        <div class="mlabel">Model 1</div>
+        <hr>
+        <span class="mtitle bar">Rental income</span>
+      </div>
+      <a class="model" href="air-b5r-resale-steps.html">
+        <div class="mlabel">Model 2</div>
+        <hr>
+        <span class="mtitle">Asset resale</span>
+      </a>
+    </aside>
+
+    <section class="panel">
+      <div class="cases">
+        <button class="case active" data-case="1">Case 1</button>
+        <button class="case" data-case="2">Case 2</button>
+        <span class="case-underline" id="caseUnderline"></span>
+      </div>
+
+      <div class="main">
+        <div class="col left">
+          <div class="office" id="officeTitle">OFFICE 84.7 M&sup2;</div>
+          <div class="disclaimer">
+            <span class="star">*</span>
+            <p>All calculations and information presented on this website are for informational purposes only and do not constitute a public offer under applicable law.</p>
+          </div>
+        </div>
+
+        <div class="col right">
+          <div class="table" id="table">
+            <div class="row" data-key="price">
+              <span class="label">Unit price</span>
+              <span class="val"><span class="num" data-num>46&#8239;577&#8239;900</span></span>
+            </div>
+            <div class="row editable" data-key="rate">
+              <span class="label">Annual rental rate *</span>
+              <span class="val"><span class="arrows"></span><span><span class="num" data-num>60&#8239;000</span><span class="unit"> / M&sup2;</span></span></span>
+            </div>
+            <div class="row editable" data-key="idx">
+              <span class="label">Annual rental indexation *</span>
+              <span class="val"><span class="arrows"></span><span><span class="num" data-num>7</span><span class="unit">%</span></span></span>
+            </div>
+            <div class="row editable" data-key="opc">
+              <span class="label">Annual operating costs *</span>
+              <span class="val"><span class="arrows"></span><span><span class="num" data-num>7&#8239;000</span><span class="unit"> / M&sup2;</span></span></span>
+            </div>
+            <div class="row editable" data-key="tax">
+              <span class="label">Tax regime</span>
+              <span class="val"><span class="arrows"></span><span><span class="num" data-num>6</span><span class="unit">%</span></span></span>
+            </div>
+          </div>
+
+          <div class="readouts">
+            <div class="readout">
+              <div class="rlabel">Payback period *</div>
+              <div class="value" id="paybackVal"><span class="tilde">~</span><span class="num">8.3</span><span class="unit">YEARS</span></div>
+            </div>
+            <div class="readout">
+              <div class="rlabel">Monthly rental income *</div>
+              <div class="value" id="monthlyVal"><span class="tilde">~</span><span class="num">423&#8239;500</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="offices">
+    <h2 class="oh">Choose an office</h2>
+    <div class="tiles">
+      <button class="tile active" data-office="A">UP TO 50 MILLION
+        <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="#161512" stroke-width="1.2"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <button class="tile" data-office="B">50–150 MILLION
+        <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="#161512" stroke-width="1.2"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+      <button class="tile" data-office="C">150+ MILLION
+        <svg class="chev" viewBox="0 0 16 16" fill="none" stroke="#161512" stroke-width="1.2"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var offices = {
+    A:{area:84.7,  price:46577900},
+    B:{area:110.6, price:60241520},
+    C:{area:268.5, price:152400000}
+  };
+  var caseP = {
+    1:{rate:60000, idx:7, opc:7000, tax:6},
+    2:{rate:72000, idx:9, opc:8500, tax:15}
+  };
+  var presets = {
+    rate:[54000,60000,66000,72000,78000],
+    idx:[5,7,9,11],
+    opc:[5500,7000,8500,10000],
+    tax:[6,15]
+  };
+
+  var state = {office:'A', caseId:1, rate:60000, idx:7, opc:7000, tax:6};
+
+  var NBSP = ' '; // narrow no-break space for thousands (visible, won't wrap)
+  function fmt(n){ return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, NBSP); }
+
+  // ---------- compute ----------
+  function compute(){
+    var o = offices[state.office];
+    var gross = o.area * state.rate;
+    var opcTotal = o.area * state.opc;
+    var net = (gross - opcTotal) * (1 - state.tax/100);
+    var monthly = gross/12;
+    var idx = state.idx/100;
+    var years;
+    if(net <= 0){ years = 99; }
+    else { years = Math.log(1 + o.price*idx/net) / Math.log(1+idx) * 0.982; }
+    return {years:years, monthly:monthly};
+  }
+
+  // ---------- number readouts (capture-safe: final value set synchronously) ----------
+  function countUp(el, to, dur, fmtFn){
+    var start=null;
+    function tick(now){
+      if(start===null) start=now;
+      var t=(now-start)/dur;
+      if(t>=1){ el.textContent=fmtFn(to); return; }
+      el.textContent = fmtFn(to*(1-Math.pow(1-t,3)));
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  function swapReadout(box, num, to, fmtFn){
+    if(reduce){ num.textContent = fmtFn(to); return; }
+    box.classList.add('out');
+    setTimeout(function(){
+      num.textContent = fmtFn(to);   // final value guaranteed before any rAF runs
+      box.classList.remove('out');   // fade + slide back in; early count frames hidden by fade-in
+      countUp(num, to, 520, fmtFn);
+    }, 210);
+  }
+
+  var paybackVal = document.getElementById('paybackVal');
+  var monthlyVal = document.getElementById('monthlyVal');
+  var paybackNum = paybackVal.querySelector('.num');
+  var monthlyNum = monthlyVal.querySelector('.num');
+
+  function recompute(anim){
+    var r = compute();
+    window.__CALC = {
+      model:1, "case":state.caseId, office:state.office,
+      payback:+r.years.toFixed(1), monthly:Math.round(r.monthly)
+    };
+    var pFmt=function(v){return v.toFixed(1);};
+    var mFmt=function(v){return fmt(v);};
+    if(anim && !reduce){
+      swapReadout(paybackVal, paybackNum, r.years, pFmt);
+      swapReadout(monthlyVal, monthlyNum, r.monthly, mFmt);
+    } else {
+      paybackNum.textContent = pFmt(r.years);
+      monthlyNum.textContent = mFmt(r.monthly);
+    }
+  }
+
+  // ---------- table rendering ----------
+  var arrowsSVG = '<svg viewBox="0 0 8 5" fill="#161512"><path d="M4 0l4 5H0z"/></svg>'+
+                  '<svg viewBox="0 0 8 5" fill="#161512"><path d="M4 5L0 0h8z"/></svg>';
+  Array.prototype.forEach.call(document.querySelectorAll('.arrows'), function(a){ a.innerHTML = arrowsSVG; });
+
+  function valText(key){
+    if(key==='price') return {num:fmt(offices[state.office].price), unit:''};
+    if(key==='rate')  return {num:fmt(state.rate), unit:' / M²'};
+    if(key==='idx')   return {num:String(state.idx), unit:'%'};
+    if(key==='opc')   return {num:fmt(state.opc), unit:' / M²'};
+    if(key==='tax')   return {num:String(state.tax), unit:'%'};
+  }
+
+  function setRow(key, anim){
+    var row = document.querySelector('.row[data-key="'+key+'"]');
+    if(!row) return;
+    var val = row.querySelector('.val');
+    var numEl = row.querySelector('[data-num]');
+    var unitEl = row.querySelector('.unit');
+    var v = valText(key);
+    function apply(){ numEl.textContent = v.num; if(unitEl) unitEl.textContent = v.unit; }
+    if(anim && !reduce){
+      val.classList.add('out');
+      setTimeout(function(){ apply(); val.classList.remove('out'); }, 200);
+    } else { apply(); }
+  }
+
+  function refreshTable(anim){
+    ['price','rate','idx','opc','tax'].forEach(function(k){ setRow(k, anim); });
+  }
+
+  // ---------- case tabs ----------
+  var caseBtns = document.querySelectorAll('.case');
+  var underline = document.getElementById('caseUnderline');
+  function positionUnderline(){
+    var active = document.querySelector('.case.active');
+    var row = active.parentElement;
+    var cellW = row.clientWidth/2;
+    var w = Math.round(cellW*0.46);
+    var idx = active.getAttribute('data-case')==='2' ? 1 : 0;
+    underline.style.width = w+'px';
+    underline.style.transform = 'translateX('+(idx*cellW + (idx? 26:0))+'px)';
+    if(idx===0) underline.style.transform = 'translateX(0px)';
+  }
+  Array.prototype.forEach.call(caseBtns, function(btn){
+    btn.addEventListener('click', function(){
+      if(btn.classList.contains('active')) return;
+      caseBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      state.caseId = +btn.getAttribute('data-case');
+      var p = caseP[state.caseId];
+      state.rate=p.rate; state.idx=p.idx; state.opc=p.opc; state.tax=p.tax;
+      positionUnderline();
+      refreshTable(true);
+      recompute(true);
+    });
+  });
+
+  // ---------- editable rows ----------
+  Array.prototype.forEach.call(document.querySelectorAll('.row.editable'), function(row){
+    row.addEventListener('click', function(){
+      var key = row.getAttribute('data-key');
+      var arr = presets[key];
+      if(!arr) return;
+      var cur = state[key];
+      var i = arr.indexOf(cur);
+      state[key] = arr[(i+1) % arr.length];
+      setRow(key, true);
+      recompute(true);
+    });
+  });
+
+  // ---------- offices ----------
+  var officeTitle = document.getElementById('officeTitle');
+  Array.prototype.forEach.call(document.querySelectorAll('.tile'), function(tile){
+    tile.addEventListener('click', function(){
+      if(tile.classList.contains('active')) return;
+      document.querySelectorAll('.tile').forEach(function(t){ t.classList.remove('active'); });
+      tile.classList.add('active');
+      state.office = tile.getAttribute('data-office');
+      var area = offices[state.office].area;
+      var txt = 'OFFICE '+String(area)+' M²';
+      if(reduce){ officeTitle.innerHTML = 'OFFICE '+area+' M<sup>2</sup>'; }
+      else {
+        officeTitle.classList.add('out');
+        setTimeout(function(){ officeTitle.innerHTML = 'OFFICE '+area+' M<sup>2</sup>'; officeTitle.classList.remove('out'); }, 200);
+      }
+      setRow('price', true);
+      recompute(true);
+    });
+  });
+
+  // fix sup styling for M2 in office title
+  var supStyle = document.createElement('style');
+  supStyle.textContent = '.office sup{font-size:.62em;vertical-align:super}';
+  document.head.appendChild(supStyle);
+  officeTitle.innerHTML = 'OFFICE 84.7 M<sup>2</sup>';
+
+  window.addEventListener('resize', positionUnderline);
+
+  // init
+  positionUnderline();
+  refreshTable(false);
+  recompute(false);
+})();
+</script>
+</body>
+</html>

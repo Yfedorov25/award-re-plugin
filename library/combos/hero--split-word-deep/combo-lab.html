@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: hero--split-word-deep - Слово за словом (hero, candidate)</title>
+<!--
+  HERO VARIANT - "Слово за словом"  (DEEP REWORK of hero--split-word-reveal).
+  ============================================================================
+  WHY THE REWORK: the owner found the first pass primitive - it had NO pin, so as
+  you scrolled the words appeared and the page immediately dumped them DOWN toward a
+  next section that does not exist; the text was bulky and overlapping. This rebuild
+  fixes ALL of that with a REAL PIN and a SEQUENCED pin-story.
+
+  THE PIN (the #1 fix): the harness owns EXACTLY ONE pinned ScrollTrigger over #combo
+  (pin:true, pinSpacing:true). The whole mechanic plays WHILE the section holds; it
+  only releases when the story is done. Nothing dumps to a next section mid-mechanic.
+
+  THE MECHANIC (one pin, three phases off one scroll position):
+    Phase A (p 0 -> .42):  the headline ASSEMBLES WORD BY WORD (split-word-headline,
+       set(pA)) while the building gently SCALES behind it (render-scroll-scale,
+       set(pA)) - the house opens as the words land. Corner meta + kicker fade in once.
+    Phase B (p .42 -> 1):  the built headline EASES up and out of the way (transform/
+       opacity), and pin-story-text brings the follow lines in SEQUENCE - block one
+       settles, HOLDS alone, then leaves as block two enters. NEVER two text blocks at
+       once, NEVER a full-screen wall (pin-story-text keeps exactly one block at op:1).
+
+  ONE pin owned by the harness drives swh.set(p) + rss.set(p) + pst.set(p). The two
+  helper atoms' own ScrollTriggers are killed at init so only the ONE harness pin lives
+  (expectPins:1). Asset: day-34.webp (clean frontal building, cars-free, 1920x1080).
+  Engine laws: transform/opacity/filter only. NO WebGL / mix-blend / backdrop / currentTime.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- eager-preload the building render (resolves via renders -> quadro/public/proto) -->
+<link rel="preload" as="image" href="renders/day-34.webp">
+
+<link rel="stylesheet" href="../../components/split-word-headline/component.css">
+<link rel="stylesheet" href="../../components/render-scroll-scale/component.css">
+<link rel="stylesheet" href="../../components/pin-story-text/component.css">
+<link rel="stylesheet" href="../../components/corner-frame-meta/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ---- variant SKIN only (scaffold owns the rails) ---------------------- */
+
+  /* a soft floor-and-side gradient anchors the cream type over the sky so the
+     headline and corner-meta stay legible while the render scales behind. */
+  .swd__scrim {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background:
+      linear-gradient(to top,  rgba(12,11,8,.74) 0%, rgba(12,11,8,.30) 30%, rgba(12,11,8,0) 58%),
+      linear-gradient(90deg,   rgba(12,11,8,.50) 0%, rgba(12,11,8,.16) 40%, rgba(12,11,8,0) 78%);
+  }
+
+  /* HEADLINE PLATE - the word-by-word title sits low-left, editorial. This whole
+     group is what eases up + out in Phase B so the story text never collides with it. */
+  .swd__plate {
+    position: absolute; inset: 0; z-index: 5;
+    padding: clamp(28px,5vh,64px) clamp(24px,5.5vw,84px);
+    color: var(--combo-cream);
+    display: flex; flex-direction: column; justify-content: flex-end;
+    will-change: transform, opacity;
+  }
+
+  /* KICKER is its OWN sequenced beat: it reveals first and holds ALONE, then recedes
+     (opacity -> 0) BEFORE the headline words rise, so the hero shows strictly one
+     composed text block at a time. The pin drives its opacity/transform (no load-in). */
+  .swd__kicker {
+    position: absolute; left: clamp(24px,5.5vw,84px); top: clamp(40px,9vh,96px);
+    font: 500 clamp(12px,1.15vw,15px)/1 var(--combo-sans);
+    letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(244,239,230,.86);
+    margin: 0; opacity: 0; z-index: 6;
+    transform: translate3d(0,10px,0); will-change: transform, opacity;
+    display: flex; align-items: center;
+    text-shadow: 0 1px 18px rgba(0,0,0,.5);
+  }
+  .swd__rule { display:inline-block; width: 40px; height: 1px;
+    background: rgba(244,239,230,.55); margin-right: 14px; }
+
+  /* THE hero moment: per-word rising headline. Fraunces display, dense lh, neg track. */
+  .swd__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(40px,8.6vw,120px); line-height: .92; letter-spacing: -.038em;
+    margin: 0; max-width: 15ch; text-wrap: balance;
+    text-shadow: 0 2px 32px rgba(0,0,0,.44);
+  }
+  .swd__title .swd__accent { color: var(--combo-accent); font-style: italic; font-weight: 400; }
+
+  /* PIN-STORY skin: the sequenced follow lines. The atom keeps exactly one block at
+     opacity:1; we skin its type to the cream/terracotta system and seat it lower-left
+     so it occupies the SAME considered zone the headline vacates (no collision). */
+  #swdHero .pst { position: absolute; inset: 0; z-index: 6; height: 100%; }
+  #swdHero .pst__eyebrow { color: var(--combo-accent); letter-spacing: .24em; }
+  #swdHero .pst__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(34px,6.4vw,92px); line-height: .98; letter-spacing: -.03em;
+    color: var(--combo-cream); text-shadow: 0 2px 28px rgba(0,0,0,.46);
+  }
+  #swdHero .pst__title em { color: var(--combo-accent); font-style: italic; font-weight: 400; }
+  #swdHero .pst__body { color: rgba(244,239,230,.84); text-shadow: 0 1px 16px rgba(0,0,0,.4); }
+  /* seat the two follow blocks low-left, in the headline's vacated frame */
+  #swdHero .pst__block--lower-left { left: clamp(24px,5.5vw,84px); bottom: clamp(28px,8vh,72px); }
+
+  /* corner-meta skin: cream, tracked, low-emphasis (atom positions them at corners) */
+  #swdHero [data-corner] { color: rgba(244,239,230,.68); font-family: var(--combo-sans); font-weight: 500; }
+  #swdHero [data-corner="rc"] { writing-mode: vertical-rl; letter-spacing: .28em; }
+
+  /* a thin scroll-progress hairline at the very bottom - quiet feedback that the
+     pin is holding while the mechanic plays (transform scaleX only). */
+  .swd__prog { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; z-index: 7;
+    transform-origin: 0 50%; transform: scaleX(0); background: var(--combo-accent); opacity: .85; }
+
+  @media (max-width: 720px) {
+    .swd__plate { padding: 24px 20px; }
+    .swd__title { max-width: 100%; font-size: clamp(38px,11vw,72px); }
+    #swdHero .pst__block--lower-left { left: 7vw; bottom: 12vh; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="hero--split-word-deep">
+    <div id="swdHero" style="position:absolute; inset:0;">
+
+      <!-- RENDER LAYER: the building, full-bleed, host-driven scale (render-scroll-scale).
+           [data-render-surface] is the frame the probe asserts painted a decoded image. -->
+      <div id="swdFrame" class="rss-frame" data-render-surface style="--rss-h:100vh; --rss-bg:#0c0b08;">
+        <img class="rss-render" src="renders/day-34.webp"
+             alt="Таунхаус на вул. Замковій, денний фасад"
+             decoding="async" fetchpriority="high">
+
+        <!-- four corner labels frame the plate (corner-frame-meta) -->
+        <span data-corner="tl">Замкова · Власний двір</span>
+        <span data-corner="bl">N 49.84 · E 24.03</span>
+        <span data-corner="br">6 таунхаусів · 82 м²</span>
+        <span data-corner="rc">2026</span>
+      </div>
+
+      <div class="swd__scrim"></div>
+
+      <!-- KICKER: the FIRST sequenced beat (top-left). Reveals + holds alone, then
+           recedes before the headline rises. Driven by the pin (never co-visible
+           with the headline). Kept OUT of the headline plate so it has its own zone. -->
+      <p class="swd__kicker" id="swdKicker"><span class="swd__rule"></span>Таунхаус у Львові</p>
+
+      <!-- HEADLINE PLATE: the per-word headline (Phase A). This group eases up and out
+           in Phase B so the pin-story never overlaps it. -->
+      <div class="swd__plate" id="swdPlate">
+        <h1 class="swd__title" id="swdTitle">Дім,<br>де тихо<br><span class="swd__accent">вдома</span></h1>
+      </div>
+
+      <!-- the pin-story stage is injected by PinStoryText into #swdHero (Phase B) -->
+      <div class="swd__prog" id="swdProg"></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms, then ONE inline orchestration script -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/render-scroll-scale/component.js"></script>
+  <script src="../../components/split-word-headline/component.js"></script>
+  <script src="../../components/pin-story-text/component.js"></script>
+  <script src="../../components/corner-frame-meta/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var g = window.gsap;
+
+      // expo-ish manual ease for the per-beat opacity/translate ramps (cheap, no GSAP per frame)
+      function ease(t){ t = t < 0 ? 0 : (t > 1 ? 1 : t); return 1 - Math.pow(1 - t, 3); }
+      // smoothstep for soft entries/exits
+      function ss(a, b, x){ var t = (x - a) / (b - a); t = t < 0 ? 0 : (t > 1 ? 1 : t); return t * t * (3 - 2 * t); }
+
+      // 1) RENDER LAYER - host-driven (selfTrigger:false => NO ScrollTrigger of its own).
+      //    The harness pin calls rss.set(p) so the building gently opens behind the words.
+      var rss = null;
+      SectionHarness.ranOK('render-scroll-scale', function () {
+        rss = window.RenderScrollScale.create('#swdFrame', {
+          scaleFrom: 1.06, scaleTo: 1.18, originY: '58%', drift: 0,
+          ease: 'none', selfTrigger: false   // pure set(p); the ONE harness pin drives it
+        });
+        window.__rss = rss;
+      });
+
+      // 2) THE HERO MOMENT - the headline assembles WORD BY WORD. Built in 'progress' mode
+      //    for its pure set(p), then its own ScrollTrigger is KILLED so the ONLY pin is the
+      //    harness pin (no two-pins-fight). The harness drives swh.set() in BEAT 2.
+      var swh = null;
+      SectionHarness.ranOK('split-word-headline', function () {
+        swh = window.SplitWordHeadline.create('#swdTitle', {
+          stagger: 0.09, from: { yPercent: 120, opacity: 0 },
+          ease: 'air', trigger: 'progress'
+        });
+        if (swh && swh.trigger && swh.trigger.kill) swh.trigger.kill(); // harness owns scroll
+        window.__swh = swh;
+      });
+
+      // 3) PIN-STORY TEXT - the SEQUENCED follow lines (Phase B). The atom builds its
+      //    stage + exposes a PURE set(p) that keeps exactly ONE block settled at a time
+      //    (no overlap, no full-screen wall). Its OWN pin is killed: the ONE harness pin
+      //    drives pst.set(pB), so there is a single pin for the whole hero.
+      var pst = null;
+      SectionHarness.ranOK('pin-story-text', function () {
+        pst = window.PinStoryText.create('#swdHero', {
+          end: '+=160%', scrub: 1, hold: 0.40, ease: 'air',
+          blocks: [
+            // block ONE sits low-left (the headline's vacated frame); block TWO sits in a
+            // DISTINCT zone (centered band) so their boxes never collide even at the handoff.
+            { eyebrow: 'СВІЙ ДВІР', align: 'lower-left', at: 0.25,
+              title: 'Шість будинків за <em>муром старого міста</em>.',
+              body: 'Свій вхід, свій двір, свій спокій.' },
+            { eyebrow: 'ЗАПРОШЕННЯ', align: 'center', at: 0.75,
+              title: 'Приходьте, поки <em>двір ще вільний</em>.',
+              body: 'Один показ. Одна тиха вулиця у Львові.' }
+          ]
+        });
+        if (pst && pst.trigger && pst.trigger.kill) pst.trigger.kill(); // harness owns scroll
+        if (pst && pst.set) pst.set(0);  // first block primed (kept hidden by stage opacity in beats 1-2)
+        window.__pst = pst;
+      });
+      // the injected stage - held at opacity 0 during beats 1-2 so the story text never
+      // overlaps the kicker/headline; fades in only when Phase B (the story) begins.
+      var pstStage = document.querySelector('#swdHero .pst__stage');
+      if (pstStage) pstStage.style.opacity = '0';
+
+      // 4) CORNER META - fade the four labels in on a load-in baseline (frames the plate).
+      var cfm = null;
+      SectionHarness.ranOK('corner-frame-meta', function () {
+        cfm = window.CornerFrameMeta.create('#swdFrame', { stagger: 0.1, dur: 0.55, ease: 'power2.out' });
+        window.__cfm = cfm;
+      });
+      // corner-meta is a quiet load-in one-shot (no pin, no scroll trigger)
+      if (g) { g.delayedCall(0.3, function () { cfm && cfm.reveal && cfm.reveal(); }); }
+      else { cfm && cfm.set && cfm.set(1); }
+
+      // cache the live DOM nodes so the per-frame onUpdate writes .style directly (no GSAP
+      // overhead per frame -> leaner, smoother under CPU throttle).
+      var elKicker = document.getElementById('swdKicker');
+      var elPlate  = document.getElementById('swdPlate');
+      var elTitle  = document.getElementById('swdTitle');
+      var elProg   = document.getElementById('swdProg');
+
+      // KICKER REVEAL is a load-in one-shot so the hero is COMPOSED AT REST (p=0 shows the
+      // kicker, alone). Its RECEDE is pin-driven (beat 1->2 below). reduced-motion: show it.
+      if (g) {
+        g.fromTo('#swdKicker', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 0.35 });
+      } else if (elKicker) {
+        elKicker.style.opacity = '1'; elKicker.style.transform = 'none';
+      }
+
+      // ---- THE ONE PIN (harness). pin:true + pinSpacing:true: the hero scroll-LOCKS
+      //      while the whole mechanic plays, and only releases when the story is done.
+      //      FOUR sequential beats off one scroll position; STRICTLY ONE composed text
+      //      block visible at a time; nothing dumps to a next section. ----------------
+      //   BEAT 1  p 0    -> 0.16 : kicker reveals + HOLDS alone (top-left). House begins opening.
+      //   BEAT 1->2 .16  -> 0.26 : kicker RECEDES (lifts + fades to 0) BEFORE the headline rises.
+      //   BEAT 2  p 0.27 -> 0.50 : headline assembles WORD BY WORD, alone. House keeps opening.
+      //   BEAT 3  p 0.50 -> 1    : headline eases up+out; pin-story brings block1 then block2,
+      //                            one settled at a time (no overlap, no full-screen wall).
+      var B_STORY = 0.50;   // where the headline hands off to the pin-story
+      var HEAD_IN = 0.27, HEAD_FULL = 0.50;  // headline word-assembly window (kicker gone by 0.26)
+      var lastPhase = -1;   // only re-prime layers on phase change
+
+      // per-driver memo: skip redundant style writes when the input value is unchanged
+      // (the big jank lever: split-word writes every word span, so guard it hard).
+      var mSwh = -1, mRss = -1, mPst = -1, mProg = -1, mKick = '', mPlate = '', mStage = -1;
+      function setSwh(v){ if (v !== mSwh && swh && swh.set){ swh.set(v); mSwh = v; } }
+      function setRss(v){ v = +v.toFixed(3); if (v !== mRss && rss && rss.set){ rss.set(v); mRss = v; } } // 0.001 scale = sub-pixel, invisible, skips writes
+      function setPst(v){ if (v !== mPst && pst && pst.set){ pst.set(v); mPst = v; } }
+
+      var st = SectionHarness.pin('#combo', { end: '+=300%', scrub: 1 });
+      if (st) st.onUpdate = function (p) {
+        // quiet progress hairline (direct transform write, GPU; guarded)
+        var pr = +p.toFixed(3);
+        if (elProg && pr !== mProg) { elProg.style.transform = 'scaleX(' + pr + ')'; mProg = pr; }
+
+        if (p < B_STORY) {
+          // ===== BEATS 1 + 2 : kicker, then headline (one at a time) =====
+          if (lastPhase !== 0) { // entering the assemble phase: prime layers, hide story
+            if (pstStage) { pstStage.style.opacity = '0'; mStage = 0; }
+            setPst(0);
+            if (elPlate) { elPlate.style.transform = 'translate3d(0,0,0)'; elPlate.style.opacity = '1'; mPlate = 'in'; }
+            if (elTitle) { elTitle.style.opacity = '1'; }   // restore title own-opacity on scroll-up reversal
+            lastPhase = 0;
+          }
+
+          // BEAT 1 : kicker revealed by the LOAD-IN tween + HOLDS alone (pin leaves it be).
+          // BEAT 1->2 : the pin RECEDES it (lifts + fades to 0) over p .16 -> .26, BEFORE the
+          // headline rises, so kicker and headline never co-exist. (guarded)
+          var kOut = ss(0.16, 0.26, p);   // 0 until p=.16, then 0 -> 1
+          if (kOut > 0) {
+            var kOp = (1 - kOut).toFixed(3);
+            var kY  = (-12 * kOut).toFixed(1);
+            var kKey = kOp + '|' + kY;
+            if (elKicker && kKey !== mKick) {
+              elKicker.style.opacity = kOp;
+              elKicker.style.transform = 'translate3d(0,' + kY + 'px,0)';
+              mKick = kKey;
+            }
+          } else if (mKick !== 'rest') {
+            // back above the recede zone (scroll-up): hand the kicker back to its settled rest
+            if (elKicker) { elKicker.style.opacity = '1'; elKicker.style.transform = 'translate3d(0,0,0)'; }
+            mKick = 'rest';
+          }
+
+          // BEAT 2 : headline assembles word by word, only AFTER the kicker is gone. (guarded)
+          var ph = (p - HEAD_IN) / (HEAD_FULL - HEAD_IN);
+          ph = +(ph < 0 ? 0 : (ph > 1 ? 1 : ph)).toFixed(3);
+          setSwh(ph);
+
+          // the house opens through the assemble phase (first ~half of the push-in)
+          setRss((p / B_STORY) * 0.5);
+
+        } else {
+          // ===== BEAT 3 : headline leaves CLEAN, THEN pin-story enters (no co-visibility) =====
+          // CLEAN HANDOFF (driven purely off the single pin progress p, reversible):
+          //   p .45 -> .55 : the headline GROUP (and the .swd__title itself) fades + rises to 0.
+          //   p .55 -> .66 : ONLY THEN the first story block rises into its settled plateau.
+          // There is a brief empty-ish window (~p .53 -> .60) where neither is at op>=.85,
+          // so at every scroll position at most ONE text element is fully composed.
+          var pB = (p - B_STORY) / (1 - B_STORY); // 0..1 within the story phase
+          if (lastPhase !== 1) {
+            if (elKicker && mKick !== '0') { elKicker.style.opacity = '0'; mKick = '0'; } // kicker stays gone
+            setSwh(1);                                                                     // headline fully built
+            lastPhase = 1;
+          }
+          // built headline eases up + out: fully gone by p=0.55 (BEFORE any block settles).
+          // Opacity is written on BOTH the plate group AND the .swd__title node so the title's
+          // own computed opacity drops to 0 (the plate is just an ancestor wrapper).
+          var exit = +ease(ss(0.45, 0.55, p)).toFixed(3);     // 0 at p<=.45 -> 1 at p>=.55
+          var plKey = exit.toString();
+          if (plKey !== mPlate) {
+            var headOp = (1 - exit).toFixed(3);
+            if (elPlate) {
+              elPlate.style.transform = 'translate3d(0,' + (-10 * exit).toFixed(2) + '%,0)';
+              elPlate.style.opacity = headOp;
+            }
+            if (elTitle) elTitle.style.opacity = headOp;
+            mPlate = plKey;
+          }
+          // continue the slow push-in through the story
+          setRss(0.5 + pB * 0.5);
+          // STORY STAGE fades in only AFTER the headline is gone (p .55 -> .62), so the stage
+          // container never carries a visible block while the headline is still up.
+          var stageIn = +ss(0.55, 0.62, p).toFixed(3);
+          if (stageIn !== mStage) { if (pstStage) pstStage.style.opacity = stageIn.toFixed(3); mStage = stageIn; }
+          // THE STORY SEQUENCER (no overlap, one at a time): map p to the atom's progress q.
+          //   p < .55      : q held FAR below block1's plateau (block1 own-opacity ~0).
+          //   p .55 -> .66 : q rises -0.12 -> 0.25  (block1 enters; crosses op .85 ~p .62, AFTER
+          //                  the headline is gone at .55 -> clean gap, never co-visible).
+          //   p .66 -> .78 : q = 0.25 (block1 settled, alone).
+          //   p .78 -> .92 : q rises 0.25 -> 0.75 (block1 leaves AS block2 enters, atom keeps 1 at a time).
+          //   p >= .92     : q = 0.75 (block2 settled, alone, to the end).
+          var q;
+          if (p < 0.55)      q = -0.12;
+          else if (p < 0.66) q = -0.12 + ((p - 0.55) / 0.11) * 0.37;
+          else if (p < 0.78) q = 0.25;
+          else if (p < 0.92) q = 0.25 + ((p - 0.78) / 0.14) * 0.50;
+          else               q = 0.75;
+          setPst(+q.toFixed(3));
+        }
+      };
+
+      // prime BEAT 1 at rest (p=0): kicker hidden, headline hidden, house at start.
+      if (swh && swh.set) swh.set(0);
+      if (rss && rss.set) rss.set(0);
+
+      // ONE pin, owned by the harness. The two helper atoms run pure set(p) (their own
+      // ScrollTriggers were killed). pin-story owns_pin normally, but here the harness
+      // is the single scroll owner -> expectPins:1 (a REAL pin), no pin-fight.
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['render-scroll-scale', 'split-word-headline', 'pin-story-text', 'corner-frame-meta']
+      });
+    })();
+  </script>
+</body>
+</html>

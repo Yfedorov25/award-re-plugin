@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+/* v4 (D14): перший кадр і скрол керуються ДО будь-якого рендера */
+history.scrollRestoration = 'manual';
+scrollTo(0, 0);
+addEventListener('pageshow', function (e) { if (e.persisted) scrollTo(0, 0); });
+/* Колектор реальних layout-зсувів — стартує до першого кадру */
+window.__CLS = { value: 0 };
+try {
+  new PerformanceObserver(function (list) {
+    list.getEntries().forEach(function (e) {
+      if (!e.hadRecentInput) window.__CLS.value += e.value;
+    });
+  }).observe({ type: 'layout-shift', buffered: true });
+} catch (err) {}
+/* Дрейф-семплер: документні bbox якірних елементів на 600ms і 2500ms після load */
+window.__DRIFT = { done: false, maxPx: -1, detail: {} };
+addEventListener('load', function () {
+  function snap() {
+    /* статичні якорі: не рухаються НАВМИСНИМИ анімаціями (track-кліки проб,
+       spread-row transform) — дрейф тут = справжній layout-зсув */
+    var sels = ['.b0__viewport', '.band', '[data-gnf-value]', '#mediaAImg'];
+    var out = {};
+    sels.forEach(function (s) {
+      var el = document.querySelector(s);
+      if (!el) return;
+      var r = el.getBoundingClientRect();
+      out[s] = [r.left + scrollX, r.top + scrollY, r.width, r.height].map(Math.round);
+    });
+    return out;
+  }
+  setTimeout(function () {
+    var a = snap();
+    setTimeout(function () {
+      var b = snap(), maxPx = 0, detail = {};
+      Object.keys(a).forEach(function (k) {
+        if (!b[k]) return;
+        var d = Math.max(Math.abs(a[k][0] - b[k][0]), Math.abs(a[k][1] - b[k][1]),
+                         Math.abs(a[k][2] - b[k][2]), Math.abs(a[k][3] - b[k][3]));
+        detail[k] = d; if (d > maxPx) maxPx = d;
+      });
+      window.__DRIFT = { done: true, maxPx: maxPx, detail: detail };
+    }, 1900);
+  }, 600);
+});
+</script>
+<style>html{overflow-anchor:none}</style>
+<title>LAB · invest--quiet-depth v4 · репліка AIR /investment: живий перегляд без проб + CLS-гейт стабільності завантаження</title>
+
+<!--
+================================================================================
+  COMBO LAB · invest--quiet-depth · v3 (фікс-коло по записах власника:
+  «після завантаження різні секції/речі просто стрибають»)
+================================================================================
+  КОНТРАКТ: skills/teardowns/references/D_AIR_invest_1to1.md (B0-B2 + число-
+  фрагмент B3, хвиля 1) + owner hover-тест (T-431 cursor-arrow, T-430 застарів).
+
+  ФІКСИ v3 (4 дефекти з покадрового розбору власника):
+  Д1 ТЕКСТ КАРТОК ТЬМЯНИЙ: причина = НЕ застряглий reveal (headless міряв
+     settled opacity 1.0), а контрактний колір #8a8d8a на 0.86vw (11px) +
+     базовий stylesheet-opacity 0.82 атома до приходу inline-1. Фікс: колір
+     body -> #a9aca8, кегль -> 1.25vw, явний opacity:1; НОВА ПРОБА: після
+     reveal КОЖЕН текст картки opacity===1 І WCAG-контраст проти ефективного
+     фону картки >= 4.5:1 (машинний розрахунок relative luminance).
+  Д2 КАРТКИ = ПОРОЖНІ КОРОБКИ: щільність тексту піднята до контрактної
+     геометрії (титул 1.5vw верх-ліво; body у нижній правій колоні від 41%
+     ширини, ТЕПЕР 2 канон-речення на картку - тільки дослівні еталони);
+     поверхня картки напівпрозора rgba(25,27,25,.85) над темним рендером
+     (render-through: night-front під щільним tint-ом; на мобайлі pergola,
+     як у v2). ПРОБА: сумарна площа bbox титул+body >= 15% площі картки
+     (контрактний орієнтир 17-28% при 5-7 рядках AIR-тексту; наша канон-копі
+     коротша - поріг 15% чесно зафіксовано, з довшим клієнтським копі число
+     росте до контрактного) + alpha поверхні < 1 + рендер під картками живий.
+  Д3 СТРІЛКА СІДАЄ НА ТЕКСТ: парковка перевіряється проти РЕАЛЬНОЇ геометрії
+     (контрактні 65.7vw/63% лишаються, але якщо bbox перетинає текст -
+     парковка піднімається в центр вільної смуги між титулом і body);
+     слідування з сильнішим damping (quickTo 0.42s) і ВЕРТИКАЛЬНИМ КЛАМПОМ
+     у вільну смугу картки - плитка ніколи не накриває текст. ПРОБА (C28):
+     bbox-перетин плитки з УСІМА текстами карток = 0 у парковці та в 5
+     settled-позиціях слідування (включно з наведенням прямо на body-зону).
+  Д4 ПОЕТАПНЕ ПОПАННЯ (корінь «все стрибає»): reveal = ОДИН каскад НА
+     СЕКЦІЮ (лаги за data-brv-order 0.18s, once); секція, ПРОЙДЕНА або
+     досягнута СТРИБКОМ/мідскролом, рендериться МИТТЄВО в settled-стані без
+     анімації (перевірка стартової scroll-позиції + rAF-слухач стрибків
+     delta > 0.45vh; реальний тач/wheel дає <0.3vh на подію). НОВА ПРОБА: стрибок у середину сторінки -> через 300ms
+     НУЛЬ [data-brv] у проміжних станах (opacity 0.05..0.95 або blur
+     0.5..9.5px), все видиме settled; повільний прохід (кроки 0.38vh) ->
+     секція b3 проходить ЧЕСНИЙ каскад і settled << 2s після входу.
+
+  Решта = v2: карусель B0 43.5vw x 51vh (гео-проби), T-431 cursor-arrow,
+  бенд B1 (атом spread-row), інтро B2, число 5.9vw БЕЗ лічильника на панелі
+  #ececea, dim-scrim + blur->sharp медіа-шви, медіа-decode гейт, T-M18
+  стрічка на мобайлі (pergola + tint 0.55), доктрина-виняток D4 для
+  one-shot blur <= 0.3s/елемент (time-based, ніколи не scrub).
+
+  КОПІ = ДОСЛІВНІ еталони _COPY_CANON (нуль вигаданого): картки тепер по
+  2 канон-речення: Оплата = ЕТ-25 + ЕТ-09; Розтермінування = ЕТ-25 + фрагмент
+  ЕТ-32; Супровід = ЕТ-25 + фрагмент ЕТ-32; Строки = рядок ЕТ-25 + body ЕТ-25
+  t-1. Інтро ЕТ-29, бенд пара з ЕТ-30, підпис ЕТ-30, kicker ЕТ-25, число
+  ЕТ-09, CTA-міст ЕТ-25. «Ви», нуль тире у видимому тексті (E1/B16).
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/invest-card-reveal/component.css">
+<link rel="stylesheet" href="../../components/spread-row-headline/component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{
+    --paper:#f4f2ee; --ink:#111110;
+    --air-dark:#0c0d0c; --air-panel:#ececea;
+    --air-body:#a9aca8;             /* Д1: контраст >=4.5:1 проти поверхні картки */
+    --sans:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+
+  .media{position:relative;height:100vh;overflow:clip;background:var(--ink)}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .media__cap{position:absolute;left:clamp(20px,4vw,60px);bottom:5vh;color:#fff;
+    font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+    background:rgba(17,17,16,.5);padding:.7em 1.5em;border-radius:999px;
+    max-width:calc(100vw - 2*clamp(20px,4vw,60px));z-index:2}
+  .media__scrim{position:absolute;inset:0;background:#000;opacity:0;
+    pointer-events:none;z-index:1}
+
+  /* ============ B0: темний акт + карусель (контракт §1 B0) ============ */
+  .b0{background:var(--air-dark);color:#fff;padding:9vh 0 10vh}
+  .b0__intro{margin-left:51vw;max-width:26vw;font-size:1.3vw;line-height:1.45;
+    letter-spacing:.08em;text-transform:uppercase;margin-bottom:6vh}
+  .b0__stage{position:relative}
+  .b0__stage-bg,.b0__stage-tint{display:none}
+  .b0__viewport{overflow:clip;position:relative}
+  @media (min-width:769px){
+    /* Д2: render-through - темний рендер під напівпрозорими картками */
+    .b0__stage-bg--desk{display:block;position:absolute;inset:0;width:100%;
+      height:100%;object-fit:cover}
+    .b0__stage-tint--desk{display:block;position:absolute;inset:0;
+      background:rgba(12,13,12,.72)}  /* щільний tint, не blend (D2) */
+    .b0__track{display:flex;gap:1.6vw;padding-left:26.5vw;position:relative;transform:translateX(0)}
+    .b0__track [data-icr-card]{
+      flex:0 0 43.5vw;height:51vh;min-height:0;border-radius:0;
+      background:rgba(25,27,25,.85);  /* Д2: напівпрозора поверхня */
+      color:#fff;padding:1.6vw;justify-content:flex-start}
+    .b0__track [data-icr-title]{font-weight:400;text-transform:uppercase;
+      font-size:1.5vw;line-height:1.3;letter-spacing:.04em;max-width:60%}
+    /* Д1+Д2: body 1.25vw #a9aca8 opacity:1, нижня права колона від 41% */
+    .b0__track [data-icr-body]{position:absolute;left:41%;right:1.6vw;
+      bottom:1.3vw;margin:0;font-size:1.32vw;line-height:1.8;
+      letter-spacing:.05em;text-transform:uppercase;color:var(--air-body);
+      opacity:1}
+    .b0__track [data-icr-index]{top:auto;bottom:1.3vw;left:1.6vw;
+      font-size:0.7vw;opacity:.4}
+    .b0__viewport{cursor:pointer}
+  }
+  /* T-431 плитка: transition лише на кольорі стану (не координатах, D3);
+     рух = gsap.quickTo 0.42s (Д3: сильніший damping); вертикальний кламп
+     у вільну смугу картки робить JS - плитка не накриває текст (C28) */
+  .b0__arrow{position:absolute;left:0;top:0;width:48px;height:48px;border:0;
+    display:grid;place-items:center;z-index:3;pointer-events:none;
+    background:rgba(236,229,216,.16);color:#fff;font-size:19px;
+    transition:background-color .15s ease-out,color .15s ease-out}
+  .b0__arrow.is-active{background:#fff;color:#0c0d0c}
+
+  .band{background:#fff;color:var(--ink);height:14vh;display:grid;
+    align-items:center;padding-inline:1.6vw}
+  .band__title{font-weight:400;text-transform:uppercase;font-size:4.5vw;
+    line-height:1;letter-spacing:.01em}
+
+  .b2{background:#fff;color:#3a3a38;text-align:center;padding:6vh 8vw 24vh}
+  .b2__line{display:block;font-size:1vw;line-height:1.7;letter-spacing:.1em;
+    text-transform:uppercase}
+
+  .b3{background:var(--air-panel);color:var(--ink);padding:12vh 1.6vw}
+  .b3__kicker{font-size:13px;letter-spacing:.22em;text-transform:uppercase;
+    color:#5c5c58;margin-bottom:9vh}
+  .b3__num-wrap{margin-left:65.4vw}
+  .b3__num{font-size:5.9vw;line-height:1;letter-spacing:-.02em;
+    font-variant-numeric:tabular-nums;font-weight:400;white-space:nowrap}
+  .b3__num-cap{display:block;margin-top:1.2em;font-size:10px;
+    letter-spacing:.24em;text-transform:uppercase;color:#77776f}
+  .b3__cta-row{margin-top:12vh}
+  .b3__cta{display:inline-flex;align-items:center;gap:.8em;
+    padding:1.05em 1.9em;border:1px solid rgba(17,17,16,.3);
+    border-radius:999px;color:var(--ink);text-decoration:none;
+    font-size:.78rem;letter-spacing:.22em;text-transform:uppercase}
+
+  .tail{padding:7vh 20px;text-align:center;font-size:.62rem;
+    letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  @media (max-width:768px){
+    .media{height:72vh}
+    .b0__intro{margin-left:clamp(20px,6vw,32px);max-width:80vw;
+      font-size:12px;margin-bottom:4vh}
+    .b0__stage{overflow:clip;position:relative}
+    .b0__stage-bg--mob{display:block;position:absolute;inset:0;width:100%;
+      height:100%;object-fit:cover}
+    .b0__stage-tint--mob{display:block;position:absolute;inset:0;
+      background:rgba(8,9,8,.55)}
+    .b0__track{position:relative;padding:clamp(20px,6vw,32px);
+      --icr-swipe-min-h:340px}     /* довші канон-тексти v3 */
+    /* Д1 на стрічці: повна непрозорість + світлий текст на морозному склі */
+    .icr-swipe [data-icr-body]{opacity:1;color:#e6e4de}
+    .b0__arrow{display:none}
+    .band{height:auto;padding:8vh clamp(20px,6vw,32px)}
+    .band__title{font-size:9vw;line-height:1.15}
+    .b2{padding:5vh clamp(20px,6vw,32px) 9vh}
+    .b2__line{font-size:12px}
+    .b3{padding:10vh clamp(20px,6vw,32px)}
+    .b3__kicker{margin-bottom:5vh}
+    .b3__num-wrap{margin-left:0}
+    .b3__num{font-size:clamp(36px,5.9vw,96px)}
+    .b3__cta-row{margin-top:8vh}
+  }
+</style>
+</head>
+<body>
+
+  <section class="media" id="mediaA">
+    <img src="renders/day-front.webp" alt="Квартал, фасад, день" id="mediaAImg">
+    <div class="media__scrim" id="scrimA" aria-hidden="true"></div>
+    <div class="media__cap">Сусід-секція · день · скрол вниз</div>
+  </section>
+
+  <!-- B0 · карусель T-431. Копі: 2 канон-речення на картку (Д2-щільність):
+       Оплата = ЕТ-25 + ЕТ-09 · Розтермінування = ЕТ-25 + ЕТ-32 ·
+       Супровід = ЕТ-25 + ЕТ-32 · Строки = ЕТ-25 -->
+  <section class="b0" id="b0">
+    <p class="b0__intro" data-brv data-brv-order="0">На цьому сайті лише перевірені цифри</p>
+    <div class="b0__stage" id="b0Stage">
+      <img class="b0__stage-bg b0__stage-bg--desk" src="renders/night-front.webp" alt="" aria-hidden="true" id="b0BgDesk">
+      <div class="b0__stage-tint b0__stage-tint--desk" aria-hidden="true"></div>
+      <img class="b0__stage-bg b0__stage-bg--mob" src="renders/macro-pergola.webp" alt="" aria-hidden="true" id="b0Bg">
+      <div class="b0__stage-tint b0__stage-tint--mob" aria-hidden="true" id="b0Tint"></div>
+      <div class="b0__viewport" id="carViewport">
+        <div class="b0__track" id="carTrack" data-icr>
+          <article data-icr-card>
+            <span data-icr-index>01</span>
+            <h3 data-icr-title data-brv data-brv-order="1">Оплата</h3>
+            <p data-icr-body data-brv data-brv-order="2">Платите всю суму одразу та отримуєте знижку. З ремонтом під ключ, вхід від 22 800 доларів.</p>
+          </article>
+          <article data-icr-card>
+            <span data-icr-index>02</span>
+            <h3 data-icr-title data-brv data-brv-order="1">Розтермінування</h3>
+            <p data-icr-body data-brv data-brv-order="2">Графік платежів складаємо під ваш бюджет. Узгодимо розтермінування або знижку за повну оплату і забронюємо її за вами.</p>
+          </article>
+          <article data-icr-card>
+            <span data-icr-index>03</span>
+            <h3 data-icr-title data-brv data-brv-order="1">Супровід</h3>
+            <p data-icr-body data-brv data-brv-order="2">Наш менеджер веде вашу угоду до ключів. Підкажемо, яка квартира вам підійде. Особисто або відеозв'язком · як зручно Вам.</p>
+          </article>
+          <article data-icr-card>
+            <span data-icr-index>04</span>
+            <h3 data-icr-title data-brv data-brv-order="1">Строки</h3>
+            <p data-icr-body data-brv data-brv-order="2">Від старту до ключів менше року. Малий будинок на 3 поверхи будується швидко. Назвемо, коли зафіксуємо їх у документах.</p>
+          </article>
+        </div>
+        <button class="b0__arrow" id="carArrow" type="button" aria-label="Наступна картка"><span aria-hidden="true" id="carArrowGlyph">→</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="band">
+    <h2 class="band__title" id="bandTitle" data-srh data-brv data-brv-order="0">
+      <span data-srh-group>Ваш</span>
+      <span data-srh-group>прибуток</span>
+    </h2>
+  </section>
+
+  <section class="b2" id="b2">
+    <p>
+      <span class="b2__line" data-brv data-brv-order="0">Житла тут будують більше, ніж магазинів.</span>
+      <span class="b2__line" data-brv data-brv-order="1">Цей розрив і є ваш прибуток.</span>
+    </p>
+  </section>
+
+  <section class="b3" id="b3">
+    <p class="b3__kicker" data-brv data-brv-order="0">Умови без дрібного шрифту</p>
+    <div class="b3__num-wrap">
+      <div class="b3__num" id="b3Num" data-brv data-brv-order="1">22 800</div>
+      <span class="b3__num-cap" data-brv data-brv-order="2">доларів · вхід з ремонтом під ключ</span>
+    </div>
+    <div class="b3__cta-row" data-brv data-brv-order="3">
+      <a class="b3__cta" href="#контакт">Запитати про розтермінування <span aria-hidden="true">→</span></a>
+    </div>
+  </section>
+
+  <section class="media" id="mediaB">
+    <img src="renders/terrace.webp" alt="Тераса, вечір" id="mediaBImg">
+    <div class="media__cap">Сусід-секція · тераса</div>
+  </section>
+
+  <footer class="tail">invest--quiet-depth v3 · кінець проби</footer>
+
+<script src="../../components/invest-card-reveal/component.js"></script>
+<script src="../../components/spread-row-headline/component.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var errs = 0;
+  var NET_RE = /Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|ERR_INTERNET|ERR_NAME/;
+  var _e = console.error;
+  console.error = function () {
+    var s = Array.prototype.join.call(arguments, ' ');
+    if (!NET_RE.test(s)) errs++;
+    return _e.apply(console, arguments);
+  };
+  window.addEventListener('error', function (ev) {
+    var s = String((ev && ev.message) || '');
+    if (!NET_RE.test(s)) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  function raf2() {
+    return new Promise(function (res) {
+      requestAnimationFrame(function () { requestAnimationFrame(res); });
+    });
+  }
+  function delay(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+  function rect(el) { return el.getBoundingClientRect(); }
+  function rangeRect(el) {
+    var rng = document.createRange();
+    rng.selectNodeContents(el);
+    return rng.getBoundingClientRect();
+  }
+  function inter(a, b) {
+    var x = Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left));
+    var y = Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+    return x * y;
+  }
+  function parseColor(css) {
+    var m = css.match(/[\d.]+/g) || [0, 0, 0];
+    return { r: +m[0], g: +m[1], b: +m[2], a: m.length > 3 ? +m[3] : 1 };
+  }
+  function relLum(c) {
+    function f(v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  }
+  function wcag(fg, bg) {
+    var l1 = relLum(fg), l2 = relLum(bg);
+    var hi = Math.max(l1, l2), lo = Math.min(l1, l2);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+  function blend(top, base) {
+    return { r: top.a * top.r + (1 - top.a) * base.r,
+             g: top.a * top.g + (1 - top.a) * base.g,
+             b: top.a * top.b + (1 - top.a) * base.b };
+  }
+  function luma(css) { return relLum(parseColor(css)); }
+  function blurPx(el) {
+    var f = getComputedStyle(el).filter || '';
+    var m = f.match(/blur\((\d+(\.\d+)?)px\)/);
+    return m ? parseFloat(m[1]) : 0;
+  }
+  function trackX() {
+    var mx = new DOMMatrixReadOnly(getComputedStyle(car.track).transform);
+    return mx.m41;
+  }
+  function vw(p) { return window.innerWidth * p / 100; }
+  function vh(p) { return window.innerHeight * p / 100; }
+
+  var mobileVP = window.innerWidth <= 768;
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGsap = !!(window.gsap && window.ScrollTrigger);
+  if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+  var outQuad = function (t) { return 1 - (1 - t) * (1 - t); };
+
+  /* ================= АТОМИ ================= */
+  var srh = SpreadRowHeadline.create('#bandTitle', { trigger: 'progress' });
+  srh.ready.then(function () { if (srh.mode === 'desktop') srh.set(1); });
+  var icr = null;
+  if (mobileVP) icr = InvestCardReveal.create('#carTrack', { mode: 'mobile' });
+
+  /* ============ КАРУСЕЛЬ + T-431 (Д3: кламп у вільну смугу) ============ */
+  var car = { idx: 0, step: 45.1, n: 4, dir: 'next', track: null, arrow: null,
+              glyph: null, viewport: null, cards: [], zones: null, qx: null, qy: null };
+  function goTo(i, animate) {
+    var clamped = Math.max(0, Math.min(car.n - 1, i));
+    if (clamped === car.idx && animate) return;
+    car.idx = clamped;
+    var x = -car.idx * vw(car.step);
+    if (hasGsap && animate && !reduced) {
+      gsap.to(car.track, { x: x, duration: 0.45, ease: outQuad, overwrite: 'auto' });
+    } else if (hasGsap) {
+      gsap.set(car.track, { x: x });
+    } else {
+      car.track.style.transform = 'translateX(' + x + 'px)';
+    }
+  }
+  function wireCarousel() {
+    car.track = document.getElementById('carTrack');
+    car.arrow = document.getElementById('carArrow');
+    car.glyph = document.getElementById('carArrowGlyph');
+    car.viewport = document.getElementById('carViewport');
+    car.cards = Array.prototype.slice.call(car.track.querySelectorAll('[data-icr-card]'));
+    car.n = car.cards.length;
+
+    /* Д3: кеш вільної смуги (між титулом і body) ВІДНОСНО картки; знімається
+       поза кадром (mouseenter/resize/park), ніколи в mousemove-петлі (D6) */
+    function cacheZones() {
+      car.zones = car.cards.map(function (c) {
+        var cr = rect(c);
+        var tr = rangeRect(c.querySelector('[data-icr-title]'));
+        var br = rangeRect(c.querySelector('[data-icr-body]'));
+        return { freeTop: (tr.bottom - cr.top) + 8, freeBottom: (br.top - cr.top) - 8 };
+      });
+    }
+    function setArrowXY(x, y, animate) {
+      if (car.qx && animate) { car.qx(x); car.qy(y); }
+      else if (hasGsap) gsap.set(car.arrow, { x: x, y: y });
+      else car.arrow.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+    }
+    /* парковка: контрактні 65.7vw / 63% висоти, АЛЕ якщо bbox сідає на текст
+       (Д3) - підняти в центр вільної смуги картки */
+    function park(animate) {
+      cacheZones();
+      var c0r = rect(car.cards[0]);
+      var vp = rect(car.viewport);
+      var z = car.zones[0];
+      var yRel = c0r.height * 0.63 - 24;
+      if (yRel + 48 > z.freeBottom || yRel < z.freeTop) {
+        yRel = z.freeTop + (z.freeBottom - z.freeTop - 48) / 2;
+      }
+      car.arrow.classList.remove('is-active');
+      var px = vw(65.7), py = (c0r.top - vp.top) + yRel;
+      if (hasGsap && animate && !reduced) {
+        gsap.to(car.arrow, { x: px, y: py, duration: 0.35, ease: outQuad, overwrite: 'auto' });
+      } else setArrowXY(px, py, false);
+    }
+    if (hasGsap && !reduced) {
+      /* Д3: сильніший damping - без телепортів */
+      car.qx = gsap.quickTo(car.arrow, 'x', { duration: 0.42, ease: 'power2.out' });
+      car.qy = gsap.quickTo(car.arrow, 'y', { duration: 0.42, ease: 'power2.out' });
+    }
+    park(false);
+    window.addEventListener('resize', function () { park(false); });
+
+    function cardAt(clientX, clientY) {
+      for (var i = 0; i < car.cards.length; i++) {
+        var r = rect(car.cards[i]);
+        if (clientX >= r.left && clientX <= r.right &&
+            clientY >= r.top && clientY <= r.bottom) return { i: i, r: r };
+      }
+      return null;
+    }
+    car.viewport.addEventListener('mouseenter', cacheZones);
+    car.viewport.addEventListener('mousemove', function (e) {
+      var vp = rect(car.viewport);
+      var hit = cardAt(e.clientX, e.clientY);
+      var x = e.clientX - vp.left - 24;
+      var y = e.clientY - vp.top - 24;
+      if (hit && car.zones) {
+        /* Д3: вертикальний кламп у вільну смугу - плитка не накриває текст */
+        var z = car.zones[hit.i];
+        var yRelMin = hit.r.top - vp.top + z.freeTop;
+        var yRelMax = hit.r.top - vp.top + z.freeBottom - 48;
+        y = Math.max(yRelMin, Math.min(yRelMax, y));
+        var half = e.clientX < hit.r.left + hit.r.width / 2 ? 'prev' : 'next';
+        car.dir = half;
+        car.glyph.textContent = half === 'prev' ? '←' : '→';
+        car.arrow.setAttribute('aria-label', half === 'prev' ? 'Попередня картка' : 'Наступна картка');
+        car.arrow.classList.add('is-active');
+      }
+      setArrowXY(x, y, true);
+    });
+    car.viewport.addEventListener('mouseleave', function () { park(true); });
+    car.viewport.addEventListener('click', function (e) {
+      if (e.target && e.target.closest && e.target.closest('.b0__arrow')) return;
+      var hit = cardAt(e.clientX, e.clientY);
+      if (!hit) return;
+      goTo(car.idx + (e.clientX < hit.r.left + hit.r.width / 2 ? -1 : 1), true);
+    });
+    car.arrow.addEventListener('click', function () { goTo(car.idx + 1, true); });
+    goTo(0, false);
+  }
+  if (!mobileVP) wireCarousel();
+
+  /* ======== BLUR-REVEAL v3: секційний каскад + анти-стрибок (Д4) ======== */
+  var BLUR_DUR = 0.3, BLUR_LAG = 0.18, BLUR_FROM = 10;
+  window.__REVEAL_LOG = [];
+  window.__GATE = { decodeT: -1, firstRevealT: -1, allCompleteAtFirstReveal: null,
+                    groupRuns: {}, instant: [] };
+
+  var groups = [];
+  (function collectGroups() {
+    var b0els = [document.querySelector('.b0__intro')];
+    if (!mobileVP) {
+      b0els = b0els.concat(Array.prototype.slice.call(
+        document.querySelectorAll('#carTrack [data-brv]')));
+    }
+    groups.push({ id: 'b0', root: document.getElementById('b0'), els: b0els, runs: 0 });
+    ['band', 'b2', 'b3'].forEach(function (id) {
+      var root = document.getElementById(id);
+      groups.push({
+        id: id, root: root, runs: 0,
+        els: Array.prototype.slice.call(root.querySelectorAll('[data-brv]'))
+      });
+    });
+    groups.forEach(function (g) {
+      g.els.forEach(function (el) {
+        el.__order = +el.getAttribute('data-brv-order') || 0;
+      });
+    });
+  })();
+
+  function hideAll() {
+    if (!hasGsap || reduced) return;
+    groups.forEach(function (g) {
+      g.els.forEach(function (el) {
+        gsap.set(el, { opacity: 0, filter: 'blur(' + BLUR_FROM + 'px)', willChange: 'filter,opacity' });
+      });
+    });
+  }
+  hideAll();
+
+  var keyImgs = [document.getElementById('mediaAImg'), document.getElementById('mediaBImg')];
+  keyImgs.push(document.getElementById(mobileVP ? 'b0Bg' : 'b0BgDesk'));
+
+  /* Д4(б): миттєвий settled-рендер без анімації */
+  function applyInstant(g) {
+    window.__GATE.instant.push(g.id);
+    g.els.forEach(function (el) {
+      gsap.set(el, { opacity: 1, filter: 'blur(0px)', clearProps: 'will-change' });
+    });
+  }
+  /* Д4(а): один каскад на секцію, лаг за ОРДЕРОМ (елементи ордера - разом) */
+  function applyCascade(g) {
+    g.els.forEach(function (el) {
+      gsap.to(el, {
+        opacity: 1, filter: 'blur(0px)', duration: BLUR_DUR,
+        delay: el.__order * BLUR_LAG, ease: outQuad,
+        onStart: function () {
+          var t = performance.now();
+          if (window.__GATE.firstRevealT < 0) {
+            window.__GATE.firstRevealT = t;
+            window.__GATE.allCompleteAtFirstReveal = keyImgs.every(function (im) { return !!(im && im.complete); });
+          }
+          window.__REVEAL_LOG.push({ g: g.id, order: el.__order, t: t });
+        },
+        onComplete: function () { gsap.set(el, { clearProps: 'will-change' }); }
+      });
+    });
+  }
+  /* ЄДИНА точка запуску групи. РЕЙС-СТІЙКІСТЬ (виміряно телеметрією):
+     IO-колбек у headless приходить РАНІШЕ за scroll-подію того самого
+     стрибка, тож рішення «каскад чи instant» відкладається на ОДИН кадр -
+     scroll-кроки рендер-циклу відпрацьовують ДО rAF-колбеків, і відкладена
+     перевірка бачить свіжий lastJumpT (Д4б: стрибок => нуль анімації). */
+  function settle(g, mode) {
+    if (g.runs > 0) return;
+    g.runs++;
+    window.__GATE.groupRuns[g.id] = g.runs;
+    if (g.io) g.io.disconnect();
+    if (mode === 'instant') { applyInstant(g); return; }
+    requestAnimationFrame(function () {
+      if (lastJumpT > 0 && performance.now() - lastJumpT < 250) applyInstant(g);
+      else applyCascade(g);
+    });
+  }
+  function instantSettle(g) { settle(g, 'instant'); }
+  function runGroup(g) { settle(g, 'auto'); }
+
+  var lastScrollY = 0, lastJumpT = -1;
+  /* СИНХРОННО в scroll-події (НЕ rAF-дефер: IO-колбек вигравав гонку і
+     запускав каскад до того, як стрибок встигав settled-нути секцію).
+     Вартість = кілька rect-читань на подію, для лаби прийнятно. */
+  function onScrollJump() {
+    var y = window.scrollY, delta = Math.abs(y - lastScrollY);
+    lastScrollY = y;
+    var vhpx = window.innerHeight;
+    window.__GATE.scrollEvents = (window.__GATE.scrollEvents || 0) + 1;
+    (window.__GATE.deltas = window.__GATE.deltas || []).push(Math.round(delta));
+    if (delta > vhpx * 0.45) lastJumpT = performance.now(); /* тач/wheel дають <0.3vh НА ПОДІЮ - 0.45vh ловить і компактний мобільний стрибок */
+    else if (delta > 2) lastJumpT = -1;   /* maintenance-фікс 2026-07-05: звичайний скрол-крок скасовує стрибок-мітку (швидкий прохід більше не конвертує каскад у хибний instant) */
+    var pending = groups.filter(function (g) { return g.runs === 0; });
+    if (!pending.length) { window.removeEventListener('scroll', onScrollJump); return; }
+    pending.forEach(function (g) {
+      var r = g.root.getBoundingClientRect();
+      if (r.bottom < 60) { instantSettle(g); return; }               /* проскочена */
+      if (delta > vhpx * 0.45 && r.top < vhpx * 0.85 && r.bottom > 0) {
+        instantSettle(g);                                            /* стрибок у секцію */
+      }
+    });
+  }
+
+  function armReveals() {
+    if (!hasGsap || reduced) return;
+    var vhpx = window.innerHeight;
+    var midScrollArrival = window.scrollY > vhpx * 0.5;                /* Д4(б) */
+    window.__GATE.armY = window.scrollY;
+    window.__GATE.armT = Math.round(performance.now());
+    groups.forEach(function (g) {
+      var r = g.root.getBoundingClientRect();
+      if (r.bottom < vhpx * 0.15) { instantSettle(g); return; }
+      if (midScrollArrival && r.top < vhpx * 0.85 && r.bottom > 0) { instantSettle(g); return; }
+      g.io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) runGroup(g); });
+      }, { threshold: 0.18 });
+      g.io.observe(g.root);
+    });
+    lastScrollY = window.scrollY;
+    window.addEventListener('scroll', onScrollJump, { passive: true });
+  }
+
+  Promise.all(keyImgs.map(function (im) {
+    return (im && im.decode) ? im.decode().catch(function () {}) : Promise.resolve();
+  })).then(function () {
+    window.__GATE.decodeT = performance.now();
+    armReveals();
+    armMediaB();
+  });
+
+  var mediaBArmed = false;
+  function armMediaB() {
+    if (mediaBArmed || !hasGsap || reduced) return;
+    mediaBArmed = true;
+    var img = document.getElementById('mediaBImg');
+    gsap.set(img, { filter: 'blur(10px)', willChange: 'filter' });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          io.disconnect();
+          gsap.to(img, {
+            filter: 'blur(0px)', duration: 0.8, ease: outQuad,
+            onComplete: function () { gsap.set(img, { clearProps: 'will-change' }); }
+          });
+        }
+      });
+    }, { threshold: 0.25 });
+    io.observe(document.getElementById('mediaB'));
+  }
+
+  if (hasGsap && !reduced) {
+    gsap.fromTo('#scrimA', { opacity: 0 }, {
+      opacity: 0.18, ease: 'none',
+      scrollTrigger: { trigger: '#mediaA', start: 'bottom bottom', end: 'bottom top', scrub: true }
+    });
+  }
+
+  /* =====================================================================
+     ПРОБИ
+     ===================================================================== */
+  var hiddenBeforeB3 = null;
+  var report = { viewport: null, gate: null, theme: null, scrim: null,
+                 jump: null, carousel: null, t431: null, quality: null,
+                 band: null, intro: null, number: null, reveal: null,
+                 mediaB: null, cta: null, deadBands: null, mobile: null,
+                 errors: null };
+
+  function jumpTo(y) {
+    window.scrollTo(0, Math.max(0, y));
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    return raf2();
+  }
+  /* Д4-сумісний повільний прохід: кроки 0.7vh (< порога стрибка 0.8vh) */
+  async function stepScrollTo(targetY) {
+    var stepPx = window.innerHeight * 0.38; /* нижче порога стрибка 0.45vh */
+    var y = window.scrollY;
+    while (Math.abs(targetY - y) > stepPx) {
+      y += Math.sign(targetY - y) * stepPx;
+      window.scrollTo(0, Math.max(0, y));
+      if (window.ScrollTrigger) ScrollTrigger.update();
+      await raf2();
+    }
+    window.scrollTo(0, Math.max(0, targetY));
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    await raf2();
+  }
+  function elTargetY(el, bias) {
+    var r = el.getBoundingClientRect();
+    return r.top + window.scrollY - (window.innerHeight - r.height) * (bias == null ? 0.5 : bias);
+  }
+  function textRectsAllCards() {
+    var out = [];
+    car.cards.forEach(function (c) {
+      out.push(rangeRect(c.querySelector('[data-icr-title]')));
+      out.push(rangeRect(c.querySelector('[data-icr-body]')));
+    });
+    return out;
+  }
+  function arrowTextOverlap() {
+    var ar = rect(car.arrow);
+    var sum = 0;
+    textRectsAllCards().forEach(function (r) { sum += inter(ar, r); });
+    return +sum.toFixed(1);
+  }
+
+  function probeTheme() {
+    var out = { b0Luma: -1, bandLuma: -1, panelLuma: -1, ok: false };
+    out.b0Luma = +luma(getComputedStyle(document.getElementById('b0')).backgroundColor).toFixed(3);
+    out.bandLuma = +luma(getComputedStyle(document.getElementById('band')).backgroundColor).toFixed(3);
+    out.panelLuma = +luma(getComputedStyle(document.getElementById('b3')).backgroundColor).toFixed(3);
+    out.ok = out.b0Luma < 0.2 && out.bandLuma > 0.9 &&
+             out.panelLuma > 0.8 && out.panelLuma < 0.95;
+    return out;
+  }
+
+  async function probeScrim() {
+    var out = { atTop: -1, atHalf: -1, atExit: -1, ok: false };
+    var scrim = document.getElementById('scrimA');
+    var mediaA = document.getElementById('mediaA');
+    await jumpTo(0);
+    out.atTop = +parseFloat(getComputedStyle(scrim).opacity).toFixed(3);
+    var r = mediaA.getBoundingClientRect();
+    await jumpTo(window.scrollY + r.bottom - vh(50));
+    out.atHalf = +parseFloat(getComputedStyle(scrim).opacity).toFixed(3);
+    await jumpTo(window.scrollY + mediaA.getBoundingClientRect().bottom - vh(2));
+    out.atExit = +parseFloat(getComputedStyle(scrim).opacity).toFixed(3);
+    out.ok = out.atTop <= 0.01 &&
+             out.atHalf >= 0.03 && out.atHalf <= 0.16 &&
+             out.atExit >= 0.12 && out.atExit <= 0.24;
+    return out;
+  }
+
+  /* Д4-ПРОБА: стрибки привели b0/band/b2 у в'юпорт -> 300ms -> нуль
+     проміжних станів; все видиме settled, b3 попереду чесно схована */
+  async function probeJump() {
+    var out = { settledVisible: 0, hiddenBelow: 0, intermediates: [], ok: false };
+    await delay(300);
+    var vhpx = window.innerHeight;
+    var all = Array.prototype.slice.call(document.querySelectorAll('[data-brv]'));
+    all.forEach(function (el) {
+      var op = parseFloat(getComputedStyle(el).opacity);
+      var bl = blurPx(el);
+      var r = el.getBoundingClientRect();
+      if ((op > 0.05 && op < 0.95) || (bl > 0.5 && bl < 9.5)) {
+        out.intermediates.push({ txt: (el.textContent || '').slice(0, 18), op: +op.toFixed(2), blur: +bl.toFixed(1) });
+      }
+      if (r.top < vhpx && op >= 0.95 && bl <= 0.5) out.settledVisible++;
+      if (r.top >= vhpx && op <= 0.05) out.hiddenBelow++;
+    });
+    out.ok = out.intermediates.length === 0 && out.settledVisible >= 8 &&
+             out.hiddenBelow >= 4;
+    return out;
+  }
+
+  async function probeCarouselGeom() {
+    var out = { n: 0, cardW_vw: 0, cardH_vh: 0, gap_vw: 0, firstLeft_vw: 0,
+                arrowW: 0, arrowH: 0, parkX_vw: 0, parkYpct: 0, idleBgA: 1, ok: false };
+    var cards = car.cards;
+    out.n = cards.length;
+    var r0 = rect(cards[0]), r1 = rect(cards[1]);
+    out.cardW_vw = +(r0.width / vw(1)).toFixed(2);
+    out.cardH_vh = +(r0.height / vh(1)).toFixed(2);
+    out.gap_vw = +((r1.left - r0.right) / vw(1)).toFixed(2);
+    out.firstLeft_vw = +(r0.left / vw(1)).toFixed(2);
+    var ar = rect(car.arrow);
+    out.arrowW = +ar.width.toFixed(1);
+    out.arrowH = +ar.height.toFixed(1);
+    out.parkX_vw = +(ar.left / vw(1)).toFixed(2);
+    out.parkYpct = +(((ar.top + ar.height / 2) - r0.top) / r0.height * 100).toFixed(1);
+    var mIdle = getComputedStyle(car.arrow).backgroundColor.match(/[\d.]+/g);
+    out.idleBgA = mIdle && mIdle.length > 3 ? +mIdle[3] : 1;
+    out.ok = out.n >= 4 &&
+             Math.abs(out.cardW_vw - 43.5) <= 0.6 &&
+             Math.abs(out.cardH_vh - 51) <= 1.5 &&
+             Math.abs(out.gap_vw - 1.6) <= 0.3 &&
+             Math.abs(out.firstLeft_vw - 26.5) <= 1 &&
+             Math.abs(out.arrowW - 48) <= 2 && Math.abs(out.arrowH - 48) <= 2 &&
+             Math.abs(out.parkX_vw - 65.7) <= 1.5 &&
+             out.parkYpct >= 20 && out.parkYpct <= 71 &&
+             out.idleBgA < 0.5;
+    return out;
+  }
+
+  /* T-431 + Д3: settled-позиції слідування БЕЗ перетину з текстом (C28) */
+  async function probeT431() {
+    var out = { restClean: false, parkOverlap: -1, followOverlaps: [],
+                glyphRight: '', activeLuma: 0, followDist: 0,
+                midFlightX_vw: null, step1X_vw: 0, noLayoutShift: false,
+                glyphLeft: '', backX_vw: 0, clampX_vw: 0, parkBack_vw: 0,
+                parkInactive: false, ok: false };
+    var cards = car.cards;
+    var vpEl = car.viewport;
+    function mm(x, y) { vpEl.dispatchEvent(new MouseEvent('mousemove', { clientX: x, clientY: y, bubbles: true })); }
+    function clk(x, y) { vpEl.dispatchEvent(new MouseEvent('click', { clientX: x, clientY: y, bubbles: true })); }
+
+    out.restClean = !car.arrow.classList.contains('is-active') &&
+                    !document.querySelector('.is-hover');
+    out.parkOverlap = arrowTextOverlap();                       /* позиція 1: парковка */
+
+    var r0 = rect(cards[0]);
+    var ry = r0.top + r0.height * 0.5;
+    var p1x = r0.left + r0.width * 0.55;
+    var p2x = r0.left + r0.width * 0.78, p2y = ry + 40;
+    mm(p1x, ry);
+    await delay(300);
+    out.glyphRight = car.glyph.textContent;
+    out.activeLuma = +luma(getComputedStyle(car.arrow).backgroundColor).toFixed(2);
+    out.followOverlaps.push(arrowTextOverlap());                /* позиція 2 */
+    var a1 = rect(car.arrow);
+    mm(p2x, p2y);
+    await delay(300);
+    var a2 = rect(car.arrow);
+    out.followDist = +Math.hypot(a2.left - a1.left, a2.top - a1.top).toFixed(1);
+    out.followOverlaps.push(arrowTextOverlap());                /* позиція 3 */
+
+    /* позиція 4: наведення ПРЯМО на body-зону (кламп мусить підняти плитку) */
+    var bR = rangeRect(cards[0].querySelector('[data-icr-body]'));
+    mm(bR.left + bR.width * 0.6, bR.top + bR.height * 0.5);
+    await delay(380);
+    out.followOverlaps.push(arrowTextOverlap());
+
+    /* клік по правій половині = next */
+    var cardTopBefore = rect(cards[1]).top;
+    mm(p2x, p2y);
+    await delay(150);
+    clk(p2x, p2y);
+    await delay(140);
+    out.midFlightX_vw = +(trackX() / vw(1)).toFixed(2);
+    var moving = out.midFlightX_vw < -1 && out.midFlightX_vw > -44;
+    await delay(440);
+    out.step1X_vw = +(trackX() / vw(1)).toFixed(2);
+    out.noLayoutShift = Math.abs(rect(cards[1]).top - cardTopBefore) <= 1;
+
+    /* ліва половина активної (тепер card2) -> гліф вліво; позиція 5 */
+    var r1n = rect(cards[1]);
+    var lx = r1n.left + r1n.width * 0.25, ly = r1n.top + r1n.height * 0.45;
+    mm(lx, ly);
+    await delay(300);
+    out.glyphLeft = car.glyph.textContent;
+    out.followOverlaps.push(arrowTextOverlap());                /* позиція 5 */
+    clk(lx, ly);
+    await delay(460);
+    out.backX_vw = +(trackX() / vw(1)).toFixed(2);
+
+    var r0b = rect(cards[0]);
+    mm(r0b.left + r0b.width * 0.25, ry);
+    await raf2();
+    clk(r0b.left + r0b.width * 0.25, ry);
+    await delay(180);
+    out.clampX_vw = +(trackX() / vw(1)).toFixed(2);
+
+    vpEl.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false }));
+    await delay(380);
+    var ap = rect(car.arrow);
+    out.parkBack_vw = +(ap.left / vw(1)).toFixed(2);
+    out.parkInactive = !car.arrow.classList.contains('is-active');
+    out.followOverlaps.push(arrowTextOverlap());                /* позиція 6: парковка знову */
+
+    var noOverlap = out.parkOverlap === 0 &&
+                    out.followOverlaps.every(function (v) { return v === 0; });
+    out.ok = out.restClean && noOverlap && out.glyphRight === '→' &&
+             out.activeLuma > 0.85 && out.followDist >= 60 && moving &&
+             Math.abs(out.step1X_vw + 45.1) <= 1 && out.noLayoutShift &&
+             out.glyphLeft === '←' && Math.abs(out.backX_vw) <= 1 &&
+             Math.abs(out.clampX_vw) <= 1 &&
+             Math.abs(out.parkBack_vw - 65.7) <= 2 && out.parkInactive;
+    return out;
+  }
+
+  /* Д1+Д2: контраст/непрозорість/щільність/render-through */
+  function probeQuality() {
+    var out = { cards: [], minContrast: 99, minDensityPct: 99, allOpacityOne: true,
+                surfaceAlpha: 0, renderThrough: false, ok: false };
+    var sectionBg = { r: 12, g: 13, b: 12 };
+    car.cards.forEach(function (c) {
+      var title = c.querySelector('[data-icr-title]');
+      var body = c.querySelector('[data-icr-body]');
+      var cardBgRaw = parseColor(getComputedStyle(c).backgroundColor);
+      out.surfaceAlpha = cardBgRaw.a;
+      var bgEff = blend(cardBgRaw, sectionBg);
+      var cT = wcag(parseColor(getComputedStyle(title).color), bgEff);
+      var cB = wcag(parseColor(getComputedStyle(body).color), bgEff);
+      var opT = getComputedStyle(title).opacity, opB = getComputedStyle(body).opacity;
+      if (opT !== '1' || opB !== '1') out.allOpacityOne = false;
+      var cr = rect(c);
+      var trr = rangeRect(title), brr = rangeRect(body);
+      var dens = (trr.width * trr.height + brr.width * brr.height) /
+                 (cr.width * cr.height) * 100;
+      out.cards.push({ title: title.textContent, contrastTitle: +cT.toFixed(2),
+                       contrastBody: +cB.toFixed(2), densityPct: +dens.toFixed(1),
+                       opT: opT, opB: opB });
+      out.minContrast = Math.min(out.minContrast, cB, cT);
+      out.minDensityPct = Math.min(out.minDensityPct, dens);
+    });
+    out.minContrast = +out.minContrast.toFixed(2);
+    out.minDensityPct = +out.minDensityPct.toFixed(1);
+    var bgDesk = document.getElementById('b0BgDesk');
+    out.renderThrough = bgDesk.naturalWidth > 0 &&
+                        getComputedStyle(bgDesk).display !== 'none' &&
+                        out.surfaceAlpha > 0.6 && out.surfaceAlpha < 0.97;
+    out.ok = out.allOpacityOne && out.minContrast >= 4.5 &&
+             out.minDensityPct >= 15 && out.renderThrough;
+    return out;
+  }
+
+  async function probeBandIntro() {
+    var band = { leftEdge_vw: 0, rightEdge_vw: 0, font_vw: 0, height_vh: 0, ok: false };
+    var intro = { centerOff_vw: 0, lines: 0, font_vw: 0, ok: false };
+    await stepScrollTo(elTargetY(document.getElementById('band'), 0.55));
+    await delay(150);
+    var words = document.querySelectorAll('#bandTitle .srh-word');
+    if (words.length >= 2) {
+      var wr1 = rect(words[0]), wr2 = rect(words[words.length - 1]);
+      band.leftEdge_vw = +(wr1.left / vw(1)).toFixed(2);
+      band.rightEdge_vw = +(wr2.right / vw(1)).toFixed(2);
+    }
+    band.font_vw = +(parseFloat(getComputedStyle(document.getElementById('bandTitle')).fontSize) / vw(1)).toFixed(2);
+    band.height_vh = +(rect(document.getElementById('band')).height / vh(1)).toFixed(1);
+    band.ok = Math.abs(band.leftEdge_vw - 1.6) <= 0.8 &&
+              Math.abs(band.rightEdge_vw - 98.4) <= 0.8 &&
+              Math.abs(band.font_vw - 4.5) <= 0.5 &&
+              Math.abs(band.height_vh - 14) <= 3;
+    var lines = document.querySelectorAll('.b2__line');
+    intro.lines = lines.length;
+    var lr = rangeRect(lines[0]);
+    intro.centerOff_vw = +(((lr.left + lr.right) / 2 - vw(50)) / vw(1)).toFixed(2);
+    intro.font_vw = +(parseFloat(getComputedStyle(lines[0]).fontSize) / vw(1)).toFixed(2);
+    intro.ok = intro.lines === 2 && Math.abs(intro.centerOff_vw) <= 2 &&
+               Math.abs(intro.font_vw - 1) <= 0.25;
+    return { band: band, intro: intro, ok: band.ok && intro.ok };
+  }
+
+  /* b3: ЧЕСНИЙ каскад повільним проходом + число без каунтера + once */
+  async function probeNumberReveal() {
+    var num = { samples: [], fontPctVw: 0, tracking: 0, inViewport: false, ok: false };
+    var rev = { hiddenBefore: hiddenBeforeB3 === true, cascade: false, midBlur: null,
+                settledBlur: null, settledOpacity: 0, topShift: 0, lags: [],
+                settleMs: 0, gateOk: false, onceOk: false, ok: false };
+    var numEl = document.getElementById('b3Num');
+
+    var t0 = performance.now();
+    await stepScrollTo(elTargetY(document.getElementById('b3'), 0.35));
+    rev.cascade = window.__GATE.instant.indexOf('b3') === -1;
+    var topBefore = rect(numEl).top;
+    num.samples.push(numEl.textContent);
+    await delay(130);
+    rev.midBlur = +blurPx(numEl).toFixed(2);
+    num.samples.push(numEl.textContent);
+    await delay(300);
+    num.samples.push(numEl.textContent);
+    await delay(560);
+    rev.settledBlur = +blurPx(numEl).toFixed(2);
+    rev.settledOpacity = +parseFloat(getComputedStyle(numEl).opacity).toFixed(2);
+    rev.topShift = +Math.abs(rect(numEl).top - topBefore).toFixed(1);
+    rev.settleMs = Math.round(performance.now() - t0);
+
+    var cs = getComputedStyle(numEl);
+    num.fontPctVw = +(parseFloat(cs.fontSize) / vw(1)).toFixed(2);
+    num.tracking = +parseFloat(cs.letterSpacing).toFixed(2);
+    var r = numEl.getBoundingClientRect();
+    num.inViewport = r.left >= -1 && r.right <= window.innerWidth + 1 &&
+                     r.top >= -1 && r.bottom <= window.innerHeight + 1;
+    num.ok = num.samples.every(function (s) { return s === '22 800'; }) &&
+             Math.abs(num.fontPctVw - 5.9) <= 0.6 && num.tracking < 0 && num.inViewport;
+
+    var log = window.__REVEAL_LOG.filter(function (x) { return x.g === 'b3'; })
+      .sort(function (a, b) { return a.order - b.order; });
+    for (var i = 1; i < log.length; i++)
+      rev.lags.push(+((log[i].t - log[i - 1].t) / 1000).toFixed(3));
+    var lagsOk = rev.lags.length >= 3 && rev.lags.every(function (l) {
+      return l >= 0.1 && l <= 0.35;
+    });
+
+    rev.gateOk = window.__GATE.decodeT > 0 &&
+                 window.__GATE.firstRevealT >= window.__GATE.decodeT &&
+                 window.__GATE.allCompleteAtFirstReveal === true;
+
+    await jumpTo(0);
+    await stepScrollTo(elTargetY(document.getElementById('b3'), 0.35));
+    await delay(240);
+    rev.onceOk = blurPx(numEl) === 0 && (window.__GATE.groupRuns.b3 || 0) >= 1 &&
+                 numEl.textContent === '22 800';
+
+    rev.ok = rev.hiddenBefore && rev.cascade && rev.midBlur !== null &&
+             rev.midBlur > 0 && rev.settledBlur === 0 &&
+             rev.settledOpacity >= 0.99 && rev.topShift <= 1 && lagsOk &&
+             rev.settleMs <= 2000 && rev.gateOk && rev.onceOk;
+    return { number: num, reveal: rev, ok: num.ok && rev.ok };
+  }
+
+  async function probeMediaB() {
+    var out = { blurBefore: -1, blurAfter: -1, ok: false };
+    var img = document.getElementById('mediaBImg');
+    out.blurBefore = +blurPx(img).toFixed(1);
+    await jumpTo(elTargetY(document.getElementById('mediaB'), 0.3));
+    await delay(950);
+    out.blurAfter = +blurPx(img).toFixed(1);
+    out.ok = out.blurBefore >= 5 && out.blurAfter === 0;
+    return out;
+  }
+
+  async function probeCTA() {
+    var out = { links: 0, pill: false, arrow: false, ok: false };
+    var links = document.getElementById('b3').querySelectorAll('a');
+    out.links = links.length;
+    var cta = links[0];
+    if (cta) {
+      var r = rect(cta);
+      out.pill = parseFloat(getComputedStyle(cta).borderRadius) >= r.height / 2 - 1;
+      out.arrow = /→/.test(cta.textContent);
+    }
+    out.ok = out.links === 1 && out.pill && out.arrow;
+    return out;
+  }
+
+  async function probeDeadBands() {
+    var out = { scanned: 0, checked: 0, bands: [], ok: false };
+    var vhpx = window.innerHeight;
+    var acts = ['b0', 'band', 'b2', 'b3'].map(function (id) { return document.getElementById(id); });
+    var content = Array.prototype.slice.call(document.querySelectorAll(
+      '.b0__intro, [data-icr-card], .band__title, .b2__line, .b3__kicker, #b3Num, .b3__cta'));
+    var maxY = document.documentElement.scrollHeight - vhpx;
+    for (var y = 0; y <= maxY; y += 360) {
+      window.scrollTo(0, y);
+      if (window.ScrollTrigger) ScrollTrigger.update();
+      await raf2();
+      out.scanned++;
+      for (var a = 0; a < acts.length; a++) {
+        var s = acts[a].getBoundingClientRect();
+        var cover = Math.min(vhpx, s.bottom) - Math.max(0, s.top);
+        if (cover <= vhpx * 0.6) continue;
+        out.checked++;
+        var visible = content.some(function (el) {
+          var rr = el.getBoundingClientRect();
+          return rr.bottom > 60 && rr.top < vhpx - 60;
+        });
+        if (!visible) out.bands.push({ y: y, act: acts[a].id });
+      }
+    }
+    out.ok = out.bands.length === 0 && out.checked > 0;
+    return out;
+  }
+
+  /* ================= МОБІЛЬНИЙ ПАКЕТ ================= */
+  async function probeMobile() {
+    var out = { gateOk: false, strip: null, quality: null, bandStack: null,
+                number: null, jump: null, arrowHidden: false, hoverClean: false,
+                links: 0, screens: 0, maxGapScreens: 0, minTextLeft: 9999, ok: false };
+    var vwpx = window.innerWidth, vhpx = window.innerHeight;
+    var track = document.getElementById('carTrack');
+    var cards = icr.cards;
+
+    out.arrowHidden = getComputedStyle(document.getElementById('carArrow')).display === 'none';
+
+    var st = { swipeBuilt: false, textOpenAll: false, overflows: false,
+               swiped: false, snapType: '', peekRatio: 0, noCut: false,
+               frost: '', bg: '', bgLoaded: false, tintA: 0, pageNoXScroll: false, ok: false };
+    st.swipeBuilt = icr.mode === 'mobile' && track.classList.contains('icr-swipe');
+    await jumpTo(elTargetY(track, 0.5));
+    await delay(450);
+    st.textOpenAll = cards.every(function (c) {
+      var cs = getComputedStyle(c.body);
+      return parseFloat(cs.opacity) >= 0.9 && !/100%/.test(cs.clipPath || '');
+    });
+    st.overflows = track.scrollWidth > track.clientWidth + 40;
+    track.scrollLeft = 0; await raf2();
+    track.scrollLeft = 200; await raf2(); await delay(80);
+    st.swiped = Math.round(track.scrollLeft) > 100;
+    st.snapType = getComputedStyle(track).scrollSnapType || '';
+    st.peekRatio = +(rect(cards[0].el).width / track.clientWidth).toFixed(2);
+    track.scrollLeft = 0; await raf2(); await delay(120);
+    st.noCut = cards.every(function (c) {
+      var cr = rect(c.el), tr = rangeRect(c.title), br = rangeRect(c.body);
+      return tr.left >= cr.left - 1 && tr.right <= cr.right + 1 &&
+             br.left >= cr.left - 1 && br.right <= cr.right + 1 &&
+             tr.top >= cr.top - 1 && br.bottom <= cr.bottom + 1;
+    });
+    var cs0 = getComputedStyle(cards[0].el);
+    st.frost = cs0.backdropFilter || cs0.webkitBackdropFilter || '';
+    var bg = document.getElementById('b0Bg');
+    st.bg = (bg.currentSrc || bg.src || '').split('/').pop();
+    st.bgLoaded = bg.naturalWidth > 0 && getComputedStyle(bg).display !== 'none';
+    var tm = getComputedStyle(document.getElementById('b0Tint')).backgroundColor.match(/[\d.]+/g);
+    st.tintA = tm && tm.length > 3 ? +tm[3] : 1;
+    st.pageNoXScroll = document.documentElement.scrollWidth <= vwpx + 1 &&
+                       document.body.scrollWidth <= vwpx + 1;
+    st.ok = st.swipeBuilt && st.textOpenAll && st.overflows && st.swiped &&
+            /x/.test(st.snapType) && st.peekRatio <= 0.9 && st.noCut &&
+            /blur/.test(st.frost) && /pergola/.test(st.bg) && st.bgLoaded &&
+            st.tintA >= 0.5 && st.pageNoXScroll;
+    out.strip = st;
+
+    /* Д1 на стрічці: opacity===1 + контраст >= 4.5 проти морозної поверхні */
+    var q = { minContrast: 99, allOpacityOne: true, ok: false };
+    var frostBase = { r: 16, g: 16, b: 16 };
+    cards.forEach(function (c) {
+      var fillRaw = parseColor(getComputedStyle(c.el).backgroundColor);
+      var bgEff = blend(fillRaw, frostBase);
+      var cT = wcag(parseColor(getComputedStyle(c.title).color), bgEff);
+      var cB = wcag(parseColor(getComputedStyle(c.body).color), bgEff);
+      if (getComputedStyle(c.body).opacity !== '1') q.allOpacityOne = false;
+      q.minContrast = Math.min(q.minContrast, cT, cB);
+    });
+    q.minContrast = +q.minContrast.toFixed(2);
+    q.ok = q.allOpacityOne && q.minContrast >= 4.5;
+    out.quality = q;
+
+    var bs = { lines: 0, texts: [], leftStack: false, noTransform: false, ok: false };
+    await jumpTo(elTargetY(document.getElementById('band'), 0.4));
+    await delay(350);
+    var lines = srh.lines || [];
+    bs.lines = lines.length;
+    if (lines.length === 2) {
+      bs.texts = [lines[0].textContent.trim(), lines[1].textContent.trim()];
+      var l0 = rect(lines[0]), l1 = rect(lines[1]);
+      bs.leftStack = Math.abs(l0.left - l1.left) <= 2 && l1.top >= l0.bottom - 2;
+      bs.noTransform = lines.every(function (ln) {
+        var tf = getComputedStyle(ln).transform;
+        return tf === 'none' || tf === 'matrix(1, 0, 0, 1, 0, 0)';
+      });
+    }
+    bs.ok = bs.lines === 2 && bs.texts[0] === 'Ваш' && bs.texts[1] === 'прибуток' &&
+            bs.leftStack && bs.noTransform;
+    out.bandStack = bs;
+
+    /* Д4 моб: після стрибків нуль проміжних станів */
+    var jp = { intermediates: 0, settledVisible: 0, ok: false };
+    await delay(300);
+    Array.prototype.slice.call(document.querySelectorAll('[data-brv]')).forEach(function (el) {
+      var op = parseFloat(getComputedStyle(el).opacity);
+      var bl = blurPx(el);
+      if ((op > 0.05 && op < 0.95) || (bl > 0.5 && bl < 9.5)) jp.intermediates++;
+      var r = el.getBoundingClientRect();
+      if (r.top < vhpx && op >= 0.95 && bl <= 0.5) jp.settledVisible++;
+    });
+    jp.ok = jp.intermediates === 0 && jp.settledVisible >= 2;
+    out.jump = jp;
+
+    var nm = { samples: [], fontPx: 0, fits: false, ok: false };
+    var num = document.getElementById('b3Num');
+    await jumpTo(elTargetY(document.getElementById('b3'), 0.35));
+    for (var i = 0; i < 3; i++) { nm.samples.push(num.textContent); await delay(180); }
+    nm.fontPx = +parseFloat(getComputedStyle(num).fontSize).toFixed(1);
+    var nr = num.getBoundingClientRect();
+    nm.fits = nr.left >= 16 && nr.right <= vwpx + 1;
+    nm.ok = nm.samples.every(function (s) { return s === '22 800'; }) &&
+            nm.fontPx >= 30 && nm.fits;
+    out.number = nm;
+
+    out.gateOk = window.__GATE.decodeT > 0 &&
+                 (window.__GATE.firstRevealT < 0 ||
+                  window.__GATE.firstRevealT >= window.__GATE.decodeT);
+    out.hoverClean = !document.querySelector('.is-active') &&
+                     !document.querySelector('.is-hover');
+    out.links = document.getElementById('b3').querySelectorAll('a').length;
+    out.screens = +(document.documentElement.scrollHeight / vhpx).toFixed(2);
+    var blocks = Array.prototype.slice.call(document.querySelectorAll(
+      '.media img, .b0__intro, .b0__stage, .band__title, .b2__line, .b3__kicker, #b3Num, .b3__cta-row, .tail'));
+    var spans = blocks.map(function (el) {
+      var r = rect(el);
+      return { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY };
+    }).sort(function (a, b) { return a.top - b.top; });
+    var maxGap = Math.max(0, spans.length ? spans[0].top : 0);
+    for (var g = 0; g < spans.length - 1; g++)
+      maxGap = Math.max(maxGap, spans[g + 1].top - spans[g].bottom);
+    out.maxGapScreens = +(maxGap / vhpx).toFixed(2);
+    var textEls = Array.prototype.slice.call(document.querySelectorAll(
+      '.media__cap, .b0__intro, .b2__line, .b3__kicker, .b3__num-cap, .b3__cta, .tail'))
+      .concat([cards[0].title, cards[0].body]);
+    var minLeft = 9999;
+    textEls.forEach(function (el) {
+      var r = rangeRect(el);
+      if (r.width > 0) minLeft = Math.min(minLeft, r.left);
+    });
+    out.minTextLeft = +minLeft.toFixed(1);
+
+    out.ok = st.ok && q.ok && bs.ok && jp.ok && nm.ok && out.gateOk &&
+             out.arrowHidden && out.hoverClean && out.links === 1 &&
+             out.screens <= 8.5 && out.maxGapScreens <= 1.5 &&
+             out.minTextLeft >= 16;
+    return out;
+  }
+
+  async function runProbes() {
+    var waits = [srh.ready];
+    if (icr) waits.push(icr.ready);
+    await Promise.all(waits);
+    await raf2();
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+    await raf2();
+    report.viewport = window.innerWidth + 'x' + window.innerHeight;
+
+    if (mobileVP) {
+      report.mobile = await probeMobile();
+      report.gate = window.__GATE;
+      report.errors = errs;
+      return report.mobile.ok && errs === 0;
+    }
+
+    var kEl = document.querySelector('.b3__kicker');
+    hiddenBeforeB3 = blurPx(kEl) >= BLUR_FROM - 1 &&
+                     parseFloat(getComputedStyle(kEl).opacity) <= 0.05;
+    report.theme = probeTheme();
+    /* Д4-проба ПЕРШОЮ: один справжній СТРИБОК від верху в зону b0+band+b2
+       (delta ~98vh > 0.8vh) -> анти-стрибковий шар мусить віддати їх
+       МИТТЄВО settled, без каскадних хвостів */
+    var mediaAEl = document.getElementById('mediaA');
+    await jumpTo(window.scrollY + mediaAEl.getBoundingClientRect().bottom - vh(2));
+    report.jump = await probeJump();         /* Д4: нуль проміжних станів */
+    report.scrim = await probeScrim();       /* чисті opacity-читання скраба */
+    report.carousel = await probeCarouselGeom();
+    report.t431 = await probeT431();         /* Д3: позиції без перетину */
+    report.quality = probeQuality();         /* Д1+Д2 */
+    var bi = await probeBandIntro();
+    report.band = bi.band; report.intro = bi.intro;
+    var nr = await probeNumberReveal();      /* чесний каскад повільним проходом */
+    report.number = nr.number; report.reveal = nr.reveal;
+    report.mediaB = await probeMediaB();
+    report.cta = await probeCTA();
+    report.deadBands = await probeDeadBands();
+    report.loadStability = await probeLoadStability(); /* v4: анти-«стрибає при завантаженні» */
+    report.gate = window.__GATE;
+    report.errors = errs;
+    return report.theme.ok && report.scrim.ok && report.jump.ok &&
+           report.carousel.ok && report.t431.ok && report.quality.ok &&
+           bi.ok && nr.ok && report.mediaB.ok && report.cta.ok &&
+           report.deadBands.ok && report.loadStability.ok && errs === 0;
+  }
+
+  /* v4: стабільність завантаження — реальні layout-зсуви (CLS, збирається з
+     першого кадру) + дрейф ДОКУМЕНТНИХ bbox якірних елементів між 600ms і
+     2500ms після load (документні координати імунні до скролів проб;
+     transform/opacity/filter у CLS не рахуються). */
+  async function probeLoadStability() {
+    while (!window.__DRIFT.done) { await new Promise(function (r) { setTimeout(r, 100); }); }
+    var out = { cls: +window.__CLS.value.toFixed(4), maxDriftPx: window.__DRIFT.maxPx,
+                drift: window.__DRIFT.detail, ok: false };
+    out.ok = out.cls < 0.1 && out.maxDriftPx >= 0 && out.maxDriftPx <= 4;
+    return out;
+  }
+
+  /* v4 КОРІНЬ «стрибає одна секція за іншою» (запис власника 12:02): сценарні
+     проби (jump/deadBands/T-431 кліки) ганялись НА КОЖНОМУ ЖИВОМУ завантаженні
+     і 5-10s ганяли сторінку скролами, потім scrollTo(0,0) = «заспокоїлось».
+     ЗАКОН: сценарні проби - ТІЛЬКИ в headless (navigator.webdriver) або за
+     явним ?probe. Живий перегляд = нуль автоскролів. */
+  var PROBE_MODE = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  window.addEventListener('load', async function () {
+    if (!PROBE_MODE) {
+      if (window.Lenis && window.gsap && !reduced) {
+        var lenisLive = new Lenis({ lerp: 0.1, smoothWheel: true });
+        lenisLive.on('scroll', function () { if (window.ScrollTrigger) ScrollTrigger.update(); });
+        gsap.ticker.add(function (t) { lenisLive.raf(t * 1000); });
+        gsap.ticker.lagSmoothing(0);
+        window.__lenis = lenisLive;
+      }
+      return; /* живий перегляд: сторінка просто працює */
+    }
+    var ok = false;
+    try {
+      ok = await runProbes();
+    } catch (e) {
+      report.exception = String(e);
+      ok = false;
+    }
+    window.scrollTo(0, 0);
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    if (ok && window.Lenis && window.gsap && !reduced) {
+      var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      lenis.on('scroll', function () { if (window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+      gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__PROBE = report;
+    window.__LAB_OK__ = !!ok;
+    if (!ok) console.log('[LAB invest--quiet-depth v4] probe report:', JSON.stringify(report));
+  });
+})();
+</script>
+</body>
+</html>

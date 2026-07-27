@@ -1,0 +1,53 @@
+/* ============================================================
+   _springs-tokens.css — РЕАЛЬНІ токени springs.estate
+   Джерело: живий сайт (computed styles) + витягнуті gd-класи springs-home + шрифтові
+   файли з skills/teardowns/live-archive/springs/fonts/. НЕ вигадано — виміряно.
+
+   Підключати ПЕРШИМ у кожному stage.html / demo.html модуля (замість Google Fraunces/Inter).
+   Шлях до шрифтів відносний до техніки: ../_fonts/ (модуль на один рівень нижче).
+   ============================================================ */
+
+/* ---- РЕАЛЬНІ шрифти springs (локальні, self-contained, офлайн) ---- */
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:400;
+  src:url(../_fonts/TT_Commons_Pro_Regular.woff2) format("woff2");}
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:500;
+  src:url(../_fonts/TTCommonsPro-Md.woff2) format("woff2");}
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:700;
+  src:url(../_fonts/TT_Commons_Pro_Bold.otf) format("opentype");}
+@font-face{font-display:swap;font-family:"Victor Serif";font-style:normal;font-weight:400;
+  src:url(../_fonts/VictorSerif-40Regular.woff2) format("woff2");}
+@font-face{font-display:swap;font-family:"Victor Serif";font-style:italic;font-weight:400;
+  src:url(../_fonts/VictorSerif-45RegularItalic.woff2) format("woff2");}
+
+:root{
+  /* реальні springs-шрифти */
+  --spr-serif:"Victor Serif", Georgia, "Times New Roman", serif;     /* заголовки-акценти */
+  --spr-sans:"TT Commons Pro", Helvetica, Arial, sans-serif;          /* весь текст/лейбли */
+
+  /* реальні springs-кольори (з computed + gd) */
+  --spr-cream:#e0d1b6;        /* rgb(224,209,182) — основний кремовий текст */
+  --spr-cream-lite:#f5e8d1;   /* rgb(245,232,209) — світлий кремовий / фон світлих секцій */
+  --spr-ink:#162d24;          /* rgb(22,45,36) — темно-зелений текст на кремовому */
+  --spr-green:#16322a;
+  --spr-green-deep:#0e241d;
+
+  /* реальні springs-метрики типографіки (з gd-класів + live h1) */
+  --spr-hero-size:clamp(46px, 8.7vw, 125px);   /* h1 «Splendor» = 125px@1440 → vw-скейл */
+  --spr-hero-ls:-2.5px;    --spr-hero-lh:1.04;  --spr-hero-weight:400;
+  --spr-body-size:20px;    --spr-body-ls:-0.4px; --spr-body-lh:26px;   --spr-body-weight:400;
+  --spr-label-size:12px;   --spr-label-ls:0.96px; --spr-label-lh:18px; --spr-label-weight:500; /* uppercase */
+
+  /* ЄДИНА моушн-мова springs — ease-крива ×72 на всьому сайті (D_arch §2) */
+  --spr-ease:cubic-bezier(.25,.74,.22,.99);
+}
+
+/* готові типо-класи (springs-точні) — застосовувати в stage/demo замість ad-hoc розмірів */
+.spr-hero{font-family:var(--spr-serif);font-weight:var(--spr-hero-weight);
+  font-size:var(--spr-hero-size);letter-spacing:var(--spr-hero-ls);line-height:var(--spr-hero-lh);
+  color:var(--spr-cream);max-width:100%;overflow-wrap:break-word;}
+.spr-body{font-family:var(--spr-sans);font-weight:var(--spr-body-weight);
+  font-size:var(--spr-body-size);letter-spacing:var(--spr-body-ls);line-height:var(--spr-body-lh);
+  color:var(--spr-cream);}
+.spr-label{font-family:var(--spr-sans);font-weight:var(--spr-label-weight);
+  font-size:var(--spr-label-size);letter-spacing:var(--spr-label-ls);line-height:var(--spr-label-lh);
+  text-transform:uppercase;color:var(--spr-cream);}

@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NORD — Select a floor</title>
+<style>
+  :root{
+    --bg:#eef0f2; --ink:#10141a; --accent:#2f5d8a;
+    --ink-70:rgba(16,20,26,.70); --ink-45:rgba(16,20,26,.45); --ink-22:rgba(16,20,26,.22);
+    --line:rgba(16,20,26,.12);
+    --serif:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--grot);-webkit-font-smoothing:antialiased;overflow:hidden}
+  a{color:var(--accent);text-decoration:none} a:hover{color:var(--ink)}
+  .stage{position:relative;width:100vw;height:100vh;min-height:640px;overflow:hidden}
+  .sky{position:absolute;inset:0;
+    background:
+      radial-gradient(120% 80% at 82% -4%, rgba(255,255,255,.95), rgba(255,255,255,0) 46%),
+      radial-gradient(80% 60% at 74% 6%, rgba(150,190,225,.5), rgba(150,190,225,0) 58%),
+      linear-gradient(180deg,#9dbedb 0%,#bcd3e5 44%,#e0e9ef 80%,#eef0f2 100%)}
+  .haze{position:absolute;left:0;right:0;bottom:0;height:44%;
+    background:linear-gradient(180deg,rgba(238,240,242,0) 0%,rgba(238,240,242,.5) 55%,var(--bg) 100%)}
+  .grain{position:absolute;inset:0;opacity:.04;mix-blend-mode:multiply;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .ghost{position:absolute;left:2vw;bottom:16vh;font-family:var(--grot);font-weight:700;
+    font-size:min(46vh,500px);line-height:.8;color:var(--ink);opacity:.04;
+    letter-spacing:-.05em;pointer-events:none;user-select:none}
+  header{position:absolute;top:0;left:0;right:0;height:64px;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 34px}
+  .brand{font-family:var(--grot);font-weight:700;font-size:25px;letter-spacing:-.02em}
+  .brand b{font-weight:700}
+  .chip{font-family:var(--grot);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink);background:rgba(255,255,255,.6);border:1px solid var(--line);padding:11px 15px;border-radius:2px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:background .3s ease,border-color .3s ease}
+  .chip:hover{background:#fff;border-color:var(--accent)}
+  .chip .x{font-size:12px;color:var(--accent)}
+  .label{position:absolute;left:34px;top:96px;z-index:30;font-family:var(--grot);font-weight:600;font-size:31px;line-height:1.0;letter-spacing:-.01em}
+  .label span{display:block;color:var(--accent);font-size:10.5px;font-weight:400;letter-spacing:.34em;text-transform:uppercase;margin-bottom:13px}
+  .scene{position:absolute;inset:0;z-index:20}
+  .ground{position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,rgba(120,140,160,0),rgba(70,90,110,.22));border-top:1px solid rgba(30,50,70,.2)}
+  .props{position:absolute;left:0;right:0;bottom:118px;height:60px;opacity:.5}
+  .skyline{position:absolute;left:50%;bottom:130px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:74px;z-index:22}
+  .tower{position:relative;cursor:pointer;filter:drop-shadow(0 34px 58px rgba(30,50,70,.22))}
+  .body{position:relative;overflow:hidden;border-radius:2px 2px 0 0;
+    background:
+      linear-gradient(100deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.1) 28%,rgba(255,255,255,.3) 58%,rgba(190,206,222,.16) 100%),
+      linear-gradient(180deg,#c6d2dc,#a3b4c4 60%,#8ea0b1);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+  .body::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.42;
+    background-image:
+      repeating-linear-gradient(0deg,rgba(16,30,48,.34) 0 1px,transparent 1px var(--fh)),
+      repeating-linear-gradient(90deg,rgba(16,30,48,.16) 0 1px,transparent 1px 15px)}
+  .cap{position:absolute;top:-7px;left:8%;right:8%;height:8px;border-radius:2px 2px 0 0;background:linear-gradient(180deg,#d7e0e8,#a7b6c4)}
+  .plates{position:absolute;inset:0;display:flex;flex-direction:column-reverse}
+  .plate{flex:1 1 0;min-height:0;opacity:0;
+    background:linear-gradient(180deg,rgba(16,20,26,.95) 0 1.4px,rgba(16,20,26,.12) 1.4px);
+    transition:opacity .3s ease;will-change:opacity}
+  .plate+.plate{margin-bottom:2px}
+  .tower.on .plate{opacity:.18;transition:opacity .25s cubic-bezier(.25,.74,.22,.99);transition-delay:calc(var(--i) * 12ms)}
+  .tower.on .plate.dead{opacity:.10}
+  .tower.on .plate.live:hover{opacity:.42;transition-delay:0s}
+  .tower.on .plate.live.hot{opacity:.42;transition-delay:0s}
+  .plate.live{cursor:pointer}
+  .plate.dead{pointer-events:none}
+  .plate.locked{background:var(--accent) !important;opacity:.52 !important}
+  .tlabel{position:absolute;top:-40px;left:50%;transform:translateX(-50%);font-family:var(--grot);font-size:10px;letter-spacing:.2em;color:var(--ink-70);background:rgba(255,255,255,.65);border:1px solid var(--line);border-radius:2px;padding:5px 9px;white-space:nowrap}
+  .card{position:absolute;z-index:35;width:244px;background:#fbfcfd;border:1px solid rgba(16,20,26,.14);box-shadow:0 30px 60px -34px rgba(16,34,58,.42);border-radius:2px;padding:20px 22px 18px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .3s cubic-bezier(.25,.74,.22,.99),transform .3s cubic-bezier(.25,.74,.22,.99),left .35s cubic-bezier(.25,.74,.22,.99),top .35s cubic-bezier(.25,.74,.22,.99)}
+  .card.show{opacity:1;transform:translateY(0)}
+  .card .fno{font-family:var(--grot);font-weight:600;font-size:50px;line-height:.9;letter-spacing:-.02em;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:10px}
+  .card .fno small{font-family:var(--grot);font-weight:400;font-size:11px;letter-spacing:.24em;color:var(--ink-45)}
+  .card .u{margin-top:14px;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+  .card .a{margin-top:4px;font-size:12px;letter-spacing:.14em;color:var(--ink-45);font-variant-numeric:tabular-nums}
+  .card .hint{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent)}
+  .card .cross{position:absolute;top:16px;right:16px;font-size:15px;color:var(--ink-45);transition:transform .3s cubic-bezier(.25,.74,.22,.99),color .3s ease}
+  .card.sel{background:rgba(47,93,138,.1);border-color:rgba(47,93,138,.5)}
+  .card.sel .cross{transform:rotate(45deg);color:var(--accent)}
+  .card.sel .hint{color:var(--ink);letter-spacing:.3em}
+  footer{position:absolute;left:34px;right:34px;bottom:26px;z-index:30;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+  footer p{max-width:520px;font-size:13.5px;line-height:1.7;color:var(--ink-70)}
+  footer .leg{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-45);white-space:nowrap}
+  @media (prefers-reduced-motion: reduce){*{transition-duration:0s !important;animation-duration:0s !important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="sky"></div>
+  <div class="haze"></div>
+  <div class="ghost">24</div>
+  <div class="grain"></div>
+
+  <header>
+    <div class="brand"><b>NORD</b></div>
+    <div class="chip" role="button" tabindex="0">Filter by parameters <span class="x">✛</span></div>
+  </header>
+
+  <div class="label"><span>Step 01 — Building</span>Select<br>floor</div>
+
+  <div class="scene">
+    <div class="props"></div>
+    <div class="ground"></div>
+    <div class="skyline" id="skyline"></div>
+    <div class="card" id="card">
+      <div class="cross">✛</div>
+      <div class="fno"><span id="cf">—</span><small id="ct">T—</small></div>
+      <div class="u" id="cu">— UNITS OPEN</div>
+      <div class="a">480–1 250 M²</div>
+      <div class="hint" id="ch">Click to select</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Every floor is drawn to scale from the working section. What you hover is what gets built.</p>
+    <div class="leg">NORD · Tower Release 04</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var TOWERS=[{id:"T1",floors:16,w:128},{id:"T2",floors:24,w:150},{id:"T3",floors:12,w:146}];
+  var FLOOR_H=17;
+  var skyline=document.getElementById("skyline");
+  var card=document.getElementById("card");
+  var cf=document.getElementById("cf"),ct=document.getElementById("ct"),
+      cu=document.getElementById("cu"),ch=document.getElementById("ch");
+  var lastType="mouse";
+  document.addEventListener("pointerdown",function(e){ if(e.pointerType) lastType=e.pointerType; },true);
+
+  var state={tower:null,floor:null,locked:null}; // locked={tower,floor,el}
+  var towerEls={};
+
+  function units(f){ return (f%3===0)?0:((f*7)%4)+1; }
+  function isDead(f){ return f%3===0; }
+
+  TOWERS.forEach(function(t){
+    var el=document.createElement("div");
+    el.className="tower"; el.dataset.id=t.id;
+    var h=t.floors*FLOOR_H;
+    el.style.width=t.w+"px";
+    var body=document.createElement("div");
+    body.className="body"; body.style.height=h+"px"; body.style.width=t.w+"px";
+    body.style.setProperty("--fh",FLOOR_H+"px");
+    var cap=document.createElement("div"); cap.className="cap"; body.appendChild(cap);
+    var plates=document.createElement("div"); plates.className="plates";
+    for(var f=1;f<=t.floors;f++){
+      var p=document.createElement("div");
+      var dead=isDead(f);
+      p.className="plate "+(dead?"dead":"live");
+      p.style.setProperty("--i",(f-1)); // bottom->top stagger
+      p.dataset.floor=f; p.dataset.tower=t.id;
+      if(!dead) wirePlate(p,t,f);
+      plates.appendChild(p);
+    }
+    body.appendChild(plates);
+    var lab=document.createElement("div"); lab.className="tlabel"; lab.textContent=t.id;
+    el.appendChild(lab); el.appendChild(body);
+
+    el.addEventListener("pointerenter",function(e){ if(e.pointerType!=="touch") enterTower(t.id); });
+    el.addEventListener("pointerleave",function(e){ if(e.pointerType!=="touch") leaveTower(t.id); });
+    skyline.appendChild(el);
+    towerEls[t.id]=el;
+  });
+
+  var lingerTimer=null;
+  function enterTower(id){
+    if(lingerTimer){clearTimeout(lingerTimer);lingerTimer=null;}
+    if(state.tower && state.tower!==id) towerEls[state.tower].classList.remove("on");
+    state.tower=id;
+    towerEls[id].classList.add("on");
+    anchorCard(id);
+  }
+  function leaveTower(id){
+    if(state.locked) return; // keep visible while a floor is locked
+    lingerTimer=setTimeout(function(){
+      towerEls[id].classList.remove("on");
+      if(state.tower===id){state.tower=null;state.floor=null;}
+      hideCard();
+    },150);
+  }
+
+  function anchorCard(id){
+    var el=towerEls[id];
+    var sc=skyline.parentElement.getBoundingClientRect();
+    var r=el.querySelector(".body").getBoundingClientRect();
+    var left=r.right-sc.left+18, top=r.top-sc.top;
+    if(left+244>sc.width-16){ left=(r.left-sc.left)-244-18; }
+    if(top<80) top=80;
+    card.style.left=left+"px"; card.style.top=top+"px";
+  }
+
+  function setCard(t,f){
+    cf.textContent=f; ct.textContent=t.id;
+    var u=units(f);
+    cu.textContent=u+" UNIT"+(u===1?"":"S")+" OPEN";
+  }
+
+  function showFloor(t,f,el){
+    setCard(t,f);
+    state.floor=f;
+    var prev=skyline.querySelector(".plate.hot");
+    if(prev&&prev!==el) prev.classList.remove("hot");
+    if(el) el.classList.add("hot");
+    if(state.locked && (state.locked.tower!==t.id || state.locked.floor!==f)){
+      card.classList.remove("sel"); ch.textContent="Click to select";
+    } else if(state.locked && state.locked.tower===t.id && state.locked.floor===f){
+      card.classList.add("sel");
+    } else {
+      card.classList.remove("sel"); ch.textContent="Click to select";
+    }
+    card.classList.add("show");
+  }
+  function hideCard(){
+    card.classList.remove("show");
+    var prev=skyline.querySelector(".plate.hot");
+    if(prev) prev.classList.remove("hot");
+  }
+
+  function selectFloor(t,f,el){
+    var prevLock=skyline.querySelector(".plate.locked");
+    if(prevLock) prevLock.classList.remove("locked");
+    state.locked={tower:t.id,floor:f,el:el};
+    el.classList.add("locked");
+    setCard(t,f);
+    card.classList.add("sel","show");
+    ch.textContent="Selected — floor "+f;
+  }
+  function unlock(){
+    if(!state.locked) return;
+    if(state.locked.el) state.locked.el.classList.remove("locked");
+    state.locked=null;
+    card.classList.remove("sel");
+    ch.textContent="Click to select";
+  }
+
+  function wirePlate(p,t,f){
+    p.addEventListener("pointerenter",function(e){ if(e.pointerType!=="touch") showFloor(t,f,p); });
+    p.addEventListener("click",function(e){
+      e.stopPropagation();
+      if(lastType==="touch"){
+        if(state.tower!==t.id){ enterTower(t.id); }
+        if(state.floor!==f || !card.classList.contains("show")){ showFloor(t,f,p); }
+        else { selectFloor(t,f,p); }
+      } else {
+        if(state.locked && state.locked.tower===t.id && state.locked.floor===f){ unlock(); }
+        else { selectFloor(t,f,p); }
+      }
+    });
+  }
+
+  document.addEventListener("click",function(e){
+    if(e.target.closest(".plate.live")) return;
+    if(e.target.closest(".chip")) return;
+    unlock();
+    if(lastType==="touch"){
+      if(state.tower){towerEls[state.tower].classList.remove("on");}
+      state.tower=null;state.floor=null;hideCard();
+    }
+  });
+
+  window.addEventListener("resize",function(){ if(state.tower) anchorCard(state.tower); });
+
+  window.__FSELECT={
+    tower:function(){return state.tower;},
+    floor:function(){return state.floor;},
+    locked:function(){return !!state.locked;}
+  };
+})();
+</script>
+</body>
+</html>

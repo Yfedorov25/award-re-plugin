@@ -1,0 +1,30 @@
+/* HERO-VIDEO-RENDER-ROTATOR · component.css
+   A full-bleed hero whose background crossfades a slideshow of video clips + render stills,
+   with a fixed serif wordmark persistent over all. opacity (crossfade) + transform scale
+   (ken-burns) only. NO mix-blend over the media. NO WebGL. */
+.hvr-stage { position: relative; height: 100vh; overflow: hidden; background: var(--hvr-bg, #0c0c0a); }
+
+.hvr-media { position: absolute; inset: 0; z-index: 1; }
+.hvr-slide { position: absolute; inset: 0; opacity: 0; will-change: opacity;
+  transition: opacity var(--hvr-fade, 1100ms) ease; }
+.hvr-slide.is-active { opacity: 1; }
+.hvr-slide img, .hvr-slide video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* slow ken-burns on the active slide only */
+.hvr-slide .hvr-frame { position: absolute; inset: 0; transform: scale(1.02); transition: transform 6000ms ease-out; will-change: transform; }
+.hvr-slide.is-kb .hvr-frame { transform: scale(1.12); }
+/* a readability scrim baked over the media (static) */
+.hvr-media::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(12,12,10,.18) 0%, rgba(12,12,10,.08) 45%, rgba(12,12,10,.42) 100%); }
+
+/* the FIXED wordmark/title layer — above all media, never animates with the rotation */
+.hvr-title { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center;
+  text-align: center; pointer-events: none; color: var(--hvr-ink, #fff); }
+.hvr-title .mark { font-family: var(--hvr-serif, Georgia, serif); font-weight: 400;
+  font-size: var(--hvr-mark, 12vw); line-height: .9; letter-spacing: -0.01em; }
+
+/* dots */
+.hvr-dots { position: absolute; left: 0; right: 0; bottom: 4vh; z-index: 5; display: flex;
+  gap: .6rem; justify-content: center; }
+.hvr-dot { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  background: rgba(255,255,255,.4); transition: background .25s, transform .25s; }
+.hvr-dot.is-on { background: #fff; transform: scale(1.3); }

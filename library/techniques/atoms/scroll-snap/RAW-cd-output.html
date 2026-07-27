@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>scroll-snap — magnet points on the scroll track</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:#0e241b; }
+  :root {
+    --cream:#EDE6D6; --cream-dim:rgba(237,230,214,.62);
+    --serif:"Didot","Bodoni 72","Playfair Display",Georgia,"Times New Roman",serif;
+    --sans:"Futura","Avenir Next","Century Gothic",Verdana,sans-serif;
+  }
+  body { font-family:var(--serif); color:var(--cream); }
+  a { color:var(--cream); text-decoration:none; } a:hover { color:#fff; }
+  .caps { font-family:var(--sans); font-size:11px; letter-spacing:.34em; text-transform:uppercase; font-weight:500; }
+  .display { font-weight:400; line-height:1.04; letter-spacing:-.01em; text-wrap:balance; }
+
+  section.flow { position:relative; height:100vh; display:flex; flex-direction:column; justify-content:center; padding:64px; overflow:hidden; }
+  #intro { background:
+      radial-gradient(120% 90% at 78% 8%, rgba(214,190,140,.16), transparent 55%),
+      radial-gradient(90% 70% at 12% 96%, rgba(9,20,15,.9), transparent 60%),
+      linear-gradient(168deg,#143528 0%,#0e241b 52%,#081711 100%); }
+  #cream { color:#1d2a20; background:
+      radial-gradient(110% 80% at 84% 6%, rgba(255,252,242,.85), transparent 58%),
+      radial-gradient(80% 60% at 8% 100%, rgba(199,186,155,.55), transparent 60%),
+      linear-gradient(160deg,#F2ECDD 0%,#EDE6D6 55%,#DFD5BE 100%); }
+  #cream .caps { color:#5a6355; }
+  #closer { background:
+      radial-gradient(120% 90% at 20% 0%, rgba(206,181,131,.14), transparent 52%),
+      radial-gradient(100% 70% at 90% 100%, rgba(5,13,9,.95), transparent 65%),
+      linear-gradient(196deg,#123028 0%,#10281e 40%,#071410 100%); }
+  section.flow::after { content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(140% 110% at 50% 50%, transparent 55%, rgba(0,0,0,.28) 100%); }
+  #cream::after { background:radial-gradient(140% 110% at 50% 50%, transparent 60%, rgba(90,80,55,.18) 100%); }
+  .flow h1, .flow h2 { font-size:clamp(56px, 7.4vw, 128px); }
+  .flow .caps { margin-bottom:28px; }
+  .flow .sub { margin-top:32px; color:var(--cream-dim); }
+  #cream .sub { color:#5a6355; }
+
+  #band { position:relative; height:400vh; }
+  #stage { position:relative; height:100vh; overflow:hidden; background:#081711; }
+  .plate { position:absolute; inset:0; }
+  .plate .word { position:absolute; left:64px; bottom:128px; font-size:clamp(72px, 10vw, 170px); font-weight:400; line-height:.95; letter-spacing:-.01em; }
+  .plate .plateCaps { position:absolute; left:66px; bottom:88px; }
+  .plate::after { content:""; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(150% 120% at 50% 45%, transparent 52%, rgba(0,0,0,.4) 100%); }
+
+  #plate1 { background:
+      radial-gradient(90% 75% at 22% 18%, rgba(126,168,116,.5), transparent 58%),
+      radial-gradient(110% 80% at 85% 90%, rgba(6,16,10,.95), transparent 70%),
+      radial-gradient(60% 50% at 70% 30%, rgba(224,204,150,.2), transparent 60%),
+      linear-gradient(160deg,#1d4432 0%,#0f2c1e 55%,#06150d 100%); color:#E9E4CF; }
+  #plate2 { background:
+      radial-gradient(95% 70% at 75% 20%, rgba(150,196,204,.42), transparent 60%),
+      radial-gradient(110% 90% at 15% 95%, rgba(5,14,18,.95), transparent 68%),
+      radial-gradient(55% 40% at 40% 55%, rgba(213,228,222,.16), transparent 60%),
+      linear-gradient(172deg,#23484d 0%,#143138 58%,#071418 100%); color:#E3EBE6; }
+  #plate3 { background:
+      radial-gradient(90% 70% at 30% 14%, rgba(226,209,148,.5), transparent 58%),
+      radial-gradient(100% 85% at 88% 92%, rgba(38,44,18,.9), transparent 66%),
+      radial-gradient(60% 45% at 68% 40%, rgba(184,196,138,.28), transparent 62%),
+      linear-gradient(156deg,#5f6a3c 0%,#3f4c2a 52%,#1a2312 100%); color:#F1ECD8; }
+  #plate4 { background:
+      radial-gradient(95% 75% at 70% 12%, rgba(214,205,192,.4), transparent 60%),
+      radial-gradient(110% 90% at 12% 96%, rgba(16,15,13,.95), transparent 66%),
+      radial-gradient(55% 45% at 35% 50%, rgba(233,222,204,.14), transparent 58%),
+      linear-gradient(168deg,#59544a 0%,#3a362f 54%,#14120f 100%); color:#EBE5D9; }
+
+  #stationLabels { position:absolute; left:64px; top:64px; height:16px; }
+  #stationLabels .stLabel { position:absolute; left:0; top:0; white-space:nowrap; color:var(--cream); }
+
+  #meter { position:absolute; right:40px; top:20vh; width:2px; height:60vh; background:rgba(237,230,214,.22); }
+  #meterFill { position:absolute; left:0; top:0; width:100%; height:0%; background:var(--cream); }
+  .tick { position:absolute; left:-3px; width:8px; height:2px; background:rgba(237,230,214,.55); }
+
+  #grain { position:fixed; inset:-8px; pointer-events:none; z-index:50; opacity:.07;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); }
+</style>
+</head>
+<body>
+
+<section class="flow" id="intro">
+  <p class="caps">Alder Vale — Private Residences</p>
+  <h1 class="display">The hillside,<br>kept quiet.</h1>
+  <p class="caps sub">Scroll — the track has resting points</p>
+</section>
+
+<section id="band">
+  <div id="stage">
+    <div class="plate" id="plate1"><div class="word display">Forest</div><p class="plateCaps caps">Canopy light, morning</p></div>
+    <div class="plate" id="plate2"><div class="word display">River</div><p class="plateCaps caps">Slow water, north bend</p></div>
+    <div class="plate" id="plate3"><div class="word display">Meadow</div><p class="plateCaps caps">Late summer, open ground</p></div>
+    <div class="plate" id="plate4"><div class="word display">Stone</div><p class="plateCaps caps">Quarried face, evening</p></div>
+    <div id="stationLabels">
+      <span class="stLabel caps">01 — Forest</span>
+      <span class="stLabel caps">02 — River</span>
+      <span class="stLabel caps">03 — Meadow</span>
+      <span class="stLabel caps">04 — Stone</span>
+    </div>
+    <div id="meter">
+      <div id="meterFill"></div>
+      <span class="tick" style="top:0%"></span>
+      <span class="tick" style="top:33.333%"></span>
+      <span class="tick" style="top:66.667%"></span>
+      <span class="tick" style="top:100%"></span>
+    </div>
+  </div>
+</section>
+
+<section class="flow" id="cream">
+  <p class="caps">Garden Apartments · Terraces · Penthouses</p>
+  <h2 class="display">Rooms that follow<br>the light.</h2>
+</section>
+
+<section class="flow" id="closer">
+  <p class="caps">Appointments from September</p>
+  <h2 class="display">Come up for air.</h2>
+  <p class="caps sub">Alder Vale · The Hillside</p>
+</section>
+
+<div id="grain"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function () {
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Lenis wiring (per common rules)
+  const lenis = new Lenis({ duration: 1.1 });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  const band = document.getElementById('band');
+  const cream = document.getElementById('cream');
+  const closer = document.getElementById('closer');
+  const plates = gsap.utils.toArray('.plate');
+  const labels = gsap.utils.toArray('.stLabel');
+
+  // initial states — GSAP owns them (refresh-safe: fromTo below re-asserts)
+  gsap.set(plates.slice(1), { clipPath: 'inset(100% 0% 0% 0%)' });
+  gsap.set(labels.slice(1), { autoAlpha: 0, y: 14 });
+  gsap.set(labels[0], { autoAlpha: 1, y: 0 });
+  gsap.set('#meterFill', { height: '0%' });
+
+  // the ONE pinned ScrollTrigger
+  ScrollTrigger.create({
+    trigger: band, start: 'top top', end: 'bottom bottom',
+    pin: '#stage', pinSpacing: false, anticipatePin: 1
+  });
+
+  // scrub choreography: pure f(p) over 300 units of band travel
+  // stations hold at 0/100/200/300; wipes live mid-transition (dead zones for magnets)
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: { trigger: band, start: 'top top', end: 'bottom bottom', scrub: true }
+  });
+  tl.to('#meterFill', { height: '100%', duration: 300 }, 0);
+  [1, 2, 3].forEach(i => {
+    const at = (i - 1) * 100 + 35;   // 35..65 / 135..165 / 235..265
+    tl.fromTo(plates[i], { clipPath: 'inset(100% 0% 0% 0%)' },
+      { clipPath: 'inset(0% 0% 0% 0%)', duration: 30 }, at);
+    tl.to(labels[i - 1], { autoAlpha: 0, y: -12, duration: 12 }, at + 3);
+    tl.fromTo(labels[i], { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 12 }, at + 15);
+  });
+
+  // ——— snap engine: magnet points on the TRACK (custom JS on Lenis; NO CSS scroll-snap) ———
+  const IDLE_MS = 150, VEL_EPS = 0.1, RADIUS_VH = 0.35, GLIDE_S = 0.9;
+  const expoOut = t => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+  let armed = false, snapping = false, lastInputAt = -1e9;
+
+  window.__SNAP_TARGETS__ = [];
+  window.__LAST_SNAP__ = null;
+
+  function maxScroll() {
+    return Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  }
+  function computeTargets() {
+    const vh = window.innerHeight, bandTop = band.offsetTop, max = maxScroll();
+    window.__SNAP_TARGETS__ = [
+      0,
+      bandTop, bandTop + vh, bandTop + 2 * vh, bandTop + 3 * vh, // station holds: element 0/100/200/300
+      cream.offsetTop,
+      closer.offsetTop
+    ].map(v => Math.min(Math.round(v), max));
+  }
+
+  function cancelSnap() {
+    if (snapping) { lenis.scrollTo(lenis.scroll, { immediate: true }); snapping = false; }
+  }
+  function onUserInput() {
+    lastInputAt = performance.now();
+    armed = true;      // only real input arms the magnets
+    cancelSnap();      // user always wins
+  }
+  ['wheel', 'touchstart', 'touchmove', 'pointerdown', 'keydown'].forEach(ev =>
+    window.addEventListener(ev, onUserInput, { passive: true }));
+
+  gsap.ticker.add(() => {
+    if (!armed || snapping) return;
+    if (performance.now() - lastInputAt < IDLE_MS) return;   // wait for idle
+    if (Math.abs(lenis.velocity) > VEL_EPS) return;          // never capture mid-flight
+    const y = lenis.scroll, radius = window.innerHeight * RADIUS_VH;
+    let best = null, bd = Infinity;
+    for (const t of window.__SNAP_TARGETS__) {
+      const d = Math.abs(t - y);
+      if (d < bd) { bd = d; best = t; }
+    }
+    if (best === null || bd > radius) return;                // outside every capture radius: free rest
+    if (bd <= 2) { armed = false; return; }                  // already there
+    snapping = true; armed = false;
+    window.__LAST_SNAP__ = { from: y, to: best, at: performance.now() };
+    lenis.scrollTo(best, {
+      duration: GLIDE_S, easing: expoOut, lock: false,
+      onComplete: () => { snapping = false; }
+    });
+  });
+
+  // deterministic render hook — never triggers snapping
+  window.render = function (p) {
+    p = Math.max(0, Math.min(1, Number(p) || 0));
+    armed = false; cancelSnap();
+    const y = p * maxScroll();
+    window.scrollTo(0, y);                                   // synchronous — gates read fresh state
+    lenis.scrollTo(y, { immediate: true, force: true });     // sync Lenis internal position
+    ScrollTrigger.update();
+  };
+
+  computeTargets();
+  window.addEventListener('resize', computeTargets);
+  ScrollTrigger.addEventListener('refresh', computeTargets);
+  ScrollTrigger.refresh();
+  computeTargets();
+
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

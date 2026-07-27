@@ -1,0 +1,53 @@
+/* HORIZONTAL-SPEC-CAROUSEL · component.css
+   A track of landscape cards translateX one step at a time with edge-peek; a vertical-pill
+   arrow in the gap; a per-card CTA-pill; a spec-row (title/sqft/rooms) that crossfades with
+   the active card. transform: translateX (track) + opacity (spec, CTA) only.
+   NO mix-blend / NO backdrop over the cards. NO WebGL. */
+.hsc-stage { position: relative; --hsc-peek: 0.16; --hsc-gap: 24px; outline: none; }
+
+.hsc-viewport { overflow: hidden; touch-action: pan-y; cursor: grab; }
+.hsc-viewport:active { cursor: grabbing; }
+
+.hsc-track { display: flex; gap: var(--hsc-gap); will-change: transform; }
+/* each card fills (1 - peek) of the viewport so the next card's edge peeks in */
+.hsc-card { position: relative; flex: 0 0 calc((100% - var(--hsc-gap)) * (1 - var(--hsc-peek)));
+  aspect-ratio: 16 / 9; overflow: hidden; border-radius: var(--hsc-radius, 12px);
+  background: #2a2521; opacity: .55; transition: opacity 520ms cubic-bezier(.22,1,.36,1); }
+.hsc-card.is-active { opacity: 1; }
+.hsc-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hsc-card::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(30,26,23,0) 50%, rgba(30,26,23,.5) 100%); }
+
+/* per-card CTA-pill (bottom-left), only on the active card */
+.hsc-cta { position: absolute; left: 1.2rem; bottom: 1.2rem; z-index: 2;
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .55rem 1.1rem; border: 1px solid rgba(244,241,234,.45); border-radius: 999px;
+  color: var(--hsc-ink, #f4f1ea); font-size: .82rem; letter-spacing: .04em;
+  background: rgba(30,26,23,.28); opacity: 0; transform: translateY(6px);
+  transition: opacity 420ms ease, transform 420ms cubic-bezier(.22,1,.36,1); pointer-events: none; }
+.hsc-card.is-active .hsc-cta { opacity: 1; transform: translateY(0); }
+
+/* vertical-pill arrows in the gap */
+.hsc-prev, .hsc-next { position: absolute; top: 50%; transform: translateY(-50%); z-index: 5;
+  width: 38px; height: 120px; border-radius: 999px; border: 1px solid rgba(244,241,234,.35);
+  background: rgba(30,26,23,.34); color: var(--hsc-ink, #f4f1ea); cursor: pointer;
+  display: grid; place-items: center; font-size: 1.1rem; line-height: 1;
+  transition: background 240ms ease, opacity 240ms ease; }
+.hsc-prev { left: -10px; } .hsc-next { right: -10px; }
+.hsc-prev:hover, .hsc-next:hover { background: rgba(30,26,23,.55); }
+.hsc-prev:disabled, .hsc-next:disabled { opacity: .25; cursor: default; }
+
+/* spec-row (title / sqft / rooms), crossfades with the active card */
+.hsc-spec { display: flex; align-items: baseline; gap: 2.4rem; margin-top: 1.6rem;
+  opacity: 1; transition: opacity 300ms ease; }
+.hsc-spec .hsc-spec-title { font-family: var(--hsc-serif, Georgia, serif); font-style: italic;
+  font-size: 2rem; line-height: 1; }
+.hsc-spec dl { display: flex; gap: 2.4rem; margin-left: auto; }
+.hsc-spec .cell { display: flex; flex-direction: column; gap: .25rem; }
+.hsc-spec .cell .k { font-size: .68rem; letter-spacing: .22em; text-transform: uppercase; opacity: .6; }
+.hsc-spec .cell .v { font-size: 1.1rem; }
+
+.hsc-dots { display: flex; gap: .5rem; margin-top: 1.2rem; }
+.hsc-dot { width: 8px; height: 8px; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+  background: rgba(244,241,234,.3); transition: background 240ms ease, transform 240ms ease; }
+.hsc-dot.is-on { background: var(--hsc-ink, #f4f1ea); transform: scale(1.25); }

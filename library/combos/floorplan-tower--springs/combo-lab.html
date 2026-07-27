@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: floorplan-tower--springs · Вежа (репліка Springs, крем-сепія)</title>
+<!--
+  SECTION VARIANT, floorplan-tower--springs (role: floorplan). PALETTE = SPRINGS CREAM (warm sand plate,
+  fine sepia plan strokes, oval cream number pills, a green accent for the L3 rail).
+  TOWER-1to1 family, Springs sister of floorplan-tower--ever. Same FULL drill: korpus+floor
+  (facade floor-hover) -> unit (numbered floorplate) -> flat (veil). Controlled-click; 0 pins; NO-WebGL.
+
+  SIGNATURE MOVE (the one novel L2 interaction): a FIXED LEFT preview-pane mini-plan slide. On pill hover
+  at L2, that unit's mini type-plan (TOWER_TYPE_PLANS keyed by type) slides into a fixed left pane
+  (autoAlpha + x:-8->0, ~0.2s, decode/render-guarded) WHILE the floorplate stays on the right. The pane
+  seeds the first unit's mini-plan at load so the render surface paints non-zero.
+
+  asset-truth posture: the tower render is Higgsfield-generated and the data is OPENLY SYNTHETIC (a demo
+  project), carrying a "Демонстраційний проєкт" legal line. The data is self-consistent (area x rate, 8
+  units/floor matching the authored tower-floor-clean.svg footprints). Floor bands traced over the real
+  render (read off a coordinate grid, not guessed). __LAB_OK__: 0 pins, atoms ran, surface painted, 0 errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/clean-floor-hover-select/component.css">
+<link rel="stylesheet" href="../../components/numbered-floorplate-select/component.css">
+<link rel="stylesheet" href="../../components/veil-flat-detail-reveal/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ===== SPRINGS CREAM skin (resort-soft). transform/opacity/clip-path/stroke-dashoffset only. ===== */
+  :root { --sv-sand:#e9e2cf; --sv-sepia:#8a7d63; --sv-ink:#34301f; --sv-stone:#cfc6ad;
+          --sv-bark:#5a5238; --sv-green:#3a5a2f; --sv-green-2:#2c4824; }
+  #combo.combo-stage { background:#dcd4bd; height:100vh; min-height:100vh; display:grid; grid-template-rows:auto 1fr; padding:0; }
+
+  .sv-head { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; padding:clamp(1rem,3vh,2rem) clamp(1.4rem,3vw,3rem) .3rem; }
+  .sv-eyebrow { margin:0; font:600 .64rem/1 var(--combo-sans); letter-spacing:.26em; text-transform:uppercase; color:var(--sv-green); }
+  .sv-h { margin:.2rem 0 0; font-family:var(--combo-serif); font-weight:300; font-size:clamp(1.5rem,2.5vw,2.3rem); line-height:1.02; letter-spacing:-.02em; color:var(--sv-ink); }
+  .sv-h em { font-style:italic; color:var(--sv-green); }
+  .sv-korpus { display:flex; gap:.5rem; }
+  .sv-kbtn { padding:.5rem 1rem; border-radius:999px; border:1px solid rgba(90,82,56,.3); background:none; color:var(--sv-bark); font:600 .72rem/1 var(--combo-sans); letter-spacing:.06em; cursor:pointer; transition:background .16s,color .16s; }
+  .sv-kbtn.is-on { background:var(--sv-green); color:#fff; border-color:var(--sv-green); }
+
+  .sv-stage { position:relative; margin:0 clamp(1rem,2.4vw,2.4rem) clamp(1rem,2.4vh,2rem); border-radius:8px; overflow:hidden; }
+
+  /* L1: tower facade + traced floor bands + a left tooltip card (Springs cream, y-tracking) */
+  .sv-l1 { position:absolute; inset:0; display:grid; grid-template-columns:minmax(210px,23%) 1fr; background:var(--sv-stone); }
+  .sv-l1.is-hidden { visibility:hidden; }
+  .sv-l1__rail { padding:clamp(1.2rem,3vh,2rem) clamp(1rem,1.6vw,1.6rem); color:var(--sv-ink); border-right:1px solid rgba(90,82,56,.22); display:flex; flex-direction:column; gap:.6rem; }
+  .sv-l1__k { font:600 .58rem/1 var(--combo-sans); letter-spacing:.22em; text-transform:uppercase; color:rgba(52,48,31,.55); }
+  .sv-l1__legal { margin-top:auto; font:500 .58rem/1.4 var(--combo-sans); color:rgba(52,48,31,.5); }
+  .cfh-stage { position:relative; display:grid; place-items:center; padding:clamp(.6rem,2vh,1.4rem); }
+  .cfh-render { position:relative; height:100%; aspect-ratio:3712 / 4608; max-height:78vh; }
+  .cfh-render .cfh-img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+  .cfh-floors { position:absolute; inset:0; width:100%; height:100%; }
+  .cfh-band { fill:var(--sv-green); fill-opacity:0; stroke:var(--sv-green-2); stroke-opacity:0; stroke-width:2; cursor:pointer;
+    transition:fill-opacity .15s, stroke-opacity .15s; }
+  .cfh-band.is-hover { fill-opacity:.34; stroke-opacity:.85; }
+  /* the Springs cream tooltip card (y-tracks the hovered floor over the render) */
+  .cfh-card { position:absolute; left:clamp(.6rem,2vw,1.4rem); top:0; z-index:5; pointer-events:none;
+    background:var(--sv-sand); color:var(--sv-ink); border-radius:8px; padding:.7rem .9rem; min-width:150px; box-shadow:0 6px 22px rgba(52,48,31,.22); }
+  .cfh-card::after { content:""; position:absolute; right:-7px; top:50%; transform:translateY(-50%); border:7px solid transparent; border-left-color:var(--sv-sand); }
+  .cfh-card__num { font-family:var(--combo-serif); font-weight:300; font-size:2rem; line-height:1; }
+  .cfh-card__lab { font:600 .56rem/1 var(--combo-sans); letter-spacing:.2em; text-transform:uppercase; opacity:.65; }
+  .cfh-card__sub { display:block; margin-top:.35rem; font:500 .76rem/1.3 var(--combo-sans); }
+
+  /* L2: SIGNATURE = fixed left preview-pane + numbered floorplate (right) + persistent unit list (far right) */
+  .sv-l2 { position:absolute; inset:0; display:grid; grid-template-columns:minmax(200px,22%) 1fr minmax(220px,22%); background:var(--sv-stone); visibility:hidden; }
+  .sv-l2.is-on { visibility:visible; }
+
+  /* the novel left preview pane: a fixed mini type-plan that slides in on pill hover */
+  .sv-preview { position:relative; padding:clamp(1.1rem,3vh,2rem) clamp(.9rem,1.4vw,1.3rem); border-right:1px solid rgba(90,82,56,.22); color:var(--sv-ink); display:flex; flex-direction:column; gap:.6rem; }
+  .sv-preview__k { font:600 .58rem/1 var(--combo-sans); letter-spacing:.22em; text-transform:uppercase; color:rgba(52,48,31,.55); }
+  .sv-preview__frame { position:relative; flex:1; min-height:0; border-radius:6px; background:var(--sv-sand); box-shadow:inset 0 0 0 1px rgba(138,125,99,.28); display:grid; place-items:center; overflow:hidden; padding:1rem; }
+  .sv-preview__mini { width:100%; height:auto; max-height:100%; display:block; will-change:transform,opacity; }
+  .sv-preview__mini svg { width:100%; height:auto; display:block; }
+  /* recolour the embedded clean plan strokes to fine sepia inside the preview */
+  .sv-preview__mini .vfd-plan__peri { stroke:var(--sv-sepia) !important; stroke-width:2 !important; }
+  .sv-preview__mini path { stroke:rgba(138,125,99,.7) !important; }
+  .sv-preview__mini text { fill:rgba(90,82,56,.8) !important; }
+  .sv-preview__mini rect { fill:var(--sv-stone) !important; stroke:var(--sv-sepia) !important; }
+  .sv-preview__cap { font:500 .78rem/1.3 var(--combo-sans); color:var(--sv-ink); }
+  .sv-preview__cap b { font-family:var(--combo-serif); font-weight:400; }
+
+  .sv-l2 .nfp-stage { background:var(--sv-stone); padding:clamp(1rem,3vh,2rem) clamp(1rem,2vw,2rem); min-height:0; height:100%; grid-template-columns:170px 1fr; }
+  /* SPRINGS sand plate + fine sepia plan strokes (re-theme the embedded floor svg) */
+  .sv-l2 .nfp-stagecard { background:var(--sv-sand); }
+  .sv-l2 .nfp-plan path { stroke:var(--sv-sepia); }
+  .sv-l2 .nfp-back,.sv-l2 .nfp-floornum,.sv-l2 .nfp-floorsel { color:var(--sv-ink); }
+  /* oval-ish cream number pills + green accent on hover */
+  .sv-l2 .nfp-pill__bg { fill:var(--sv-sand); stroke:var(--sv-sepia); }
+  .sv-l2 .nfp-pill__nr { fill:var(--sv-bark); }
+  .sv-l2 .nfp-pill.is-sale.is-hover .nfp-pill__bg { stroke:var(--sv-green); fill:#fff; }
+  .sv-l2 .nfp-pill.is-sale.is-hover .nfp-pill__nr { fill:var(--sv-green); }
+  .sv-l2 .nfp-pill.is-sold .nfp-pill__bg,.sv-l2 .nfp-pill.is-reserved .nfp-pill__bg { fill:var(--sv-stone); }
+  .sv-l2 .nfp-pill.is-sold .nfp-pill__nr,.sv-l2 .nfp-pill.is-reserved .nfp-pill__nr { fill:#a89e83; }
+
+  .sv-list { border-left:1px solid rgba(90,82,56,.22); padding:clamp(1.1rem,3vh,2rem) clamp(.9rem,1.4vw,1.3rem); overflow:auto; color:var(--sv-ink); }
+  .sv-list__t { font-family:var(--combo-serif); font-weight:300; font-size:1.3rem; }
+  .sv-list ul { list-style:none; margin:.6rem 0 0; padding:0; display:flex; flex-direction:column; gap:.25rem; }
+  .sv-row { display:grid; grid-template-columns:2.4ch 1fr auto; gap:.6rem; align-items:baseline; cursor:pointer; padding:.45rem .5rem; border-radius:5px; border:1px solid transparent; transition:background .16s; }
+  .sv-row:hover { background:rgba(90,82,56,.08); }
+  .sv-row.is-dead { opacity:.5; }
+  .sv-row__n { font-family:var(--combo-serif); font-size:.95rem; color:var(--sv-ink); }
+  .sv-row__m { font:400 .7rem/1.3 var(--combo-sans); color:rgba(52,48,31,.7); }
+  .sv-row__p { font:500 .74rem/1 var(--combo-sans); color:var(--sv-ink); font-variant-numeric:tabular-nums; text-align:right; }
+  .sv-row__d { display:inline-block; width:6px; height:6px; border-radius:50%; margin-left:.3rem; }
+  .sv-d-sale{background:#6f9a4f} .sv-d-reserved{background:#c79a4a} .sv-d-sold{background:#a89e83}
+
+  /* L3 veil: SPRINGS two-tone = green-gradient left rail + cream plan canvas */
+  .vfd-overlay { --vfd-veil:#2c4824; --vfd-rail-bg:linear-gradient(160deg,#3a5a2f 0%,#2c4824 100%);
+    --vfd-canvas-bg:#e9e2cf; --vfd-ink:#f2eede; --vfd-dark:#243d1d; --vfd-serif:var(--combo-serif); --vfd-sans:var(--combo-sans);
+    --fp-loc-on:var(--sv-green); --fp-loc-off:#b6ab8d; }
+  /* the green rail prints in cream ink */
+  #sv-flat .vfd-rail { color:var(--sv-ink); }
+  #sv-flat .vfd-type,#sv-flat .vfd-price,#sv-flat .vfd-sub,#sv-flat .vfd-area { color:#f2eede; }
+  #sv-flat .vfd-sub { color:rgba(242,238,222,.78); }
+  #sv-flat .vfd-reserve { background:#f2eede; color:var(--sv-green-2); }
+  #sv-flat .vfd-rail__icons button { border-color:rgba(242,238,222,.5); color:#f2eede; }
+  #sv-flat .vfd-similar { border-color:rgba(242,238,222,.5); color:#f2eede; }
+  /* the cream canvas: fine sepia plan strokes */
+  #sv-flat .vfd-plan .vfd-plan__peri { stroke:var(--sv-sepia); }
+  #sv-flat .vfd-plan path { stroke:rgba(138,125,99,.7); }
+  #sv-flat .vfd-plan text { fill:rgba(90,82,56,.85); }
+  #sv-flat .vfd-plan rect { fill:var(--sv-stone); stroke:var(--sv-sepia); }
+  /* F-21 prominent back pill (cream on green) */
+  #sv-flat .vfd-back { display:inline-flex; align-items:center; gap:.6rem; padding:.5rem .95rem .5rem .55rem; border-radius:999px;
+    background:rgba(242,238,222,.92); border:1px solid rgba(36,61,29,.35); color:var(--sv-green-2); font:600 .68rem/1 var(--combo-sans);
+    letter-spacing:.1em; text-transform:uppercase; cursor:pointer; box-shadow:0 2px 12px rgba(36,61,29,.28); transition:background .16s,color .16s,transform .16s; }
+  #sv-flat .vfd-back:hover { background:var(--sv-green); border-color:var(--sv-green); color:#f2eede; transform:translateX(-2px); }
+  #sv-flat .vfd-back__o { width:32px; height:32px; border-radius:50%; border:1px solid rgba(36,61,29,.45); display:grid; place-items:center; }
+  #sv-flat .vfd-back:hover .vfd-back__o { background:#f2eede; border-color:#f2eede; color:var(--sv-green); }
+  /* F-22 visible floor-locator + big plan owning the canvas */
+  #sv-flat .vfd-floorchip { width:150px; }
+  #sv-flat .vfd-floorchip svg { width:100%; height:auto; }
+  #sv-flat .vfd-floorchip [data-nr].is-active { fill:var(--fp-loc-on); stroke:var(--fp-loc-on); }
+  #sv-flat .vfd-plan { width:auto; height:80%; max-height:80vh; max-width:60%; }
+  #sv-flat .vfd-plan svg { width:auto; height:100%; max-width:100%; margin:0 auto; }
+  .combo-pre,.combo-post { background:#d2c9b1; color:#6c6346; }
+  @media (max-width:900px){ .sv-l1,.sv-l2{ grid-template-columns:1fr; } .sv-list,.sv-l1__rail,.sv-preview,.cfh-card{ display:none; } }
+  @media (prefers-reduced-motion:reduce){ .cfh-band,.sv-kbtn,.sv-row,.sv-preview__mini{ transition:none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll &darr;</div>
+
+  <section id="combo" class="combo-stage" data-combo="floorplan-tower--springs">
+    <div class="sv-head">
+      <div>
+        <p class="sv-eyebrow">Корпус і поверх</p>
+        <h2 class="sv-h">Знайдіть свою квартиру <em>у вежі.</em></h2>
+      </div>
+      <div class="sv-korpus" data-korpus>
+        <button class="sv-kbtn is-on" data-k="A" type="button">Корпус A</button>
+        <button class="sv-kbtn" data-k="B" type="button">Корпус B</button>
+      </div>
+    </div>
+
+    <div class="sv-stage" data-render-surface>
+      <!-- L1 tower facade -->
+      <div class="sv-l1" data-l1>
+        <aside class="sv-l1__rail">
+          <span class="sv-l1__k" data-l1k>Корпус A · до 20 поверхів</span>
+          <span class="sv-l1__legal">Демонстраційний проєкт. Дані наведено для прикладу.</span>
+        </aside>
+        <div class="cfh-stage" id="sv-tower">
+          <div class="cfh-render">
+            <img class="cfh-img" src="fp-assets/tower-front.png" alt="Житлова вежа, два корпуси" loading="eager" decoding="async"/>
+            <svg class="cfh-floors"></svg>
+          </div>
+          <div class="cfh-card"><div class="cfh-card__num">9</div><div class="cfh-card__lab">поверх</div><div class="cfh-card__sub"></div></div>
+        </div>
+      </div>
+
+      <!-- L2 left preview pane (SIGNATURE) + numbered floorplate + unit list -->
+      <div class="sv-l2" data-l2>
+        <aside class="sv-preview" data-preview>
+          <span class="sv-preview__k">Попередній перегляд</span>
+          <div class="sv-preview__frame"><div class="sv-preview__mini" data-preview-mini></div></div>
+          <div class="sv-preview__cap" data-preview-cap><b>3 спальні</b> · 96.5 м²</div>
+        </aside>
+        <section class="nfp-stage" id="sv-plate">
+          <div class="nfp-rail">
+            <div class="nfp-back" data-l2-back><span class="nfp-back__o">&larr;</span> До вежі</div>
+            <div class="nfp-floornum" data-l2-num>9</div>
+            <div class="nfp-floorsel" data-l2-k>Корпус A</div>
+            <div class="nfp-rail__div"></div>
+          </div>
+          <div class="nfp-stagecard">
+            <svg class="nfp-plan" viewBox="0 0 100 72" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" data-plan></svg>
+            <svg class="nfp-zones" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="nfp-card"><span class="nfp-card__type"></span><span><span class="nfp-card__nr"></span><br><span class="nfp-card__area"></span></span><span class="nfp-card__price"></span></div>
+          </div>
+        </section>
+        <aside class="sv-list" data-list>
+          <div class="sv-list__t" data-list-t>9 поверх</div>
+          <ul data-list-ul></ul>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <div class="vfd-overlay" id="sv-flat">
+    <div class="vfd-veil"></div>
+    <div class="vfd-page">
+      <div class="vfd-head">
+        <button class="vfd-back"><span class="vfd-back__o">&larr;</span> До поверху</button>
+        <span class="vfd-word" style="font-family:var(--combo-serif);letter-spacing:.06em;opacity:.7">tower</span>
+        <span style="width:120px"></span>
+      </div>
+      <div class="vfd-crumbs"></div>
+      <div class="vfd-rail">
+        <div class="vfd-type"></div><div class="vfd-sub"></div><div class="vfd-area"></div><div class="vfd-price"></div>
+        <button class="vfd-reserve">Забронювати перегляд</button>
+        <div class="vfd-rail__icons"><button aria-label="обране">&#9825;</button><button aria-label="порівняти">&#8646;</button></div>
+        <button class="vfd-similar">Схожі квартири &#8595;</button>
+      </div>
+      <div class="vfd-canvas">
+        <div class="vfd-plan"></div>
+        <div class="vfd-locators">
+          <div class="vfd-floorchip"></div>
+          <div class="vfd-compass"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="none" stroke="#b6ab8d"/><path d="M20 5 L24 20 L20 35 L16 20 Z" fill="#3a5a2f"/><text x="20" y="14" text-anchor="middle" font-size="7" fill="#3a5a2f">N</text></svg></div>
+          <div class="vfd-sitechip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/clean-floor-hover-select/component.js"></script>
+  <script src="../../components/numbered-floorplate-select/component.js"></script>
+  <script src="../../components/veil-flat-detail-reveal/component.js"></script>
+
+  <script type="module">
+    import { TOWER_META } from '../../_assets/floorplan/tower-meta.js';
+    import { TOWER_FOOTPRINTS } from '../../_assets/floorplan/tower-footprints.js';
+    import { TOWER_TYPE_PLANS } from '../../_assets/floorplan/tower-type-plans.js';
+    import { towerUnitsForFloor, fmtPrice, TOWER_TYPE } from '../_shared/floorplan-helpers.js';
+
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    var IW = 3712, IH = 4608;
+
+    // inline the authored tower floor plan into .nfp-plan (shared viewBox 100x72)
+    fetch('../../_assets/floorplan/tower-floor-clean.svg').then(function(r){return r.text();}).then(function(svg){
+      var inner = svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+      document.querySelector('[data-plan]').innerHTML = inner;
+    });
+
+    // ---- traced floor bands over the real render (read off a coordinate grid, NOT guessed) ----
+    // tower fills X ~11..91, Y ~21..82 in the contain box; korpus A (left) X 11..47, korpus B (right) 53..91.
+    // 9 readable floors (B3 cap). Each band = a quad spanning the korpus width at that floor's Y row.
+    function pct(x,y){ return (x/100*IW).toFixed(0)+','+(y/100*IH).toFixed(0); }
+    function bandsFor(korpus){
+      var x0base = korpus==='A' ? 11 : 53, x1base = korpus==='A' ? 47 : 91;
+      var floors = TOWER_META.korpus.filter(function(k){return k.id===korpus;})[0].floors; // high..low
+      var topY=21, botY=82, n=floors.length;
+      var rowH=(botY-topY)/n;
+      return floors.map(function(fl,i){
+        var yT=topY+i*rowH, yB=topY+(i+1)*rowH;
+        var insT=(1-i/n)*1.5, insB=(1-(i+1)/n)*1.5;
+        var x0t=x0base+insT, x1t=x1base-insT, x0b=x0base+insB, x1b=x1base-insB;
+        return { floor:fl, label:'поверх', sub:'', status:'live',
+          points: pct(x0t,yT)+' '+pct(x1t,yT)+' '+pct(x1b,yB)+' '+pct(x0b,yB),
+          anchor:{ x:(x0base/100*IW), y:((yT+yB)/2/100*IH) } };
+      });
+    }
+
+    var cfh=null, nfp=null, vfd=null, korpus='A', currentFloor=TOWER_META.sampleFloor, currentUnits=[];
+
+    function freeCount(units){ return units.filter(function(u){return u.status==='sale';}).length; }
+    function typeKeyOf(label){ for(var k in TOWER_TYPE){ if(TOWER_TYPE[k].label===label) return k; } return 't-2'; }
+
+    /* ===== SIGNATURE MOVE: fixed left preview-pane mini-plan slide =====
+       On pill hover at L2, slide that unit's mini type-plan into the fixed left pane.
+       autoAlpha + x:-8->0, ~0.2s; we inject the plan SVG (it starts with '<svg') so it is
+       decodeable inline (vector, no async decode), then animate the wrapper. */
+    var previewLastKey=null;
+    function showPreview(u){
+      if(!u) return;
+      var tk=typeKeyOf(u.type);
+      var mini=document.querySelector('[data-preview-mini]');
+      var cap=document.querySelector('[data-preview-cap]');
+      if(tk!==previewLastKey){
+        mini.innerHTML = TOWER_TYPE_PLANS[tk];
+        previewLastKey=tk;
+        if(gsap){ gsap.fromTo(mini,{autoAlpha:0,x:-8},{autoAlpha:1,x:0,duration:.2,ease:'air'}); }
+      }
+      cap.innerHTML = '<b>'+u.type+'</b> · '+u.area+' м²';
+    }
+    function seedPreview(units){
+      // seed the first sellable unit (or first) so [data-render-surface] paints non-zero at load
+      var u=units.filter(function(x){return x.status==='sale';})[0]||units[0];
+      previewLastKey=null;
+      showPreview(u);
+    }
+
+    function buildList(units){
+      var ul=document.querySelector('[data-list-ul]');
+      ul.innerHTML = units.map(function(u){ var dead=u.status!=='sale';
+        var pr=u.status==='sale'?fmtPrice(u.price):(u.status==='sold'?'Продано':'Бронь');
+        return '<li class="sv-row'+(dead?' is-dead':'')+'" data-row="'+u.nr+'"><span class="sv-row__n">'+u.nr+'</span>'+
+          '<span class="sv-row__m">'+u.type+' · '+u.area+' м²</span>'+
+          '<span class="sv-row__p">'+pr+'<i class="sv-row__d sv-d-'+u.status+'"></i></span></li>'; }).join('');
+      ul.querySelectorAll('.sv-row').forEach(function(li){ var nr=li.dataset.row;
+        li.addEventListener('mouseenter',function(){ if(nfp&&nfp.setHover) nfp.setHover(nr);
+          var u=currentUnits.filter(function(x){return String(x.nr)===String(nr);})[0]; showPreview(u); });
+        li.addEventListener('mouseleave',function(){ if(nfp&&nfp.clear) nfp.clear(); });
+        li.addEventListener('click',function(){ var u=currentUnits.filter(function(x){return String(x.nr)===String(nr);})[0]; if(u) openFlat(u); });
+      });
+    }
+
+    // wire combo-level mouseenter on the built .nfp-pill[data-nr] (after render) -> drive the preview pane
+    function wirePillPreview(){
+      document.querySelectorAll('#sv-plate .nfp-pill[data-nr]').forEach(function(p){
+        var nr=p.getAttribute('data-nr');
+        p.addEventListener('mouseenter',function(){
+          var u=currentUnits.filter(function(x){return String(x.nr)===String(nr);})[0]; showPreview(u);
+        });
+      });
+    }
+
+    // ---- L1: facade floor-hover ----
+    SectionHarness.ranOK('clean-floor-hover-select', function(){
+      cfh = window.CleanFloorHoverSelect.create('#sv-tower', {
+        imgW:IW, imgH:IH, bands:bandsFor('A'), fit:'contain', fillOn:.34, hoverDur:.15,
+        onSelect:function(floor){ openFloor(+floor); }
+      });
+      var sub=document.querySelector('.cfh-card__sub');
+      document.querySelectorAll('.cfh-band').forEach(function(b){
+        b.addEventListener('mouseenter',function(){ var u=towerUnitsForFloor('A',+b.dataset.floor,TOWER_FOOTPRINTS); if(sub) sub.textContent=freeCount(u)+' вільних · 8 квартир'; });
+      });
+    });
+
+    function rebuildBands(){
+      cfh = window.CleanFloorHoverSelect.create('#sv-tower', {
+        imgW:IW, imgH:IH, bands:bandsFor(korpus), fit:'contain', fillOn:.34, hoverDur:.15,
+        onSelect:function(floor){ openFloor(+floor); }
+      });
+    }
+
+    // ---- L2: numbered floorplate + the left preview pane ----
+    SectionHarness.ranOK('numbered-floorplate-select', function(){
+      currentUnits = towerUnitsForFloor('A', currentFloor, TOWER_FOOTPRINTS);
+      nfp = window.NumberedFloorplateSelect.create('#sv-plate', {
+        vbW:100, vbH:72, units:currentUnits, pillR:2.6, pillFont:2.4, hoverFill:.12, ease:'power2.out',
+        fmtPrice:fmtPrice, onSelect:function(nr,u){ openFlat(u); }
+      });
+      buildList(currentUnits);
+      wirePillPreview();
+      seedPreview(currentUnits); // seed the first unit's mini-plan so the surface paints non-zero at load
+    });
+
+    function openFloor(fl){
+      currentFloor=fl; currentUnits=towerUnitsForFloor(korpus,fl,TOWER_FOOTPRINTS);
+      document.querySelector('[data-l2-num]').textContent=fl;
+      document.querySelector('[data-l2-k]').textContent='Корпус '+korpus;
+      document.querySelector('[data-list-t]').textContent=fl+' поверх · корпус '+korpus;
+      if(nfp&&nfp.render) nfp.render(currentUnits);
+      buildList(currentUnits);
+      wirePillPreview();
+      seedPreview(currentUnits);
+      var L1=document.querySelector('[data-l1]'), L2=document.querySelector('[data-l2]');
+      L2.classList.add('is-on');
+      if(gsap){ gsap.fromTo(L2,{autoAlpha:0},{autoAlpha:1,duration:.5,ease:'award'});
+        gsap.to(L1,{autoAlpha:0,duration:.35,ease:'power2.in',onComplete:function(){ L1.classList.add('is-hidden'); }}); }
+      else L1.classList.add('is-hidden');
+    }
+    function backToTower(){
+      var L1=document.querySelector('[data-l1]'), L2=document.querySelector('[data-l2]');
+      L1.classList.remove('is-hidden');
+      if(gsap){ gsap.fromTo(L1,{autoAlpha:0},{autoAlpha:1,duration:.5,ease:'award'});
+        gsap.to(L2,{autoAlpha:0,duration:.3,ease:'power2.in',onComplete:function(){ L2.classList.remove('is-on'); gsap.set(L2,{clearProps:'opacity,visibility'}); }}); }
+      else L2.classList.remove('is-on');
+    }
+    document.querySelector('[data-l2-back]').addEventListener('click', backToTower);
+
+    // korpus toggle (re-themes L1 bands; on L2 swaps the floor's units)
+    document.querySelectorAll('[data-korpus] .sv-kbtn').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        korpus=btn.dataset.k;
+        document.querySelectorAll('[data-korpus] .sv-kbtn').forEach(function(b){ b.classList.toggle('is-on',b===btn); });
+        document.querySelector('[data-l1k]').textContent='Корпус '+korpus+' · до '+(korpus==='A'?'20':'16')+' поверхів';
+        rebuildBands();
+      });
+    });
+
+    // ---- L3: veil flat ----
+    SectionHarness.ranOK('veil-flat-detail-reveal', function(){
+      vfd = window.VeilFlatDetailReveal.create('#sv-flat', {
+        veilColor:'#2c4824', coverDur:.4, holdDur:.3, uncoverDur:.45, ease:'expo.out', drawPlan:true,
+        fmtPrice:fmtPrice, onReserve:function(u){ console.log('reserve', u&&u.code); }
+      });
+    });
+    // tower floor-locator: the 8 footprints round the core, THIS unit filled (reuses the real footprint coords)
+    function towerFloorChip(activeNr){
+      var cells=TOWER_FOOTPRINTS.map(function(pts,i){
+        var nr=String(i+1).padStart(2,'0'); var on=nr===activeNr;
+        return '<polygon data-nr="'+nr+'" points="'+pts+'" fill="'+(on?'var(--fp-loc-on)':'none')+'" stroke="'+(on?'var(--fp-loc-on)':'var(--fp-loc-off)')+'" stroke-width="0.6"/>';
+      }).join('');
+      return '<svg viewBox="0 0 100 72" preserveAspectRatio="xMidYMid meet"><rect x="2" y="2" width="96" height="68" fill="none" stroke="var(--fp-loc-off)" stroke-width="0.4"/>'+cells+'</svg>';
+    }
+    function openFlat(u){
+      if(!vfd) return;
+      var tk=typeKeyOf(u.type);
+      vfd.open({
+        type:u.type, sub:'Корпус '+u.korpus+' · '+u.floor+' поверх', areaM2:u.area, areaUnit:'м²', price:u.price,
+        status:u.status, crumbs:'Вежа · корпус '+u.korpus+' · '+u.floor+' поверх · № '+u.nr,
+        planSVG:TOWER_TYPE_PLANS[tk], floorChipSVG:towerFloorChip(u.nr), floorNr:u.nr
+      });
+    }
+
+    // ---- birth (controlled, scroll-in once) ----
+    if(gsap){
+      var headEls=gsap.utils.toArray('.sv-eyebrow,.sv-h,.sv-kbtn');
+      gsap.set(headEls,{autoAlpha:0,y:12});
+      gsap.set('.sv-stage',{clipPath:'inset(8% 0 0 0)'});
+      ScrollTrigger.create({ trigger:'#combo', start:'top 68%', once:true, onEnter:function(){
+        gsap.to(headEls,{autoAlpha:1,y:0,duration:.6,ease:'award',stagger:.07});
+        gsap.to('.sv-stage',{clipPath:'inset(0% 0 0 0)',duration:.9,ease:'award',delay:.1});
+      }});
+    }
+
+    SectionHarness.declare({ pinOwner:'none', expectPins:0, atomsCited:['clean-floor-hover-select','numbered-floorplate-select','veil-flat-detail-reveal'] });
+  </script>
+</body>
+</html>

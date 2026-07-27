@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · giant-number-fact · гігантське число-факт із докруткою один раз (AIR T-422 + T-304)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · giant-number-fact · v1
+================================================================================
+  AIR T-422: гігантське число-факт (clamp ~20-28vw) з людським підписом.
+  T-304: число докручується лічильником, коли секція в'їжджає у в'юпорт,
+  ОДИН раз (once). D6: DOM пишеться ЛИШЕ при зміні відформатованого рядка -
+  stats {ticks, writes} машинно це доводять. C27: негативний трекінг.
+  Формат канону: тисячі нерозривним пробілом (22 800), десяткові комою (1,5).
+
+  КОНТЕКСТ (C11): числа живуть МІЖ full-bleed рендер-секціями (symlink
+  renders/), light/dark ритм. Копі = еталони _COPY_CANON (ЕТ-09/ЕТ-16/ЕТ-29),
+  «ви»-регістр, нуль тире у видимому тексті.
+
+  ГЕЙТ (B14/B15): __LAB_OK__ = true ЛИШЕ після РЕАЛЬНИХ проб. Десктоп-пакет:
+    1. C27-масштаб: computed font-size числа >= 18% ширини в'юпорта;
+       letter-spacing НЕГАТИВНИЙ; tabular-nums;
+    2. ДРАЙВ скролом (B14): секція A (22 800) довозиться у в'юпорт -> семпли
+       textContent на 120/300/800ms: значення ростуть монотонно, на 120ms
+       докрутка ще НЕ доїхала; settled == «22 800» ДОСЛІВНО (нерозривний
+       пробіл тисяч); блок доїхав (opacity 1, transform identity);
+    3. bbox числа ПОВНІСТЮ у в'юпорті (right <= vw - гігант не ріжеться);
+    4. десяткова кома: секція B settled == «1,5» ДОСЛІВНО;
+    5. D6-дисципліна: секція C (value 5) - stats.writes <= 7 ПРИ
+       stats.ticks >> writes (лічильник пише DOM лише при зміні);
+    6. ONCE: після скролу геть і назад stats.ticks НЕ ростуть, текст стоїть;
+    7. console errors == 0 (мережеві збої CDN відфільтровано).
+  МОБІЛЬНИЙ ГЕЙТ (<=768px, напр. 390x844):
+    М1. число вміщається: bbox.left >= 16px, bbox.right <= vw (без обрізів);
+    М2. докрутка спрацювала і settled == «22 800»;
+    М3. D6-дисципліна на секції C, як на десктопі;
+    М4. сторінка <= 8 екранів, жоден проміжок > 1.5 екрана;
+    М5. safe-padding: текст-ректи (Range) left >= 16px;
+    М6. console errors == 0.
+  Проби йдуть на нативному скролі. NO WebGL. Компонент __LAB_OK__ не торкається.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+  :root{
+    --paper:#f4f2ee; --ink:#111110;
+    --sans:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+
+  /* інтро-бенд: видимий контент першого екрана без медіа (дефект-фікс v1) */
+  .intro{background:var(--ink);color:var(--paper);
+    padding:9vh clamp(20px,4vw,64px) 8vh}
+  .intro__kicker{font-size:.68rem;letter-spacing:.34em;text-transform:uppercase;
+    opacity:.55;margin-bottom:2.2rem}
+  .intro__title{font-weight:300;font-size:clamp(22px,2.4vw,40px);
+    line-height:1.25;max-width:24ch}
+  .intro__hint{margin-top:2.4rem;font-size:.62rem;letter-spacing:.3em;
+    text-transform:uppercase;opacity:.45}
+
+  /* сусід-секції: full-bleed медіа (C11) */
+  .media{position:relative;height:100vh;overflow:clip;background:var(--ink)}
+  .media img{width:100%;height:100%;object-fit:cover;display:block}
+  .media__cap{position:absolute;left:clamp(20px,4vw,60px);bottom:5vh;color:#fff;
+    font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;
+    background:rgba(17,17,16,.5);padding:.7em 1.5em;border-radius:999px;
+    max-width:calc(100vw - 2*clamp(20px,4vw,60px))}
+
+  /* число-секції: light/dark ритм, число = єдиний герой кадру */
+  .fact{min-height:100vh;display:grid;align-content:center;
+    padding:10vh clamp(20px,4vw,64px)}
+  .fact--dark{background:var(--ink);color:var(--paper)}
+  .fact__kicker{font-size:.68rem;letter-spacing:.34em;text-transform:uppercase;
+    opacity:.55;margin-bottom:4vh}
+  .fact [data-gnf]{font-weight:300}
+
+  .tail{padding:7vh 20px;text-align:center;font-size:.62rem;
+    letter-spacing:.3em;text-transform:uppercase;opacity:.45}
+
+  /* МОБАЙЛ: секції коротші, safe-padding >=20px (клас К1) */
+  @media (max-width:768px){
+    .media{height:72vh}
+    .fact{min-height:78vh;padding:9vh clamp(20px,6vw,32px)}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ІНТРО-БЕНД (дефект-фікс v1: перший екран лаби НЕ сміє бути порожнім
+       білим - видимий текст-контекст без залежності від завантаження медіа) -->
+  <header class="intro">
+    <p class="intro__kicker">Lab · giant-number-fact · T-422 + T-304</p>
+    <h1 class="intro__title">Число-факт на пів-екрана. Докручується один раз і стоїть.</h1>
+    <p class="intro__hint">Гортайте вниз</p>
+  </header>
+
+  <!-- СУСІД-СЕКЦІЯ · медіа (C11) -->
+  <section class="media">
+    <img src="renders/day-front.webp" alt="Квартал, фасад, день">
+    <div class="media__cap">Сусід-секція · день · скрол вниз</div>
+  </section>
+
+  <!-- ЧИСЛО A · вхідна ціна (ЕТ-09: «вхід від 22 800 доларів») -->
+  <section class="fact" id="factA">
+    <p class="fact__kicker">Ціна входу</p>
+    <div data-gnf id="gnfA">
+      <span class="gnf-row">
+        <span data-gnf-num data-gnf-value="22800">22 800</span>
+        <span data-gnf-unit>доларів</span>
+      </span>
+      <span data-gnf-label>вхід з ремонтом під ключ</span>
+    </div>
+  </section>
+
+  <!-- СУСІД-СЕКЦІЯ · медіа -->
+  <section class="media">
+    <img src="renders/terrace.webp" alt="Тераса, вечір">
+    <div class="media__cap">Сусід-секція · тераса</div>
+  </section>
+
+  <!-- ЧИСЛО B · dark + десяткова кома (ЕТ-29: «1,5 сотки власного двору») -->
+  <section class="fact fact--dark" id="factB">
+    <p class="fact__kicker">Свій двір</p>
+    <div data-gnf id="gnfB">
+      <span class="gnf-row">
+        <span data-gnf-num data-gnf-value="1.5" data-gnf-decimals="1">1,5</span>
+        <span data-gnf-unit>сотки</span>
+      </span>
+      <span data-gnf-label>власного двору в кожного тауна</span>
+    </div>
+  </section>
+
+  <!-- ЧИСЛО C · мала величина = D6-проба (ЕТ-16: «До Вінниці 5 хвилин») -->
+  <section class="fact" id="factC">
+    <p class="fact__kicker">Дорога</p>
+    <div data-gnf id="gnfC">
+      <span class="gnf-row">
+        <span data-gnf-num data-gnf-value="5">5</span>
+        <span data-gnf-unit>хвилин</span>
+      </span>
+      <span data-gnf-label>до Вінниці</span>
+    </div>
+  </section>
+
+  <!-- СУСІД-СЕКЦІЯ · медіа -->
+  <section class="media">
+    <img src="renders/night-front.webp" alt="Фасад, ніч">
+    <div class="media__cap">Сусід-секція · ніч</div>
+  </section>
+
+  <footer class="tail">T-422 · кінець проби</footer>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---- лічильник console-помилок (мережеві збої CDN/шрифтів не рахуємо) ---- */
+  var errs = 0;
+  var NET_RE = /Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|ERR_INTERNET|ERR_NAME/;
+  var _e = console.error;
+  console.error = function () {
+    var s = Array.prototype.join.call(arguments, ' ');
+    if (!NET_RE.test(s)) errs++;
+    return _e.apply(console, arguments);
+  };
+  window.addEventListener('error', function (ev) {
+    var s = String((ev && ev.message) || '');
+    if (!NET_RE.test(s)) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  function raf2() {
+    return new Promise(function (res) {
+      requestAnimationFrame(function () { requestAnimationFrame(res); });
+    });
+  }
+  function delay(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+  function parseNum(txt) {
+    return parseFloat(String(txt).replace(/[\s ]/g, '').replace(',', '.'));
+  }
+
+  /* коротша докрутка в lab, щоб повний прогін проб влазив у headless-вікно */
+  var DUR = 1.1;
+  var a = GiantNumberFact.create('#gnfA', { ease: 'air', duration: DUR });
+  var b = GiantNumberFact.create('#gnfB', { ease: 'air', duration: DUR });
+  var c = GiantNumberFact.create('#gnfC', { ease: 'air', duration: DUR });
+
+  var report = { viewport: null, firstScreen: null, scale: null, count: null,
+                 decimal: null, d6: null, once: null, mobile: null, errors: null };
+
+  async function scrollToFact(id) {
+    var el = document.getElementById(id);
+    var r = el.getBoundingClientRect();
+    window.scrollTo(0, r.top + window.scrollY - (window.innerHeight - r.height) / 2);
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    await raf2();
+  }
+
+  /* ДЕФЕКТ-ФІКС v1: перший екран лаби МУСИТЬ мати видимий текст-контекст
+     (порожній білий старт заборонено) */
+  function probeFirstScreen() {
+    var t = document.querySelector('.intro__title');
+    var rng = document.createRange();
+    rng.selectNodeContents(t);
+    var r = rng.getBoundingClientRect();
+    var cs = getComputedStyle(t);
+    var visible = r.width > 0 && r.top >= 0 && r.bottom <= window.innerHeight &&
+                  parseFloat(cs.opacity) >= 0.99;
+    return { visible: visible, top: +r.top.toFixed(0), ok: visible };
+  }
+
+  /* C27-масштаб: гігантський кегль + негативний трекінг + tabular-nums */
+  function probeScale() {
+    var cs = getComputedStyle(a.num);
+    var fs = parseFloat(cs.fontSize);
+    var ls = parseFloat(cs.letterSpacing);
+    return {
+      fontPx: +fs.toFixed(1),
+      fontPctVw: +(fs / window.innerWidth * 100).toFixed(1),
+      letterSpacing: +ls.toFixed(2),
+      tabular: /tabular-nums/.test(cs.fontVariantNumeric || cs.fontVariant || ''),
+      ok: fs >= window.innerWidth * 0.18 && ls < 0 &&
+          /tabular-nums/.test(cs.fontVariantNumeric || cs.fontVariant || '')
+    };
+  }
+
+  /* ДРАЙВ скролом + семпли значень у часі (B14) */
+  async function probeCount() {
+    var out = { samples: [], settled: null, inViewport: false, arrived: false, ok: false };
+    await scrollToFact('factA');
+    var t0 = performance.now();
+    for (var i = 0; i < 3; i++) {
+      var at = [120, 300, 800][i];
+      await delay(Math.max(0, at - (performance.now() - t0)));
+      out.samples.push({ t: at, num: parseNum(a.num.textContent) });
+    }
+    await delay(600); /* хвіст докрутки + в'їзду */
+    out.settled = a.num.textContent;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var r = a.num.getBoundingClientRect();
+    out.inViewport = r.left >= -1 && r.right <= vw + 1 && r.top >= -1 && r.bottom <= vh + 1;
+    var hostCS = getComputedStyle(a.el);
+    out.arrived = parseFloat(hostCS.opacity) >= 0.99 &&
+      (hostCS.transform === 'none' || hostCS.transform === 'matrix(1, 0, 0, 1, 0, 0)');
+    var mono = out.samples[0].num <= out.samples[1].num &&
+               out.samples[1].num <= out.samples[2].num;
+    var midway = out.samples[0].num < a.value; /* на 120ms ще їде */
+    out.ok = mono && midway && out.settled === '22\u00A0800' &&
+             out.inViewport && out.arrived;
+    return out;
+  }
+
+  /* десяткова кома (канон: 1,5) */
+  async function probeDecimal() {
+    var out = { settled: null, ok: false };
+    await scrollToFact('factB');
+    await delay(DUR * 1000 + 500);
+    out.settled = b.num.textContent;
+    out.ok = out.settled === '1,5';
+    return out;
+  }
+
+  /* D6: DOM пишеться лише при зміні (мала величина => мало записів) */
+  async function probeD6() {
+    var out = { ticks: 0, writes: 0, settled: null, ok: false };
+    await scrollToFact('factC');
+    await delay(DUR * 1000 + 500);
+    out.ticks = c.stats.ticks;
+    out.writes = c.stats.writes;
+    out.settled = c.num.textContent;
+    out.ok = out.settled === '5' && out.writes <= 7 &&
+             out.ticks > out.writes && out.ticks >= 10;
+    return out;
+  }
+
+  /* ONCE: скрол геть і назад — лічильник НЕ передокручується */
+  async function probeOnce() {
+    var out = { ticksBefore: 0, ticksAfter: 0, text: null, ok: false };
+    out.ticksBefore = a.stats.ticks;
+    window.scrollTo(0, 0);
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    await raf2();
+    await scrollToFact('factA');
+    await delay(400);
+    out.ticksAfter = a.stats.ticks;
+    out.text = a.num.textContent;
+    out.ok = out.ticksAfter === out.ticksBefore && out.text === '22\u00A0800';
+    return out;
+  }
+
+  /* ================= МОБІЛЬНИЙ ПАКЕТ (<=768px) ================= */
+  async function probeMobilePage() {
+    var out = { fits: false, settled: null, d6: null, screens: 0,
+                maxGapScreens: 0, minTextLeft: 9999, ok: false };
+    var vw = window.innerWidth, vh = window.innerHeight;
+
+    await scrollToFact('factA');
+    await delay(DUR * 1000 + 500);
+    var r = a.num.getBoundingClientRect();
+    out.fits = r.left >= 16 && r.right <= vw + 1;
+    out.settled = a.num.textContent;
+
+    out.d6 = await probeD6();
+
+    window.scrollTo(0, 0);
+    await raf2();
+    out.screens = +(document.documentElement.scrollHeight / vh).toFixed(2);
+    var blocks = Array.prototype.slice.call(
+      document.querySelectorAll('.intro__title, .media img, [data-gnf], .tail'));
+    var spans = blocks.map(function (el) {
+      var rr = el.getBoundingClientRect();
+      return { top: rr.top + window.scrollY, bottom: rr.bottom + window.scrollY };
+    }).sort(function (x, y) { return x.top - y.top; });
+    var maxGap = Math.max(0, spans.length ? spans[0].top : 0);
+    for (var i = 0; i < spans.length - 1; i++)
+      maxGap = Math.max(maxGap, spans[i + 1].top - spans[i].bottom);
+    out.maxGapScreens = +(maxGap / vh).toFixed(2);
+
+    var textEls = Array.prototype.slice.call(
+      document.querySelectorAll('.intro__kicker, .intro__title, .media__cap, .fact__kicker, [data-gnf-label], .tail'));
+    var minLeft = 9999;
+    textEls.forEach(function (el) {
+      var rng = document.createRange();
+      rng.selectNodeContents(el);
+      var rr = rng.getBoundingClientRect();
+      if (rr.width > 0) minLeft = Math.min(minLeft, rr.left);
+    });
+    out.minTextLeft = +minLeft.toFixed(1);
+
+    out.ok = out.fits && out.settled === '22\u00A0800' && out.d6.ok &&
+             out.screens <= 8 && out.maxGapScreens <= 1.5 && out.minTextLeft >= 16;
+    return out;
+  }
+
+  async function runProbes() {
+    await Promise.all([a.ready, b.ready, c.ready]);
+    await raf2();
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
+    await raf2();
+    report.viewport = window.innerWidth + 'x' + window.innerHeight;
+
+    if (window.innerWidth <= 768) {
+      report.firstScreen = probeFirstScreen();
+      report.mobile = await probeMobilePage();
+      report.errors = errs;
+      return report.firstScreen.ok && report.mobile.ok && errs === 0;
+    }
+
+    report.firstScreen = probeFirstScreen();
+    report.scale = probeScale();
+    report.count = await probeCount();
+    report.decimal = await probeDecimal();
+    report.d6 = await probeD6();
+    report.once = await probeOnce();
+    report.errors = errs;
+    return report.firstScreen.ok && report.scale.ok && report.count.ok &&
+           report.decimal.ok && report.d6.ok && report.once.ok && errs === 0;
+  }
+
+  window.addEventListener('load', async function () {
+    var ok = false;
+    try {
+      ok = await runProbes();
+    } catch (e) {
+      report.exception = String(e);
+      ok = false;
+    }
+    window.scrollTo(0, 0);
+    if (window.ScrollTrigger) ScrollTrigger.update();
+    window.__PROBE = report;
+    window.__LAB_OK__ = !!ok;
+    if (!ok) console.log('[LAB giant-number-fact] probe report:', JSON.stringify(report));
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<!--
+  units-20-mobile «Все своє» (towns) - phone twin of units-20-all-yours.html
+  MOBILE STAGE MAP (same spine, same seams):
+   1 «Свій двір» over back-yard, portrait cover [seam: word-swap, relay = the fixed word slot]
+   2 «Свої два поверхи» over hero-day, portrait cover [same relay]
+   3+4 the ROW screen (sticky): photo contained full-width on the dark band, text swaps IN PLACE
+     («6 таунхаусів, кожен зі своїм входом.» -> «Обери свій таунхаус.» + verbs stacked), no extra
+     screen [seams: word-swap into the bridge title]
+  ONE fixed word-slot node (translateY strip, never remounted), positioned inside the phone column
+  via left:max(18px, calc(50% - 197px)). Facts sit above the bottom 90px thumb zone.
+  Copy identical to desktop. Zero em/en-dash. No WebGL. Towns facts only.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Таунхауси - Все своє · мобільна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--ink:#2A231D;--sub:#87796a;--oak:#9c7b52;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{background:#0b0a09;font-family:"Jost",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--ink)}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .num{font-variant-numeric:tabular-nums}
+
+  .beat{height:100dvh;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+  .beat .bg{position:absolute;inset:0}
+  .beat .bg img{width:100%;height:100%;object-fit:cover}
+  .beat .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(18,13,9,.55),rgba(18,13,9,.08) 50%,rgba(18,13,9,.34))}
+  .beat .ov{position:relative;z-index:3;padding:0 22px 110px}
+  .beat .fv{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(28px,8.4vw,40px);line-height:1.12;color:#fff;
+    opacity:0;transform:translateY(24px);transition:opacity .9s var(--hs),transform .9s var(--hs)}
+  .beat.live .fv{opacity:1;transform:none}
+  .beat .fk{margin-top:8px;font-size:15px;line-height:1.65;font-weight:300;color:rgba(255,255,255,.9);
+    opacity:0;transform:translateY(16px);transition:opacity .8s var(--hs) .12s,transform .8s var(--hs) .12s}
+  .beat.live .fk{opacity:1;transform:none}
+  .beat .mplate{position:absolute;right:10px;bottom:10px;z-index:3;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+  .scrollcue{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.8);z-index:3}
+
+  /* the row screen: sticky, photo contained full-width, text swaps in place */
+  .rowpinwrap{position:relative;height:200dvh}
+  .rowpin{position:sticky;top:0;height:100dvh;overflow:hidden;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:60px 0 100px}
+  .rowpin img.row{width:100%;height:auto;display:block}
+  .rowpin .ovr{text-align:center;padding:0 22px;width:100%}
+  .rowpin .fv{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(24px,7.4vw,34px);line-height:1.15;color:#fff;
+    opacity:0;transform:translateY(20px);transition:opacity .9s var(--hs),transform .9s var(--hs)}
+  .rowpin.live .fv{opacity:1;transform:none}
+  .rowpin .fk{margin-top:8px;font-size:14px;font-weight:300;color:rgba(255,255,255,.8);line-height:1.6}
+  .rowpin .mplate{position:absolute;right:10px;bottom:10px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+  .swapwin{display:grid;justify-items:center}
+  .tx{grid-area:1/1;transition:opacity .6s var(--hs),transform .6s var(--hs);width:100%}
+  .tx.off-up{opacity:0;transform:translateY(-22px);pointer-events:none}
+  .tx.off-down{opacity:0;transform:translateY(22px);pointer-events:none}
+  .verbs{width:100%;padding:0 22px;display:flex;flex-direction:column;opacity:0;transition:opacity .8s var(--hs) .2s;pointer-events:none}
+  .rowpin.bridged .verbs{opacity:1;pointer-events:auto}
+  .verb{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 4px;border-top:1px solid rgba(255,255,255,.3);text-decoration:none;color:#fff;min-height:58px}
+  .verb:last-child{border-bottom:1px solid rgba(255,255,255,.3)}
+  .verb .vt{font-family:"Cormorant Garamond",serif;font-size:22px;font-style:italic}
+  .ring{width:48px;height:48px;min-width:48px;border:1px solid rgba(255,255,255,.55);border-radius:50%;display:grid;place-items:center}
+  .ring svg{width:16px;height:16px;stroke:currentColor}
+
+  /* THE WORD SLOT: one fixed node inside the phone column */
+  .wordslot{position:fixed;top:max(20px,3dvh);left:max(18px,calc(50% - 197px));z-index:50;
+    opacity:0;transform:translateY(-12px);transition:opacity .7s var(--hs),transform .7s var(--hs)}
+  .wordslot.docked{opacity:1;transform:none}
+  .wordslot .wk{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.85);text-shadow:0 1px 8px rgba(0,0,0,.4)}
+  .wordslot .wwin{overflow:hidden;height:34px;margin-top:5px}
+  .wordslot .wstrip{display:flex;flex-direction:column;transition:transform .7s var(--hs)}
+  .wordslot .wstrip span{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:26px;line-height:1;height:34px;display:flex;align-items:center;color:#fff;text-shadow:0 1px 12px rgba(0,0,0,.45);white-space:nowrap}
+  .wordslot .wstrip span em{font-style:normal;color:#E8C89A;margin-right:.26em}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important;transition-delay:0s !important}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+<section class="beat" id="b1" data-stage="1" data-screen-label="u20m свій двір">
+  <div class="bg"><img src="assets/towns/back-yard.webp" alt="Двір таунхауса"></div>
+  <div class="ov">
+    <div class="fv num">1,5 сотки за кухнею.</div>
+    <p class="fk">Свій вихід з кухні у свій двір.</p>
+  </div>
+  <span class="mplate">Двір · візуалізація</span>
+  <div class="scrollcue">Далі поверхи</div>
+</section>
+
+<section class="beat" id="b2" data-stage="2" data-screen-label="u20m свої два поверхи">
+  <div class="bg"><img src="assets/towns/hero-day.webp" alt="Таунхаус"></div>
+  <div class="ov">
+    <div class="fv num">82 м², сусідів згори нема.</div>
+    <p class="fk num">Дві спальні нагорі, кухня-вітальня внизу.</p>
+  </div>
+  <span class="mplate">Таунхаус · візуалізація</span>
+</section>
+
+<div class="rowpinwrap" id="b3wrap">
+<section class="rowpin" id="b3" data-stage="3 4" data-screen-label="u20m своє місце в ряду + bridge">
+  <div class="ovr swapwin">
+    <div class="tx" id="txA">
+      <div class="fv num">6 таунхаусів, кожен зі своїм входом.</div>
+    </div>
+    <div class="tx off-down" id="txB">
+      <div class="fv">Обери свій таунхаус.</div>
+      <p class="fk num">6 однакових, по 82 м². Далі на плані кожен окремо.</p>
+    </div>
+  </div>
+  <img class="row" src="assets/towns/selector-row-6-day.png" alt="Ряд із шести таунхаусів">
+  <nav class="verbs">
+    <a class="verb" href="#pick-place"><span class="vt">Обрати місце</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="verb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </nav>
+  <span class="mplate">Ряд · візуалізація</span>
+</section>
+</div>
+
+</div>
+<div class="wordslot" id="wordslot" aria-live="polite">
+  <div class="wk">Таунхауси · все своє</div>
+  <div class="wwin">
+    <div class="wstrip" id="wstrip">
+      <span class="num"><em>Свій</em> двір</span>
+      <span class="num"><em>Свої</em> два поверхи</span>
+      <span class="num"><em>Своє</em> місце в ряду</span>
+      <span class="num"><em>Свій</em> таунхаус</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  ['assets/towns/back-yard.webp','assets/towns/hero-day.webp','assets/towns/selector-row-6-day.png'].forEach(function(s){
+    var i = new Image(); i.src = s; if (i.decode) i.decode().catch(function(){});
+  });
+
+  var slot = document.getElementById('wordslot');
+  var strip = document.getElementById('wstrip');
+  var beats = ['b1', 'b2', 'b3'].map(function(id){ return document.getElementById(id); });
+  var wrap3 = document.getElementById('b3wrap');
+  var b3 = document.getElementById('b3');
+  var txA = document.getElementById('txA'), txB = document.getElementById('txB');
+  var shown = -1;
+
+  function onScroll(){
+    var vh = innerHeight;
+    var active = 0;
+    beats.forEach(function(b, i){
+      var r = b.getBoundingClientRect();
+      if (r.top < vh * 0.55 && r.bottom > vh * 0.35){ active = i; b.classList.add('live'); }
+    });
+    if (beats[0].getBoundingClientRect().top < vh * 0.4) slot.classList.add('docked');
+    var r3 = wrap3.getBoundingClientRect();
+    var total = wrap3.offsetHeight - vh;
+    var p = Math.min(1, Math.max(0, -r3.top / total));
+    var bridged = p > 0.5;
+    b3.classList.toggle('bridged', bridged);
+    txA.classList.toggle('off-up', bridged);
+    txB.classList.toggle('off-down', !bridged);
+    var word = bridged ? 3 : active;
+    if (word !== shown){
+      shown = word;
+      strip.style.transform = 'translateY(' + (-word * 100 / 4) + '%)';
+    }
+  }
+  strip.style.transform = 'translateY(0)';
+  addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(function(){
+    beats[0].classList.add('live');
+    slot.classList.add('docked');
+    onScroll();
+  }, 250);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+/* ============================================================
+   WATERCOLOR-SVG-MAP · component.css
+   A cream watercolor district map (inline SVG) rises over a dark leaf bg and pins;
+   a dark teardrop brand pin + circular POI chips sit on it, dark-on-cream. The map
+   art + POI positions are composition; the engine drives the rise + reveal.
+   Composes circular-ui-language: .cui-pin (teardrop) + .cui-poi (circular chip).
+   ============================================================ */
+
+.wm-stage { position: relative; width: 100%; height: 100vh; overflow: hidden;
+  background: var(--wm-bg, #16302a); }
+
+/* dark leaf backdrop behind the cream panel (stays visible as a left/edge strip) */
+.wm-bg { position: absolute; inset: 0; z-index: 1;
+  background: var(--wm-bg, #16302a); }
+.wm-bg img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .9; }
+
+/* the cream map panel — rises from below, settles, pins. ~75% width on the right. */
+.wm-panel { position: absolute; z-index: 2; top: 0; right: 0; bottom: 0;
+  width: var(--wm-panel-w, 78%);
+  background: var(--wm-cream, #ece4d2);
+  will-change: transform, opacity;
+  box-shadow: -24px 0 60px rgba(0,0,0,.25);
+  color: var(--wm-ink, #1c2b25);            /* dark-on-cream: pins/chips inherit currentColor */
+}
+
+/* the hand-authored inline SVG map fills the panel */
+.wm-map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* headline over the cream map (the one inverted-contrast, dark-on-cream beat) */
+.wm-head { position: absolute; z-index: 4; left: clamp(20px,4vw,56px); top: clamp(24px,5vh,56px);
+  max-width: 22ch; color: var(--wm-ink, #1c2b25);
+  font-family: var(--wm-serif, 'Fraunces', Georgia, serif); font-weight: 300;
+  font-size: clamp(1.3rem, 2.4vw, 2.1rem); line-height: 1.15; letter-spacing: -.01em; }
+
+/* POI / pin wrappers — absolutely positioned by inline left/top; engine fades+rises them */
+.wm-poi { position: absolute; z-index: 5; transform: translate(-50%, -50%);
+  display: grid; place-items: center; color: var(--wm-ink, #1c2b25); }
+.wm-poi__label { position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 11px; letter-spacing: .04em; color: var(--wm-ink, #1c2b25);
+  font-family: var(--wm-sans, 'Inter', system-ui, sans-serif); }
+
+/* the brand pin reads slightly larger; size via the cui var */
+.wm-poi--pin { --cui-pin: 44px; }
+.wm-poi--chip { --cui-poi: 34px; }
+
+/* NO mix-blend / NO backdrop. transform + opacity only. */

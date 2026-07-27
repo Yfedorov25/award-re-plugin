@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<!--
+  units-17-mobile «Обміряна квартира» (smarts) - phone twin of units-17-measured-flat.html
+  MOBILE STAGE MAP (same spine, same seams):
+   1 statement AND first measure: day-05-zahalnyi portrait cover; pen lines recomputed for the
+     portrait cover rect - the desktop kitchen line (x=79) falls outside the portrait crop and is
+     DROPPED per the mobile law; the floor width line and the bathroom door line re-anchor into the
+     visible central band [seam: pen-start]
+   2 plan 27 on the dark museum wall, facts stacked UNDER the mount [seam: wall-mount]
+   3 plan 24 + the formats row, facts stacked under [seam: wall-mount-2]
+   4 THE BRIDGE: the measuring rule draws above two full-width verb rows [seam: rule-converge]
+  Pure film, no instruments. Phone canvas 430px, overflow-x:clip, 100dvh stage 1.
+  Copy identical to desktop. Zero em/en-dash. No WebGL. Dataset embedded as const SMARTS.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Формати - Обміряна квартира · мобільна</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--wall:#2A231D;--wall2:#352A1F;--cream:#EDE3D4;--sub:#a3937f;--oak:#C39A66;--pen:#F6EDDD;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{background:#0b0a09;font-family:"Jost",sans-serif;color:var(--cream);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--wall)}
+  .eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--oak)}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* s1 measured interior */
+  .s1{height:100dvh;position:relative;overflow:hidden}
+  .s1 .bg{position:absolute;inset:0}
+  .s1 .bg img{width:100%;height:100%;object-fit:cover}
+  .s1 .veil{position:absolute;inset:0;background:rgba(16,12,8,.26)}
+  .s1 .ov{position:absolute;left:22px;right:22px;top:max(50px,8dvh);z-index:6}
+  .s1 .ot{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,9vw,44px);line-height:1.1;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.4)}
+  .s1 .ol{margin-top:8px;font-size:14px;line-height:1.6;font-weight:300;color:rgba(255,255,255,.9);text-shadow:0 1px 10px rgba(0,0,0,.4)}
+  .s1 .mplate{position:absolute;right:10px;bottom:10px;z-index:5;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+  .pen{position:absolute;z-index:4;pointer-events:none}
+  .pen svg{display:block;width:100%;height:100%}
+  .pen path{fill:none;stroke:var(--pen);stroke-width:1.4;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+  .pen .draw{transition:stroke-dashoffset 1.2s var(--hs)}
+  .lab{position:absolute;z-index:5;display:flex;flex-direction:column;gap:2px;align-items:center;transform:translate(-50%,-50%);opacity:0;transition:opacity .7s var(--hs)}
+  .lab.on{opacity:1}
+  .lab .lv{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(20px,6vw,26px);line-height:1;color:#fff;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+  .lab .lk{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.9);text-shadow:0 1px 8px rgba(0,0,0,.6);text-align:center}
+  .scrollcue{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.85);z-index:6}
+
+  /* s2-s3 dark museum wall */
+  .wallstage{min-height:100dvh;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:20px;padding:60px 22px 100px}
+  .wallstage.w2{background:var(--wall2)}
+  .mount{background:rgba(0,0,0,.25);border:1px solid rgba(237,227,212,.2);padding:18px;display:flex;flex-direction:column;gap:12px;
+    opacity:0;transform:translateY(26px);transition:opacity 1s var(--hs),transform 1s var(--hs)}
+  .wallstage.live .mount{opacity:1;transform:none}
+  .mount .mimg{display:flex;align-items:center;justify-content:center}
+  .mount img{max-width:100%;max-height:46dvh;object-fit:contain;display:block}
+  .mount .plate{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--sub);text-align:center;border-top:1px solid rgba(237,227,212,.14);padding-top:9px}
+  .facts .eyebrow{margin-bottom:10px;opacity:0;transform:translateY(16px);transition:opacity .8s var(--hs) .12s,transform .8s var(--hs) .12s}
+  .facts .ft{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(22px,6.6vw,28px);line-height:1.2;margin-bottom:14px;
+    opacity:0;transform:translateY(16px);transition:opacity .8s var(--hs) .12s,transform .8s var(--hs) .12s}
+  .wallstage.live .facts .eyebrow,.wallstage.live .facts .ft{opacity:1;transform:none}
+  .fact{border-top:1px solid rgba(237,227,212,.16);padding-top:10px;padding-bottom:10px;display:flex;align-items:baseline;gap:12px;
+    opacity:0;transform:translateY(16px);transition:opacity .8s var(--hs),transform .8s var(--hs)}
+  .wallstage.live .fact{opacity:1;transform:none}
+  .wallstage.live .fact:nth-of-type(2){transition-delay:.22s}
+  .wallstage.live .fact:nth-of-type(3){transition-delay:.32s}
+  .fact .fv{font-family:"Cormorant Garamond",serif;font-size:clamp(24px,7vw,32px);line-height:1;color:var(--cream)}
+  .fact .fk{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sub)}
+
+  /* s4 bridge */
+  .s4{min-height:100dvh;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:60px 22px 100px;text-align:center}
+  .s4 .bh{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,9vw,44px);line-height:1.1;
+    opacity:0;transform:translateY(22px);transition:opacity .9s var(--hs),transform .9s var(--hs)}
+  .s4.live .bh{opacity:1;transform:none}
+  .s4 .bsub{margin-top:12px;font-size:15px;color:var(--sub);font-weight:300;line-height:1.65;
+    opacity:0;transform:translateY(16px);transition:opacity .9s var(--hs) .12s,transform .9s var(--hs) .12s}
+  .s4.live .bsub{opacity:1;transform:none}
+  .rulebox{margin-top:30px;height:30px;position:relative}
+  .rulebox svg{position:absolute;inset:0;width:100%;height:100%}
+  .rulebox line{stroke:var(--pen);stroke-width:1.4;vector-effect:non-scaling-stroke}
+  .verbs{margin-top:6px;display:flex;flex-direction:column;text-align:left;opacity:0;transition:opacity .8s var(--hs) .8s}
+  .s4.live .verbs{opacity:1}
+  .verb{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 4px;border-top:1px solid rgba(237,227,212,.2);text-decoration:none;color:var(--cream);min-height:62px}
+  .verb:last-child{border-bottom:1px solid rgba(237,227,212,.2)}
+  .verb .vt{font-family:"Cormorant Garamond",serif;font-size:23px;font-style:italic}
+  .ring{width:48px;height:48px;min-width:48px;border:1px solid rgba(237,227,212,.4);border-radius:50%;display:grid;place-items:center}
+  .ring svg{width:16px;height:16px;stroke:currentColor}
+
+  .rise{opacity:0;transform:translateY(30px)}
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important;transition-delay:0s !important}
+    .rise{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+<section class="s1" id="s1" data-stage="1" data-screen-label="u17m stage 1 measured interior">
+  <div class="bg"><img id="img1" src="assets/renders-smarts/day-05-zahalnyi.webp" alt="Кімната Смарт 27"></div>
+  <div class="veil"></div>
+  <div class="ov">
+    <div class="eyebrow rise" style="color:#E8C89A">Формати</div>
+    <h1 class="serif ot rise d1">Обміряна квартира.</h1>
+    <p class="ol rise d2 num">Кімната Смарт 27 з реальними розмірами.</p>
+  </div>
+  <div class="pen" id="pen1"></div>
+  <span class="mplate">Кімната · візуалізація</span>
+  <div class="scrollcue rise d3">План нижче</div>
+</section>
+
+<section class="wallstage" id="s2" data-stage="2" data-screen-label="u17m stage 2 plan 27 mounted">
+  <figure class="mount">
+    <div class="mimg"><img src="assets/plans-smarts/type-27-clean.webp" alt="План Смарт 27"></div>
+    <figcaption class="plate num">Смарт 27 · план типології</figcaption>
+  </figure>
+  <div class="facts">
+    <div class="eyebrow">Смарт 27</div>
+    <div class="ft num">Найпоширеніший формат дому.</div>
+    <div class="fact"><span class="fv num" data-a27></span><span class="fk">метрів загалом</span></div>
+    <div class="fact"><span class="fv num" data-perfloor></span><span class="fk">квартир на поверсі</span></div>
+    <div class="fact"><span class="fv num" data-n27></span><span class="fk">квартир Смарт 27 у домі</span></div>
+  </div>
+</section>
+
+<section class="wallstage w2" id="s3" data-stage="3" data-screen-label="u17m stage 3 plan 24 + formats row">
+  <figure class="mount">
+    <div class="mimg"><img src="assets/plans-smarts/type-24-clean.webp" alt="План Смарт 24"></div>
+    <figcaption class="plate num">Смарт 24 · план типології</figcaption>
+  </figure>
+  <div class="facts">
+    <div class="eyebrow">Два формати</div>
+    <div class="ft num">Два формати: <span data-a24></span> і <span data-a27></span> м².</div>
+    <div class="fact"><span class="fv num" data-a24></span><span class="fk">метрів у Смарт 24</span></div>
+    <div class="fact"><span class="fv num" data-n24></span><span class="fk">квартир Смарт 24 у домі</span></div>
+    <div class="fact"><span class="fv num" data-r24></span><span class="fk">метрів кімнати</span></div>
+  </div>
+</section>
+
+<section class="s4" id="s4" data-stage="4" data-screen-label="u17m stage 4 bridge">
+  <h2 class="bh serif">Обери свою квартиру.</h2>
+  <p class="bsub num"><span data-total></span> квартири на трьох поверхах. Далі на плані кожна окремо.</p>
+  <div class="rulebox" id="rulebox">
+    <svg viewBox="0 0 680 30" preserveAspectRatio="none" aria-hidden="true">
+      <line class="rl" x1="2" y1="15" x2="678" y2="15"/>
+      <line class="rt" x1="2" y1="5" x2="2" y2="25"/>
+      <line class="rt2" x1="678" y1="5" x2="678" y2="25"/>
+    </svg>
+  </div>
+  <nav class="verbs">
+    <a class="verb" href="#pick-params"><span class="vt">За параметрами</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    <a class="verb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+  </nav>
+</section>
+
+</div>
+<script>
+const SMARTS = {"priceUsdPerM2":950,"commercial":{"totalM2":712,"openSpaceM2":668.72,"minBlockM2":100,"priceUsdPerM2":1100,"capitalizationPct":30,"blocks":[{"code":"C-01","m2":100},{"code":"C-02","m2":120},{"code":"C-03","m2":150},{"code":"C-04","m2":100},{"code":"C-05","m2":198.72}]},"floors":[{"id":"2","label":"2-й поверх"},{"id":"3","label":"3-й поверх"},{"id":"m","label":"Мансардний поверх"}],"types":{"smart-27":{"label":"Смарт 27 м²","m2":17.34,"livingM2":17.34,"bathM2":5.03,"hallM2":4.69,"totalM2":27.06},"smart-24":{"label":"Смарт 24 м²","m2":15.27,"livingM2":15.27,"bathM2":4.68,"hallM2":3.81,"totalM2":23.76}},"units":[{"code":"A2-01","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"A2-02","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"A2-03","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"A2-04","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-05","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-06","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-07","floor":"2","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"A2-08","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"A2-09","floor":"2","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"A2-10","floor":"2","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"A2-11","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"A2-12","floor":"2","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"A2-13","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-14","floor":"2","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"A2-15","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"A2-16","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-17","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"A2-18","floor":"2","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-01","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"A3-02","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"A3-03","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-04","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-05","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-06","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-07","floor":"3","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"A3-08","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"A3-09","floor":"3","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"A3-10","floor":"3","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"A3-11","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"A3-12","floor":"3","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"A3-13","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-14","floor":"3","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"A3-15","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"A3-16","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-17","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"A3-18","floor":"3","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-01","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":53.69,"w":10.65,"h":45.07}},{"code":"Am-02","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":0.11,"y":1.72,"w":10.65,"h":44.58}},{"code":"Am-03","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-04","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":10.76,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-05","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":21.4,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-06","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":30.89,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-07","floor":"m","type":"smart-27","m2":26.74,"pos":{"x":30.89,"y":53.69,"w":9.49,"h":45.07}},{"code":"Am-08","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":40.38,"y":53.69,"w":9.62,"h":45.07}},{"code":"Am-09","floor":"m","type":"smart-24","m2":24.13,"pos":{"x":40.38,"y":1.72,"w":9.62,"h":44.58}},{"code":"Am-10","floor":"m","type":"smart-24","m2":24.13,"pos":{"x":50,"y":1.72,"w":9.62,"h":44.58}},{"code":"Am-11","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":50,"y":53.69,"w":9.62,"h":45.07}},{"code":"Am-12","floor":"m","type":"smart-27","m2":26.69,"pos":{"x":59.62,"y":53.69,"w":9.49,"h":45.07}},{"code":"Am-13","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":59.62,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-14","floor":"m","type":"smart-24","m2":23.76,"pos":{"x":69.11,"y":1.72,"w":9.49,"h":44.58}},{"code":"Am-15","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":1.72,"w":10.64,"h":44.58}},{"code":"Am-16","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":78.6,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-17","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":53.69,"w":10.64,"h":45.07}},{"code":"Am-18","floor":"m","type":"smart-27","m2":27.06,"pos":{"x":89.24,"y":1.72,"w":10.64,"h":44.58}}]}; /* embedded 1:1 from data/smarts-units.json; statuses and entry sums omitted: never used in UNITS */
+(function(){
+  'use strict';
+  var fmt = function(n){ return String(n).replace('.', ','); };
+  var units = SMARTS.units;
+  var n24 = units.filter(function(u){ return u.type === 'smart-24'; }).length;
+  var n27 = units.filter(function(u){ return u.type === 'smart-27'; }).length;
+  var perFloor = units.filter(function(u){ return u.floor === '2'; }).length;
+  var fill = function(sel, v){ [].slice.call(document.querySelectorAll(sel)).forEach(function(e){ e.textContent = v; }); };
+  fill('[data-a27]', fmt(SMARTS.types['smart-27'].totalM2));
+  fill('[data-a24]', fmt(SMARTS.types['smart-24'].totalM2));
+  fill('[data-r24]', fmt(SMARTS.types['smart-24'].m2));
+  fill('[data-n24]', n24); fill('[data-n27]', n27);
+  fill('[data-perfloor]', perFloor); fill('[data-total]', units.length);
+
+  ['assets/renders-smarts/day-05-zahalnyi.webp','assets/plans-smarts/type-27-clean.webp','assets/plans-smarts/type-24-clean.webp'].forEach(function(s){
+    var i = new Image(); i.src = s; if (i.decode) i.decode().catch(function(){});
+  });
+
+  function dOf(el){ return el.classList.contains('d3') ? 480 : el.classList.contains('d2') ? 300 : el.classList.contains('d1') ? 140 : 0; }
+  [].slice.call(document.querySelectorAll('.rise')).forEach(function(el){
+    setTimeout(function(){
+      el.style.transition = 'opacity .9s var(--hs), transform .9s var(--hs)';
+      el.style.opacity = 1; el.style.transform = 'none';
+    }, 80 + dOf(el));
+  });
+
+  function coverRect(img, section){
+    var iw = img.naturalWidth || 1600, ih = img.naturalHeight || 1200;
+    var vw = section.clientWidth, vh = section.clientHeight;
+    var s = Math.max(vw / iw, vh / ih);
+    var w = iw * s, h = ih * s;
+    return { left: (vw - w) / 2, top: (vh - h) / 2, w: w, h: h };
+  }
+  /* MOBILE lines: the portrait crop shows the central ~33-67% band; the desktop kitchen line (x=79)
+     is outside it and is dropped; the two kept lines re-anchor onto their subjects */
+  var LINES = [
+    { d: 'M 36 88 L 64 88 M 36 85.5 L 36 90.5 M 64 85.5 L 64 90.5', lab: { x: 50, y: 82, v: fmt(SMARTS.types['smart-27'].m2) + ' м²', k: 'кімната' } },
+    { d: 'M 58 30 L 58 20 M 55.5 20 L 60.5 20', lab: { x: 58, y: 14, v: '', k: 'санвузол за дверима' } }
+  ];
+  var pen = document.getElementById('pen1');
+  var s1 = document.getElementById('s1');
+  var img1 = document.getElementById('img1');
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  var paths = [];
+  LINES.forEach(function(L){
+    var p = document.createElementNS(svgNS, 'path');
+    p.setAttribute('d', L.d);
+    p.classList.add('draw');
+    svg.appendChild(p);
+    paths.push(p);
+    var lab = document.createElement('div');
+    lab.className = 'lab';
+    lab.style.left = L.lab.x + '%';
+    lab.style.top = L.lab.y + '%';
+    lab.innerHTML = (L.lab.v ? '<span class="lv num">' + L.lab.v + '</span>' : '') + '<span class="lk">' + L.lab.k + '</span>';
+    pen.appendChild(lab);
+    L._lab = lab;
+  });
+  pen.appendChild(svg);
+  var drawn = false;
+  function fit(){
+    var r = coverRect(img1, s1);
+    pen.style.left = r.left + 'px'; pen.style.top = r.top + 'px';
+    pen.style.width = r.w + 'px'; pen.style.height = r.h + 'px';
+    paths.forEach(function(p){
+      var len = p.getTotalLength();
+      p.style.strokeDasharray = len;
+      if (!drawn) p.style.strokeDashoffset = len;
+    });
+  }
+  function draw(){
+    if (drawn) return;
+    drawn = true;
+    LINES.forEach(function(L, i){
+      var p = paths[i];
+      setTimeout(function(){
+        p.style.strokeDashoffset = 0;
+        setTimeout(function(){ L._lab.classList.add('on'); }, 1100);
+      }, 500 + i * 650);
+    });
+  }
+  addEventListener('resize', fit);
+  addEventListener('load', fit);
+  setTimeout(function(){ fit(); draw(); }, 600);
+
+  var rl = [].slice.call(document.querySelectorAll('#rulebox line'));
+  rl.forEach(function(l){
+    l.style.strokeDasharray = 700;
+    l.style.strokeDashoffset = 700;
+    l.style.transition = 'stroke-dashoffset 1.1s var(--hs)';
+  });
+  var ruleDrawn = false;
+
+  function onScroll(){
+    var vh = innerHeight;
+    ['s2', 's3', 's4'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (el.getBoundingClientRect().top < vh * 0.55) el.classList.add('live');
+    });
+    if (document.getElementById('s4').getBoundingClientRect().top < vh * 0.45 && !ruleDrawn){
+      ruleDrawn = true;
+      rl.forEach(function(l, i){
+        setTimeout(function(){ l.style.strokeDashoffset = 0; }, i * 200);
+      });
+    }
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(onScroll, 400);
+
+  window.__unitsCount = function(){ return units.length; };
+})();
+</script>
+</body>
+</html>

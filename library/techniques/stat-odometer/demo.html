@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DEMO · stat-odometer · телефон + десктоп</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<style>
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); --line:#26463c; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#0a1a15;color:var(--cream);font-family:var(--body)}
+  header.demo-head{ padding: clamp(24px,5vw,56px) clamp(20px,5vw,64px) 0; max-width:1180px; margin:0 auto; }
+  .kicker{ font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:var(--slate); }
+  h1{ font-family:var(--serif); font-weight:400; font-size:clamp(1.9rem,5vw,3.2rem); line-height:1.05; margin:.4em 0 .3em; }
+  .lede{ color:#c7d3cb; max-width:64ch; line-height:1.55; font-size:clamp(.95rem,1.4vw,1.05rem); }
+  .lede b{ color:var(--cream); font-weight:600; }
+  .board{ max-width:1180px; margin:clamp(28px,5vw,52px) auto; padding:0 clamp(20px,5vw,64px);
+    display:grid; grid-template-columns:auto 1fr; gap:clamp(24px,4vw,52px); align-items:start; }
+  @media (max-width:900px){ .board{ grid-template-columns:1fr; } }
+  .col-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px; }
+  .col-head .t{ font-family:var(--serif); font-weight:400; font-size:1.35rem; }
+  .col-head .tag{ font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--slate);
+    border:1px solid var(--line); border-radius:999px; padding:3px 10px; }
+  .phone{ width:390px; }
+  .phone .device{ width:390px; height:760px; border:10px solid #05100c; border-radius:38px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.5); background:#000; }
+  .phone iframe{ width:390px; height:100%; border:0; display:block; }
+  .desk{ min-width:0; }
+  .desk .device{ border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#000;
+    box-shadow:0 24px 70px rgba(0,0,0,.45); position:relative; }
+  .desk .scaler{ width:1440px; height:900px; transform-origin:top left; }
+  .desk iframe{ width:1440px; height:900px; border:0; display:block; }
+  .cap{ margin-top:14px; color:#aebbb2; font-size:.82rem; line-height:1.5; }
+  .cap b{ color:var(--cream); } .cap .src{ color:var(--slate); font-size:.72rem; display:block; margin-top:6px; }
+  footer.diff{ max-width:1180px; margin:0 auto clamp(40px,8vw,90px); padding:0 clamp(20px,5vw,64px); }
+  .diff-card{ border:1px solid var(--line); border-radius:14px; padding:clamp(18px,3vw,28px); background:linear-gradient(180deg,#0c1f19,#0a1a15); }
+  .diff-card h2{ font-family:var(--serif); font-weight:400; font-size:clamp(1.3rem,3vw,1.8rem); margin-bottom:.5em; }
+  .diff-grid{ display:grid; grid-template-columns:130px 1fr 1fr; font-size:.86rem; }
+  @media (max-width:640px){ .diff-grid{ grid-template-columns:1fr; } .diff-grid .h{ display:none; } }
+  .diff-grid > div{ padding:11px 14px; border-top:1px solid var(--line); }
+  .diff-grid .h{ border-top:none; color:var(--slate); font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; }
+  .diff-grid .k{ color:var(--slate); } .diff-grid b{ color:var(--cream); font-weight:600; }
+</style>
+</head>
+<body>
+  <header class="demo-head">
+    <div class="kicker">SPRINGS · L2 молекула · технічний прототип · #5/17</div>
+    <h1>Stat-odometer (4 mechanics/step)</h1>
+    <p class="lede">📍 <b>Де на springs:</b> секція <code>l-place</code> — «бігова сцена» / proof-of-location
+      («5 MINUTE WALK», «9 MINUTE BY CAR») на <b>springs.estate</b>. <b>4 механіки за крок разом</b>:
+      bg slide-up + card-photo crossfade + odometer-roll + swap лейбла.</p>
+    <p class="lede" style="margin-top:.5em">✅ <b>Виправлено (S19g, це був єдиний «bad» в аудиті):</b>
+      mobile більше НЕ auto-slider. Обидві платформи — <b>PINNED-SCROLL</b>: стат пінить, 4 механіки
+      крокають <b>по скролу</b>. Springs mobile = pinned-scroll (T-PIN-RUNSCENE), не таймер.</p>
+  </header>
+  <div class="board">
+    <section class="phone">
+      <div class="col-head"><span class="t">Телефон</span><span class="tag">390 × 844</span></div>
+      <div class="device"><iframe src="stage.html" title="phone" scrolling="no"></iframe></div>
+      <div class="cap"><b>Скролиш ↕</b> — стат ПІНИТЬ, 4 механіки крокають по скрол-прогресу (не auto).
+        Springs mobile = pinned-scroll (T-PIN-RUNSCENE).
+        <span class="src">гілка: scrollStep() — скрол drive render(prog)</span></div>
+    </section>
+    <section class="desk">
+      <div class="col-head"><span class="t">Десктоп</span><span class="tag">1440 wide</span></div>
+      <div class="device"><div class="scaler" id="scaler"><iframe src="stage.html" title="desktop"></iframe></div></div>
+      <div class="cap"><b>Скролиш всередині ↕</b> — стат крокає по скролу у піні через N−1 хендофів
+        (scroll-step, реверсивний). Плавний Lenis.
+        <span class="src">гілка: scrollStep() — скрол drive render(prog)</span></div>
+    </section>
+  </div>
+  <footer class="diff">
+    <div class="diff-card">
+      <h2>Чим mobile відрізняється й чому</h2>
+      <div class="diff-grid">
+        <div class="h">аспект</div><div class="h">телефон</div><div class="h">десктоп</div>
+        <div class="k">Тригер</div><div><b>scroll-pin</b> (full-bleed, по скролу)</div><div><b>scroll-pin scrub</b> (wide, по скролу)</div>
+        <div class="k">Функція</div><div>scrollStep()</div><div>scrollStep() (той самий)</div>
+        <div class="k">Драйвер</div><div>той самий render(prog)</div><div>той самий render(prog)</div>
+        <div class="k">Механіки/крок</div><div>bg+photo+odometer+label</div><div>bg+photo+odometer+label <i>(ті самі 4)</i></div>
+        <div class="k">Чому різний</div>
+        <div style="grid-column:2 / span 2">Springs mobile ПІНИТЬ стат і крокає 4 механіки ПО СКРОЛУ (T-PIN-RUNSCENE) — так само як desktop. Різниця = layout (mobile full-bleed) + pin-length, НЕ scroll-vs-time.</div>
+      </div>
+    </div>
+  </footer>
+<script>
+  function fitDesk(){ var s=document.getElementById('scaler'), col=s.closest('.device');
+    var k=Math.min(1,(col.clientWidth||s.parentElement.clientWidth)/1440);
+    s.style.transform='scale('+k+')'; col.style.height=(900*k)+'px'; }
+  addEventListener('resize',fitDesk); addEventListener('load',fitDesk); fitDesk();
+</script>
+</body>
+</html>

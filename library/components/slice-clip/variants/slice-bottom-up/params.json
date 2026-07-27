@@ -1,0 +1,16 @@
+{
+  "$extends": "slice-clip",
+  "$variant": "slice-bottom-up",
+  "note": "Knob DIFF over the base slice-clip (frs7, clip wipes LEFT->RIGHT, keeps its vertical bronze edge). The base engine (component.js) is parameterized over `dir` and `edge`, so this variant is PURE DATA (CONTRACT §3 preferred path): flip the clip axis to BOTTOM->UP and turn the edge-line OFF. No new DOM layer, no new phase, zero code. Byte-faithful to frs10-slice-td-relay.html (filename says 'relay' for historical reasons; it is now a clip-reveal, bottom->up).",
+  "params": {
+    "dir": "bu",
+    "edge": false
+  },
+  "engine": {
+    "model": "same parity-locked two-<img> clip-wipe as the base; only the inset axis changes",
+    "closedInset": "inset(0 0 100% 0)   (incoming layer fully hidden BELOW)",
+    "openInset": "inset(0 0 BOTTOM% 0)   BOTTOM 100% (hidden) -> 0% (full) — the new photo rises, the seam travels BOTTOM->UP",
+    "edge": "REMOVED on purpose — the bronze edge-line read as a stray horizontal line moving from the opposite side of the wipe, so the bottom-up variant ships edge:false. Do NOT re-add it.",
+    "shared": "frs3 composition (rail 38% / render 62%, ~2cm gap, bronze), Lenis lerp 0.1 smoother, pure render(prog), pin/pinSpacing/scrub:true, dwell 0.86 / hold 0.78 / pinFactor 1.4, glide wipe ease + air rail ease, transform/opacity/clip-path only, reduced-motion/<=820px static stack"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "stat-odometer",
+  "title": "Stat-odometer — 4 mechanics per step (Springs)",
+  "level": "L2-molecule",
+  "batch": "B (#5/17)",
+  "source": "springs.estate wellness stat block. Engine = library/components/stat-odometer (proven). Dual wrapper adds forceMotion + manualDrive + mobile auto-slider.",
+  "engine": "A pinned stat-card slider — 4 mechanics per step at once (bg vertical slide-up + card-photo crossfade + numeral odometer-roll + label swap). Pure render(prog) drives all four off a single 0..1.",
+
+  "dual_platform": true,
+  "differs": "CORRECTED (S19g vs D_SPRINGS_video, was the audit's only BAD): springs mobile stat = PINNED-SCROLL, not auto-slider. BOTH platforms scroll-pin drive the same 4-mechanic render(prog); difference = LAYOUT + pin-length (desktop wide; mobile full-bleed sticky, mechanics advance by scroll-progress = T-PIN-RUNSCENE). NOT scroll-vs-time.",
+
+  "desktop": { "driver": "scrollStep — prog = scroll progress across the pin span (N-1 handoffs, reversible).", "knobs": ["snap", "pinFactor"] },
+  "mobile": { "driver": "scrollStep too — same pinned-scroll; stat sticks full-bleed and the 4 mechanics advance by scroll-progress (no timer).", "knobs": ["pinFactor"] },
+
+  "knobs": {
+    "steps": { "default": "from .so-step data-* children", "what": "each step: num, label, bg (+photo)." },
+    "holdMs": { "default": 1100, "unit": "ms", "platform": "mobile", "what": "how long each step rests before advancing." },
+    "moveMs": { "default": 900, "unit": "ms", "platform": "mobile", "what": "the ease duration between two steps." },
+    "snap": { "default": true, "platform": "desktop", "what": "snap scroll to whole steps." },
+    "pinFactor": { "default": 1.0, "platform": "desktop", "what": "scroll length per handoff (viewport fraction)." }
+  },
+
+  "engine_patch": "forceMotion (skip <=820px static guard) + manualDrive (expose render() WITHOUT engine ScrollTrigger/pin; also skips its Lenis, guards registerPlugin/ticker so it runs with no ScrollTrigger loaded). Additive & opt-in; default desktop behavior unchanged. See memory dual-platform-forcemotion.",
+  "entry": "StatOdometerDual.init(target, opts) -> { platform, engine, driver, count }. Load engine.js THEN component.js. Markup: .so-stage > .so-bg + content(.so-num-window>.so-num-col, .so-label, .so-progress) + .so-step[data-num,data-label,data-bg] children.",
+  "law": "render(prog) PURE; transform (bg slide, numeral roll) + opacity (photo/label crossfade) only; GPU; NO mix-blend/backdrop over the scrubbed surface; NO WebGL. reduced-motion → rest on last step.",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core + forceMotion/manualDrive)", "component.css", "img/s1..s4.webp", "stage.html", "demo.html", "meta.json", "README.md"]
+}

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · kinetic-letters-hero · T-311 + T-M02 (літери збираються в лого)</title>
+<!--
+================================================================================
+  LAB: kinetic-letters-hero — T-311 kinetic nav-letters + дзеркальний футер.
+  Контракт: живий shared.js AIR (landingIntroLogoA/I/R): гігантський
+  розведений wordmark у hero; скрол секції збирає літери В ЛОГО ХЕДЕРА
+  (scale 50/140, виїзд угору, колапс розведення), easeOutQuad, clamp;
+  reversible. Футер = дзеркало (spread + scale-в'їзд 0.92→1 once).
+
+  ГЕЙТ (PROBE_MODE):
+  1. p=0: гігант-spread (перша літера <12vw зліва, остання >88vw, висота
+     >12% ширини екрана);
+  2. скрол до assembleAt: літери ЗІБРАНІ - scale ≈0.357 (висота літери
+     впала до ~36%±4% від старту), верх (центр < 12vh), компакт (загальна
+     ширина рядка < 30vw), послідовні X (без перетинів);
+  3. reversible: скрол назад до 0 → знову гігант-spread (дельта старт-X
+     ≤2px) — render чистий;
+  4. футер: доскрол до футера → spread-рядок є, scale-в'їзд завершився
+     (transform-scale 1±0.01);
+  5. transform-only: CLS < 0.1; console errors == 0.
+  Живий перегляд (без ?probe): скроль вручну — нуль автоскролів.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  header { position: fixed; top: 0; left: 0; right: 0; z-index: 5; display: flex;
+           justify-content: space-between; padding: 20px 4vw; font-size: 12px;
+           letter-spacing: .12em; }
+  .hero { height: 185vh; position: relative; }
+  .hero__hint { position: absolute; top: 78vh; left: 4vw; font-size: 12px;
+                letter-spacing: .18em; text-transform: uppercase; color: #6b6b68; }
+  .act { min-height: 100vh; background: #161616; color: #f2f1ee;
+         display: flex; align-items: center; padding: 0 6vw; }
+  .act p { font-size: clamp(20px, 2.6vw, 36px); font-weight: 300; max-width: 34ch; }
+  .filler { min-height: 80vh; display: flex; align-items: center; padding: 0 6vw; color: #6b6b68; }
+  footer { background: #111110; color: #f2f1ee; padding: 10vh 4vw 6vh; }
+  .footer-mark { position: relative; height: 15vw; margin-bottom: 5vh; }
+  .footer-legal { font-size: 11px; color: #8a8886; letter-spacing: .1em; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · kinetic-letters-hero · t-311 + t-m02 · скроль</div>
+
+<header>
+  <span>ВИВЧАЙ ПРОСТО</span>
+  <span>МЕНЮ</span>
+</header>
+
+<section class="hero" id="hero">
+  <p class="hero__hint">Гортайте · літери зберуться в лого</p>
+</section>
+
+<section class="act">
+  <p>Житла тут будують більше, ніж магазинів. Цей розрив і є ваш прибуток.</p>
+</section>
+
+<section class="filler"><p>… контент сторінки …</p></section>
+
+<footer>
+  <div class="footer-mark" id="footerMark"></div>
+  <p class="footer-legal">© 2026 · НА ЦЬОМУ САЙТІ ЛИШЕ ПЕРЕВІРЕНІ ЦИФРИ</p>
+</footer>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var report = { spread: null, assembled: null, reversible: null, footer: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  var klh = window.KineticLettersHero.create('#hero', { wordmark: 'ДІМ' });
+  var kfoot = window.KineticLettersHero.footer('#footerMark', { wordmark: 'ДІМ' });
+  window.__KLH = klh;
+
+  function rects() {
+    return klh.letters.map(function (s) { return s.getBoundingClientRect(); });
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+
+    /* 1. p=0: гігант-spread */
+    await delay(400);
+    var r0 = rects();
+    var vw = window.innerWidth, vh = window.innerHeight;
+    var h0 = r0[0].height;
+    report.spread = {
+      left: Math.round(r0[0].left), right: Math.round(r0[r0.length - 1].right),
+      hFrac: Math.round(h0 / vw * 100) / 100,
+      ok: r0[0].left < vw * 0.12 && r0[r0.length - 1].right > vw * 0.88 && h0 > vw * 0.12
+    };
+    ok = report.spread.ok && ok;
+
+    /* 2. скрол до assembleAt: зібрані в лого */
+    var hero = document.getElementById('hero');
+    var span = hero.offsetHeight - vh;
+    var y = 0;
+    while (y < span * 0.86) { y = Math.min(y + vh * 0.3, span * 0.86); window.scrollTo(0, y); await delay(60); }
+    await delay(250);
+    var r1 = rects();
+    var scaleNow = r1[0].height / h0;
+    var rowW = r1[r1.length - 1].right - r1[0].left;
+    var monoX = r1.every(function (r, i) { return i === 0 || r.left > r1[i - 1].left; });
+    var cy = (r1[0].top + r1[0].bottom) / 2;
+    report.assembled = {
+      scale: Math.round(scaleNow * 100) / 100, rowVw: Math.round(rowW / vw * 100),
+      topVh: Math.round(cy / vh * 100), monoX: monoX,
+      ok: Math.abs(scaleNow - 0.357) < 0.05 && rowW < vw * 0.3 && cy < vh * 0.12 && monoX
+    };
+    ok = report.assembled.ok && ok;
+
+    /* 3. reversible: назад до 0 */
+    while (y > 0) { y = Math.max(y - vh * 0.3, 0); window.scrollTo(0, y); await delay(60); }
+    await delay(250);
+    var r2 = rects();
+    report.reversible = {
+      dLeft: Math.round(Math.abs(r2[0].left - r0[0].left)),
+      dH: Math.round(Math.abs(r2[0].height - h0)),
+      ok: Math.abs(r2[0].left - r0[0].left) <= 2 && Math.abs(r2[0].height - h0) <= 2
+    };
+    ok = report.reversible.ok && ok;
+
+    /* 4. футер: доскрол, scale-в'їзд завершився */
+    window.scrollTo(0, document.body.scrollHeight - vh);
+    await delay(1600); /* в'їзд 1s + запас */
+    var fr = kfoot.letters.map(function (s) { return s.getBoundingClientRect(); });
+    var fscale = /scale\((\d*\.?\d+)\)/.exec(kfoot.letters[0].style.transform);
+    report.footer = {
+      letters: fr.length,
+      spread: fr[0].left < vw * 0.14 && fr[fr.length - 1].right > vw * 0.82,
+      scale: fscale ? parseFloat(fscale[1]) : -1,
+      ok: fr.length === 3 && Math.abs((fscale ? parseFloat(fscale[1]) : 0) - 1) < 0.01
+    };
+    ok = report.footer.ok && report.footer.spread && ok;
+
+    report.errors = errs;
+    report.cls = Math.round(cls * 1000) / 1000;
+    ok = ok && errs === 0 && cls < 0.1;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:kinetic-letters-hero]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATOM: odometer — scene-counter roll (dummy facade)</title>
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     ATOM BUILD: odometer (springs 3→9→16 → dummy 5→12→48).
+     LAW (see SPEC.md): N full-viewport scenes swap inside ONE pinned band via a
+     single scroll-scrubbed WIPE-UP boundary; card items clip bottom-up in place,
+     bg completes ~2× faster, incoming media settles scale 1.2→1.0, counter+label
+     swap first / photo last — EMERGENT from geometry, zero separate fades.
+     Facade is deliberately NOT springs (transfer gate).
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#151517;color:#eae6da;font-family:system-ui,sans-serif}
+  .spacer{height:100vh;display:flex;align-items:center;justify-content:center;font-size:.8rem;letter-spacing:.2em;opacity:.45;text-transform:uppercase}
+  .stage{position:relative}
+  .pin{position:relative;height:100vh;overflow:hidden;background:#151517}
+
+  /* ── bg-media role: full-bleed stacked panels (dummy gradients, NOT springs) ── */
+  .bg{position:absolute;inset:0;will-change:clip-path,transform}
+  .bg .inner{position:absolute;inset:0;will-change:transform}
+  #bg0 .inner{background:linear-gradient(160deg,#6d6a52,#3c3d31 55%,#23241d);}
+  #bg1 .inner{background:linear-gradient(175deg,#2e4a4d,#1c3336 50%,#0f2124);}
+  #bg1 .inner::after{content:"";position:absolute;inset:0;opacity:.35;
+    background:repeating-linear-gradient(178deg,transparent 0 110px,rgba(255,255,255,.06) 110px 118px);}
+  #bg2 .inner{background:linear-gradient(178deg,#3a3350 0%,#241f38 45%,#171225 70%,#0d0a18);}
+  #bg2 .inner::after{content:"";position:absolute;left:0;right:0;bottom:0;height:18vh;opacity:.5;
+    background:repeating-linear-gradient(90deg,rgba(255,214,150,.12) 0 5px,transparent 5px 42px);}
+
+  /* ── card slot: fixed layout spot, all scene-items absolutely stacked.
+       item = НЕПРОЗОРА плита (як у springs: фото зверху + solid-панель з цифрою) —
+       саме плита «ролить» стару цифру, коли межа проходить ── */
+  .cardslot{position:absolute;right:10%;top:20vh;width:23vw;min-width:280px;height:58vh}
+  .item{position:absolute;inset:0;will-change:clip-path;background:#1a2023;padding:0 1.4vw 0 1.4vw}
+  .item .photo{margin:0 -1.4vw}
+  .photo{height:55%;overflow:hidden;position:relative}
+  .photo .ph{position:absolute;inset:0;will-change:transform}
+  #item0 .ph{background:linear-gradient(140deg,#b9b08a,#7a7458 60%,#565138)}
+  #item1 .ph{background:linear-gradient(140deg,#7fb3b8,#39696e 60%,#1f4448)}
+  #item2 .ph{background:linear-gradient(140deg,#a08ec9,#5e5085 60%,#372e57)}
+  .ph::after{content:"DUMMY PHOTO";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-size:.6rem;letter-spacing:.3em;opacity:.55}
+  .num{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:8.2rem;line-height:.9;margin-top:2.2vh}
+  .lbl{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;margin-top:1.6vh;max-width:70%}
+
+  .hud{position:fixed;left:14px;bottom:12px;font-size:.66rem;opacity:.5;z-index:99;font-family:ui-monospace,monospace}
+</style>
+</head>
+<body>
+  <div class="spacer">scroll ↓ — atom: odometer (dummy facade)</div>
+
+  <div class="stage" id="stage">
+    <div class="pin" id="pin">
+      <div class="bg" id="bg0"><div class="inner"></div></div>
+      <div class="bg" id="bg1"><div class="inner"></div></div>
+      <div class="bg" id="bg2"><div class="inner"></div></div>
+      <div class="cardslot" id="cardslot">
+        <div class="item" id="item0">
+          <div class="photo"><div class="ph"></div></div>
+          <div class="num">5</div>
+          <div class="lbl">dummy units to metric one</div>
+        </div>
+        <div class="item" id="item1">
+          <div class="photo"><div class="ph"></div></div>
+          <div class="num">12</div>
+          <div class="lbl">dummy units to metric two</div>
+        </div>
+        <div class="item" id="item2">
+          <div class="photo"><div class="ph"></div></div>
+          <div class="num">48</div>
+          <div class="lbl">dummy units to metric three</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer">next section (exit is a separate atom)</div>
+  <div class="hud" id="hud">p=0.000</div>
+
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger);
+  var EASE='none'; // scrub-закон: темп дає скрол, не easing твінів
+  gsap.defaults({ease:EASE});
+
+  // clip helper: reveal boundary Y% від верху item-простору (100=сховано внизу, 0=відкрито)
+  var P=function(y){return 'polygon(0% '+y+'%, 100% '+y+'%, 100% 100%, 0% 100%)';};
+
+  /* ── КАЛІБРУВАЛЬНІ КОНСТАНТИ (v1: markup-ключі [0..⅓][⅓..⅔] зі зсувом під плівку;
+       уточнити з наративом Єгора — SPEC «КАЛІБРУВАТИ») ── */
+  var W = 0.30;                    // ширина вікна транзиції (частка band)
+  var T = [0.06, 0.39];            // старти W1 (3→9) і W2 (9→16)
+  var BGF = 0.55;                  // bg завершує за цю частку вікна (швидший за item)
+  var SETTLE = 1.8;                // scale-settle тягнеться довше вікна
+  var DRIFT = -4;                  // vh: повільний дрейф card-колонки вгору за band
+
+  var tl=gsap.timeline({paused:true});
+
+  // старт: сцена0 повністю відкрита, наступні сколапсовані внизу
+  tl.set(['#bg1','#bg2'],{clipPath:P(100)},0);
+  tl.set(['#item1','#item2'],{clipPath:P(100)},0);
+  // вхід картки сцени0 (markup: колонка wipe-in біля pin)
+  tl.fromTo('#item0',{clipPath:P(100)},{clipPath:P(0),duration:0.07},0.005);
+  tl.fromTo('#item0 .ph',{scale:1.2},{scale:1.0,duration:W*SETTLE},0.005);
+
+  // M4: повільний дрейф колонки вгору весь band
+  tl.fromTo('#cardslot',{yPercent:2},{yPercent:2+DRIFT,duration:1},0);
+
+  // транзиції: ОДНА межа на сцену — bg швидше, item повне вікно, медіа settle
+  [1,2].forEach(function(k,i){
+    var at=T[i];
+    tl.fromTo('#bg'+k,{clipPath:P(100)},{clipPath:P(0),duration:W*BGF},at);
+    tl.fromTo('#bg'+k+' .inner',{scale:1.12},{scale:1.0,duration:W*SETTLE},at);
+    tl.fromTo('#item'+k,{clipPath:P(100)},{clipPath:P(0),duration:W},at);
+    tl.fromTo('#item'+k+' .ph',{scale:1.2},{scale:1.0,duration:W*SETTLE},at);
+  });
+  tl.set({},{},1); // нормалізувати годинник до 1
+
+  // ── verify hooks ──
+  window.render=function(p){ p=Math.max(0,Math.min(1,p)); tl.progress(p); document.getElementById('hud').textContent='p='+p.toFixed(3); };
+  window.__ATOM_OK__=true;
+
+  // ── driver: Lenis → ScrollTrigger pin+scrub; band hold = 300vh (N=3 сцени) ──
+  if(window.Lenis){
+    var lenis=new Lenis({lerp:0.1});
+    lenis.on('scroll',ScrollTrigger.update);
+    gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+    gsap.ticker.lagSmoothing(0);
+  }
+  ScrollTrigger.create({ trigger:'#stage', start:'top top', end:'+=300%', pin:'#pin', scrub:1,
+    onUpdate:function(self){ window.render(self.progress); } });
+
+  window.render(0);
+})();
+</script>
+</body>
+</html>

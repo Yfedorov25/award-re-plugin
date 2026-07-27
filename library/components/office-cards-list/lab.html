@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · office-cards-list · A-15 + T-409 + T-419 + ♡ (каталог на живих даних)</title>
+<!--
+================================================================================
+  LAB: office-cards-list — каталог /offices на ЖИВИХ даних (8 реальних
+  офісів з планами hotlink; діапазон цін живий 39 611 870–706 815 000).
+  Контракт: живий /offices (live-archive 2026-07-06): card-office +
+  popover-план right + ♡ favourite (active = чорна заливка + бейдж) +
+  range step 1 000 000 + live-лічильник «Show N offices» + LIST/GRID +
+  сорт + T-419 sticky-бар.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. старт: 8 карток, «Show 8 offices», сорт asc
+  (перша — найдешевша №18); 3. chip B2 → 3 картки, «Show 3 offices»;
+  clear → 8; 4. range price max ≈ 50M → лише картки ≤ 50M; clear;
+  5. сорт → desc: перша картка = найдорожча; 6. ♡ на двох → бейдж «2»,
+  повторний тап знімає → «1»; 7. GRID → data-view-style=grid;
+  8. 🔒-картка не веде нікуди (locked href глухий); errors == 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; overflow-x: clip; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  header.vs { display: flex; align-items: center; gap: 14px; padding: 16px 3vw; }
+  header.vs .logo { letter-spacing: .32em; font-weight: 500; margin-right: auto; }
+  .wrap { max-width: 1150px; margin: 2vh auto 10vh; padding: 0 3vw; }
+  h1 { font-size: clamp(26px, 3.4vw, 44px); font-weight: 300; margin: 2vh 0 3vh; }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 2.6vh; }
+  .bar .spacer { flex: 1; }
+  .bar button.plain { font: inherit; font-size: 11px; letter-spacing: .08em;
+    text-transform: uppercase; padding: 9px 12px; border-radius: 4px;
+    border: 1px solid rgba(17,17,16,.3); background: none; cursor: pointer; }
+  .bar button.plain.is-active { background: #111110; color: #f4f2ee; }
+  .ranges { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 640px;
+            margin-bottom: 3vh; font-size: 11px; letter-spacing: .06em;
+            text-transform: uppercase; color: #55544f; }
+  .ranges [data-ocl-range-out] { display: block; margin-top: 6px; color: #111110;
+    letter-spacing: 0; text-transform: none; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · office-cards-list · a-15 + t-409 + t-419 + ♡ · фільтруй</div>
+
+<header class="vs"><span class="logo">AIR</span>
+  <span style="font-size:13px">♡ <span data-ocl-fav-badge></span></span>
+</header>
+
+<div class="wrap" data-ocl id="ocl">
+  <h1>Choose an office</h1>
+
+  <div class="bar" data-ocl-filters>
+    <button type="button" class="plain" data-ocl-chip="b:1">Building 1</button>
+    <button type="button" class="plain" data-ocl-chip="b:2">Building 2</button>
+    <button type="button" class="plain" data-ocl-chip="b:3">Building 3</button>
+    <span class="spacer"></span>
+    <button type="button" class="plain" data-ocl-sort-btn>Ascending price ∨</button>
+    <span data-ocl-view>
+      <button type="button" class="plain is-active" data-ocl-view-btn="list">List</button>
+      <button type="button" class="plain" data-ocl-view-btn="grid">Grid</button>
+    </span>
+  </div>
+
+  <div class="ranges">
+    <label>Area, m²
+      <span data-ocl-range="area">
+        <span class="ocl-range-track"></span>
+        <input type="range" min="59" max="742" value="59" step="1" aria-label="Area from">
+        <input type="range" min="59" max="742" value="742" step="1" aria-label="Area to">
+      </span>
+      <span data-ocl-range-out></span>
+    </label>
+    <label>Price
+      <span data-ocl-range="price">
+        <span class="ocl-range-track"></span>
+        <input type="range" min="39611870" max="706815000" value="39611870" step="1000000" aria-label="Price from">
+        <input type="range" min="39611870" max="706815000" value="706815000" step="1000000" aria-label="Price to">
+      </span>
+      <span data-ocl-range-out></span>
+    </label>
+  </div>
+
+  <ul data-ocl-list></ul>
+
+  <div data-ocl-sticky>
+    <button type="button" data-ocl-clear>Clear filters</button>
+    <span data-ocl-counter class="counter-pill"></span>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  /* ЖИВІ дані /offices (8 реальних офісів; №165 позначений 🔒 і №46 зі
+     знижкою для проби станів A-15) */
+  var A = 'https://aircenter.space';
+  var OFFICES = [
+    { nr: '18', area: 59.9, floor: 9, building: 1, price: 39611870, plan: A + '/assets/images/offices/plans/k1/floor_9/1_9_18.svg', href: '/office/AR-1-18' },
+    { nr: '46', area: 60, floor: 11, building: 1, price: 43728000, oldPrice: 46029474, plan: A + '/assets/images/offices/plans/k1/floor_11/1_11_46.svg', href: '/office/AR-1-46' },
+    { nr: '59', area: 70.4, floor: 7, building: 2, price: 47914240, plan: A + '/assets/images/offices/plans/k2/floor_7/2_7_59.svg', href: '/office/AR-2-59' },
+    { nr: '60', area: 73.7, floor: 7, building: 2, price: 47949220, plan: A + '/assets/images/offices/plans/k2/floor_7/2_7_60.svg', href: '/office/AR-2-60' },
+    { nr: '20', area: 77.3, floor: 9, building: 1, price: 48227470, plan: A + '/assets/images/offices/plans/k1/floor_9/1_9_20.svg', href: '/office/AR-1-20' },
+    { nr: '165', area: 64.4, floor: 22, building: 2, price: 50425200, locked: true, plan: A + '/assets/images/offices/plans/k2/floor_22/2_22_165.svg', href: '/office/AR-2-165' },
+    { nr: '3', area: 77, floor: 7, building: 1, price: 50573600, plan: A + '/assets/images/offices/plans/k1/floor_7/1_7_3.svg', href: '/office/AR-1-3' },
+    { nr: '48', area: 78.2, floor: 11, building: 1, price: 51885700, plan: A + '/assets/images/offices/plans/k1/floor_11/1_11_48.svg', href: '/office/AR-1-48' }
+  ];
+  var ocl = window.OfficeCardsList.create('#ocl', OFFICES, {});
+  window.__OCL = ocl;
+
+  var report = { stability: null, start: null, chips: null, range: null,
+                 sort: null, fav: null, view: null, locked: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function counterText() {
+    return document.querySelector('[data-ocl-sticky] [data-ocl-counter]').textContent;
+  }
+  function firstNr() {
+    var c = document.querySelector('[data-ocl-list] .ocl-card');
+    return c && c.getAttribute('data-nr');
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    var anchor = document.querySelector('h1');
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* 2: старт */
+    report.start = { shown: ocl.gate.shown, counter: counterText(), first: firstNr() };
+    report.start.ok = ocl.gate.shown === 8 && /Show 8 offices/.test(report.start.counter) &&
+                      report.start.first === '18';
+    ok = report.start.ok && ok;
+
+    /* 3: chip B2 */
+    document.querySelector('[data-ocl-chip="b:2"]').click();
+    await delay(60);
+    report.chips = { shown: ocl.gate.shown, counter: counterText() };
+    document.querySelector('[data-ocl-clear]').click();
+    await delay(60);
+    report.chips.afterClear = ocl.gate.shown;
+    report.chips.ok = report.chips.shown === 3 && /Show 3 offices/.test(report.chips.counter) &&
+                      report.chips.afterClear === 8;
+    ok = report.chips.ok && ok;
+
+    /* 4: range price → до 50 000 000 */
+    var pr = document.querySelectorAll('[data-ocl-range="price"] input');
+    pr[1].value = 50000000;
+    pr[1].dispatchEvent(new Event('input'));
+    await delay(60);
+    report.range = { shown: ocl.gate.shown };
+    document.querySelector('[data-ocl-clear]').click();
+    await delay(60);
+    report.range.ok = report.range.shown === 5 && ocl.gate.shown === 8;
+    ok = report.range.ok && ok;
+
+    /* 5: сорт desc */
+    document.querySelector('[data-ocl-sort-btn]').click();
+    await delay(60);
+    report.sort = { first: firstNr(), ok: firstNr() === '48' };
+    document.querySelector('[data-ocl-sort-btn]').click();
+    await delay(60);
+    ok = report.sort.ok && ok;
+
+    /* 6: ♡ два → бейдж 2 → зняти один → 1 */
+    var favBtns = document.querySelectorAll('.ocl-fav');
+    favBtns[0].click(); favBtns[1].click();
+    await delay(60);
+    var badge = document.querySelector('[data-ocl-fav-badge]');
+    var b2 = badge.textContent;
+    favBtns[0].click();
+    await delay(60);
+    report.fav = { after2: b2, after1: badge.textContent,
+                   active: document.querySelectorAll('.ocl-fav.is-active').length };
+    report.fav.ok = b2 === '2' && badge.textContent === '1' && report.fav.active === 1;
+    ok = report.fav.ok && ok;
+
+    /* 7: GRID */
+    document.querySelector('[data-ocl-view-btn="grid"]').click();
+    report.view = { style: document.getElementById('ocl').getAttribute('data-view-style'),
+                    ok: document.getElementById('ocl').getAttribute('data-view-style') === 'grid' };
+    ok = report.view.ok && ok;
+
+    /* 8: 🔒 глухий */
+    var lockCard = document.querySelector('.ocl-card-locked');
+    report.locked = { href: lockCard.getAttribute('href'), ok: lockCard.getAttribute('href') === '#' };
+    ok = report.locked.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:office-cards-list]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

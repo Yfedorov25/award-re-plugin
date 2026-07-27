@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>map-pic-in-pic</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #101f15; }
+  html { scrollbar-width: thin; }
+  * { box-sizing: border-box; }
+
+  .stage {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ---- living botanical background ---- */
+  .bg-wrap { position: absolute; inset: 0; overflow: hidden; }
+  .bg-zoom {
+    position: absolute; inset: 0;
+    /* layered gradients: base wash, midrib light band, vein striations (light + dark), radial glow, deep corner */
+    background:
+      radial-gradient(130% 100% at 18% 28%, rgba(126, 176, 112, 0.32), transparent 58%),
+      radial-gradient(120% 110% at 85% 85%, rgba(0, 0, 0, 0.38), transparent 55%),
+      linear-gradient(115deg, transparent 38%, rgba(156, 196, 132, 0.16) 46%, rgba(156, 196, 132, 0.05) 54%, transparent 62%),
+      repeating-linear-gradient(104deg, rgba(214, 236, 198, 0.05) 0 2px, transparent 2px 28px),
+      repeating-linear-gradient(99deg, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 38px),
+      linear-gradient(158deg, #2a4632 0%, #1a2f21 52%, #0f2014 100%);
+  }
+  .vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(115% 95% at 50% 42%, transparent 55%, rgba(4, 10, 6, 0.42) 100%);
+  }
+  .grain {
+    position: absolute; inset: 0; pointer-events: none;
+    opacity: 0.07; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='240' height='240' filter='url(%23n)' opacity='0.6'/></svg>");
+    background-size: 240px 240px;
+  }
+
+  /* ---- cream map panel, flush right ---- */
+  .panel {
+    position: absolute;
+    top: 14vh; right: 0;
+    width: 88vw; height: 72vh;
+    background:
+      radial-gradient(90% 80% at 70% 30%, rgba(255, 252, 240, 0.55), transparent 70%),
+      linear-gradient(180deg, #f5f0e2 0%, #efe7d3 100%);
+    box-shadow: 0 32px 88px rgba(8, 18, 10, 0.38);
+    overflow: hidden;
+  }
+  .map-art {
+    position: absolute; top: 0; right: -4%;
+    width: 66%; height: 100%;
+  }
+  .map-art svg { width: 100%; height: 100%; display: block; }
+
+  .caption {
+    position: absolute;
+    top: 64px; left: 64px;
+    max-width: 34%;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(21px, 1.55vw + 8px, 32px);
+    line-height: 1.4;
+    color: #2c4133;
+    letter-spacing: 0.005em;
+    text-wrap: pretty;
+  }
+  .cap-line { overflow: hidden; }
+  .cap-line-inner { display: block; }
+
+  @media (max-width: 720px) {
+    .caption { top: 40px; left: 40px; max-width: 60%; }
+    .map-art { width: 100%; right: -12%; top: 22%; height: 84%; }
+  }
+</style>
+</head>
+<body>
+
+<section class="stage">
+  <div class="bg-wrap">
+    <div class="bg-zoom"></div>
+    <div class="vignette"></div>
+    <div class="grain"></div>
+  </div>
+
+  <div class="panel">
+    <div class="map-art" aria-hidden="true">
+      <svg viewBox="0 0 900 700" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <pattern id="gridA" width="54" height="54" patternUnits="userSpaceOnUse" patternTransform="rotate(13)">
+            <path d="M 0 0 V 54" stroke="#d9cfb6" stroke-width="1"/>
+          </pattern>
+          <pattern id="gridB" width="68" height="68" patternUnits="userSpaceOnUse" patternTransform="rotate(-77)">
+            <path d="M 0 0 V 68" stroke="#ddd3bc" stroke-width="1"/>
+          </pattern>
+          <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="7"/>
+          </filter>
+        </defs>
+
+        <!-- fine two-angle street grid -->
+        <rect x="-80" y="-80" width="1060" height="860" fill="url(#gridA)" opacity="0.55"/>
+        <rect x="-80" y="-80" width="1060" height="860" fill="url(#gridB)" opacity="0.45"/>
+        <!-- a few avenues -->
+        <path d="M -40 180 L 940 120" stroke="#cfc4a8" stroke-width="2.5" fill="none"/>
+        <path d="M 180 -40 L 320 740" stroke="#cfc4a8" stroke-width="2" fill="none"/>
+        <path d="M -40 560 L 940 470" stroke="#d4caae" stroke-width="2" fill="none"/>
+
+        <!-- park patches -->
+        <ellipse cx="345" cy="245" rx="96" ry="62" fill="#c8d6ab" opacity="0.85" filter="url(#soft)"/>
+        <ellipse cx="640" cy="480" rx="118" ry="74" fill="#c3d2a4" opacity="0.8" filter="url(#soft)"/>
+        <ellipse cx="230" cy="540" rx="82" ry="56" fill="#cdd9b2" opacity="0.75" filter="url(#soft)"/>
+
+        <!-- river -->
+        <path d="M 770 -30 C 700 120, 838 200, 724 302 C 620 396, 706 480, 602 562 C 540 612, 566 664, 522 730"
+              fill="none" stroke="#c8d5da" stroke-width="42" stroke-linecap="round" opacity="0.5"/>
+        <path d="M 770 -30 C 700 120, 838 200, 724 302 C 620 396, 706 480, 602 562 C 540 612, 566 664, 522 730"
+              fill="none" stroke="#aec3ca" stroke-width="22" stroke-linecap="round" opacity="0.9"/>
+
+        <!-- small round markers -->
+        <g class="marker"><circle cx="316" cy="200" r="13" fill="#f4eede" stroke="#2f4a38" stroke-width="1.6"/><circle cx="316" cy="200" r="3.2" fill="#2f4a38"/></g>
+        <g class="marker"><circle cx="540" cy="150" r="13" fill="#f4eede" stroke="#2f4a38" stroke-width="1.6"/><circle cx="540" cy="150" r="3.2" fill="#2f4a38"/></g>
+        <g class="marker"><circle cx="672" cy="308" r="13" fill="#f4eede" stroke="#2f4a38" stroke-width="1.6"/><circle cx="672" cy="308" r="3.2" fill="#2f4a38"/></g>
+        <g class="marker"><circle cx="410" cy="452" r="13" fill="#f4eede" stroke="#2f4a38" stroke-width="1.6"/><circle cx="410" cy="452" r="3.2" fill="#2f4a38"/></g>
+        <g class="marker"><circle cx="700" cy="580" r="13" fill="#f4eede" stroke="#2f4a38" stroke-width="1.6"/><circle cx="700" cy="580" r="3.2" fill="#2f4a38"/></g>
+
+        <!-- large drop badge -->
+        <g class="badge">
+          <path d="M 508 306 a 40 40 0 1 1 24 0 l -12 22 z" fill="#213c2c"/>
+          <circle cx="520" cy="268" r="40" fill="#213c2c"/>
+          <!-- tiny spire glyph -->
+          <path d="M 520 248 L 526 262 L 523 262 L 523 284 L 517 284 L 517 262 L 514 262 Z" fill="#efe7d1"/>
+          <path d="M 508 284 H 532" stroke="#efe7d1" stroke-width="2"/>
+          <rect x="481" y="336" width="78" height="20" rx="10" fill="#f2ecdb" stroke="#213c2c" stroke-width="0.8"/>
+          <text x="520" y="350" text-anchor="middle" font-family="Georgia, serif" font-size="9.5" letter-spacing="3" fill="#213c2c">VERAMONT</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="caption">
+      <div class="cap-line"><span class="cap-line-inner">Easy access to the river park.</span></div>
+      <div class="cap-line"><span class="cap-line-inner">Watercolor landscapes of quiet green,</span></div>
+      <div class="cap-line"><span class="cap-line-inner">kept for slow mornings.</span></div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function () {
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  CustomEase.create('lux', '0.25,0.74,0.22,0.99');
+
+  // Lenis wiring (required form)
+  const lenis = new Lenis();
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  // initial states — transforms owned by GSAP only
+  gsap.set('.bg-zoom', { scale: 1.05, transformOrigin: '50% 50%' });
+  gsap.set('.panel', { clipPath: 'inset(100% 0% 0% 0%)', y: 60 });
+  gsap.set('.cap-line-inner', { yPercent: 110 });
+  gsap.set('.marker', { scale: 0.6, autoAlpha: 0, transformOrigin: '50% 50%' });
+  gsap.set('.badge', { scale: 0.8, autoAlpha: 0, transformOrigin: '50% 50%' });
+
+  // ONE master timeline, normalized 0..1
+  const tl = gsap.timeline({ defaults: { ease: 'lux' } });
+
+  // p0.00-1.00 — bg lives the whole band (never frozen)
+  tl.to('.bg-zoom', { scale: 1.15, ease: 'none', duration: 1 }, 0);
+
+  // p0.30-0.55 — panel slicer: wipe up from bottom + settle; caption rides the same window
+  tl.to('.panel', { clipPath: 'inset(0% 0% 0% 0%)', y: 0, duration: 0.25 }, 0.30);
+  tl.to('.cap-line-inner', { yPercent: 0, duration: 0.16, stagger: 0.035 }, 0.375);
+
+  // p0.48-0.60 — markers pop staggered
+  tl.to('.marker', { scale: 1, autoAlpha: 1, duration: 0.05, stagger: 0.018, ease: 'back.out(2)' }, 0.48);
+
+  // badge settles last, window ends ~p0.62
+  tl.to('.badge', { scale: 1, autoAlpha: 1, duration: 0.07, ease: 'back.out(1.7)' }, 0.55);
+
+  // p0.62-1.00 — HOLD: nothing exits; bg keeps living
+
+  // ONE pinned ScrollTrigger
+  ScrollTrigger.create({
+    trigger: '.stage',
+    start: 'top top',
+    end: '+=400%',
+    pin: true,
+    scrub: 1,
+    animation: tl
+  });
+
+  // hooks
+  window.render = function (p) {
+    p = Math.max(0, Math.min(1, Number(p) || 0));
+    tl.progress(p);
+  };
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Verdure — Mobile Menu · A / B / C review board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{--ink:#e9ece6;--dim:#8ea092;--line:rgba(233,236,230,.12);--glow:#a4dd4b;}
+  html,body{background:#0a120e;color:var(--ink);font-family:'Manrope',system-ui,sans-serif;}
+  body{min-height:100vh;padding:34px 30px 60px;
+    background:
+      radial-gradient(90% 60% at 50% -10%,rgba(60,110,60,.18),rgba(10,18,14,0) 60%),
+      #0a120e;}
+  a{color:var(--glow);text-decoration:none;}
+  a:hover{color:#c7ef6c;}
+
+  .head{max-width:1240px;margin:0 auto 30px;display:flex;align-items:flex-end;
+    justify-content:space-between;gap:24px;flex-wrap:wrap;}
+  .title{font-family:'Cormorant Garamond';font-weight:600;font-size:34px;line-height:1;letter-spacing:.3px;}
+  .title small{display:block;font-family:'Manrope';font-weight:400;font-size:12.5px;letter-spacing:.4px;
+    color:var(--dim);margin-top:9px;}
+  .master{display:flex;gap:10px;}
+  .btn{font-family:'Manrope';font-weight:500;font-size:12px;letter-spacing:.6px;color:var(--ink);
+    background:rgba(233,236,230,.06);border:1px solid var(--line);border-radius:999px;
+    padding:9px 16px;cursor:pointer;transition:background .2s,border-color .2s;}
+  .btn:hover{background:rgba(164,221,75,.12);border-color:rgba(164,221,75,.4);}
+  .btn.solid{background:var(--glow);color:#12271b;border-color:var(--glow);font-weight:600;}
+  .btn.solid:hover{background:#c7ef6c;}
+
+  .rail{max-width:1240px;margin:0 auto;display:flex;gap:34px;align-items:flex-start;
+    overflow-x:auto;padding-bottom:14px;}
+  .col{flex:0 0 auto;display:flex;flex-direction:column;gap:16px;width:390px;}
+  .cap{display:flex;flex-direction:column;gap:6px;padding:0 4px;}
+  .cap .lab{display:flex;align-items:center;gap:10px;}
+  .cap .badge{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+    font-family:'Cormorant Garamond';font-weight:600;font-size:16px;color:#12271b;background:var(--glow);}
+  .cap h2{font-family:'Cormorant Garamond';font-weight:600;font-size:21px;letter-spacing:.2px;}
+  .cap p{font-size:12.5px;line-height:1.5;color:var(--dim);font-weight:300;max-width:360px;}
+
+  .phone{position:relative;width:390px;height:844px;border-radius:44px;padding:11px;
+    background:linear-gradient(160deg,#20272322,#05080622);
+    box-shadow:0 0 0 2px #05080a,0 0 0 12px #14181688,0 34px 90px rgba(0,0,0,.6);}
+  .phone::before{content:"";position:absolute;top:20px;left:50%;transform:translateX(-50%);
+    width:120px;height:26px;background:#05080a;border-radius:0 0 16px 16px;z-index:3;pointer-events:none;}
+  .phone iframe{width:368px;height:822px;border:0;border-radius:34px;display:block;background:#0b1712;}
+
+  .ctl{display:flex;gap:9px;padding:0 4px;}
+  .ctl .btn{flex:1;text-align:center;}
+
+  .foot{max-width:1240px;margin:34px auto 0;font-size:12px;color:var(--dim);font-weight:300;
+    line-height:1.6;border-top:1px solid var(--line);padding-top:18px;}
+  .foot code{font-family:ui-monospace,Menlo,monospace;color:#b9d59a;background:rgba(164,221,75,.08);
+    padding:1px 6px;border-radius:5px;font-size:11.5px;}
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="title">Verdure — Mobile Menu
+      <small>Full-screen overlay atom · 390 × 844 · three takes on the open animation + orchid</small>
+    </div>
+    <div class="master">
+      <button class="btn solid" onclick="all('openMenu')">Open all</button>
+      <button class="btn" onclick="all('closeMenu')">Close all</button>
+    </div>
+  </div>
+
+  <div class="rail">
+    <div class="col">
+      <div class="cap">
+        <div class="lab"><span class="badge">A</span><h2>Slide down</h2></div>
+        <p>Panel drops in from the top; list items stagger up behind a line-mask; the orchid fades up with a gentle scale-settle. Clean and quiet.</p>
+      </div>
+      <div class="phone"><iframe id="fa" src="mobile-menu-a.html" title="Variant A" loading="eager"></iframe></div>
+      <div class="ctl">
+        <button class="btn" onclick="drive('fa','openMenu')">Open</button>
+        <button class="btn" onclick="drive('fa','closeMenu')">Close</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="cap">
+        <div class="lab"><span class="badge">B</span><h2>Bright-green bloom</h2></div>
+        <p>Panel fades as the floor glow blooms up from the bottom; the orchid and every blossom unfurl from nothing; list rises with opacity. More organic.</p>
+      </div>
+      <div class="phone"><iframe id="fb" src="mobile-menu-b.html" title="Variant B" loading="eager"></iframe></div>
+      <div class="ctl">
+        <button class="btn" onclick="drive('fb','openMenu')">Open</button>
+        <button class="btn" onclick="drive('fb','closeMenu')">Close</button>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="cap">
+        <div class="lab"><span class="badge">C</span><h2>Designer's cut</h2></div>
+        <p>A light sweep crosses the panel on open, the marker underlines the tapped item, and the orchid drifts in a slow idle-sway that runs off the open clock.</p>
+      </div>
+      <div class="phone"><iframe id="fc" src="mobile-menu-c.html" title="Variant C" loading="eager"></iframe></div>
+      <div class="ctl">
+        <button class="btn" onclick="drive('fc','openMenu')">Open</button>
+        <button class="btn" onclick="drive('fc','closeMenu')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">Each frame is a self-contained atom (inline CSS + JS, GSAP + Lenis). Tap the burger inside a frame,
+  or drive it from here — the controls call <code>openMenu()</code> / <code>closeMenu()</code> on each iframe. Tapping a
+  section highlights it (no navigation). Same law across all three; only the open choreography and orchid treatment vary.</p>
+
+  <script>
+    function drive(id,fn){var f=document.getElementById(id);try{f.contentWindow[fn]&&f.contentWindow[fn]();}catch(e){}}
+    function all(fn){['fa','fb','fc'].forEach(function(id){drive(id,fn);});}
+  </script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+# SECTIONS.yaml — the canonical section vocabulary for the award-re gallery.
+# The single source of truth: every brick's page_beat resolves through `aliases` to ONE lane
+# (a section role) OR to the MECHANIC class. The gallery generator + verify read this file.
+# 19 section roles in 3 tiers (core/common/custom) + a MECHANIC class for connective/abstract bricks.
+# Derived from the 4 shipped sites (round-trip: all 46 real sections map with zero "other").
+
+roles:
+  # ---- TIER A: CORE (every RE project has these) ----
+  - id: hero
+    tier: core
+    title: Hero
+    job: Opening full-bleed first impression; sets price-tier and atmosphere in one frame.
+  - id: architecture
+    tier: core
+    title: Architecture
+    job: The building/house as object — exterior, facade, materials, why it looks this way.
+  - id: floorplan
+    tier: core
+    title: Floor plan
+    job: The actual layout(s) drilled into; max 2 full plans; villa = single, ЖК = numbered plate.
+  - id: location
+    tier: core
+    title: Location
+    job: Where it sits + what is nearby; real OSM map, not drawn on the eye.
+  - id: cta
+    tier: core
+    title: CTA / Contact
+    job: The conversion close — one quiet action to a lead.
+
+  # ---- TIER B: COMMON (most projects) ----
+  - id: manifesto
+    tier: common
+    title: Manifesto
+    job: Positioning / big-idea statement; act-words, the project thesis.
+  - id: interiors
+    tier: common
+    title: Interiors
+    job: Inside spaces / rooms / the life lived here (job = room walkthrough).
+  - id: units
+    tier: common
+    title: Units
+    job: The inventory/typologies — which homes exist (types, apartment mix, spec).
+  - id: gallery
+    tier: common
+    title: Gallery
+    job: Atmospheric image/video reel (job = atmosphere, distinct from interiors).
+  - id: amenities
+    tier: common
+    title: Amenities
+    job: Outdoor/shared assets — yard, courtyard, landscape, water, terrace.
+  - id: trust
+    tier: common
+    title: Trust
+    job: Credibility — developer, guarantees, timeline, materials-proof.
+  - id: facts
+    tier: common
+    title: Facts / Specs
+    job: Hard-number spec sheet — area, rooms, year, stories, plot.
+
+  # ---- TIER C: CUSTOM (only bigger/special projects) ----
+  - id: price
+    tier: custom
+    title: Price
+    job: Explicit pricing climax (townhouse/single-asset); hidden until data confirmed.
+  - id: visual-search
+    tier: custom
+    title: Visual search
+    job: Interactive unit selector — building -> floor -> unit with available/sold/reserved.
+  - id: compare
+    tier: custom
+    title: Compare
+    job: Side-by-side weigh of options (unit vs unit, this vs alternative).
+  - id: commercial
+    tier: custom
+    title: Commercial
+    job: Ground-floor / mixed-use commercial offer.
+  - id: invest
+    tier: custom
+    title: Invest
+    job: Investment thesis + calculators (installment, ROI, rental).
+  - id: scenarios
+    tier: custom
+    title: Scenarios / Fork
+    job: Audience branching — self-living vs investor; a day in the life; choose-your-journey.
+  - id: tour3d
+    tier: custom
+    title: 3D tour
+    job: Immersive 3D — walkthrough, GLB viewer, orbit, roof on/off (iframe-modal, no inline WebGL).
+
+# The MECHANIC class — NOT sections. Connective tissue + abstract reveals that drop into ANY lane.
+# They get a "reusable reveals" shelf in the gallery, not a section lane (so lanes don't lie).
+mechanic:
+  - transition
+  - preloader
+  - menu
+  - theme
+  - reveal
+
+# aliases: every real page_beat in the library -> a role id OR a mechanic id.
+# (built from the 99 distinct beats actually present; keep in sync as bricks are added.)
+aliases:
+  # hero
+  hero: hero
+  hero-sequence: hero
+  hero-to-content: hero
+  project-top: hero
+  intro: hero
+  # architecture (the building as object, facade, materials)
+  architecture: architecture
+  exterior: architecture
+  material: architecture
+  material-block: architecture
+  media-block: architecture
+  media-reveal: architecture
+  heritage: architecture
+  history: architecture
+  provenance: architecture
+  # floor plan
+  floor-plan: floorplan
+  floorplan: floorplan
+  plans: floorplan
+  # location (the merged nearby/proximity family)
+  location: location
+  nearby: location
+  proximity: location
+  surroundings: location
+  neighbourhood: location
+  where: location
+  district: location
+  map: location
+  map-backdrop: location
+  find-us: location
+  points-of-interest: location
+  coverage: location
+  scale: location
+  time: location
+  # cta / contact
+  cta: cta
+  conversion: cta
+  contacts: cta
+  contact-drawer: cta
+  # manifesto / statement
+  manifesto: manifesto
+  statement: manifesto
+  quiet-statement: manifesto
+  poem: manifesto
+  editorial: manifesto
+  editorial-acts: manifesto
+  project-narrative: manifesto
+  overview: manifesto
+  bridge: manifesto
+  # interiors
+  interiors: interiors
+  interior: interiors
+  comfort: interiors
+  apartment: interiors
+  # units / inventory
+  units: units
+  unit-page: units
+  unit-select: units
+  unit-selector: units
+  apartment-types: units
+  apartment-selector: units
+  floor-select: units
+  flat-detail: units
+  product-stage: units
+  spec-showcase: units
+  collection: units
+  product-tiers: units
+  # gallery (atmosphere reel)
+  gallery: gallery
+  gallery-block: gallery
+  gallery-strip: gallery
+  films: gallery
+  render-reel: gallery
+  show: gallery
+  showcase: gallery
+  showcase-reveal: gallery
+  captioned-carousel: gallery
+  focus-carousel: gallery
+  card-rail: gallery
+  lifestyle-climax: gallery
+  media: gallery
+  # amenities
+  amenities: amenities
+  facilities: amenities
+  services: amenities
+  features: amenities
+  feature: amenities
+  feature-card: amenities
+  capabilities: amenities
+  # trust
+  trust: trust
+  proof: trust
+  team: trust
+  people: trust
+  testimonials: trust
+  # facts / specs
+  facts: facts
+  stat-band: facts
+  spec: facts
+  # price
+  price: price
+  # visual-search
+  visual-search: visual-search
+  picker: visual-search
+  # scenarios / fork
+  scenarios: scenarios
+  fork: scenarios
+  # tour3d
+  tour3d: tour3d
+  # ---- MECHANIC class (not a section) ----
+  transition: transition
+  section-announce: transition
+  section-entrance: transition
+  section-handoff: transition
+  chapter: transition
+  chapter-opener: transition
+  chapter-break: transition
+  divider: transition
+  preloader: preloader
+  scroll-affordance: preloader
+  ambient-cue: preloader
+  menu: menu
+  primary-nav: menu
+  quick-menu: menu
+  chrome: menu
+  utility-panel: menu
+  theme-flip: theme
+  theme-ladder: theme
+
+# disambiguation notes (job-based, so it is not agent judgement):
+#   gallery = atmosphere reel | interiors = room walkthrough | scenarios = audience branch
+#   on S-size skeletons one section may satisfy two slots (e.g. facts folded into manifesto).

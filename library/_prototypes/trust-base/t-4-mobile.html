@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PASSPORT · t-4-mobile «Технічний аркуш» · клас A · PHONE TWIN
+Десктоп-база: t-4-technical-sheet.html (не чіпати). Той самий DATA-контракт.
+SIGNATURE MORPH збережено: SELF-DRAW сітки аркуша (scaleX/scaleY), факти сідають
+на бейслайни, що прокреслюються слідом. Інверсія читається ще сильніше на телефоні:
+темний сайт -> білий аркуш на всю ширину -> назад у темряву.
+Мобільна форма: аркуш full-width, padding 24px, шапка документа стеком,
+креслення на всю ширину, факти однією колонкою, мапа під ними. Без піна.
+
+F-48: тапів у спокої = 0. Анімовані властивості: transform, opacity.
+Reduced-motion: усе намальовано одразу. Нуль печаток/сертифікатів/PDF.
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-4 mobile · Технічний аркуш</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,400&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.16); --gutter:20px;
+    --paper:#F2EEE4; --pink:#211D18; --pmuted:#7A7264; --phair:rgba(33,29,24,.22);
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:clip}
+  body{background:#0b0a09;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--bg)}
+  img{display:block}
+
+  .meta-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:20px var(--gutter) 0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .head{padding:40px var(--gutter) 40px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:300;font-size:40px;line-height:1.05;text-wrap:balance}
+  .lede{color:var(--muted);margin-top:16px;font-size:15px;max-width:36ch}
+
+  .sheet{position:relative;background:var(--paper);color:var(--pink);padding:40px 24px 48px;
+    opacity:0;transform:translateY(48px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+  .sheet.on{opacity:1;transform:none}
+  html.static .sheet{opacity:1;transform:none;transition:none}
+
+  .rule{position:absolute;background:var(--phair)}
+  .rule.v{width:1px;top:16px;bottom:16px;transform:scaleY(0);transform-origin:top}
+  .rule.h{height:1px;left:16px;right:16px;transform:scaleX(0);transform-origin:left}
+  .sheet.on .rule{transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+  .sheet.on .rule.v{transform:scaleY(1)}
+  .sheet.on .rule.h{transform:scaleX(1)}
+  html.static .rule.v{transform:scaleY(1)!important;transition:none}
+  html.static .rule.h{transform:scaleX(1)!important;transition:none}
+
+  .doc-head{margin-bottom:28px}
+  .doc-title{font-size:30px;line-height:1.1}
+  .doc-title .w1{font-weight:400}
+  .doc-title .w2{font-weight:600}
+  .doc-meta{margin-top:8px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--pmuted)}
+
+  .drawing{position:relative;margin-bottom:8px}
+  .drawing img{width:100%;height:auto}
+  .h-cap{position:absolute;left:16px;bottom:14px;z-index:5;font:500 11px/1 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(33,29,24,.72)}
+
+  .facts{margin-top:20px}
+  .fact{position:relative;display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    padding:16px 0 14px;opacity:0;transform:translateY(12px)}
+  .sheet.on .fact{transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+  .sheet.on .fact.on{opacity:1;transform:none}
+  html.static .fact{opacity:1;transform:none;transition:none}
+  .fact .k{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--pmuted)}
+  .fact .v{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1;text-align:right;white-space:nowrap}
+  .fact .base{position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--phair);
+    transform:scaleX(0);transform-origin:left}
+  .sheet.on .fact.on .base{transition:transform .7s cubic-bezier(.2,.7,.2,1) .1s;transform:scaleX(1)}
+  html.static .fact .base{transform:scaleX(1)!important;transition:none}
+
+  .map-block{position:relative;margin-top:32px;opacity:0;transform:translateY(12px)}
+  .sheet.on .map-block{transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .sheet.on .map-block.on{opacity:1;transform:none}
+  html.static .map-block{opacity:1;transform:none;transition:none}
+  .map-block img{width:100%;height:auto}
+
+  .closing{height:30dvh;display:grid;place-items:center;padding:0 var(--gutter)}
+  .closing p{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div class="phone">
+<section data-screen-label="t-4 mobile technical sheet">
+  <div class="meta-row"><span data-slot="project"></span><span>Клас A · t-4 · моб</span></div>
+  <header class="head">
+    <p class="eyebrow" data-slot="eyebrow"></p>
+    <h1 data-slot="title"></h1>
+    <p class="lede" data-slot="body"></p>
+  </header>
+
+  <article class="sheet" id="sheet">
+    <span class="rule h" style="top:16px"></span>
+    <span class="rule v" style="left:16px"></span>
+    <span class="rule v" style="right:16px"></span>
+    <span class="rule h" style="bottom:16px"></span>
+    <div class="doc-head">
+      <div class="doc-title"><span class="w1" data-slot="docTitleA"></span> <span class="w2" data-slot="docTitleB"></span></div>
+      <div class="doc-meta" data-slot="docMeta"></div>
+    </div>
+    <figure class="drawing">
+      <img id="drawingImg" alt="">
+      <figcaption class="h-cap" data-slot="drawingHonesty"></figcaption>
+    </figure>
+    <div class="facts" id="facts"></div>
+    <figure class="map-block" id="mapBlock">
+      <img id="mapImg" alt="">
+      <figcaption class="h-cap" data-slot="mapHonesty"></figcaption>
+    </figure>
+  </article>
+
+  <div class="closing"><p data-slot="closing"></p></div>
+</section>
+</div>
+
+<script>
+/* ═ TEMPLATE CONTRACT ═ (ідентичний десктопному t-4-technical-sheet.html)
+   ОБОВʼЯЗКОВІ: project.name · section.{eyebrow,title,body} · sheet.{docTitle
+   [light,bold], meta (реальні реквізити), drawing.{src,honesty}} · facts[]{k,v}
+   ОПЦІЙНІ: sheet.map.{src,honesty} · closing.
+   ЗАБОРОНЕНО: печатки, сертифікати, PDF-мініатюри, логотипи банків. */
+const DATA = {
+  project: { name: 'ЖК Агрономічне' },
+  section: {
+    eyebrow: 'Документи',
+    title: 'Будинок на аркуші проєкту',
+    body: 'Факти нижче взяті зі схеми забудови. Що на аркуші, те й на ділянці.'
+  },
+  sheet: {
+    docTitle: ['Схема', 'забудови'],
+    meta: 'Проєктна документація · аркуш 34 · 2025',
+    drawing: { src: 'assets/site-smarts/building-scheme.webp',
+      honesty: 'Документ · схема забудови, 2025' },
+    map: { src: 'assets/site-smarts/situational-map.webp',
+      honesty: 'Документ · ситуаційна схема, 2025' }
+  },
+  facts: [
+    { k: 'Поверхи',  v: '3' },
+    { k: 'Квартири', v: '54' },
+    { k: 'Тип 1',    v: '18 x 23,76 м²' },
+    { k: 'Тип 2',    v: '36 x 27,06 м²' },
+    { k: 'Старт',    v: 'червень 2026' },
+    { k: 'Ключі',    v: '2 квартал 2027' }
+  ],
+  closing: 'Аркуш закривається. Далі темп будівництва.'
+};
+
+const $ = s => document.querySelector(s);
+const put = (slot, v) => { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = v; };
+put('project', DATA.project.name);
+put('eyebrow', DATA.section.eyebrow);
+put('title', DATA.section.title);
+put('body', DATA.section.body);
+put('docTitleA', DATA.sheet.docTitle[0]);
+put('docTitleB', DATA.sheet.docTitle[1]);
+put('docMeta', DATA.sheet.meta);
+put('drawingHonesty', DATA.sheet.drawing.honesty);
+put('closing', DATA.closing);
+
+const drawing = $('#drawingImg');
+drawing.src = DATA.sheet.drawing.src;
+drawing.alt = DATA.sheet.drawing.honesty.replace(' · ', ': ');
+if (DATA.sheet.map) {
+  const m = $('#mapImg');
+  m.src = DATA.sheet.map.src;
+  m.alt = DATA.sheet.map.honesty.replace(' · ', ': ');
+  put('mapHonesty', DATA.sheet.map.honesty);
+} else { $('#mapBlock').remove(); }
+
+const factsEl = $('#facts');
+DATA.facts.forEach(f => {
+  const d = document.createElement('div'); d.className = 'fact';
+  const k = document.createElement('span'); k.className = 'k'; k.textContent = f.k;
+  const v = document.createElement('span'); v.className = 'v'; v.textContent = f.v;
+  const b = document.createElement('span'); b.className = 'base';
+  d.appendChild(k); d.appendChild(v); d.appendChild(b); factsEl.appendChild(d);
+});
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const sheet = $('#sheet');
+const decoded = img => Promise.race([
+  img.decode().catch(() => {}),
+  new Promise(r => { if (img.complete) r(); else img.addEventListener('load', r, { once: true }); }),
+  new Promise(r => setTimeout(r, 800))
+]);
+
+async function init(){
+  /* DECODE-GUARD: креслення декодуються ДО створення тригера появи */
+  const imgs = [drawing, $('#mapImg')].filter(Boolean);
+  await Promise.all(imgs.map(decoded));
+
+  if (reduced.matches) {
+    document.documentElement.classList.add('static');
+    sheet.classList.add('on');
+    [...document.querySelectorAll('.fact, .map-block')].forEach(el => el.classList.add('on'));
+    return;
+  }
+
+  [...sheet.querySelectorAll('.rule')].forEach((r, i) => { r.style.transitionDelay = (200 + i * 90) + 'ms'; });
+
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return;
+    sheet.classList.add('on');
+    const rows = [...document.querySelectorAll('.fact')];
+    rows.forEach((r, i) => setTimeout(() => r.classList.add('on'), 500 + i * 130));
+    setTimeout(() => $('#mapBlock') && $('#mapBlock').classList.add('on'), 500 + rows.length * 130);
+    io.disconnect();
+  }), { threshold: 0.12 });
+  io.observe(sheet);
+}
+init();
+reduced.addEventListener('change', () => init());
+</script>
+</body>
+</html>

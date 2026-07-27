@@ -1,0 +1,64 @@
+{
+ "_note": "self-check config v2 (Етап B S45). Wiring атома: таргети/механізми/ролі. Чесність декларації доводить census (незадекларований рухомий шар = FAIL). Числа-очікування НЕ тут — в expectations.json з src.",
+ "url": "variants/wellness.html",
+ "targets": [
+  {
+   "id": "card",
+   "sel": "#card",
+   "channel": "ty",
+   "unit": "dvh",
+   "mechanism": "translate",
+   "role": "card"
+  },
+  {
+   "id": "v1",
+   "sel": ".fb.v1",
+   "channel": "clipTop",
+   "mechanism": "clip",
+   "role": "media",
+   "wipe": "up"
+  },
+  {
+   "id": "handoff",
+   "sel": "#handoff",
+   "channel": "ty",
+   "mechanism": "translate",
+   "role": "media",
+   "wipe": "up"
+  },
+  {
+   "id": "p1",
+   "sel": "#p1",
+   "channel": "clipBottom",
+   "mechanism": "clip",
+   "role": "text"
+  },
+  {
+   "id": "p2",
+   "sel": "#p2",
+   "channel": "clipBottom",
+   "mechanism": "clip",
+   "role": "text"
+  }
+ ],
+ "ignore": [],
+ "media": {
+  "declared": "photo-placeholder",
+  "waiverSrc": "SPEC.md:36 «Зараз jog-фото як плейсхолдер» — photo-first рішення Єгора; вимір media-type увімкнеться при заміні на kling-відео (declared:'video')"
+ },
+ "mechanicClass": "stack+cover",
+ "_mechanicClass_src": "клас визначив LIVE zone-track (reference/*.zonetrack.json, S48 крок 5); config лише декларує збіг — mismatch = FAIL",
+ "pan": {
+  "_note": "S54 pan-parity: фаза, у якій живе ГОРИЗОНТАЛЬНИЙ закон. Поза нею вимір = шум.",
+  "ourRange": [
+   0,
+   1
+  ],
+  "liveFrames": [
+   1,
+   131
+  ],
+  "states": 44,
+  "_src": "крива G(live) росте з самого початку 1.00→1.24 до частки 0.5, просідає до 1.09 і повертається на 1.23 — рух розкиданий по всьому тілу, фаза = все тіло."
+ }
+}

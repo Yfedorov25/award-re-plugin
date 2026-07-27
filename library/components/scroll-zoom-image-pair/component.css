@@ -1,0 +1,24 @@
+/* SCROLL-ZOOM-IMAGE-PAIR · component.css
+   A portrait render in a fixed clipping frame + serif heading/body beside it; the image
+   scales up within the frame on scroll while the copy holds. transform scale/translateY
+   (image) + opacity/translateY (copy) + overflow clip (frame) only. NO mix-blend / NO
+   backdrop. NO WebGL. */
+.szp-stage { display: grid; grid-template-columns: var(--szp-cols, 1fr 1fr); align-items: center;
+  gap: var(--szp-gap, 5vw); padding: var(--szp-pad, 12vh 7vw);
+  background: var(--szp-bg, #f1efe9); color: var(--szp-ink, #16150f); }
+.szp--rtl .szp-figure { order: 2; }
+.szp--rtl .szp-copy { order: 1; }
+
+/* the clipping frame — the zoom is bound inside it */
+.szp-figure { position: relative; }
+.szp-frame { position: relative; overflow: hidden; border-radius: var(--szp-radius, 4px);
+  aspect-ratio: var(--szp-ratio, 4 / 5); }
+.szp-frame img { width: 100%; height: 100%; object-fit: cover; display: block;
+  transform-origin: 50% 50%; will-change: transform; }
+
+/* the held editorial copy */
+.szp-copy { max-width: 42ch; will-change: transform, opacity; }
+.szp-copy h2 { font-family: var(--szp-serif, Georgia, serif); font-weight: 400;
+  font-size: var(--szp-head, 2.6vw); line-height: 1.1; margin-bottom: 1.4rem; }
+.szp-copy p { font-family: var(--szp-sans, system-ui, sans-serif); font-size: 1.02rem;
+  line-height: 1.7; opacity: .85; }

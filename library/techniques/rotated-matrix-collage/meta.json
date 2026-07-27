@@ -1,0 +1,41 @@
+{
+  "id": "rotated-matrix-collage",
+  "title": "Rotated matrix collage (Springs hero)",
+  "level": "L3-organism",
+  "source": "springs.estate — S1 hero. Extracted: desktop from library/components/rotated-mosaic-hero, mobile auto-drift from library/combos/springs-home/springs-engine.js (S18-F).",
+  "engine": "A grid of photo tiles rotated as ONE rigid plane (~-9deg), bound by a colour multiply wash that unifies the disparate photos, that DRIFTS as one plane. Depth is free: the tilt makes top-row and bottom-row tiles travel a different screen-Y as the plane moves — no per-tile speed.",
+
+  "dual_platform": true,
+  "differs": "Same static pose + same drift AXIS (translateY of the whole plane). What DIFFERS is the drift TRIGGER: desktop = scroll-linked (plane follows scroll position), mobile = auto-play over wall-clock time (plane drifts on its own at s=0, independent of scroll). This is empirically how springs behaves, not a guess — the mobile hero auto-drifts before any scroll input.",
+
+  "desktop": {
+    "driver": "scrollDrift — plane translateY = f(scroll progress). Measured live: plane Y 0 → -121px across the hero.",
+    "knobs": ["parallax"],
+    "parity": "component parent (rotated-mosaic-hero) gate CURTAIN PASS: 0 blank, 59.9fps, jank 1/685."
+  },
+  "mobile": {
+    "driver": "autoDrift — plane translateY = f(wall-clock time), looped, ease-in-out. Measured live: item tx 531 → 766 → 1005 across ~12s at s=0.",
+    "knobs": ["autoMs", "autoDrift"],
+    "parity": "springs-engine mobile branch proven to 1.99% pixel-parity (S18-F, mobile-intro0, same-run timing extractor).",
+    "extras_on_mobile": "On the live site mobile ALSO adds slider sections (wellness-slider, residences-slider, interiors-slider) that desktop renders as scroll sections — those are separate techniques, not part of this collage."
+  },
+
+  "knobs": {
+    "tiles": { "default": "from .rmc-tile children or a tiles[] array", "what": "the photo srcs." },
+    "cols": { "default": 4, "what": "grid columns." },
+    "rows": { "default": 3, "what": "grid rows (cols*rows >= tiles)." },
+    "angle": { "default": -9, "unit": "deg", "what": "plane rotation (counter-clockwise)." },
+    "scale": { "default": 1.4, "what": "plane scale so corners over-cover the viewport after rotation." },
+    "wash": { "default": 0.55, "what": "opacity of the unifying multiply colour wash over the mosaic." },
+    "gutter": { "default": 8, "unit": "px", "what": "gap between tiles." },
+    "parallax": { "default": 16, "unit": "yPercent", "platform": "desktop", "what": "whole-plane drift across the scroll span." },
+    "autoMs": { "default": 12000, "unit": "ms", "platform": "mobile", "what": "one auto-drift cycle length." },
+    "autoDrift": { "default": 240, "unit": "px", "platform": "mobile", "what": "distance the plane travels over one auto cycle." }
+  },
+
+  "entry": "RotatedMatrixCollage.init(target, opts) -> { platform, plane, driver }. Markup: .rmc-stage > .rmc-bg + .rmc-plane(.rmc-grid + .rmc-wash) + .rmc-content. Pass opts.platform 'desktop'|'mobile' to force a branch (demos); default 'auto' reads matchMedia(min-width:1024px).",
+
+  "law": "transform (plane translate/rotate/scale) + opacity only. The wash is mix-blend:multiply but BAKED INTO the static plane (whole plane transforms together — the one allowed mix-blend spot, catalog P18). GPU layer on the plane. reduced-motion → no drift on BOTH platforms. NO WebGL.",
+
+  "gate_mode": "CURTAIN (a mosaic always shows many tile-renders at once; seam 100% is inherent, not a diptych bug). blank/jank/fps stay hard."
+}

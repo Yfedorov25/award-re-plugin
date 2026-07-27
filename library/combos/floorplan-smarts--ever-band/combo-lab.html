@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: floorplan-smarts--ever-band · Планування (EVER вимірна смуга)</title>
+<!--
+  SECTION VARIANT, floorplan-smarts--ever-band (role: floorplan). PALETTE = EVER daylight sky-to-ground,
+  the COMPOSITION ported from Claude Design "03 EVER band". Claude Design gave the LOOK; this is the
+  working mechanism on our atoms + real data.
+
+  HEROIC MOVE: the facade fills the stage in daylight; ONE tracking tooltip + a hairline MEASURE BAND
+  (two glowing lines at the top+bottom of the active floor) glide between floors (expo.out). Minimal,
+  surgical. Same drill engine as the other smarts floorplan variants
+  (FBANDS -> numbered-floorplate-select -> veil-flat-detail-reveal). 0 pins, NO-WebGL, ZERO em/en-dash.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/numbered-floorplate-select/component.css">
+<link rel="stylesheet" href="../../components/veil-flat-detail-reveal/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Flip.min.js"></script>
+
+<style>
+  /* ===== EVER LIGHT museum-numeral skin. transform / opacity / clip-path / filter / stroke-dashoffset only. ===== */
+  :root {
+    --en-base:#aeb9c0; --en-accent:#b9633c; --en-accent-2:#cb724a; --en-ink:#1c2227;
+    --en-muted:#46525b; --en-line:rgba(28,34,39,.18); --en-ghost:rgba(28,34,39,.10);
+    --en-grad:linear-gradient(180deg,#c7d4dd 0%,#bcc9d3 30%,#aeb9c0 55%,#7d8a7e 78%,#4d5a4a 100%);
+  }
+
+  #combo.combo-stage { background:var(--en-base); height:100vh; min-height:100vh; padding:0;
+    font-family:'Inter',sans-serif; color:var(--en-ink); }
+
+  /* the whole drill lives in ONE stage; the three levels swap (opacity only, no scale-from-origin) */
+  .en-stage { position:relative; width:100%; height:100vh; min-height:680px; overflow:hidden;
+    background:var(--en-grad); }
+
+  /* the giant ghost numeral: ONE element, repositioned/retargeted per level via [data-num] */
+  .en-num { position:absolute; z-index:1; font-family:'Fraunces',serif; font-weight:300;
+    line-height:.78; letter-spacing:-.04em; color:var(--en-ghost); user-select:none; pointer-events:none; }
+
+  /* ---------- LEVEL 1: facade floor-pick ---------- */
+  .en-l1 { position:absolute; inset:0; z-index:2; }
+  .en-l1.is-hidden { visibility:hidden; }
+  .en-l1 .en-num { display:none; }   /* EVER-band: the tracking tooltip is the numeral affordance */
+
+  .en-head { position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:clamp(20px,3.2vh,36px) clamp(24px,5vw,72px); }
+  .en-brand { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(17px,1.5vw,21px);
+    letter-spacing:.3em; text-transform:uppercase; color:var(--en-ink); }
+  .en-place { font:500 11px/1 'Inter'; letter-spacing:.2em; text-transform:uppercase; color:var(--en-muted); }
+
+  .en-lead { position:absolute; left:clamp(24px,5vw,72px); bottom:clamp(96px,16vh,150px); top:auto; z-index:6; max-width:520px; }
+  .en-eyebrow { margin:0 0 12px; font:600 12px/1 'Inter'; letter-spacing:.3em; text-transform:uppercase; color:#fbf3ee; }
+  .en-h1 { margin:0; font-family:'Fraunces',serif; font-weight:300; font-size:clamp(32px,4.4vw,60px);
+    line-height:.96; letter-spacing:-.02em; color:#fbfaf7; text-shadow:0 2px 30px rgba(20,26,31,.5); }
+  .en-sub { display:none; }
+  .en-hint2 { margin:14px 0 0; font:500 12px/1 'Inter'; letter-spacing:.14em; text-transform:uppercase; color:rgba(251,250,247,.72); }
+
+  /* the facade exhibit - the render's true aspect so SVG units == image pixels (anti-crooked, F-20). */
+  .en-facade-wrap { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:100%; max-width:min(94vw, calc((100vh - 12rem) * 2.357)); aspect-ratio:2.357; z-index:2; }
+  .en-facade { position:absolute; inset:0; width:100%; height:100%; }
+  .en-facade img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+  .en-facade__svg { position:absolute; inset:0; width:100%; height:100%; }
+  .en-fband { fill:var(--en-accent); fill-opacity:0; stroke:rgba(185,99,60,0); stroke-width:.3;
+    cursor:pointer; transition:fill-opacity .45s cubic-bezier(.16,1,.3,1), stroke .45s cubic-bezier(.16,1,.3,1);
+    vector-effect:non-scaling-stroke; }
+  .en-fband.is-hot { fill-opacity:.10; stroke:rgba(251,250,247,.85); stroke-width:.5; }
+  /* the chip rides the band's left edge (off the building face), revealing on hover */
+  .en-chip { position:absolute; transform:translate(0,-50%); padding:5px 10px; background:var(--en-accent);
+    color:#fbf3ee; font:600 10px/1 'Inter'; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap;
+    opacity:0; pointer-events:none; z-index:4;
+    transition:opacity .4s cubic-bezier(.16,1,.3,1), transform .4s cubic-bezier(.16,1,.3,1); }
+  .en-chip { display:none; }   /* ever-band: the tracking tooltip carries the count, not a chip */
+  .en-chip.is-hot { opacity:1; }
+
+  /* the gliding hairline MEASURE BAND (two lines) + the tracking tooltip (EVER-band signature) */
+  .en-mline { position:absolute; left:0; right:0; height:1px; top:50%; z-index:3; pointer-events:none; opacity:0;
+    background:rgba(251,250,247,.85); box-shadow:0 0 12px rgba(251,250,247,.5);
+    transition:top .55s cubic-bezier(.16,1,.3,1), opacity .3s ease; }
+  .en-mline.is-on { opacity:1; }
+  .en-tip { position:absolute; left:5%; top:50%; transform:translateY(-50%); z-index:5; display:flex;
+    align-items:center; gap:14px; padding:12px 16px; background:rgba(251,250,247,.96); backdrop-filter:blur(8px);
+    box-shadow:0 24px 60px -28px rgba(20,26,31,.75); pointer-events:none; white-space:nowrap; opacity:0;
+    transition:top .55s cubic-bezier(.16,1,.3,1), opacity .3s ease; }
+  .en-tip.is-on { opacity:1; }
+  .en-tip::after { content:""; position:absolute; right:-9px; top:50%; transform:translateY(-50%);
+    width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent;
+    border-left:10px solid rgba(251,250,247,.96); }
+  .en-tip__num { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(26px,2.4vw,38px); line-height:.9;
+    letter-spacing:-.02em; color:#1c2227; }
+  .en-tip__body { display:flex; flex-direction:column; gap:3px; }
+  .en-tip__lab { font:600 13px/1.1 'Inter'; color:#1c2227; }
+  .en-tip__meta { font:500 11px/1 'Inter'; letter-spacing:.06em; text-transform:uppercase; color:#8a5238; }
+  .en-tip__arr { margin-left:4px; font-size:15px; color:var(--en-accent); }
+  /* EVER-band: the facade bands + tracking tooltip ARE the floor picker (per prototype); hide the ledger */
+  .en-ledger { display:none; position:absolute; left:0; right:0; bottom:0; z-index:5;
+    padding:0 clamp(24px,5vw,72px) clamp(18px,3vh,30px); }
+  .en-ledger__hd { display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom:1px solid var(--en-line); padding-bottom:10px; margin-bottom:4px; }
+  .en-ledger__k { font:600 11px/1 'Inter'; letter-spacing:.2em; text-transform:uppercase; color:var(--en-muted); }
+  .en-row { appearance:none; width:100%; background:transparent; border:none;
+    border-bottom:1px solid rgba(31,36,41,.1); cursor:pointer; display:flex; align-items:center;
+    justify-content:space-between; padding:clamp(8px,1.1vh,13px) clamp(8px,1vw,16px); text-align:left;
+    color:#3c454d; transition:background .4s cubic-bezier(.16,1,.3,1), color .4s cubic-bezier(.16,1,.3,1); }
+  .en-row.is-hot { background:rgba(31,36,41,.05); color:var(--en-ink); }
+  .en-row__l { display:flex; align-items:baseline; gap:clamp(14px,1.6vw,26px); min-width:0; }
+  .en-row__num { font-family:'Fraunces',serif; font-weight:400; font-size:clamp(22px,2vw,30px); line-height:1; width:1.4em; color:inherit; }
+  .en-row__lab { font:500 clamp(14px,1.3vw,17px)/1 'Inter'; letter-spacing:.01em; color:inherit; }
+  .en-row__r { display:flex; align-items:baseline; gap:clamp(20px,3vw,52px); }
+  .en-row__free { font:500 12px/1 'Inter'; letter-spacing:.04em; color:#8a939b; }
+  .en-row.is-hot .en-row__free { color:#8a5238; }
+  .en-row__from { font:600 clamp(14px,1.3vw,17px)/1 'Inter'; font-variant-numeric:tabular-nums; color:inherit; text-align:right; min-width:5.5em; }
+  .en-row__arr { font-size:15px; color:rgba(31,36,41,0); transition:transform .4s cubic-bezier(.16,1,.3,1); }
+  .en-row.is-hot .en-row__arr { color:var(--en-accent); transform:translateX(4px); }
+
+  /* ---------- LEVEL 2: numbered floorplate + persistent unit list (spec visible) ---------- */
+  .en-l2 { position:absolute; inset:0; z-index:3; display:grid;
+    grid-template-columns:1fr clamp(330px,28vw,420px); visibility:hidden; }
+  .en-l2.is-on { visibility:visible; }
+  .en-l2__main { position:relative; display:flex; flex-direction:column;
+    padding:clamp(20px,3.2vh,36px) clamp(20px,3vw,44px); min-width:0; }
+  .en-l2 .en-num { right:-1%; top:5%; font-size:clamp(200px,32vh,440px); }
+
+  .en-l2__top { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; }
+  .en-back { display:inline-flex; align-items:center; gap:10px; padding:9px 16px 9px 9px;
+    border:1px solid rgba(31,36,41,.28); border-radius:999px; background:rgba(255,255,255,.5);
+    color:var(--en-ink); font:600 11px/1 'Inter'; letter-spacing:.14em; text-transform:uppercase; cursor:pointer;
+    transition:background .35s cubic-bezier(.16,1,.3,1), border-color .35s cubic-bezier(.16,1,.3,1), transform .35s cubic-bezier(.16,1,.3,1); }
+  .en-back:hover { background:rgba(185,99,60,.12); border-color:rgba(185,99,60,.7); transform:translateX(-2px); }
+  .en-back__o { width:26px; height:26px; border-radius:50%; border:1px solid rgba(31,36,41,.4);
+    display:flex; align-items:center; justify-content:center; font-size:13px; background:#fff; }
+
+  .en-l2__title { position:relative; z-index:2; margin-top:clamp(10px,2vh,22px); }
+  .en-l2__eyebrow { margin:0 0 8px; font:600 11px/1 'Inter'; letter-spacing:.3em; text-transform:uppercase; color:var(--en-accent); }
+  .en-l2__h { margin:0; font-family:'Fraunces',serif; font-weight:300; font-size:clamp(28px,3.4vw,46px); line-height:.96; letter-spacing:-.02em; color:var(--en-ink); }
+  .en-l2__c { margin:8px 0 0; font:500 11px/1 'Inter'; letter-spacing:.06em; color:#6b7680; }
+
+  /* the plate stage (numbered-floorplate-select markup) - clean white card, plan is the hero */
+  .en-platewrap { position:relative; z-index:2; flex:1; display:flex; align-items:center; justify-content:center;
+    margin-top:clamp(12px,2vh,22px); min-height:0; }
+  .en-l2 .nfp-stage { display:block; background:transparent; padding:0; height:100%; width:100%;
+    display:flex; align-items:center; justify-content:center; }
+  /* the atom's own rail is hidden - this composition carries nav in the ledger/title, not a dark rail */
+  .en-l2 .nfp-rail { display:none; }
+  .en-l2 .nfp-stagecard { position:relative; width:100%; max-width:min(100%, calc((100vh - 22rem) * 2.27));
+    aspect-ratio:100 / 44.08; background:#fff; padding:0; box-shadow:0 40px 80px -42px rgba(28,34,40,.5);
+    outline:1px solid rgba(31,36,41,.12); }
+  .en-l2 .nfp-plan { position:absolute; inset:0; width:100%; height:100%; }
+  .en-l2 .nfp-zones { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }
+  /* the atom's floating top card - kept for the plate hover echo, but the right rail carries the spec */
+  .en-l2 .nfp-card { background:rgba(40,46,52,.9); color:#fff; }
+  /* the mobile static plan picture is desktop-hidden (the interactive atom plate carries desktop) */
+  .en-mplan { display:none; }
+
+  /* RIGHT: spec + ledger (always visible - never behind a click, F-20) */
+  .en-aside { position:relative; z-index:2; border-left:1px solid rgba(31,36,41,.12);
+    background:rgba(255,255,255,.5); backdrop-filter:blur(6px); display:flex; flex-direction:column; min-height:0; }
+  .en-aside__spec { padding:clamp(18px,3vh,28px) clamp(18px,1.6vw,26px) clamp(12px,2vh,18px);
+    border-bottom:1px solid rgba(31,36,41,.14); }
+  .en-aside__k { font:600 11px/1 'Inter'; letter-spacing:.18em; text-transform:uppercase; color:var(--en-muted); }
+  .en-aside__head { display:flex; align-items:baseline; gap:14px; margin-top:10px; }
+  .en-aside__nr { font-family:'Fraunces',serif; font-weight:300; font-size:clamp(42px,4.6vw,60px); line-height:.82; letter-spacing:-.02em; color:var(--en-ink); }
+  .en-aside__type { font-family:'Fraunces',serif; font-weight:400; font-size:21px; color:#2a2f34; white-space:nowrap; }
+  .en-aside__st { display:inline-block; margin-top:8px; font:500 12px/1 'Inter'; letter-spacing:.04em; }
+  .en-aside__nums { display:flex; gap:28px; margin-top:18px; }
+  .en-aside__nv { display:block; font-family:'Fraunces',serif; font-weight:400; font-size:24px; color:var(--en-ink); font-variant-numeric:tabular-nums; }
+  .en-aside__nl { font:500 10px/1 'Inter'; letter-spacing:.12em; text-transform:uppercase; color:var(--en-muted); }
+  .en-cta { margin-top:22px; width:100%; display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 18px; background:var(--en-accent); border:none; color:#fff; font:600 11px/1 'Inter';
+    letter-spacing:.14em; text-transform:uppercase; cursor:pointer; text-align:left;
+    transition:background .35s cubic-bezier(.16,1,.3,1); }
+  .en-cta:hover { background:var(--en-accent-2); }
+  .en-cta.is-dead { background:rgba(31,36,41,.06); color:#8a939b; border:1px solid rgba(31,36,41,.14);
+    pointer-events:none; justify-content:center; }
+
+  .en-list { flex:1; overflow:auto; padding:6px clamp(14px,1.2vw,20px) 18px; min-height:0; }
+  .en-list::-webkit-scrollbar { width:6px; }
+  .en-list::-webkit-scrollbar-thumb { background:rgba(185,99,60,.4); border-radius:3px; }
+  .en-li { display:grid; grid-template-columns:2.2ch 1fr auto; gap:10px; align-items:center;
+    padding:9px 10px; cursor:pointer; border-radius:6px; background:transparent; border:1px solid transparent;
+    transition:background .3s cubic-bezier(.16,1,.3,1), border-color .3s cubic-bezier(.16,1,.3,1); }
+  .en-li.is-hot { background:rgba(185,99,60,.12); border-color:rgba(185,99,60,.4); }
+  .en-li.is-dead { opacity:.5; cursor:default; }
+  .en-li__n { font-family:'Fraunces',serif; font-size:16px; color:#3c454d; }
+  .en-li.is-hot .en-li__n { color:var(--en-ink); }
+  .en-li__m { font:400 12px/1.3 'Inter'; color:#8a939b; min-width:0; }
+  .en-li.is-hot .en-li__m { color:#5c666f; }
+  .en-li__r { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+  .en-li__p { font:500 12px/1 'Inter'; font-variant-numeric:tabular-nums; color:#3c454d; }
+  .en-li.is-hot .en-li__p { color:var(--en-ink); }
+  .en-li__d { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .en-d-sale{background:#7fbf80} .en-d-reserved{background:#d8a64a} .en-d-sold{background:#9aa1a8}
+
+  /* ---------- L3 veil flat-detail: EVER museum-numeral two-tone (re-skin the atom tokens to the light palette) ---------- */
+  .vfd-overlay {
+    --vfd-veil:#2c343a; --vfd-rail-bg:#dfe3e6; --vfd-canvas-bg:#e8ebed; --vfd-ink:var(--en-ink);
+    --vfd-serif:'Fraunces',serif; --vfd-sans:'Inter',sans-serif;
+    --fp-loc-on:var(--en-accent); --fp-loc-off:#8a949b;
+  }
+  /* the ghost numeral behind the rail title (L3) - the museum-numeral thread, third beat */
+  #fp-flat .vfd-rail { position:relative; overflow:hidden; }
+  #fp-flat .en-num-l3 { position:absolute; right:-4%; top:12%; z-index:0; font-family:'Fraunces',serif;
+    font-weight:300; font-size:clamp(180px,28vh,360px); line-height:.78; letter-spacing:-.04em;
+    color:#d4d9dd; user-select:none; pointer-events:none; }
+  #fp-flat .vfd-rail > *:not(.en-num-l3) { position:relative; z-index:2; }
+
+  /* FIX-A (F-21): a PROMINENT back control on the light rail */
+  #fp-flat .vfd-back { display:inline-flex; align-items:center; gap:.6rem; padding:.5rem .95rem .5rem .55rem;
+    border:1px solid rgba(31,36,41,.3); border-radius:999px; background:rgba(255,255,255,.78);
+    color:var(--en-ink); font:600 .66rem/1 'Inter'; letter-spacing:.13em; text-transform:uppercase;
+    cursor:pointer; transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+    box-shadow:0 2px 10px rgba(20,24,28,.1); }
+  #fp-flat .vfd-back:hover { background:var(--en-accent); border-color:var(--en-accent); color:#fff; transform:translateX(-2px); }
+  #fp-flat .vfd-back__o { width:30px; height:30px; border-radius:50%; border:1px solid rgba(31,36,41,.4);
+    display:inline-flex; align-items:center; justify-content:center; font-size:1rem; line-height:1;
+    background:#fff; color:var(--en-ink); transition:background .18s ease, color .18s ease, border-color .18s ease; }
+  #fp-flat .vfd-back:hover .vfd-back__o { background:#fff; border-color:#fff; color:var(--en-accent); }
+
+  /* FIX-B (F-22): fill the canvas. plan is the hero (portrait), locator chips sized to read. */
+  #fp-flat .vfd-floorchip { width:150px; }
+  #fp-flat .vfd-floorchip svg { width:100%; height:auto; }
+  #fp-flat .vfd-sitechip { width:46px; }
+  #fp-flat .vfd-sitechip svg { width:100%; height:auto; }
+  #fp-flat .vfd-locators { gap:1.7rem; bottom:5%; }
+  #fp-flat .vfd-floorchip [data-nr].is-active,
+  #fp-flat .vfd-sitechip [data-block].is-active { fill:var(--fp-loc-on); stroke:var(--fp-loc-on); }
+  #fp-flat .vfd-plan { width:auto; height:82%; max-height:82vh; max-width:62%; }
+  #fp-flat .vfd-plan svg { width:auto; height:100%; max-width:100%; margin:0 auto; }
+  /* the reserve pill in the accent (museum-numeral uses terracotta, not slate) */
+  #fp-flat .vfd-reserve { background:var(--en-accent); }
+  #fp-flat .vfd-reserve:hover { background:var(--en-accent-2); }
+
+  /* FIX-B: a similar-apartments strip in the rail (real units, same type, same floor) */
+  #fp-flat .vfd-similar { margin-top:.4rem; }
+  .vfd-simstrip { display:flex; flex-direction:column; gap:.55rem; margin-top:.4rem; }
+  .vfd-simstrip__h { font:600 .58rem/1 'Inter'; letter-spacing:.16em; text-transform:uppercase; color:rgba(31,36,41,.55); }
+  .vfd-simstrip__row { display:flex; gap:.5rem; flex-wrap:wrap; }
+  .vfd-simcard { display:flex; flex-direction:column; gap:.18rem; padding:.5rem .65rem; min-width:78px;
+    border:1px solid rgba(31,36,41,.18); border-radius:7px; background:rgba(255,255,255,.5);
+    cursor:pointer; transition:border-color .18s ease, background .18s ease, transform .18s ease; text-align:left; }
+  .vfd-simcard:hover { border-color:var(--en-accent); background:rgba(255,255,255,.85); transform:translateY(-2px); }
+  .vfd-simcard__nr { font-family:'Fraunces',serif; font-weight:300; font-size:1.15rem; line-height:1; color:var(--en-ink); }
+  .vfd-simcard__m { font:500 .62rem/1.2 'Inter'; color:rgba(31,36,41,.6); }
+  .vfd-simcard__p { font:600 .68rem/1 'Inter'; color:var(--en-accent); font-variant-numeric:tabular-nums; }
+  .vfd-simcard.is-empty { cursor:default; opacity:.55; }
+  .vfd-simcard.is-empty:hover { border-color:rgba(31,36,41,.18); background:rgba(255,255,255,.5); transform:none; }
+
+  .combo-pre, .combo-post { background:#cfd5d9; color:#5a646d; }
+
+  /* ===================== MOBILE (<=768px): FACADE-HERO. building fills the screen, floors are big
+     tap-zones ON the building; L2 plan+list; L3 a real scroll. ===================== */
+  @media (max-width:768px){
+    .en-stage { min-height:100vh; height:100vh; }
+    .en-l1 .en-num { display:none; }   /* no ghost numeral on the phone; the building is the hero */
+    /* the WHOLE building shows (contain, not cropped); it is a STATIC picture (no tapping on it).
+       the floor buttons docked at the bottom are the ONLY clickable picker. */
+    .en-facade-wrap { position:absolute; left:0; right:0; top:clamp(128px,18vh,180px); bottom:210px; transform:none;
+      width:100%; max-width:none; aspect-ratio:auto; z-index:1; box-shadow:none; }
+    .en-facade { position:absolute; inset:0; }
+    .en-facade img { width:100%; height:100%; object-fit:contain; object-position:center center; }
+    /* the facade is a static image on mobile: no band contours, no tapping on the building */
+    .en-facade__svg, .en-chip { display:none; }
+    /* minimal top chrome */
+    .en-head { position:absolute; z-index:6; padding:16px clamp(16px,5vw,22px); }
+    .en-brand { color:var(--en-ink); }
+    .en-place { color:var(--en-muted); }
+    .en-lead { position:absolute; left:clamp(16px,5vw,22px); top:52px; right:clamp(16px,5vw,22px); max-width:none; z-index:6; }
+    .en-eyebrow { color:var(--en-accent); }
+    .en-h1 { font-size:clamp(26px,7vw,36px); color:var(--en-ink); }
+    .en-sub { display:none; }
+    /* the floor picker = big tap buttons DOCKED at the bottom (the ONLY clickable floor picker) */
+    .en-ledger { position:absolute; left:0; right:0; bottom:0; z-index:6; padding:0 0 env(safe-area-inset-bottom);
+      background:#fff; box-shadow:0 -12px 30px -20px rgba(28,34,40,.4); }
+    .en-ledger__hd { display:none; }   /* the header ledger label is redundant on the phone */
+    .en-row { padding:16px clamp(16px,5vw,22px); border-bottom:none; border-top:1px solid rgba(31,36,41,.1);
+      background:#fff; color:var(--en-ink); }
+    .en-row.is-hot { background:var(--en-accent); color:#fff; }
+    .en-row__num { font-size:clamp(22px,6.5vw,30px); color:inherit; }
+    .en-row__lab { font-size:15px; color:inherit; }
+    .en-row__free { color:var(--en-muted); }
+    .en-row.is-hot .en-row__free { color:rgba(255,255,255,.9); }
+    .en-row__from { min-width:auto; white-space:nowrap; color:inherit; }
+    .en-row.is-hot .en-row__from { color:#fff; }
+    .en-row__r { gap:14px; }
+    .en-row__arr { color:inherit; }
+    /* L2: the whole level scrolls vertically (block flow): title -> plan card -> spec -> list.
+       the .en-stage clips, so L2 owns its own vertical scroll. plan gets a definite aspect height. */
+    .en-l2 { display:block; overflow-y:auto; -webkit-overflow-scrolling:touch; background:#eef0f2; }
+    .en-l2__main { display:block; padding:16px clamp(16px,5vw,22px) 4px; }
+    .en-l2 .en-num { font-size:clamp(110px,20vh,180px); top:auto; bottom:auto; position:absolute; right:0; top:1%; }
+    .en-platewrap { display:block; margin-top:14px; }
+    /* the atom plate goes list-only on mobile (its contract) -> hide it; show the static plan picture */
+    .en-l2 #fp-plate { display:none; }
+    .en-mplan { display:block; position:relative; z-index:2; width:100%; aspect-ratio:100 / 44.08;
+      background:#fff; box-shadow:0 24px 50px -36px rgba(28,34,40,.5); outline:1px solid rgba(31,36,41,.12); padding:0; }
+    .en-mplan__svg { width:100%; height:100%; display:block; }
+    .en-aside { border-left:none; border-top:1px solid rgba(31,36,41,.14); margin-top:14px;
+      background:rgba(255,255,255,.4); }
+    .en-aside__nums { gap:20px; }
+    .en-list { overflow:visible; }   /* the L2 container scrolls, not the list */
+
+    /* L2 mobile contrast: opaque card + darker text so the list is legible on a phone */
+    .en-aside { background:#fff !important; }
+    .en-aside__spec { background:#fff; }
+    .en-li__n { color:#1f2429; }
+    .en-li__m { color:#3c454d; }
+    .en-li__p { color:#1f2429; }
+    .en-li { border-bottom:1px solid rgba(31,36,41,.08); border-radius:0; }
+    .en-li.is-dead { opacity:.72; }
+    .en-li.is-dead .en-li__m { color:#6b7680; }
+    .en-aside__k, .en-aside__nl { color:#5c666f; }
+    .en-l2__c { color:#5c666f; }
+    /* L3 mobile: a REAL single-column scroll. The overlay + page scroll the whole content (rail with the
+       CTA fully visible FIRST, then the plan). Fix: the overlay itself scrolls + children take natural
+       height (the atom's absolute-inset page clipped before, so nothing scrolled). */
+    #fp-flat.vfd-overlay { overflow-y:auto; -webkit-overflow-scrolling:touch; }
+    #fp-flat .vfd-page { position:relative; inset:auto; display:flex; flex-direction:column; height:auto; min-height:100%;
+      grid-template-columns:none; grid-template-rows:none; overflow:visible; }
+    #fp-flat .vfd-head { position:relative; padding:12px clamp(16px,5vw,22px); }
+    #fp-flat .vfd-head .vfd-word { display:none; }   /* the wordmark collides with the back-pill on mobile; drop it */
+    #fp-flat .vfd-crumbs { position:static; margin:2px clamp(16px,5vw,22px) 0; top:auto; left:auto; }
+    #fp-flat .vfd-rail { position:relative; justify-content:flex-start; padding:8px clamp(16px,5vw,22px) 24px; gap:.7rem; }
+    #fp-flat .vfd-canvas { position:relative; min-height:auto; padding:8px clamp(12px,4vw,18px) 40px; }
+    #fp-flat .vfd-plan { position:relative; width:100%; height:auto; max-height:none; max-width:100%; }
+    #fp-flat .vfd-plan svg { width:100%; height:auto; }
+    #fp-flat .vfd-locators { display:none; }   /* the 3 mini locator chips add no value on the phone; drop them */
+    #fp-flat .vfd-seed { display:none; }   /* the sculptural seed floats mid-screen on the phone; drop it */
+    #fp-flat .en-num-l3 { font-size:clamp(80px,15vh,130px); top:6px; }
+    /* ever-band mobile: the tracking tooltip + measure lines are a desktop affordance; on the phone use
+       the docked floor buttons (ledger) like the other variants. */
+    .en-tip, .en-mline { display:none !important; }
+    .en-ledger { display:block !important; }
+    .en-hint2 { display:none; }
+  }
+  @media (prefers-reduced-motion:reduce){ .en-fband,.en-chip,.en-row,.en-li,.en-back{ transition:none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="floorplan-smarts--ever-band">
+    <div class="en-stage" data-render-surface>
+
+      <!-- ===== LEVEL 1: facade floor-pick ===== -->
+      <div class="en-l1" data-l1>
+        <div class="en-num" data-num-l1>2</div>
+
+        <header class="en-head">
+          <span class="en-brand">Смартс</span>
+          <span class="en-place">с. Агрономічне &middot; 5 хв від Вінниці</span>
+        </header>
+
+        <div class="en-lead">
+          <p class="en-eyebrow">Планування</p>
+          <h1 class="en-h1">Оберіть поверх.<br>Номер квартири далі.</h1>
+          <p class="en-hint2">Наведіть на рівень будинку</p>
+        </div>
+
+        <div class="en-facade-wrap">
+          <div class="en-facade">
+            <img src="smarts-assets/plans/facade-commerce-clean.webp" alt="Фасад будинку Смартс" loading="eager" decoding="async"/>
+            <svg class="en-facade__svg" viewBox="0 0 100 42.4" preserveAspectRatio="none" aria-hidden="true" data-fbands></svg>
+            <div class="en-mline en-mline--t" data-mline-t aria-hidden="true"></div>
+            <div class="en-mline en-mline--b" data-mline-b aria-hidden="true"></div>
+            <div class="en-tip" data-tip aria-hidden="true"><span class="en-tip__num" data-tip-num></span><span class="en-tip__body"><span class="en-tip__lab" data-tip-lab></span><span class="en-tip__meta" data-tip-meta></span></span><span class="en-tip__arr">&#8594;</span></div>
+          </div>
+        </div>
+
+        <div class="en-ledger">
+          <div class="en-ledger__hd">
+            <span class="en-ledger__k">Реєстр поверхів</span>
+            <span class="en-ledger__k" data-ledger-count></span>
+          </div>
+          <div data-ledger-rows></div>
+        </div>
+      </div>
+
+      <!-- ===== LEVEL 2: numbered floorplate + persistent unit list ===== -->
+      <div class="en-l2" data-l2>
+        <div class="en-l2__main">
+          <div class="en-num" data-num-l2>2</div>
+
+          <div class="en-l2__top">
+            <button class="en-back" data-l2-back type="button"><span class="en-back__o">&#8592;</span>До будинку</button>
+            <span class="en-brand" style="font-size:18px;letter-spacing:.26em;">Смартс</span>
+          </div>
+
+          <div class="en-l2__title">
+            <p class="en-l2__eyebrow">Планування &middot; поверх</p>
+            <h2 class="en-l2__h" data-l2-h>2-й поверх</h2>
+            <p class="en-l2__c" data-l2-c></p>
+          </div>
+
+          <div class="en-platewrap">
+            <section class="nfp-stage" id="fp-plate">
+              <div class="nfp-rail">
+                <div class="nfp-back"></div><div class="nfp-floornum"></div><div class="nfp-floorsel"></div>
+              </div>
+              <div class="nfp-stagecard">
+                <svg class="nfp-plan" viewBox="0 0 100 44.08" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" data-plan></svg>
+                <svg class="nfp-zones" xmlns="http://www.w3.org/2000/svg"></svg>
+                <div class="nfp-card">
+                  <span class="nfp-card__type"></span>
+                  <span><span class="nfp-card__nr"></span><br><span class="nfp-card__area"></span></span>
+                  <span class="nfp-card__price"></span>
+                </div>
+              </div>
+            </section>
+            <!-- MOBILE-ONLY static plan picture: the atom goes list-only at <=820px (its contract), so on
+                 mobile the plan reads as a clean PICTURE (orientation) and the rail list below is the selector
+                 (matches Redesign2 mobile step2). Same real floor-std-clean.svg, non-interactive. -->
+            <div class="en-mplan" data-mplan aria-hidden="true">
+              <svg class="en-mplan__svg" viewBox="0 0 100 44.08" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" data-mplan-svg></svg>
+            </div>
+          </div>
+        </div>
+
+        <aside class="en-aside">
+          <div class="en-aside__spec">
+            <span class="en-aside__k">Квартира</span>
+            <div class="en-aside__head">
+              <span class="en-aside__nr" data-spec-nr>01</span>
+              <span class="en-aside__type" data-spec-type>Смарт 27 м&#178;</span>
+            </div>
+            <span class="en-aside__st" data-spec-st></span>
+            <div class="en-aside__nums">
+              <div><span class="en-aside__nv" data-spec-area></span><span class="en-aside__nl">м&#178;</span></div>
+              <div><span class="en-aside__nv" data-spec-price></span><span class="en-aside__nl">вартість</span></div>
+            </div>
+            <button class="en-cta" data-spec-cta type="button"><span data-spec-cta-t>Відкрити квартиру</span><span data-spec-cta-a>&#8594;</span></button>
+          </div>
+          <div class="en-list" data-list></div>
+        </aside>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- L3 veil flat-detail (single fixed overlay, data swapped per unit) -->
+  <div class="vfd-overlay" id="fp-flat">
+    <div class="vfd-veil"></div>
+    <div class="vfd-page">
+      <div class="vfd-head">
+        <button class="vfd-back"><span class="vfd-back__o">&#8592;</span> До поверху</button>
+        <span class="vfd-word" style="font-family:'Fraunces',serif;letter-spacing:.06em;opacity:.7">Агрономічне</span>
+        <span style="width:120px"></span>
+      </div>
+      <div class="vfd-crumbs"></div>
+      <div class="vfd-rail">
+        <div class="en-num-l3" data-num-l3></div>
+        <div class="vfd-type"></div>
+        <div class="vfd-sub"></div>
+        <div class="vfd-area"></div>
+        <div class="vfd-price"></div>
+        <button class="vfd-reserve">Залишити заявку</button>
+        <div class="vfd-rail__icons"><button aria-label="обране">&#9825;</button><button aria-label="порівняти">&#8646;</button></div>
+        <button class="vfd-similar">Схожі квартири &#8595;</button>
+        <div class="vfd-simstrip" data-simstrip></div>
+      </div>
+      <div class="vfd-canvas">
+        <div class="vfd-plan"></div>
+        <div class="vfd-locators">
+          <div class="vfd-floorchip"></div>
+          <div class="vfd-compass"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="18" fill="none" stroke="#8a949b"/><path d="M20 5 L24 20 L20 35 L16 20 Z" fill="#2c343a"/><text x="20" y="14" text-anchor="middle" font-size="7" fill="#2c343a">Пн</text></svg></div>
+          <div class="vfd-sitechip"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/numbered-floorplate-select/component.js"></script>
+  <script src="../../components/veil-flat-detail-reveal/component.js"></script>
+
+  <script type="module">
+    import { SMARTS_RAW } from '../../_assets/floorplan/smarts-units.js';
+    import { smartsUnitsForFloor, smartsFloorChip, smartsSiteChip, fmtPrice, SMARTS_FLOORS } from '../_shared/floorplan-helpers.js';
+
+    SectionHarness.boot();
+    var gsap = window.gsap;
+    var raw = SMARTS_RAW;
+    var E = 'cubic-bezier(.16,1,.3,1)';
+
+    // ---- the real clean plan artwork, inlined into .nfp-plan (shared viewBox 100x44.08) ----
+    var planEl = document.querySelector('[data-plan]');
+    fetch('../../_assets/floorplan/floor-std-clean.svg').then(function(r){return r.text();}).then(function(svg){
+      var inner = svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+      planEl.innerHTML = inner;
+      // the mobile static plan picture reuses the SAME real artwork (non-interactive orientation)
+      var mplan = document.querySelector('[data-mplan-svg]'); if (mplan) mplan.innerHTML = inner;
+    });
+
+    // ---- real counts ----
+    var FLOORS = SMARTS_FLOORS; // 2,3,m
+    function freeOnFloor(fid){ return raw.units.filter(function(u){return u.floor===fid && u.status==='available';}).length; }
+    function soldOnFloor(fid){ return raw.units.filter(function(u){return u.floor===fid && u.status==='sold';}).length; }
+    function resvOnFloor(fid){ return raw.units.filter(function(u){return u.floor===fid && u.status==='reserved';}).length; }
+    function totalOnFloor(fid){ return raw.units.filter(function(u){return u.floor===fid;}).length; }
+    function floorLabel(fid){ var f=FLOORS.filter(function(x){return x.id===fid;})[0]; return f?f.label:fid; }
+    function floorNumeral(fid){ return fid==='m' ? 'М' : fid; }
+    function minPrice(fid){
+      var av=raw.units.filter(function(u){return u.floor===fid&&u.status==='available';});
+      if(!av.length) return null;
+      return Math.round(Math.min.apply(null,av.map(function(u){return u.m2;}))*raw.priceUsdPerM2);
+    }
+    var totalFree = raw.units.filter(function(u){return u.status==='available';}).length;
+    var totalUnits = raw.units.length;
+
+    // ---- the giant ghost numeral (swaps on hover, expo.out) ----
+    var numL1 = document.querySelector('[data-num-l1]');
+    var numL2 = document.querySelector('[data-num-l2]');
+    function swapNumeral(el, val){
+      if (!el) return;
+      el.textContent = val;
+      if (gsap && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
+        gsap.fromTo(el, { autoAlpha:.25, y:18, scale:.97 }, { autoAlpha:1, y:0, scale:1, duration:.7, ease:'expo.out' });
+      }
+    }
+
+    // ===================== LEVEL 1: facade bands + floor ledger =====================
+    // FBANDS verbatim from smarts units.js (viewBox 0 0 100 42.4) - the shipped geometry (do NOT re-trace).
+    var VBH_F = 42.4;
+    var FB = [
+      { id:'m', n:'М', label:'Мансардний поверх', shape:'polygon', pts:'5.5,11 8.5,2.2 93,2.2 96,11 5.5,11', mkyVB:6.6, topVB:2.2, botVB:11 },
+      { id:'3', n:'3', label:'3-й поверх',        shape:'rect', x:5.5, y:11.3, w:90.5, h:6.1, mkyVB:14.35, topVB:11.3, botVB:17.4 },
+      { id:'2', n:'2', label:'2-й поверх',        shape:'rect', x:5.5, y:17.6, w:90.5, h:5.8, mkyVB:20.5, topVB:17.6, botVB:23.4 },
+    ];
+    var fbandsSvg = document.querySelector('[data-fbands]');
+    var l1 = document.querySelector('[data-l1]');
+    var facadeBox = l1.querySelector('.en-facade');
+    FB.forEach(function(b){
+      var s;
+      if (b.shape==='polygon'){ s=document.createElementNS('http://www.w3.org/2000/svg','polygon'); s.setAttribute('points',b.pts); }
+      else { s=document.createElementNS('http://www.w3.org/2000/svg','rect'); s.setAttribute('x',b.x); s.setAttribute('y',b.y); s.setAttribute('width',b.w); s.setAttribute('height',b.h); }
+      s.setAttribute('class','en-fband'); s.setAttribute('data-fb',b.id); fbandsSvg.appendChild(s);
+      // the chip rides the band's left edge (off the building face)
+      var chip=document.createElement('div'); chip.className='en-chip'; chip.dataset.chip=b.id;
+      chip.style.left='2%'; chip.style.top=(b.mkyVB / VBH_F * 100).toFixed(1)+'%';
+      chip.textContent = freeOnFloor(b.id)+' вільних';
+      facadeBox.appendChild(chip);
+    });
+
+    // the floor ledger (реєстр поверхів) - the L1 spine
+    document.querySelector('[data-ledger-count]').textContent = totalFree+' вільних · '+totalUnits+' квартири';
+    var ledgerRows = document.querySelector('[data-ledger-rows]');
+    ledgerRows.innerHTML = FLOORS.slice().reverse().map(function(f){  // м, 3, 2 top->down reads м first
+      var mp=minPrice(f.id);
+      return '<button class="en-row" data-row="'+f.id+'" type="button">'+
+        '<span class="en-row__l"><span class="en-row__num">'+floorNumeral(f.id)+'</span>'+
+          '<span class="en-row__lab">'+floorLabel(f.id)+'</span></span>'+
+        '<span class="en-row__r">'+
+          '<span class="en-row__free">'+freeOnFloor(f.id)+' вільних</span>'+
+          '<span class="en-row__from">'+(mp?('від '+fmtPrice(mp)):'немає вільних')+'</span>'+
+          '<span class="en-row__arr">&#8594;</span></span>'+
+      '</button>';
+    }).join('');
+
+    function hotFloor(fid, on){
+      var band=l1.querySelector('.en-fband[data-fb="'+fid+'"]'); if(band) band.classList.toggle('is-hot',on);
+      var chip=facadeBox.querySelector('.en-chip[data-chip="'+fid+'"]'); if(chip) chip.classList.toggle('is-hot',on);
+      var row=ledgerRows.querySelector('.en-row[data-row="'+fid+'"]'); if(row) row.classList.toggle('is-hot',on);
+    }
+    // the gliding measure-band (2 lines at the active floor's top+bottom) + the tracking tooltip
+    var mlineT=document.querySelector('[data-mline-t]'), mlineB=document.querySelector('[data-mline-b]'),
+        tipEl=document.querySelector('[data-tip]'), tipNum=document.querySelector('[data-tip-num]'),
+        tipLab=document.querySelector('[data-tip-lab]'), tipMeta=document.querySelector('[data-tip-meta]');
+    function moveBand(fid){
+      var b=FB.filter(function(x){return x.id===fid;})[0];
+      if(!b){ [mlineT,mlineB,tipEl].forEach(function(e){if(e)e.classList.remove('is-on');}); return; }
+      if(mlineT){ mlineT.style.top=(b.topVB/VBH_F*100).toFixed(1)+'%'; mlineT.classList.add('is-on'); }
+      if(mlineB){ mlineB.style.top=(b.botVB/VBH_F*100).toFixed(1)+'%'; mlineB.classList.add('is-on'); }
+      if(tipEl){ tipEl.style.top=(b.mkyVB/VBH_F*100).toFixed(1)+'%'; tipEl.classList.add('is-on');
+        if(tipNum) tipNum.textContent=b.n;
+        if(tipLab) tipLab.textContent=b.label;
+        var mp=minPrice(fid);
+        if(tipMeta) tipMeta.textContent=freeOnFloor(fid)+' вільних'+(mp?(' · від '+fmtPrice(mp)):''); }
+    }
+    var _curHot = '2';
+    function enterFloor(fid){
+      if (_curHot && _curHot!==fid) hotFloor(_curHot,false);
+      _curHot = fid; hotFloor(fid,true);
+      swapNumeral(numL1, floorNumeral(fid));
+      moveBand(fid);
+    }
+    // wire the bands + the ledger rows together
+    FB.forEach(function(b){
+      var band=l1.querySelector('.en-fband[data-fb="'+b.id+'"]');
+      band.addEventListener('mouseenter',function(){ enterFloor(b.id); });
+      band.addEventListener('click',function(){ openFloor(b.id); });
+    });
+    ledgerRows.querySelectorAll('.en-row').forEach(function(row){
+      var fid=row.dataset.row;
+      row.addEventListener('mouseenter',function(){ enterFloor(fid); });
+      row.addEventListener('click',function(){ openFloor(fid); });
+    });
+
+    // ===================== LEVEL 2: numbered-floorplate-select + persistent list =====================
+    var L2=document.querySelector('[data-l2]');
+    var l2h=document.querySelector('[data-l2-h]'), l2c=document.querySelector('[data-l2-c]');
+    var listEl=document.querySelector('[data-list]');
+    var specNr=document.querySelector('[data-spec-nr]'), specType=document.querySelector('[data-spec-type]'),
+        specSt=document.querySelector('[data-spec-st]'), specArea=document.querySelector('[data-spec-area]'),
+        specPrice=document.querySelector('[data-spec-price]'), specCta=document.querySelector('[data-spec-cta]'),
+        specCtaT=document.querySelector('[data-spec-cta-t]'), specCtaA=document.querySelector('[data-spec-cta-a]');
+    var nfp=null, currentFloor=null, currentUnits=[];
+
+    function stMeta(st){
+      if(st==='sold')   return { word:'Продана', color:'#9aa1a8', cls:'sold' };
+      if(st==='reserved') return { word:'Бронь', color:'#c08a2e', cls:'reserved' };
+      return { word:'Вільна', color:'#4f9b50', cls:'sale' };
+    }
+    // the default spec on floor-entry should be the first AVAILABLE unit (live CTA), not a dead one
+    function firstLive(units){ for(var i=0;i<units.length;i++){ if(units[i].status==='sale') return units[i]; } return units[0]; }
+    function setSpec(u){
+      var m=stMeta(u.status);
+      specNr.textContent=u.nr; specType.textContent=u.type;
+      specSt.textContent=m.word; specSt.style.color=m.color;
+      specArea.textContent=u.area; specPrice.textContent=fmtPrice(u.price);
+      if (u.status==='sale'){
+        specCta.classList.remove('is-dead'); specCtaT.textContent='Відкрити квартиру'; specCtaA.textContent='→';
+        specCta.onclick=function(){ openFlat(u); };
+      } else {
+        specCta.classList.add('is-dead'); specCtaT.textContent=(u.status==='sold'?'Квартира продана':'Квартира у броні');
+        specCtaA.textContent=''; specCta.onclick=null;
+      }
+    }
+    function buildList(units){
+      listEl.innerHTML = units.map(function(u){
+        var dead=u.status!=='sale', m=stMeta(u.status);
+        var right = u.status==='sale' ? fmtPrice(u.price) : m.word;
+        return '<div class="en-li'+(dead?' is-dead':'')+'" data-row="'+u.nr+'">'+
+          '<span class="en-li__n">'+u.nr+'</span>'+
+          '<span class="en-li__m">'+u.type+' · '+u.area+' м&#178;</span>'+
+          '<span class="en-li__r"><span class="en-li__p">'+right+'</span>'+
+            '<span class="en-li__d en-d-'+m.cls+'"></span></span>'+
+        '</div>';
+      }).join('');
+      listEl.querySelectorAll('.en-li').forEach(function(li){
+        var nr=li.dataset.row;
+        li.addEventListener('mouseenter',function(){
+          var u=currentUnits.filter(function(x){return String(x.nr)===String(nr);})[0]; if(!u) return;
+          if(nfp&&nfp.setHover) nfp.setHover(nr);
+          setActiveRow(nr); setSpec(u);
+        });
+        li.addEventListener('click',function(){
+          var u=currentUnits.filter(function(x){return String(x.nr)===String(nr);})[0];
+          if(u && u.status==='sale') openFlat(u);
+        });
+      });
+    }
+    function setActiveRow(nr){
+      listEl.querySelectorAll('.en-li').forEach(function(li){ li.classList.toggle('is-hot', String(li.dataset.row)===String(nr)); });
+    }
+
+    // the atom exposes onSelect/setHover/clear but NO onHover; sync the rail by listening to the atom's
+    // own plate DOM (.nfp-zones [data-nr] get a mouseenter from the atom) - delegated, atom stays unforked.
+    function wirePlateHover(){
+      var zones=document.querySelector('#fp-plate .nfp-zones'); if(!zones) return;
+      if (zones.__enWired) return; zones.__enWired=true;   // delegate once; survives nfp.render()
+      zones.addEventListener('mouseover', function(e){
+        var node=e.target.closest('[data-nr]'); if(!node) return;
+        var nr=node.getAttribute('data-nr');
+        var u=currentUnits.filter(function(x){return String(x.nr)===String(nr);})[0]; if(!u) return;
+        setActiveRow(nr); setSpec(u);
+      });
+    }
+
+    SectionHarness.ranOK('numbered-floorplate-select', function(){
+      currentFloor='2'; currentUnits=smartsUnitsForFloor(raw.units,'2');
+      nfp = window.NumberedFloorplateSelect.create('#fp-plate', {
+        vbW:100, vbH:44.08, units:currentUnits, pillR:1.9, pillFont:1.7, hoverFill:.12, ease:'power2.out',
+        fmtPrice:fmtPrice,
+        onSelect:function(nr,u){ if(u && u.status==='sale') openFlat(u); }
+      });
+      wirePlateHover();
+      buildList(currentUnits);
+      l2c.textContent = freeOnFloor('2')+' вільних · '+soldOnFloor('2')+' продано · '+resvOnFloor('2')+' у броні';
+      if (currentUnits.length) setSpec(firstLive(currentUnits));
+    });
+
+    function openFloor(fid){
+      currentFloor=fid; currentUnits=smartsUnitsForFloor(raw.units,fid);
+      l2h.textContent = floorLabel(fid);
+      l2c.textContent = freeOnFloor(fid)+' вільних · '+soldOnFloor(fid)+' продано · '+resvOnFloor(fid)+' у броні';
+      numL2.textContent = floorNumeral(fid);
+      if (nfp&&nfp.render) nfp.render(currentUnits);
+      buildList(currentUnits);
+      if (currentUnits.length) setSpec(firstLive(currentUnits));
+      // controlled swap L1 -> L2 (opacity only; no scale-from-origin)
+      L2.classList.add('is-on');
+      if (gsap){
+        gsap.fromTo(L2,{autoAlpha:0},{autoAlpha:1,duration:.5,ease:'power2.out'});
+        gsap.fromTo(numL2,{autoAlpha:0,y:18,scale:.97},{autoAlpha:1,y:0,scale:1,duration:.7,ease:'expo.out'});
+        gsap.to(l1,{autoAlpha:0,duration:.35,ease:'power2.in',onComplete:function(){ l1.classList.add('is-hidden'); }});
+      } else { l1.classList.add('is-hidden'); }
+    }
+    function backToBuilding(){
+      l1.classList.remove('is-hidden');
+      if (gsap){
+        gsap.fromTo(l1,{autoAlpha:0},{autoAlpha:1,duration:.5,ease:'power2.out'});
+        gsap.to(L2,{autoAlpha:0,duration:.3,ease:'power2.in',onComplete:function(){ L2.classList.remove('is-on'); gsap.set(L2,{clearProps:'opacity,visibility'}); }});
+      } else L2.classList.remove('is-on');
+    }
+    document.querySelector('[data-l2-back]').addEventListener('click', backToBuilding);
+
+    // ===================== LEVEL 3: veil flat-detail =====================
+    var numL3=document.querySelector('[data-num-l3]');
+    var vfd=null;
+    SectionHarness.ranOK('veil-flat-detail-reveal', function(){
+      vfd = window.VeilFlatDetailReveal.create('#fp-flat', {
+        veilColor:'#2c343a', coverDur:.4, holdDur:.3, uncoverDur:.45, ease:'expo.out', drawPlan:true,
+        fmtPrice:fmtPrice, onClose:function(){}, onReserve:function(u){ console.log('reserve', u&&u.code); }
+      });
+    });
+    var PLAN_DIM = { '27': { src:'type-27-clean.webp', w:600, h:991 }, '24': { src:'type-24-clean.webp', w:600, h:1170 } };
+    function buildSimStrip(u){
+      var strip=document.querySelector('[data-simstrip]'); if(!strip) return;
+      var sims=currentUnits.filter(function(x){
+        return x.status==='sale' && x.type===u.type && String(x.code)!==String(u.code);
+      }).slice(0,4);
+      if(!sims.length){
+        strip.innerHTML='<span class="vfd-simstrip__h">Той самий поверх</span>'+
+          '<div class="vfd-simcard is-empty"><span class="vfd-simcard__m">Інших вільних '+u.type+' на цьому поверсі немає</span></div>';
+        return;
+      }
+      strip.innerHTML='<span class="vfd-simstrip__h">'+u.type+' поруч · '+floorLabel(u.floor)+'</span>'+
+        '<div class="vfd-simstrip__row">'+sims.map(function(s){
+          return '<button class="vfd-simcard" type="button" data-sim="'+s.code+'">'+
+            '<span class="vfd-simcard__nr">&#8470; '+s.nr+'</span>'+
+            '<span class="vfd-simcard__m">'+s.area+' м&#178;</span>'+
+            '<span class="vfd-simcard__p">'+fmtPrice(s.price)+'</span></button>';
+        }).join('')+'</div>';
+      strip.querySelectorAll('.vfd-simcard[data-sim]').forEach(function(b){
+        b.addEventListener('click',function(){
+          var nu=currentUnits.filter(function(x){return String(x.code)===String(b.dataset.sim);})[0];
+          if(nu) openFlat(nu);
+        });
+      });
+    }
+    function openFlat(u){
+      if (!vfd) return;
+      var dim = u.type.indexOf('27')>-1 ? PLAN_DIM['27'] : PLAN_DIM['24'];
+      var mx = Math.round(dim.w*0.06), my = Math.round(dim.h*0.04);
+      var vbW = dim.w + mx*2, vbH = dim.h + my*2;
+      var planImg = '<svg viewBox="0 0 '+vbW+' '+vbH+'" xmlns="http://www.w3.org/2000/svg">'+
+        '<image href="smarts-assets/plans/'+dim.src+'" x="'+mx+'" y="'+my+'" width="'+dim.w+'" height="'+dim.h+'" preserveAspectRatio="xMidYMid meet"/></svg>';
+      // the third beat of the museum numeral: the apartment number behind the rail
+      if (numL3){ numL3.textContent=u.nr;
+        if (gsap && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches))
+          gsap.fromTo(numL3,{autoAlpha:0,y:18,scale:.97},{autoAlpha:.9,y:0,scale:1,duration:.8,ease:'expo.out',delay:.45}); }
+      vfd.open({
+        type:u.type, sub:floorLabel(u.floor)+' · Агрономічне', areaM2:u.area, price:u.price,
+        status:u.status==='sale'?'sale':(u.status==='sold'?'sold':'reserved'),
+        crumbs:'Планування · '+floorLabel(u.floor)+' · № '+u.nr,
+        planSVG:planImg, floorChipSVG:smartsFloorChip(raw.units,u.floor,u.code), floorNr:u.code,
+        siteChipSVG:smartsSiteChip(u.floor), siteBlock:u.floor
+      });
+      buildSimStrip(u);
+    }
+
+    // ---- staggered birth of the lead + facade reveal (controlled, once) ----
+    if (gsap){
+      var leadEls = gsap.utils.toArray('.en-eyebrow, .en-h1, .en-sub, .en-row');
+      gsap.set(leadEls,{autoAlpha:0,y:14});
+      gsap.set(numL1,{autoAlpha:0,scale:.94});
+      gsap.set('.en-stage',{clipPath:'inset(6% 0 0 0)'});
+      ScrollTrigger.create({ trigger:'#combo', start:'top 70%', once:true, onEnter:function(){
+        gsap.to(numL1,{autoAlpha:1,scale:1,duration:1.1,ease:'expo.out'});
+        gsap.to(leadEls,{autoAlpha:1,y:0,duration:.6,ease:'power2.out',stagger:.06,delay:.1});
+        gsap.to('.en-stage',{clipPath:'inset(0% 0 0 0)',duration:.9,ease:'power2.out',delay:.05});
+        // a soft band hint-pass, then settle
+        ['2','3','m'].forEach(function(fid,i){
+          var bnd=l1.querySelector('.en-fband[data-fb="'+fid+'"]');
+          if(bnd) gsap.fromTo(bnd,{fillOpacity:.1},{fillOpacity:0,duration:.8,delay:.5+i*.16,ease:'power2.out'});
+        });
+        enterFloor('2'); // seed the ledger/band hot state on the default floor
+      }});
+    } else {
+      enterFloor('2');
+    }
+
+    SectionHarness.declare({ pinOwner:'none', expectPins:0, atomsCited:['numbered-floorplate-select','veil-flat-detail-reveal'] });
+  </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "id": "fullscreen-media-carousel",
+  "title": "Fullscreen media carousel (Springs)",
+  "level": "L2-molecule",
+  "batch": "D (#15/17)",
+  "source": "springs.estate /gallery + full-viewport residence/interior media slides (\"SEARCH FLATS\" beats). Engine = library/components/fullscreen-media-carousel (proven, imperative go/next/prev + built-in arrows/keys/pointer-drag/IntersectionObserver video pause). NO engine patch needed.",
+  "engine": "An edge-to-edge full-bleed carousel: each .fmc-slide fills the WHOLE viewport (no card chrome), the .fmc-track translateX(-index*100%), stepping one full width at a time. Imperative: go(i)/next()/prev()/index(), count; wires ‹ ›, Left/Right keys, pointer drag/swipe (F-08); a video slide plays only while active AND on-screen (IntersectionObserver).",
+
+  "dual_platform": true,
+  "differs": "Same push-slide mechanic (track translateX(-index*100%)) + same go/next/prev. INTERACTION differs (not the driver source but the INPUT surface): desktop uses the round ‹ › buttons (click / Left-Right keys); mobile uses touch-swipe on the full-bleed frame. NO ambient auto-advance on either platform — a carousel is a swipe/arrow affordance, it must not self-page (S20). Springs mobile is a swipeable full-bleed slider; desktop is arrow-paged.",
+
+  "desktop": { "driver": "arrowNav — the engine already wired .fmc-prev/.fmc-next + Left/Right keys; nothing extra.", "knobs": ["duration", "ease", "loop", "wheel", "index"] },
+  "mobile":  { "driver": "swipe — the engine already wires pointer drag/swipe (F-08); clean swipe, NO auto-advance timer.", "knobs": ["duration", "ease", "loop", "drag", "index"] },
+
+  "knobs": {
+    "slides": { "default": "from .fmc-track > .fmc-slide (img | video) children", "what": "the full-viewport media slides." },
+    "duration": { "default": 700, "unit": "ms", "what": "push-slide transition duration." },
+    "ease": { "default": "cubic-bezier(.22,1,.36,1)", "what": "push-slide easing." },
+    "loop": { "default": false, "what": "wrap past the ends; when false, arrows disable at the ends." },
+    "drag": { "default": true, "what": "pointer drag/swipe on the stage (release past max(60px,12%) steps)." },
+    "wheel": { "default": false, "what": "horizontal-wheel stepping (optional)." },
+    "index": { "default": 0, "what": "start slide index." }
+  },
+
+  "engine_patch": "NONE — imperative, interaction-driven engine (go/next/prev). No scroll driver, no narrow-guard that kills motion on phone width, so NO forceMotion patch (go() works identically on any width). The wrapper only chooses the INPUT surface: desktop arrows/keys (engine-native), mobile swipe (engine-native pointer drag).",
+  "entry": "FullscreenMediaCarouselDual.init(target, opts) -> { platform, engine, driver }. Load engine.js THEN component.js. Markup: .fmc-stage > .fmc-track > .fmc-slide (img|video) xN + .fmc-prev/.fmc-next + optional .fmc-counter(.fmc-cur/.fmc-total).",
+  "law": "transform: translateX (track) only; GPU layers; NO mix-blend over the media; NO backdrop over the moving slide; NO WebGL. Videos muted+loop+playsinline, play only when active+on-screen (IntersectionObserver), never scrub currentTime. reduced-motion → instant index (show first slide static, no push).",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core, unpatched)", "component.css", "img/s1..s3.webp", "stage.html", "demo.html", "meta.json", "README.md"]
+}

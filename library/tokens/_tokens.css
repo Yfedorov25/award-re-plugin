@@ -1,0 +1,57 @@
+/* ============================================================================
+   library/tokens/_tokens.css — the GLOBAL --aw-* design surface
+   ----------------------------------------------------------------------------
+   ONE token file every component.css + lab.html shares. Lifted from
+   skills/motion-engine/references/PB_motion_system.md (the motion score).
+   Components consume var(--aw-*) so a single edit retunes the whole library.
+   Eases are also registered in JS via CustomEase (see _tokens.json).
+   ========================================================================== */
+
+:root {
+  /* ---- EASES (the named curves the whole library reaches for) ---- */
+  --aw-ease-air:          cubic-bezier(0.25, 0.74, 0.22, 0.99);  /* house ease — assembly settle, card-up */
+  --aw-ease-out-quad:     cubic-bezier(0.25, 0.46, 0.45, 0.94);  /* DEFAULT for UI / quiet sections */
+  --aw-ease-anticipation: cubic-bezier(0.68, -0.55, 0.27, 1.55); /* small overshoot / wind-up before a move */
+  --aw-ease-out-expo:     cubic-bezier(0.16, 1, 0.30, 1);        /* dramatic reveals (puzzle assembly) */
+
+  /* ---- DURATIONS (s) — the tempo ladder ---- */
+  --aw-dur-1: 0.4s;   /* micro / hover / toggle */
+  --aw-dur-2: 0.8s;   /* content appears */
+  --aw-dur-3: 1.6s;   /* slow reveal / hold */
+  --aw-dur-4: 2.4s;   /* cinematic beat */
+  --aw-dur-5: 2.8s;   /* longest authored gesture */
+
+  /* ---- STAGGER (the reading-order wave) ---- */
+  --aw-stagger-1: 60ms;    /* tight, brisk (editorial) */
+  --aw-stagger-2: 180ms;   /* slow, luxe (cinematic) */
+
+  /* ---- TYPE SCALE (fluid clamps; display = real serif, never Inter-as-display) ---- */
+  --aw-type-eyebrow:  clamp(11px, 0.8vw, 13px);
+  --aw-type-body:     clamp(15px, 1.05vw, 18px);
+  --aw-type-h3:       clamp(28px, 4vw, 56px);
+  --aw-type-h2:       clamp(40px, 7vw, 88px);
+  --aw-type-display:  clamp(56px, 9vw, 132px);
+  --aw-tracking-tight: -0.015em;
+
+  /* ---- THEME (temperature flow — the per-section wave) ---- */
+  --aw-dark:        #0a0a0a;
+  --aw-dark-2:      #141210;
+  --aw-cream:       #ece5d8;
+  --aw-ink:         #14130f;
+  --aw-warm-accent: #b9885a;   /* editorial copper */
+  --aw-gold-accent: #c8a96a;   /* cinematic gold */
+  --aw-line-dark:   rgba(20, 17, 13, 0.16);
+  --aw-line-light:  rgba(236, 229, 216, 0.18);
+
+  /* ---- LAYOUT ---- */
+  --aw-gutter: clamp(20px, 4.5vw, 84px);
+  --aw-radius: 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --aw-dur-1: 0.01s; --aw-dur-2: 0.01s; --aw-dur-3: 0.01s;
+    --aw-dur-4: 0.01s; --aw-dur-5: 0.01s;
+    --aw-stagger-1: 0ms; --aw-stagger-2: 0ms;
+  }
+}

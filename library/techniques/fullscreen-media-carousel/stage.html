@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>fullscreen-media-carousel · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root{--green:#16322a;--green-deep:#0e241d;--cream:var(--spr-cream);--slate:#9fb0a6;--serif:var(--spr-serif);--body:var(--spr-sans);}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#0c0c0a;color:var(--cream);font-family:var(--body);min-height:100%;overflow-x:hidden;}
+  /* full-viewport stage, no page horizontal overflow at 390px */
+  .fmc-stage{width:100vw;max-width:100%;height:100vh!important;}
+  /* a quiet caption riding on the active slide (springs "SEARCH FLATS" residence beat) */
+  .fmc-cap{position:absolute;left:0;bottom:0;z-index:4;padding:clamp(22px,6vw,72px);pointer-events:none;max-width:100%;}
+  .fmc-cap .eyebrow{font-size:.66rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cream);opacity:.85;}
+  .fmc-cap .title{margin-top:.3em;font-family:var(--serif);font-weight:400;font-size:clamp(1.9rem,7vw,4rem);line-height:1.03;max-width:min(18ch,100%);overflow-wrap:break-word;}
+  .badge{position:fixed;top:10px;left:10px;z-index:9;font-family:ui-monospace,Menlo,monospace;font-size:.62rem;letter-spacing:.06em;color:#7fd8b0;background:rgba(8,22,17,.72);border:1px solid #26463c;border-radius:999px;padding:4px 10px;pointer-events:none;}
+</style>
+</head>
+<body>
+  <div class="badge" id="badge">…</div>
+  <section class="fmc-stage" id="stage">
+    <div class="fmc-track">
+      <div class="fmc-slide">
+        <img src="img/s1.webp" alt="">
+        <div class="fmc-cap"><div class="eyebrow">SPRINGS · SEARCH FLATS</div><div class="title">Резиденція, кадр за кадром</div></div>
+      </div>
+      <div class="fmc-slide">
+        <img src="img/s2.webp" alt="">
+        <div class="fmc-cap"><div class="eyebrow">SPRINGS · інтер'єр</div><div class="title">Світло по всій ширині</div></div>
+      </div>
+      <div class="fmc-slide">
+        <img src="img/s3.webp" alt="">
+        <div class="fmc-cap"><div class="eyebrow">SPRINGS · тераса</div><div class="title">Межа з садом</div></div>
+      </div>
+    </div>
+    <button class="fmc-prev" aria-label="назад">‹</button>
+    <button class="fmc-next" aria-label="далі">›</button>
+    <div class="fmc-counter"><span class="fmc-cur">01</span><span class="sep">/</span><span class="fmc-total">03</span></div>
+  </section>
+
+<script src="engine.js"></script>
+<script src="component.js"></script>
+<script>
+  var r = FullscreenMediaCarouselDual.init('#stage', { platform:'auto', duration:700, drag:true });
+  window.__fmcApi = r;
+  document.getElementById('badge').textContent = r.platform==='desktop' ? 'desktop · arrows' : 'mobile · swipe';
+</script>
+</body>
+</html>

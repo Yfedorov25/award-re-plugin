@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · daynight-scroll-scrub · день→ніч на pinned-scrub (NAHIRNA dialect)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · daynight-scroll-scrub  (V2 — the NAHIRNA dialect)
+================================================================================
+  Day dissolves to night as you scroll a PINNED hero (~110% viewport-height of
+  scroll = the full day→night dissolve). A warm window-glow rises and a legibility
+  scrim deepens, both riding the SAME progress t. This is the canon's "scrub"
+  driver (mode:"scrub", reveal:"opacity") plus the Nahirna caption layering and a
+  one-time intro reveal. Harvested 1:1 from apps/nahirna/.../00-Hero.tsx.
+
+  The page is intentionally TALL (a 250vh scroll container) so the pin+scrub has
+  real room to play — scroll down to bring the evening; scroll back up to undo it.
+  Fully interactive; a gentle autoplay nudge runs once on load for a screen-record.
+
+  LOAD ORDER (load-bearing): canon CSS → variation CSS → GSAP → ScrollTrigger →
+  canon JS (window.DayNight) → variation JS (window.DayNightScrub).
+  NO WebGL / NO mix-blend / NO backdrop-filter. window.__LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- 1 · the CANON stage/seam/tag styles (MUST come first) -->
+<link rel="stylesheet" href="../daynight-engine/component.css">
+<!-- 2 · this variation's chrome -->
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --color-night:#0F0F0E; --color-warm:#E8C9A0; --color-plaster:#EDEAE3;
+         --color-text:#EDEAE3; --color-text-muted:#9B978F;
+         --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{background:var(--color-night);color:var(--color-text);font-family:var(--sans)}
+
+  /* TALL scroll container so the pinned hero + 110% scrub actually has room to run */
+  .scroller{position:relative;height:250vh}
+
+  /* the pinned hero fills the viewport; the canon injects .dn (stage) into it */
+  .hero{position:relative;height:100svh;width:100%;overflow:hidden;background:var(--color-night)}
+
+  /* a quiet "after the hero" band so you can see the pin release cleanly */
+  .after{min-height:100vh;display:grid;place-items:center;padding:10vh 6vw;text-align:center}
+  .after p{font-family:var(--serif);font-weight:300;font-size:clamp(1.4rem,3.4vw,2.4rem);
+    line-height:1.2;color:var(--color-text-muted);max-width:26ch;letter-spacing:-.01em}
+
+  /* lab affordance — replay the intro (does not touch the scrub) */
+  .replay{position:fixed;z-index:9999;right:18px;top:18px;
+    font:500 .62rem/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--color-text);
+    background:rgba(15,15,14,.6);border:1px solid rgba(237,234,227,.28);
+    padding:.62rem .9rem;border-radius:6px;cursor:pointer}
+  .replay:hover{border-color:var(--color-warm);color:var(--color-warm)}
+
+  /* a tiny live t readout (top-left) so the move is legible during QA */
+  .tread{position:fixed;z-index:9999;left:18px;top:18px;
+    font:500 .62rem/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--color-text-muted);background:rgba(15,15,14,.55);
+    border:1px solid rgba(237,234,227,.18);padding:.6rem .8rem;border-radius:6px;
+    font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+  <button class="replay" id="replay">повторити інтро</button>
+  <div class="tread" id="tread">день · t 0.00</div>
+
+  <div class="scroller">
+    <!-- the hero the canon pins; day/night stills are injected by the engine -->
+    <section class="hero" id="hero" aria-label="Дім · день переходить у вечір на скролі"></section>
+  </div>
+
+  <section class="after">
+    <p>Скрол відпустив герой. День уже став вечором.</p>
+  </section>
+
+<!-- 3 · GSAP + ScrollTrigger (the scrub driver REQUIRES ScrollTrigger) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<!-- 4 · the CANON engine (window.DayNight) — MUST load before the variation -->
+<script src="../daynight-engine/component.js"></script>
+<!-- 5 · this variation (window.DayNightScrub) -->
+<script src="component.js"></script>
+
+<script>
+  (function () {
+    if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
+
+    var hero = document.getElementById('hero');
+    var tread = document.getElementById('tread');
+
+    var DAY = 'renders/dn-ext-day.webp';     // exterior house — frame-matched pair
+    var NIGHT = 'renders/dn-ext-night.webp';
+
+    function tlabel(t) {
+      return t < 0.04 ? 'день' : t > 0.96 ? 'ніч' : (t < 0.5 ? 'присмерк' : 'сутінки');
+    }
+
+    var brick = window.DayNightScrub.create(hero, {
+      dayMedia: DAY,
+      nightMedia: NIGHT,
+      scrub: { start: 'top top', end: '+=110%', pin: true },
+      glow: true,
+      scrim: 0.5,
+      kicker: { place: 'вул. Нагірна, Вінниця', edge: 'перша лінія до Південного Бугу' },
+      headline: ['Прокидатися', 'від води,', 'не від сусідів'],
+      sub: 'Тупікова вулиця, далі тільки річка й дерева. Найближче сусідське вікно аж за садом.',
+      hint: 'гортайте, настає вечір',
+      onUpdate: function (t) {
+        tread.textContent = tlabel(t) + ' · t ' + t.toFixed(2);
+      }
+    });
+
+    // replay only the one-time intro (text), never the scrub.
+    document.getElementById('replay').addEventListener('click', function () { brick.replay(); });
+
+    // gentle autoplay NUDGE on load: scroll the window down a touch then back, so a
+    // screen-record shows the day→night begin to arrive. The user then drives it for real.
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduced) {
+      setTimeout(function () {
+        var vh = window.innerHeight;
+        var demo = { y: 0 };
+        gsap.timeline({ defaults: { ease: 'sine.inOut' } })
+          .to(demo, { y: vh * 0.85, duration: 3.2, onUpdate: function () { window.scrollTo(0, demo.y); } })
+          .to(demo, { y: 0, duration: 2.4, onUpdate: function () { window.scrollTo(0, demo.y); } }, '+=0.5');
+      }, 1700);
+    }
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

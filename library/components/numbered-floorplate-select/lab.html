@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · numbered-floorplate-select · EVER (clean redrawn vector floor plan; apartments marked by NUMBER pills at computed centroids; hover wash + top info card; '+' opens detail)</title>
+<!--
+================================================================================
+  TECHNIQUE LAB · numbered-floorplate-select  (EVER visual-search Level 2)
+================================================================================
+  Pick a UNIT on a CLEAN REDRAWN vector floor plan where the NUMBER IS the UI (NOT the developer
+  raw plan image + a text wall = the smarts mistake). Inline SVG line-art substrate; per-unit
+  footprint <path data-nr> in the SAME viewBox; each unit gets a NUMBER PILL at its COMPUTED
+  CENTROID (engine, never hand-placed). Hover -> footprint wash + pill scale + top info card; dead
+  units 'not on sale', live units reveal '+'. Harvested from D_ever_visualsearch_video.md (§3). NO WebGL.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{ --slate:#2b343b; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{ background:var(--slate); color:#e7e2d6; font-family:'Inter',system-ui,sans-serif; }
+  .nfp-stage{ --nfp-bg:#2b343b; --nfp-ink:#e7e2d6; --nfp-plate:#e9ecee; --nfp-accent:#c2724e;
+    --nfp-dead:#6b7480; --nfp-pill-bd:#c4c9cd; --nfp-pill-ink:#3a4047;
+    --nfp-serif:'Playfair Display',Georgia,serif; --nfp-sans:'Inter',sans-serif;
+    --nfp-rail:230px; --nfp-hover-fill:.12; }
+  .nav{ position:absolute; left:0; right:0; top:0; height:60px; display:flex; align-items:center; justify-content:center;
+    z-index:6; font-family:var(--nfp-serif); letter-spacing:.2em; font-size:1.05rem; color:#e7e2d6; opacity:.92; }
+  .brd{ position:absolute; left:4vw; top:64px; font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; opacity:.55; z-index:6; }
+</style>
+</head>
+<body>
+  <div class="nav">ever</div>
+  <div class="brd">Visual search — Housing 5 — Floor 28</div>
+  <section class="nfp-stage" id="fp">
+    <div class="nfp-rail">
+      <div class="nfp-back"><span class="nfp-back__o">&larr;</span> Back to housing</div>
+      <div class="nfp-floornum">28</div>
+      <div class="nfp-floorsel">Floor &#9662;</div>
+      <div class="nfp-rail__div"></div>
+      <div class="nfp-locator">
+        <svg viewBox="0 0 80 60" aria-hidden="true"><rect x="6" y="20" width="14" height="34" fill="#586" opacity=".4"/><rect x="24" y="10" width="14" height="44" fill="#c2724e"/><rect x="42" y="16" width="14" height="38" fill="#586" opacity=".4"/><rect x="60" y="24" width="14" height="30" fill="#586" opacity=".4"/></svg>
+        <svg class="nfp-compass" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20" fill="none" stroke="#e7e2d6" stroke-opacity=".4"/><path d="M22 6 L26 22 L22 38 L18 22 Z" fill="#e7e2d6" opacity=".7"/><text x="22" y="16" text-anchor="middle" fill="#e7e2d6" font-size="7" opacity=".7">N</text></svg>
+      </div>
+    </div>
+
+    <div class="nfp-stagecard">
+      <svg class="nfp-plan" viewBox="0 0 1600 780" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="1600" height="780" fill="#e9ecee"/><rect x="40" y="40" width="1520" height="700" fill="#ffffff" stroke="#1e2227" stroke-width="6"/><rect x="40" y="355" width="1520" height="70" fill="#f1f3f4" stroke="#b9bfc4" stroke-width="1.5"/><line x1="293" y1="40" x2="293" y2="355" stroke="#b9bfc4" stroke-width="1.5"/><line x1="293" y1="425" x2="293" y2="740" stroke="#b9bfc4" stroke-width="1.5"/><rect x="284" y="346" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><rect x="284" y="416" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><line x1="547" y1="40" x2="547" y2="355" stroke="#b9bfc4" stroke-width="1.5"/><line x1="547" y1="425" x2="547" y2="740" stroke="#b9bfc4" stroke-width="1.5"/><rect x="538" y="346" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><rect x="538" y="416" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><line x1="800" y1="40" x2="800" y2="355" stroke="#b9bfc4" stroke-width="1.5"/><line x1="800" y1="425" x2="800" y2="740" stroke="#b9bfc4" stroke-width="1.5"/><rect x="791" y="346" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><rect x="791" y="416" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><line x1="1053" y1="40" x2="1053" y2="355" stroke="#b9bfc4" stroke-width="1.5"/><line x1="1053" y1="425" x2="1053" y2="740" stroke="#b9bfc4" stroke-width="1.5"/><rect x="1044" y="346" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><rect x="1044" y="416" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><line x1="1307" y1="40" x2="1307" y2="355" stroke="#b9bfc4" stroke-width="1.5"/><line x1="1307" y1="425" x2="1307" y2="740" stroke="#b9bfc4" stroke-width="1.5"/><rect x="1298" y="346" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><rect x="1298" y="416" width="18" height="18" fill="#cdd2d6" stroke="#9aa1a8" stroke-width="1"/><line x1="40" y1="198" x2="167" y2="198" stroke="#cfd4d8" stroke-width="1"/><line x1="167" y1="583" x2="293" y2="583" stroke="#cfd4d8" stroke-width="1"/><line x1="293" y1="198" x2="420" y2="198" stroke="#cfd4d8" stroke-width="1"/><line x1="420" y1="583" x2="547" y2="583" stroke="#cfd4d8" stroke-width="1"/><line x1="547" y1="198" x2="674" y2="198" stroke="#cfd4d8" stroke-width="1"/><line x1="674" y1="583" x2="800" y2="583" stroke="#cfd4d8" stroke-width="1"/><line x1="800" y1="198" x2="927" y2="198" stroke="#cfd4d8" stroke-width="1"/><line x1="927" y1="583" x2="1053" y2="583" stroke="#cfd4d8" stroke-width="1"/><line x1="1053" y1="198" x2="1180" y2="198" stroke="#cfd4d8" stroke-width="1"/><line x1="1180" y1="583" x2="1307" y2="583" stroke="#cfd4d8" stroke-width="1"/><line x1="1307" y1="198" x2="1434" y2="198" stroke="#cfd4d8" stroke-width="1"/><line x1="1434" y1="583" x2="1560" y2="583" stroke="#cfd4d8" stroke-width="1"/></svg>
+      <svg class="nfp-zones" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="nfp-card">
+        <span class="nfp-card__type">3E</span>
+        <span><span class="nfp-card__nr">№ 292</span><br><span class="nfp-card__area">60.1 м²</span></span>
+        <span class="nfp-card__price">&mdash;</span>
+      </div>
+    </div>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  window.__nfp = NumberedFloorplateSelect.create('#fp', {
+    vbW: 1600, vbH: 780,
+    units: [{"nr":292,"type":"3E","area":60.1,"price":23330820,"status":"sale","points":"42,42 291,42 291,353 42,353"},{"nr":286,"type":"3E","area":72.4,"price":28940000,"status":"sale","points":"42,427 291,427 291,738 42,738"},{"nr":293,"type":"2E","area":43.1,"price":17671000,"status":"sale","points":"295,42 545,42 545,353 295,353"},{"nr":287,"type":"2E","area":49,"price":19320000,"status":"sold","points":"295,427 545,427 545,738 295,738"},{"nr":294,"type":"1E","area":38.2,"price":15010000,"status":"reserved","points":"549,42 798,42 798,353 549,353"},{"nr":288,"type":"1E","area":33.6,"price":13120000,"status":"sale","points":"549,427 798,427 798,738 549,738"},{"nr":295,"type":"3E","area":72.4,"price":28940000,"status":"sale","points":"802,42 1051,42 1051,353 802,353"},{"nr":289,"type":"3E","area":60.1,"price":23330820,"status":"sale","points":"802,427 1051,427 1051,738 802,738"},{"nr":296,"type":"2E","area":49,"price":19320000,"status":"sold","points":"1055,42 1305,42 1305,353 1055,353"},{"nr":290,"type":"2E","area":43.1,"price":17671000,"status":"sale","points":"1055,427 1305,427 1305,738 1055,738"},{"nr":297,"type":"1E","area":33.6,"price":13120000,"status":"sale","points":"1309,42 1558,42 1558,353 1309,353"},{"nr":291,"type":"1E","area":38.2,"price":15010000,"status":"sale","points":"1309,427 1558,427 1558,738 1309,738"}],
+    pillR: 16, hoverFill: 0.12, hoverDur: 0.18, ease: 'power2.out',
+    onSelect: function(nr, u){ console.log('open flat', nr, u.type); document.querySelector('.brd').textContent = 'Visual search — Housing 5 — Floor 28 — № ' + nr + ' (' + u.type + ')'; }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Springs — Nature → Place (full section)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Playfair+Display:wght@400&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:#060d08}
+  body{font-family:'Cormorant Garamond',Georgia,serif;color:#ece6d5;overflow-x:hidden}
+  .stage{position:relative;height:100vh;width:100%;overflow:hidden}
+  .layer{position:absolute;inset:0;overflow:hidden}
+  .fill{position:absolute;inset:-5%;will-change:transform}
+  .wipe{clip-path:inset(100% 0 0 0)}
+  .serif-xl{font-size:clamp(70px,10.5vw,210px);font-weight:400;line-height:.9;letter-spacing:-.01em;color:#ece6d5}
+  .kick{font-family:"Helvetica Neue",Arial,sans-serif;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:rgba(236,230,213,.72)}
+  .body-s{font-family:"Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.68;font-weight:300;color:rgba(236,230,213,.84);text-wrap:pretty}
+
+  /* 1 · NATURE */
+  .l-nature{z-index:1}
+  .l-nature .fill{background:
+    radial-gradient(110% 85% at 18% 88%, rgba(90,132,66,.5), rgba(90,132,66,0) 55%),
+    radial-gradient(70% 60% at 78% 18%, rgba(22,50,30,.9), rgba(22,50,30,0) 60%),
+    linear-gradient(158deg,#152e1c 0%,#0c1f12 48%,#06100a 100%)}
+  .l-nature .vein{position:absolute;inset:-5%;opacity:.35;background:
+    radial-gradient(140% 40% at 30% 30%, transparent 62%, rgba(4,10,5,.55) 63%, transparent 66%),
+    radial-gradient(150% 46% at 60% 75%, transparent 58%, rgba(4,10,5,.45) 59%, transparent 63%)}
+  .nature-title{position:absolute;left:5vw;bottom:9vh}
+  .nature-kick{position:absolute;left:5.2vw;bottom:5.5vh}
+  .nature-para{position:absolute;right:5vw;bottom:9vh;width:min(320px,28vw)}
+
+  /* 2 · ENJOY (scrim + copy live ABOVE terrace so copy holds) */
+  .l-enjoy-card{z-index:2}
+  .enjoy-card{position:absolute;right:8vw;top:24vh;width:clamp(240px,19vw,340px);aspect-ratio:1.05;
+    background:radial-gradient(90% 90% at 35% 65%, #7fae57, #223f1a 72%),#223f1a;
+    box-shadow:0 30px 70px rgba(0,0,0,.4)}
+  .l-terrace{z-index:3}
+  .l-terrace .fill{background:
+    radial-gradient(85% 70% at 70% 20%, rgba(255,224,166,.7), rgba(255,224,166,0) 55%),
+    radial-gradient(120% 90% at 12% 96%, rgba(40,26,14,.92), rgba(40,26,14,0) 62%),
+    linear-gradient(152deg,#372716 0%,#6f4e2c 40%,#c1925d 74%,#e4bf89 100%)}
+  .l-enjoy-copy{z-index:4;pointer-events:none}
+  .enjoy-scrim{position:absolute;inset:0;background:linear-gradient(100deg,rgba(6,15,9,.88) 0%,rgba(6,15,9,.55) 42%,rgba(6,15,9,0) 68%);opacity:0}
+  .enjoy-copy{position:absolute;left:5vw;top:20vh;width:min(560px,44vw);
+    font-size:clamp(28px,2.9vw,46px);line-height:1.22;font-weight:400;color:#ece6d5;opacity:0}
+
+  /* 4 · SLIDER */
+  .l-slider{z-index:5}
+  .l-slider .fill{background:linear-gradient(160deg,#122a18 0%,#0a1c10 55%,#060f08 100%)}
+  .sl-card{position:absolute;left:5vw;top:14vh;width:44vw;height:66vh;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.45)}
+  .sl{position:absolute;inset:0}
+  .sl-1{background:radial-gradient(100% 90% at 30% 75%, #86a75c, #23421e 70%),#23421e;z-index:1}
+  .sl-2{background:radial-gradient(90% 80% at 65% 25%, #e8c48d, #6f4e2c 65%),#6f4e2c;z-index:2;clip-path:inset(100% 0 0 0)}
+  .sl-3{background:radial-gradient(110% 90% at 40% 20%, #9fd6c8, #113c40 68%),#113c40;z-index:3;clip-path:inset(100% 0 0 0)}
+  .sl-caption-wrap{position:absolute;right:6vw;bottom:22vh;width:min(360px,26vw);height:120px;overflow:hidden}
+  .sl-cap{position:absolute;inset:0}
+  .sl-cap.later{transform:translateY(110%);opacity:0}
+  .sl-nav{position:absolute;right:6vw;bottom:13vh;display:flex;gap:14px}
+  .sl-btn{width:52px;height:52px;border-radius:50%;border:1px solid rgba(236,230,213,.45);display:grid;place-items:center;color:rgba(236,230,213,.85);font-family:"Helvetica Neue",Arial,sans-serif;font-size:16px}
+  .sl-count{position:absolute;left:5vw;bottom:9vh;font-family:"Helvetica Neue",Arial,sans-serif;font-size:10px;letter-spacing:.3em;color:rgba(236,230,213,.55)}
+
+  /* 5 · PLACE */
+  .l-place{z-index:6}
+  .l-place .fill{background:
+    radial-gradient(75% 85% at 12% 88%, rgba(168,178,74,.55), rgba(168,178,74,0) 58%),
+    radial-gradient(60% 60% at 38% 45%, rgba(74,116,58,.45), rgba(74,116,58,0) 60%),
+    radial-gradient(90% 100% at 95% 20%, rgba(4,18,10,.95), rgba(4,18,10,0) 65%),
+    linear-gradient(115deg,#3d5a2c 0%,#1c3a20 40%,#0a2013 72%,#04110a 100%)}
+  .ribbon{position:absolute;inset:-4% 0;width:100%;height:108%;will-change:transform}
+  .ribbon svg{width:100%;height:100%;overflow:visible;display:block}
+  .place-title{position:absolute;right:4.5vw;bottom:20vh;text-align:right;
+    font-family:'Playfair Display',serif;font-size:clamp(100px,12vw,240px);line-height:.85;color:#eee5cf;opacity:0}
+  .place-kick{position:absolute;right:4.7vw;bottom:16vh;opacity:0}
+  .place-para{position:absolute;left:5vw;bottom:9vh;width:min(320px,28vw);opacity:0}
+  .place-cool{position:absolute;inset:0;background:linear-gradient(150deg,rgba(6,18,24,.9),rgba(3,8,12,.95));opacity:0}
+
+  /* 6 · RUNNERS */
+  .l-runners{z-index:7}
+  .l-runners .fill{background:
+    radial-gradient(80% 65% at 30% 40%, rgba(120,150,80,.55), rgba(120,150,80,0) 60%),
+    radial-gradient(90% 80% at 78% 85%, rgba(190,200,110,.35), rgba(190,200,110,0) 55%),
+    linear-gradient(150deg,#2c421f 0%,#1a2f14 50%,#0c1a0c 100%)}
+  .runners-path{position:absolute;left:0;right:0;bottom:0;height:26vh;opacity:.5;background:
+    radial-gradient(120% 200% at 50% 130%, #6a6350 0%, #4a4a38 30%, transparent 62%)}
+  .runners-cap{position:absolute;right:5vw;bottom:12vh;width:min(460px,36vw);
+    font-size:clamp(22px,2.1vw,32px);line-height:1.3;color:#e6e0cc;opacity:0}
+
+  /* 7 · ODOMETER */
+  .l-odo{z-index:8}
+  .odo-bg{position:absolute;inset:0;overflow:hidden}
+  .o1{z-index:1}.o2{z-index:2}.o3{z-index:3}
+  .o1 .fill{background:radial-gradient(120% 80% at 22% 85%, rgba(88,130,66,.45), transparent 55%),linear-gradient(158deg,#153019,#06100a)}
+  .o2 .fill{background:radial-gradient(100% 70% at 30% 20%, rgba(120,190,180,.3), transparent 55%),linear-gradient(168deg,#123a3a,#061418)}
+  .o3 .fill{background:radial-gradient(90% 55% at 50% 100%, rgba(235,170,110,.3), transparent 55%),linear-gradient(178deg,#1c2947,#0c1122)}
+  .odo-card{position:absolute;right:4.5vw;bottom:0;z-index:5;width:clamp(280px,22vw,380px);
+    background:#0f261a;padding:12px 12px 0;box-shadow:0 30px 80px rgba(0,0,0,.45);transform:translateY(115%)}
+  .odo-photo{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden}
+  .oph{position:absolute;inset:0}
+  .oph-1{background:radial-gradient(90% 90% at 30% 70%, #6f9b4e, #1d3a1c 70%);z-index:1}
+  .oph-2{background:radial-gradient(120% 80% at 60% 20%, #9fd6c8, #12474a 65%);z-index:2;clip-path:inset(100% 0 0 0)}
+  .oph-3{background:linear-gradient(190deg,#41539b,#11142b);z-index:3;clip-path:inset(100% 0 0 0)}
+  .odo-numwrap{position:relative;height:1em;overflow:hidden;font-size:clamp(80px,6.5vw,120px);line-height:1;color:#ece6d5;margin:16px 2px 4px}
+  .odo-num{position:absolute;left:0;top:0;transform:translateY(112%)}
+  .odo-num.first{transform:none}
+  .odo-capwrap{position:relative;height:28px;overflow:hidden;margin:0 2px 14px}
+  .odo-cap{position:absolute;left:0;top:5px;font-family:"Helvetica Neue",Arial,sans-serif;font-size:9.5px;
+    letter-spacing:.24em;text-transform:uppercase;color:rgba(236,230,213,.7);transform:translateY(26px);opacity:0}
+  .odo-cap.first{transform:none;opacity:1}
+
+  /* 8 · LOCATION */
+  .l-location{z-index:9}
+  .l-location .fill{background:radial-gradient(110% 85% at 20% 80%, rgba(80,120,60,.5), transparent 55%),linear-gradient(160deg,#132a16,#050d07)}
+  .map-panel{position:absolute;left:12vw;right:0;bottom:0;height:76vh;background:#ede5d0;transform:translateY(110%);
+    box-shadow:0 -30px 90px rgba(0,0,0,.5);overflow:hidden}
+  .map-panel svg{width:100%;height:100%;display:block}
+  .loc-cap{position:absolute;right:5vw;top:10vh;text-align:right;opacity:0}
+  .loc-cap .serif-m{font-size:clamp(40px,4.5vw,84px);line-height:1;color:#ece6d5}
+
+  /* chrome */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;align-items:center;justify-content:space-between;
+    padding:26px 5vw;font-family:"Helvetica Neue",Arial,sans-serif;font-size:10px;letter-spacing:.28em;
+    text-transform:uppercase;color:rgba(236,230,213,.85);mix-blend-mode:difference}
+  .nav .logo{font-family:'Cormorant Garamond',serif;font-size:22px;text-transform:none;letter-spacing:.06em}
+  .rail{position:fixed;right:calc(4.5vw - 24px);top:50%;transform:translateY(-50%);z-index:30;height:140px;width:1px;background:rgba(236,230,213,.22)}
+  .rail i{position:absolute;inset:0;background:#ece6d5;transform-origin:top;transform:scaleY(0)}
+  .grain{position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)'/%3E%3C/svg%3E")}
+</style>
+</head>
+<body>
+
+<nav class="nav"><div>Menu</div><div class="logo">Springs</div><div>Contact us</div></nav>
+<div class="rail"><i id="railFill"></i></div>
+<div class="grain"></div>
+
+<div class="stage" id="stage">
+
+  <!-- 1 · NATURE -->
+  <section class="layer l-nature">
+    <div class="fill" id="natureBg"></div><div class="vein"></div>
+    <h1 class="serif-xl nature-title" id="natureTitle">Nature</h1>
+    <div class="kick nature-kick" id="natureKick">Lightness of breathing</div>
+    <p class="body-s nature-para" id="naturePara">Enjoy nature&rsquo;s embrace that shields you from the world outside. Emerald lawns, winding layouts of flowerbeds.</p>
+  </section>
+
+  <!-- 2 · ENJOY card (below terrace) -->
+  <section class="layer l-enjoy-card" style="pointer-events:none">
+    <div class="enjoy-card wipe" id="enjoyCard"></div>
+  </section>
+
+  <!-- 3 · TERRACE -->
+  <section class="layer l-terrace wipe" id="terrace">
+    <div class="fill" id="terraceBg"></div>
+  </section>
+
+  <!-- 2b · ENJOY copy (above terrace — it holds over it) -->
+  <section class="layer l-enjoy-copy">
+    <div class="enjoy-scrim" id="enjoyScrim"></div>
+    <div class="enjoy-copy" id="enjoyCopy">Enjoy nature&rsquo;s embrace that shields you from the world outside. Climbing rooftop plants, winding layouts of flowerbeds, emerald lawns. Springs lets you learn the art of leisure.</div>
+  </section>
+
+  <!-- 4 · SLIDER -->
+  <section class="layer l-slider wipe" id="slider">
+    <div class="fill"></div>
+    <div class="sl-card">
+      <div class="sl sl-1"></div>
+      <div class="sl sl-2" id="sl2"></div>
+      <div class="sl sl-3" id="sl3"></div>
+    </div>
+    <div class="sl-caption-wrap">
+      <p class="body-s sl-cap" id="slc1">Landscaped terraces with topiary trees, framed with glass, create the atmosphere of a miniature park floating above the City.</p>
+      <p class="body-s sl-cap later" id="slc2">Warm evening light on the upper terraces &mdash; a quiet room without a ceiling, open to the sunset.</p>
+      <p class="body-s sl-cap later" id="slc3">Water mirrors along the promenade cool the air and carry the sky down to eye level.</p>
+    </div>
+    <div class="sl-nav"><div class="sl-btn">&larr;</div><div class="sl-btn">&rarr;</div></div>
+    <div class="sl-count" id="slCount">01 / 03</div>
+  </section>
+
+  <!-- 5 · PLACE -->
+  <section class="layer l-place wipe" id="place">
+    <div class="fill" id="placeBg"></div>
+    <div class="ribbon" id="ribbon">
+      <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="gBody" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#9fbf6a" stop-opacity=".28"/><stop offset=".4" stop-color="#4f7a44" stop-opacity=".46"/>
+            <stop offset="1" stop-color="#0a2015" stop-opacity=".7"/>
+          </linearGradient>
+          <linearGradient id="gSpec" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f2f7d8" stop-opacity="0"/><stop offset=".38" stop-color="#f2f7d8" stop-opacity=".9"/>
+            <stop offset="1" stop-color="#f2f7d8" stop-opacity="0"/>
+          </linearGradient>
+          <filter id="fSoft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="9"/></filter>
+          <filter id="fFine" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>
+        </defs>
+        <g fill="none" stroke-linecap="round">
+          <path d="M470,-80 C180,220 800,400 470,640 C260,815 430,930 340,1120" stroke="#243f22" stroke-width="230" opacity=".5" filter="url(#fSoft)"/>
+          <path d="M470,-80 C180,220 800,400 470,640 C260,815 430,930 340,1120" stroke="url(#gBody)" stroke-width="148" style="mix-blend-mode:screen"/>
+          <path d="M452,-80 C162,220 782,402 452,642 C244,816 414,932 324,1120" stroke="#0a1c10" stroke-width="52" opacity=".55" filter="url(#fSoft)"/>
+          <path d="M414,-80 C124,222 744,406 414,646 C210,818 380,934 290,1120" stroke="url(#gSpec)" stroke-width="5" filter="url(#fFine)" style="mix-blend-mode:screen"/>
+          <path d="M540,-80 C252,216 866,396 538,636 C326,810 496,926 406,1118" stroke="url(#gSpec)" stroke-width="2.5" opacity=".6" filter="url(#fFine)" style="mix-blend-mode:screen"/>
+        </g>
+      </svg>
+    </div>
+    <h1 class="place-title" id="placeTitle">Place</h1>
+    <div class="kick place-kick" id="placeKick">Essence of contemplation</div>
+    <p class="body-s place-para" id="placePara">Springs is situated in the prestigious Western District, surrounded by parks and close to the embankment.</p>
+    <div class="place-cool" id="placeCool"></div>
+  </section>
+
+  <!-- 6 · RUNNERS -->
+  <section class="layer l-runners wipe" id="runners">
+    <div class="fill" id="runnersBg"></div>
+    <div class="runners-path"></div>
+    <p class="runners-cap" id="runnersCap">Breathe in the air and open space. As you run along the embankment, delight in the kaleidoscope of shifting panoramas.</p>
+  </section>
+
+  <!-- 7 · ODOMETER -->
+  <section class="layer l-odo">
+    <div class="odo-bg o1 wipe" id="o1"><div class="fill"></div></div>
+    <div class="odo-bg o2 wipe" id="o2"><div class="fill"></div></div>
+    <div class="odo-bg o3 wipe" id="o3"><div class="fill"></div></div>
+    <aside class="odo-card" id="odoCard">
+      <div class="odo-photo">
+        <div class="oph oph-1"></div><div class="oph oph-2" id="oph2"></div><div class="oph oph-3" id="oph3"></div>
+      </div>
+      <div class="odo-numwrap">
+        <div class="odo-num first" id="on1">3</div><div class="odo-num" id="on2">9</div><div class="odo-num" id="on3">16</div>
+      </div>
+      <div class="odo-capwrap">
+        <div class="odo-cap first" id="oc1">Minute walk to nature park</div>
+        <div class="odo-cap" id="oc2">Minute walk to the embankment</div>
+        <div class="odo-cap" id="oc3">Minutes by car to the MIBC</div>
+      </div>
+    </aside>
+  </section>
+
+  <!-- 8 · LOCATION -->
+  <section class="layer l-location wipe" id="location">
+    <div class="fill"></div>
+    <div class="loc-cap" id="locCap"><div class="serif-m">Location</div><div class="kick" style="margin-top:10px">Western District</div></div>
+    <div class="map-panel" id="mapPanel">
+      <svg viewBox="0 0 1200 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <rect width="1200" height="760" fill="#ede5d0"/>
+        <path d="M700,-40 C640,120 780,200 700,320 C620,440 840,520 780,680 C760,730 790,760 800,800" fill="none" stroke="#a9c2c6" stroke-width="34" opacity=".9"/>
+        <path d="M1050,80 C960,180 1080,300 980,380 C900,444 1010,560 950,660" fill="none" stroke="#a9c2c6" stroke-width="22" opacity=".8"/>
+        <ellipse cx="880" cy="560" rx="130" ry="80" fill="#c9d3a4"/>
+        <ellipse cx="330" cy="620" rx="170" ry="95" fill="#cfd8ac"/>
+        <ellipse cx="1080" cy="220" rx="110" ry="70" fill="#c9d3a4"/>
+        <g stroke="#d8ceb4" stroke-width="6" fill="none">
+          <path d="M0,200 L1200,150"/><path d="M0,420 L1200,380"/><path d="M0,640 L1200,600"/>
+          <path d="M240,0 L300,760"/><path d="M520,0 L560,760"/><path d="M860,0 L820,760"/>
+        </g>
+        <g stroke="#e2d9c0" stroke-width="3" fill="none">
+          <path d="M0,300 L1200,280"/><path d="M0,520 L1200,500"/><path d="M400,0 L430,760"/><path d="M980,0 L960,760"/>
+        </g>
+        <circle cx="620" cy="330" r="58" fill="#12301c"/>
+        <g fill="#ece6d5">
+          <rect x="606" y="300" width="8" height="34"/><rect x="617" y="292" width="8" height="42"/><rect x="628" y="306" width="8" height="28"/>
+          <text x="620" y="356" text-anchor="middle" font-family="Cormorant Garamond,serif" font-size="15">Springs</text>
+        </g>
+        <g fill="#5c7a4a">
+          <circle cx="330" cy="620" r="13" opacity=".9"/><circle cx="880" cy="560" r="13" opacity=".9"/><circle cx="1080" cy="220" r="13" opacity=".9"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/CustomEase.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger, CustomEase);
+CustomEase.create("premium", "0.25,0.74,0.22,0.99");
+
+/* Lenis smooth scroll feeding ScrollTrigger — one clock end to end */
+if (window.Lenis){
+  const lenis = new Lenis();
+  lenis.on("scroll", ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t*1000));
+  gsap.ticker.lagSmoothing(0);
+}
+
+/* ONE pinned trigger → ONE master timeline. Units 0..100 == progress ×100. */
+const UP = "inset(0% 0 0 0)", DOWN = "inset(100% 0 0 0)";
+const tl = gsap.timeline({
+  defaults:{ease:"premium"},
+  scrollTrigger:{
+    trigger:"#stage", start:"top top", end:"+=1400%", pin:true, scrub:1,
+    onUpdate(s){ document.getElementById("railFill").style.transform = `scaleY(${s.progress})`; }
+  }
+});
+const wipe = (sel,pos,dur=5) => tl.fromTo(sel,{clipPath:DOWN},{clipPath:UP,duration:dur},pos);
+
+/* ——— 1 · NATURE · long hold 0→20, only drift ——— */
+tl.fromTo("#natureBg",{scale:1.06},{scale:1.14,duration:34,ease:"none"},0);
+
+/* ——— 2 · ENJOY · p30: scrim + copy enter, card wipes in, then card exits ——— */
+tl.to("#natureTitle",{y:-70,autoAlpha:0,duration:5},28);
+tl.to("#natureKick",{y:-40,autoAlpha:0,duration:4},28);
+tl.to("#naturePara",{y:-40,autoAlpha:0,duration:4},28.5);
+tl.to("#enjoyScrim",{opacity:1,duration:5,ease:"none"},28);
+tl.fromTo("#enjoyCopy",{y:60,autoAlpha:0},{y:0,autoAlpha:1,duration:5},29);
+wipe("#enjoyCard",30,4);
+tl.to("#enjoyCard",{clipPath:"inset(0 0 100% 0)",y:-50,duration:3},35); /* card wipes up & out */
+
+/* ——— 3 · TERRACE · p37: warm render rises, copy HOLDS over it ——— */
+wipe("#terrace",37,5);
+tl.fromTo("#terraceBg",{scale:1.1},{scale:1.03,duration:10,ease:"none"},37);
+tl.to("#enjoyScrim",{opacity:.65,duration:5,ease:"none"},37);
+/* copy exits just before the slider covers everything */
+tl.to("#enjoyCopy",{y:-70,autoAlpha:0,duration:4},42);
+tl.to("#enjoyScrim",{opacity:0,duration:4,ease:"none"},42);
+
+/* ——— 4 · SLIDER · p44→66: slides cycle BY SCROLL inside the card ——— */
+wipe("#slider",44,5);
+wipe("#sl2",52,4);
+tl.to("#slc1",{y:-40,autoAlpha:0,duration:3},52);
+tl.fromTo("#slc2",{y:40,autoAlpha:0},{y:0,autoAlpha:1,duration:3},53);
+tl.set("#slCount",{textContent:"02 / 03"},54);
+wipe("#sl3",60,4);
+tl.to("#slc2",{y:-40,autoAlpha:0,duration:3},60);
+tl.fromTo("#slc3",{y:40,autoAlpha:0},{y:0,autoAlpha:1,duration:3},61);
+tl.set("#slCount",{textContent:"03 / 03"},62);
+tl.set("#slCount",{textContent:"01 / 03"},51); /* keeps reverse-scrub honest */
+
+/* ——— 5 · PLACE · p68: glass ribbon field ——— */
+wipe("#place",68,5);
+tl.fromTo("#ribbon",{y:"13vh"},{y:0,duration:7},68.6);           /* ribbon lags ~10% */
+tl.fromTo("#placeBg",{scale:1.07},{scale:1.02,duration:12,ease:"none"},68);
+tl.fromTo("#placeTitle",{y:50,autoAlpha:0},{y:0,autoAlpha:1,duration:3.5},74);
+tl.fromTo("#placeKick",{y:24,autoAlpha:0},{y:0,autoAlpha:1,duration:3},75);
+tl.fromTo("#placePara",{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:3},74.5);
+/* gradual exit: title drifts up, ribbon flows down, field cools */
+tl.to("#placeTitle",{y:-80,autoAlpha:0,duration:4},79.5);
+tl.to("#placeKick",{y:-50,autoAlpha:0,duration:3.5},79.5);
+tl.to("#placePara",{y:-50,autoAlpha:0,duration:3.5},80);
+tl.to("#ribbon",{y:"12vh",duration:6,ease:"none"},79.5);
+tl.to("#placeCool",{opacity:.7,duration:5,ease:"none"},79.5);
+
+/* ——— 6 · RUNNERS · p82: slow zoom 1.1 → 1.0 ——— */
+wipe("#runners",82,4);
+tl.fromTo("#runnersBg",{scale:1.1},{scale:1.0,duration:14,ease:"none"},82);
+tl.fromTo("#runnersCap",{y:40,autoAlpha:0},{y:0,autoAlpha:1,duration:3},85);
+tl.to("#runnersCap",{y:-50,autoAlpha:0,duration:2.5},87.5);
+
+/* ——— 7 · ODOMETER · p88→97: three wipes, triple coupling per beat ——— */
+wipe("#o1",88,2.5);
+tl.to("#odoCard",{y:0,duration:3},88);
+const beat = (pos,bg,ph,nOut,nIn,cOut,cIn)=>{
+  wipe(bg,pos,2.5);
+  wipe(ph,pos,2.5);
+  tl.to(nOut,{yPercent:-112,duration:2.5},pos);
+  tl.fromTo(nIn,{yPercent:112},{yPercent:0,duration:2.5},pos);
+  tl.to(cOut,{y:-26,autoAlpha:0,duration:2},pos);
+  tl.fromTo(cIn,{y:26,autoAlpha:0},{y:0,autoAlpha:1,duration:2},pos+.5);
+};
+beat(91,"#o2","#oph2","#on1","#on2","#oc1","#oc2");
+beat(94,"#o3","#oph3","#on2","#on3","#oc2","#oc3");
+
+/* ——— 8 · LOCATION · p97+: leaf field, cream map rises from the bottom ——— */
+wipe("#location",96.5,2);
+tl.to("#odoCard",{y:"20%",autoAlpha:0,duration:2},96.5);
+tl.to("#mapPanel",{y:0,duration:2.5},97.8);
+tl.fromTo("#locCap",{y:30,autoAlpha:0},{y:0,autoAlpha:1,duration:1.6},98.2);
+tl.to({},{duration:.2},99.8);
+</script>
+</body>
+</html>

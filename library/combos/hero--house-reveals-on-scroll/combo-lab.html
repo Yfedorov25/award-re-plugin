@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: hero--house-reveals-on-scroll · "Дім розкривається"</title>
+<!--
+  HERO VARIANT · hero--house-reveals-on-scroll · "Дім розкривається"
+  ============================================================================
+  THE MECHANIC ROOT (unmistakable in a screenshot, not just in code):
+    The section PINS and scroll-LOCKS. At the top a dark cover hides the house
+    behind a centre seam. As the visitor scrolls, the seam PARTS from the centre
+    outward (center-seam-split) WHILE the house render pushes in toward you
+    (render-scroll-scale, scale 1.06 -> 1.16) — the building literally OPENS into
+    the frame. Welded to that SAME pin, a short story reveals ONE line at a time
+    (pin-story-text): line one settles and holds, leaves, line two arrives, then
+    the proof line. The reveal of the house and the reveal of the text happen
+    together, one locked moment, then the pin releases. No other hero opens the
+    building down a parting centre seam coupled to a pushed-in render.
+
+  THE OWNER'S FOUR FIXES — all obeyed:
+    1. REAL PIN. pin-story-text owns ONE pinned ScrollTrigger (pin:true,
+       pinSpacing:true). The mechanic plays WHILE the section holds; it does NOT
+       dump elements down toward a phantom next section. expectPins === 1.
+    2. NO TEXT OVERLAP. pin-story-text keeps EXACTLY ONE block at opacity:1 at a
+       time (no-overlap by layout + by the engine). Blocks are width-constrained
+       (max ~46ch), never a full-screen wall, each anchored to its own composition
+       (lower-left -> centre -> lower-left), arriving as a sequence.
+    3. DEPTH / WOW. The HOUSE reveals: a parting centre seam + a pushed-in render,
+       plus text revealing one by one. Both directions the owner named, in one pin.
+    4. NO LAGGY OBLIT. No frame-scrub <img>.src swap, no video.currentTime scrub.
+       The render is a single decoded webp scaled by transform only (GPU). The
+       reveal is clip-path on the cover (GPU). Zero decoder lag.
+
+  THE COUPLING (one scroll beat, ONE pin owner):
+    pin-story-text.create() OWNS the pin. We hijack its trigger.vars.onUpdate so
+    the SAME progress p drives, in lockstep:
+      • center-seam-split.set(p)  — cover peels centre->edges, the house appears
+      • render-scroll-scale.set(p) — the house pushes in (opens toward you)
+    Both atoms are owns_pin:false PURE set(p) layers — they create NO pin.
+
+  HARD ANTI (obeyed): ONE pin (pin-story-text). Motion ONLY transform / opacity /
+    clip-path. NO mix-blend, NO backdrop-filter, NO video.currentTime, NO WebGL,
+    NO animating width/height/top/left/margin. corner-frame-meta fades opacity +
+    tiny transform once at intro (not on the scrub).
+  DECODE-GUARD: the house render force-decodes (render-scroll-scale decodeThen)
+    before __LAB_OK__, so the seam never parts onto a black, undecoded frame.
+  Asset-truth: renders/day-34.webp — the cars-free townhouse, 1920x1080 landscape
+    (front facade + garden + terrace, no cars, no front-crop).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/render-scroll-scale/component.css">
+<link rel="stylesheet" href="../../components/center-seam-split/component.css">
+<link rel="stylesheet" href="../../components/pin-story-text/component.css">
+<link rel="stylesheet" href="../../components/corner-frame-meta/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the stage rails; the atoms own the mechanic).
+     A quiet warm-paper field; the hero plate is the dark-revealing house. */
+  :root {
+    --field: #ece4d4;          /* warm dawn paper around the plate */
+    --field-ink: #2a241d;
+    --pst-ink: #f4efe4;        /* text-over-render ink (pin-story-text reads these) */
+    --pst-accent: #cda06a;     /* warm lamp-glow accent */
+    --plate: #100d0a;          /* the seam-cover dark + plate frame */
+  }
+  body { background: var(--field); color: var(--field-ink); }
+  .combo-pre  { background: var(--field); color: color-mix(in srgb, var(--field-ink) 45%, transparent); }
+  .combo-post { background: var(--plate); color: color-mix(in srgb, var(--pst-accent) 65%, transparent); }
+
+  /* the stage IS the render surface: the house frame fills it, the seam cover sits
+     above the render, the pin-story text + corner meta sit above the cover. */
+  #combo { background: var(--plate); }
+
+  /* render-scroll-scale frame fills the stage (the only moving render layer) */
+  #houseFrame { position: absolute; inset: 0; z-index: 1; --rss-from: 1.06; --rss-bg: #100d0a; }
+  #houseFrame .rss-render { object-position: 50% 56%; }      /* hold the facade, garden low */
+
+  /* a soft legibility gradient so the sparse text stays readable on the bright facade.
+     Pure gradient paint (no blend, no backdrop). Sits between render and seam-cover. */
+  .hrs__scrim { position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background:
+      linear-gradient(to top, rgba(12,10,7,.62) 0%, rgba(12,10,7,.16) 34%, rgba(12,10,7,0) 60%),
+      linear-gradient(to bottom, rgba(12,10,7,.34) 0%, rgba(12,10,7,0) 26%); }
+
+  /* the centre-seam cover is injected by center-seam-split at z:30 (set in JS).
+     It carries the hairline guide rule down the seam (Saisei tell) via the class. */
+
+  /* pin-story-text adds the .pst class to #combo ITSELF and builds a .pst__stage
+     inside it. The seam cover sits at z:30, so the TEXT STAGE must out-rank it or the
+     dark cover occludes the copy. Lift the stage above the cover; tune the at-rest
+     title shadow so lines read on the live facade. */
+  #combo.pst .pst__stage { z-index: 50; }
+  #combo .pst__title { text-shadow: 0 3px 30px rgba(0,0,0,.55); }
+  #combo .pst__eyebrow { text-shadow: 0 1px 12px rgba(0,0,0,.6); }
+  #combo .pst__body { text-shadow: 0 1px 12px rgba(0,0,0,.55); }
+
+  /* corner meta — the authored-plate frame (assembles once at intro, z above text-bg) */
+  #combo .hrs__meta { z-index: 45; color: var(--pst-ink); }
+  #combo .hrs__meta [data-corner] { color: var(--pst-ink); text-shadow: 0 1px 12px rgba(0,0,0,.6); }
+  #combo .hrs__meta [data-corner] b { color: var(--pst-accent); font-weight: 600; }
+
+  /* a thin inset frame line on the plate (consistent radius 0, sharp editorial frame) */
+  .hrs__rule { position: absolute; z-index: 44; inset: clamp(16px,2.4vh,28px) clamp(16px,2.4vw,28px);
+    border: 1px solid rgba(244,239,228,.16); pointer-events: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* reduced-motion: no pin, no seam. The house shows fully, the text stacks
+       (pin-story-text static deck). The seam cover stays fully OPEN (revealed). */
+    .hrs__scrim { background: linear-gradient(to top, rgba(12,10,7,.5), rgba(12,10,7,0) 50%); }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">гортайте, дім розкривається ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="hero--house-reveals-on-scroll">
+
+    <!-- THE RENDER SURFACE: the cars-free townhouse. render-scroll-scale pushes it in. -->
+    <div id="houseFrame" class="rss-frame" data-render-surface>
+      <img class="rss-render" src="renders/day-34.webp"
+           alt="Двоповерховий таунхаус із терасою та садом" decoding="async">
+    </div>
+
+    <!-- legibility gradient between render and seam-cover -->
+    <div class="hrs__scrim"></div>
+
+    <!-- the inset editorial frame line -->
+    <div class="hrs__rule"></div>
+
+    <!-- center-seam-split injects its dark cover here (over #combo) — driven in JS -->
+
+    <!-- corner meta: the authored-plate tell (assembles once at intro) -->
+    <div class="hrs__meta" id="meta">
+      <span data-corner="tl">вул. Замкова</span>
+      <span data-corner="bl">6 таунхаусів</span>
+      <span data-corner="br">82&#8201;м&#178; · <b>1.5 сотки</b></span>
+    </div>
+
+    <!-- pin-story-text builds its own .pst stage over #combo (the sequenced lines) -->
+  </section>
+
+  <div class="combo-post">далі поверхи</div>
+
+  <!-- scaffold + adapters, then the cited atoms -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/render-scroll-scale/component.js"></script>
+  <script src="../../components/center-seam-split/component.js"></script>
+  <script src="../../components/pin-story-text/component.js"></script>
+  <script src="../../components/corner-frame-meta/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var g = window.gsap;
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var rss, seam, story, meta;
+
+      // ── 1) HOUSE RENDER layer: render-scroll-scale, owns_pin:false, PURE set(p).
+      //    Host-driven (we feed it p) — it creates NO ScrollTrigger. Decode-guarded.
+      SectionHarness.ranOK('render-scroll-scale', function () {
+        rss = window.RenderScrollScale.create('#houseFrame', {
+          scaleFrom: 1.06, scaleTo: 1.16, originY: '56%', drift: 0,
+          ease: 'none', selfTrigger: false   // host-driven; no pin from this atom
+        });
+        rss.set(0);
+        window.__rss = rss;
+      });
+
+      // ── 2) CENTRE SEAM cover: center-seam-split over #combo, owns_pin:false.
+      //    p=0 -> fully covering (house hidden behind the dark seam);
+      //    p=1 -> fully open (house revealed). PURE set(p), no pin, no tween here.
+      SectionHarness.ranOK('center-seam-split', function () {
+        seam = window.CenterSeamSplit.create('#combo', {
+          axis: 'x', fill: 'var(--plate)', z: 30
+        });
+        // hairline guide rule down the centre while it covers (Saisei tell)
+        seam.el.classList.add('css-cover--seam');
+        seam.el.style.setProperty('--seam-colour', 'rgba(205,160,106,.5)');
+        seam.set(0);                          // start CLOSED — the house is hidden
+        window.__seam = seam;
+      });
+
+      // ── 3) CORNER META: authored-plate labels — assemble ONCE at intro (opacity +
+      //    tiny transform). Not on the scrub. owns_pin:false.
+      SectionHarness.ranOK('corner-frame-meta', function () {
+        meta = window.CornerFrameMeta.create('#meta', { stagger: 0.1, dur: 0.6 });
+        window.__meta = meta;
+      });
+
+      // ── 4) THE PIN OWNER + the sequenced story: pin-story-text owns the ONE pin
+      //    (pin:true, pinSpacing:true). Sparse UA copy, Fedoriv voice. We KEEP the
+      //    atom for the pin + the built markup, but OVERRIDE its set(p) below with a
+      //    STRICT NON-OVERLAPPING sequencer (owner fix #2): exactly ONE block is ever
+      //    non-hidden — each line settles, HOLDS alone, fully LEAVES (opacity 0,
+      //    visibility hidden) BEFORE the next arrives. No crossfade, no collision.
+      SectionHarness.ranOK('pin-story-text', function () {
+        story = window.PinStoryText.create('#combo', {
+          blocks: [
+            { eyebrow: 'вул. Замкова',
+              title: 'Дім, який<br>досі закритий',
+              align: 'lower-left' },
+            { eyebrow: 'гортайте',
+              title: 'Він <em>розкривається</em>',
+              align: 'center' },
+            { eyebrow: 'таунхаус 82 м²',
+              title: 'Свій двір.<br>Своя тераса.',
+              body: 'Шість будинків. Власна земля під кожним.',
+              align: 'lower-left' }
+          ],
+          end: '+=200%',     // generous pin length: the reveal has room to land
+          scrub: 1,
+          ease: 'air'
+        });
+        window.__story = story;
+      });
+
+      // ── STRICT SEQUENCER (owner fix: NEVER two text blocks at once). One scroll
+      //    range -> three DISJOINT windows. Within each window a block ENTERS (rise +
+      //    fade), HOLDS settled and alone, then EXITS (rise + fade to 0). The block is
+      //    HARD-SELECTED by which window p falls in, so by construction at most ONE
+      //    block is ever non-hidden — co-visibility is impossible, not merely unlikely.
+      //    transform(translateY) + opacity only (GPU). Eased with a named curve.
+      var pstEls = (function () {
+        return Array.prototype.slice.call(document.querySelectorAll('#combo .pst__block'));
+      })();
+      var N = pstEls.length || 1;
+      var easeAir = (g && g.parseEase && (g.parseEase('air') || g.parseEase('expo.out'))) ||
+                    function (t) { return 1 - Math.pow(1 - t, 3); };
+      var ENTER = 26, EXIT = -30;          // px rise on enter / exit (leaves upward)
+      var EDGE = 0.30;                      // fraction of each window spent entering / exiting
+      function hideBlock(el) {
+        el.style.opacity = '0';
+        el.style.transform = 'translate3d(0,' + ENTER + 'px,0)';
+        el.style.visibility = 'hidden';
+      }
+      function paintStory(p) {
+        p = p < 0 ? 0 : (p > 1 ? 1 : p);
+        // which window owns p? windows are [i/N, (i+1)/N); clamp the last edge in.
+        var idx = Math.min(N - 1, Math.floor(p * N));
+        var u = (p - idx / N) * N;          // local 0..1 inside this block's window
+        for (var i = 0; i < N; i++) {
+          var el = pstEls[i];
+          if (i !== idx) { hideBlock(el); continue; }   // every other block: hard-hidden
+          var op, y;
+          var firstBlock = (idx === 0), lastBlock = (idx === N - 1);
+          // first block skips ENTER (settled at rest, no empty first beat); last block
+          // skips EXIT (holds to the end). Everyone else enters AND exits gracefully.
+          if (u < EDGE && !firstBlock) {     // ENTER: rise up + fade in
+            var te = easeAir(u / EDGE);
+            op = te; y = ENTER * (1 - te);
+          } else if (u > 1 - EDGE && !lastBlock) {  // EXIT: rise + fade out to 0
+            var tx = easeAir((u - (1 - EDGE)) / EDGE);
+            op = 1 - tx; y = EXIT * tx;
+          } else {                            // HOLD: settled, alone
+            op = 1; y = 0;
+          }
+          el.style.opacity = op.toFixed(3);
+          el.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
+          el.style.visibility = op < 0.012 ? 'hidden' : 'visible';
+        }
+      }
+      // replace the atom's crossfading set(p) with our strict sequencer + reprime.
+      // The atom's pinned trigger calls its OWN internal crossfade set() on every
+      // onUpdate/onRefresh; we re-point those trigger callbacks to paintStory so there
+      // is exactly ONE writer to the blocks (no two systems fighting per frame).
+      if (story) {
+        story.set = paintStory;
+        if (story.trigger) {
+          story.trigger.vars.onUpdate  = function (self) { paintStory(self.progress); };
+          story.trigger.vars.onRefresh = function (self) { paintStory(self.progress); };
+        }
+      }
+      paintStory(0);
+
+      // ── WELD the house reveal to the SAME pin. pin-story-text's trigger OWNS the
+      //    pin; a gsap.ticker reads its live progress each frame and drives BOTH the
+      //    seam-part and the render push-in off the SAME value — plus the strict text
+      //    sequencer. ONE pin, three systems, one scroll beat (transform/clip-path).
+      //    The seam starts AJAR and eases open so frame 0 is a COMPOSED, lit plate —
+      //    not a flat black void (owner fix: weak first beat). The house is already
+      //    partly visible behind the first line, then opens fully as you scroll.
+      var SEAM0 = 0.20;                                   // house ~20% revealed at rest
+      function revealMap(p) { return SEAM0 + (1 - SEAM0) * easeAir(p); }  // eased open
+      if (g && story && story.trigger && !reduced) {
+        var st = story.trigger;
+        var lastP = -1;
+        var driveReveal = function () {
+          var p = st.progress;
+          if (p === lastP) return;               // idempotent; skip if unchanged
+          lastP = p;
+          var r = revealMap(p);
+          if (seam && seam.set) seam.set(r);      // part the centre seam (reveal house)
+          if (rss && rss.set)   rss.set(p);       // push the house in (opens toward you)
+          paintStory(p);                          // keep text exactly in lockstep
+        };
+        g.ticker.add(driveReveal);
+        // prime frame 0: house already ajar + lit, first line settled and readable
+        seam.set(revealMap(0)); rss.set(0); paintStory(0);
+      }
+
+      // ── INTRO (once, not tied to the scrub): assemble the corner-meta plate after
+      //    the render decodes, so the authored frame reads at the hero rest state.
+      function runIntro() {
+        if (reduced) { if (meta && meta.reveal) meta.reveal(); if (seam) seam.set(1); return; }
+        var im = document.querySelector('#houseFrame img');
+        var p = (im && im.decode) ? im.decode().catch(function () {}) : Promise.resolve();
+        p.then(function () { if (meta && meta.reveal) meta.reveal(); });
+      }
+
+      // declare the contract BEFORE the probe samples it: pin-story-text owns the
+      // ONE pin; the other three are pure owns_pin:false layers.
+      SectionHarness.declare({
+        pinOwner: 'pin-story-text', expectPins: 1,
+        atomsCited: ['render-scroll-scale', 'center-seam-split', 'pin-story-text', 'corner-frame-meta']
+      });
+
+      runIntro();
+    })();
+  </script>
+</body>
+</html>

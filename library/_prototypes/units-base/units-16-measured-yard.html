@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<!--
+  units-16 «Розміряний двір» - DIMENSION LINES OVER REAL RENDERS (towns; the architect's pen)
+  PASSPORT:
+   (a) archetype: dimension lines drawn over full-bleed renders (annotation register)
+   (b) media count: 1 full-bleed render per stage (yard / row house / street)
+   (c) copy position: annotation labels riding the lines; honest «візуалізація» plates
+   (d) instrument cell: none (a pure film; scroll only)
+   (e) interaction model: scroll-triggered draws
+  STAGE MAP: 4 stages, 0 states, no pin.
+   1 statement over the dimmed yard [seam: pen-start, relay = the first line starting to draw]
+   2 THE MEASURE: the yard held full-bleed; the lines DRAW themselves (dashoffset), labels lag 100ms
+   3 second measure: the house width + two-floor height; «від $67 тис» lands as the only money numeral
+   4 THE BRIDGE of its own matter [seam: rule-converge, relay = the measuring rule]: one horizontal
+     measuring rule draws itself and underlines the verbs
+  MORPH: dimension lines = SVG paths drawn by stroke-dashoffset (one system, prescribed by the brief);
+  each label lags its line by ~100ms; overlays are sized to the image's cover rect so the lines stay
+  geometry-honest to the photo at any viewport (calibrated by eye, straight and consistent).
+  SMOOTHNESS: animated = stroke-dashoffset (the prescribed draw), transform, opacity, color/background-color;
+  one easing per move; no hover instruments. Zero em/en-dash. No WebGL. Towns facts from the brief.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Таунхауси - Розміряний двір</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F2EDE4;--ink:#2A231D;--sub:#87796a;--oak:#9c7b52;--pen:#F6EDDD;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{font-family:"Jost",sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .eyebrow{font-size:13px;letter-spacing:.34em;text-transform:uppercase;color:#E8C89A}
+  .serif{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em}
+  .num{font-variant-numeric:tabular-nums}
+
+  .beat{height:100vh;position:relative;overflow:hidden}
+  .beat .bg{position:absolute;inset:0}
+  .beat .bg img{width:100%;height:100%;object-fit:cover}
+  .beat .veil{position:absolute;inset:0;background:rgba(16,12,8,.22)}
+  .beat .mplate{position:absolute;right:16px;bottom:12px;z-index:5;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+  /* the pen layer: sized to the cover rect in JS */
+  .pen{position:absolute;z-index:4;pointer-events:none}
+  .pen svg{display:block;width:100%;height:100%}
+  .pen path,.pen line{fill:none;stroke:var(--pen);stroke-width:1.4;vector-effect:non-scaling-stroke;
+    filter:drop-shadow(0 1px 3px rgba(0,0,0,.5))}
+  .pen .draw{transition:stroke-dashoffset 1.2s var(--hs)}
+  .lab{position:absolute;z-index:5;display:flex;flex-direction:column;gap:2px;align-items:center;transform:translate(-50%,-50%);
+    opacity:0;transition:opacity .7s var(--hs)}
+  .lab.on{opacity:1}
+  .lab .lv{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(22px,2.2vw,38px);line-height:1;color:#fff;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+  .lab .lk{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.88);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+
+  .beat .ov{position:absolute;left:clamp(40px,6vw,110px);top:clamp(50px,9vh,100px);z-index:6;max-width:620px}
+  .beat .ot{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(30px,3.2vw,56px);line-height:1.1;color:#fff;text-shadow:0 2px 20px rgba(0,0,0,.4)}
+  .beat .ol{margin-top:10px;font-size:14px;font-weight:300;color:rgba(255,255,255,.9);text-shadow:0 1px 10px rgba(0,0,0,.4);max-width:44ch}
+
+  /* s1 statement */
+  .s1{display:flex;align-items:center;justify-content:center;text-align:center}
+  .s1 .veil{background:rgba(16,12,8,.48)}
+  .s1 .inner{position:relative;z-index:6;max-width:64ch;padding:0 24px}
+  .s1 .t{font-size:clamp(40px,5vw,88px);line-height:1.08;color:#fff}
+  .s1 .line{margin-top:18px;font-size:clamp(15px,1.1vw,17px);line-height:1.7;color:rgba(255,255,255,.85);font-weight:300}
+  .scrollcue{position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.85);z-index:6}
+
+  /* s4 bridge */
+  .s4{display:flex;align-items:center;justify-content:center}
+  .s4 .veil{background:rgba(16,12,8,.6)}
+  .s4 .inner{position:relative;z-index:6;width:min(680px,86vw);text-align:center}
+  .s4 .bh{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:clamp(36px,4vw,68px);line-height:1.1;color:#fff}
+  .bverbs{display:flex;justify-content:space-between;margin-top:34px;padding:0 6px}
+  .bverb{display:flex;align-items:center;gap:12px;text-decoration:none;color:#fff;padding:12px 0;min-height:44px}
+  .bverb .vt{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:clamp(21px,2vw,32px);transition:color .4s}
+  .bverb:hover .vt{color:#E8C89A}
+  .ring{width:46px;height:46px;min-width:46px;border:1px solid rgba(255,255,255,.55);border-radius:50%;display:grid;place-items:center;transition:background .4s,color .4s}
+  .ring svg{width:16px;height:16px;stroke:currentColor}
+  .bverb:hover .ring{background:#fff;color:#1c1712}
+  .rulebox{margin-top:6px;height:30px;position:relative}
+  .rulebox svg{position:absolute;inset:0;width:100%;height:100%}
+  .rulebox line{stroke:var(--pen);stroke-width:1.4;vector-effect:non-scaling-stroke}
+  .rulebox .rlab{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:6px;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.85);opacity:0;transition:opacity .7s var(--hs)}
+  .rulebox .rlab.on{opacity:1}
+
+  .rise{opacity:0;transform:translateY(34px)}
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.01ms !important;transition-delay:0s !important}
+    .rise{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<section class="beat s1" data-stage="1" data-screen-label="u16 stage 1 statement">
+  <div class="bg"><img src="assets/towns/back-yard.webp" alt=""></div>
+  <div class="veil"></div>
+  <div class="inner">
+    <div class="eyebrow rise">Формат · Таунхауси</div>
+    <h1 class="serif t rise d1 num">82 м², які стоять на власній землі.</h1>
+    <p class="line rise d2">Дім і його двір, проміряні олівцем архітектора.</p>
+  </div>
+  <span class="mplate">Двір · візуалізація</span>
+  <div class="scrollcue rise d3">Виміри нижче</div>
+</section>
+
+<section class="beat" id="s2" data-stage="2" data-screen-label="u16 the yard measured">
+  <div class="bg"><img id="img2" src="assets/towns/back-yard.webp" alt="Двір таунхауса"></div>
+  <div class="veil"></div>
+  <div class="ov"><div class="ot">Свій двір, проміряний чесно.</div><div class="ol num">1,5 сотки власної землі за кухнею, без сусідів згори.</div></div>
+  <div class="pen" id="pen2"></div>
+  <span class="mplate">Двір · візуалізація</span>
+</section>
+
+<section class="beat" id="s3" data-stage="3" data-screen-label="u16 the house measured">
+  <div class="bg"><img id="img3" src="assets/towns/hero-day.webp" alt="Таунхаус у ряду"></div>
+  <div class="veil"></div>
+  <div class="ov"><div class="ot">Два поверхи на своїй землі.</div><div class="ol num">82 м² всередині, і жодного метра над чужою головою.</div></div>
+  <div class="pen" id="pen3"></div>
+  <span class="mplate">Ряд · візуалізація</span>
+</section>
+
+<section class="beat s4" id="s4" data-stage="4" data-screen-label="u16 bridge">
+  <div class="bg"><img src="assets/towns/arch-entry-dusk.webp" alt=""></div>
+  <div class="veil"></div>
+  <div class="inner">
+    <h2 class="bh">Ряд один, місць шість.<br>Обери своє.</h2>
+    <div class="bverbs">
+      <a class="bverb" href="#pick-place"><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span><span class="vt">Обрати місце</span></a>
+      <a class="bverb" href="#pick-plan"><span class="vt">На плані</span><span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <div class="rulebox" id="rulebox">
+      <svg viewBox="0 0 680 30" preserveAspectRatio="none" aria-hidden="true">
+        <line class="rl" x1="2" y1="15" x2="678" y2="15"/>
+        <line class="rt" x1="2" y1="5" x2="2" y2="25"/>
+        <line class="rt2" x1="678" y1="5" x2="678" y2="25"/>
+      </svg>
+      <span class="rlab num" id="rlab">6 місць у ряду · одна мірка</span>
+    </div>
+  </div>
+  <span class="mplate">Вулиця · візуалізація</span>
+</section>
+
+<script>
+(function(){
+  'use strict';
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  ['assets/towns/back-yard.webp','assets/towns/hero-day.webp','assets/towns/arch-entry-dusk.webp'].forEach(function(s){
+    var i = new Image(); i.src = s; if (i.decode) i.decode().catch(function(){});
+  });
+
+  function dOf(el){ return el.classList.contains('d3') ? 480 : el.classList.contains('d2') ? 300 : el.classList.contains('d1') ? 140 : 0; }
+  [].slice.call(document.querySelectorAll('.rise')).forEach(function(el){
+    setTimeout(function(){
+      el.style.transition = 'opacity .9s var(--hs), transform .9s var(--hs)';
+      el.style.opacity = 1; el.style.transform = 'none';
+    }, 80 + dOf(el));
+  });
+
+  /* ---- the pen: overlays sized to the image COVER rect so % coordinates stay honest ---- */
+  function coverRect(img, section){
+    var iw = img.naturalWidth || 2560, ih = img.naturalHeight || 1706;
+    var vw = section.clientWidth, vh = section.clientHeight;
+    var s = Math.max(vw / iw, vh / ih);
+    var w = iw * s, h = ih * s;
+    return { left: (vw - w) / 2, top: (vh - h) / 2, w: w, h: h };
+  }
+
+  /* measures in % of the PHOTO frame (calibrated by eye to real edges) */
+  var MEASURES = {
+    pen2: {
+      img: 'img2',
+      lines: [
+        /* the yard width along the fence, with end ticks */
+        { d: 'M 28 84 L 62 84 M 28 81.5 L 28 86.5 M 62 81.5 L 62 86.5', lab: { x: 45, y: 78, v: '1,5 сотки', k: 'свого двору' } },
+        /* the kitchen exit arrow: from the ground-floor glass doors down into the yard */
+        { d: 'M 46 62 C 48 70, 51 74, 54 79 M 54 79 L 52.2 76.6 M 54 79 L 51.2 78.6', lab: { x: 58, y: 66, v: '', k: 'вихід з кухні' } },
+        /* nobody above: up from the roof edge */
+        { d: 'M 21 38 L 21 22 M 18.5 22 L 23.5 22', lab: { x: 21, y: 15, v: '', k: 'без сусідів згори' } }
+      ]
+    },
+    pen3: {
+      img: 'img3',
+      lines: [
+        /* two-floor height along the white pier */
+        { d: 'M 13.5 12 L 13.5 95 M 11 12 L 16 12 M 11 95 L 16 95', lab: { x: 8.5, y: 52, v: '2', k: 'поверхи' } },
+        /* the house width along the base */
+        { d: 'M 13.5 91 L 44.5 91 M 44.5 88.5 L 44.5 93.5', lab: { x: 29, y: 84, v: '82 м²', k: 'всередині' } },
+        /* the money callout at the entry */
+        { d: 'M 52 78 L 52 64 M 49.5 64 L 54.5 64', lab: { x: 52, y: 57, v: 'від $67 тис', k: 'за свій дім' } }
+      ]
+    }
+  };
+
+  function buildPen(penId, secId){
+    var conf = MEASURES[penId];
+    var pen = document.getElementById(penId);
+    var section = document.getElementById(secId);
+    var img = document.getElementById(conf.img);
+    var svgNS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    var paths = [];
+    conf.lines.forEach(function(L){
+      var p = document.createElementNS(svgNS, 'path');
+      p.setAttribute('d', L.d);
+      p.classList.add('draw');
+      svg.appendChild(p);
+      paths.push(p);
+      var lab = document.createElement('div');
+      lab.className = 'lab';
+      lab.style.left = L.lab.x + '%';
+      lab.style.top = L.lab.y + '%';
+      lab.innerHTML = (L.lab.v ? '<span class="lv num">' + L.lab.v + '</span>' : '') + '<span class="lk">' + L.lab.k + '</span>';
+      pen.appendChild(lab);
+      L._lab = lab;
+    });
+    pen.appendChild(svg);
+    function fit(){
+      var r = coverRect(img, section);
+      pen.style.left = r.left + 'px';
+      pen.style.top = r.top + 'px';
+      pen.style.width = r.w + 'px';
+      pen.style.height = r.h + 'px';
+      paths.forEach(function(p){
+        var len = p.getTotalLength();
+        p.style.strokeDasharray = len;
+        if (!pen.dataset.drawn) p.style.strokeDashoffset = len;
+      });
+    }
+    var drawn = false;
+    function draw(){
+      if (drawn) return;
+      drawn = true;
+      pen.dataset.drawn = '1';
+      conf.lines.forEach(function(L, i){
+        var p = paths[i];
+        setTimeout(function(){
+          p.style.strokeDashoffset = 0;                 /* the line draws (one easing) */
+          setTimeout(function(){ L._lab.classList.add('on'); }, 1100); /* the label lags */
+        }, 200 + i * 650);
+      });
+    }
+    return { fit: fit, draw: draw, section: section };
+  }
+
+  var pens = [buildPen('pen2', 's2'), buildPen('pen3', 's3')];
+  function fitAll(){ pens.forEach(function(p){ p.fit(); }); }
+  addEventListener('resize', fitAll);
+  addEventListener('load', fitAll);
+  setTimeout(fitAll, 300);
+
+  /* the bridge rule: the same pen, one horizontal measuring rule under the verbs */
+  var rl = document.querySelectorAll('#rulebox line');
+  [].slice.call(rl).forEach(function(l){
+    var len = 700;
+    l.style.strokeDasharray = len;
+    l.style.strokeDashoffset = len;
+    l.style.transition = 'stroke-dashoffset 1.1s var(--hs)';
+  });
+  var ruleDrawn = false;
+
+  function onScroll(){
+    var vh = innerHeight;
+    pens.forEach(function(p){
+      var r = p.section.getBoundingClientRect();
+      if (r.top < vh * 0.5 && r.bottom > vh * 0.3) p.draw();
+    });
+    var r4 = document.getElementById('s4').getBoundingClientRect();
+    if (r4.top < vh * 0.45 && !ruleDrawn){
+      ruleDrawn = true;
+      [].slice.call(rl).forEach(function(l, i){
+        setTimeout(function(){ l.style.strokeDashoffset = 0; }, i * 200);
+      });
+      setTimeout(function(){ document.getElementById('rlab').classList.add('on'); }, 1100);
+    }
+  }
+  addEventListener('scroll', onScroll, { passive: true });
+  setTimeout(onScroll, 400);
+})();
+</script>
+</body>
+</html>

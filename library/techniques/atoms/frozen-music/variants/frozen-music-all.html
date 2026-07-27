@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Springs — Frozen Music · A / B / C board</title>
+<style>
+body{background:radial-gradient(120% 90% at 50% -10%,#16332a,#0b1712 60%);color:#e0d1b6;font-family:Helvetica,Arial,sans-serif;margin:0;padding:26px 22px 60px}
+h1{font-family:Georgia,serif;font-weight:400;font-size:30px;color:#f5e8d1;margin:0 0 6px}
+.sub{font-size:13px;color:rgba(224,209,182,.7);max-width:720px;margin-bottom:18px}
+.master{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 16px;border:1px solid rgba(224,209,182,.16);background:rgba(14,36,29,.5);margin-bottom:22px}
+.master .lbl{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;white-space:nowrap}
+input[type=range]{-webkit-appearance:none;height:2px;background:rgba(224,209,182,.28);flex:1;min-width:160px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#f5e8d1;cursor:pointer}
+.read{font-family:Georgia,serif;font-size:18px;color:#f5e8d1;min-width:64px}
+button{font-family:inherit;font-size:11px;letter-spacing:1.3px;text-transform:uppercase;color:#16322a;background:#f5e8d1;border:0;border-radius:999px;padding:9px 16px;cursor:pointer}
+button.ghost{background:transparent;color:#e0d1b6;border:1px solid rgba(224,209,182,.4)}
+.rail{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.col{width:390px}
+.ch{display:flex;align-items:center;gap:9px;height:22px;margin-bottom:10px}
+.dot{width:9px;height:9px;border-radius:50%;background:#c9762e}
+.dot.on{background:#7fae54;box-shadow:0 0 9px rgba(127,174,84,.6)}
+.lab b{font-family:Georgia,serif;font-size:15px;color:#f5e8d1;margin-right:8px}
+.lab{font-size:12px;letter-spacing:1.3px;text-transform:uppercase}
+.fr{width:390px;height:844px;overflow:hidden;border:1px solid rgba(224,209,182,.18);border-radius:14px;background:#0e241d}
+iframe{width:390px;height:844px;border:0;display:block}
+.ctrl{display:flex;align-items:center;gap:10px;margin-top:12px}
+.ctrl .read{font-size:14px;min-width:42px}
+@media(max-width:900px){.fr,iframe,.col{width:min(390px,92vw)}}
+</style></head><body>
+<h1>Frozen Music</h1>
+<div class="sub">springs.estate /design continuation — 3 варіанти хореографії. Драйв render(p) 0→1.</div>
+<div class="master"><span class="lbl">Drive all</span><input type="range" id="m" min="0" max="1" step="0.001" value="0"><span class="read" id="mr">0.000</span><button id="pa">Replay all</button><button class="ghost" id="ra">Reset</button></div>
+<div class="rail" id="rail"></div>
+<script>
+var V=[{f:'frozen-music-a.html',n:'A',d:'live-parity calm'},{f:'frozen-music-b.html',n:'B',d:'drift'},{f:'frozen-music-c.html',n:"C",d:"designer's cut"}];
+var rail=document.getElementById('rail'),cols=[];
+V.forEach(function(v){var c=document.createElement('div');c.className='col';
+c.innerHTML='<div class="ch"><span class="dot"></span><span class="lab"><b>'+v.n+'</b>'+v.d+'</span></div><div class="fr"><iframe src="'+v.f+'?board=1"></iframe></div><div class="ctrl"><input type="range" min="0" max="1" step="0.001" value="0"><span class="read">0.00</span><button class="ghost rp">Replay</button></div>';
+rail.appendChild(c);cols.push({dot:c.querySelector('.dot'),ifr:c.querySelector('iframe'),sc:c.querySelector('input'),rd:c.querySelector('.read'),rp:c.querySelector('.rp'),ok:false});});
+function drv(c,p){try{if(c.ifr.contentWindow&&c.ifr.contentWindow.render)c.ifr.contentWindow.render(p);}catch(e){}}
+function ss(c,p){c.sc.value=p;c.rd.textContent=(+p).toFixed(2);drv(c,p);}
+cols.forEach(function(c){c.sc.addEventListener('input',function(){ss(c,+c.sc.value);});c.rp.addEventListener('click',function(){pl(c);});});
+var poll=setInterval(function(){var all=true;cols.forEach(function(c){var ok=false;try{ok=!!(c.ifr.contentWindow&&c.ifr.contentWindow.__ATOM_OK__);}catch(e){}if(ok&&!c.ok){c.ok=true;c.dot.classList.add('on');drv(c,0);}if(!c.ok)all=false;});if(all)clearInterval(poll);},200);
+var m=document.getElementById('m'),mr=document.getElementById('mr');
+m.addEventListener('input',function(){var p=+m.value;mr.textContent=p.toFixed(3);cols.forEach(function(c){ss(c,p);});});
+var raf;function anim(d,f){if(raf)cancelAnimationFrame(raf);var t0=null;function st(t){if(t0===null)t0=t;var k=Math.min(1,(t-t0)/d);f(k);if(k<1)raf=requestAnimationFrame(st);}raf=requestAnimationFrame(st);}
+function pl(c){anim(5200,function(k){ss(c,k);});}
+document.getElementById('pa').addEventListener('click',function(){anim(6000,function(k){m.value=k;mr.textContent=k.toFixed(3);cols.forEach(function(c){ss(c,k);});});});
+document.getElementById('ra').addEventListener('click',function(){if(raf)cancelAnimationFrame(raf);m.value=0;mr.textContent='0.000';cols.forEach(function(c){ss(c,0);});});
+</script></body></html>

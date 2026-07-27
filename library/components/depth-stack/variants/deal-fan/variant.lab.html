@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>depth-stack / deal-fan — variant lab</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,300;9..144,1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+<!-- the SHARED base styling + the deal-fan skin (variant delta) -->
+<link rel="stylesheet" href="../../component.css" />
+<link rel="stylesheet" href="variant.css" />
+</head>
+<body>
+
+<!-- GLOBAL GRADE -->
+<div class="grade" aria-hidden="true">
+  <div class="grain"></div>
+  <div class="vignette"></div>
+</div>
+
+<!-- ENTRY HERO (dark) -->
+<section class="hero">
+  <div class="hero__top">
+    <span>QUADRO</span>
+    <span>Корея · Вінниця</span>
+  </div>
+  <div class="hero__center">
+    <div class="hero__kicker">Чотири квартири</div>
+    <h1 class="hero__title serif">Два будинки-<em>близнюки</em> в тихому лісі</h1>
+    <p class="hero__sub">Гортайте вниз. Будинок розкривається кадр за кадром, наче карти, що лягають на стіл одна за одною.</p>
+  </div>
+  <div class="hero__bottom">
+    <span class="dot"></span>
+    <span>Гортайте вниз</span>
+  </div>
+</section>
+
+<!-- PINNED DEAL / FAN STAGE -->
+<section class="stage" id="stage">
+  <div class="felt">
+    <div class="felt__deck-glow"></div>
+    <div class="deck__pad" id="pad">
+      <!-- cards injected by the deal-fan engine -->
+    </div>
+  </div>
+</section>
+
+<!-- OUTRO -->
+<section class="outro">
+  <h2 class="outro__t serif">Чотири квартири. Перша вже знайде господаря.</h2>
+  <p class="outro__b">Залиште номер, надішлемо план, ціну і дату.</p>
+</section>
+
+<!-- PROGRESS RAIL + DEALT-CARD HANDLE -->
+<div class="rail" aria-hidden="true">
+  <span class="rail__num" id="railNum">01</span>
+  <div class="rail__track">
+    <div class="rail__fill" id="railFill"></div>
+    <div class="rail__chip" id="railChip"></div>
+  </div>
+  <span class="rail__num" style="opacity:.5">04</span>
+</div>
+
+<div class="scrollhint" id="hint">Карта 01 / 04</div>
+
+<!-- GSAP + the SHARED base engine + the deal-fan engine (base-importing, NOT a fork) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="../../component.js"></script>
+<script src="variant.js"></script>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+
+  /* renders relative to this lab → the production QUADRO renders dir.
+     If absent (standalone plugin checkout), the deck still boots; the probe
+     ignores missing image assets. */
+  var R = "../../../../../../eruhomist/apps/quadro/public/cards-lab/renders/";
+
+  /* ---- CARD DATA: real Quadro renders + honest Fedoriv copy (verbatim from depth-d2) ---- */
+  var CARDS = [
+    {
+      theme:"cream", flip:false,
+      img:R+"day-front.webp", tag:"Візуалізація · фасад",
+      title:["Два", "будинки.", "Чотири", "<em>домівки.</em>"],
+      desc:"Корея під Вінницею. Два однакові будинки-близнюки, по дві квартири в кожному. Близько ста тридцяти квадратів на родину.",
+      feats:[["Планування","два близнюки"],["Площа","~130 м²"],["Квартир","чотири"]],
+      cta:"Гортайте далі"
+    },
+    {
+      theme:"dark", flip:true,
+      img:R+"terrace-02.webp", tag:"Візуалізація · тераса",
+      title:["Дах,", "який", "стає", "<em>терасою.</em>"],
+      desc:"Плюс двадцять два з половиною квадрати під відкритим небом. Тераса на даху це опція, яку ви додаєте за бажанням.",
+      feats:[["Тераса","+22.36 м²"],["Статус","платна опція"],["Рівень","покрівля"]],
+      cta:"Дивіться обʼєм"
+    },
+    {
+      theme:"cream", flip:false,
+      img:R+"day-34.webp", tag:"Візуалізація · обʼєм",
+      title:["Світло", "крізь", "великі", "<em>вікна.</em>"],
+      desc:"Бюро A2+ працювало над пропорціями. Великі вікна, чисті обʼєми, спокійна геометрія, що тримає форму і вдень, і ввечері.",
+      feats:[["Бюро","A2+"],["Вікна","великі"],["Висота","повноцінна"]],
+      cta:"Що поруч"
+    },
+    {
+      theme:"dark", flip:true,
+      img:R+"aerial.webp", tag:"Візуалізація · локація",
+      title:["Ліс,", "озеро,", "сім", "<em>хвилин.</em>"],
+      desc:"Тихий ліс просто за вікном, озеро за пʼять хвилин автом, центр Вінниці за сім. Власне укриття під будинком.",
+      feats:[["Озеро","5 хв автом"],["Центр","7 хв автом"],["Безпека","укриття"]],
+      cta:"Дізнатись ціну"
+    }
+  ];
+
+  var ctrl = window.DepthDealFan && DepthDealFan.init({
+    stage:"#stage", pad:"#pad", cards:CARDS,
+    railFill:document.getElementById("railFill"),
+    railChip:document.getElementById("railChip"),
+    railNum:document.getElementById("railNum"),
+    hint:document.getElementById("hint")
+  });
+</script>
+
+<!-- ── __LAB_OK__ acceptance probe (variant) ── -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR|decode/i.test(s)) errs++; return _e.apply(console,arguments);};
+  var tries=0;
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll)?ScrollTrigger.getAll().length:0;
+      var cardsBuilt = document.querySelectorAll('#pad .card').length === 4;
+      // booted: base + variant present, 4 cards built, a pinned ScrollTrigger exists (or reduce), zero real console.error
+      var ok = errs===0 && !!window.DepthStack && !!window.DepthDealFan && cardsBuilt && (reduce || stCount>0);
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+</body>
+</html>

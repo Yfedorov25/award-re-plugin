@@ -1,0 +1,16 @@
+/* ============================================================
+   BLEEDING-WORDMARK · component.css
+   The oversized clipped section word. Owns the clip wrap + the word baseline bleed.
+   Size comes from fluid-type-sizing; color/font/position are composition.
+   ============================================================ */
+
+/* the wrap CLIPS the word so it bleeds off the bottom edge */
+[data-bleeding-wordmark] { display: block; overflow: hidden; line-height: .9; }
+
+/* the word itself: one line, sized by fluid-type-sizing, GPU layer for the rise */
+.bwm__i { display: block; white-space: nowrap; line-height: .9; letter-spacing: -.02em;
+  will-change: transform; backface-visibility: hidden; }
+
+/* outline vs solid is set inline by the engine (data-fill). default solid = inherit color. */
+
+/* NO mix-blend / NO backdrop. reveal = overflow clip + translateY, NOT clip-path on text. */

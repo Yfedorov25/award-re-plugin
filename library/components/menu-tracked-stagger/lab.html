@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · menu-tracked-stagger · gapsy (full-screen overlay nav, ghost→solid hover, current red, stagger)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · menu-tracked-stagger
+================================================================================
+  gapsystudio's overlay menu — a FULL-SCREEN overlay on the studio field. LEFT: a big
+  condensed nav, items ghost-grey by default, solid on hover, current page RED. RIGHT: a
+  contact column. On open the nav items STAGGER in (fade + rise). Close pill + Escape.
+  Harvested from D_gapsy (B overlay menu). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --studio:#f2f2f0; --ink:#16150f; --red:#f0473e; --display:'Anton',sans-serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--studio);color:var(--ink);font-family:var(--sans)}
+  /* a header with the logo + a menu trigger */
+  .bar{position:fixed;top:0;left:0;right:0;z-index:90;display:flex;align-items:center;justify-content:space-between;padding:3.4vh 7vw}
+  .bar .logo{font-family:var(--display);font-size:1.4rem;letter-spacing:.02em}
+  .bar .open{padding:.6rem 1.4rem;border-radius:999px;border:0;cursor:pointer;background:var(--ink);color:var(--studio);font-size:.9rem}
+  .stage-hint{position:fixed;inset:0;display:grid;place-items:center;text-align:center;opacity:.5}
+  .stage-hint h1{font-family:var(--display);font-size:6vw}
+
+  .mts-overlay{ --mts-bg:#f2f2f0; --mts-ink:#16150f; --mts-ghost:rgba(22,21,15,.26); --mts-accent:#f0473e;
+    --mts-display:'Anton',sans-serif; --mts-sans:'Inter',sans-serif; --mts-size:4vw; }
+</style>
+</head>
+<body>
+
+  <div class="bar">
+    <div class="logo">gapsy<span style="color:var(--red)">·</span></div>
+    <button class="open" id="menu-open">Menu</button>
+  </div>
+
+  <div class="stage-hint"><h1>натисни «Menu»</h1></div>
+
+  <nav class="mts-overlay" id="menu" aria-hidden="true">
+    <div class="mts-nav">
+      <a class="mts-item is-current" href="#">Home</a>
+      <a class="mts-item" href="#">Services</a>
+      <a class="mts-item" href="#">Cases</a>
+      <a class="mts-item" href="#">Industries</a>
+      <a class="mts-item" href="#">Who we are</a>
+      <a class="mts-item" href="#">Blog</a>
+      <a class="mts-item" href="#">Contacts</a>
+      <a class="mts-item" href="#">Book a call</a>
+    </div>
+    <div class="mts-aside">
+      <div class="mts-lbl">Наші соцмережі</div>
+      <a href="#">Facebook</a><a href="#">Behance</a><a href="#">Dribbble</a><a href="#">Instagram</a>
+      <div class="mts-lbl">Звʼязатися</div>
+      <a href="#">info@gapsystudio.com</a><a href="#">+380 73 038 90 63</a>
+      <div class="mts-lbl">Більше про нас</div>
+      <a href="#">↓ Завантажити презентацію</a>
+    </div>
+  </nav>
+  <button class="mts-close">Close</button>
+
+<script src="component.js"></script>
+<script>
+  window.__mts = MenuTrackedStagger.create('#menu', { trigger:'#menu-open', closeSelector:'.mts-close', stagger:60, duration:520, ease:'cubic-bezier(.22,1,.36,1)' });
+</script>
+</body>
+</html>

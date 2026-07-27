@@ -1,0 +1,622 @@
+{
+  "tool": "zone-track.mjs",
+  "version": 1,
+  "ts": "2026-07-26T19:38:05.940Z",
+  "video": "swim-live.mp4",
+  "videoSha": "5e33837ae30a67db0f57e36d9a6c7fbb1bd0198b2994ef0aa7d9b0f44ec7466f",
+  "zonesSha": "80f8e03ad28b85e8fdd0211e0b910c6c98b8eef2245340c6d56e6e0437bd8373",
+  "fps": 12,
+  "frames": 240,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "cuts": {
+    "topPct": 5.5,
+    "botPct": 11.4
+  },
+  "zones": [
+    {
+      "id": "card",
+      "rectPct": [
+        8,
+        25,
+        95,
+        60
+      ],
+      "note": "картка-медіа, що МОРФИТЬ від мініатюри (~66% ширини, ландшафт) до full-bleed. Смуга 25-60% контенту це те, де картка присутня на ВСЬОМУ ході, а не лише в кінці.",
+      "kind": "media",
+      "_kind_src": "🔴 kind:'media' НЕ на око: atom-probe знайшов 17 ЧАСОВИХ клітинок (вміст живе, поки СТОРІНКА СТОЇТЬ) ⇒ в картці ГРАЄ ВІДЕО. Без kind:'media' zone-track мінтив би SWAPS-CONTENT на КОЖНІЙ монтажній склейці, і парність розійшлась би не через атом."
+    },
+    {
+      "id": "title",
+      "rectPct": [
+        3,
+        18,
+        97,
+        24
+      ],
+      "note": "«Where Change Becomes Art», serif. Гасне по скролу разом з нижнім текстом (coupled fade), картку не перекриває.",
+      "kind": "text"
+    }
+  ],
+  "liveScope": {
+    "range": [
+      0,
+      0.6
+    ],
+    "src": "🔴 запис НЕ обрізаний до тіла атома. Закон цього атома це МОРФІНГ картки від мініатюри до full-bleed, і він завершується близько f140 (0.58). Далі йде вже інше: суцільна послідовність full-bleed кліпів, а з f232 поверх них текст наступного блоку («…to a carefree resort. Marbles steps of the pool…»). Саме цей хвіст давав у токенах EXITS і зайві SWAPS-CONTENT. Межа взята з кадрів, не вгадана."
+  },
+  "scopeFrames": [
+    0,
+    144
+  ],
+  "windows": {
+    "card": [
+      {
+        "f0": 0,
+        "f1": 31
+      },
+      {
+        "f0": 68,
+        "f1": 108
+      },
+      {
+        "f0": 133,
+        "f1": 156
+      },
+      {
+        "f0": 163,
+        "f1": 182
+      },
+      {
+        "f0": 213,
+        "f1": 239
+      }
+    ],
+    "title": [
+      {
+        "f0": 14,
+        "f1": 33
+      },
+      {
+        "f0": 58,
+        "f1": 67
+      },
+      {
+        "f0": 72,
+        "f1": 108
+      },
+      {
+        "f0": 139,
+        "f1": 156
+      },
+      {
+        "f0": 161,
+        "f1": 181
+      },
+      {
+        "f0": 221,
+        "f1": 234
+      }
+    ]
+  },
+  "verdicts": [
+    {
+      "zone": "card",
+      "f0": 0,
+      "f1": 31,
+      "numbers": {
+        "driftPct": -7.4,
+        "pagePct": -7.1,
+        "confMin": 0.82,
+        "changedFrac": 0.51,
+        "bandsFrac": 0.42,
+        "gridDist": 23.7,
+        "ink": [
+          109,
+          39,
+          39
+        ],
+        "texVar": [
+          2726,
+          340
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -39
+        },
+        "pageLocked": "18.3<23.7"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 7.4
+    },
+    {
+      "zone": "title",
+      "f0": 14,
+      "f1": 33,
+      "numbers": {
+        "driftPct": -7.4,
+        "pagePct": -7.1,
+        "confMin": 0.79,
+        "changedFrac": 0.74,
+        "bandsFrac": 1,
+        "gridDist": 34.4,
+        "ink": [
+          12,
+          12,
+          25
+        ],
+        "texVar": [
+          1177,
+          1647
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": "34.8<34.4"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 7.4
+    },
+    {
+      "zone": "title",
+      "f0": 58,
+      "f1": 67,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 1,
+        "changedFrac": 0.37,
+        "bandsFrac": 0,
+        "gridDist": 7.5,
+        "ink": [
+          25,
+          25,
+          25
+        ],
+        "texVar": [
+          1708,
+          1168
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "STANDS"
+    },
+    {
+      "zone": "card",
+      "f0": 68,
+      "f1": 108,
+      "numbers": {
+        "driftPct": 10.2,
+        "pagePct": -3.8,
+        "confMin": 0.19,
+        "changedFrac": 0.54,
+        "bandsFrac": 1,
+        "gridDist": 35,
+        "ink": [
+          9,
+          9,
+          147
+        ],
+        "texVar": [
+          192,
+          1683
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "38.8<35"
+      },
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 1
+    },
+    {
+      "zone": "title",
+      "f0": 101,
+      "f1": 108,
+      "verdict": "SWAPS-CONTENT",
+      "numbers": {
+        "ink": [
+          13,
+          0,
+          25
+        ],
+        "driftPct": 0
+      },
+      "inkEvent": true
+    },
+    {
+      "zone": "card",
+      "f0": 133,
+      "f1": 182,
+      "numbers": {
+        "driftPct": 1,
+        "pagePct": 6,
+        "confMin": 0,
+        "changedFrac": 0.81,
+        "bandsFrac": 1,
+        "gridDist": 42.9,
+        "ink": [
+          147,
+          147,
+          147
+        ],
+        "texVar": [
+          1539,
+          1303
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.91,
+          "dPx": 4
+        },
+        "pageLocked": "47.8<42.9"
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "enterMerged": 1
+    },
+    {
+      "zone": "title",
+      "f0": 139,
+      "f1": 156,
+      "numbers": {
+        "driftPct": -2.1,
+        "pagePct": 6,
+        "confMin": 0,
+        "changedFrac": 0.9,
+        "bandsFrac": 1,
+        "gridDist": 45.7,
+        "ink": [
+          25,
+          25,
+          25
+        ],
+        "texVar": [
+          1316,
+          1656
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": "44.6<45.7"
+      },
+      "verdict": "SWAPS-CONTENT"
+    },
+    {
+      "zone": "title",
+      "f0": 161,
+      "f1": 181,
+      "numbers": {
+        "driftPct": 1.2,
+        "pagePct": -8.1,
+        "confMin": 0,
+        "changedFrac": 0.92,
+        "bandsFrac": 1,
+        "gridDist": 49,
+        "ink": [
+          25,
+          25,
+          25
+        ],
+        "texVar": [
+          1643,
+          1237
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "59.5<49"
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1
+    },
+    {
+      "zone": "card",
+      "f0": 213,
+      "f1": 239,
+      "numbers": {
+        "driftPct": 5.5,
+        "pagePct": 0.2,
+        "confMin": 0.74,
+        "changedFrac": 0.98,
+        "bandsFrac": 1,
+        "gridDist": 77.6,
+        "ink": [
+          147,
+          139,
+          140
+        ],
+        "texVar": [
+          1765,
+          4128
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "TRAVELS",
+      "dir": "down",
+      "movePct": 5.5
+    },
+    {
+      "zone": "title",
+      "f0": 216,
+      "f1": 225,
+      "verdict": "SWAPS-CONTENT",
+      "numbers": {
+        "ink": [
+          25,
+          0,
+          14
+        ],
+        "driftPct": 0
+      },
+      "inkEvent": true
+    },
+    {
+      "zone": "title",
+      "f0": 233,
+      "f1": 239,
+      "verdict": "EXITS",
+      "numbers": {
+        "ink": [
+          11,
+          0,
+          0
+        ]
+      },
+      "inkEvent": true
+    }
+  ],
+  "verdictsScoped": [
+    {
+      "zone": "card",
+      "f0": 0,
+      "f1": 31,
+      "numbers": {
+        "driftPct": -7.4,
+        "pagePct": -7.1,
+        "confMin": 0.82,
+        "changedFrac": 0.51,
+        "bandsFrac": 0.42,
+        "gridDist": 23.7,
+        "ink": [
+          109,
+          39,
+          39
+        ],
+        "texVar": [
+          2726,
+          340
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -39
+        },
+        "pageLocked": "18.3<23.7"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 7.4
+    },
+    {
+      "zone": "title",
+      "f0": 14,
+      "f1": 33,
+      "numbers": {
+        "driftPct": -7.4,
+        "pagePct": -7.1,
+        "confMin": 0.79,
+        "changedFrac": 0.74,
+        "bandsFrac": 1,
+        "gridDist": 34.4,
+        "ink": [
+          12,
+          12,
+          25
+        ],
+        "texVar": [
+          1177,
+          1647
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": "34.8<34.4"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 7.4
+    },
+    {
+      "zone": "title",
+      "f0": 58,
+      "f1": 67,
+      "numbers": {
+        "driftPct": 0,
+        "pagePct": 0,
+        "confMin": 1,
+        "changedFrac": 0.37,
+        "bandsFrac": 0,
+        "gridDist": 7.5,
+        "ink": [
+          25,
+          25,
+          25
+        ],
+        "texVar": [
+          1708,
+          1168
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "STANDS"
+    },
+    {
+      "zone": "card",
+      "f0": 68,
+      "f1": 108,
+      "numbers": {
+        "driftPct": 10.2,
+        "pagePct": -3.8,
+        "confMin": 0.19,
+        "changedFrac": 0.54,
+        "bandsFrac": 1,
+        "gridDist": 35,
+        "ink": [
+          9,
+          9,
+          147
+        ],
+        "texVar": [
+          192,
+          1683
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "38.8<35"
+      },
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 1
+    },
+    {
+      "zone": "title",
+      "f0": 101,
+      "f1": 108,
+      "verdict": "SWAPS-CONTENT",
+      "numbers": {
+        "ink": [
+          13,
+          0,
+          25
+        ],
+        "driftPct": 0
+      },
+      "inkEvent": true
+    },
+    {
+      "zone": "card",
+      "f0": 133,
+      "f1": 182,
+      "numbers": {
+        "driftPct": 1,
+        "pagePct": 6,
+        "confMin": 0,
+        "changedFrac": 0.81,
+        "bandsFrac": 1,
+        "gridDist": 42.9,
+        "ink": [
+          147,
+          147,
+          147
+        ],
+        "texVar": [
+          1539,
+          1303
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.91,
+          "dPx": 4
+        },
+        "pageLocked": "47.8<42.9"
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 1,
+      "enterMerged": 1
+    },
+    {
+      "zone": "title",
+      "f0": 139,
+      "f1": 156,
+      "numbers": {
+        "driftPct": -2.1,
+        "pagePct": 6,
+        "confMin": 0,
+        "changedFrac": 0.9,
+        "bandsFrac": 1,
+        "gridDist": 45.7,
+        "ink": [
+          25,
+          25,
+          25
+        ],
+        "texVar": [
+          1316,
+          1656
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": "44.6<45.7"
+      },
+      "verdict": "SWAPS-CONTENT"
+    }
+  ],
+  "tokens": {
+    "seq": {
+      "card": [
+        "TRAVELS:up",
+        "COVERED-BY",
+        "TRAVELS:down"
+      ],
+      "title": [
+        "TRAVELS:up",
+        "SWAPS-CONTENT",
+        "SWAPS-CONTENT",
+        "COVERED-BY",
+        "SWAPS-CONTENT",
+        "EXITS"
+      ]
+    },
+    "counters": {
+      "card": {
+        "TRAVELS": 2,
+        "COVERED-BY": 1
+      },
+      "title": {
+        "TRAVELS": 1,
+        "SWAPS-CONTENT": 3,
+        "COVERED-BY": 1,
+        "EXITS": 1
+      }
+    }
+  },
+  "tokensScoped": {
+    "seq": {
+      "card": [
+        "TRAVELS:up",
+        "COVERED-BY"
+      ],
+      "title": [
+        "TRAVELS:up",
+        "SWAPS-CONTENT",
+        "SWAPS-CONTENT"
+      ]
+    },
+    "counters": {
+      "card": {
+        "TRAVELS": 1,
+        "COVERED-BY": 1
+      },
+      "title": {
+        "TRAVELS": 1,
+        "SWAPS-CONTENT": 2
+      }
+    }
+  },
+  "mechanicClass": {
+    "class": "pin+swap",
+    "evidence": [
+      "текст-зона SWAPS на місці + картки COVER/ENTER; page-зсув 24.8%"
+    ]
+  },
+  "unknownCount": 0,
+  "note": "вердикти-кандидати З LIVE (закритий словник). CHOREO-CLAIMS цитує ці числа (src=zonetrack:...). UNKNOWN = автоматичний борд-блокер Єгору. Порівняння з нашим render — ТІЛЬКИ EVENT-домен (structure-parity)."
+}

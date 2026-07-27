@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · script-overline-display-pair · gapsy (handwritten script overline + huge condensed display, line-reveal)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · script-overline-display-pair
+================================================================================
+  gapsystudio's services type-pair — a small HANDWRITTEN SCRIPT overline (in quotes) above
+  a HUGE CONDENSED display title; on scroll-into-view the script fades+lifts, the display
+  reveals line-by-line from a bottom mask, then body+CTA fade-rise. Alternating L/R section.
+  Harvested from D_gapsy (D /services). OUR QUADRO render in the aside. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --studio:#f2f2f0; --ink:#16150f; --red:#f0473e;
+         --display:'Anton',system-ui,sans-serif; --script:'Caveat',cursive; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--studio);color:var(--ink);font-family:var(--sans)}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--studio);color:var(--ink);opacity:.4;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+
+  .sodp-stage{ --sodp-bg:#f2f2f0; --sodp-ink:#16150f; --sodp-display:'Anton',sans-serif;
+    --sodp-script:'Caveat',cursive; --sodp-sans:'Inter',sans-serif; --sodp-display-size:5.6vw; --sodp-script-size:1.6rem; }
+  .sodp-script{color:var(--ink)} .sodp-script .q{color:var(--red)}
+  .sodp-visual{border-radius:14px;overflow:hidden;background:#e9e9e6}
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — script-надрядок, тоді гігант-display по рядках, тоді body+CTA</div>
+
+  <!-- section 1: text-left / visual-right -->
+  <section class="sodp-stage" id="s1">
+    <div class="sodp-copy">
+      <div class="sodp-script"><span class="q">“</span>Проєктуємо ваш простір онлайн — до того, як він стане домом<span class="q">”</span></div>
+      <h2 class="sodp-title">
+        <span class="sodp-line">Веб-</span>
+        <span class="sodp-line">дизайн</span>
+      </h2>
+      <p class="sodp-body">Gapsy робить сайти, що однаково добре виглядають на всіх екранах: дизайн, розробка, e-commerce, SEO та більше.</p>
+      <a class="sodp-cta" href="#">Дивитись більше ›</a>
+    </div>
+    <div class="sodp-visual"><img src="renders/day-front.webp" alt="QUADRO"></div>
+  </section>
+
+  <div class="spacer">↓</div>
+
+  <!-- section 2: visual-left / text-right (rtl) -->
+  <section class="sodp-stage sodp--rtl" id="s2">
+    <div class="sodp-copy">
+      <div class="sodp-script"><span class="q">“</span>Цілісний підхід, що говорить характером бренду<span class="q">”</span></div>
+      <h2 class="sodp-title">
+        <span class="sodp-line">Візуальна</span>
+        <span class="sodp-line">ідентичність</span>
+      </h2>
+      <p class="sodp-body">Бренд-айдентика буває складною — Gapsy знає, як зібрати її в одне впізнаване ціле.</p>
+      <a class="sodp-cta" href="#">Дивитись більше ›</a>
+    </div>
+    <div class="sodp-visual"><img src="renders/terrace.webp" alt="QUADRO"></div>
+  </section>
+
+  <div class="spacer">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__s1 = ScriptOverlineDisplayPair.create('#s1', { lineStagger:0.12, duration:1.0, ease:'power3.out', start:'top 80%', once:true, manageLenis:false });
+    window.__s2 = ScriptOverlineDisplayPair.create('#s2', { lineStagger:0.12, duration:1.0, ease:'power3.out', start:'top 80%', once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Карта композицій · springs · L3</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<style>
+  :root{
+    --bg:#0d1712; --panel:#131f18; --panel-2:#0f1a14;
+    --ink:#ece0c8; --ink-dim:#b6c3b2; --muted:#7f9488;
+    --accent:#5fae7d; --accent-soft:rgba(95,174,125,.14); --accent-line:rgba(95,174,125,.35);
+    --amber:#d3ac6e; --amber-soft:rgba(211,172,110,.13);
+    --line:#233229; --code:#0a120d;
+    --serif:var(--spr-serif);
+    --sans:var(--spr-sans);
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  :root[data-theme="light"]{
+    --bg:#f4efe3; --panel:#fbf7ec; --panel-2:#f0e9d8;
+    --ink:#1c2b22; --ink-dim:#3a4a40; --muted:#5f7266;
+    --accent:#2f7a4f; --accent-soft:rgba(47,122,79,.1); --accent-line:rgba(47,122,79,.3);
+    --amber:#9a7328; --amber-soft:rgba(154,115,40,.12);
+    --line:#ddd3bf; --code:#efe8d6;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#f4efe3; --panel:#fbf7ec; --panel-2:#f0e9d8;
+      --ink:#1c2b22; --ink-dim:#3a4a40; --muted:#5f7266;
+      --accent:#2f7a4f; --accent-soft:rgba(47,122,79,.1); --accent-line:rgba(47,122,79,.3);
+      --amber:#9a7328; --amber-soft:rgba(154,115,40,.12);
+      --line:#ddd3bf; --code:#efe8d6;
+    }
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;margin:0;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px 96px}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  ::selection{background:var(--accent-soft)}
+
+  header{padding:72px 0 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(32px,7vw,56px);line-height:1.02;letter-spacing:-.015em;margin:0;text-wrap:balance}
+  h1 em{font-style:italic;color:var(--accent)}
+  .sub{color:var(--ink-dim);font-size:clamp(16px,2.4vw,19px);margin:20px 0 0;max-width:64ch}
+  .facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .fact{font-family:var(--mono);font-size:12px;color:var(--ink-dim);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+  .fact b{color:var(--ink)}
+
+  section{padding:44px 0 8px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);margin-bottom:14px}
+  h2{font-family:var(--serif);font-weight:400;font-size:clamp(24px,4.4vw,34px);margin:0 0 8px;letter-spacing:-.01em}
+  .lead{color:var(--ink-dim);font-size:16px;margin:0 0 26px;max-width:70ch}
+
+  /* the 3-layer legend */
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 28px}
+  .lg{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-dim);font-family:var(--mono)}
+  .dot{width:10px;height:10px;border-radius:3px;display:inline-block}
+  .dot.A{background:var(--amber)} .dot.B{background:var(--accent)} .dot.C{background:#7ba9d8}
+
+  /* section cards — one springs l-* per card */
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:760px){ .grid{grid-template-columns:1fr 1fr;} }
+  .sec{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,var(--panel),var(--panel-2));padding:20px 20px 18px;position:relative;overflow:hidden}
+  .sec .role{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:999px;padding:3px 10px;display:inline-block}
+  .sec h3{font-family:var(--serif);font-weight:400;font-size:20px;margin:12px 0 2px;letter-spacing:-.01em}
+  .sec .code{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .sec .job{color:var(--ink-dim);font-size:14px;margin:8px 0 14px}
+  .stack{display:flex;flex-direction:column;gap:7px}
+  .row{display:grid;grid-template-columns:16px 1fr;gap:10px;align-items:baseline;font-size:14px}
+  .row .layer{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase}
+  .row .mods a{border-bottom:1px dotted var(--accent-line)}
+  .row .mods .sep{color:var(--muted);margin:0 4px}
+  .row .note{color:var(--muted);font-size:12.5px}
+  .webgl{margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--amber);background:var(--amber-soft);border:1px solid rgba(211,172,110,.3);border-radius:8px;padding:6px 10px}
+
+  .note-block{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:18px 20px;margin-top:24px;color:var(--ink-dim);font-size:14px}
+  .note-block b{color:var(--ink)}
+  .theme-btn{position:fixed;top:14px;right:14px;z-index:9;font-family:var(--mono);font-size:12px;color:var(--ink-dim);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
+  code{font-family:var(--mono);font-size:.92em;background:var(--code);padding:1px 5px;border-radius:4px;color:var(--ink-dim)}
+</style>
+</head>
+<body>
+<button class="theme-btn" id="themeBtn">◐ тема</button>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">L3 · організм · карта композицій</div>
+    <h1>Як прийоми <em>складаються</em> в секції springs</h1>
+    <p class="sub">Вищий рівень за молекулою. L1-атоми й L2-молекули (16 модулів у <code>techniques/</code>)
+      не живуть поодинці — springs-секція це <b>3–5 прийомів у стек</b> за граматикою
+      <code>rules/STACKING-GRAMMAR.md</code>: один <b>Ambient</b> + один <b>Entrance</b> + один
+      <b>Interaction</b>, плюс theme-flip на шві. Ця карта показує, який стек будує кожен
+      <code>l-*</code> блок springs.estate — і куди тапнути, щоб побачити прийом живим.</p>
+    <div class="facts">
+      <span class="fact">джерело · <b>D_Springs_architecture §2</b></span>
+      <span class="fact">граматика · <b>Ambient + Entrance + Interaction</b></span>
+      <span class="fact">модулів у стеку · <b>16</b></span>
+      <span class="fact">no-WebGL · <b>3 біти springs = WebGL, не тягнемо</b></span>
+    </div>
+  </header>
+
+  <section>
+    <div class="kicker">Модель · три часові шари</div>
+    <h2>Легенда стеку</h2>
+    <p class="lead">Кожен рядок у картці = один шар граматики. Не «5 незв'язаних анімацій» —
+      а заповнені слоти A+B+C. Клікабельне = наш модуль-прийом (демо телефон+десктоп).</p>
+    <div class="legend">
+      <span class="lg"><span class="dot A"></span>Ambient — завжди-он, поки секція у вью (parallax, drift, tint)</span>
+      <span class="lg"><span class="dot B"></span>Entrance — один раз на inview (reveal, wipe, counter)</span>
+      <span class="lg"><span class="dot C"></span>Interaction — за жестом (swipe, tap, arrows)</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Springs · 12 блоків l-*</div>
+    <h2>Карта секція → стек</h2>
+    <p class="lead">Порядок = справжня послідовність головної springs.estate (D_arch §2).
+      WebGL-біти (wellness / nature-canvas / 3D-дерево) позначені — їх ми не відтворюємо
+      пікселем, лише DOM-нарацію прийому поверх.</p>
+
+    <div class="grid">
+
+      <!-- 1. HERO -->
+      <div class="sec">
+        <span class="role">hero · core</span>
+        <h3>Hero — «Splendor of Renewal»</h3>
+        <div class="code">l-intro / l-gallery</div>
+        <div class="job">Повноекранний перший кадр; reveal title delay 1000ms, sub «step into your true self».</div>
+        <div class="stack">
+          <div class="row"><span class="layer A">A</span><span class="mods"><a href="../rotated-matrix-collage/demo.html">rotated-matrix-collage</a> <span class="note">— обернена мозаїка фото пливе (drift)</span></span></div>
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../split-word-headline/demo.html">split-word-headline</a> <span class="note">— тайтл підіймається з-під clip</span></span></div>
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../numeral-frame-expand-hero/demo.html">numeral-frame-expand-hero</a> <span class="note">— кадр-нарація clip-expand</span></span></div>
+        </div>
+      </div>
+
+      <!-- 2. WELLNESS -->
+      <div class="sec">
+        <span class="role">gallery · common</span>
+        <h3>Wellness</h3>
+        <div class="code">l-wellness · WebGL</div>
+        <div class="job">Емоційний біт «спа/wellness» — WebGL canvas (webglWellness).</div>
+        <div class="stack">
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../render-scroll-scale/demo.html">render-scroll-scale</a> <span class="note">— «кадр дихає» scale поверх</span></span></div>
+        </div>
+        <div class="webgl">springs-nature = WebGL (js-wellness-canvas) — паритет НЕ заявляємо, лише DOM-шар поверх.</div>
+      </div>
+
+      <!-- 3. NATURE -->
+      <div class="sec">
+        <span class="role">amenities · common</span>
+        <h3>Nature — «watercolor tenderness»</h3>
+        <div class="code">l-nature · WebGL</div>
+        <div class="job">js-nature-canvas (webglNature) + natureCaptionMoveUp — зелена панель-капшен.</div>
+        <div class="stack">
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../numeral-frame-expand-hero/demo.html">numeral-frame-expand-hero</a> <span class="note">— hero-нарація прийом</span></span></div>
+          <div class="row"><span class="layer A">A</span><span class="mods"><a href="../brand-overlay-crossfade/demo.html">brand-overlay-crossfade</a> <span class="note">— брендовий тінт capшена</span></span></div>
+        </div>
+        <div class="webgl">springs-nature = WebGL — цей стек = DOM-нарація прийому, не піксель WebGL-сцени.</div>
+      </div>
+
+      <!-- 4. PLACE -->
+      <div class="sec">
+        <span class="role">amenities · common</span>
+        <h3>Place — 3D-дерево</h3>
+        <div class="code">l-place · WebGL + Vimeo-bg</div>
+        <div class="job">js-tree-canvas (webglTree, 6 canvas) + відео-фон; стати «бігової сцени».</div>
+        <div class="stack">
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../stat-odometer/demo.html">stat-odometer</a> <span class="note">— 4 механіки/крок</span></span></div>
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../numeral-odometer-roll/demo.html">numeral-odometer-roll</a> <span class="note">— цифри котяться</span></span></div>
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../brand-overlay-crossfade/demo.html">brand-overlay-crossfade</a> <span class="note">— push-over доводчик акт→акт</span></span></div>
+        </div>
+        <div class="webgl">springs-tree = WebGL (3D) — стати/доводчик = DOM-шар поверх WebGL-місця.</div>
+      </div>
+
+      <!-- 5. MAP -->
+      <div class="sec">
+        <span class="role">location · core</span>
+        <h3>Location — «Center of Your Life»</h3>
+        <div class="code">l-map · landingMapScroll</div>
+        <div class="job">Scroll-driven inline-SVG карта; POI; жодного mapbox/google.</div>
+        <div class="stack">
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../map-dim-carousel/demo.html">map-dim-carousel</a> <span class="note">— карта дімиться + announce-рейл</span></span></div>
+        </div>
+      </div>
+
+      <!-- 6. RESIDENCES -->
+      <div class="sec">
+        <span class="role">units · common</span>
+        <h3>Residences</h3>
+        <div class="code">l-residences · residencesSlide</div>
+        <div class="job">Parallax-каталог резиденцій → /flats.</div>
+        <div class="stack">
+          <div class="row"><span class="layer C">C</span><span class="mods"><a href="../portrait-carousel/demo.html">portrait-carousel</a> <span class="note">— портретні картки: стрілки / свайп</span></span></div>
+          <div class="row"><span class="layer C">C</span><span class="mods"><a href="../fullscreen-media-carousel/demo.html">fullscreen-media-carousel</a> <span class="note">— full-bleed медіа-слайди</span></span></div>
+        </div>
+      </div>
+
+      <!-- 7. INTERIORS -->
+      <div class="sec">
+        <span class="role">interiors · common</span>
+        <h3>Interiors — «glistening waves»</h3>
+        <div class="code">l-interiors · tabs mouseAnimation</div>
+        <div class="job">Таби + custom cursor; рендери інтер'єрів.</div>
+        <div class="stack">
+          <div class="row"><span class="layer C">C</span><span class="mods"><a href="../layer-accordion-reveal/demo.html">layer-accordion-reveal</a> <span class="note">— слаби: hover / tap</span></span></div>
+        </div>
+      </div>
+
+      <!-- 8. DESIGN -->
+      <div class="sec">
+        <span class="role">architecture · core</span>
+        <h3>Design &amp; architecture</h3>
+        <div class="code">l-design · designMoveLeft/RightImage</div>
+        <div class="job">Зустрічний left/right parallax-pair; будівля як об'єкт.</div>
+        <div class="stack">
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../dual-slicer/demo.html">dual-slicer</a> <span class="note">— зчеплений render-strip + line-reveal</span></span></div>
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../vertical-curtain-wipe/demo.html">vertical-curtain-wipe</a> <span class="note">— вертикальний clip-шов входу секції</span></span></div>
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../editorial-act-crossfade/demo.html">editorial-act-crossfade</a> <span class="note">— 4-шаровий act-crossfade</span></span></div>
+        </div>
+      </div>
+
+      <!-- 9. GALLERY -->
+      <div class="sec">
+        <span class="role">gallery · common</span>
+        <h3>Gallery reel</h3>
+        <div class="code">/gallery · y-* pinned scroll</div>
+        <div class="job">Атмосферний image/video reel; pinned desktop scroll-gallery.</div>
+        <div class="stack">
+          <div class="row"><span class="layer B">B</span><span class="mods"><a href="../raster-tile-reveal/demo.html">raster-tile-reveal</a> <span class="note">— фото по плитках мозаїки</span></span></div>
+          <div class="row"><span class="layer C">C</span><span class="mods"><a href="../fullscreen-media-carousel/demo.html">fullscreen-media-carousel</a> <span class="note">— edge-to-edge медіа</span></span></div>
+        </div>
+      </div>
+
+      <!-- 10. CTA / CALLBACK -->
+      <div class="sec">
+        <span class="role">cta · core</span>
+        <h3>CTA — воронка / callback</h3>
+        <div class="code">l-callback · /flats hub (9 лінків)</div>
+        <div class="job">Конверсійний close; «SEARCH FLATS» / «AVAILABLE SOON» + lead-form.</div>
+        <div class="stack">
+          <div class="row"><span class="layer C">C</span><span class="mods"><a href="../funnel-curtain/demo.html">funnel-curtain</a> <span class="note">— curtain-доводчик на тап CTA (T-530 drill)</span></span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="note-block">
+      <b>Як читати:</b> A/B/C = часовий шар (Ambient / Entrance / Interaction). Один
+      springs-блок = стек із цих шарів, а не один прийом. <b>Що ще НЕ зібрано атомами:</b>
+      наступна фаза після цих 17 модулів — розібрати L2-молекули на переюзні <b>L1-атоми</b>
+      (десятки: clip-канал, stagger, translateY-drift, wash-opacity, odometer-column…), щоб
+      будувати нові award-секції точніше. Springs дав перший повний зріз стеку — інші сайти
+      доповнять граматику. <b>WebGL-біти</b> (wellness / nature / tree) springs робить на
+      Three.js+OGL; ми відтворюємо DOM-нарацію прийому поверх, паритет WebGL-сцени не заявляємо.
+    </div>
+  </section>
+</div>
+<script>
+  var btn = document.getElementById('themeBtn');
+  btn.addEventListener('click', function(){
+    var cur = document.documentElement.getAttribute('data-theme');
+    var next = cur === 'light' ? 'dark' : (cur === 'dark' ? 'light' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'light' : 'dark'));
+    document.documentElement.setAttribute('data-theme', next);
+  });
+  try { window.__LAB_OK__ = true; } catch(e){}
+</script>
+</body>
+</html>

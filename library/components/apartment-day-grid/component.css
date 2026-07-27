@@ -1,0 +1,35 @@
+/* APARTMENT-DAY-GRID · component.css
+   MODEL A: all rooms in a grid, all changing lighting TOGETHER on one scroll-clock.
+   Each cell's day/night is the verified daynight-engine; this file styles the grid + chrome.
+   opacity + transform + CSS-props only. NO WebGL, NO mix-blend. */
+
+.adg { --adg-t: 0; position: relative; }
+
+.adg__grid {
+  position: absolute; inset: 0;
+  display: grid; gap: 6px;
+  grid-template-columns: repeat(var(--adg-cols, 2), 1fr);   /* default 2 (4 rooms = calm 2x2) */
+  grid-auto-rows: 1fr;
+  padding: 6px;
+}
+
+.adg__cell { position: relative; overflow: hidden; border-radius: 4px; background: #16121a; }
+.adg__media { position: absolute; inset: 0; }
+.adg__media .dn { position: absolute; inset: 0; }
+.adg__media .dn__layer img { object-fit: cover; }
+
+.adg__label {
+  position: absolute; z-index: 6; left: 12px; bottom: 10px;
+  font: 500 .7rem/1 var(--adg-sans, 'Inter', system-ui, sans-serif);
+  letter-spacing: .14em; text-transform: uppercase; color: #f3f1ec; pointer-events: none;
+  padding: .4rem .6rem; border-radius: 3px;
+  background: linear-gradient(105deg, rgba(10,8,14,0.5), rgba(10,8,14,0.18)); /* scrim chip: legible over bright cells */
+}
+
+@media (max-width: 760px) {
+  .adg__grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adg__media .dn__layer { transition: none; }
+}

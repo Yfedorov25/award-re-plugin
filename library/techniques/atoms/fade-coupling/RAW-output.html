@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fade-coupling — flow atom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; }
+  html.lenis, html.lenis body { height:auto; }
+  .lenis.lenis-smooth { scroll-behavior:auto !important; }
+  body { background:#0b1b13; color:#e9e4d6; font-family:'Cormorant Garamond', Georgia, serif; overflow-x:hidden; }
+  .label { font-family:"Helvetica Neue", Helvetica, sans-serif; font-size:11px; letter-spacing:.32em; text-transform:uppercase; font-weight:500; color:#94b07e; }
+  .grain::after { content:''; position:absolute; inset:0; pointer-events:none; opacity:.16; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .vignette::before { content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(120% 90% at 55% 40%, transparent 55%, rgba(0,0,0,.42) 100%); }
+  .band { position:relative; }
+  /* backgrounds are CONTINUOUS — they never fade */
+  .hero { height:150vh; background:
+    radial-gradient(70% 55% at 62% 34%, rgba(150,200,120,.42) 0%, transparent 60%),
+    radial-gradient(45% 70% at 44% 52%, rgba(224,236,170,.30) 0%, transparent 55%),
+    radial-gradient(80% 80% at 20% 80%, rgba(18,48,30,.9) 0%, transparent 65%),
+    linear-gradient(165deg, #16301f 0%, #0b1b13 55%, #071209 100%); }
+  .band-2 { height:150vh; background:
+    radial-gradient(80% 60% at 25% 30%, rgba(60,110,70,.35) 0%, transparent 60%),
+    radial-gradient(70% 80% at 80% 75%, rgba(10,26,16,.9) 0%, transparent 65%),
+    linear-gradient(175deg, #0d2115 0%, #081409 60%, #060f08 100%); }
+  .band-3 { height:100vh; background:
+    radial-gradient(75% 60% at 55% 40%, rgba(30,60,38,.5) 0%, transparent 60%),
+    radial-gradient(90% 80% at 30% 85%, rgba(3,8,5,.95) 0%, transparent 70%),
+    linear-gradient(180deg, #081209 0%, #040905 100%); }
+  .display { font-size:clamp(96px, 13vw, 220px); font-weight:400; line-height:.95; color:#e9e4d6; margin:0; }
+  .caption { font-size:19px; line-height:1.6; color:rgba(233,228,214,.88); max-width:340px; margin:0; }
+  .outro { height:60vh; display:flex; align-items:center; justify-content:center; }
+  .outro .label { color:rgba(148,176,126,.6); }
+</style>
+</head>
+<body>
+
+  <section class="band hero grain vignette">
+    <div style="position:absolute; right:8vw; top:34vh; text-align:right;">
+      <span class="label" data-fade>Essence of contemplation</span>
+      <h1 class="display" data-fade style="margin-top:16px;">Willow</h1>
+    </div>
+    <p class="caption" data-fade style="position:absolute; left:8vw; top:96vh;">
+      Willow sits in the quiet west of the city, held between parkland and the
+      embankment. Mornings arrive through the trees; evenings leave along the
+      water. Nothing here insists — everything simply stays.</p>
+  </section>
+
+  <section class="band band-2 grain vignette">
+    <p class="caption" data-fade style="position:absolute; left:8vw; top:64vh;">
+      The gardens are planted in layers, so that no season leaves the grounds
+      bare. What blooms is allowed to lean; what fades is allowed to rest.</p>
+    <div style="position:absolute; left:41vw; top:34vh; max-width:340px;">
+      <span class="label" data-fade>Grounds — north walk</span>
+      <p class="caption" data-fade style="margin-top:16px;">
+        A gravel line runs the full length of the estate, unlit by design.
+        Residents learn it by footfall, the way one learns a house at night.</p>
+    </div>
+    <p class="caption" data-fade style="position:absolute; right:8vw; top:10vh; text-align:right;">
+      Interiors keep to stone, oak and unbleached linen. Their only ornament
+      is the green that stands outside every window.</p>
+  </section>
+
+  <section class="band band-3 grain vignette">
+    <div style="position:absolute; left:50%; top:38vh; width:min(720px, 80vw); margin-left:min(-360px, -40vw); text-align:center;">
+      <span class="label" data-fade>A closing note</span>
+      <p data-fade style="font-size:clamp(30px, 3vw, 44px); line-height:1.35; margin:24px 0 0; color:#e9e4d6;">
+        The estate does not ask to be remembered.<br>It asks to be returned to.</p>
+    </div>
+  </section>
+
+  <section class="outro"><span class="label">End of study</span></section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+  const lenis = new Lenis();
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  document.querySelectorAll('[data-fade]').forEach(el => {
+    // ENTRY window
+    gsap.fromTo(el, { opacity: 0, yPercent: 20 }, {
+      opacity: 1, yPercent: 0, ease: 'none',
+      scrollTrigger: { trigger: el, start: 'top bottom', end: 'top 62%', scrub: true } });
+    // EXIT window
+    gsap.fromTo(el, { opacity: 1, yPercent: 0 }, {
+      opacity: 0, yPercent: -20, ease: 'none', immediateRender: false,
+      scrollTrigger: { trigger: el, start: 'bottom 30%', end: 'bottom 6%', scrub: true } });
+  });
+
+  window.render = function (p) {
+    p = Math.max(0, Math.min(1, p));
+    window.scrollTo(0, p * (document.documentElement.scrollHeight - innerHeight));
+    ScrollTrigger.update();
+  };
+  window.__ATOM_OK__ = true;
+</script>
+</body>
+</html>

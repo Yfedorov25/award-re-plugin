@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>combo: architecture--depth-portal · Крізь шари дому (harness)</title>
+<!--
+  SECTION VARIANT: architecture--depth-portal · "Крізь шари дому"
+  Shape = ENGINE-ATOM. The cited atom depth-stack is a SHARED FRAME; its turnkey
+  engine is the variant 'portal-through' (variants/portal-through/variant.js base-
+  imports component.js and supplies applyTunnel + DepthStack.mount). That engine
+  OWNS the one pinned scrub ScrollTrigger - so this lab does NOT call SectionHarness.pin.
+  Markup + the DepthPortalThrough.init(...) call are reused EXACTLY from the verified
+  variant.lab.html; only the media (QUADRO exterior/material renders) and the copy change.
+  [data-render-surface] sits on #pad (the tunnel pad that holds the frame <img>s).
+  The depth IS the architecture story: facade, material, roofline, the whole house,
+  each a plane at its own Z, scrolled THROUGH as one continuous signed-depth gesture.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,400;9..144,0,500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+<!-- GSAP first (the engine + the scaffold both register against this one source) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<!-- cited atom: the SHARED base styling + the portal-through skin (the verified tunnel CSS) -->
+<link rel="stylesheet" href="../../components/depth-stack/component.css" />
+<link rel="stylesheet" href="../../components/depth-stack/variants/portal-through/variant.css" />
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css" />
+
+<style>
+  /* variant SKIN only - the scaffold + the atom CSS own the rails and the tunnel.
+     This trims the field to the QUADRO architecture voice and keeps the lab spacers quiet. */
+  .combo-pre, .combo-post { background: var(--dark-3); }
+  /* sparser eyebrow rhythm: this section sells the BUILDING, the render is the hero */
+  .hero__sub { max-width: 40ch; }
+  .frame__desc { max-width: 34ch; }
+
+  /* ---- BAN FIX: the atom's portal-through CSS puts backdrop-filter:blur(7px) on the
+     per-frame pill (variant.css:95). backdrop-filter is a registry ban AND a per-frame
+     recompositing cost on a 3D-transformed scaling plane. Override it OFF here (this
+     <style> loads after the atom CSS) and give the pill a flat, GPU-cheap tint instead.
+     Pure background/opacity -> composited, no blur, no recomposite. ---- */
+  .frame__tag{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(10,9,8,.62) !important;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+
+  /* ---- SMOOTHNESS FIX (GATE B): the engine's applyTunnel writes an ANIMATED
+     filter:brightness() blur(Npx) onto all 4 full-bleed planes every scrub tick.
+     Animating a blur RADIUS re-rasterizes each plane every frame - that is the
+     dominant jank source (median ~66ms -> ~15fps under 4x CPU). We cannot edit the
+     engine, but this <style> wins the cascade: pin the plane filter to a static,
+     cheap value so the radius never animates. The depth read is preserved by the
+     engine's OWN .frame__haze overlay (a pure opacity composite it already drives)
+     plus the static drop-shadow, so the tunnel still reads deep - just without the
+     per-frame blur rasterization. will-change is narrowed to transform/opacity so
+     the compositor never reserves a filter layer. All motion stays transform/opacity. */
+  .frame{
+    filter: none !important;
+    will-change: transform, opacity !important;
+    contain: layout paint;
+    /* the atom ships a 120px-blur drop-shadow per plane (variant.css:34); a soft blur
+       shadow that big is a heavy paint that re-rasterizes when the plane scales. Trade
+       it for a tighter, far cheaper shadow that still grounds the plane. Paint cost
+       only; the depth still reads via .frame__haze + the inset edge. */
+    box-shadow: 0 24px 60px -42px rgba(0,0,0,.7) !important;
+  }
+  /* keep the inner render on its own compositor layer; ken-burns is transform-only.
+     Trim the 114% ken-burns bleed to a 6% pad: a smaller backing texture per plane =
+     cheaper rasterization on scale, with the same push-in read. */
+  .frame__img{ will-change: transform; inset: -3%; width: 106%; height: 106%; }
+
+  /* ---- LEGIBILITY FIX: on light/busy macro frames the desc (muted tan) washed out;
+     the atom only ships a scrim at <=480px. Add a soft lower-left scrim behind
+     .frame__text at desktop too - linear-gradient + opacity only (GPU-composited,
+     no blur). Anchored to the lower-left text column so the render stays the hero. ---- */
+  .frame__text{ isolation: isolate; }
+  .frame__text::after{
+    content:""; position:absolute; z-index:-1;
+    inset:-46% -28% -28% -28%;
+    background:linear-gradient(120deg,
+      rgba(8,7,6,.74) 0%, rgba(8,7,6,.56) 26%, rgba(8,7,6,.22) 52%, transparent 72%);
+    pointer-events:none;
+  }
+  /* lift desc contrast over bright frames (was rgb(165,154,135)) */
+  .frame__desc{ color:#d9d2c6; text-shadow:0 1px 26px rgba(0,0,0,.72); }
+</style>
+</head>
+<body>
+
+<div class="combo-pre">крізь шари дому</div>
+
+<!-- GLOBAL GRADE (from the atom CSS) -->
+<div class="grade" aria-hidden="true">
+  <div class="grain"></div>
+  <div class="vignette"></div>
+</div>
+
+<!-- ENTRY HERO (dark) -->
+<section class="hero">
+  <div class="hero__top">
+    <span>QUADRO</span>
+    <span>Корея, Вінниця</span>
+  </div>
+  <div class="hero__center">
+    <div class="hero__kicker">Архітектура</div>
+    <h1 class="hero__title serif">Крізь <em>шари</em> дому</h1>
+    <p class="hero__sub">Гортайте вниз. Камера входить углиб, площина за площиною: фасад, матеріал, дах. Так читається будинок.</p>
+  </div>
+  <div class="hero__bottom">
+    <span class="dot"></span>
+    <span>Гортайте вниз</span>
+  </div>
+</section>
+
+<!-- PINNED PORTAL-THROUGH STAGE. [data-render-surface] on #pad (holds the frame imgs). -->
+<section class="stage" id="stage">
+  <div class="tunnel">
+    <div class="tunnel__pad" id="pad" data-render-surface>
+      <!-- frames injected by the portal-through engine -->
+    </div>
+  </div>
+</section>
+
+<!-- OUTRO -->
+<section class="outro">
+  <span class="outro__k">Архітектура</span>
+  <h2 class="outro__t serif">Форма, світло, матеріал. Один будинок, прочитаний наскрізь.</h2>
+  <p class="outro__b">Залиште номер, надішлемо план, ціну і дату.</p>
+</section>
+
+<!-- DEPTH COUNTER (flies forward) -->
+<div class="depthnum" id="depthNum">01</div>
+
+<!-- PROGRESS RAIL -->
+<div class="rail" aria-hidden="true">
+  <span class="rail__num" id="railNum">01</span>
+  <div class="rail__track">
+    <div class="rail__fill" id="railFill"></div>
+    <div class="rail__bead" id="railBead"></div>
+  </div>
+  <span class="rail__num" style="opacity:.5">04</span>
+</div>
+
+<div class="scrollhint" id="hint">Шар 01 / 04</div>
+
+<!-- scaffold + adapters FIRST (rails + honest gate), then the cited atom: canon base, then the engine -->
+<script src="../_scaffold/combo-scaffold.js"></script>
+<script src="../_scaffold/adapters.js"></script>
+<script src="../../components/depth-stack/component.js"></script>
+<script src="../../components/depth-stack/variants/portal-through/variant.js"></script>
+
+<script>
+  (function () {
+    SectionHarness.boot();
+
+    /* renders resolve under file:// AND http: via the combo's `renders` symlink
+       (-> apps/quadro/public/proto). Copy-pasted paths, never typed. */
+    var R = "renders/";
+
+    /* ---- FRAME DATA: ONE building, read layer by layer. Все чотири площини -
+       той самий білий двоповерховий обʼєм QUADRO (фасад day-front -> його ж матеріал
+       перголи -> той самий обʼєм ззаду під дахом-терасою terrace-02 -> він же, цілий,
+       з вулиці terrace). НЕ галерея різних будинків: один дім, прочитаний наскрізь.
+       Кожен підпис описує саме ті пікселі, що на екрані.
+       Sparse 2-3 word titles. ZERO em/en-dashes anywhere visible. ---- */
+    var FRAMES = [
+      {
+        img: R + "day-front.webp", tag: "Візуалізація, фасад",
+        title: ["Спершу", "<em>фасад.</em>"],
+        desc: "Білий двоповерховий обʼєм, спокійна геометрія. Перший шар, який ви бачите з вулиці.",
+        feats: [["Поверхи", "2"], ["Лінія", "спокійна"]]
+      },
+      {
+        img: R + "macro-pergola.webp", tag: "Візуалізація, матеріал",
+        title: ["Потім", "<em>матеріал.</em>"],
+        desc: "Темне дерево перголи цього ж дому, зблизька. Тепла фактура, яку відчуваєш рукою, а не лише оком.",
+        feats: [["Шар", "пергола"], ["Фактура", "дерево"]]
+      },
+      {
+        img: R + "terrace-02.webp", tag: "Візуалізація, обʼєм",
+        title: ["Вище", "<em>дах.</em>"],
+        desc: "Той самий обʼєм ззаду: суцільне скління, а нагорі дах-тераса з парапетом проти неба.",
+        feats: [["Шар", "дах-тераса"], ["Скління", "у підлогу"]]
+      },
+      {
+        img: R + "terrace.webp", tag: "Візуалізація, цілість",
+        title: ["І", "<em>цілість.</em>"],
+        desc: "Він же, цілий, у денному світлі з вулиці. Один будинок, прочитаний наскрізь.",
+        feats: [["Світло", "день"], ["Прочитання", "наскрізь"]]
+      }
+    ];
+
+    var ctrl = null;
+    SectionHarness.ranOK('depth-stack', function () {
+      ctrl = window.DepthPortalThrough && DepthPortalThrough.init({
+        stage: "#stage", pad: "#pad", frames: FRAMES,
+        depthNum: document.getElementById("depthNum"),
+        railFill: document.getElementById("railFill"),
+        railBead: document.getElementById("railBead"),
+        railNum: document.getElementById("railNum"),
+        hint: document.getElementById("hint")
+      });
+      window.__depth = ctrl;
+    });
+
+    /* ENGINE owns its pin (one pinned scrub ScrollTrigger inside DepthStack.mount).
+       Do NOT call SectionHarness.pin(). Just declare the contract for the probe. */
+    SectionHarness.declare({
+      pinOwner: 'depth-stack', expectPins: 1,
+      atomsCited: ['depth-stack']
+    });
+  })();
+</script>
+</body>
+</html>

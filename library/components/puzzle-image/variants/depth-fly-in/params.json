@@ -1,0 +1,35 @@
+{
+  "$extends": "puzzle-image",
+  "$variant": "depth-fly-in",
+  "note": "Knob DIFF over the base puzzle-image (center-out). The base owns the single-src sprite contract, the photo+scrim fade-under, the modest GROW (transform:scale of .coverWrap), the never-fade headline and reduced-motion/narrow static fallback. This variant's engine (variant.js) ADDS a real Z-depth assemble: tiles wait scattered in CSS perspective and converge home from depth. Byte-faithful to pz3-depth-fly-in.html.",
+  "params": {
+    "rows": 4,
+    "cols": 7,
+    "assembleEnd": 0.58,
+    "growPeak": 1.35,
+    "blurMax": 17,
+    "scrub": 0.8,
+    "pinVh": 3.0
+  },
+  "engine": {
+    "model": "depth-converge (Z-fly-in) — tiles wait in real CSS perspective Z-depth then converge to z=0",
+    "zNear": 260,
+    "zFar": -1180,
+    "depthScatterSpread": "36 + zNorm*60   (near tiles fly from further out)",
+    "translateZ_range": "[zFar -1180 .. zNear 260]   (per-tile zNorm 0..1, deterministic seed)",
+    "depthStagger": "per-tile startAt = (zNorm * 0.16) * assembleEnd   (near tiles begin a hair later → converge from depth)",
+    "tileScale": "0.74 far .. 1.24 near   (depth-coupled)",
+    "tileBlur": "5 .. blurMax px   (near = blurrier, DOF)",
+    "tileBrightness": "0.55 + (1-zNorm)*0.18   (a touch dimmer up close)",
+    "tileTilt": { "rotation": "(rnd-0.5)*7  in-plane", "rotationX": "(rnd2-0.5)*8  3D card tilt" },
+    "stagePerspective": "1300px @ 50% 47%",
+    "cue": "thin filling progress line (scaleX 0→1), NOT a count-up"
+  },
+  "skin": {
+    "field": "dark cinematic near-black (radial 1A1612 → 0E0C0B → 080706)",
+    "serif": "Fraunces, Times New Roman, Georgia, serif",
+    "bronze": "#B5895A",
+    "wordmark": "ghost serif 13vw across the top, rgba(239,231,218,0.30)",
+    "fallback": "static .fallback cover block for reduced-motion / narrow"
+  }
+}

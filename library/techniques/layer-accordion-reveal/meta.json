@@ -1,0 +1,27 @@
+{
+  "id": "layer-accordion-reveal",
+  "title": "Layer accordion reveal (Springs interiors)",
+  "level": "L2-molecule",
+  "batch": "B (#8/17)",
+  "source": "springs.estate interiors. Engine = library/components/layer-accordion-reveal (proven, open/rest). Dual wrapper adds forceMotion + mobile swipe-slider.",
+  "engine": "N big renders as vertical slabs, one open at a time; at rest each is a narrow strip, the open one expands to a near-full render with label+spec (clip-path inset + translateX, NO width tween). Engine exposes open(i)/rest().",
+
+  "dual_platform": true,
+  "differs": "Same expand mechanic (clip-path inset + translateX) + same open(i). INTERACTION differs: desktop opens a slab on HOVER (engine wires mouseenter/focus/mouseleave); mobile has no hover, so the branch keeps the LIVE accordion (forceMotion) and drives the same open(i) via SWIPE + auto-cycle — turning the hover-rack into a swipe-slider. Springs presents interiors as a slider on mobile, a hover-rack on desktop.",
+
+  "desktop": { "driver": "hoverNav — the engine already wires hover/focus/mouseleave; nothing extra.", "knobs": ["openFlex", "seam", "defaultIndex", "dur"] },
+  "mobile":  { "driver": "swipeSlider — touch-swipe → open(next/prev) + setInterval auto-cycle (pauses after a swipe). forceMotion keeps the accordion live on touch.", "knobs": ["autoMs", "defaultIndex"] },
+
+  "knobs": {
+    "panels": { "default": "[{img,label,kicker,spec}]", "what": "the slab renders + labels." },
+    "openFlex": { "default": "engine", "what": "open slab width as a fraction of the rack." },
+    "seam": { "default": "engine", "unit": "px", "what": "gap between slabs." },
+    "defaultIndex": { "default": 0, "what": "which slab is open at rest (-1 = even)." },
+    "autoMs": { "default": 2600, "unit": "ms", "platform": "mobile", "what": "auto-cycle interval for the swipe-slider." }
+  },
+
+  "engine_patch": "forceMotion (skip the hover:none static fallback so the accordion stays LIVE on touch). reduced-motion still honored. Additive & opt-in; default desktop/reduced behavior unchanged. See memory dual-platform-forcemotion.",
+  "entry": "LayerAccordionRevealDual.init(target, opts) -> { platform, engine, driver, count }. Load engine.js THEN component.js. target = the .lar-rack; pass panels:[{img,label,kicker,spec}] (engine builds the slabs).",
+  "law": "transform (translateX) + clip-path (inset) + opacity + filter transition ONLY; width:100% on every slab is FIXED and never animated; NO width/height/top animation; NO WebGL. reduced-motion → static labelled list.",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core + forceMotion)", "component.css", "img/l1..l4.webp", "stage.html", "demo.html", "meta.json", "README.md"]
+}

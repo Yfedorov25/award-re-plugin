@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · funnel-curtain · T-530 + T-M29 (штора фунела)</title>
+<!--
+================================================================================
+  LAB: funnel-curtain — T-M29 чорна wordmark-штора фунела + T-530 flash.
+  Контракт: D_AIR_mobile_video dense tr-05..32 — тап [ОБРАТИ ✛] → чорна
+  панель знизу↑ з розведеним рядком wordmark на верхній кромці (~1.2s) →
+  повне покриття (свап) → панель далі вгору (~1.05s); разом ~2.4s.
+
+  ГЕЙТ (PROBE_MODE):
+  1. тап кнопки → mid-rise (~50% підйому): панель ЧАСТКОВО покриває
+     в'юпорт (top панелі всередині вікна), кромка існує, літер
+     wordmark×repeat, розведені (перший біля лівого краю, останній
+     біля правого);
+  2. свап РІВНО під покриттям: у момент виклику swapFn панель покриває
+     весь в'юпорт (top <= 0); сторінка B видима після ритуалу;
+  3. тривалість ритуалу 2.0–2.9s (тірдаун-вікно + запас), панель
+     ЗНЯТА з DOM; transform-only: CLS < 0.1;
+  4. mode:'flash': свап відбувся, тривалість 0.3–0.8s, панель знята;
+  5. console errors == 0.
+  Живий перегляд: тапай кнопки — фунел-ритуал і дріл-flash.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .page { min-height: 100vh; display: flex; flex-direction: column;
+          justify-content: center; align-items: flex-start; padding: 0 6vw; }
+  .page h1 { font-size: clamp(28px, 4.6vw, 60px); font-weight: 300; line-height: 1.12;
+             max-width: 26ch; margin-bottom: 4vh; }
+  .page .kicker { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+                  color: #6b6b68; margin-bottom: 2.4vh; }
+  button { font-family: var(--sans); font-size: 14px; letter-spacing: .08em;
+           padding: 16px 28px; border-radius: 999px; border: 0; cursor: pointer;
+           background: var(--ink); color: #fff; margin-right: 12px; }
+  button.ghost { background: transparent; border: 1px solid #b9b7b2; color: var(--ink); }
+  #pageB { display: none; background: #ececea; }
+  #pageB .num { font-size: clamp(48px, 5.9vw, 92px); font-weight: 300; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · funnel-curtain · t-530 + t-m29 · тапни кнопку</div>
+
+<section class="page" id="pageA">
+  <p class="kicker">На цьому сайті лише перевірені цифри</p>
+  <h1>Умови без дрібного шрифту</h1>
+  <div>
+    <button id="goFunnel">ОБРАТИ КВАРТИРУ ✛</button>
+    <button id="goFlash" class="ghost">ДРІЛ-FLASH (T-530)</button>
+  </div>
+</section>
+
+<section class="page" id="pageB">
+  <p class="kicker">Обрати квартиру</p>
+  <div class="num">22 800</div>
+  <p style="margin-top:1.4vh;color:#6b6b68;font-size:13px">доларів · вхід з ремонтом під ключ</p>
+</section>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var report = { rise: null, swap: null, ritual: null, flash: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  var fc = window.FunnelCurtain.create({ wordmark: 'ДІМ' });
+  window.__FC = fc;
+  var A = document.getElementById('pageA'), B = document.getElementById('pageB');
+  var onB = false;
+  function swapPages() {
+    onB = !onB;
+    A.style.display = onB ? 'none' : 'flex';
+    B.style.display = onB ? 'flex' : 'none';
+  }
+  document.getElementById('goFunnel').addEventListener('click', function () {
+    fc.play(swapPages, 'curtain');
+  });
+  document.getElementById('goFlash').addEventListener('click', function () {
+    fc.play(swapPages, 'flash');
+  });
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+
+    /* 1+2+3: повний фунел-ритуал з інструментованим свапом */
+    var t0 = performance.now();
+    var coverTop = null;
+    var p = fc.play(function () {
+      var panel = document.querySelector('.fcr');
+      coverTop = panel ? panel.getBoundingClientRect().top : 999;
+      swapPages();
+    }, 'curtain');
+    await delay(900); /* середина БРЕНД-ПАУЗИ (0.42s вискок + пауза 1.15s) */
+    var panel = document.querySelector('.fcr');
+    var midTop = panel ? panel.getBoundingClientRect().top : -1;
+    var edge = panel ? panel.querySelector('.fcr__edge') : null;
+    var spans = edge ? edge.querySelectorAll('span') : [];
+    var spread = false, centerZone = false;
+    if (spans.length >= 2) {
+      var first = spans[0].getBoundingClientRect(), last = spans[spans.length - 1].getBoundingClientRect();
+      spread = first.left < window.innerWidth * 0.12 && last.right > window.innerWidth * 0.88;
+      var cy = (first.top + first.bottom) / 2;
+      centerZone = cy > window.innerHeight * 0.55 && cy < window.innerHeight * 0.92; /* білборд: центр видимої чорної зони */
+    }
+    var vh = window.innerHeight;
+    report.rise = { midTop: Math.round(midTop),
+                    billboard: midTop > vh * 0.35 && midTop < vh * 0.62, /* пауза на ~52% */
+                    letters: spans.length, spread: spread, centerZone: centerZone,
+                    giant: spans.length ? spans[0].getBoundingClientRect().height > window.innerWidth * 0.12 : false };
+    ok = report.rise.billboard && spans.length === 3 && spread && centerZone && report.rise.giant && ok;
+
+    await p;
+    var dur = performance.now() - t0;
+    report.swap = { coverTop: Math.round(coverTop), covered: coverTop <= 2, pageBshown: onB === true };
+    report.ritual = { durMs: Math.round(dur), inWindow: dur > 2000 && dur < 2900,
+                      panelGone: !document.querySelector('.fcr'),
+                      cls: Math.round(cls * 1000) / 1000 };
+    ok = report.swap.covered && report.swap.pageBshown &&
+         report.ritual.inWindow && report.ritual.panelGone && cls < 0.1 && ok;
+
+    /* 4: flash-режим (T-530) */
+    var tf = performance.now();
+    await fc.play(swapPages, 'flash');
+    var fdur = performance.now() - tf;
+    report.flash = { durMs: Math.round(fdur), inWindow: fdur > 300 && fdur < 800,
+                     backOnA: onB === false, panelGone: !document.querySelector('.fcr') };
+    ok = report.flash.inWindow && report.flash.backOnA && report.flash.panelGone && ok;
+
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:funnel-curtain]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

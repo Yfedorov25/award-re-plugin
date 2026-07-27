@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · orbit-stage-3d · interactive 3D orbit stage + tuning panel (terrace toggle)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · orbit-stage-3d   ·   BASE = orbit3d-quadro (owner-approved)
+================================================================================
+  SOURCE: apps/quadro/public/slide-lab/orbit3d-quadro.html
+  PIN-DOC: apps/quadro/public/3d/README-3D-STATE.md (the engine contract, frozen)
+
+  AN INTERACTIVE 3D ORBIT STAGE for a RE site. LEFT ~70% = a LIVE 3D scene you
+  ORBIT with the mouse (the QUADRO house). RIGHT ~30% = a TUNING panel that
+  changes the scene in REAL TIME. The signature floating pill = the STATE TOGGLE
+  (Без тераси <-> Тераса на даху) — swaps the two glb states with ZERO jump
+  (identically aligned; same X/Y, same Z-min; only the roof differs).
+
+  WebGL IS ALLOWED here — it OVERRIDES the plugin's usual no-WebGL rule because
+  this is a SELF-CONTAINED 3D stage, not page chrome.
+
+  GATE NOTE: a GL technique CANNOT pass the DOM pixel-audit gate. Acceptance is
+  a GL-READINESS PROBE (window.__LAB_OK__ once renderer + a model/placeholder is
+  up) PLUS a real-browser eye check. Headless WebGL (swiftshader) is slow and
+  unreliable with this model, so library-verify SKIPS this lab (webgl:true ->
+  status:candidate). VERIFY THIS IN A REAL BROWSER.
+
+  MODELS: renders/quadro-noterrace.glb + renders/quadro-terrace.glb resolve via
+  the renders symlink -> apps/quadro/public/proto.
+
+  STACK: three 0.169 (importmap/unpkg) + GLTFLoader + DRACOLoader + OrbitControls
+  + procedural Sky. No build. Canonical drop-in:
+  award-re-plugin/library/components/orbit-stage-3d/
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- the canonical component skin -->
+<link rel="stylesheet" href="component.css">
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#0c0a10;overflow:hidden}
+  /* the lab fills the viewport with one full-screen stage */
+  #orbit-stage{position:fixed;inset:0}
+</style>
+
+<!-- importmap: three 0.169 + addons -->
+<script type="importmap">{"imports":{
+  "three":"https://unpkg.com/three@0.169.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.169.0/examples/jsm/"
+}}</script>
+</head>
+<body>
+
+  <!-- the stage: LEFT 3D + RIGHT tuning panel. The engine builds the canvas
+       into .orbit__stage and wires every [data-state]/[data-knob]/[data-bg]. -->
+  <div id="orbit-stage" class="orbit-stage-3d">
+
+    <!-- LEFT ~70%: the live 3D stage -->
+    <div class="orbit__stage">
+      <div class="orbit__brand">
+        <span class="orbit__k">QUADRO HOUSE</span>
+        <div class="orbit__t">Ваш дім, <em>з усіх боків</em></div>
+      </div>
+
+      <!-- the signature STATE TOGGLE (floating pill, bottom-center) -->
+      <div class="orbit__toggle">
+        <button data-state="stateA" class="on">Без тераси</button>
+        <button data-state="stateB">Тераса на даху</button>
+      </div>
+
+      <div class="orbit__hint">тягніть, щоб обертати · колесо = зум</div>
+      <div class="orbit__loading">Завантаження моделі…</div>
+    </div>
+
+    <!-- RIGHT ~30%: the TUNING panel -->
+    <aside class="orbit__panel">
+      <div class="orbit__panel-head"><h1>Tuning</h1><span class="dot"></span></div>
+
+      <div class="orbit__grp">
+        <div class="orbit__grp-t">Дах</div>
+        <div class="orbit__row"><label>Стан</label></div>
+        <div class="orbit__seg">
+          <button data-state="stateA" class="on">Без тераси</button>
+          <button data-state="stateB">Тераса</button>
+        </div>
+      </div>
+
+      <div class="orbit__grp">
+        <div class="orbit__grp-t">Світло</div>
+        <div class="orbit__row"><label>Яскравість</label><input data-knob="exposure" type="range" min="0.6" max="1.5" step="0.01" value="1.0"><span class="val" id="vExp">1.00</span></div>
+        <div class="orbit__row"><label>Сонце</label><input data-knob="sun" type="range" min="0.5" max="3.5" step="0.05" value="2.4"><span class="val" id="vSun">2.4</span></div>
+        <div class="orbit__row"><label>Тіні</label><div class="orbit__sw on" data-knob="shadows"></div></div>
+      </div>
+
+      <div class="orbit__grp">
+        <div class="orbit__grp-t">Камера</div>
+        <div class="orbit__row"><label>Авто-обертання</label><div class="orbit__sw" data-knob="autorotate"></div></div>
+        <div class="orbit__row"><label>Швидкість</label><input data-knob="spin" type="range" min="0.2" max="3" step="0.1" value="1"><span class="val" id="vSpin">1.0</span></div>
+        <div class="orbit__row"><label>Поле зору</label><input data-knob="fov" type="range" min="28" max="65" step="1" value="42"><span class="val" id="vFov">42</span></div>
+      </div>
+
+      <div class="orbit__grp">
+        <div class="orbit__grp-t">Сцена</div>
+        <div class="orbit__row"><label>Фон</label></div>
+        <div class="orbit__seg" data-seg="bg">
+          <button data-bg="dark" class="on">Темний</button>
+          <button data-bg="cream">Кремовий</button>
+          <button data-bg="grid">Сітка</button>
+        </div>
+        <div class="orbit__row"><label>Площина</label><div class="orbit__sw on" data-knob="ground"></div></div>
+      </div>
+
+      <div class="orbit__panel-foot">Інтерактивна 3D-модель будинку. Візуалізація екстерʼєру.</div>
+    </aside>
+  </div>
+
+  <!-- the canonical component engine (ES module) + boot -->
+  <script type="module">
+    import { init } from './component.js';
+    // small range-value mirror (the engine drives the 3D; this just echoes nums)
+    function mirror(knob, id, fmt){
+      var r=document.querySelector('[data-knob="'+knob+'"]'), v=document.getElementById(id);
+      if(r&&v) r.addEventListener('input',function(){ v.textContent=fmt(parseFloat(r.value)); });
+    }
+    mirror('exposure','vExp',function(n){return n.toFixed(2);});
+    mirror('sun','vSun',function(n){return n.toFixed(1);});
+    mirror('spin','vSpin',function(n){return n.toFixed(1);});
+    mirror('fov','vFov',function(n){return n.toFixed(0);});
+
+    // the faithful orbit3d-quadro scene: two states via the renders symlink,
+    // initial = stateA (Без тераси). All params default to the frozen contract.
+    window.__ORBIT = init('#orbit-stage', {
+      models: { stateA: 'renders/quadro-noterrace.glb', stateB: 'renders/quadro-terrace.glb' }
+    });
+  </script>
+
+<!-- ── __LAB_OK__ GL-readiness probe (NOT the DOM pixel-audit gate) ──
+     A WebGL technique cannot pass the DOM pixel gate; acceptance is this probe
+     (renderer + at least one model OR the lazy placeholder is up) PLUS a real-
+     browser eye check. Headless WebGL is slow/unreliable, so library-verify
+     SKIPS this lab (webgl:true). The component itself sets window.__LAB_OK__:
+       true  once the renderer + a model/placeholder is in the scene
+       false if WebGL init throws.
+     This block reports the probe state; it does NOT fake-pass when GL is down. -->
+<script>(function(){
+  function gather(){
+    var hasCanvas = !!document.querySelector('#orbit-stage canvas.orbit__canvas');
+    var toggles   = document.querySelectorAll('#orbit-stage [data-state]').length;
+    var knobs     = document.querySelectorAll('#orbit-stage [data-knob]').length;
+    var glProbe   = window.__LAB_OK__;   // set true/false by component.js
+    return { hasCanvas:hasCanvas, toggles:toggles, knobs:knobs, glProbe:glProbe };
+  }
+  var tries=0;
+  function ready(){
+    var p = gather();
+    window.__ORBIT_PROBE__ = p;
+    try{ console.log('__LAB_OK__', p); }catch(e){}
+    // keep polling until the model loads (the component flips __LAB_OK__);
+    // if GL is unavailable the component sets it FALSE — we do not override.
+    if(window.__LAB_OK__===undefined && tries<40){ tries++; return setTimeout(ready,150); }
+  }
+  window.addEventListener('load', function(){ setTimeout(ready,400); });
+})();</script>
+
+</body>
+</html>

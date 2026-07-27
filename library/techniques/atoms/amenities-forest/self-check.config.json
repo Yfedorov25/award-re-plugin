@@ -1,0 +1,27 @@
+{
+ "_note": "config forest (S54): TAP-атом (arrow-cycle). render(p) у файлі — це ШИМ для свіпу (p<0.34?0:...), законом він НЕ є, тому scroll-гейти сюди не застосовуються. Судить смуга interaction-check + око Єгора (прийнято S45).",
+ "url": "variants/forest.html",
+ "mechanicClass": "OTHER",
+ "interaction": {
+  "_note": "Стани = кроки циклу вперед. Повернення = стрілка НАЗАД (для cycle-атома це і є закон повернення, аналог toggle у hotspot).",
+  "settleMs": 900,
+  "band": [
+   0.1,
+   0.92
+  ],
+  "stateDiffMin": 0.03,
+  "returnDiffMax": 0.02,
+  "states": [
+   {
+    "id": "next-1",
+    "sel": "#next",
+    "closeSel": "#prev"
+   },
+   {
+    "id": "prev-1",
+    "sel": "#prev",
+    "closeSel": "#next"
+   }
+  ]
+ }
+}

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MERIDIAN — Allocations</title>
+<style>
+  :root{
+    --bg:#0e1013; --ink:#f0eee8; --accent:#cf9d52;
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --E:cubic-bezier(0.25,0.74,0.22,0.99);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--grot);
+    font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  a{color:var(--ink); text-decoration:none; transition:color .3s var(--E)}
+  a:hover{color:var(--accent)}
+  .caps{text-transform:uppercase; letter-spacing:.3em; font-size:10.5px; font-weight:400}
+  body::after{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:60; opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size:160px 160px;
+  }
+  header{
+    height:64px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 4vw; border-bottom:1px solid rgba(240,238,232,.07);
+  }
+  .brand{font-family:var(--serif); font-size:22px; letter-spacing:.16em}
+  nav{display:flex; gap:32px}
+  nav a{font-size:10.5px; letter-spacing:.3em; text-transform:uppercase}
+  /* ---------- intro ---------- */
+  .intro{
+    min-height:35vh; padding:9vh 4vw 7vh; display:grid;
+    grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:4vh 8vw; align-items:end;
+  }
+  .intro .caps{color:var(--accent); display:block; margin-bottom:24px}
+  .intro h1{
+    font-family:var(--serif); font-weight:400; font-size:clamp(40px,4.4vw,64px);
+    line-height:1; letter-spacing:.005em; text-wrap:pretty;
+  }
+  .intro p{color:rgba(240,238,232,.78); max-width:46ch; text-wrap:pretty; padding-bottom:6px}
+  /* ---------- act ---------- */
+  .act{
+    position:relative; padding:8vh 4vw 12vh;
+    background:
+      radial-gradient(120% 90% at 85% 0%, rgba(207,157,82,.06), transparent 55%),
+      repeating-linear-gradient(180deg, rgba(240,238,232,.05) 0 1px, transparent 1px 72px),
+      linear-gradient(180deg,#0e1013,#0d0f12);
+  }
+  .act .row{display:grid; grid-template-columns:repeat(3,1fr); gap:24px}
+  .card{
+    position:relative; min-height:460px; padding:34px 30px 84px;
+    background:rgba(240,238,232,.03); border:1px solid rgba(240,238,232,.10);
+    border-radius:6px; display:flex; flex-direction:column; cursor:pointer;
+    outline:none; transition:border-color .3s var(--E);
+    box-shadow:0 30px 60px -30px rgba(0,0,0,.25);
+  }
+  .card.open{border-color:rgba(240,238,232,.22)}
+  .card:focus-visible{border-color:rgba(207,157,82,.5)}
+  .card .idx{
+    font-family:var(--serif); font-size:64px; line-height:1; opacity:.10;
+    font-variant-numeric:tabular-nums; margin-bottom:26px;
+    transition:opacity .45s var(--E);
+  }
+  .card.open .idx{opacity:.04}
+  .card .ctitle{display:block; margin-bottom:20px}
+  .card .rule{height:1px; background:rgba(240,238,232,.1); margin-bottom:24px}
+  /* folded zone: clipper reserves layout height; inner slides via transform only */
+  .clip{overflow:hidden; flex:0 0 auto}
+  .fold{
+    transform:translateY(101%);
+    transition:transform .45s var(--E);
+    will-change:transform;
+  }
+  .card.open .fold{transform:translateY(0)}
+  .fold p{color:rgba(240,238,232,.8); font-size:15px; line-height:1.7; margin-bottom:22px; text-wrap:pretty}
+  .fold .metric{
+    color:var(--accent); font-variant-numeric:tabular-nums;
+    letter-spacing:.25em; font-size:10.5px; text-transform:uppercase;
+  }
+  .chip{
+    position:absolute; right:20px; bottom:20px; width:30px; height:30px;
+    border:1px solid rgba(240,238,232,.25); border-radius:2px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chip svg{transition:transform .3s var(--E)}
+  .card.open .chip svg{transform:rotate(45deg)}
+  /* ---------- outro ---------- */
+  .outro{
+    min-height:25vh; padding:7vh 4vw 5vh; display:flex; flex-direction:column;
+    justify-content:flex-end; gap:5vh; border-top:1px solid rgba(240,238,232,.07);
+  }
+  .outro .top{display:flex; justify-content:space-between; align-items:baseline; gap:4vw; flex-wrap:wrap}
+  .outro .disclaimer{font-size:12px; color:rgba(240,238,232,.5); max-width:52ch; line-height:1.7}
+  .outro nav{gap:28px}
+  .outro .mark{
+    font-family:var(--serif); letter-spacing:.16em; color:rgba(240,238,232,.55); font-size:13px;
+    border-top:1px solid rgba(240,238,232,.06); padding-top:20px;
+  }
+  @media (max-width:960px){
+    .act .row{grid-template-columns:1fr}
+    .intro{grid-template-columns:1fr; align-items:start}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .fold{transform:none !important; transition:none}
+    .card .idx, .chip svg, .card{transition:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">MERIDIAN</div>
+  <nav>
+    <a href="#mandates">Mandates</a><a href="#stewardship">Stewardship</a><a href="#letters">Letters</a><a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="intro">
+  <div>
+    <span class="caps">MERIDIAN · ALLOCATIONS</span>
+    <h1>Three ways we put patience to work</h1>
+  </div>
+  <p>Meridian runs concentrated, unhurried positions in real assets. Each mandate below unfolds the same way our theses do — only when you lean in.</p>
+</section>
+
+<section class="act" id="mandates">
+  <div class="row" id="cardRow">
+    <article class="card" tabindex="0" data-i="0" aria-expanded="false">
+      <div class="idx" aria-hidden="true">01</div>
+      <span class="caps ctitle">GROUND LEASES</span>
+      <div class="rule"></div>
+      <div class="clip"><div class="fold">
+        <p>Ninety-nine-year ground positions under supermarkets and depots. The land collects rent while the buildings above it change owners twice a decade. Target net yield 5.1%; duration is the moat.</p>
+        <div class="metric">€410M DEPLOYED · 61 SITES</div>
+      </div></div>
+      <div class="chip" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 10 L10 2 M4 2 H10 V8" fill="none" stroke="#f0eee8" stroke-opacity=".8" stroke-width="1.2"/></svg></div>
+    </article>
+    <article class="card" tabindex="0" data-i="1" aria-expanded="false">
+      <div class="idx" aria-hidden="true">02</div>
+      <span class="caps ctitle">COLD STORAGE</span>
+      <div class="rule"></div>
+      <div class="clip"><div class="fold">
+        <p>Refrigerated logistics within one hour of three capitals. Food does not follow the business cycle, and neither do our leases: fifteen-year triple-net with indexation floors. Vacancy has never exceeded 2%.</p>
+        <div class="metric">€275M DEPLOYED · 9 HUBS</div>
+      </div></div>
+      <div class="chip" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 10 L10 2 M4 2 H10 V8" fill="none" stroke="#f0eee8" stroke-opacity=".8" stroke-width="1.2"/></svg></div>
+    </article>
+    <article class="card" tabindex="0" data-i="2" aria-expanded="false">
+      <div class="idx" aria-hidden="true">03</div>
+      <span class="caps ctitle">RIVER ENERGY</span>
+      <div class="rule"></div>
+      <div class="clip"><div class="fold">
+        <p>Small run-of-river hydro rebuilt on century-old weirs. Licensed to 2071, machinery warrantied to 2040, and the river has been showing up for work since the last ice age. Contracted price on 82% of output.</p>
+        <div class="metric">€130M DEPLOYED · 14 PLANTS</div>
+      </div></div>
+      <div class="chip" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 10 L10 2 M4 2 H10 V8" fill="none" stroke="#f0eee8" stroke-opacity=".8" stroke-width="1.2"/></svg></div>
+    </article>
+  </div>
+</section>
+
+<footer class="outro">
+  <div class="top">
+    <p class="disclaimer">Illustrative figures. Meridian Capital Partners does not accept retail subscriptions.</p>
+    <nav>
+      <a href="#mandates">Mandates</a><a href="#stewardship">Stewardship</a><a href="#letters">Letters</a><a href="#contact">Contact</a>
+    </nav>
+  </div>
+  <div class="mark">MERIDIAN</div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var cards=[].slice.call(document.querySelectorAll(".card"));
+  var reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+  var hoverCapable=window.matchMedia("(hover: hover) and (pointer: fine)");
+  var openIdx=null;
+
+  function setOpen(card,on){
+    var i=Number(card.getAttribute("data-i"));
+    card.classList.toggle("open",on);
+    card.setAttribute("aria-expanded",on?"true":"false");
+    if(on) openIdx=i;
+    else if(openIdx===i) openIdx=null;
+  }
+  function foldAllExcept(card){
+    cards.forEach(function(c){ if(c!==card && c.classList.contains("open")) setOpen(c,false); });
+  }
+
+  cards.forEach(function(card){
+    /* desktop: hover opens, unhover folds (never click-close on the same control) */
+    card.addEventListener("mouseenter",function(){ if(hoverCapable.matches) setOpen(card,true); });
+    card.addEventListener("mouseleave",function(){
+      if(hoverCapable.matches && !card.contains(document.activeElement)) setOpen(card,false);
+    });
+    /* keyboard: focus = unfold, blur = fold */
+    card.addEventListener("focus",function(){ foldAllExcept(card); setOpen(card,true); });
+    card.addEventListener("blur",function(){ if(!card.matches(":hover") || !hoverCapable.matches) setOpen(card,false); });
+    /* touch mode: tap toggles; one open at a time */
+    card.addEventListener("click",function(){
+      if(hoverCapable.matches) return;
+      var willOpen=!card.classList.contains("open");
+      foldAllExcept(card);
+      setOpen(card,willOpen);
+    });
+  });
+
+  if(reduced.matches) openIdx=null; /* all visible statically; hook reports none */
+
+  window.__UNFOLD={ open:function(){ return openIdx; } };
+})();
+</script>
+</body>
+</html>

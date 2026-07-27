@@ -1,0 +1,29 @@
+{
+  "id": "funnel-curtain",
+  "title": "Funnel curtain (Springs lead-funnel / callback CTA reveal)",
+  "level": "L3-organism",
+  "batch": "D (#16/17)",
+  "source": "springs.estate l-callback funnel / /flats hub (most-linked node, 9 links = funnel hub) — the conversion beat. Engine = library/components/funnel-curtain (proven, imperative play(swapFn, mode), owns_pin:false, no narrow-guard). NO engine patch needed.",
+  "engine": "The black wordmark curtain ritual (T-M29): a black panel rides bottom→up with a spaced wordmark on its top edge, covers, swaps the page UNDER full coverage, then rides out (~2.25s). mode:'flash' = the T-530 short black blink between visual-search drill levels (no wordmark, ~0.45s). Imperative: create(opts) → play(swapFn, mode).",
+
+  "dual_platform": true,
+  "differs": "Same curtain mechanic + same play(swapFn, mode) drive the SAME translateY panel on both platforms. This is the INTERACTION-DRIVEN subtype (teardown: trigger = programmatic play() on a CTA TAP, NOT scroll — RECIPE trigger; and mobile-is-pinned-scroll exception list: a conversion CTA is a tap beat, not a scroll-pin). The LAYOUT + preset differ, not the driver source: desktop is the wide 2-col funnel hub (SEARCH FLATS / AVAILABLE SOON + lead-form) and can use mode:'flash' for the drill; mobile is the single-col full-bleed funnel — same tap, same curtain over the whole phone. reduced-motion → the core swaps immediately, zero curtain.",
+
+  "desktop": { "driver": "tapFunnel('curtain') — CTA click drives the full brand ritual (rise → billboard pause → cover → swap-under-coverage → exit). drill 'back' uses mode:'flash'.", "knobs": ["wordmark","repeat","bg","ink","rise1Ms","pauseMs","pauseAt","rise2Ms","holdMs","exitMs","flashMs"] },
+  "mobile":  { "driver": "tapFunnel('curtain') — SAME CTA tap drives the SAME play(swapFn); single-col full-bleed layout so the ritual reads over the whole phone.", "knobs": ["wordmark","repeat","bg","ink"] },
+
+  "knobs": {
+    "wordmark": { "default": "AIR", "what": "the spaced edge-row string that rides on the panel top edge." },
+    "repeat": { "default": 1, "what": "how many times the wordmark repeats across the edge (live footage: one giant pass)." },
+    "bg": { "default": "#111110", "what": "the black panel color." },
+    "ink": { "default": "#f4f2ee", "what": "the edge-letter color." },
+    "pauseMs": { "default": 1150, "unit": "ms", "what": "the brand-billboard pause at pauseAt coverage (the read-window)." },
+    "pauseAt": { "default": 0.52, "what": "coverage fraction where the panel holds as a billboard." },
+    "mode": { "default": "curtain", "what": "'curtain' = full ~2.25s ritual; 'flash' = ~0.45s black blink (T-530 drill), no wordmark." }
+  },
+
+  "engine_patch": "NONE — imperative engine (create → play), no scroll driver, no narrow-guard, owns_pin:false. Nothing to bypass; same posture as portrait-carousel. The wrapper only wires [data-fc-cta] buttons to play() and crossfades .fc-page panels under coverage.",
+  "entry": "FunnelCurtainDual.init(target, opts) -> { platform, engine, driver }. Load engine.js THEN component.js. Markup: .fc-stage > .fc-page(.is-on) with [data-fc-cta data-fc-swap='<sel>' data-fc-mode='curtain|flash'] buttons; the wrapper crossfades .fc-page.is-on on swap.",
+  "law": "transform (translateY of the panel; the edge letters ride WITH the panel — zero separate tweens) only; GPU; swapFn fires EXACTLY under full coverage (viewer never sees the swap); the panel is removed from the DOM after the ritual; parallel play() ignored (one curtain at a time); NO WebGL. reduced-motion → swapFn immediately, no panel.",
+  "files": ["component.js (dual wrapper)", "engine.js (proven core, unpatched)", "component.css", "img/hub.webp", "img/next.webp", "stage.html", "demo.html", "meta.json", "README.md"]
+}

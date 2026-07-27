@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>scrub-carousel-2slide — atom (dummy facade)</title>
+<script>window.__CAROUSEL_OK__=false;</script>
+<style>
+  /* ── DUMMY FACADE (навмисне НЕ springs) ── */
+  :root{
+    --ease:cubic-bezier(.25,.74,.22,.99);
+    --paper:#e7ddc8;
+    --ink:#22322b;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;-webkit-font-smoothing:antialiased}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink)}
+
+  .pin-wrap{position:relative;height:calc(var(--vh,1vh)*300)} /* N=2 */
+  .stage{position:sticky;top:0;width:min(390px,100%);height:calc(var(--vh,1vh)*100);
+    margin:0 auto;overflow:hidden;background:var(--paper)}
+
+  /* M2 card-mask — нерухома */
+  .card{position:absolute;left:20px;right:20px;top:calc(var(--vh,1vh)*8);height:calc(var(--vh,1vh)*50);
+    overflow:hidden;border-radius:2px}
+  .slide{position:absolute;inset:0;background-size:cover;background-position:center;will-change:opacity}
+  .slide-a{opacity:1;background:
+    radial-gradient(90% 80% at 30% 30%, #c9a56a 0%, #8a6a3a 55%, #4a3820 100%),
+    linear-gradient(180deg,#d8b57e,#5c4326);}
+  .slide-b{opacity:0;background:
+    radial-gradient(90% 80% at 70% 40%, #7fa9a0 0%, #47756c 50%, #22403a 100%),
+    linear-gradient(180deg,#a6cbc2,#2c4a43);}
+  /* M5 progress-bars */
+  .bars{position:absolute;left:14px;right:14px;bottom:14px;display:flex;gap:8px;z-index:3}
+  .bar{flex:1;height:2px;background:rgba(245,240,220,.35)}
+
+  /* M6 pinned-heading — поза карткою */
+  .heading{position:absolute;left:22px;top:calc(var(--vh,1vh)*61);font-family:var(--serif);
+    font-weight:400;font-size:31px;line-height:1;letter-spacing:-.5px;color:var(--ink)}
+
+  /* captions — синхронно зі слайдом */
+  .cap-wrap{position:absolute;left:22px;right:26px;top:calc(var(--vh,1vh)*84);height:calc(var(--vh,1vh)*14)}
+  .cap{position:absolute;inset:0;font-family:var(--sans);font-weight:400;font-size:15px;line-height:1.36;
+    letter-spacing:-.1px;color:var(--ink);will-change:opacity}
+  .cap-a{opacity:1} .cap-b{opacity:0}
+
+  .badge{position:absolute;left:22px;bottom:16px;font-size:9px;font-weight:600;letter-spacing:1.4px;
+    text-transform:uppercase;color:rgba(34,50,43,.5)}
+</style>
+</head>
+<body>
+<div class="scroller" style="height:calc(var(--vh,1vh)*100);overflow-y:auto;overflow-x:hidden;position:relative;-webkit-overflow-scrolling:touch">
+  <div class="pin-wrap">
+    <div class="stage">
+      <div class="card">
+        <div class="slide slide-a"></div>
+        <div class="slide slide-b"></div>
+        <div class="bars"><i class="bar bar-0"></i><i class="bar bar-1"></i></div>
+      </div>
+      <h2 class="heading">Quiet<br>Rooms</h2>
+      <div class="cap-wrap">
+        <p class="cap cap-a">The reading room holds the morning light against oiled walnut and a single long table cut from one fallen elm.</p>
+        <p class="cap cap-b">The bathing room keeps the water still and warm; stone underfoot, steam rising slow toward a skylight of ribbed glass.</p>
+      </div>
+      <div class="badge">atom · scrub-carousel-2slide · dummy facade</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var clamp=function(v,a,b){a=a==null?0:a;b=b==null?1:b;return v<a?a:v>b?b:v;};
+  var lerp=function(a,b,t){return a+(b-a)*t;};
+  function bezier(p1x,p1y,p2x,p2y){
+    function A(a,b){return 1-3*b+3*a;} function B(a,b){return 3*b-6*a;} function C(a){return 3*a;}
+    function calc(t,a,b){return ((A(a,b)*t+B(a,b))*t+C(a))*t;}
+    function slope(t,a,b){return 3*A(a,b)*t*t+2*B(a,b)*t+C(a);}
+    function tForX(x){var t=x;for(var i=0;i<8;i++){var xx=calc(t,p1x,p2x)-x;if(Math.abs(xx)<1e-4)return t;var d=slope(t,p1x,p2x);if(Math.abs(d)<1e-6)break;t-=xx/d;}return t;}
+    return function(x){if(x<=0)return 0;if(x>=1)return 1;return calc(tForX(x),p1y,p2y);};
+  }
+  var ease=bezier(.25,.74,.22,.99);
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  var scroller=document.querySelector('.scroller'), pinWrap=document.querySelector('.pin-wrap'),
+      sa=document.querySelector('.slide-a'), sb=document.querySelector('.slide-b'),
+      ca=document.querySelector('.cap-a'), cb=document.querySelector('.cap-b'),
+      b0=document.querySelector('.bar-0'), b1=document.querySelector('.bar-1');
+
+  var probe=document.createElement('div');
+  probe.style.cssText='position:fixed;top:0;left:0;height:100vh;width:1px;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  var vh=probe.offsetHeight||window.innerHeight||844;
+  function setVH(){ vh=probe.offsetHeight||window.innerHeight||844; document.documentElement.style.setProperty('--vh',(vh/100)+'px'); }
+  setVH();
+
+  var ON='rgba(245,240,220,.95)', OFF='rgba(245,240,220,.35)';
+
+  function render(hold){
+    hold=clamp((typeof hold==='number'&&isFinite(hold))?hold:0,0,1);
+    window.__hold=hold;
+    if(reduce){ sa.style.opacity='1'; sb.style.opacity='0'; ca.style.opacity='1'; cb.style.opacity='0'; b0.style.background=ON; b1.style.background=OFF; return; }
+    // M3 scrub-crossfade у вікні [0.35,0.65]
+    var cf=ease(clamp((hold-0.35)/0.30,0,1));
+    sa.style.opacity=(1-cf).toFixed(4); sb.style.opacity=cf.toFixed(4);
+    ca.style.opacity=(1-cf).toFixed(4); cb.style.opacity=cf.toFixed(4);
+    // M4 ken-burns
+    sa.style.backgroundPosition=(20+hold*10).toFixed(1)+'% center';
+    sb.style.backgroundPosition=(70+hold*10).toFixed(1)+'% center';
+    // M5 progress-bars
+    b0.style.background = cf<0.5?ON:OFF;
+    b1.style.background = cf>=0.5?ON:OFF;
+  }
+  window.__carouselRender=render;
+
+  function onScroll(){
+    var span=pinWrap.offsetHeight - vh;
+    var prog = span>0 ? clamp((scroller.scrollTop - pinWrap.offsetTop)/span,0,1) : 0;
+    render(prog);
+  }
+  if('scrollRestoration' in history) history.scrollRestoration='manual';
+  scroller.scrollTop=0;
+  scroller.addEventListener('scroll',onScroll,{passive:true});
+  var rsT; window.addEventListener('resize',function(){ clearTimeout(rsT); rsT=setTimeout(function(){ setVH(); onScroll(); },160); });
+  render(0);
+  window.__CAROUSEL_OK__=true;
+})();
+</script>
+</body>
+</html>

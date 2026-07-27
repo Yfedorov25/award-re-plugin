@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · locmap-engine · award-grade location map (real OSM + Dijkstra walker + dual mode)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · locmap-engine  (THE MAP CANON)
+================================================================================
+  The award-grade location map: a hand-built SVG of REAL baked OSM geography (136 roads,
+  823 buildings), the property anchored on it, numbered POIs synced two-way with a side
+  list, a Dijkstra route that DRAWS along the real street graph with a walking dot and a
+  LIVE minute counter, a walking-radius ring, deterministic lit windows, a 9-gate reveal,
+  asymmetric layer parallax, and a dual MODE switch (places vs infrastructure + cluster).
+
+  The union of two shipped maps: SMARTS (the motion) + QUADRO (the dual-mode IA).
+  NO WebGL, NO canvas, NO tiles. window.__LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="renders/locmap-demo.js"></script>
+
+<style>
+  :root{ --cream:#f3f1ec; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:#0b0a08;color:var(--cream);font-family:var(--sans)}
+  .pre{height:40vh}  /* scroll room so the 9-gate reveal triggers on enter */
+
+  .loc{display:grid;grid-template-columns:1fr;gap:0;min-height:100vh}
+  @media(min-width:900px){ .loc{grid-template-columns:1.55fr 0.95fr} }
+
+  .lm__stage{min-height:62vh}
+  @media(min-width:900px){ .lm__stage{min-height:100vh} }
+
+  .panel{position:relative;border-left:1px solid rgba(243,241,236,0.1);
+    padding:clamp(2rem,5vh,4rem) clamp(1.4rem,3vw,3rem);display:flex;flex-direction:column;gap:1.4rem;justify-content:center}
+  .eyebrow{color:var(--lm-accent-soft);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase}
+  .h{font-family:var(--serif);font-weight:300;font-size:clamp(1.8rem,2.4vw,2.6rem);line-height:1.04;letter-spacing:-.02em}
+  .intro{font-size:.95rem;line-height:1.6;opacity:.8;max-width:40ch}
+
+  .tabs{display:inline-flex;gap:.4rem;margin-top:.4rem}
+  .tabs button{font:600 .7rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:rgba(243,241,236,.45);
+    background:transparent;border:1px solid rgba(243,241,236,.2);padding:.55rem .9rem;border-radius:999px;cursor:pointer;transition:.2s}
+  .tabs button.on{color:#20272c;background:var(--cream);border-color:var(--cream)}
+
+  .cats{display:flex;gap:.4rem;flex-wrap:wrap}
+  .cats button{font:600 .66rem/1 var(--sans);letter-spacing:.06em;color:rgba(243,241,236,.6);
+    background:rgba(243,241,236,.05);border:1px solid rgba(243,241,236,.14);padding:.45rem .7rem;border-radius:6px;cursor:pointer;transition:.2s}
+  .cats button.on{color:#20272c;background:var(--lm-accent-soft);border-color:var(--lm-accent-soft)}
+</style>
+</head>
+<body>
+  <div class="pre"></div>
+
+  <section class="loc lm" data-lm-mode="loc">
+    <div class="lm__stage" data-lm-stage></div>
+
+    <aside class="panel">
+      <p class="eyebrow">Локація · за даними OpenStreetMap</p>
+      <h2 class="h">Усе, що поряд.<br>Хвилини, не кілометри.</h2>
+      <p class="intro">Клікніть точку на карті. Маршрут малюється по реальних вулицях, крапка йде, лічильник хвилин росте до місця.</p>
+
+      <div class="tabs" data-lm-tabs>
+        <button data-mode="loc" class="on">Місця</button>
+        <button data-mode="infra">Інфраструктура</button>
+      </div>
+
+      <div class="cats" data-lm-cats hidden></div>
+
+      <div class="lm__list" data-lm-list></div>
+    </aside>
+  </section>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    var data = window.LOCMAP_DEMO;
+    // the property anchor (smarts site) + a "building here" tag
+    data.site = Object.assign({}, data.site, { tag: 'Тут будується' });
+
+    var map = window.LocMap.create('.loc', {
+      data: data,
+      mScale: 2.6,
+      walkMin: 10,
+      modes: ['loc', 'infra'],
+      route: true,
+      onSelect: function (id) {}
+    });
+
+    // mode tabs
+    var tabs = document.querySelector('[data-lm-tabs]');
+    var cats = document.querySelector('[data-lm-cats]');
+    var list = document.querySelector('[data-lm-list]');
+    var CAT_LABELS = { food: 'Їжа', shop: 'Магазини', school: 'Школи', health: 'Здоровʼя', transit: 'Транспорт', park: 'Парки' };
+
+    // build category chips from the data
+    Object.keys(data.infra || {}).forEach(function (c, i) {
+      var b = document.createElement('button');
+      b.dataset.cat = c; b.textContent = CAT_LABELS[c] || c; if (i === 0) b.className = 'on';
+      cats.appendChild(b);
+    });
+    var firstCat = Object.keys(data.infra || {})[0];
+
+    tabs.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-mode]'); if (!b) return;
+      tabs.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      var m = b.dataset.mode;
+      map.setMode(m);
+      cats.hidden = m !== 'infra';
+      list.hidden = m === 'infra';
+      if (m === 'infra') map.setCat(cats.querySelector('button.on') ? cats.querySelector('button.on').dataset.cat : firstCat);
+    });
+    cats.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-cat]'); if (!b) return;
+      cats.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+      map.setCat(b.dataset.cat);
+    });
+
+    // demo: after the reveal settles, draw one route so a screen-record shows the walker + timer
+    if (window.gsap && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      setTimeout(function () { var first = document.querySelector('.lm-pt'); if (first) map.select(first.dataset.id); }, 4200);
+    }
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

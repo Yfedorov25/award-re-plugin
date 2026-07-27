@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · section-rise-into-view · finest (whole full-bleed media block rises up + fades on enter)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · section-rise-into-view
+================================================================================
+  crownd/finest's section entrance — a whole full-bleed MEDIA BLOCK rises up from below
+  (translateY -> 0) and fades in as it scrolls into view, once. The lightest "rise": the WHOLE
+  block moves as one, no per-element masking, no cover, no pin. Harvested from D_finest (F4).
+  Distinct from scroll-clip-rise (per-line mask) + panel-rise-over (cover + theme-flip + pin).
+  OUR QUADRO renders. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#f1efe9; --ink:#16150f; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+  .spacer{height:95vh;display:grid;place-items:center;opacity:.4;font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .sriv-stage{ --sriv-bg:#f1efe9; padding:8vh 6vw; display:flex;flex-direction:column;gap:16vh }
+  .sriv-media{ --sriv-h:72vh; --sriv-radius:4px; }
+  .cap{font-family:var(--serif);font-size:2.4vw;margin-top:1.4rem;text-align:center}
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — кожен медіа-блок виїжджає знизу + проявляється на вході</div>
+
+  <section class="sriv-stage" id="rise">
+    <div data-rise-block>
+      <div class="sriv-media"><img src="renders/macro-table.webp" alt="QUADRO"></div>
+      <div class="cap">Інтер'єр, прорахований до деталі</div>
+    </div>
+    <div data-rise-block>
+      <div class="sriv-media"><img src="renders/terrace.webp" alt="QUADRO"></div>
+      <div class="cap">Приватна тераса для кожного</div>
+    </div>
+    <div data-rise-block>
+      <div class="sriv-media"><img src="renders/night.webp" alt="QUADRO"></div>
+      <div class="cap">Вечірнє світло кварталу</div>
+    </div>
+  </section>
+
+  <div class="spacer">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__sriv = SectionRiseIntoView.create('#rise', { riseY:90, scaleFrom:0.98, duration:1.0, stagger:0.12, ease:'power3.out', start:'top 85%', once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

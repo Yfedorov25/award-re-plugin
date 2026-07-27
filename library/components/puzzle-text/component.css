@@ -1,0 +1,135 @@
+/* ============================================================
+   PUZZLE-TEXT · component.css
+   BASE = tx5-paired-with-render  (owner-approved, 9/10)
+   Re-extracted BYTE-FAITHFULLY from
+     apps/quadro/public/slide-lab/tx5-paired-with-render.html
+   ------------------------------------------------------------
+   SAISEI-style PAIRED composition: a big contained QUADRO render
+   SLAB on one side (~45vw) and the confident STATEMENT in the
+   facing CREAM AIR COLUMN. The words are inline-block in NORMAL
+   FLOW; we animate ONLY transform + color. opacity STAYS 1 (the
+   words are always opaque — never opacity:0). Display = Fraunces
+   serif, big; body/eyebrow = Inter.
+
+   Load Fraunces + Inter before this file, e.g.:
+     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,340;9..144,0,420;9..144,1,360&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+   ============================================================ */
+
+:root{
+  --cream:#EFE9DC;        /* page / air column */
+  --cream-deep:#E6DECF;   /* faint inner field */
+  --ink:#171511;          /* seated word color */
+  --ghost-near:#B7B3A8;   /* nearby scattered word */
+  --ghost-far:#D2CDC0;    /* far scattered word (lighter) */
+  --line:rgba(23,21,17,.18);
+  --muted:rgba(23,21,17,.55);
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  /* the ONE air ease, mirrored for any CSS motion */
+  --air:cubic-bezier(0.25,0.74,0.22,0.99);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--cream);color:var(--ink)}
+body{font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+
+/* ── intro / outro breathing air so the pin entry/exit feels owned ── */
+.rail{
+  min-height:88vh;display:flex;align-items:center;
+  padding:0 7vw;color:var(--muted);
+}
+.rail .eyebrow{font-size:11px;letter-spacing:.34em;text-transform:uppercase}
+.rail.bottom{justify-content:flex-end;text-align:right}
+
+/* ── the pinned stage: render slab + cream column, side by side ── */
+.stage{
+  height:100vh;width:100%;overflow:hidden;position:relative;
+  background:var(--cream);
+  display:grid;
+  grid-template-columns:45vw 1fr;   /* contained render | facing air column */
+  align-items:center;
+}
+
+/* RENDER SLAB — fully painted, left, portrait-cropped, quietly present.
+   Its own wrapper handles the counter-drift parallax (GPU transform). */
+.slab{
+  position:relative;height:100vh;width:45vw;overflow:hidden;
+  will-change:transform;
+}
+.slab__img{
+  position:absolute;inset:-3% -2%;            /* tiny overscan so drift never bares an edge */
+  width:104%;height:106%;
+  background:#0e0d0b center 38%/cover no-repeat; /* JS sets the render url */
+  will-change:transform;
+}
+/* soft seam where the render meets the cream — keeps it contained, calm */
+.slab::after{
+  content:"";position:absolute;top:0;right:0;bottom:0;width:14%;
+  background:linear-gradient(90deg,rgba(239,233,220,0) 0%,var(--cream) 100%);
+  pointer-events:none;
+}
+/* slab caption — honesty tag, quiet */
+.slab__cap{
+  position:absolute;left:1.6vw;bottom:1.6vw;z-index:2;
+  font-size:10px;letter-spacing:.26em;text-transform:uppercase;
+  color:rgba(239,233,220,.72);
+}
+
+/* CREAM AIR COLUMN — the statement assembles here ── */
+.col{
+  position:relative;height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:0 7vw 0 4vw;
+}
+.col__eyebrow{
+  font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:2.2rem;
+  /* drawn in as the words finish */
+  opacity:0;transform:translateY(8px);
+}
+
+/* THE STATEMENT — Fraunces, big, the star.
+   Words flow normally. We never animate layout — words start at a transform
+   offset and return to transform:none, so these line-breaks are the
+   pixel-perfect rest state. */
+.statement{
+  font-family:var(--serif);
+  font-weight:360;
+  font-size:clamp(30px,3.5vw,58px);
+  line-height:1.12;
+  letter-spacing:-.012em;
+  color:var(--ink);
+  max-width:18ch;
+}
+/* each split word: inline-block so transform applies; opacity ALWAYS 1 */
+.w{display:inline-block;will-change:transform;color:var(--ghost-near)}
+.sp{display:inline-block;white-space:pre}
+
+.col__rule{
+  margin-top:2.6rem;height:1px;width:0;background:var(--line);
+}
+.col__ord{
+  margin-top:1.1rem;font-size:11px;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--muted);opacity:0;
+}
+
+/* ── reduced-motion / narrow: collapse to STATIC readable paragraph,
+      render stacks above, nothing scatters, nothing pins ── */
+@media (prefers-reduced-motion: reduce){
+  .w{color:var(--ink)!important;transform:none!important}
+  .col__eyebrow,.col__ord{opacity:1!important;transform:none!important}
+  .col__rule{width:100%!important}
+}
+@media (max-width:880px){
+  .stage{
+    grid-template-columns:1fr;height:auto;display:block;
+  }
+  .slab,.slab__img{position:relative;height:48vh;width:100%;inset:auto;transform:none!important}
+  .slab__img{width:100%;height:100%}
+  .slab::after{display:none}
+  .col{height:auto;padding:11vw 8vw;justify-content:flex-start}
+  .statement{max-width:none;font-size:clamp(26px,7vw,40px)}
+  .w{color:var(--ink)!important;transform:none!important}
+  .col__eyebrow,.col__ord{opacity:1!important;transform:none!important}
+  .col__rule{width:100%!important}
+}

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--architects-sketch · Схема від руки</title>
+<!--
+  SECTION VARIANT, location--architects-sketch (role: location). MAP-STYLE = PEN/INK DRAFTING.
+  CONTROLLED-INTERACTIVE model (the smarts Агрономічне model) drawn as an architect's hand site plan:
+  the SAME dense, real baked OSM district of с. Агрономічне (true road hierarchy by class, the building
+  footprints, the site parcel inside a true-scale 10-minute walking ring) rendered as a PEN DRAWING,
+  thin dark-ink strokes on warm drafting paper, NO filled blocks, NO colour photography, NO lit windows.
+  The plan REVEALS on scroll-in once (the 9-gate birth). After that there is NO pin and NO forced
+  stepping: the USER clicks (or hovers) any of the 6 real POIs, on the map or in the side list, and THAT
+  draws the real Dijkstra route along the actual streets, heavier ink, while a walking dot travels it and
+  the live minute badge shows the honest walk-time. Two-way hover (pin <-> list row). This is
+  locmap-engine's native interaction; no scroll-lock, the visitor drives. The map is the REAL dense OSM,
+  not a sparse sketch; only the rendering is a pen on a drafting sheet.
+
+  asset-truth: streets/footprints from osm.js (the real с. Агрономічне dataset); POI names + minutes are
+  the 6 real ones (Траш! 9хв, Аврора 18хв, Грош Експрес 15хв, Нова Пошта 10хв, Подорожник 10хв,
+  Школа·садок 9хв). __LAB_OK__ passes only if: 0 pins (pin-less click section), the cited real atom ran,
+  the [data-render-surface] painted (the drafting-paper field), 0 real console errors. NO WebGL/canvas/tiles.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left/margin.
+     The whole map is re-themed to a PEN/INK DRAFTING sheet by re-pointing the engine CSS tokens
+     (--lm-ink / --lm-bg-1 / --lm-bg-2 / --lm-accent / --lm-accent-soft) and overriding the road,
+     building, parcel, ring, POI and route classes to thin dark ink on warm paper. */
+  :root { --as-paper: #ece3d2; --as-ink: #2a2118; --as-accent: #7a4a2c; --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* the stage is a full-viewport drafting sheet + a reading rail; normal-flow block (no pin) */
+  #combo.combo-stage { background: var(--as-paper); min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
+
+  /* THE RENDER SURFACE = warm drafting PAPER: a painted CSS background (paper grain + faint
+     cross-hatch grid) so the honest paint-probe sees a real surface and the medium reads as a sheet
+     on a drafting table. The engine SVG mounts on top. */
+  .as__field {
+    position: absolute; inset: 0;
+    background-color: var(--as-paper);
+    background-image:
+      radial-gradient(120% 95% at 32% 24%, rgba(255,251,242,.5), rgba(255,251,242,0) 58%),
+      radial-gradient(95% 85% at 78% 80%, rgba(122,74,44,.06), rgba(122,74,44,0) 60%),
+      linear-gradient(rgba(42,33,24,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,33,24,.05) 1px, transparent 1px),
+      linear-gradient(158deg, #efe7d7 0%, #e3d8c2 100%);
+    background-size: auto, auto, 34px 34px, 34px 34px, auto;
+  }
+  /* re-point the engine palette tokens to ink-on-paper for the whole map */
+  .as__field {
+    --lm-ink: var(--as-ink);
+    --lm-bg-1: var(--as-paper); --lm-bg-2: var(--as-paper);
+    --lm-accent: var(--as-accent); --lm-accent-soft: #9a6238;
+  }
+  .as__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* kill the engine's dark radial field; the paper background shows through (no second surface) */
+  .as__field.lm__stage, .as__field .lm__stage { background: transparent; }
+
+  /* ---- PEN / INK rendering of the real OSM layers --------------------------------------------- */
+
+  /* no green wash, no water wash: a pen drawing has no fills */
+  .as__field .lm-gw--green, .as__field .lm-gw--water { fill: none; }
+
+  /* building footprints = VERY thin ink outlines, near-zero fill (drawn, not blocked).
+     lit windows are OFF (flicker.rate 1e9) so .lm-bld--lit never appears, but neutralise it anyway. */
+  .as__field .lm-bld { fill: rgba(42,33,24,.025); stroke: rgba(42,33,24,.5); stroke-width: .5;
+    vector-effect: non-scaling-stroke; }
+  .as__field .lm-bld--lit { fill: rgba(42,33,24,.025); stroke: rgba(42,33,24,.5); animation: none; }
+
+  /* roads = thin dark-ink hairlines; the hierarchy is by stroke-width only (no colour, no casing). */
+  .as__field .lm-rdc { stroke: var(--as-paper); }                 /* casing = paper, hides nothing */
+  .as__field .lm-rd--hwy   { stroke: rgba(42,33,24,.92); stroke-width: 1.9; } .as__field .lm-rdc--hwy  { stroke-width: 2.6; }
+  .as__field .lm-rd--main  { stroke: rgba(42,33,24,.85); stroke-width: 1.5; } .as__field .lm-rdc--main { stroke-width: 2.2; }
+  .as__field .lm-rd--mid   { stroke: rgba(42,33,24,.6);  stroke-width: 1.05; }
+  .as__field .lm-rd--minor { stroke: rgba(42,33,24,.42); stroke-width: .8; }
+  .as__field .lm-rd--faint { stroke: rgba(42,33,24,.26); stroke-width: .55; }
+  .as__field .lm-rd, .as__field .lm-rdc { vector-effect: non-scaling-stroke; }
+  .as__field .lm-rdname { fill: rgba(42,33,24,.55); font-weight: 500; }
+
+  /* parcel = an ink hatch (re-point the engine hatch pattern + outline) */
+  .as__field #lmHatch rect { fill: rgba(122,74,44,.1); }
+  .as__field #lmHatch line { stroke: rgba(42,33,24,.7); stroke-width: 1.2; }
+  .as__field .lm-parcel { fill: url(#lmHatch); stroke: var(--as-ink); stroke-width: 1; }
+  .as__field .lm-pulse { stroke: rgba(122,74,44,.6); stroke-width: 1; }
+  .as__field .lm-sitetag { fill: var(--as-ink); }
+
+  /* walking ring = a thin dashed ink circle */
+  .as__field .lm-ring { stroke: rgba(42,33,24,.4); stroke-width: 1; stroke-dasharray: 4 6; }
+  .as__field .lm-ringt { fill: rgba(42,33,24,.55); }
+
+  /* POIs = small ink-ringed dots (paper centre); active/hover fills with the accent */
+  .as__field .lm-pt circle { fill: var(--as-paper); stroke: var(--as-ink); stroke-width: 1.2; }
+  .as__field .lm-pt text { fill: var(--as-ink); font-weight: 600; }
+  .as__field .lm-pt:hover circle, .as__field .lm-pt.is-on circle { fill: var(--as-accent); stroke: var(--as-ink); }
+  .as__field .lm-pt:hover text, .as__field .lm-pt.is-on text { fill: #fbf6ea; }
+
+  /* the active Dijkstra route = a slightly heavier ink line + an ink walking dot + a live badge */
+  .as__field .lm-route { stroke: var(--as-accent); stroke-width: 2.2; stroke-dasharray: 7 6; }
+  .as__field .lm-walker { fill: var(--as-ink); stroke: var(--as-accent); stroke-width: 1.6; }
+  .as__field .lm-livet { fill: #fbf6ea; font-weight: 600; }
+  .as__field .lm-livebg { fill: rgba(42,33,24,.92); stroke: var(--as-accent); stroke-width: 1; }
+
+  /* the standing section label top-left */
+  .as__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
+    font: 600 .64rem/1.5 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(42,33,24,.62); max-width: 26ch; pointer-events: none;
+  }
+  .as__label b { display: block; font-weight: 600; color: rgba(42,33,24,.4); letter-spacing: .2em;
+    margin-top: .35rem; font-size: .56rem; }
+
+  /* ---- the reading rail: eyebrow + serif title + hint + coords + a CLICKABLE list of 6 real POIs --- */
+  .as__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(22px, 6vh, 56px);
+    width: min(40ch, 88vw);
+  }
+  @media (min-width: 900px) {
+    .as__rail { left: auto; right: clamp(24px, 4vw, 60px); top: 50%; bottom: auto;
+      transform: translateY(-50%); width: min(32ch, 34vw); }
+  }
+  .as__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(42,33,24,.6); margin: 0 0 .5rem;
+  }
+  .as__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.7rem, 3vw, 2.7rem); line-height: 1.0; letter-spacing: -.03em;
+    color: var(--as-ink); margin: 0 0 .4rem;
+  }
+  .as__hint {
+    font: 500 .76rem/1.45 var(--combo-sans); letter-spacing: .01em;
+    color: rgba(42,33,24,.6); margin: 0 0 clamp(.9rem, 2vh, 1.4rem);
+  }
+  .as__coords {
+    display: block; margin-top: .4rem;
+    font: 500 .62rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(42,33,24,.42); text-transform: none;
+  }
+  /* the list the engine fills with .lm-row rows (click + hover drives the route) */
+  .as__list { display: block; }
+
+  /* re-skin the engine's .lm-row (ships dark) for the light paper: ink text, thin ink rule */
+  .as__rail .lm-row { color: var(--as-ink); border-bottom: 1px solid rgba(42,33,24,.16);
+    padding: .62rem 0; transition: background .25s, padding-left .25s; }
+  .as__rail .lm-row .n { color: var(--as-accent); }
+  .as__rail .lm-row .tm { opacity: .62; }
+  .as__rail .lm-row:hover, .as__rail .lm-row.is-on { background: rgba(42,33,24,.05); padding-left: .5rem; }
+  .as__rail .lm-row.is-on .n { color: var(--as-accent); }
+
+  .combo-pre, .combo-post { background: #e3d8c2; color: rgba(42,33,24,.5); }
+
+  @media (prefers-reduced-motion: reduce) { .as__rail .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--architects-sketch">
+
+    <!-- the drafting-paper field. locmap-engine injects the pen-drawn SVG here. -->
+    <div class="as__field lm" data-lm-stage data-render-surface></div>
+
+    <p class="as__label">Схема від руки<b>с. Агрономічне · за даними OpenStreetMap</b></p>
+
+    <div class="as__rail">
+      <p class="as__eyebrow">5 хвилин від Вінниці</p>
+      <h2 class="as__title">Що поруч</h2>
+      <p class="as__hint">Натисніть місце, щоб побачити шлях і час пішки.
+        <span class="as__coords">49.18° Пн · 28.33° Сх · ділянка 22,5 сотки на вул. Перемоги</span>
+      </p>
+      <!-- the engine fills this with clickable rows (two-way synced with the map pins) -->
+      <div class="as__list" data-lm-list></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+
+    // ---- ENGINE: the real district drawn as ink on paper. owns_pin FALSE; reveal on scroll-in once;
+    // ---- then CLICK/HOVER drives the route. flicker.rate huge -> no lit windows (a pen drawing). ----
+    SectionHarness.ranOK('locmap-engine', function () {
+      var map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true,
+        flicker: { rate: 1e9 },
+        reveal: { start: 'top 70%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award'
+      });
+      window.__asMap = map;
+    });
+
+    // pin-less, controlled-interactive section: the visitor clicks to draw routes. 0 pins.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>

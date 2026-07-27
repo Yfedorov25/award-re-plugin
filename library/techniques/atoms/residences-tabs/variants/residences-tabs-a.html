@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>residences-tabs · A — springs Residences (self-contained atom)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>window.__ATOM_OK__=false;window.render=function(){};</script>
+<style>
+  /* ---- real springs fonts (packaged alongside the atom) ---- */
+  @font-face{font-display:swap;font-family:"Victor Serif";font-weight:400;
+    src:url(../_fonts/VictorSerif-40Regular.woff2) format("woff2");}
+  @font-face{font-display:swap;font-family:"TT Commons Pro";font-weight:400;
+    src:url(../_fonts/TT_Commons_Pro_Regular.woff2) format("woff2");}
+  @font-face{font-display:swap;font-family:"TT Commons Pro";font-weight:500;
+    src:url(../_fonts/TTCommonsPro-Md.woff2) format("woff2");}
+
+  :root{
+    /* real springs tokens */
+    --spr-serif:"Victor Serif",Georgia,serif;
+    --spr-sans:"TT Commons Pro",Helvetica,Arial,sans-serif;
+    --cream:#e0d1b6; --cream-lite:#f5e8d1; --cream-hi:#efe3c8;
+    --green:#16322a; --green-deep:#0e241d; --teal:#1f6569;
+    --lime:rgba(150,196,74,.5);
+    --ease:cubic-bezier(.25,.74,.22,.99);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--green-deep);-webkit-font-smoothing:antialiased;}
+  body{max-width:390px;margin:0 auto;font-family:var(--spr-sans);color:var(--cream);overflow-x:hidden;}
+
+  /* ---- header ---- */
+  .hdr{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+    padding:calc(env(safe-area-inset-top,0px) + 15px) 20px 13px;
+    background:linear-gradient(180deg,rgba(14,36,29,.42),rgba(14,36,29,0));backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);}
+  .brand{display:flex;align-items:center;gap:8px;}
+  .brand .wm{font-family:var(--spr-serif);font-size:24px;letter-spacing:.2px;color:var(--cream-lite);line-height:1;}
+  .brand svg{display:block;transform:translateY(-3px);}
+  .tools{display:flex;align-items:center;gap:17px;}
+  .tools .caps{font-family:var(--spr-sans);font-weight:500;font-size:13px;letter-spacing:.11em;color:var(--cream);}
+  .burger{display:flex;flex-direction:column;gap:5px;width:22px;}
+  .burger i{height:1.5px;background:var(--cream);border-radius:2px;display:block;}
+
+  /* ---- intro hero (Residences + flowering branch) ---- */
+  .intro{position:relative;min-height:560px;overflow:hidden;margin-top:-64px;
+    background:linear-gradient(163deg,#1f6569 0%,#1a5450 28%,#16403a 58%,#16322a 100%);}
+  .intro .lime{position:absolute;left:-40px;top:38%;width:150px;height:320px;z-index:2;pointer-events:none;
+    background:radial-gradient(60% 50% at 0% 50%,var(--lime),rgba(150,196,74,0) 72%);filter:blur(6px);}
+  .intro .branch{position:absolute;left:0;right:0;top:260px;bottom:0;z-index:1;overflow:hidden;}
+  /* dummy flowering-branch facade: teal field + soft white blossom dots + a thin stem */
+  .intro .branch::before{content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(3px 3px at 72% 30%,rgba(245,240,225,.9),transparent 60%),
+      radial-gradient(3px 3px at 60% 42%,rgba(245,240,225,.8),transparent 60%),
+      radial-gradient(4px 4px at 80% 52%,rgba(245,240,225,.85),transparent 60%),
+      radial-gradient(3px 3px at 46% 60%,rgba(245,240,225,.7),transparent 60%),
+      radial-gradient(3px 3px at 30% 74%,rgba(245,240,225,.75),transparent 60%),
+      radial-gradient(4px 4px at 88% 78%,rgba(245,240,225,.7),transparent 60%),
+      linear-gradient(115deg,transparent 60%,rgba(150,196,74,.10) 100%);}
+  .intro .stem{position:absolute;right:22%;top:8%;width:1.5px;height:86%;z-index:1;
+    background:linear-gradient(180deg,rgba(120,110,80,.0),rgba(140,128,92,.55) 40%,rgba(120,110,80,.2));
+    transform:rotate(9deg);transform-origin:bottom;}
+  .intro .veil{position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:linear-gradient(180deg,rgba(22,64,58,.55) 0%,rgba(22,64,58,0) 34%);}
+  .intro .copy{position:relative;z-index:3;padding:120px 22px 0;pointer-events:none;}
+  .intro h1{font-family:var(--spr-serif);font-weight:400;font-size:73px;line-height:.98;letter-spacing:-1.5px;color:var(--cream-hi);}
+  .intro .sub{margin-top:22px;font-family:var(--spr-sans);font-weight:500;font-size:13px;line-height:1.5;
+    letter-spacing:.12em;text-transform:uppercase;color:rgba(224,209,182,.72);max-width:280px;}
+
+  /* ---- tabs section ---- */
+  .tabs-sec{position:relative;background:var(--green);display:flex;flex-direction:column;min-height:844px;overflow:hidden;}
+  .tabs-sec .lime{position:absolute;left:-40px;top:46%;width:150px;height:340px;z-index:6;pointer-events:none;
+    background:radial-gradient(60% 50% at 0% 50%,rgba(150,196,74,.4),rgba(150,196,74,0) 72%);filter:blur(8px);}
+
+  .stage{position:relative;height:470px;width:100%;overflow:hidden;}
+  .slot{position:absolute;inset:0;opacity:0;transition:opacity .6s var(--ease);will-change:opacity;}
+  .slot.on{opacity:1;}
+  .art{position:absolute;inset:0;}
+  .grain{position:absolute;inset:-1px;pointer-events:none;opacity:.12;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  /* real generated photos (higgsfield, springs mood) — read as actual rooms */
+  .art-flats{background:#d8ceb8 url(../_img/flats.webp) center/cover no-repeat;}
+  .art-town{background:#8a9a63 url(../_img/town.webp) center/cover no-repeat;}
+  .art-pent{background:#5f7548 url(../_img/pent.webp) center/cover no-repeat;}
+  .depth{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 46px rgba(6,18,12,.34), inset 0 1px 0 rgba(255,255,255,.05);}
+
+  .scrim-top{position:absolute;top:0;left:0;right:0;height:120px;z-index:4;pointer-events:none;
+    background:linear-gradient(180deg,rgba(14,36,29,.5),rgba(14,36,29,0));}
+  .scrim-bot{position:absolute;left:0;right:0;bottom:0;height:56%;z-index:4;pointer-events:none;
+    background:linear-gradient(180deg,rgba(9,22,17,0) 0%,rgba(9,22,17,.28) 55%,rgba(9,22,17,.72) 100%);}
+
+  .tabs{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:0 20px 22px;
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .tab{appearance:none;background:none;border:0;padding:0;cursor:pointer;text-align:left;
+    display:flex;flex-direction:column;gap:13px;}
+  .tab .lbl{font-family:var(--spr-sans);font-weight:500;font-size:12.5px;letter-spacing:.09em;
+    text-transform:uppercase;color:var(--cream-lite);opacity:.5;transition:opacity .4s ease;}
+  .tab.on .lbl{opacity:1;}
+  .tab .rail{position:relative;height:1.6px;width:100%;background:rgba(245,232,209,.28);overflow:hidden;display:block;}
+  .tab .fill{position:absolute;inset:0;background:var(--cream-lite);transform-origin:left;transform:scaleX(0);
+    transition:transform .55s var(--ease);display:block;}
+  .tab.on .fill{transform:scaleX(1);}
+
+  .info{padding:30px 22px 0;position:relative;z-index:7;}
+  .info .swap{transition:opacity .5s ease,transform .5s var(--ease);}
+  .info h2{font-family:var(--spr-serif);font-weight:400;font-size:47px;line-height:1;letter-spacing:-.5px;color:var(--cream-hi);}
+  .info .st{margin-top:12px;font-family:var(--spr-sans);font-weight:400;font-size:20px;letter-spacing:-.2px;color:rgba(224,209,182,.66);}
+  .info .cta{margin-top:30px;display:inline-block;cursor:pointer;font-family:var(--spr-sans);font-weight:500;
+    font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);background:transparent;
+    border:1px solid rgba(224,209,182,.42);border-radius:999px;padding:14px 30px;white-space:nowrap;transition:.25s var(--ease);}
+  .info .cta:hover{border-color:rgba(224,209,182,.85);background:rgba(224,209,182,.08);}
+
+  .stats{margin-top:auto;padding:0 22px 44px;display:flex;justify-content:space-between;align-items:flex-start;gap:18px;
+    position:relative;z-index:7;}
+  .stats .swap{transition:opacity .5s ease,transform .5s var(--ease);}
+  .stats .num{font-family:var(--spr-serif);font-weight:400;font-size:56px;line-height:1;color:var(--cream-hi);}
+  .stats .num.nowrap{white-space:nowrap;}
+  .stats .num .pre{font-size:34px;}
+  .stats .lab{margin-top:8px;font-family:var(--spr-sans);font-weight:400;font-size:15px;letter-spacing:.01em;color:rgba(224,209,182,.55);}
+</style>
+</head>
+<body>
+  <header class="hdr">
+    <div class="brand">
+      <span class="wm">Springs</span>
+      <svg width="21" height="21" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14.5" stroke="#e0d1b6" stroke-width="1.1" opacity=".85"/><path d="M11 20c0-4 3-5 5-5s5-1 5-5" stroke="#e0d1b6" stroke-width="1.2" stroke-linecap="round"/><path d="M21 12c0 4-3 5-5 5s-5 1-5 5" stroke="#e0d1b6" stroke-width="1.2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="tools">
+      <span class="caps">RESIDENCES</span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0d1b6" stroke-width="1.4"><path d="M12 20s-7-4.6-7-9.3A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7 2.7C19 15.4 12 20 12 20Z"/></svg>
+      <span class="burger"><i></i><i></i></span>
+    </div>
+  </header>
+
+  <section class="intro">
+    <div class="lime"></div>
+    <div class="branch"></div>
+    <div class="stem"></div>
+    <div class="veil"></div>
+    <div class="copy">
+      <h1>Residences</h1>
+      <p class="sub">Collection of premium living spaces</p>
+    </div>
+  </section>
+
+  <section class="tabs-sec">
+    <div class="lime"></div>
+    <div class="stage">
+      <div class="slot on" data-slot="0"><div class="art art-flats"></div><div class="depth"></div><div class="grain"></div></div>
+      <div class="slot" data-slot="1"><div class="art art-town"></div><div class="depth"></div><div class="grain"></div></div>
+      <div class="slot" data-slot="2"><div class="art art-pent"></div><div class="depth"></div><div class="grain"></div></div>
+
+      <div class="scrim-top"></div>
+      <div class="scrim-bot"></div>
+
+      <div class="tabs">
+        <button class="tab on" data-tab="0"><span class="lbl">Flats</span><span class="rail"><span class="fill"></span></span></button>
+        <button class="tab" data-tab="1"><span class="lbl">Townhouses</span><span class="rail"><span class="fill"></span></span></button>
+        <button class="tab" data-tab="2"><span class="lbl">Penthouses</span><span class="rail"><span class="fill"></span></span></button>
+      </div>
+    </div>
+
+    <div class="info">
+      <div class="swap" id="infoSwap">
+        <h2 id="title">Flats</h2>
+        <p class="st" id="subtitle">Designer finishings</p>
+        <a class="cta" id="btn">Search flats</a>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="swap" id="statSwap" style="display:flex;justify-content:space-between;width:100%;gap:18px;">
+        <div>
+          <div class="num" id="s1n">138</div>
+          <div class="lab" id="s1l">panoramic view flats</div>
+        </div>
+        <div>
+          <div class="num nowrap"><span class="pre" id="s2p">up to</span> <span id="s2v">3.1 m</span></div>
+          <div class="lab" id="s2l">Ceiling height</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<script>
+(function(){
+  var DATA=[
+    {t:"Flats",      s:"Designer finishings", b:"Search flats",   s1n:"138", s1l:"panoramic view flats", s2p:"up to", s2v:"3.1 m", s2l:"Ceiling height"},
+    {t:"Townhouses", s:"Private patios",      b:"Available soon", s1n:"5",   s1l:"townhouses",           s2p:"up to", s2v:"4.1 m", s2l:"Ceiling height"},
+    {t:"Penthouses", s:"Green terraces",      b:"Available soon", s1n:"7",   s1l:"Penthouses",           s2p:"up to", s2v:"4.1 m", s2l:"Ceiling height"}
+  ];
+  var slots=[].slice.call(document.querySelectorAll('.slot'));
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var infoSwap=document.getElementById('infoSwap'), statSwap=document.getElementById('statSwap');
+  var el={title:'title',subtitle:'subtitle',btn:'btn',s1n:'s1n',s1l:'s1l',s2p:'s2p',s2v:'s2v',s2l:'s2l'};
+  for(var k in el) el[k]=document.getElementById(el[k]);
+  var active=-1, swapT=null;
+
+  function paint(i){
+    var d=DATA[i];
+    el.title.textContent=d.t; el.subtitle.textContent=d.s; el.btn.textContent=d.b;
+    el.s1n.textContent=d.s1n; el.s1l.textContent=d.s1l;
+    el.s2p.textContent=d.s2p; el.s2v.textContent=d.s2v; el.s2l.textContent=d.s2l;
+  }
+  function setTab(i,instant){
+    if(i===active) return;
+    active=i;
+    slots.forEach(function(s,n){ s.classList.toggle('on',n===i); });
+    tabs.forEach(function(t,n){ t.classList.toggle('on',n===i); });
+    if(instant){ paint(i); infoSwap.style.opacity=1; statSwap.style.opacity=1; return; }
+    // text swap: fade out → repaint → fade in (mirrors live)
+    infoSwap.style.opacity=0; infoSwap.style.transform='translateY(10px)';
+    statSwap.style.opacity=0; statSwap.style.transform='translateY(10px)';
+    clearTimeout(swapT);
+    swapT=setTimeout(function(){
+      paint(i);
+      infoSwap.style.opacity=1; infoSwap.style.transform='translateY(0)';
+      statSwap.style.opacity=1; statSwap.style.transform='translateY(0)';
+    },220);
+  }
+  tabs.forEach(function(t,i){ t.addEventListener('click',function(){ setTab(i); }); });
+
+  // window.render(p): p∈[0,1] maps to tab index (for the review-board scrubber)
+  window.render=function(p){
+    p=(typeof p==='number'&&isFinite(p))?p:0; p=p<0?0:(p>1?1:p);
+    var i=p<0.34?0:(p<0.67?1:2);
+    setTab(i,true);
+  };
+
+  // Lenis (page is short here; still wire it for consistency with the atom contract)
+  if(window.Lenis){
+    var lenis=new Lenis({lerp:0.11}); function raf(t){ lenis.raf(t); requestAnimationFrame(raf); } requestAnimationFrame(raf);
+  }
+  if(window.gsap&&window.CustomEase){ try{ gsap.registerPlugin(CustomEase); }catch(e){} }
+
+  setTab(0,true);
+  window.__ATOM_OK__=true;
+})();
+</script>
+</body>
+</html>

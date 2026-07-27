@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Springs · Panoramic Terraces · hotspot-card-reveal</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:#0e241d;font-family:var(--spr-sans);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  .stage{position:relative;width:100%;max-width:390px;margin:0 auto;height:100dvh;min-height:640px;overflow:hidden;background:#16322a;}
+  .photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 62%;}
+  .veil-top{position:absolute;left:0;right:0;top:0;height:22%;background:linear-gradient(180deg,rgba(14,36,29,.34),rgba(14,36,29,0));pointer-events:none;z-index:2;}
+  .veil-bot{position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(0deg,rgba(14,36,29,.78),rgba(14,36,29,0));pointer-events:none;z-index:2;}
+  /* header */
+  .hdr{position:absolute;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:15px 20px 12px;color:var(--spr-cream);}
+  .hdr .wm{font-family:var(--spr-serif);font-size:23px;letter-spacing:-.6px;line-height:1;}
+  .hdr .r{display:flex;gap:15px;align-items:center;}
+  .hdr svg{display:block;}
+  /* title */
+  .title{position:absolute;top:12%;right:22px;left:32%;z-index:5;text-align:right;font-family:var(--spr-serif);font-weight:400;
+    font-size:clamp(40px,11.6vw,52px);line-height:1.02;letter-spacing:-1.4px;color:var(--spr-cream);}
+  /* default bottom paragraph */
+  .lead{position:absolute;left:24px;right:24px;bottom:7.5%;z-index:6;font-family:var(--spr-sans);font-size:17px;line-height:23px;
+    letter-spacing:-.3px;color:var(--spr-cream);opacity:.95;transition:opacity .42s var(--spr-ease);}
+  .lead.hidden{opacity:0;pointer-events:none;}
+  /* markers */
+  .marker{position:absolute;z-index:12;width:50px;height:50px;border-radius:50%;transform:translate(-50%,-50%);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--spr-cream);
+    background:rgba(20,40,32,.28);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    border:1px solid rgba(224,209,182,.62);transition:transform .3s var(--spr-ease),opacity .3s var(--spr-ease);}
+  .marker:active{transform:translate(-50%,-50%) scale(1.06);}
+  .marker svg{width:20px;height:20px;}
+  .marker.dim{opacity:.9;}
+  /* info card grows from marker corner — sized to live: near-square, wide to right edge, text in rows */
+  .card{position:absolute;z-index:20;width:63%;aspect-ratio:0.73;background:var(--spr-card,#162A1F);border-radius:2px;
+    padding:22px;color:var(--spr-cream);opacity:0;pointer-events:none;
+    transform:scale(.32);transform-origin:var(--tox,100%) var(--toy,0%);
+    transition:opacity .42s var(--spr-ease),transform .42s var(--spr-ease);
+    display:flex;flex-direction:column;justify-content:flex-end;box-shadow:0 24px 60px rgba(0,0,0,.4);}
+  .card.open{opacity:1;pointer-events:auto;transform:scale(1);}
+  /* active marker rises ABOVE the card and becomes its corner icon (no clone, no tint fill) */
+  .marker.active{z-index:30;background:rgba(20,40,32,.0);backdrop-filter:none;-webkit-backdrop-filter:none;border-color:rgba(224,209,182,.75);}
+  /* label big, in ROWS (each word on its own line), lower-left */
+  .card .lbl{font-family:var(--spr-sans);font-weight:400;font-size:21px;letter-spacing:.12em;line-height:1.35;
+    text-transform:uppercase;color:var(--spr-cream);}
+  .card .lbl span{display:block;}
+  :root{--spr-card:#162A1F;}
+</style>
+</head>
+<body>
+<div class="stage" data-stage>
+  <img class="photo" src="assets/terraces.webp" alt="Panoramic terrace at golden hour">
+  <div class="veil-top"></div>
+  <div class="veil-bot"></div>
+
+  <header class="hdr">
+    <span class="wm">Springs</span>
+    <span class="r">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 20s-6.8-4.2-6.8-9.1C5.2 8.1 7.1 6.3 9.3 6.3c1.5 0 2.3.8 2.7 1.4.4-.6 1.2-1.4 2.7-1.4 2.2 0 4.1 1.8 4.1 4.6C18.8 15.8 12 20 12 20z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      <span style="display:flex;flex-direction:column;gap:5px;"><span style="display:block;width:21px;height:1.5px;background:currentColor;"></span><span style="display:block;width:21px;height:1.5px;background:currentColor;"></span></span>
+    </span>
+  </header>
+
+  <h2 class="title">Panoramic<br>Terraces</h2>
+
+  <!-- markers: aperture (railing area), plant (climbing greenery left), bulb (lighting right) -->
+  <!-- positions tuned to OUR render subjects; corner = where card grows from -->
+  <button class="marker" data-marker="aperture" data-corner="tl" style="left:31%;top:50.5%;" aria-label="Transparent panoramic railing">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 6v12M16 6v12M4 12h16" stroke="currentColor" stroke-width="1.1"/></svg>
+  </button>
+  <button class="marker" data-marker="plant" data-corner="tl" style="left:14%;top:66%;" aria-label="Decorative climbing plants">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c0-6 3-10 8-11-1 7-4 10-8 11m0 0c0-5-2.5-8-7-9 1 5.5 3.5 8.5 7 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+  </button>
+  <button class="marker" data-marker="bulb" data-corner="tr" style="left:82%;top:63.5%;" aria-label="Integrated lighting">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 1 4 10.5c-.7.6-1 1-1 1.8H9c0-.8-.3-1.2-1-1.8A6 6 0 0 1 12 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <p class="lead" data-lead>Light plays delicately across the viewing terraces, hiding among flowers, shimmering in treetops, arranging a quiet dance of shadows. Let nothing distract you from the twinkle of distant stars or the loving sparks in the eyes of your close ones.</p>
+
+  <!-- card (single, label swaps per marker). NO glyph inside — the REAL marker rises to become the card corner. -->
+  <div class="card" data-card>
+    <span class="lbl" data-cardlbl></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  window.__PAGE_OK__=false;
+  var stage=document.querySelector('[data-stage]');
+  var lead=document.querySelector('[data-lead]');
+  var card=document.querySelector('[data-card]');
+  var cardLbl=document.querySelector('[data-cardlbl]');
+  var markers=[].slice.call(document.querySelectorAll('[data-marker]'));
+  // labels as ROWS — each word on its own line, matching live (INTEGRATED / LIGHTING)
+  var DATA={
+    aperture:{rows:['TRANSPARENT','PANORAMIC','RAILING']},
+    plant:{rows:['DECORATIVE','CLIMBING','PLANTS']},
+    bulb:{rows:['INTEGRATED','LIGHTING']}
+  };
+  var openKey=null;
+  function markerEl(k){ return markers.filter(function(m){return m.getAttribute('data-marker')===k;})[0]; }
+  var MPCT=14; // marker inset from card corner (px), so the card corner sits around the marker
+  function openCard(k){
+    var m=markerEl(k); if(!m) return;
+    var key=k, d=DATA[k], corner=m.getAttribute('data-corner');
+    var sx=stage.clientWidth, sy=stage.clientHeight;
+    var mx=m.offsetLeft, my=m.offsetTop;   // marker CENTRE (marker has translate -50%,-50%)
+    var msz=m.offsetWidth;                 // ~50px
+    var cw=sx*0.63, ch=cw/0.73;
+    // The REAL marker becomes the card's corner. Card corner ~ marker centre, offset so marker sits inside corner.
+    var cardLeft, cardTop, tox, toy;
+    if(corner==='tr'){                     // marker at card TOP-RIGHT
+      cardLeft = mx + msz/2 + MPCT - cw;   // right edge just past marker
+      cardTop  = my - msz/2 - MPCT;        // top edge just above marker
+      tox='100%'; toy='0%';
+    } else {                               // marker at card TOP-LEFT
+      cardLeft = mx - msz/2 - MPCT;
+      cardTop  = my - msz/2 - MPCT;
+      tox='0%'; toy='0%';
+    }
+    // clamp fully in-frame
+    cardLeft=Math.max(8, Math.min(cardLeft, sx-cw-8));
+    cardTop =Math.max(sy*0.10, Math.min(cardTop, sy*0.865-ch));
+    card.style.left=cardLeft+'px';
+    card.style.top=cardTop+'px';
+    card.style.setProperty('--tox',tox);
+    card.style.setProperty('--toy',toy);
+    cardLbl.innerHTML=d.rows.map(function(r){return '<span>'+r+'</span>';}).join('');
+    card.classList.add('open');
+    lead.classList.add('hidden');
+    // the tapped marker RISES to become the card corner (no clone); others dim, stay frosted
+    markers.forEach(function(x){ x.classList.toggle('active', x===m); x.classList.toggle('dim', x!==m); });
+    openKey=key;
+  }
+  function closeCard(){
+    card.classList.remove('open');
+    lead.classList.remove('hidden');
+    markers.forEach(function(x){ x.classList.remove('dim'); x.classList.remove('active'); });
+    openKey=null;
+  }
+  markers.forEach(function(m){
+    m.addEventListener('click', function(e){
+      e.stopPropagation();
+      var k=m.getAttribute('data-marker');
+      if(openKey===k){ closeCard(); return; }        // re-tap same → toggle shut
+      if(openKey){ openCard(k); return; }             // tap other → direct swap
+      openCard(k);
+    });
+  });
+  // tap anywhere (outside a marker) closes (Yehor: close = tap anywhere)
+  stage.addEventListener('click', function(){ if(openKey) closeCard(); });
+  card.addEventListener('click', function(e){ e.stopPropagation(); if(openKey) closeCard(); });
+  window.__PAGE_OK__=true;
+})();
+</script>
+</body>
+</html>

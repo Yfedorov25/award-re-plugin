@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · hero-video-render-rotator · finest (crossfading video+render slideshow, fixed serif title)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · hero-video-render-rotator
+================================================================================
+  crownd/finest's hero — a full-bleed hero whose BACKGROUND crossfades a slideshow mixing
+  VIDEO clips + RENDER stills, with a big serif wordmark FIXED + persistent over all of them
+  (title never moves; only the media rotates). Video slides autoplay muted+loop while active.
+  Harvested from D_finest (F1). OUR QUADRO clips + renders. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#0c0c0a;color:#fff;font-family:var(--sans)}
+
+  .hvr-stage{ --hvr-bg:#0c0c0a; --hvr-ink:#fff; --hvr-serif:'Playfair Display',serif; --hvr-mark:13vw; --hvr-fade:1100ms; }
+  /* persistent UI like finest (nav + bottom pill) for context */
+  .bar{position:absolute;top:0;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:3vh 4vw;color:#fff;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase}
+  .bar .logo{font-family:var(--serif);font-style:italic;font-size:1.3rem;letter-spacing:0;text-transform:none}
+  .hvr-title .mark{font-style:italic}
+  .searchpill{position:absolute;left:50%;bottom:4vh;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:1rem;
+    background:#fff;border-radius:999px;padding:.7rem 1.4rem;box-shadow:0 8px 30px rgba(0,0,0,.18);font-size:.95rem;color:#16150f}
+  .searchpill .chip{background:#efece6;border-radius:999px;padding:.3rem .8rem;font-size:.85rem}
+  .searchpill a{color:#16150f;text-decoration:underline}
+</style>
+</head>
+<body>
+
+  <section class="hvr-stage" id="hero">
+    <div class="bar"><div class="logo">finest</div><div>Immobiliensuche · Kontakt</div></div>
+
+    <div class="hvr-media">
+      <div class="hvr-slide is-video"><div class="hvr-frame"><video src="renders/clip-river-lite.webm" muted loop playsinline></video></div></div>
+      <div class="hvr-slide"><div class="hvr-frame"><img src="renders/aerial.webp" alt=""></div></div>
+      <div class="hvr-slide"><div class="hvr-frame"><img src="renders/day-front.webp" alt=""></div></div>
+      <div class="hvr-slide"><div class="hvr-frame"><img src="renders/terrace.webp" alt=""></div></div>
+      <div class="hvr-slide"><div class="hvr-frame"><img src="renders/night.webp" alt=""></div></div>
+    </div>
+
+    <div class="hvr-title"><div class="mark">finest</div></div>
+    <!-- finest hero has NO dots/controls — it just auto-rotates the background under the
+         fixed wordmark until you scroll on. Dots are an OPTIONAL extra (omit for the finest look). -->
+  </section>
+
+<script src="component.js"></script>
+<script>
+  window.__hvr = HeroVideoRenderRotator.create('#hero', { interval:4200, fade:1100, kenburns:true, hoverPause:true, auto:true });
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>lab: layer-accordion-reveal - Дім у розрізі</title>
+<!--
+  Proof of the atom in isolation: 4 BIG renders as vertical slabs side by side.
+  At rest one slab is open (a near-full render) and the rest are narrow strips with a
+  vertical spine label. Hover/focus a strip -> it opens (clip-path inset grows, the
+  slab translates) while the previous collapses. One open at a time, transform+clip-path
+  only. Each slab IS its component: Вінець(macro-roof) / Пергола(macro-pergola) /
+  Фасад(day-34) / Основа(aerial). Sets __LAB_OK__ via the atom.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  html, body { margin: 0; background: #16130f; color: #f4efe6; font-family: 'Inter', system-ui, sans-serif; }
+  .wrap { padding: clamp(28px, 6vh, 72px) clamp(20px, 5vw, 80px); }
+  .lab-eyebrow { font: 600 .7rem/1 'Inter'; letter-spacing: .24em; text-transform: uppercase; opacity: .6; }
+  .lab-h { font-family: 'Fraunces', Georgia, serif; font-weight: 300; font-size: clamp(2.2rem, 6vw, 4.6rem);
+    line-height: .96; letter-spacing: -.03em; margin: 14px 0 28px; }
+  .rack-box { position: relative; width: 100%; height: 64vh; min-height: 460px; border-radius: 2px; overflow: hidden; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="lab-eyebrow">вул. Замкова · конструкція</div>
+    <h1 class="lab-h">Дім у розрізі</h1>
+    <div class="rack-box">
+      <div class="lar-rack" id="rack"></div>
+    </div>
+  </div>
+
+  <script src="component.js"></script>
+  <script>
+    window.LayerAccordionReveal.create('#rack', {
+      openFlex: 0.62,
+      defaultIndex: 0,
+      panels: [
+        { img: 'renders/macro-roof.webp',    label: 'Вінець',  kicker: '01 · покрівля',   spec: 'Експлуатована покрівля з настилом. Площина, з якої видно місто.' },
+        { img: 'renders/macro-pergola.webp', label: 'Пергола', kicker: '02 · тінь',       spec: 'Термодеревина над терасою. Тепла лінія на тлі білого тиньку.' },
+        { img: 'renders/day-34.webp',        label: 'Фасад',   kicker: '03 · оболонка',   spec: 'Архітектурний тиньк і панорамне скло. Шість будинків, один почерк.' },
+        { img: 'renders/aerial.webp',        label: 'Основа',  kicker: '04 · ділянка',    spec: 'Півтори сотки під кожним домом. Двір, що належить лише вам.' }
+      ]
+    });
+  </script>
+</body>
+</html>

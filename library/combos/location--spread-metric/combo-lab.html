@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--spread-metric · Локація (метрика веде)</title>
+<!--
+  SECTION VARIANT, location--spread-metric (role: location). MAP-STYLE = HI-CONTRAST MONO.
+  COMPOSITION = the SMARTS proportion, RE-PLANNED as a 60/40 spread: the dense real OSM map of
+  с. Агрономічне on the LEFT (~60%), a reading PANEL on the RIGHT (~40%) that LEADS WITH THE METRIC.
+  The top of the panel is a big editorial block that foregrounds the plot: a large «22,5» with
+  «сотки» beside it, «вул. Перемоги · фасад шосе», and the «45 x 50 м» frontage. THEN below it the
+  VISIBLE list of the 6 real POIs with their walk-times, THEN the highway sign-guide, THEN a legal
+  line. The metric is the hero of the panel; the list and the times stay fully visible below it.
+
+  The map carries the property parcel with an authored «22,5 сотки» dimension line and a «≈10 хв»
+  walking ring, exactly the smarts geometry (how much space it takes, the metres written on the
+  plate). Elements appear ONE BY ONE on scroll-in (the staggered birth). CONTROLLED-CLICK (the smarts
+  model): the visitor clicks a list row or a map POI and the real Dijkstra route draws + an honest
+  minute badge. Same content as the smarts reference, a fresh layout, the metric leading the panel.
+  Pin-less; nothing floats.
+
+  Palette HI-CONTRAST MONO: pure black linework on pure white paper, NO warm-lit windows, ONE single
+  red accent reserved for the active route. The realism is identical to the ideal (same baked OSM,
+  same Dijkstra routes); only the cartographic TREATMENT differs (palette + line/fill).
+
+  asset-truth: streets/footprints/green + 6 real POIs verbatim from osm.js (Школа·садок 9хв, Нова
+  Пошта 10хв, Траш! 9хв, Подорожник 10хв, Грош Експрес 15хв, Аврора 18хв). Real facts: вул. Перемоги,
+  22,5 сотки, 45 x 50 м фасад, Гніванське шосе, 5 хвилин від Вінниці. Coords 49.18N 28.33E.
+  __LAB_OK__: 0 pins, the cited atom ran, [data-render-surface] painted (the white paper), 0 errors.
+  NO WebGL/canvas/tiles/mix-blend/backdrop-filter.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only. transform / opacity / clip-path / filter / stroke-dashoffset only.
+     NO mix-blend, NO backdrop-filter, NO animating width/height/top/left. */
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* the SMARTS proportion re-planned as a 60/40 SPREAD: map LEFT ~60%, panel RIGHT ~40% */
+  #combo.combo-stage { background: #ffffff; color: #15140f; min-height: 100vh; height: 100vh;
+    position: relative; display: grid; grid-template-columns: 60% 40%; }
+  @media (max-width: 900px) { #combo.combo-stage { grid-template-columns: 1fr; grid-template-rows: 46vh 1fr; } }
+
+  /* MONO PALETTE: re-point every engine token to a black-on-white register, one red accent.
+     This is the whole "different map style": same engine, different paint. */
+  #combo.combo-stage,
+  .sm__field {
+    --lm-ink: #15140f;            /* near-black foreground */
+    --lm-bg-1: #ffffff;
+    --lm-bg-2: #ffffff;           /* road casing = white halo so black strokes separate */
+    --lm-accent: #d4271c;         /* the single editorial red, reserved for the active route */
+    --lm-accent-soft: #d4271c;
+  }
+
+  /* ---- the LEFT map field (the hero, ~60%) ---- */
+  /* the render surface = pure white paper. A real CSS background-image (a hairline paper grain) so
+     the honest paint-probe sees a painted surface AND the sheet reads like printed stock. */
+  .sm__field {
+    position: relative; overflow: clip;
+    background-color: #ffffff;
+    background-image:
+      radial-gradient(rgba(21,20,15,.022) 0.5px, transparent 0.6px),
+      radial-gradient(rgba(21,20,15,.016) 0.5px, transparent 0.6px);
+    background-size: 4px 4px, 7px 7px;
+    background-position: 0 0, 2px 3px;
+    border-right: 1px solid rgba(21,20,15,.14);
+  }
+  @media (max-width: 900px) { .sm__field { border-right: 0; border-bottom: 1px solid rgba(21,20,15,.14); } }
+  .sm__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the engine's stage gradient would re-tint the field; force flat white under the SVG */
+  .sm__field.lm__stage, .sm__field.lm { background-color: #ffffff; }
+
+  /* ---- MONO MAP TREATMENT: redraw the engine's SVG classes black-on-white ---- */
+  /* green/water demoted to the faintest grey wash so the map stays monochrome */
+  .sm__field .lm-gw--green { fill: rgba(21,20,15,.045); }
+  .sm__field .lm-gw--water { fill: rgba(21,20,15,.06); }
+
+  /* buildings: light black footprints, hairline black stroke, a printed cadastral plan.
+     NO lit windows in mono: the --lit class renders like every other footprint (kill warm glow). */
+  .sm__field .lm-bld      { fill: rgba(21,20,15,.085); stroke: rgba(21,20,15,.16); stroke-width: 0.5; }
+  .sm__field .lm-bld--lit { fill: rgba(21,20,15,.085); stroke: rgba(21,20,15,.16); animation: none; }
+
+  /* road hierarchy: PURE BLACK strokes over WHITE halo casing, so the grid reads crisp on the
+     dense footprint field. Widths kept from the engine ranking; casing is the white halo. */
+  .sm__field .lm-rdc { stroke: #ffffff; }
+  .sm__field .lm-rd--hwy   { stroke: rgba(21,20,15,.92); }
+  .sm__field .lm-rd--main  { stroke: rgba(21,20,15,.74); }
+  .sm__field .lm-rd--mid   { stroke: rgba(21,20,15,.5); }
+  .sm__field .lm-rd--minor { stroke: rgba(21,20,15,.3); }
+  .sm__field .lm-rd--faint { stroke: rgba(21,20,15,.14); }
+  .sm__field .lm-rdname { fill: rgba(21,20,15,.5); }
+
+  /* parcel: black hatch + black stroke; tag in ink. (engine hatch uses brick rgba, override) */
+  .sm__field #lmHatch rect { fill: rgba(21,20,15,.06); }
+  .sm__field #lmHatch line { stroke: rgba(21,20,15,.6); }
+  .sm__field .lm-parcel { stroke: #15140f; stroke-width: 1.6; }
+  .sm__field .lm-pulse  { stroke: #15140f; }
+  .sm__field .lm-sitetag { fill: #15140f; }
+
+  /* walking ring: thin black dashed */
+  .sm__field .lm-ring  { stroke: rgba(21,20,15,.3); }
+  .sm__field .lm-ringt { fill: rgba(21,20,15,.5); }
+
+  /* numbered POIs: white disc, black ring, black numeral; active flips to the red accent */
+  .sm__field .lm-pt circle { fill: #ffffff; stroke: rgba(21,20,15,.75); stroke-width: 1.4; }
+  .sm__field .lm-pt text   { fill: #15140f; }
+  .sm__field .lm-pt:hover circle, .sm__field .lm-pt.is-on circle { fill: var(--lm-accent); stroke: #15140f; }
+
+  /* the ONE red moment: the active Dijkstra route + walker + live badge */
+  .sm__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.2; }
+  .sm__field .lm-walker { fill: var(--lm-accent); stroke: #ffffff; }
+  .sm__field .lm-livet  { fill: #ffffff; }
+  .sm__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* the standing section label, top-left of the map sheet */
+  .sm__label { position: absolute; z-index: 8; top: clamp(18px, 4.5vh, 46px); left: clamp(18px, 3vw, 44px);
+    font: 600 .64rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(21,20,15,.56); pointer-events: none; }
+
+  /* the «22,5 сотки» dimension line + metric over the parcel (authored, the smarts loc-dim) */
+  .sm__field .sm-dim   { stroke: rgba(21,20,15,.62); stroke-width: 1; }
+  .sm__field .sm-dimt  { fill: #15140f; font: 600 11px var(--combo-sans); letter-spacing: .1em;
+    text-transform: uppercase; text-anchor: middle; }
+
+  /* ---- the RIGHT panel (~40%): the METRIC LEADS, then the visible list, then the highway guide ---- */
+  .sm__panel { position: relative; z-index: 6; background: #ffffff;
+    padding: clamp(1.3rem, 4vh, 2.8rem) clamp(1.2rem, 2.2vw, 2.2rem);
+    display: flex; flex-direction: column; gap: clamp(.7rem, 1.5vh, 1.1rem); overflow: auto; }
+
+  .sm__eyebrow { font: 600 .64rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(21,20,15,.6); margin: 0; }
+
+  /* THE METRIC HERO: a large «22,5» with «сотки» beside it + frontage facts */
+  .sm__metric { margin: .1rem 0 .2rem; padding-bottom: clamp(.7rem, 1.6vh, 1.1rem);
+    border-bottom: 2px solid rgba(21,20,15,.9); }
+  .sm__metric .figure { display: flex; align-items: baseline; gap: .5rem; }
+  .sm__metric .num { font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(4.4rem, 9.5vw, 7.2rem); line-height: .82; letter-spacing: -.04em;
+    color: #15140f; font-variant-numeric: lining-nums; }
+  .sm__metric .unit { display: flex; flex-direction: column; gap: .1rem; padding-bottom: .5rem; }
+  .sm__metric .unit b { font: 500 1.1rem/1 var(--combo-serif); color: #15140f; }
+  .sm__metric .unit span { font: 600 .58rem/1.2 var(--combo-sans); letter-spacing: .2em;
+    text-transform: uppercase; color: rgba(21,20,15,.5); }
+  .sm__metric .frontage { margin: .55rem 0 0; display: flex; flex-wrap: wrap; gap: .35rem 1.1rem;
+    font: 500 .8rem/1.3 var(--combo-sans); color: rgba(21,20,15,.72); }
+  .sm__metric .frontage b { color: #15140f; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .sm__hint { margin: 0; font: 500 .8rem/1.5 var(--combo-sans); color: rgba(21,20,15,.6); max-width: 40ch; }
+  .sm__coords { display: block; margin-top: .3rem; font: 500 .6rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(21,20,15,.42); }
+
+  /* the VISIBLE POI list (engine fills it), re-skinned for the WHITE field */
+  .sm__list { display: block; margin-top: .2rem; }
+  .sm__panel .lm-row { padding: .56rem 0; border-bottom: 1px solid rgba(21,20,15,.12);
+    color: rgba(21,20,15,.82); cursor: pointer;
+    transition: background .25s, padding-left .25s, color .25s; }
+  .sm__panel .lm-row .n  { color: rgba(21,20,15,.45); font-variant-numeric: tabular-nums; }
+  .sm__panel .lm-row .nm { color: #15140f; }
+  .sm__panel .lm-row .tm { color: rgba(21,20,15,.6); }
+  .sm__panel .lm-row .tm b { color: #15140f; font-variant-numeric: tabular-nums; }
+  .sm__panel .lm-row:hover, .sm__panel .lm-row.is-on { background: rgba(21,20,15,.04); padding-left: .5rem; }
+  .sm__panel .lm-row.is-on .nm, .sm__panel .lm-row.is-on .n { color: var(--lm-accent); }
+
+  /* the highway sign-guide (smarts loc__sign), mono register */
+  .sm__sign { margin-top: .3rem; border: 1px solid rgba(21,20,15,.18); background: #ffffff;
+    border-radius: 8px; padding: .7rem .8rem; }
+  .sm__sign .tt { margin: 0; font: 600 .58rem/1 var(--combo-sans); letter-spacing: .2em; text-transform: uppercase;
+    color: rgba(21,20,15,.7); }
+  .sm__sign .tt::after { content: " \2192"; color: var(--lm-accent); }
+  .sm__sign ul { margin: .55rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .42rem; }
+  .sm__sign li { list-style: none; display: flex; justify-content: space-between; gap: 1rem;
+    font: 500 .78rem/1 var(--combo-sans); color: rgba(21,20,15,.78); }
+  .sm__sign li b { font-weight: 600; color: #15140f; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .sm__legal { margin-top: auto; font: 500 .58rem/1.4 var(--combo-sans); letter-spacing: .04em; color: rgba(21,20,15,.5); }
+
+  .combo-pre, .combo-post { background: #f4f2ec; color: rgba(21,20,15,.45); }
+
+  @media (prefers-reduced-motion: reduce) { .sm__panel .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--spread-metric">
+
+    <!-- LEFT: the white paper map field (the hero, ~60%). locmap-engine injects the SVG here. -->
+    <div class="sm__field lm" data-lm-stage data-render-surface>
+      <p class="sm__label">с. Агрономічне · за даними OpenStreetMap</p>
+    </div>
+
+    <!-- RIGHT: the panel (~40%). The METRIC leads, then the visible list, then the highway guide. -->
+    <aside class="sm__panel">
+      <p class="sm__eyebrow" data-sm-fade>Локація · ділянка</p>
+
+      <div class="sm__metric" data-sm-fade>
+        <div class="figure">
+          <span class="num">22,5</span>
+          <span class="unit"><b>сотки</b><span>власна земля</span></span>
+        </div>
+        <p class="frontage">
+          <span>вул. Перемоги · фасад шосе</span>
+          <span>Фасад <b>45 x 50 м</b></span>
+        </p>
+      </div>
+
+      <p class="sm__hint" data-sm-fade>Натисніть місце, щоб побачити шлях по справжніх вулицях і час пішки.
+        <span class="sm__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+
+      <div class="sm__list" data-lm-list></div>
+
+      <div class="sm__sign" data-sm-fade>
+        <p class="tt">По Гніванському шосе</p>
+        <ul>
+          <li data-loc-hwy><span>До Вінниці</span><b>12 хв</b></li>
+          <li data-loc-hwy><span>До обʼїзної</span><b>4 хв</b></li>
+        </ul>
+      </div>
+
+      <p class="sm__legal" data-sm-fade>Карта за даними OpenStreetMap. Хвилини орієнтовні.</p>
+    </aside>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (canon engine) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+    var gsap = window.gsap;
+
+    // ---- ENGINE: the dense real map, re-themed mono via CSS. owns_pin FALSE; reveal on
+    //      scroll-in; CLICK/HOVER any POI (map or list row) draws the red route. ----
+    var map;
+    SectionHarness.ranOK('locmap-engine', function () {
+      map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6, walkMin: 10, modes: ['loc'], route: true,
+        flicker: { rate: 1e9 },    // mono: NO lit windows (rate huge -> none light)
+        reveal: { start: 'top 72%', once: true },
+        parallax: { green: 1.0, buildings: 1.6, pins: 2.4 },
+        ease: 'award'
+      });
+      window.__smMap = map;
+
+      // authored dimension line + «22,5 сотки» over the real parcel (the smarts loc-dim geometry)
+      var S = OSM.site, svg = map.svg, NS = 'http://www.w3.org/2000/svg';
+      var g = document.createElementNS(NS, 'g'); g.setAttribute('data-sm-dim', '');
+      function ln(x1, y1, x2, y2) { var e = document.createElementNS(NS, 'line');
+        e.setAttribute('x1', x1); e.setAttribute('y1', y1); e.setAttribute('x2', x2); e.setAttribute('y2', y2);
+        e.setAttribute('class', 'sm-dim'); g.appendChild(e); }
+      ln(S.x - 15, S.y + 22, S.x + 14, S.y + 22);
+      ln(S.x - 15, S.y + 18, S.x - 15, S.y + 26);
+      ln(S.x + 14, S.y + 18, S.x + 14, S.y + 26);
+      var t = document.createElementNS(NS, 'text'); t.setAttribute('x', S.x); t.setAttribute('y', S.y + 38);
+      t.setAttribute('class', 'sm-dimt'); t.textContent = '22,5 сотки'; g.appendChild(t);
+      svg.appendChild(g);
+    });
+
+    // ---- staggered birth of the RIGHT panel: blocks fade in one by one (the smarts reveal) ----
+    if (gsap) {
+      var fades = gsap.utils.toArray('[data-sm-fade]');
+      gsap.set(fades, { opacity: 0, y: 8 });
+      ScrollTrigger.create({ trigger: '#combo', start: 'top 70%', once: true, onEnter: function () {
+        gsap.to(fades, { opacity: 1, y: 0, duration: .7, ease: 'power2.out', stagger: .12, delay: .3 });
+      } });
+    }
+
+    // pin-less, controlled-interactive section: the visitor clicks to draw routes. 0 pins.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>

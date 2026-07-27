@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · scroll-zoom-image-pair · finest (framed render scroll-zooms beside held serif copy)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · scroll-zoom-image-pair
+================================================================================
+  crownd/finest's editorial pair — a portrait RENDER in a fixed clipping FRAME + a serif
+  HEADING/body beside it; as the section passes through the viewport the image SCALES UP
+  within its frame (scroll-scrubbed Ken-Burns bound to the frame) while the copy holds; the
+  copy rises in once on enter. Harvested from D_finest (F3). OUR QUADRO render. NO WebGL.
+  window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --paper:#f1efe9; --ink:#16150f; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans)}
+  .spacer{height:90vh;display:grid;place-items:center;background:var(--paper);color:var(--ink);opacity:.4;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+  .szp-stage{ --szp-bg:#f1efe9; --szp-ink:#16150f; --szp-serif:'Playfair Display',serif; --szp-sans:'Inter',sans-serif;
+    --szp-head:2.8vw; --szp-ratio:4/5; --szp-radius:4px; }
+  .szp-copy h2{font-style:normal}
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — рендер у рамці плавно zoom, копі тримається</div>
+
+  <section class="szp-stage" id="pair">
+    <div class="szp-figure"><div class="szp-frame"><img src="renders/day-front.webp" alt="QUADRO"></div></div>
+    <div class="szp-copy" data-zoomcopy>
+      <h2>Архітектура найвищого ґатунку</h2>
+      <p>Finest поєднує новобудову з матеріалами й опорядженням преміумкласу: відкриті плани, великі вікна, щедрі тераси й сади — простір, у якому одразу відчуваєш себе вдома.</p>
+    </div>
+  </section>
+
+  <div class="spacer">↓ ще секція (rtl)</div>
+
+  <section class="szp-stage szp--rtl" id="pair2">
+    <div class="szp-figure"><div class="szp-frame"><img src="renders/terrace.webp" alt="QUADRO"></div></div>
+    <div class="szp-copy" data-zoomcopy>
+      <h2>Тиша, що має адресу</h2>
+      <p>Зелене ядро кварталу, приватні тераси й власний вихід у двір — деталі, які перетворюють квадратні метри на дім.</p>
+    </div>
+  </section>
+
+  <div class="spacer">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__szp = ScrollZoomImagePair.create('#pair', { zoomFrom:1.0, zoomTo:1.14, ease:'none', revealCopy:true, manageLenis:false });
+    window.__szp2 = ScrollZoomImagePair.create('#pair2', { zoomFrom:1.0, zoomTo:1.14, ease:'none', revealCopy:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>lab: exploded-stack-inspect — interactive exploded axonometric</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<style>
+  html,body{margin:0;background:#16130f;color:#f4efe6;font-family:'Inter',system-ui,sans-serif;}
+  .wrap{min-height:100vh;display:grid;place-items:center;padding:6vh clamp(20px,5vw,80px);}
+  .stage{position:relative;width:100%;max-width:1200px;height:78vh;}
+  .lead{position:absolute;top:clamp(20px,5vh,48px);left:0;max-width:24ch;z-index:80;}
+  .lead .eyebrow{font:600 .7rem/1 'Inter';letter-spacing:.22em;text-transform:uppercase;color:#b56a4a;}
+  .lead h1{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(2.2rem,5vw,4rem);line-height:.96;letter-spacing:-.03em;margin:.5rem 0 0;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage" id="stage">
+      <div class="lead">
+        <div class="eyebrow">Дім у розрізі</div>
+        <h1>Шар за шаром</h1>
+      </div>
+    </div>
+  </div>
+
+  <script src="component.js"></script>
+  <script>
+    (function(){
+      var ctrl = window.ExplodedStackInspect.create('#stage', {
+        layers: [
+          { img:'renders/macro-roof.webp',    label:'Вінець',  spec:'Фальцева покрівля. Чисті лінії, прихований водозбір.' },
+          { img:'renders/terrace-02.webp',     label:'Скління',  spec:'Панорамна тераса верхнього обʼєму. Світло через увесь день.' },
+          { img:'renders/day-front.webp',      label:'Фасад',    spec:'Тиньк і теплий камінь. Спокійна геометрія обʼєму.' },
+          { img:'renders/aerial.webp',         label:'Основа',   spec:'Цоколь і ділянка. Дім посаджено в рельєф, не на нього.' }
+        ]
+      });
+      window.__esi = ctrl;
+      // probe: ready once the rig built and the top render (roof) decoded
+      function ready(){
+        var root = document.querySelector('#stage');
+        var img = root && root.querySelector('.esi__layer .esi__plane img');
+        var built = root && root.getAttribute('data-esi-ready') === '1';
+        var painted = img && img.complete && img.naturalWidth > 0;
+        if (built && painted) { window.__LAB_OK__ = true; return; }
+        setTimeout(ready, 120);
+      }
+      setTimeout(ready, 120);
+    })();
+  </script>
+</body>
+</html>

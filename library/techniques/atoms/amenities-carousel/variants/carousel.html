@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Springs · Amenities carousel · scroll-wipe-4slide</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--spr-teal,#0E3A34);font-family:var(--spr-sans);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  :root{--spr-teal:#0E3A34;--spr-teal2:#0d2b28;}
+  /* spacer above/below so the pinned section has scroll room */
+  .pad{height:60vh;}
+  /* pin band: tall wrapper, sticky stage */
+  .pinwrap{position:relative;height:500vh;background:var(--spr-teal);}
+  .stage{position:sticky;top:0;height:100dvh;min-height:640px;overflow:hidden;display:flex;flex-direction:column;
+    background:var(--spr-teal);}
+  /* header */
+  .hdr{position:absolute;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:15px 20px 12px;color:var(--spr-cream);}
+  .hdr .wm{font-family:var(--spr-serif);font-size:23px;letter-spacing:-.6px;line-height:1;}
+  .hdr .r{display:flex;gap:15px;align-items:center;}
+  /* card: image slot near top; slides stacked, clip-path wipe; TABS OVERLAID on image bottom (like live) */
+  .card{position:relative;margin:56px 0 0;width:100%;height:46vh;min-height:330px;overflow:hidden;background:#0b201d;}
+  .slide{position:absolute;inset:0;}
+  .slide img{width:100%;height:100%;object-fit:cover;display:block;}
+  .slide .grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,43,40,.28) 0%,rgba(13,43,40,0) 26%,rgba(13,43,40,.12) 50%,rgba(13,43,40,.78) 100%);}
+  /* tabs overlaid on the image's lower area (live position) */
+  .tabs{position:absolute;left:24px;right:24px;bottom:20px;z-index:10;}
+  .tabrow{display:flex;gap:8px;}
+  .tab{flex:1;font-family:var(--spr-sans);font-weight:400;font-size:12px;letter-spacing:.96px;text-transform:uppercase;
+    color:rgba(224,209,182,.5);padding-bottom:9px;transition:color .3s var(--spr-ease);text-align:left;}
+  .tab.on{color:var(--spr-cream);font-weight:500;}
+  .ulrow{display:flex;gap:8px;}
+  .ul{flex:1;height:1px;background:rgba(224,209,182,.6);opacity:.3;transition:opacity .3s var(--spr-ease);}
+  .ul.on{opacity:1;}
+  /* caption below the image: heading + body (no 01/04 index — live doesn't show it) */
+  .cap{position:relative;flex:1;padding:24px 24px 20px;color:var(--spr-cream);}
+  .capstack{position:relative;min-height:170px;}
+  .h{font-family:var(--spr-serif);font-weight:400;font-size:clamp(28px,7.6vw,34px);line-height:1.06;letter-spacing:-.8px;margin:0 0 14px;}
+  .body{font-family:var(--spr-sans);font-size:16px;line-height:22px;letter-spacing:-.3px;opacity:.9;max-width:34ch;}
+  /* ALL capsets absolutely stacked in the same box — only opacity cross-fades (no layout jump, no third state) */
+  .capset{position:absolute;left:24px;right:24px;top:24px;opacity:0;transition:opacity .28s var(--spr-ease);pointer-events:none;}
+  /* S55: службовий клас для гейт-хука. Вмикається на час ОДНОГО перемальовування в
+     render(p) і одразу знімається, тому поведінка того, що шипиться, не змінюється. */
+  .no-trans, .no-trans *{ transition:none !important; animation:none !important; }
+  .capset.on{opacity:1;pointer-events:auto;}
+  .idx{display:none;}
+</style>
+</head>
+<body>
+<div class="pad"></div>
+<div class="pinwrap" data-pin>
+  <div class="stage" data-stage>
+    <header class="hdr">
+      <span class="wm">Springs</span>
+      <span class="r">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M12 20s-6.8-4.2-6.8-9.1C5.2 8.1 7.1 6.3 9.3 6.3c1.5 0 2.3.8 2.7 1.4.4-.6 1.2-1.4 2.7-1.4 2.2 0 4.1 1.8 4.1 4.6C18.8 15.8 12 20 12 20z"/></svg>
+        <span style="display:flex;flex-direction:column;gap:5px;"><span style="display:block;width:21px;height:1.5px;background:currentColor;"></span><span style="display:block;width:21px;height:1.5px;background:currentColor;"></span></span>
+      </span>
+    </header>
+
+    <div class="card" data-cardframe>
+      <!-- 4 slides stacked; wipe reveals via clip-path -->
+      <div class="slide" data-slide="0"><img src="assets/pool.webp" alt="Spacious Swimming Pool"><div class="grad"></div></div>
+      <div class="slide" data-slide="1"><img src="assets/fitness.webp" alt="Fitness Center"><div class="grad"></div></div>
+      <div class="slide" data-slide="2"><img src="assets/beauty.webp" alt="Beauty Lounge"><div class="grad"></div></div>
+      <div class="slide" data-slide="3"><img src="assets/hammam.webp" alt="Luxurious Stone Hammam"><div class="grad"></div></div>
+      <!-- tabs overlaid on image bottom (live position) -->
+      <div class="tabs">
+        <div class="tabrow">
+          <span class="tab" data-tab="0">POOL</span>
+          <span class="tab" data-tab="1">FITNESS</span>
+          <span class="tab" data-tab="2">BEAUTY</span>
+          <span class="tab" data-tab="3">HAMMAM</span>
+        </div>
+        <div class="ulrow">
+          <span class="ul" data-ul="0"></span><span class="ul" data-ul="1"></span><span class="ul" data-ul="2"></span><span class="ul" data-ul="3"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cap">
+      <div class="capstack">
+        <div class="capset" data-cap="0">
+          <div class="idx">01 / 04</div>
+          <h3 class="h">Spacious Swimming Pool</h3>
+          <p class="body">Imagine diving into a crystal-clear pool, feeling light and refreshed with every cell. Splashing water washes your worries away. Emerge and feel pleasant coolness on your skin.</p>
+        </div>
+        <div class="capset" data-cap="1">
+          <div class="idx">02 / 04</div>
+          <h3 class="h">Fitness Center with Panoramic Windows</h3>
+          <p class="body">Our state-of-the-art equipment supports your health and well-being. Panoramic windows and comfortable environment guarantee your full satisfaction.</p>
+        </div>
+        <div class="capset" data-cap="2">
+          <div class="idx">03 / 04</div>
+          <h3 class="h">Beauty Lounge with Massage Parlour</h3>
+          <p class="body">Springs beauty lounge and its unique care programs help you end your day on a finest note.</p>
+        </div>
+        <div class="capset" data-cap="3">
+          <div class="idx">04 / 04</div>
+          <h3 class="h">Luxurious Stone Hammam</h3>
+          <p class="body">Soft light, delicate textures of natural stone walls, and warm glowing steam that can make your body light and your thoughts — airy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="pad"></div>
+
+<script>
+(function(){
+  window.__PAGE_OK__=false;
+  var N=4;
+  var pin=document.querySelector('[data-pin]');
+  var slides=[].slice.call(document.querySelectorAll('[data-slide]'));
+  var caps=[].slice.call(document.querySelectorAll('[data-cap]'));
+  var tabs=[].slice.call(document.querySelectorAll('[data-tab]'));
+  var uls=[].slice.call(document.querySelectorAll('[data-ul]'));
+  var reduced=false; try{reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;}catch(e){}
+  var EASE=function(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }; // house-ish ease
+
+  // ── discrete SNAP slider: 4 stations. scroll drives a float index, but the WIPE
+  //    animates as a clean transition toward the target station; on idle we GLIDE-SNAP
+  //    to the nearest station so it never rests mid-wipe. caption/tab swap only on the
+  //    SETTLED index (no intermediate third state, no flicker). ──
+  var disp=0;         // displayed float index (animated, 0..N-1)
+  var target=0;       // target station scroll drives toward (snapped integer on idle)
+  var settled=-1;     // last integer index whose caption/tab is shown
+  var raf=0, idleT=0;
+
+  function paintCaption(i){
+    if(i===settled) return; settled=i;
+    caps.forEach(function(c,k){ c.classList.toggle('on', k===i); });
+    tabs.forEach(function(t,k){ t.classList.toggle('on', k===i); });
+    uls.forEach(function(u,k){ u.classList.toggle('on', k===i); });
+  }
+  function paintWipe(f){
+    // f = displayed float 0..N-1. slide 0 base; each higher slide revealed by a HARD
+    // vertical seam travelling R→L (incoming enters from right, seam moves left) as f passes it.
+    for(var k=0;k<N;k++){
+      var s=slides[k];
+      if(k===0){ s.style.clipPath='none'; s.style.zIndex=1; continue; }
+      s.style.zIndex=1+k;
+      if(f>=k){ s.style.clipPath='none'; }                       // fully revealed
+      else if(f<=k-1){ s.style.clipPath='inset(0 0 0 100%)'; }   // fully hidden (0 width, from right)
+      else { var frac=f-(k-1); s.style.clipPath='inset(0 0 0 '+((1-frac)*100)+'%)'; } // wiping in from right
+    }
+  }
+  function tick(){
+    // ease disp toward target (this IS the доводчик/settling animation)
+    var d=target-disp;
+    if(Math.abs(d)<0.001){ disp=target; }
+    else { disp += d*0.16; }
+    paintWipe(disp);
+    paintCaption(Math.round(disp));
+    if(disp!==target){ raf=requestAnimationFrame(tick); } else { raf=0; }
+  }
+  function kick(){ if(!raf) raf=requestAnimationFrame(tick); }
+
+  function scrollIndex(){
+    var r=pin.getBoundingClientRect();
+    var vh=window.innerHeight;
+    var total=pin.offsetHeight - vh;
+    var scrolled=Math.min(Math.max(-r.top,0),total);
+    return total>0 ? (scrolled/total)*(N-1) : 0;   // float 0..N-1
+  }
+  function onScroll(){
+    var raw=scrollIndex();
+    // while actively scrolling, follow the raw float (so the wipe tracks the finger)
+    target=raw; kick();
+    // debounce: on scroll idle, SNAP-glide to the nearest station (доводчик)
+    clearTimeout(idleT);
+    idleT=setTimeout(function(){ target=Math.round(raw); kick(); }, 90);
+  }
+
+  if(reduced){
+    disp=0; target=0; paintWipe(0); paintCaption(0);
+  } else {
+    window.addEventListener('scroll', onScroll, {passive:true});
+    window.addEventListener('resize', onScroll);
+    onScroll();
+  }
+
+  // ── S55 ГЕЙТ-ХУК: чиста render(p) зі СКРОЛ-закону ──────────────────────────────
+  // Атом має ДВА шари: (а) скрол-закон «вайп стежить за пальцем», f = p·(N−1), суто
+  // від позиції скролу; (б) ДОВОДЧИК — часовий шар: експоненційне доганяння disp→target
+  // (0.16/кадр) плюс снап на найближчу станцію через 90мс тиші.
+  // render(p) виражає САМЕ (а) і малює тими самими paintWipe/paintCaption, що шипляться
+  // (не копія закону). Шар (б) від часу, а не від p, тому scroll-гейт його судити НЕ може
+  // і не повинен: інакше судив би таймер. Оголошується в config як ignore-з-причиною.
+  // rAF гаситься, бо інакше наступний тік перемалює кадр і render(p) перестане бути чистою.
+  // Підписи/таби/лінійки крос-фейдяться CSS-переходом 280-300мс. Це ТЕЖ часовий шар:
+  // якби гейт семплив під час переходу, він міряв би годинник браузера, а не закон.
+  // Тому render(p) наносить зміну з вимкненими переходами і ОДРАЗУ їх вертає: сторінка,
+  // яка шипиться, лишається з крос-фейдом, а гейт бачить УСТАЛЕНИЙ стан.
+  // ⚠️ Ціна: тайминг крос-фейду цим виміром не судиться взагалі, його судить ОКО.
+  function settleNow(fn){
+    var el = document.documentElement;
+    el.classList.add('no-trans');
+    fn();
+    void el.offsetHeight;                 // reflow, щоб зміна лягла з вимкненими переходами
+    el.classList.remove('no-trans');
+  }
+  window.render = function(p){
+    if(raf){ cancelAnimationFrame(raf); raf=0; }
+    clearTimeout(idleT);
+    var f = (p<0?0:p>1?1:p) * (N-1);
+    disp = target = f;
+    settleNow(function(){ paintWipe(f); paintCaption(Math.round(f)); });
+  };
+  window.__PAGE_OK__=true;
+})();
+</script>
+</body>
+</html>

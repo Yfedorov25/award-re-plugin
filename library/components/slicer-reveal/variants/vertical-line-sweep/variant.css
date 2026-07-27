@@ -1,0 +1,262 @@
+/* ============================================================================
+   slicer-reveal / vertical-line-sweep — variant.css
+   ----------------------------------------------------------------------------
+   variant-as-delta. The base slicer-reveal component.css owns the cream-paper
+   SAISEI palette + restraint; THIS file owns the VERTICAL top→bottom
+   LINE-SWEEP engine CSS, recorded 1:1 (byte-faithful) from owner-chosen
+   apps/quadro/public/slide-lab/slc-v3-topdown-line-sweep.html.
+
+   THE MECHANIC (the star, the vertical cousin of the horizontal slice):
+     A thin luminous WARM line descends from the top edge of each render to the
+     bottom, and the image is REVEALED IN ITS WAKE — a scanner painting the
+     render downward, on the same clean cream field, contained render + serif.
+
+     Reveal = clip-path: inset(0 0 calc(--eff * 100%) 0)  (BOTTOM mask travels
+       --sweep:1 → fully closed (line at the very top, render hidden)
+       --sweep:0 → fully open   (line passed the bottom, render painted)
+     --eff = max(--sweep, 1 - --active): an instant --active gate forces every
+     non-active panel fully closed → ZERO-OVERLAP immune to scrub lag at seams.
+
+   BUG-B (no-plate): every .frame backing = the CLEAN PAGE cream (--cream), NOT a
+   contrasting plate. The photo slices in on clean cream. transform/opacity/
+   clip-path ONLY on scrub. No mix-blend / backdrop-filter over scrub. No video.
+   No WebGL. reduced-motion + narrow → static legible, slices fully open.
+   ========================================================================== */
+
+:root{
+  --cream:#EDE6D4;          /* dominant surface — ~60% of pixels        */
+  --cream-2:#E7DFC9;        /* faint warmer cream for void band         */
+  --ink:#1A1A17;            /* text on cream                            */
+  --ink-55:rgba(26,26,23,.55);
+  --ink-40:rgba(26,26,23,.40);
+  --hair:rgba(26,26,23,.18);/* hairline rules                           */
+  --cream-text:#EFE7D2;     /* text on dark renders                     */
+  --render-dim:rgba(15,13,10,.42);  /* overlay on full-bleed carrying text */
+  --line:#F3E6C4;           /* the luminous sweep line (warm)           */
+  --glow:rgba(243,222,168,.55);
+  --gut:6vw;                /* page gutter                              */
+  --eb:.62rem;              /* eyebrow size                             */
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* ───────── type ───────── */
+.eyebrow{
+  font-size:var(--eb);
+  text-transform:uppercase;
+  letter-spacing:.22em;
+  color:var(--ink-55);
+  font-weight:500;
+}
+.eyebrow--light{color:rgba(239,231,210,.62)}
+.serif{font-family:"Fraunces",Georgia,serif}
+.display{
+  font-family:"Fraunces",Georgia,serif;
+  font-weight:300;
+  line-height:.92;
+  letter-spacing:-.012em;
+}
+
+/* ───────── reusable render frame + the line-sweep ───────── */
+/* BUG-B fix: the slot background = the CLEAN PAGE cream (--cream), NOT a
+   contrasting plate. Above the descending line (render clipped away) and
+   before the photo decodes, the slot is indistinguishable from the page:
+   no grey/beige placeholder rectangle ever shows. The photo slices in on
+   clean cream. */
+.frame{position:relative;overflow:hidden;background:var(--cream)}
+/* --eff = effective closed fraction. An --active gate (set instantly per panel,
+   NOT scrubbed) forces the render fully closed whenever its panel is not the
+   active one: eff = max(sweep, 1 - active). This makes ZERO-OVERLAP immune to
+   scrub lag at the pin hand-off seams (forward AND reverse). */
+.frame{ --active:1; }
+.frame__img{
+  position:absolute;inset:0;
+  /* the render is fully PAINTED & fixed in world-space; only the mask moves */
+  clip-path:inset(0 0 calc(max(var(--sweep,1), (1 - var(--active,1))) * 100%) 0);
+  -webkit-clip-path:inset(0 0 calc(max(var(--sweep,1), (1 - var(--active,1))) * 100%) 0);
+  transform:scale(var(--kb,1.06)) translateY(var(--ky,0%));
+  transform-origin:50% 38%;
+  will-change:clip-path,transform;
+}
+/* the develop band — a soft warm wash just below the line that fades as it passes */
+.frame__develop{
+  position:absolute;left:0;right:0;top:0;
+  height:calc((1 - max(var(--sweep,1), (1 - var(--active,1)))) * 100%);
+  pointer-events:none;
+  background:linear-gradient(to bottom,
+     rgba(243,222,168,0) 0%,
+     rgba(243,222,168,0) calc(100% - 86px),
+     rgba(243,222,168,.10) calc(100% - 30px),
+     rgba(243,222,168,.16) 100%);
+  will-change:height;
+}
+/* the luminous scanner line, pinned to the leading clip edge */
+.frame__line{
+  position:absolute;left:0;right:0;height:2px;
+  top:calc((1 - max(var(--sweep,1), (1 - var(--active,1)))) * 100%);
+  transform:translateY(-1px);
+  background:linear-gradient(to right,
+     rgba(243,222,168,0) 0%,
+     var(--line) 14%,
+     var(--line) 86%,
+     rgba(243,222,168,0) 100%);
+  box-shadow:0 0 14px 2px var(--glow), 0 0 34px 6px rgba(243,222,168,.22);
+  /* line hidden when the panel is inactive (gate) or when --lineOn faded out */
+  opacity:calc(var(--lineOn,1) * var(--active,1));
+  will-change:top,opacity;
+}
+
+/* ════════════════════════════════════════════════════════════
+   PANELS — each is a self-contained pinned arrival window.
+   Only ONE render is on screen during its pin → zero overlap.
+   ════════════════════════════════════════════════════════════ */
+.panel{position:relative}
+.pin{height:100vh;width:100%;position:relative;overflow:hidden;background:var(--cream)}
+
+/* ── 1 · HERO (full-bleed render, cream meta over a dim plate) ── */
+#hero{position:relative}
+#hero .frame{position:absolute;inset:0}
+/* a steady cinematic dim so the cream serif stays legible over the painted facade.
+   above the descending line the frame shows bare cream (the render is clipped away). */
+#hero .hero__veil{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(13,11,9,.50) 0%, rgba(13,11,9,.30) 42%, rgba(13,11,9,.52) 100%)}
+#hero .hero__meta{position:absolute;inset:0;padding:clamp(20px,3.4vw,46px);
+  display:grid;grid-template-rows:auto 1fr auto;color:var(--cream-text);z-index:3}
+.hero__top{display:flex;justify-content:space-between;align-items:flex-start}
+.hero__rule{position:absolute;left:clamp(20px,3.4vw,46px);right:clamp(20px,3.4vw,46px);
+  top:clamp(58px,7.4vw,92px);height:1px;background:rgba(239,231,210,.26);
+  transform:scaleX(var(--reveal,1));transform-origin:left}
+.hero__title{align-self:center}
+.hero__ja{font-size:clamp(.85rem,1.5vw,1.15rem);letter-spacing:.42em;
+  color:rgba(239,231,210,.78);margin-bottom:.7rem;text-transform:uppercase}
+.hero__h1{font-size:clamp(3.1rem,11.2vw,9.4rem)}
+.hero__bot{display:flex;justify-content:space-between;align-items:flex-end}
+.hero__bot .eyebrow{color:rgba(239,231,210,.7)}
+
+/* ── 2 · CONTAINED-COLUMN workhorse (cream dominant) ── */
+#col .pin{display:grid;
+  grid-template-columns:var(--gut) 42vw 1fr;
+  align-items:center}
+#col .col__frame{grid-column:2;height:min(86vh,760px);align-self:center}
+#col .col__text{grid-column:3;padding:0 var(--gut) 0 clamp(34px,4.4vw,72px);
+  max-width:30vw}
+.meta{margin-bottom:clamp(20px,2.6vw,34px)}
+.meta .eyebrow{display:block;margin-bottom:.85rem}
+.meta__lead{font-family:"Fraunces",Georgia,serif;font-weight:300;
+  font-size:clamp(1.15rem,1.7vw,1.55rem);line-height:1.32;letter-spacing:-.005em}
+.feats{list-style:none}
+.feat{padding:clamp(13px,1.5vw,19px) 0;border-bottom:1px solid var(--hair)}
+.feat:first-child{border-top:1px solid var(--hair)}
+.feat__t{font-family:"Fraunces",Georgia,serif;font-weight:400;
+  font-size:clamp(1.02rem,1.32vw,1.28rem);margin-bottom:.34rem;letter-spacing:-.004em}
+.feat__b{font-size:.82rem;line-height:1.5;color:var(--ink-55);max-width:30ch}
+/* small inset render — lives INSIDE the text column (big+small pairing) */
+#col .col__inset{grid-column:3;justify-self:start;align-self:start;
+  width:clamp(150px,16vw,232px);aspect-ratio:1.322;margin:clamp(18px,2vw,28px) 0 0
+    clamp(34px,4.4vw,72px)}
+
+/* ── 3 · FULL-BLEED BREATHER (night reset) ── */
+#breather .frame{position:absolute;inset:0}
+#breather .br__veil{position:absolute;inset:0;background:rgba(12,12,16,.30);
+  opacity:calc(1 - var(--sweep,1) * .4)}
+#breather .br__cap{position:absolute;left:0;right:0;bottom:clamp(34px,6vw,72px);
+  text-align:center;color:var(--cream-text);z-index:3}
+#breather .br__cap .serif{font-weight:300;
+  font-size:clamp(1.3rem,3vw,2.4rem);line-height:1.18;letter-spacing:-.01em;
+  opacity:var(--cap,0);transform:translateY(calc((1 - var(--cap)) * 14px))}
+#breather .br__eb{margin-bottom:1rem;opacity:var(--cap,0)}
+
+/* ── 4 · SHOWPIECE portrait (climax — biggest cream air) ── */
+#show .pin{display:grid;grid-template-rows:1fr auto;
+  place-items:center;padding:clamp(26px,4vw,52px) 0}
+/* height-first sizing so the 2:3 portrait aspect is preserved (never letterboxed).
+   height drives the box; width = height * 0.667; capped so it stays contained with cream air. */
+#show .show__frame{height:min(72vh,640px);width:calc(min(72vh,640px) * 0.667);
+  max-width:46vw;align-self:center}
+#show .show__cap{display:flex;justify-content:space-between;align-items:baseline;
+  width:calc(min(72vh,640px) * 0.667);max-width:46vw;margin-top:clamp(12px,1.6vw,22px);
+  opacity:var(--cap,0);transform:translateY(calc((1 - var(--cap)) * 12px))}
+#show .show__cap .serif{font-weight:300;font-size:clamp(1rem,1.5vw,1.4rem);
+  letter-spacing:-.005em}
+/* climax breath: showpiece scales a touch more, line lingers */
+#show .frame__img{transform:scale(var(--kb,1.04)) translateY(var(--ky,0%))}
+
+/* ── 5 · DIM QUOTE (page closes on type over dimmed render) ── */
+#quote .frame{position:absolute;inset:0}
+#quote .q__veil{position:absolute;inset:0;
+  /* text sits left → veil weighted dark on the left so cream serif stays legible.
+     holds strong even fully-open (render is the "darker world" behind the words). */
+  background:linear-gradient(100deg, rgba(11,10,8,.74) 0%, rgba(11,10,8,.58) 46%, rgba(11,10,8,.40) 100%);
+  opacity:calc(.78 + var(--sweep,1) * .22)}
+#quote .q__wrap{position:absolute;inset:0;display:grid;align-items:center;
+  z-index:3;color:var(--cream-text);
+  padding:0 clamp(28px,12vw,200px)}
+#quote .q__mark{font-family:"Fraunces",Georgia,serif;font-weight:300;
+  font-size:clamp(4rem,9vw,8rem);line-height:.6;color:rgba(243,222,168,.66);
+  margin-bottom:.4rem;opacity:var(--cap,0)}
+#quote .q__body{font-family:"Fraunces",Georgia,serif;font-weight:300;
+  font-size:clamp(1.3rem,2.7vw,2.3rem);line-height:1.3;letter-spacing:-.008em;
+  max-width:20ch;opacity:var(--cap,0);transform:translateY(calc((1 - var(--cap)) * 16px))}
+#quote .q__attr{margin-top:clamp(20px,2.6vw,34px);max-width:24ch;
+  opacity:var(--cap,0)}
+#quote .q__hair{width:46px;height:1px;background:rgba(239,231,210,.4);
+  margin-bottom:.8rem;transform:scaleX(var(--cap,0));transform-origin:left}
+#quote .q__attr .eyebrow{letter-spacing:.16em}
+
+/* ── outro · pure cream, page ends on type + air ── */
+.outro{padding:clamp(64px,11vw,150px) var(--gut) clamp(50px,8vw,110px)}
+.outro__eb{margin-bottom:clamp(26px,3.4vw,46px)}
+.award{display:grid;grid-template-columns:1.3fr 1.6fr .7fr;gap:1.5rem;
+  padding:clamp(15px,1.7vw,22px) 0;border-bottom:1px solid var(--hair)}
+.award:first-of-type{border-top:1px solid var(--hair)}
+.award__n{font-family:"Fraunces",Georgia,serif;font-weight:400;font-size:clamp(1rem,1.4vw,1.3rem)}
+.award__d{font-size:.84rem;color:var(--ink-55);align-self:center}
+.award__y{font-size:.84rem;color:var(--ink-55);text-align:right;align-self:center}
+.outro__note{margin-top:clamp(40px,6vw,80px);font-size:.74rem;color:var(--ink-40)}
+
+/* fixed progress spine (thin ink hairline, scaleY) */
+.prog{position:fixed;left:0;top:0;width:2px;height:100vh;z-index:40;
+  background:rgba(26,26,23,.08)}
+.prog__fill{position:absolute;left:0;top:0;width:100%;height:100%;
+  background:var(--ink);transform:scaleY(var(--p,0));transform-origin:top}
+
+/* ─────────── STATIC fallback (reduced-motion / narrow) ─────────── */
+.static{display:none}
+@media (prefers-reduced-motion:reduce){
+  .scrolly{display:none !important}
+  .static{display:block}
+}
+@media (max-width:820px){
+  .scrolly{display:none !important}
+  .static{display:block}
+  :root{--gut:7vw}
+}
+.static .frame__img{clip-path:none !important;-webkit-clip-path:none !important;
+  transform:none !important;position:static}
+.static .frame__line,.static .frame__develop{display:none}
+.s-hero{position:relative;height:74vh;min-height:420px;overflow:hidden;background:#16140f}
+.s-hero .frame{position:absolute;inset:0}
+.s-hero__veil{position:absolute;inset:0;background:var(--render-dim)}
+.s-hero__txt{position:absolute;inset:0;display:grid;align-content:center;
+  padding:0 7vw;color:var(--cream-text);z-index:2}
+.s-hero__txt .display{font-size:clamp(2.4rem,13vw,4.6rem)}
+.s-sec{padding:clamp(40px,9vw,80px) 7vw}
+.s-shot{width:100%;margin-bottom:1.4rem;background:var(--cream)}
+.s-shot--port{aspect-ratio:.667}
+.s-shot--land{aspect-ratio:1.6}
+.s-sec h3{font-family:"Fraunces",serif;font-weight:300;font-size:clamp(1.4rem,7vw,2rem);
+  line-height:1.16;margin-bottom:1rem;letter-spacing:-.01em}
+.s-sec p{font-size:.95rem;line-height:1.55;color:var(--ink-55);max-width:46ch}
+.s-feat{padding:1rem 0;border-bottom:1px solid var(--hair)}
+.s-feat:first-child{border-top:1px solid var(--hair)}
+.s-feat strong{font-family:"Fraunces",serif;font-weight:400;display:block;margin-bottom:.3rem}
+.s-feat span{font-size:.85rem;color:var(--ink-55)}

@@ -1,0 +1,76 @@
+# PB_color — ПАЛІТРА award-ЖК (реальні системи 5 Vide Infra сайтів) ★★★
+> Перезаписано з ЖИВОГО зонду CSS 5 сайтів (ERA·AIR·Springs·Silver Pinewood·Ever), 2026-06-09.
+> Не теорія — точні hex, токени, theme-класи, alpha-рампи. Споріднено: [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_media](../../re-media/references/PB_media) [D_ERA_architecture](../../re-architecture/references/D_ERA_architecture.md).
+
+## 0. ГОЛОВНЕ (одна система на всіх 5)
+Усі 5 = ОДНА CSS-архітектура Vide Infra. Дволанковий токен-набір:
+- **`--c-*`** = сирий палітр (літерал hex + парний `--c-*-rgb` триплет для alpha-математики)
+- **`--t-*`** = семантичні (`--t-background/-text/-heading/-primary/-secondary/-line/-accent` + 60-120 sub-токенів кнопок) що ВКАЗУЮТЬ на `--c-*`
+- **Тема = КЛАС на секції** (`.ui-dark/.ui-light/.ui-brown/.ui-warm-2`...) що ПЕРЕВʼЯЗУЄ весь `--t-*` набір. `:root` = дефолтна (завжди світла) тема.
+- Бордери/оверлеї ЗАВЖДИ `rgba(var(--c-x-rgb), α)` — ніколи окремий hex.
+
+## 1. РЕАЛЬНІ ПАЛІТРИ (точні hex)
+| Сайт | База bg | Темна-контр | Акцент | Текст/heading | Muted | Настрій |
+|---|---|---|---|---|---|---|
+| **ERA** | `#f8f0e8` крем | `#051936` навія | `#cf8f7d`/`#c07863` brick | `#051936` | `#686058` | Сутінки |
+| **AIR** | `#fff` білий | `#000` | `#ea4651` (discount-red, ЄДИНИЙ) | head `#000`/text `#8d8d8d` | `#606060` | Клінічний моно |
+| **Springs** | `#f5e8d1` пісок | `#162d24` ліс | `#758535` оливка (+blue/green family) | `#162d24` | — | Ботанічний |
+| **Silver Pinewood** | `#f0eae2` овес | `#282828` вугіль | `#ba8f71` тан / `#998170` brown | `#282828` | — | Земляний |
+| **Ever** | `#dce2eb` блідо-слейт | `#313e48` слейт | `#ac7e65` теракота + `#dcc5b7` blush | `#313e48` | `#95a3ae` | Термальний |
+
+## 2. THEME-КЛАСИ (який колір у якій секції — точні)
+- **ERA (2):** `.ui-light` bg `#f8f0e8`/text `#051936`/primary `#c07863` · `.ui-dark` bg `#051936`/text `#f8f0e8`/primary `#cf8f7d`. Точний навія↔крем фліп.
+- **AIR (2+):** `.ui-light` bg #fff/head #000/text grey · `.ui-dark` bg #000/head #fff · `.ui-light-alt`, `.ui-background-blur`.
+- **Springs (2):** `.ui-light` bg `#f5e8d1`/text `#162d24` · `.ui-dark` bg `#162d24`/text `#e0d1b6`. Ліс↔пісок.
+- **Silver (3 — єдиний з named brown):** `.ui-light` `#f0eae2` · `.ui-dark` `#282828`/text #fff · `.ui-brown` `#998170`/text `#282828` (мід-тон-міст між світлим і темним).
+- **Ever (8 — дуальна температура!):** `.ui-cold-1` `#dce2eb` · `-cold-2` `#95a3ae` · `-cold-3` `#313e48` · `-warm-1` `#dcc5b7` · `-warm-2` `#ac7e65` · `-warm-3` `#402020` · `-green` `#293630` · `-white`. **Логіка:** темні секції (cold-3/warm-3/green) кладуть warm-1 blush на heading — тепло ЗАВЖДИ освітлює темне.
+
+## 3. ALPHA-РАМПИ (бордери/оверлеї — НІКОЛИ новий колір)
+- ERA: `.15/.2/.3/.5` (line-thin/line/line-thick/overlay)
+- AIR (найглибша): black `.05/.08/.12/.15/.2/.3`, white `.05/.1/.15/.2/.3`
+- Springs: dark-green `.2/.4/.8`
+- Silver: gray `.2/.5` (найменша)
+- Ever: рівномірна `.15/.2/.4` на КОЖНІЙ базі (warm-1/2/3, cold-1/2/3)
+
+## 4. ФОРМУЛА LUXURY-RE ПАЛІТРИ (спільна, всі 5)
+1. **Тепла світла база + темна контр-база як ФЛІП-пара.** Крем/пісок/овес/блідо (#f8f0e8/#f5e8d1/#f0eae2/#dce2eb) + глибока контра (#051936/#162d24/#282828/#313e48). `:root` ЗАВЖДИ світла; темна = клас.
+2. **РІВНО ОДИН теплий земляний акцент** робить усю конверсію — brick/тан/теракота/оливка. Живе в `--t-primary`/`--t-accent`, заливає CTA/лінки/active/hover/маркери. (AIR — виняток: моно+червоний.)
+3. **Бордери/оверлеї = alpha-рамп бази**, ніколи новий hex. Близько-універсальна драбина `.15/.2/.3-.4/.5`.
+4. **Дволанкові токени + RGB-twin** для alpha-математики всюди.
+5. **Секція = theme-клас.** Ритм кольору хореографується тегом на `<section>` що атомарно перевʼязує 60-120 `--t-*`. Стриманість: лише 6-15 сирих кольорів на сайт.
+
+## 5. ПЕР-СЕКЦІЙНА ЛОГІКА (ритм — який тип секції яку тему)
+- **Hero / immersive / map / footer → ТЕМНА тема** (навія/ліс/вугіль/слейт база, світлий текст). Темні секції = де акцент НАЙЯСКРАВІШИЙ (warmth lights the dark).
+- **Content / listings / text-heavy → СВІТЛА тема** (крем база, темний текст). Читабельний дефолт `:root`.
+- **Transitional / "feature" банди → МІД тема.** Silver `.ui-brown`, Ever `.ui-cold-2/-warm-2/-green` — мід-земляні кроки що мостять світле→темне щоб сторінка не стробила між крайнощами.
+- **Active/available units → теплий акцент; sold/disabled → muted база/сіре.** Акцент = «доступно/дій»; cold/темне = інертне.
+
+## 6. ГРАДІЄНТИ (дозовано)
+- ERA: `--c-gradient-blue-pink: linear-gradient(180deg,#051936,#cf8f7d)` (підпис), `--c-brick-gradient: linear-gradient(90deg,#dda086,#c1816f)` (заливка кнопки), `--c-text-gradient` (градієнт-heading).
+- Springs: `linear-gradient(101.51deg,rgba(27,71,50,0),#1b4732)` (hover-кнопка), image-scrim `linear-gradient(180deg,transparent,rgba(0,0,0,.4))`.
+- AIR/Silver: 0 градієнтів (моно/земля чистим кольором). **Урок:** градієнт = дозований підпис, не дефолт.
+
+## 7. ВИНЯТКИ (запамʼятай як варіації)
+- **AIR** = моно-пурист: black/white/grey + ОДИН червоний акцент, найглибший alpha-рамп.
+- **Springs** = єдиний МУЛЬТИ-акцент (оливка+light-green+light-blue+sky+petrol); error = ЗОЛОТО `#e1c35b` не червоне.
+- **Silver** = єдиний 3-named-theme з `.ui-brown`; найменша палітра (6 кольорів) — найдисциплінованіша.
+- **Ever** = єдина дуально-температурна (warm 3-step + cold 3-step + green), єдина з справжнім `--t-accent`, 8-theme шкала — найвідтворюваніша «термальна» структура для однієї вілли.
+
+## 8. ДЛЯ НАШИХ ПРОЄКТІВ (рецепт)
+```css
+:root{ /* світла дефолт-тема */
+  --c-base: #f0eae2;  --c-base-rgb: 240,234,226;     /* тепла світла */
+  --c-deep: #1a2230;  --c-deep-rgb: 26,34,48;         /* темна контра (Quadro evening-blue) */
+  --c-accent: #e0a96d; --c-accent-rgb: 224,169,109;   /* ОДИН теплий земляний акцент */
+  --t-bg: var(--c-base); --t-text: var(--c-deep); --t-primary: var(--c-accent);
+  --t-line-thin: rgba(var(--c-deep-rgb),.15);
+  --t-line:      rgba(var(--c-deep-rgb),.3);
+  --t-overlay:   rgba(var(--c-deep-rgb),.5);
+}
+.ui-dark{ --t-bg: var(--c-deep); --t-text: var(--c-base); --t-primary: var(--c-accent);
+          --t-line: rgba(var(--c-base-rgb),.3); }
+```
+Quadro: avail=`--accent #e0a96d`, sold=muted сіро-синій, reserved=warm. Nahirna: бери Ever/ERA-формулу.
+
+## 9. ЧЕК
+☐ дволанкові токени (--c-* + --t-*) + RGB-twin ☐ тепла світла база + темна контра як фліп-пара ☐ РІВНО 1 теплий земляний акцент у --t-primary ☐ alpha-рамп .15/.2/.3/.5 для ВСІХ ліній/оверлеїв (не новий hex) ☐ тема = клас на секції ☐ 6-15 сирих кольорів максимум ☐ hero/map/footer темні (акцент яскравий), content світлий, є мід-тон-міст ☐ градієнт дозовано ☐ контраст ≥4.5:1.

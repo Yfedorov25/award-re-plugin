@@ -1,0 +1,13 @@
+{
+  "id": "dual-slicer", "title": "Coupled-split slicer (Springs)", "level": "L2-molecule", "batch": "C (#6/17)",
+  "source": "springs.estate design coupled-split. Engine = library/components/dual-slicer (proven, render(prog)).",
+  "engine": "A right-column vertical render-strip that slices through N renders, per-line heading reveal on the left, and a rising inset photo — all coupled on one pinned scroll. Pure render(prog).",
+  "dual_platform": true,
+  "differs": "SAME clip-slice mechanic on BOTH platforms (Єгор: the slicer on mobile must be the SAME as desktop — for THIS technique the vertical slice is correct on a narrow screen too). Both scrub the same render(prog) from scroll while pinned: the render strip clip-reveals through N renders + the coupled left line-reveal + rising inset. Difference = LAYOUT (mobile 1-col) + pin-length only, NOT the strip visual.",
+  "desktop": { "driver": "scrollSlice — render(prog): clip-slice strip + coupled line-reveal, scroll-scrubbed while pinned.", "knobs": ["headingLines","inset","pinFactor"] },
+  "mobile": { "driver": "scrollSlice — render(prog): SAME clip-slice strip as desktop (1-col layout), scroll-scrubbed while pinned.", "knobs": ["headingLines","inset","pinFactor"] },
+  "engine_patch": "forceMotion + manualDrive (expose render() without engine pin/ScrollTrigger; guard registerPlugin/CustomEase/lenis). Additive & opt-in.",
+  "entry": "DualSlicerDual.init(target, opts). Load engine.js THEN component.js. Markup: .ds-stage(flex) > .ds-left(.ds-head>.ds-line>.ds-line__i + .ds-inset) + .ds-right(.ds-render x N). Desktop wraps in .pin-wrap.",
+  "law": "render(prog) PURE; clip-path inset + transform + opacity only; GPU; NO mix-blend/backdrop over the scrubbed surface; NO WebGL. reduced-motion -> static stacked.",
+  "files": ["component.js","engine.js (+forceMotion/manualDrive)","component.css","img/a-c.webp","stage.html","demo.html","meta.json","README.md"]
+}

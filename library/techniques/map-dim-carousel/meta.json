@@ -1,0 +1,26 @@
+{
+  "id": "map-dim-carousel",
+  "title": "Map-dim carousel announce (Springs /location announce)",
+  "level": "L2-molecule",
+  "batch": "D (#12/17)",
+  "source": "springs.estate l-map / landingMapScroll + /location ('The Center of Your Life'). Engine = library/components/map-dim-carousel-announce (proven, owns_pin:optional, pure set(p) ENTER + finite go() rail).",
+  "engine": "A POI map DIMS (opacity 1 -> dimTo 0.3 + scale 1 -> 1.04) to a dark backdrop as the section enters, while a serif announce headline + sub rise over it and a rail of location-beat cards staggers in; a finite rail advances by go()/next()/prev(). Pure set(p) scrub of the ENTER.",
+  "dual_platform": true,
+  "differs": "Same map-dim + rail-advance mechanic + same pure set(p)/go(). BOTH platforms scroll-pin (S19g law): the map dims, the announce rises and the rail steps by SCROLL-PROGRESS read off .pin-wrap, on desktop AND mobile. Difference = LAYOUT (desktop wide / 2-col; mobile full-bleed single-col) + pin-length, NOT scroll-vs-time.",
+  "desktop": { "driver": "scrollMap — set(p) = scroll progress across the pin span (stage pinned, wide/2-col); the tail of the scroll advances the finite rail via go().", "knobs": ["dimTo","cardStagger","step","railStart","railSteps"] },
+  "mobile": { "driver": "scrollMap — SAME set(p)+go() from scroll (stage pinned, full-bleed single-col); rail steps by scroll-progress, not a timer.", "knobs": ["dimTo","cardStagger","step","railStart","railSteps"] },
+  "knobs": {
+    "dimTo": { "default": 0.3, "what": "map backdrop opacity at full reveal." },
+    "cardStagger": { "default": 0.5, "what": "per-card stagger window of the rail reveal." },
+    "step": { "default": 1, "what": "cards advanced per rail nudge." },
+    "loop": { "default": false, "what": "rail wraps at the ends (else clamps)." },
+    "revealDur": { "default": 1.1, "unit": "ms-eq", "what": "engine ENTER reveal duration (bypassed under manualDrive — wrapper scrubs)." },
+    "slideDur": { "default": 0.6, "unit": "s", "what": "eased rail translateX duration per go()." },
+    "railStart": { "default": 0.6, "platform": "wrapper", "what": "scroll-progress point where the ENTER finishes and rail-advance begins." },
+    "railSteps": { "default": 2, "platform": "wrapper", "what": "how many rail nudges over the scroll tail." }
+  },
+  "engine_patch": "forceMotion (skip <=820px static-lock; wrapper drives set(p)+go() itself) + manualDrive (skip the engine's own ScrollTrigger so the wrapper owns the scroll driver; both additive, opt-in). See memory dual-platform-forcemotion + techniques-format-spec.",
+  "entry": "MapDimCarouselDual.init(target, opts). Load engine.js THEN component.js. target = .mdc-stage > .mdc-map + .mdc-overlay ( .mdc-headline + .mdc-sub + .mdc-rail-wrap( .mdc-rail > .mdc-card x N ) + .mdc-nav ). Wrap in .pin-wrap for the pin (both platforms).",
+  "law": "opacity + transform (translate/scale) only; GPU; NO mix-blend over the map; NO backdrop-filter over scroll; NO WebGL. reduced-motion -> resolved state (map dimmed, cards shown, rail at 0).",
+  "files": ["component.js","engine.js (+forceMotion +manualDrive)","component.css","stage.html","demo.html","meta.json","README.md"]
+}

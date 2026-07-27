@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>combo: location--hi-contrast-mono · Чорним по білому, до кожних дверей</title>
+<!--
+  SECTION VARIANT, location--hi-contrast-mono (role: location). MAP-STYLE = HI-CONTRAST MONO.
+  CONTROLLED-INTERACTIVE model (the smarts Агрономічне model): the SAME dense real OSM district
+  of с. Агрономічне as the surveyed-route-map ideal (real road hierarchy by class, 823 building
+  footprints, the site parcel inside a true-scale 10-minute walking ring), re-rendered as a stark
+  editorial plan: pure black linework on pure white paper, NO warm-lit windows, ONE single red
+  accent reserved for the active route. The realism is identical to the ideal (same baked OSM,
+  same Dijkstra routes); only the cartographic TREATMENT differs (palette + line/fill).
+
+  The map REVEALS on scroll-in ONCE, then there is NO pin and NO forced stepping: the USER clicks
+  (or hovers) any of the 6 real POIs, on the map or in the visible side list, and THAT draws the
+  red Dijkstra route along the actual streets while a red walking dot travels it and the live
+  minute badge shows the honest walk-time. Two-way hover (pin to list row). This is locmap-engine's
+  native interaction; no scroll-lock, the visitor drives, the map never floats after the reveal.
+
+  asset-truth: streets/footprints from osm.js (osm-agronomichne); POI names + minutes are the 6
+  real ones (Траш! 9хв, Аврора 18хв, Грош Експрес 15хв, Нова Пошта 10хв, Подорожник 10хв,
+  Школа·садок 9хв). __LAB_OK__ passes only if: 0 pins (pin-less click section), the cited real
+  atom ran, [data-render-surface] painted (the white paper), 0 real console errors.
+  NO WebGL/canvas/tiles/mix-blend/backdrop-filter.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/locmap-engine/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the rails). transform / opacity / clip-path / filter /
+     stroke-dashoffset only. NO mix-blend, NO backdrop-filter, NO animating width/height/top/left. */
+
+  :root { --ease-air: cubic-bezier(.22,1,.36,1); }
+
+  /* the stage is a full-viewport map + a reading rail; the section is a normal-flow block (no pin) */
+  #combo.combo-stage { background: #ffffff; color: #15140f; min-height: 100vh; height: 100vh; position: relative; overflow: clip; }
+
+  /* MONO PALETTE: re-point every engine token to a black-on-white register, one red accent.
+     This is the whole "different map style": same engine, different paint. */
+  #combo.combo-stage,
+  .hcm__field {
+    --lm-ink: #15140f;            /* near-black foreground */
+    --lm-bg-1: #ffffff;
+    --lm-bg-2: #ffffff;           /* road casing = white halo so black strokes separate */
+    --lm-accent: #d4271c;         /* the single editorial red, reserved for the active route */
+    --lm-accent-soft: #d4271c;
+  }
+
+  /* the render surface = pure white paper. A real CSS background-image (a hairline paper grain)
+     so the honest paint-probe sees a painted surface AND the sheet reads like printed stock. */
+  .hcm__field {
+    position: absolute; inset: 0;
+    background-color: #ffffff;
+    background-image:
+      radial-gradient(rgba(21,20,15,.022) 0.5px, transparent 0.6px),
+      radial-gradient(rgba(21,20,15,.016) 0.5px, transparent 0.6px);
+    background-size: 4px 4px, 7px 7px;
+    background-position: 0 0, 2px 3px;
+  }
+  .hcm__field .lm__map { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* the engine's stage gradient would re-tint the field; force flat white under the SVG */
+  .hcm__field.lm__stage, .hcm__field.lm { background-color: #ffffff; }
+
+  /* ---- MONO MAP TREATMENT: redraw the engine's SVG classes black-on-white ---- */
+  /* green/water demoted to the faintest grey wash so the map stays monochrome */
+  .hcm__field .lm-gw--green { fill: rgba(21,20,15,.045); }
+  .hcm__field .lm-gw--water { fill: rgba(21,20,15,.06); }
+
+  /* buildings: light black footprints, hairline black stroke, a printed cadastral plan.
+     NO lit windows in mono: the --lit class renders like every other footprint (kill warm glow). */
+  .hcm__field .lm-bld      { fill: rgba(21,20,15,.085); stroke: rgba(21,20,15,.16); stroke-width: 0.5; }
+  .hcm__field .lm-bld--lit { fill: rgba(21,20,15,.085); stroke: rgba(21,20,15,.16); animation: none; }
+
+  /* road hierarchy: PURE BLACK strokes over WHITE halo casing, so the grid reads crisp on
+     the dense footprint field. Widths kept from the engine ranking; casing is the white halo. */
+  .hcm__field .lm-rdc { stroke: #ffffff; }
+  .hcm__field .lm-rd--hwy   { stroke: rgba(21,20,15,.92); }
+  .hcm__field .lm-rd--main  { stroke: rgba(21,20,15,.74); }
+  .hcm__field .lm-rd--mid   { stroke: rgba(21,20,15,.5); }
+  .hcm__field .lm-rd--minor { stroke: rgba(21,20,15,.3); }
+  .hcm__field .lm-rd--faint { stroke: rgba(21,20,15,.14); }
+  .hcm__field .lm-rdname { fill: rgba(21,20,15,.5); }
+
+  /* parcel: black hatch + black stroke; tag in ink. (engine hatch uses brick rgba, override) */
+  .hcm__field #lmHatch rect { fill: rgba(21,20,15,.06); }
+  .hcm__field #lmHatch line { stroke: rgba(21,20,15,.6); }
+  .hcm__field .lm-parcel { stroke: #15140f; stroke-width: 1.6; }
+  .hcm__field .lm-pulse  { stroke: #15140f; }
+  .hcm__field .lm-sitetag { fill: #15140f; }
+
+  /* walking ring: thin black dashed */
+  .hcm__field .lm-ring  { stroke: rgba(21,20,15,.3); }
+  .hcm__field .lm-ringt { fill: rgba(21,20,15,.5); }
+
+  /* numbered POIs: white disc, black ring, black numeral; active flips to the red accent */
+  .hcm__field .lm-pt circle { fill: #ffffff; stroke: rgba(21,20,15,.75); stroke-width: 1.4; }
+  .hcm__field .lm-pt text   { fill: #15140f; }
+  .hcm__field .lm-pt:hover circle, .hcm__field .lm-pt.is-on circle { fill: var(--lm-accent); stroke: #15140f; }
+
+  /* the ONE red moment: the active Dijkstra route + walker + live badge */
+  .hcm__field .lm-route  { stroke: var(--lm-accent); stroke-width: 3.2; }
+  .hcm__field .lm-walker { fill: var(--lm-accent); stroke: #ffffff; }
+  .hcm__field .lm-livet  { fill: #ffffff; }
+  .hcm__field .lm-livebg { fill: var(--lm-accent); stroke: var(--lm-accent); }
+
+  /* the standing section label top-left */
+  .hcm__label {
+    position: absolute; z-index: 8; top: clamp(20px, 5vh, 52px); left: clamp(20px, 4vw, 64px);
+    font: 600 .66rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(21,20,15,.56); pointer-events: none;
+  }
+
+  /* ---- the reading rail (ink on white): eyebrow + serif title + hint + the CLICKABLE POI list ---- */
+  .hcm__rail {
+    position: absolute; z-index: 8;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(22px, 6vh, 56px);
+    width: min(40ch, 88vw);
+  }
+  @media (min-width: 900px) {
+    .hcm__rail { left: auto; right: clamp(24px, 4vw, 60px); top: 50%; bottom: auto;
+      transform: translateY(-50%); width: min(32ch, 34vw); }
+  }
+  .hcm__eyebrow {
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .26em; text-transform: uppercase;
+    color: rgba(21,20,15,.6); margin: 0 0 .5rem;
+  }
+  .hcm__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(1.7rem, 3vw, 2.7rem); line-height: 1.0; letter-spacing: -.03em;
+    color: #15140f; margin: 0 0 .4rem;
+  }
+  .hcm__hint {
+    font: 500 .76rem/1.45 var(--combo-sans); letter-spacing: .01em;
+    color: rgba(21,20,15,.55); margin: 0 0 clamp(.9rem, 2vh, 1.4rem);
+  }
+  .hcm__coords {
+    display: block; margin-top: .4rem;
+    font: 500 .62rem/1.4 var(--combo-sans);
+    letter-spacing: .12em; color: rgba(21,20,15,.42); text-transform: none;
+  }
+  /* the list the engine fills with .lm-row rows (click + hover drives the route) */
+  .hcm__list { display: block; }
+
+  /* RE-SKIN the engine's .lm-row rows for the WHITE field: dark ink text, red active.
+     (the engine ships dark defaults; this re-points them light for the mono sheet) */
+  .hcm__rail .lm-row {
+    padding: .62rem 0; border-bottom: 1px solid rgba(21,20,15,.12);
+    color: rgba(21,20,15,.82); cursor: pointer;
+    transition: background .25s, padding-left .25s, color .25s;
+  }
+  .hcm__rail .lm-row .n  { color: rgba(21,20,15,.45); font-variant-numeric: tabular-nums; }
+  .hcm__rail .lm-row .nm { color: #15140f; }
+  .hcm__rail .lm-row .tm { color: rgba(21,20,15,.6); }
+  .hcm__rail .lm-row .tm b { color: #15140f; font-variant-numeric: tabular-nums; }
+  .hcm__rail .lm-row:hover, .hcm__rail .lm-row.is-on {
+    background: rgba(21,20,15,.04); padding-left: .5rem;
+  }
+  .hcm__rail .lm-row.is-on .nm, .hcm__rail .lm-row.is-on .n { color: var(--lm-accent); }
+
+  .combo-pre, .combo-post { background: #f4f2ec; color: rgba(21,20,15,.45); }
+
+  @media (prefers-reduced-motion: reduce) { .hcm__rail .lm-row { transition: none; } }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="location--hi-contrast-mono">
+
+    <!-- the white paper field. locmap-engine injects the SVG here. -->
+    <div class="hcm__field lm" data-lm-stage data-render-surface></div>
+
+    <p class="hcm__label">с. Агрономічне · за даними OpenStreetMap</p>
+
+    <div class="hcm__rail">
+      <p class="hcm__eyebrow">Чорним по білому</p>
+      <h2 class="hcm__title">Що поруч</h2>
+      <p class="hcm__hint">Натисніть місце, щоб побачити шлях і час пішки.
+        <span class="hcm__coords">49.18° Пн · 28.33° Сх · 5 хвилин від Вінниці</span>
+      </p>
+      <!-- the engine fills this with clickable rows (two-way synced with the map pins) -->
+      <div class="hcm__list" data-lm-list></div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom (canon engine) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/locmap-engine/component.js"></script>
+
+  <script type="module">
+    import { OSM } from './osm.js';
+    SectionHarness.boot();
+
+    // ---- ENGINE: the dense real map, re-themed mono via CSS. owns_pin FALSE; reveal on
+    //      scroll-in; CLICK/HOVER any POI (map or list row) draws the red route. ----
+    SectionHarness.ranOK('locmap-engine', function () {
+      var map = window.LocMap.create('#combo', {
+        data: Object.assign({}, OSM, { site: Object.assign({}, OSM.site, { tag: 'Тут будується' }) }),
+        mScale: 2.6,
+        walkMin: 10,
+        modes: ['loc'],
+        flicker: { rate: 1e9 },    // mono: NO lit windows (rate huge -> none light)
+        route: true,
+        reveal: { start: 'top 70%', once: true },
+        parallax: { green: 1.2, buildings: 2, pins: 3 },
+        ease: 'award'
+      });
+      window.__hcmMap = map;
+    });
+
+    // pin-less, controlled-interactive section: the visitor clicks to draw routes. 0 pins.
+    SectionHarness.declare({ pinOwner: 'none', expectPins: 0, atomsCited: ['locmap-engine'] });
+  </script>
+</body>
+</html>

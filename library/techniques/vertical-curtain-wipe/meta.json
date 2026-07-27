@@ -1,0 +1,21 @@
+{
+  "id": "vertical-curtain-wipe",
+  "title": "Vertical curtain wipe (Springs section-entry seam)",
+  "level": "L2-molecule",
+  "batch": "D (#16/17)",
+  "source": "springs.estate Place->Design section boundary (SEAM-02). Engine = library/components/vertical-curtain-wipe (proven, owns_pin:true, pure render(prog)).",
+  "engine": "A panel enters as a hard VERTICAL seam wiping L->R and parking at the column split (~50%), while the outgoing full-bleed image crop-zooms (scale up + object-position shift) to stay composed as its column narrows. Pure render(prog); scroll-scrubbed, reversible.",
+  "dual_platform": true,
+  "differs": "SAME clip-wipe technique on both platforms, but the seam AXIS is rotated to fit the screen (Єгор: a horizontal seam on a tall phone reads as 'two columns squished' — the motion must run along the LONG axis). desktop = HORIZONTAL seam: panel sweeps L->R via inset(right), parks at a vertical split (wide screen splits vertically). mobile = VERTICAL seam: the full-width text-panel rises bottom->top via inset(top), photo stays composed above (tall screen splits horizontally). Both scroll-scrubbed while pinned + crop-zoom on the outgoing image.",
+  "desktop": { "driver": "scrollWipe — render(prog): HORIZONTAL clip-seam L->R (inset right) + crop-zoom, parks at vertical split.", "knobs": ["park","zoom","pinFactor"] },
+  "mobile": { "driver": "renderMobile(prog): VERTICAL clip-seam bottom->top (inset top) — full-width panel rises, photo above + crop-zoom. Axis rotated for the tall screen.", "knobs": ["park","zoom","pinFactor"] },
+  "knobs": {
+    "park": { "default": 50, "unit": "%", "what": "where the seam stops (column split, % from left)." },
+    "zoom": { "default": 0.12, "what": "outgoing image crop-zoom (scale 1 -> 1+zoom)." },
+    "pinFactor": { "default": 0.8, "what": "pin length = innerHeight*pinFactor (drives scroll span; the demo pin-wrap overrides to ~200vh)." }
+  },
+  "engine_patch": "forceMotion (skip the <=820px static guard; the dual wrapper owns the mobile branch) + manualDrive (expose render() WITHOUT the engine's own ScrollTrigger/pin, so the wrapper drives render(prog) from scroll on both platforms). Both additive & opt-in; default (no flags) = original desktop-only behaviour. render(prog) logic lives once in the engine. See memory dual-platform-forcemotion + mobile-is-pinned-scroll.",
+  "entry": "VerticalCurtainWipeDual.init(target, opts). Load engine.js THEN component.js. target = .vcw-stage. Markup: .vcw-stage > .vcw-out(img, the crop-zooming media) + .vcw-panel(the entering panel, clip-revealed L->R to park%). Both platforms wrap the stage in .pin-wrap (sticky pin).",
+  "law": "render(prog) PURE; clip-path (inset) + transform (scale) only; GPU layers; NO mix-blend / NO backdrop over the scrubbed surface; NO WebGL. reduced-motion -> render(1) (fully wiped-in, panel parked + image composed). window.__LAB_OK__ on init.",
+  "files": ["component.js","engine.js (+forceMotion/manualDrive)","component.css","img/panel.webp","img/out.webp","stage.html","demo.html","meta.json","README.md"]
+}

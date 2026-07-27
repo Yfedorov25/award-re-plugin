@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · pcs / cmwp-dark · пін CMWP /management (T-513 у чорному)</title>
+<!--
+================================================================================
+  VARIANT LAB · pinned-counter-slideshow / cmwp-dark
+  Живий proj-info-section: той самий движок T-513; дельта = чорний скін
+  (метал-спіраль) + CMWP-лого/divider + ЖИВІ тексти Drucker↔CMWP.
+  ГЕЙТ: база (пін, свап на старті, бар/ticks) + тема темна (фон darker
+  #333) + живі тексти присутні; обидва в'юпорти.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; overflow-x: clip; }
+  body { font-family: var(--sans); background: #0d0d0c; color: #f2f1ee; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #777; text-transform: uppercase; pointer-events: none; }
+  .intro, .outro { min-height: 90vh; display: flex; align-items: center; padding: 0 6vw; color: #8b8a86; }
+  #act .head { padding: 10vh 3vw 6vh; }
+  #act .head h2 { font-size: clamp(28px, 4.2vw, 60px); font-weight: 300; text-transform: uppercase; }
+
+  /* чорна метал-спіраль */
+  #pcsBg { position: absolute; inset: 0; background: #0d0d0c; }
+  #pcsBg .coil { position: absolute; left: 55%; top: 50%; width: 46vw; aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: repeating-conic-gradient(from 8deg at 50% 50%, rgba(242,241,238,.10) 0 4deg, rgba(20,20,20,.0) 4deg 9deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 24%, #000 25% 74%, transparent 75%);
+            mask-image: radial-gradient(circle, transparent 24%, #000 25% 74%, transparent 75%);
+    filter: contrast(1.2); }
+
+  .pcs-row { position: absolute; inset: 0; display: grid;
+    grid-template-columns: 4fr 2fr 4fr; gap: 2vw; align-items: center; padding: 0 6vw; }
+  .cmwp-logo { font-size: clamp(22px, 2.4vw, 34px); letter-spacing: .18em; font-weight: 500; }
+  .cmwp-logo small { display: block; font-size: 10px; letter-spacing: .3em; color: #8b8a86; margin-top: 8px; }
+  .divider { justify-self: center; width: 1px; height: 40vh; background: rgba(242, 241, 238, .18); }
+  [data-pcs-card] { display: grid; }
+  .pcs-tint { position: absolute; inset: -14% -22%; z-index: -1;
+    background: radial-gradient(70% 80% at 50% 50%, rgba(13,13,12,.85) 30%, rgba(13,13,12,0) 100%); }
+  [data-pcs-text] p { font-size: clamp(15px, 1.3vw, 20px); font-weight: 300; line-height: 1.5; color: #c9c7c2; }
+  [data-pcs-widget] { width: 92px; color: #f2f1ee; }
+  [data-pcs-widget] .nums { display: flex; gap: .6em; font-size: 12px; margin-top: 10px; }
+  [data-pcs-widget] [data-pcs-total] { color: #8b8a86; }
+  #pcs:not(.pcs-touch) [data-pcs-widget]:not(.pcs-widget-cursor) { position: absolute; right: 4vw; bottom: 6vh; }
+  @media (max-width: 768px) {
+    .pcs-row { grid-template-columns: 1fr; align-content: end; padding: 0 6vw 22vh; }
+    .divider { display: none; }
+    [data-pcs-ticks] { position: absolute; left: 6vw; right: 6vw; bottom: 9vh; color: #f2f1ee; }
+  }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · pcs / cmwp-dark · t-513 у чорному · скроль</div>
+
+<section class="intro"><p>… скроль: чорний пін CMWP — спіраль зі сталі, Drucker поступається CMWP …</p></section>
+
+<section id="act">
+  <div class="head"><h2>Delegate with confidence</h2></div>
+  <div id="pcs">
+    <div data-pcs-layer>
+      <div data-pcs-bg id="pcsBg"><div class="coil"></div></div>
+      <div class="pcs-row">
+        <div class="cmwp-logo">CMWP<small>Commonwealth Partnership</small></div>
+        <div class="divider" aria-hidden="true"></div>
+        <div data-pcs-card>
+          <div class="pcs-tint"></div>
+          <div data-pcs-text><p>Peter Drucker believed that the measure of management quality is ordinary people doing extraordinary things. AIR, however, chose to be managed by extraordinary people delivering truly exceptional results.</p></div>
+          <div data-pcs-text class="is-off"><p>For 25 years you knew them as Cushman &amp; Wakefield; for the past three years — as Commonwealth Partnership. The company manages properties for leading global corporations.</p></div>
+        </div>
+      </div>
+      <div data-pcs-widget>
+        <div data-pcs-bar-track><div data-pcs-bar></div></div>
+        <p class="nums"><span data-pcs-count>1</span><span data-pcs-total>/ 2</span></p>
+      </div>
+      <div data-pcs-ticks></div>
+    </div>
+  </div>
+</section>
+
+<section class="outro"><p>… кінець проби …</p></section>
+
+<script src="../../component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  var pcs = window.PinnedCounterSlideshow.create('#pcs', {});
+  window.__PCS = pcs;
+
+  var root = document.getElementById('pcs');
+  var layer = root.querySelector('[data-pcs-layer]');
+  var count = root.querySelector('[data-pcs-count]');
+  var texts = root.querySelectorAll('[data-pcs-text]');
+  var report = { stability: null, theme: null, pin: null, swap: null, ticks: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function yTo(p) {
+    var top = root.getBoundingClientRect().top + window.scrollY;
+    return top + p * (root.offsetHeight - window.innerHeight);
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await delay(120);
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' });
+    } catch (e) {}
+    var anchor = document.querySelector('#act .head h2');
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(500);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* тема: чорне поле + живі тексти */
+    var bg = getComputedStyle(document.body).backgroundColor;
+    report.theme = { bg: bg,
+                     drucker: /Drucker/.test(texts[0].textContent),
+                     cmwp: /Commonwealth/.test(texts[1].textContent) };
+    report.theme.ok = /\(1[0-9], 1[0-9], 1[0-9]\)|13, 13, 12/.test(bg) &&
+                      report.theme.drucker && report.theme.cmwp;
+    ok = report.theme.ok && ok;
+
+    /* база: пін + свап на старті */
+    window.scrollTo(0, yTo(0.25));
+    await delay(350);
+    report.pin = { layerTop: Math.round(layer.getBoundingClientRect().top),
+                   count: count.textContent };
+    report.pin.ok = Math.abs(report.pin.layerTop) <= 2 && count.textContent === '1';
+    ok = report.pin.ok && ok;
+
+    window.scrollTo(0, yTo(0.7));
+    await delay(100);
+    var early = count.textContent;
+    await delay(1500);
+    report.swap = { early: early, s2on: !texts[1].classList.contains('is-off') };
+    report.swap.ok = early === '2' && report.swap.s2on;
+    ok = report.swap.ok && ok;
+
+    if (touch) {
+      var ticks = root.querySelectorAll('.pcs-tick-fill');
+      report.ticks = { n: ticks.length, ok: ticks.length === 2 };
+      ok = report.ticks.ok && ok;
+    } else { report.ticks = { ok: true, skipped: 'desktop' }; }
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:pcs/cmwp-dark]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

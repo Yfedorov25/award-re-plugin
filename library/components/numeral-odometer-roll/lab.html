@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · numeral-odometer-roll · the numeral column roll, pin-less (extracted from stat-odometer)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · numeral-odometer-roll
+================================================================================
+  The PURE numeral ODOMETER-ROLL, EXTRACTED out of stat-odometer's pinned
+  ScrollTrigger. A big serif minute number rolls inside a one-number-tall window:
+  the column translates on Y (translateY only), the window clips the rest.
+  owns_pin:false — NO ScrollTrigger here. Driven by to(n) AND by a synthetic
+  set(p) sweep. Demonstrates 9 -> 10 -> 6 (хвилини до реальних місць
+  Агрономічного). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --paper:#f1efe9; --ink:#16150f; --accent:#9a8c6a;
+    --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{min-height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);
+    display:grid;place-items:center;min-height:100vh;padding:8vh 6vw}
+
+  .panel{ width:min(560px,92vw); text-align:center; }
+  .eyebrow{ font-size:.72rem; letter-spacing:.26em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:2.2rem; }
+
+  /* the odometer: a big serif minute number in a one-number-tall window */
+  .minute{ display:inline-flex; align-items:baseline; gap:.18em; }
+  .minute .nor-window{
+    --nor-row: 1em;              /* one number tall == one line of this font-size */
+    --nor-font: var(--serif);
+    --nor-weight: 500;
+    --nor-ink: var(--ink);
+    --nor-align: right;
+    font-size: clamp(96px, 18vw, 200px);
+  }
+  .minute .unit{ font-family:var(--serif); font-size:clamp(22px,3.4vw,34px);
+    color:var(--accent); align-self:end; padding-bottom:.5em; }
+
+  .place{ margin-top:1.6rem; min-height:1.4em; font-family:var(--serif);
+    font-size:clamp(18px,2.6vw,24px); }
+  .sub{ margin-top:.5rem; font-size:.86rem; letter-spacing:.04em; color:#6b665a; }
+
+  .controls{ margin-top:3rem; display:flex; gap:.6rem; justify-content:center; flex-wrap:wrap; }
+  button{ font-family:var(--sans); font-size:.82rem; letter-spacing:.04em;
+    padding:.66rem 1.1rem; border:1px solid #cfc9bb; background:transparent;
+    color:var(--ink); border-radius:2px; cursor:pointer; transition:border-color .2s,color .2s; }
+  button:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .sweep{ margin-top:1.6rem; }
+  .sweep input{ width:min(420px,80vw); accent-color:var(--accent); }
+  .sweep .cap{ margin-top:.4rem; font-size:.74rem; letter-spacing:.14em;
+    text-transform:uppercase; color:#8a8473; }
+</style>
+</head>
+<body>
+
+  <main class="panel">
+    <p class="eyebrow">скільки хвилин до</p>
+
+    <div class="minute">
+      <!-- the atom: window > column. values are baked in markup; the engine reads them -->
+      <span class="nor-window">
+        <span class="nor-col">
+          <span class="nor-num">9</span>
+          <span class="nor-num">10</span>
+          <span class="nor-num">6</span>
+        </span>
+      </span>
+      <span class="unit">хв</span>
+    </div>
+
+    <p class="place" id="place">Супермаркет «Траш!»</p>
+    <p class="sub" id="sub">пішки</p>
+
+    <div class="controls">
+      <button data-to="9">9 хв · «Траш!»</button>
+      <button data-to="10">10 хв · Нова Пошта</button>
+      <button data-to="6">6 хв · до зупинки</button>
+    </div>
+
+    <div class="sweep">
+      <input id="sweep" type="range" min="0" max="1000" value="0">
+      <div class="cap">set(p) · хост-пін драйвить рол</div>
+    </div>
+  </main>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    // honest framing per value (real Агрономічне POIs where the minute matches)
+    var PLACES = {
+      '9':  { name: 'Супермаркет «Траш!»', sub: 'пішки' },
+      '10': { name: 'Нова Пошта · аптека',  sub: 'пішки' },
+      '6':  { name: 'До зупинки транспорту', sub: 'пішки' }
+    };
+    var placeEl = document.getElementById('place');
+    var subEl = document.getElementById('sub');
+    function describe(v) {
+      var p = PLACES[String(v)]; if (!p) return;
+      placeEl.textContent = p.name; subEl.textContent = p.sub;
+    }
+
+    // wire the atom — values [9,10,6], 2-digit pad so 9 and 10 share a steady band
+    var roll = NumeralOdometerRoll.create('.nor-window', {
+      values: [9, 10, 6], value: 9, digits: 2, ease: 'air', dur: 0.6
+    });
+
+    // to(n): animated roll on button press
+    [].forEach.call(document.querySelectorAll('[data-to]'), function (b) {
+      b.addEventListener('click', function () {
+        var v = +b.getAttribute('data-to');
+        roll.to(v); describe(v);
+      });
+    });
+
+    // set(p): a host pin/scrub WOULD call this every frame — here a slider stands in
+    var sweep = document.getElementById('sweep');
+    sweep.addEventListener('input', function () {
+      var p = sweep.value / 1000;
+      roll.set(p);
+      describe(roll.value);
+    });
+
+    describe(9);
+
+    // PROOF the roll works headless without any user input or ScrollTrigger:
+    // sweep set(p) across the whole sequence, then settle on a to() roll.
+    if (window.gsap) {
+      var probe = { p: 0 };
+      gsap.to(probe, {
+        p: 1, duration: 1.1, ease: 'none',
+        onUpdate: function () { roll.set(probe.p); describe(roll.value); },
+        onComplete: function () { roll.set(0); describe(9); roll.to(10); describe(10); }
+      });
+    }
+  })();
+</script>
+</body>
+</html>

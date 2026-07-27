@@ -1,0 +1,96 @@
+{
+ "_note": "config ivy v3 (S48 конвеєр ради): pin+swap — стос карток (card2/card3 в'їжджають знизу, card1 статична), докрутка контейнера, title-swap самим opacity. Клас з LIVE zone-track.",
+ "url": "variants/ivy.html",
+ "mechanicClass": "pin+swap",
+ "_mechanicClass_src": "reference/ivy-live.zonetrack.json mechanicClass=pin+swap (S48 крок 5: клас визначає live, config лише декларує збіг)",
+ "targets": [
+  {
+   "id": "card1",
+   "sel": "#card1",
+   "channel": "ty",
+   "role": "card",
+   "_note": "найстаріша: stack-recede scale+малий lift (хід 51px < chIdentTranslateMinPx=100 — mechanism не декларується; рух ловить census/structure)"
+  },
+  {
+   "id": "card2",
+   "sel": "#card2",
+   "channel": "ty",
+   "mechanism": "translate",
+   "role": "card",
+   "_note": "cover №1: playground поверх pod",
+   "unit": "dvh"
+  },
+  {
+   "id": "card3",
+   "sel": "#card3",
+   "channel": "ty",
+   "mechanism": "translate",
+   "role": "card",
+   "_note": "cover №2: yoga поверх playground",
+   "unit": "dvh"
+  },
+  {
+   "id": "t1",
+   "sel": "#t1",
+   "channel": "opacity",
+   "role": "text",
+   "_note": "title-текст №1 (стос span-ів, лише opacity)"
+  },
+  {
+   "id": "t2",
+   "sel": "#t2",
+   "channel": "opacity",
+   "role": "text",
+   "_note": "title-текст №2 (стос span-ів, лише opacity)"
+  },
+  {
+   "id": "t3",
+   "sel": "#t3",
+   "channel": "opacity",
+   "role": "text",
+   "_note": "title-текст №3 (стос span-ів, лише opacity)"
+  },
+  {
+   "id": "t4",
+   "sel": "#t4",
+   "channel": "opacity",
+   "role": "text",
+   "_note": "title-текст №4 (стос span-ів, лише opacity)"
+  }
+ ],
+ "ignore": [],
+ "liveAnchors": {
+  "_note": "cream-панель #f5e8d1 (live rgb 244,227,202) на всіх станах; фото-картки В полях",
+  "video": "reference/ivy-live.mp4",
+  "bandRGB": [
+   244,
+   227,
+   202
+  ],
+  "states": [
+   0.15,
+   0.45,
+   0.7,
+   0.85
+  ],
+  "topCutPct": 8,
+  "botCutPct": 4
+ },
+ "media": {
+  "declared": "photo-placeholder",
+  "waiverSrc": "live = статичний рендер (не відео); наші higgsfield-асети (pod/playground/yoga) фінальні, звірені оком S47. media-type не застосовний."
+ },
+ "pan": {
+  "_note": "S54: фаза ОБОВ'ЯЗКОВО всередині життя ОДНІЄЇ картки. Перша спроба [0,1] була несправна: зона card свапає вміст (3 різні картки, вхід p0.26 і p0.58), і крива G мала СХОДИНКИ рівно на входах, тобто вимір читав свапи, а не закон.",
+  "ourRange": [
+   0.02,
+   0.24
+  ],
+  "liveFrames": [
+   7,
+   78
+  ],
+  "states": 44,
+  "_src": "сегмент ДО першого входу (IN2=0.26 у ivy.html): на екрані живе лише card1 і працює її recede. Це єдиний відрізок тіла без свапу вмісту."
+ }
+}

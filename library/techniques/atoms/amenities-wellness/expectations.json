@@ -1,0 +1,136 @@
+{
+  "_note": "expectations v2 (Етап B S45). КОЖНЕ число з обов'язковим src. basis:'self' = число з render-коду (регрес-guard, не «зелений-проти-live»). Після приймання атома оком — файл заморожується.",
+  "events": [
+    {
+      "key": "card.motion.start",
+      "p": 0.16,
+      "tol": 0.02,
+      "src": "SPEC.md:16 Ф2 (0.16–0.50) картка вилазить ← CHOREO f25"
+    },
+    {
+      "key": "card.plateau.value",
+      "val": 38,
+      "valTol": 2,
+      "src": "SPEC.md:24 M3 pin ~38dvh"
+    },
+    {
+      "key": "card.plateau.start",
+      "p": 0.38,
+      "tol": 0.02,
+      "src": "render-math wellness.html:130 lerp(100,38) кінець 0.38",
+      "basis": "self"
+    },
+    {
+      "key": "card.plateau.end",
+      "p": 0.52,
+      "tol": 0.02,
+      "src": "render-math wellness.html:132 travel з 0.52",
+      "basis": "self"
+    },
+    {
+      "key": "p1.motion.start",
+      "p": 0.16,
+      "tol": 0.02,
+      "src": "SPEC.md:26 M4 P1 reveal 0.16–0.36"
+    },
+    {
+      "key": "p1.motion.end",
+      "p": 0.36,
+      "tol": 0.02,
+      "src": "SPEC.md:26 M4 P1 reveal 0.16–0.36"
+    },
+    {
+      "key": "p2.motion.start",
+      "p": 0.44,
+      "tol": 0.02,
+      "src": "render-math wellness.html:137 (🔴 КОНФЛІКТ зі SPEC.md:26 M5=0.50 — прийнятий код 0.44; на підпис Єгору)",
+      "basis": "self"
+    },
+    {
+      "key": "v1.motion.start",
+      "p": 0.5,
+      "tol": 0.02,
+      "src": "SPEC.md:25 M2 band 0.50"
+    },
+    {
+      "key": "handoff.motion.start",
+      "p": 0.66,
+      "tol": 0.02,
+      "src": "SPEC.md:5 «виміряно f89/56.3с коли P1cream→0» + wellness.html:124 коментар-вимір"
+    },
+    {
+      "key": "handoff.motion.end",
+      "p": 0.92,
+      "tol": 0.02,
+      "src": "render-math wellness.html:144 0.66+0.26=0.92",
+      "basis": "self"
+    }
+  ],
+  "ordering": [
+    {
+      "later": "handoff",
+      "notBefore": {
+        "target": "card",
+        "value": -34,
+        "unit": "dvh"
+      },
+      "src": "ЗАКОН live SPEC.md:5 «новий фон ТІЛЬКИ коли картка дійшла до P2-only» (f89/56.3с); waypoint -34dvh = P2-only (render-math wellness.html:132)"
+    }
+  ],
+  "overlap": [
+    {
+      "a": "p2",
+      "b": "v1",
+      "type": "mustOverlap",
+      "src": "CHOREO-MAP Ф3 (кадри 61-89): фото вилазить + P2 додається ПАРАЛЕЛЬНО"
+    }
+  ],
+  "composition": {
+    "cardPin": {
+      "target": "card",
+      "valueDvh": 38,
+      "tolDvh": 2,
+      "src": "SPEC.md:24 M3 pin ~38"
+    },
+    "canvasColor": {
+      "sel": "#handoff",
+      "rgb": [
+        93,
+        108,
+        45
+      ],
+      "src": "SPEC.md:4 олив-полотно #5d6c2d"
+    },
+    "picBox": {
+      "sel": "#handoff .pic",
+      "topPct": 16,
+      "heightPct": 52,
+      "tolPct": 2,
+      "src": "render-math wellness.html:37 (концепт «картинка в полях, не full-bleed» = SPEC.md:4)",
+      "basis": "self"
+    }
+  },
+  "typography": {
+    "exit": {
+      "target": "card",
+      "afterP": 0.6,
+      "minTravelDvh": 8,
+      "src": "SPEC.md:5 «текст УХОДИТЬ (не пінится)»"
+    },
+    "revealOrder": {
+      "first": "p1",
+      "then": "p2",
+      "src": "SPEC.md:26 M5 «P2 reveal ПІЗНІШЕ за P1»"
+    }
+  },
+  "surfaceWaivers": [
+    {
+      "p": 0.5,
+      "src": "S46-c РЕТРОАКТИВНА ЗНАХІДКА surface-виміру: live Ф3+ = фото-картки В ПОЛЯХ на канві, наш прийнятий атом = full-bleed slide-up. Атом ПРИЙНЯТО оком Єгора S45 (7 ітерацій). Рішення про перебудову за Єгором"
+    },
+    {
+      "p": 0.95,
+      "src": "те саме: live олив+框-картки композиція ширша ніж наш handoff; прийнято оком S45; судить Єгор"
+    }
+  ]
+}

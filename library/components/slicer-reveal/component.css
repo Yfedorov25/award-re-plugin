@@ -1,0 +1,320 @@
+/* ============================================================================
+   slicer-reveal/component.css — Slicer reveal (SAISEI horizontal slice)
+   ----------------------------------------------------------------------------
+   Recorded 1:1 from the RESTORED, owner-approved
+   apps/quadro/public/slide-lab/slc-h2-split-reveal.html — the CONTAINED ~50vw
+   calm version (NOT the broken full-screen variant).
+
+   SAISEI's contained-column slot: a big CONTAINED render (~50vw) sits to one
+   side, hugging the page with a small cream gutter; a confident Fraunces serif
+   headline + meta column sits opposite on cream paper. Cream is the dominant
+   surface (>=55% of the viewport on every beat). The render is CONTAINED —
+   never full-bleed, never full-screen.
+
+   THE STAR — the horizontal slicer:
+     The render APPEARS via a hard-edged clip that opens LEFT->RIGHT.
+       closed:  clip-path inset(0 100% 0 0)  (only a 1px seam shows)
+       open:    clip-path inset(0 0 0 0)     (full contained ~50vw render)
+     A thin LIGHT line rides the leading edge while it travels; the image
+     behind is STATIC in world-space (scale 1.06 -> 1.0 micro-parallax only).
+     Eased expo.out, scroll-scrubbed — calm, slow, premium. NOT a snap.
+
+   STACKED-SCROLL REVEAL (BUG-A FIX): each beat lives in its OWN tall section
+   (height:200vh) whose inner STICKY stage (.beat-stage, 100vh) pins the
+   contained render centred in the viewport while the band scrolls the slice
+   ONCE; then it STAYS OPEN / STATIC (no re-close), alternating render side.
+
+   NO-PLATE FIX (BUG-B FIX): the render slot's backing colour is the PAGE CREAM
+   (--render-back = --cream), never a dark/beige plate. Closed slot reads clean
+   cream; the photo slices in onto cream.
+
+   Motion is transform / opacity / clip-path ONLY on the scrubbed surface. No
+   mix-blend, no backdrop-filter over the scrub. No video. No WebGL.
+   ========================================================================== */
+
+:root{
+  /* SAISEI cream-paper palette */
+  --cream:#EDE6D4;        /* dominant surface (~60% of pixels) */
+  --cream-2:#E7DFC9;      /* faint inner panel tone */
+  --ink:#1A1A17;          /* warm charcoal text on cream */
+  --ink-soft:#6A6453;     /* muted meta ink */
+  --hair:rgba(26,26,23,.18); /* hairline rules */
+  --cream-text:#EFE7D2;   /* text on dark render */
+  --seam:rgba(247,242,228,.92); /* the thin LIGHT line on the slice edge */
+
+  /* BUG-B: the slot backing IS the page cream — NO dark/beige plate ever shows
+     behind the photo. The closed slot reads as clean cream; the photo slices in
+     onto cream. */
+  --render-back:var(--cream);
+
+  --serif:"Fraunces","Times New Roman",Georgia,serif;
+  --sans:"Inter",system-ui,-apple-system,sans-serif;
+
+  --mx:clamp(22px,5vw,84px);  /* page margin / cream gutter */
+  --air:cubic-bezier(0.25,0.74,0.22,0.99);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--cream);}
+body{font-family:var(--sans);color:var(--ink);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+
+/* scroll-in / scroll-out spacers (cream, quiet) */
+.lead,.tail{
+  height:100vh;display:grid;place-items:center;
+  background:var(--cream);color:var(--ink-soft);
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.34em;
+  text-transform:uppercase;
+}
+.lead span,.tail span{opacity:.62}
+
+/* ============================================================
+   STACK — tall beat-sections; the page scrolls past them.
+   ============================================================ */
+.stack{
+  position:relative;width:100vw;
+  background:var(--cream);color:var(--ink);
+}
+
+/* clean cream backdrop with a barely-there warm vignette (NO words),
+   fixed behind the stack so every beat sits on the same calm paper. */
+.bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(120% 100% at 18% 30%, #F1EAD9 0%, var(--cream) 52%, var(--cream-2) 100%);
+}
+
+/* ---------- static print-plate chrome (fixed, one set for the stack) ---------- */
+.brand{
+  position:fixed;top:var(--mx);left:var(--mx);z-index:9;
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.40em;
+  text-transform:uppercase;color:var(--ink);opacity:.74;
+}
+.brand-rule{
+  position:fixed;top:calc(var(--mx) + 26px);left:var(--mx);z-index:9;
+  width:clamp(120px,16vw,230px);height:1px;background:var(--hair);
+}
+.est{
+  position:fixed;top:var(--mx);right:var(--mx);z-index:9;
+  font-family:var(--sans);font-size:.6rem;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+.index{
+  position:fixed;bottom:var(--mx);right:var(--mx);z-index:9;
+  font-family:var(--serif);font-size:.95rem;letter-spacing:.04em;color:var(--ink-soft);
+}
+.foot-l{
+  position:fixed;bottom:var(--mx);left:var(--mx);z-index:9;
+  font-family:var(--sans);font-size:.6rem;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--ink-soft);
+}
+
+/* thin filmic progress cue (NOT a count-up) — fixed line across the stack */
+.prog{
+  position:fixed;left:50%;bottom:var(--mx);z-index:9;
+  transform:translateX(-50%);
+  width:clamp(120px,16vw,220px);height:1px;
+  background:rgba(26,26,23,.14);overflow:hidden;
+}
+.prog i{
+  position:absolute;inset:0;transform:scaleX(0);transform-origin:left center;
+  background:var(--ink);opacity:.55;
+}
+
+/* ============================================================
+   BEAT SECTION — tall scroll band. A STICKY inner stage holds the
+   contained render centred in the viewport while the slice plays.
+   The render owns its own band (section taller than the viewport)
+   so a stayed-open render scrolls away above before the next opens.
+   ============================================================ */
+.beat{
+  position:relative;z-index:3;
+  /* tall band: gives the scrubbed slice a generous scroll distance and
+     keeps each render in its OWN window (zero overlap with the next). */
+  height:200vh;
+}
+/* the STICKY stage is exactly one viewport tall and pins the contained
+   render in view while its section's band scrolls. NOT full-bleed:
+   the render inside is min(86vh,720px) with cream air around it. */
+.beat-stage{
+  position:sticky;top:0;
+  width:100%;height:100vh;
+  display:grid;
+  grid-template-columns: var(--mx) minmax(0,50fr) clamp(40px,6vw,96px) minmax(0,42fr) var(--mx);
+  /*                      [gutter] [   RENDER   ]  [center axis ]   [  TEXT  ]  [gutter] */
+  align-items:center;
+}
+/* mirror: render on the right, text on the left (editorial alternation) */
+.beat--right .beat-stage{
+  grid-template-columns: var(--mx) minmax(0,42fr) clamp(40px,6vw,96px) minmax(0,50fr) var(--mx);
+}
+.beat--right .render-col{grid-column:4;}
+.beat--right .text-col{grid-column:2;}
+.beat--right .inset{grid-column:2;}
+
+/* ---------- RENDER ZONE (contained ~50vw) ---------- */
+.render-col{
+  grid-column:2;grid-row:1;
+  position:relative;
+  height:min(86vh,720px);
+}
+
+/* the render = a hard-clipped slab; it travels closed->open L->R ONCE,
+   then STAYS OPEN. BUG-B: backing = page cream, never a dark plate. */
+.slab{
+  position:absolute;inset:0;z-index:1;
+  overflow:hidden;
+  background:var(--render-back);    /* BUG-B: clean cream, NO dark plate */
+  /* CLOSED by default: clipped from the right to a 0-width sliver at left */
+  clip-path:inset(0 100% 0 0);
+  will-change:clip-path;
+  box-shadow:0 40px 90px -52px rgba(20,16,10,.5);
+}
+.slab img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transform:scale(1.06);            /* JS micro-parallax 1.06 -> 1.0, never squashes */
+  will-change:transform;
+}
+/* gentle dark foot so cream-text captions read on the render */
+.slab .grad{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(180deg, rgba(10,8,6,.04) 0%, rgba(10,8,6,0) 38%, rgba(10,8,6,.34) 100%);
+}
+
+/* the thin LIGHT line that rides the leading (right) edge of the slab while it
+   is mid-slice. A 2px vertical bar pinned to the slab's right edge, inside
+   overflow:hidden so it's only visible across the open band. */
+.slab .edge{
+  position:absolute;top:0;bottom:0;right:0;width:2px;z-index:3;
+  background:linear-gradient(180deg,
+    rgba(247,242,228,0) 0%, var(--seam) 14%, var(--seam) 86%, rgba(247,242,228,0) 100%);
+  opacity:0;                        /* JS shows it only during travel */
+  box-shadow:0 0 16px 1px rgba(247,242,228,.35);
+  pointer-events:none;
+}
+
+/* tiny on-render eyebrow chip (sits on the render's own dark foot, NOT backdrop) */
+.slab .chip{
+  position:absolute;left:0;right:0;bottom:0;z-index:4;
+  padding:1rem 1.1rem .95rem;
+  font-family:var(--sans);font-size:.54rem;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--cream-text);opacity:.9;
+  background:linear-gradient(to top, rgba(8,6,4,.6), transparent);
+}
+
+/* ---------- SMALL INSET detail render (climax pairing) ---------- */
+.inset{
+  grid-column:4;grid-row:1;
+  align-self:end;
+  position:relative;
+  width:min(27vw,300px);height:min(20vh,180px); /* SAISEI inset ~27vw, 3:2 */
+  margin-bottom:clamp(8px,3vh,40px);
+  margin-left:auto;                 /* hug the right edge of the text column */
+  overflow:hidden;
+  background:var(--render-back);    /* BUG-B: clean cream, NO dark plate */
+  clip-path:inset(0 100% 0 0);       /* its own L->R slicer, opens at climax */
+  will-change:clip-path;
+  box-shadow:0 26px 60px -40px rgba(20,16,10,.5);
+  z-index:5;
+}
+.inset img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transform:scale(1.06);will-change:transform;
+}
+.inset .edge{
+  position:absolute;top:0;bottom:0;right:0;width:2px;z-index:3;
+  background:linear-gradient(180deg,
+    rgba(247,242,228,0) 0%, var(--seam) 14%, var(--seam) 86%, rgba(247,242,228,0) 100%);
+  opacity:0;box-shadow:0 0 14px 1px rgba(247,242,228,.32);pointer-events:none;
+}
+.inset .cap{
+  position:absolute;left:0;right:0;bottom:0;z-index:4;
+  padding:.7rem .8rem .65rem;
+  font-family:var(--sans);font-size:.48rem;letter-spacing:.24em;
+  text-transform:uppercase;color:var(--cream-text);opacity:.88;
+  background:linear-gradient(to top, rgba(8,6,4,.62), transparent);
+}
+
+/* ---------- TEXT ZONE (on cream) ---------- */
+.text-col{
+  grid-column:4;grid-row:1;
+  position:relative;
+  align-self:center;
+  /* match the render zone height so the centred beat text aligns vertically
+     with the centre of the tall render (SAISEI frame_05). */
+  height:min(86vh,720px);
+  display:flex;flex-direction:column;justify-content:center;
+  max-width:36ch;
+}
+
+.eyebrow{
+  display:block;margin-bottom:1.1rem;
+  font-family:var(--sans);font-size:.66rem;letter-spacing:.30em;
+  text-transform:uppercase;color:var(--ink-soft);
+  opacity:0;transform:translateY(8px);
+}
+h2.beat-head{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(2rem,4.4vw,3.6rem);line-height:1.0;letter-spacing:-.012em;
+  color:var(--ink);
+}
+h2.beat-head .ln{display:block;overflow:hidden;}
+/* masked start is owned by GSAP (yPercent:112 in setStart). The static /
+   reduced-motion / pre-JS path shows lines at rest (translateY 0). */
+h2.beat-head .ln > span{display:block;will-change:transform;}
+.beat-body{
+  margin-top:1.5rem;max-width:32ch;
+  font-family:var(--sans);font-weight:300;font-size:clamp(.92rem,1.15vw,1.02rem);
+  line-height:1.62;color:var(--ink);
+  opacity:0;transform:translateY(10px);
+}
+.beat-meta{
+  display:block;margin-top:1.7rem;padding-top:1rem;
+  border-top:1px solid var(--hair);
+  font-family:var(--sans);font-size:.62rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-soft);
+  opacity:0;transform:translateY(8px);
+}
+
+/* ============================================================
+   STATIC / NARROW FALLBACK (reduced-motion OR <=820px):
+   no sticky, slices FULLY OPEN, legible stacked layout.
+   ============================================================ */
+.is-static .beat{height:auto;}
+.is-static .beat-stage{
+  position:relative;top:auto;height:auto;display:block;
+  padding:12vh var(--mx) 10vh;
+}
+.is-static .render-col{
+  grid-column:auto;position:relative;height:auto;width:100%;
+  aspect-ratio:4 / 3;margin:0 0 6vh;
+}
+.is-static .slab{
+  position:absolute;inset:0;clip-path:inset(0 0 0 0)!important; /* fully open */
+  background:var(--render-back);
+}
+.is-static .slab img{transform:none!important;}
+.is-static .slab .edge{display:none!important;}
+.is-static .inset{
+  grid-column:auto;width:min(70vw,360px);height:auto;aspect-ratio:3/2;
+  clip-path:inset(0 0 0 0)!important;margin:0 0 6vh auto;
+}
+.is-static .inset img{transform:none!important;}
+.is-static .inset .edge{display:none!important;}
+.is-static .text-col{
+  grid-column:auto;position:relative;height:auto;max-width:46ch;display:block;
+}
+.is-static .eyebrow,
+.is-static .beat-body,
+.is-static .beat-meta{opacity:1!important;transform:none!important;}
+.is-static h2.beat-head .ln > span{transform:none!important;}
+.is-static .prog{display:none!important;}
+
+@media (max-width:820px){
+  :root{--mx:18px;}
+  .index{font-size:.85rem}
+  h2.beat-head{font-size:clamp(1.8rem,8vw,2.4rem)}
+}
+@media (prefers-reduced-motion:reduce){
+  .lead,.tail{display:none}
+}

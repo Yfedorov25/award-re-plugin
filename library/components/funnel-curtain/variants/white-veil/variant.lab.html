@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · funnel-curtain / white-veil · T-M22 (біла між-сторінкова штора ~0.5с)</title>
+<!--
+================================================================================
+  VARIANT LAB · funnel-curtain / white-veil (T-M22)
+  Механіка = живий flash-режим бази: штора знизу↑ (0.5с) → swap під
+  покриттям → вихід угору (0.5с). Дельта: біла (#f4f2ee), без wordmark.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. play(): панель БІЛА, покриття настає ~500ms
+  (250<t<900), swap викликаний ПІД покриттям (сторінка Б підмінена доки
+  панель видима), літер на панелі НЕМА; 3. повний ритуал ~1s (0.8–1.6),
+  панель прибрана з DOM; 4. reduced би свапнув одразу (не перевіряємо
+  headless); 5. errors == 0. Обидва в'юпорти — та сама механіка.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 40; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  main { min-height: 100svh; display: grid; place-content: center; text-align: center; gap: 3vh; }
+  main h1 { font-size: clamp(28px, 4vw, 54px); font-weight: 300; }
+  main button { font: inherit; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+    padding: 13px 18px; border-radius: 4px; border: 1px solid rgba(17,17,16,.35);
+    background: none; cursor: pointer; }
+  #pageB { display: none; }
+  body.on-b #pageA { display: none; }
+  body.on-b #pageB { display: grid; }
+  #pageB.pg { background: #111110; color: #f2f1ee; min-height: 100svh; place-content: center; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · funnel-curtain / white-veil · t-m22 · тисни кнопку</div>
+
+<main id="pageA"><h1>Сторінка А</h1><button id="go">На сторінку Б →</button></main>
+<main id="pageB" class="pg"><h1>Сторінка Б</h1><button id="back">← Назад</button></main>
+
+<script src="../../component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  /* T-M22 = дельта параметрів над живим flash-режимом */
+  var veil = window.FunnelCurtain.create({ bg: '#f4f2ee', flashMs: 1000 });
+  window.__VEIL = veil;
+  if (PM) { try { delete window.__LAB_OK__; } catch (e) { window.__LAB_OK__ = undefined; } }
+
+  function swapTo(b) { document.body.classList.toggle('on-b', b); }
+  document.getElementById('go').addEventListener('click', function () {
+    veil.play(function () { swapTo(true); }, 'flash');
+  });
+  document.getElementById('back').addEventListener('click', function () {
+    veil.play(function () { swapTo(false); }, 'flash');
+  });
+
+  var report = { stability: null, ritual: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function run() {
+    if (!PM) return;
+    var ok = true;
+    var anchor = document.querySelector('#pageA h1');
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    var t0 = performance.now();
+    var midInfo = null;
+    document.getElementById('go').click();
+    await delay(700);   /* під покриттям (rise ~500ms + запас на старт кадру) */
+    (function () {
+      var p = document.querySelector('.fcr');
+      midInfo = {
+        panelOn: !!p,
+        white: p ? /244,\s*242,\s*238/.test(getComputedStyle(p).backgroundColor) : false,
+        letters: p ? p.querySelectorAll('.fcr-letter, [class*=letter]').length : -1,
+        swapped: document.body.classList.contains('on-b')
+      };
+    }());
+    await delay(1200);
+    var done = performance.now() - t0;
+    report.ritual = {
+      mid: midInfo,
+      coveredAt: Math.round(veil.gate.coveredT - t0),
+      total: Math.round(veil.gate.doneT - t0),
+      panelGone: !document.querySelector('.fcr')
+    };
+    report.ritual.ok = midInfo.panelOn && midInfo.white && midInfo.letters === 0 &&
+                       midInfo.swapped &&
+                       report.ritual.coveredAt > 250 && report.ritual.coveredAt < 900 &&
+                       report.ritual.total > 800 && report.ritual.total < 1700 &&
+                       report.ritual.panelGone;
+    ok = report.ritual.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:fc/white-veil]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

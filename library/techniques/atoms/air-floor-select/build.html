@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ONYX — Select a floor</title>
+<style>
+  :root{
+    --bg:#101110; --ink:#f0ede6; --accent:#c9a35e;
+    --ink-70:rgba(240,237,230,.70); --ink-45:rgba(240,237,230,.42); --ink-22:rgba(240,237,230,.2);
+    --line:rgba(240,237,230,.10);
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--grot);-webkit-font-smoothing:antialiased;overflow:hidden}
+  a{color:var(--accent);text-decoration:none} a:hover{color:var(--ink)}
+  .stage{position:relative;width:100vw;height:100vh;min-height:640px;overflow:hidden}
+  .sky{position:absolute;inset:0;
+    background:
+      radial-gradient(38% 30% at 84% 2%, rgba(222,230,240,.16), rgba(222,230,240,0) 62%),
+      radial-gradient(120% 60% at 50% 112%, rgba(201,163,94,.20), rgba(201,163,94,0) 55%),
+      radial-gradient(100% 60% at 16% -6%, rgba(44,62,86,.55), rgba(44,62,86,0) 60%),
+      linear-gradient(180deg,#0a0c10 0%,#111520 46%,#15130f 82%,#101110 100%)}
+  .haze{position:absolute;left:0;right:0;bottom:0;height:48%;background:linear-gradient(180deg,rgba(16,17,16,0) 0%,rgba(14,15,15,.55) 55%,var(--bg) 100%)}
+  .grain{position:absolute;inset:0;opacity:.06;mix-blend-mode:screen;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .ghost{position:absolute;right:2vw;top:6vh;font-family:var(--serif);font-size:min(52vh,560px);line-height:.8;color:var(--accent);opacity:.06;letter-spacing:-.03em;pointer-events:none;user-select:none}
+  header{position:absolute;top:0;left:0;right:0;height:64px;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 34px}
+  .brand{font-family:var(--serif);font-size:30px;letter-spacing:.06em}
+  .brand b{font-weight:400}
+  .chip{font-family:var(--grot);font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink);background:rgba(34,36,34,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--line);padding:11px 15px;border-radius:2px;display:flex;gap:12px;align-items:center;cursor:pointer;transition:background .3s ease,border-color .3s ease}
+  .chip:hover{background:rgba(50,52,50,.6);border-color:rgba(201,163,94,.5)}
+  .chip .x{font-size:12px;color:var(--accent)}
+  .label{position:absolute;left:34px;top:96px;z-index:30;font-family:var(--serif);font-size:30px;line-height:1.02;letter-spacing:.01em}
+  .label span{display:block;color:var(--accent);font-size:10.5px;font-family:var(--grot);letter-spacing:.34em;text-transform:uppercase;margin-bottom:12px}
+  .scene{position:absolute;inset:0;z-index:20}
+  .ground{position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(180deg,rgba(10,12,14,0),rgba(5,6,7,.72));border-top:1px solid rgba(240,237,230,.08)}
+  .props{position:absolute;left:0;right:0;bottom:118px;height:60px;opacity:.5}
+  .skyline{position:absolute;left:50%;bottom:130px;transform:translateX(-50%);display:flex;align-items:flex-end;gap:74px;z-index:22}
+  .tower{position:relative;cursor:pointer;filter:drop-shadow(0 34px 66px rgba(0,0,0,.6))}
+  .body{position:relative;overflow:hidden;border-radius:3px 3px 0 0;
+    background:linear-gradient(180deg,#1c222b,#12161c 62%,#0d1013);
+    box-shadow:inset 0 0 0 1px rgba(240,237,230,.1)}
+  .body::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.6;
+    background-image:
+      repeating-linear-gradient(0deg,rgba(240,237,230,.08) 0 1px,transparent 1px var(--fh)),
+      repeating-linear-gradient(90deg,rgba(240,237,230,.05) 0 1px,transparent 1px 15px)}
+  .body::after{content:"";position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:.34;
+    -webkit-mask-image:radial-gradient(120% 90% at 60% 20%,#000 30%,rgba(0,0,0,.35) 100%);
+    mask-image:radial-gradient(120% 90% at 60% 20%,#000 30%,rgba(0,0,0,.35) 100%);
+    background:
+      repeating-linear-gradient(0deg,rgba(245,205,140,0) 0 6px,rgba(245,205,140,.42) 6px calc(var(--fh) - 3px),rgba(245,205,140,0) calc(var(--fh) - 3px) var(--fh)),
+      repeating-linear-gradient(90deg,rgba(6,8,10,.8) 0 4px,transparent 4px 16px)}
+  .cap{position:absolute;top:-8px;left:8%;right:8%;height:9px;border-radius:2px 2px 0 0;background:linear-gradient(180deg,#2a323c,#171c22)}
+  .plates{position:absolute;inset:0;display:flex;flex-direction:column-reverse;z-index:2}
+  .plate{flex:1 1 0;min-height:0;opacity:0;background:var(--ink);transition:opacity .3s ease;will-change:opacity}
+  .plate+.plate{margin-bottom:2px}
+  .tower.on .plate{opacity:.18;transition:opacity .25s cubic-bezier(.25,.74,.22,.99);transition-delay:calc(var(--i) * 12ms)}
+  .tower.on .plate.dead{opacity:.10}
+  .tower.on .plate.live:hover{opacity:.42;transition-delay:0s;box-shadow:0 0 14px rgba(201,163,94,.4)}
+  .tower.on .plate.live.hot{opacity:.42;transition-delay:0s;box-shadow:0 0 14px rgba(201,163,94,.4)}
+  .plate.live{cursor:pointer}
+  .plate.dead{pointer-events:none}
+  .plate.locked{background:var(--accent) !important;opacity:.55 !important;box-shadow:0 0 18px rgba(201,163,94,.55)}
+  .tlabel{position:absolute;top:-40px;left:50%;transform:translateX(-50%);font-family:var(--grot);font-size:10px;letter-spacing:.2em;color:var(--ink-70);background:rgba(24,26,28,.62);border:1px solid var(--line);border-radius:3px;padding:5px 9px;white-space:nowrap}
+  .card{position:absolute;z-index:35;width:244px;background:rgba(22,24,22,.46);backdrop-filter:blur(16px) saturate(1.15);-webkit-backdrop-filter:blur(16px) saturate(1.15);border:1px solid rgba(240,237,230,.16);box-shadow:0 34px 70px -30px rgba(0,0,0,.75);border-radius:4px;padding:20px 22px 18px;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .3s cubic-bezier(.25,.74,.22,.99),transform .3s cubic-bezier(.25,.74,.22,.99),left .35s cubic-bezier(.25,.74,.22,.99),top .35s cubic-bezier(.25,.74,.22,.99)}
+  .card.show{opacity:1;transform:translateY(0)}
+  .card .fno{font-family:var(--serif);font-size:52px;line-height:.9;letter-spacing:-.01em;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:10px;color:var(--ink)}
+  .card .fno small{font-family:var(--grot);font-size:11px;letter-spacing:.24em;color:var(--ink-45)}
+  .card .u{margin-top:14px;font-size:12px;letter-spacing:.16em;text-transform:uppercase}
+  .card .a{margin-top:4px;font-size:12px;letter-spacing:.14em;color:var(--ink-45);font-variant-numeric:tabular-nums}
+  .card .hint{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--accent)}
+  .card .cross{position:absolute;top:16px;right:16px;font-size:15px;color:var(--ink-45);transition:transform .3s cubic-bezier(.25,.74,.22,.99),color .3s ease}
+  .card.sel{background:rgba(201,163,94,.16);border-color:rgba(201,163,94,.5)}
+  .card.sel .cross{transform:rotate(45deg);color:var(--accent)}
+  .card.sel .hint{color:var(--ink);letter-spacing:.3em}
+  footer{position:absolute;left:34px;right:34px;bottom:26px;z-index:30;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+  footer p{max-width:520px;font-size:13.5px;line-height:1.7;color:var(--ink-70)}
+  footer .leg{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-45);white-space:nowrap}
+  @media (prefers-reduced-motion: reduce){*{transition-duration:0s !important;animation-duration:0s !important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="sky"></div>
+  <div class="haze"></div>
+  <div class="ghost">24</div>
+  <div class="grain"></div>
+
+  <header>
+    <div class="brand"><b>ONYX</b></div>
+    <div class="chip" role="button" tabindex="0">Filter by parameters <span class="x">✛</span></div>
+  </header>
+
+  <div class="label"><span>Step 01 — Building</span>Select<br>floor</div>
+
+  <div class="scene">
+    <div class="props"></div>
+    <div class="ground"></div>
+    <div class="skyline" id="skyline"></div>
+    <div class="card" id="card">
+      <div class="cross">✛</div>
+      <div class="fno"><span id="cf">—</span><small id="ct">T—</small></div>
+      <div class="u" id="cu">— UNITS OPEN</div>
+      <div class="a">480–1 250 M²</div>
+      <div class="hint" id="ch">Click to select</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Every floor is drawn to scale from the working section. What you hover is what gets built.</p>
+    <div class="leg">ONYX · Tower Release 04</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var TOWERS=[{id:"T1",floors:16,w:128},{id:"T2",floors:24,w:150},{id:"T3",floors:12,w:146}];
+  var FLOOR_H=17;
+  var skyline=document.getElementById("skyline");
+  var card=document.getElementById("card");
+  var cf=document.getElementById("cf"),ct=document.getElementById("ct"),
+      cu=document.getElementById("cu"),ch=document.getElementById("ch");
+  var lastType="mouse";
+  document.addEventListener("pointerdown",function(e){ if(e.pointerType) lastType=e.pointerType; },true);
+
+  var state={tower:null,floor:null,locked:null};
+  var towerEls={};
+
+  function units(f){ return (f%3===0)?0:((f*7)%4)+1; }
+  function isDead(f){ return f%3===0; }
+
+  TOWERS.forEach(function(t){
+    var el=document.createElement("div");
+    el.className="tower"; el.dataset.id=t.id;
+    var h=t.floors*FLOOR_H;
+    el.style.width=t.w+"px";
+    var body=document.createElement("div");
+    body.className="body"; body.style.height=h+"px"; body.style.width=t.w+"px";
+    body.style.setProperty("--fh",FLOOR_H+"px");
+    var cap=document.createElement("div"); cap.className="cap"; body.appendChild(cap);
+    var plates=document.createElement("div"); plates.className="plates";
+    for(var f=1;f<=t.floors;f++){
+      var p=document.createElement("div");
+      var dead=isDead(f);
+      p.className="plate "+(dead?"dead":"live");
+      p.style.setProperty("--i",(f-1));
+      p.dataset.floor=f; p.dataset.tower=t.id;
+      if(!dead) wirePlate(p,t,f);
+      plates.appendChild(p);
+    }
+    body.appendChild(plates);
+    var lab=document.createElement("div"); lab.className="tlabel"; lab.textContent=t.id;
+    el.appendChild(lab); el.appendChild(body);
+
+    el.addEventListener("pointerenter",function(e){ if(e.pointerType!=="touch") enterTower(t.id); });
+    el.addEventListener("pointerleave",function(e){ if(e.pointerType!=="touch") leaveTower(t.id); });
+    skyline.appendChild(el);
+    towerEls[t.id]=el;
+  });
+
+  var lingerTimer=null;
+  function enterTower(id){
+    if(lingerTimer){clearTimeout(lingerTimer);lingerTimer=null;}
+    if(state.tower && state.tower!==id) towerEls[state.tower].classList.remove("on");
+    state.tower=id;
+    towerEls[id].classList.add("on");
+    anchorCard(id);
+  }
+  function leaveTower(id){
+    if(state.locked) return;
+    lingerTimer=setTimeout(function(){
+      towerEls[id].classList.remove("on");
+      if(state.tower===id){state.tower=null;state.floor=null;}
+      hideCard();
+    },150);
+  }
+
+  function anchorCard(id){
+    var el=towerEls[id];
+    var sc=skyline.parentElement.getBoundingClientRect();
+    var r=el.querySelector(".body").getBoundingClientRect();
+    var left=r.right-sc.left+18, top=r.top-sc.top;
+    if(left+244>sc.width-16){ left=(r.left-sc.left)-244-18; }
+    if(top<80) top=80;
+    card.style.left=left+"px"; card.style.top=top+"px";
+  }
+
+  function setCard(t,f){
+    cf.textContent=f; ct.textContent=t.id;
+    var u=units(f);
+    cu.textContent=u+" UNIT"+(u===1?"":"S")+" OPEN";
+  }
+
+  function showFloor(t,f,el){
+    setCard(t,f);
+    state.floor=f;
+    var prev=skyline.querySelector(".plate.hot");
+    if(prev&&prev!==el) prev.classList.remove("hot");
+    if(el) el.classList.add("hot");
+    if(state.locked && (state.locked.tower!==t.id || state.locked.floor!==f)){
+      card.classList.remove("sel"); ch.textContent="Click to select";
+    } else if(state.locked && state.locked.tower===t.id && state.locked.floor===f){
+      card.classList.add("sel");
+    } else {
+      card.classList.remove("sel"); ch.textContent="Click to select";
+    }
+    card.classList.add("show");
+  }
+  function hideCard(){
+    card.classList.remove("show");
+    var prev=skyline.querySelector(".plate.hot");
+    if(prev) prev.classList.remove("hot");
+  }
+
+  function selectFloor(t,f,el){
+    var prevLock=skyline.querySelector(".plate.locked");
+    if(prevLock) prevLock.classList.remove("locked");
+    state.locked={tower:t.id,floor:f,el:el};
+    el.classList.add("locked");
+    setCard(t,f);
+    card.classList.add("sel","show");
+    ch.textContent="Selected — floor "+f;
+  }
+  function unlock(){
+    if(!state.locked) return;
+    if(state.locked.el) state.locked.el.classList.remove("locked");
+    state.locked=null;
+    card.classList.remove("sel");
+    ch.textContent="Click to select";
+  }
+
+  function wirePlate(p,t,f){
+    p.addEventListener("pointerenter",function(e){ if(e.pointerType!=="touch") showFloor(t,f,p); });
+    p.addEventListener("click",function(e){
+      e.stopPropagation();
+      if(lastType==="touch"){
+        if(state.tower!==t.id){ enterTower(t.id); }
+        if(state.floor!==f || !card.classList.contains("show")){ showFloor(t,f,p); }
+        else { selectFloor(t,f,p); }
+      } else {
+        if(state.locked && state.locked.tower===t.id && state.locked.floor===f){ unlock(); }
+        else { selectFloor(t,f,p); }
+      }
+    });
+  }
+
+  document.addEventListener("click",function(e){
+    if(e.target.closest(".plate.live")) return;
+    if(e.target.closest(".chip")) return;
+    unlock();
+    if(lastType==="touch"){
+      if(state.tower){towerEls[state.tower].classList.remove("on");}
+      state.tower=null;state.floor=null;hideCard();
+    }
+  });
+
+  window.addEventListener("resize",function(){ if(state.tower) anchorCard(state.tower); });
+
+  window.__FSELECT={
+    tower:function(){return state.tower;},
+    floor:function(){return state.floor;},
+    locked:function(){return !!state.locked;}
+  };
+})();
+</script>
+</body>
+</html>

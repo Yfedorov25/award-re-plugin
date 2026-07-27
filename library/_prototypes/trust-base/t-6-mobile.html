@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PASSPORT · t-6-mobile «Шість із шести» · клас B · PHONE TWIN
+Десктоп-база: t-6-six-of-six.html (не чіпати). Той самий DATA-контракт.
+SIGNATURE MORPH збережено: STATUS-WRITE (слово + hairline self-draw) над кожним
+будинком, однаковий жест на всіх шести.
+Мобільна форма: ряд contained на всю ширину (390px -> зони тапу вузькі, тому
+АВТО-ДЕМОНСТРАЦІЙНИЙ ПРОХІД при вході = первинний показ; тапи лишаються іграшкою).
+Слово статусу 10px з тінню. Landing + міст нижче на темному.
+
+БОУНДАРІ: тап лише показує статус; вибір = за мостом (пікер).
+КЛАС B: нуль дат, нуль років, нуль девелопера у всьому файлі.
+F-48: тапів у спокої = 1 кнопкоподібний (міст) + зони-іграшки на фото.
+Анімовані властивості: transform, opacity. Reduced-motion: усе одразу.
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-6 mobile · Шість із шести</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,400&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.35); --gutter:20px;
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:clip}
+  body{background:#0b0a09;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--bg)}
+  img{display:block}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  .meta-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:20px var(--gutter) 0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .head{padding:40px var(--gutter) 28px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:300;font-size:36px;line-height:1.08;text-wrap:balance}
+  .lede{color:var(--muted);margin-top:14px;font-size:15px;max-width:36ch}
+
+  .row-stage{position:relative;margin:8px 0}
+  .row-stage img{width:100%;height:auto}
+  .h-cap{position:absolute;left:16px;bottom:14px;z-index:5;font:500 11px/1 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(237,230,216,.82);
+    text-shadow:0 1px 8px rgba(10,8,6,.65);pointer-events:none}
+
+  .zone{position:absolute;top:0;bottom:0;z-index:4;-webkit-tap-highlight-color:transparent}
+  .status{position:absolute;z-index:5;left:50%;top:30%;transform:translate(-50%,8px);opacity:0;
+    pointer-events:none;text-align:center}
+  .zone.lit .status{opacity:1;transform:translate(-50%,0);
+    transition:opacity .5s cubic-bezier(.2,.7,.2,1),transform .5s cubic-bezier(.2,.7,.2,1)}
+  html.static .zone .status{opacity:1;transform:translate(-50%,0);transition:none}
+  .status .w{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+    text-shadow:0 1px 8px rgba(10,8,6,.85);padding-bottom:6px}
+  .status .u{display:block;height:1px;background:var(--hair);transform:scaleX(0);transform-origin:center}
+  .zone.lit .status .u{transform:scaleX(1);transition:transform .6s cubic-bezier(.2,.7,.2,1) .1s}
+  html.static .status .u{transform:scaleX(1);transition:none}
+
+  .landing{padding:40px var(--gutter) 110px;display:grid;justify-items:start;gap:24px}
+  .landing .line{font-family:var(--serif);font-weight:300;font-size:32px;line-height:1.12;
+    opacity:0;transform:translateY(16px)}
+  .landing.on .line{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  html.static .landing .line{opacity:1;transform:none;transition:none}
+  .bridge{display:inline-flex;align-items:center;gap:14px;min-height:44px;font-size:15px;
+    text-decoration:none;border-bottom:1px solid var(--accent);color:var(--ink);
+    opacity:0;transform:translateY(12px)}
+  .landing.on .bridge{opacity:1;transform:none;transition:opacity .7s cubic-bezier(.2,.7,.2,1) .15s,transform .7s cubic-bezier(.2,.7,.2,1) .15s}
+  html.static .bridge{opacity:1;transform:none;transition:none}
+</style>
+</head>
+<body>
+<div class="phone">
+<section data-screen-label="t-6 mobile six of six">
+  <div class="meta-row"><span data-slot="project"></span><span>Клас B · t-6 · моб</span></div>
+  <header class="head">
+    <p class="eyebrow" data-slot="eyebrow"></p>
+    <h1 data-slot="title"></h1>
+    <p class="lede" data-slot="body"></p>
+  </header>
+
+  <figure class="row-stage" id="stage">
+    <img id="rowImg" alt="">
+    <figcaption class="h-cap" data-slot="honesty"></figcaption>
+  </figure>
+
+  <div class="landing" id="landing">
+    <p class="line" data-slot="landing"></p>
+    <a class="bridge" data-slot-href="bridge" href="#">
+      <span data-slot="bridgeLabel"></span>
+      <svg width="22" height="10" viewBox="0 0 22 10" fill="none" aria-hidden="true">
+        <path d="M0 5h20M16 1l4 4-4 4" stroke="#AC7E65" stroke-width="1.2"/></svg>
+    </a>
+  </div>
+</section>
+</div>
+
+<script>
+/* ═ TEMPLATE CONTRACT ═ (ідентичний десктопному t-6-six-of-six.html)
+   ОБОВʼЯЗКОВІ: project.name · section.{eyebrow,title,body} · media.{src
+   (ряд юнітів, contained, НЕ кропиться), honesty, altSubject БЕЗ дат} · units ·
+   statusWord · landing · bridge.{label,href}
+   ОПЦІЙНІ: statusTop (дефолт .30 на моб).
+   БОУНДАРІ: тап не обирає юніт; вибір живе за bridge.href (пікер). */
+const DATA = {
+  project: { name: 'Таунхауси · вул. Замкова' },
+  section: {
+    eyebrow: 'Статус',
+    title: 'На цьому сайті лише перевірені цифри',
+    body: 'Торкніться будь-якого будинку в ряду. Статус у всіх один.'
+  },
+  media: {
+    src: 'assets/towns/selector-row-6-day.png',
+    honesty: 'Візуалізація',
+    altSubject: 'ряд із шести однакових таунхаусів'
+  },
+  units: 6,
+  statusWord: 'вільний',
+  landing: 'Всі 6 таунів зараз вільні.',
+  bridge: { label: 'Обрати місце в ряду', href: '#units' }
+};
+
+const $ = s => document.querySelector(s);
+const put = (slot, v) => { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = v; };
+put('project', DATA.project.name);
+put('eyebrow', DATA.section.eyebrow);
+put('title', DATA.section.title);
+put('body', DATA.section.body);
+put('honesty', DATA.media.honesty);
+put('landing', DATA.landing);
+put('bridgeLabel', DATA.bridge.label);
+$('[data-slot-href="bridge"]').href = DATA.bridge.href;
+
+const img = $('#rowImg');
+img.src = DATA.media.src;
+img.alt = DATA.media.honesty + ': ' + DATA.media.altSubject;
+
+const stage = $('#stage'), landing = $('#landing');
+const zones = [];
+for (let i = 0; i < DATA.units; i++) {
+  const z = document.createElement('button');
+  z.className = 'zone';
+  z.style.left = (i * 100 / DATA.units) + '%';
+  z.style.width = (100 / DATA.units) + '%';
+  z.setAttribute('aria-label', 'Будинок ' + (i + 1) + ': показати статус');
+  const s = document.createElement('span'); s.className = 'status';
+  s.style.top = ((DATA.statusTop || 0.30) * 100) + '%';
+  const w = document.createElement('span'); w.className = 'w'; w.textContent = DATA.statusWord;
+  const u = document.createElement('span'); u.className = 'u';
+  s.appendChild(w); s.appendChild(u); z.appendChild(s);
+  z.addEventListener('click', () => reveal(i));
+  stage.appendChild(z); zones.push(z);
+}
+
+let litCount = 0, landed = false;
+function reveal(i){
+  if (zones[i].classList.contains('lit')) return;
+  zones[i].classList.add('lit');
+  zones[i].setAttribute('aria-label', 'Будинок ' + (i + 1) + ': ' + DATA.statusWord);
+  litCount++;
+  if (litCount >= DATA.units && !landed) {
+    landed = true;
+    setTimeout(() => landing.classList.add('on'), 350);
+  }
+}
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+let autoDone = false;
+const decoded = im => Promise.race([
+  im.decode().catch(() => {}),
+  new Promise(r => { if (im.complete) r(); else im.addEventListener('load', r, { once: true }); }),
+  new Promise(r => setTimeout(r, 800))
+]);
+
+async function init(){
+  /* DECODE-GUARD: рендер ряду декодується ДО вмикання зон тапу й авто-проходу */
+  await decoded(img);
+
+  if (reduced.matches) {
+    document.documentElement.classList.add('static');
+    zones.forEach(z => z.classList.add('lit'));
+    litCount = DATA.units; landed = true;
+    landing.classList.add('on');
+    return;
+  }
+
+  /* авто-демонстраційний прохід = первинний показ на телефоні (зони вузькі) */
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting || autoDone) return;
+    autoDone = true;
+    zones.forEach((z, i) => setTimeout(() => reveal(i), 700 + i * 360));
+    io.disconnect();
+  }), { threshold: 0.5 });
+  io.observe(stage);
+}
+init();
+reduced.addEventListener('change', () => init());
+</script>
+</body>
+</html>

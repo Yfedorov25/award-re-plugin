@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · FULL Saisei page transition (center-seam + 木-loader + mask-title + cascade) on QUADRO</title>
+
+<!--
+================================================================================
+  COMBO LAB · the FULL Saisei page transition, assembled on OUR content
+================================================================================
+  Four Saisei bricks chained into one cinematic transition:
+    S1 center-seam-split    — close in cream / open in dark
+    S2 monogram-ring-loader — 木 + ring stroke-on + grid skeleton, held in the cream gap
+    S5 mask-up-title        — QUADRO title rises from under a baseline mask, per line
+    S4 content-stage-cascade— reveal order bg -> awards -> title -> meta -> header LAST
+  With Saisei typography (narrow high-contrast serif, kanji, tracked micro-labels) on
+  OUR QUADRO render. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --cream:#f1ebd6; --ink:#2a2418; --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mrl-serif:'Fraunces',Georgia,serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:var(--ink);color:var(--cream);font-family:var(--sans);overflow:hidden}
+
+  /* state A: the cream "current page" we are leaving */
+  .page-a{position:fixed;inset:0;z-index:5;background:var(--cream);color:var(--ink);display:grid;place-items:center;text-align:center}
+  .page-a .mono{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,6vw,3.4rem)}
+  .page-a .lbl{margin-top:1rem;font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;opacity:.55}
+
+  /* state B: the dark project hero we arrive at (built with Saisei chrome) */
+  .hero{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0c0c0a}
+  .hero-bg{position:absolute;inset:0}
+  .hero-bg img{width:100%;height:100%;object-fit:cover;opacity:.6}
+  .hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(8,9,7,.66),rgba(8,9,7,0) 46%)}
+
+  /* header (drawn LAST) */
+  header{position:absolute;top:0;left:0;right:0;z-index:4;display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(28px,4vw,56px) 16px}
+  header .brand{font-family:var(--serif);font-weight:400;letter-spacing:.18em;font-size:14px}
+  header .est{font-size:11px;letter-spacing:.2em;opacity:.8}
+  .toprule{position:absolute;top:54px;left:clamp(28px,4vw,56px);right:clamp(28px,4vw,56px);height:1px;background:rgba(240,233,210,.45);z-index:4;transform:scaleX(0);transform-origin:left}
+
+  /* giant masked title bottom-left */
+  .title{position:absolute;left:clamp(24px,4vw,64px);bottom:clamp(40px,9vh,90px);z-index:3}
+  .title .mut-line{overflow:hidden;display:block}
+  .title .mut-line > span{display:block;font-family:var(--serif);font-weight:300;color:var(--cream);
+    font-size:clamp(3.4rem,13vw,11rem);line-height:.86;letter-spacing:-.012em}
+
+  /* corner meta (frame) */
+  .eyebrow{position:absolute;left:clamp(26px,4vw,60px);top:clamp(78px,11vh,110px);z-index:3;
+    font-family:var(--serif);font-size:clamp(1rem,1.8vw,1.4rem);opacity:.92}
+  .meta-tl{position:absolute;left:clamp(26px,4vw,60px);top:calc(clamp(78px,11vh,110px) + 2.2rem);z-index:3;
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+  .meta-br{position:absolute;right:clamp(26px,4vw,60px);bottom:clamp(40px,9vh,90px);z-index:3;text-align:right;max-width:26ch}
+  .meta-br .jp{font-family:var(--serif);font-size:clamp(1.05rem,1.9vw,1.5rem);margin-bottom:.45rem}
+  .meta-br p{font-size:clamp(.82rem,1vw,.96rem);line-height:1.5;opacity:.8}
+
+  /* awards rail right edge */
+  .awards{position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:4;display:flex;flex-direction:column;gap:2px}
+  .awards .a{writing-mode:vertical-rl;padding:14px 7px;font-size:11px;letter-spacing:.12em;display:flex;align-items:center;gap:8px}
+  .awards .a b{font-family:var(--serif);writing-mode:horizontal-tb}
+  .awards .a--w{background:#dfeaee;color:#13130e}
+  .awards .a--s{background:#fff;color:#13130e}
+
+  .replay{position:fixed;z-index:10000;left:50%;bottom:16px;transform:translateX(-50%);
+    font:500 .68rem/1 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--cream);
+    background:rgba(0,0,0,.42);border:1px solid rgba(240,233,210,.4);padding:.55rem 1rem;cursor:pointer}
+</style>
+</head>
+<body>
+
+  <!-- STATE B (dark hero, behind, revealed by the open seam; chrome hidden until cascade) -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"><img src="renders/terrace.webp" alt="QUADRO"></div>
+    <div class="toprule" id="toprule"></div>
+    <header><div class="brand">QUADRO</div><div class="est">EST — 2025</div></header>
+    <div class="eyebrow">再生</div>
+    <div class="meta-tl">Обраний проєкт</div>
+    <div class="title" id="title">
+      <span class="mut-line"><span>QUADRO</span></span>
+      <span class="mut-line"><span>HOUSE</span></span>
+    </div>
+    <div class="meta-br"><div class="jp">静けさ</div><p>Простір, що відкривається одним рухом. Дім, який дихає тишею.</p></div>
+    <div class="awards">
+      <div class="a a--w"><b>W.</b><span>Winner</span></div>
+      <div class="a a--s"><b>W.</b><span>Site of the Day</span></div>
+    </div>
+  </section>
+
+  <!-- STATE A (cream page we leave) -->
+  <section class="page-a" id="pageA">
+    <div><div class="mono">木</div><div class="lbl">повний Saisei-перехід · клік знизу повторить</div></div>
+  </section>
+
+  <button class="replay" id="replay">▶ програти повний перехід</button>
+
+<!-- the four Saisei bricks (sibling components) -->
+<script src="../center-seam-split/component.js"></script>
+<script src="../monogram-ring-loader/component.js"></script>
+<script src="../mask-up-title/component.js"></script>
+<script src="../content-stage-cascade/component.js"></script>
+<script>
+  (function () {
+    var pageA = document.getElementById('pageA');
+    var hero = document.getElementById('hero');
+
+    // pre-build the title + cascade (controls hero chrome state)
+    var titleApi = MaskUpTitle.create('#title', { stagger: 0.2, duration: 0.34, ease: 'power3.out', from: 115 });
+    var cascade = ContentStageCascade.create({
+      gap: 0.12,
+      // UNEVEN staggers (Saisei 1:1): awards first, then the title block, then BIGGER
+      // pauses (~0.4s) before the corner meta and the chrome — header/rule LAST + slowest.
+      stages: [
+        { el: '.hero-bg', kind: 'fade', dur: 0.7, gapAfter: 0.1 },
+        { el: '.awards .a', kind: 'slide-x', from: 36, dur: 0.5, stagger: 0.08, gapAfter: 0.2 },
+        { el: '#title', kind: 'fn', fn: function () { titleApi.play(); }, gapAfter: 0.46 },  // title holds, then a real pause
+        { el: '.eyebrow', kind: 'fade', dur: 0.5, gapAfter: 0.06 },
+        { el: '.meta-tl', kind: 'fade', dur: 0.5, gapAfter: 0.06 },
+        { el: '.meta-br', kind: 'fade', dur: 0.6, gapAfter: 0.4 },                            // pause before the chrome
+        { el: '.toprule', kind: 'draw-line', dur: 0.7, gapAfter: 0.04 },                      // header chrome LAST
+        { el: 'header', kind: 'fade', dur: 0.5 }
+      ]
+    });
+    cascade.reset();          // hero chrome hidden
+    titleApi.reset();
+
+    // Saisei 1:1 transition = THREE separate layers, not a morph:
+    //   1) CLOSE cream  (soft, ease-in-out ~0.73s)         — entry is the softer move
+    //   2) LOADER on cream, builds + FULLY clears in cream  — network-wait gate
+    //   3) ~270ms EMPTY-CREAM pause  (the purgatory beat)
+    //   4) OPEN dark    (power2.in ~0.93s — hairline dwells, then rips)  — exit is sharper
+    //   5) CASCADE  (awards first under the seam -> title rises -> ... -> header LAST)
+    var cream = '#f1ebd6', dark = '#0e0e0c', ink = '#2a2418';
+    function play() {
+      pageA.style.display = '';
+      cascade.reset(); titleApi.reset();
+      // 1) CLOSE — soft cream curtain converges edges->centre
+      var creamSeam = CenterSeamSplit.create(document.body, { fill: cream, z: 9998 });
+      creamSeam.set(1);
+      creamSeam.close({ duration: 0.73, ease: 'power3.inOut', onComplete: function () {
+        pageA.style.display = 'none';
+        // 2) LOADER builds on the cream, then fully clears (still cream underneath)
+        var loader = MonogramRingLoader.create(document.body, { glyph: '木', bg: cream, ink: ink, ringR: 30, grid: [7, 50, 93], minHold: 900, z: 9998 });
+        loader.show();
+        setTimeout(function () { loader.ready(); }, 1100);   // prod: call ready() when the page is loaded
+        loader.whenDone(function () {
+          loader.destroy();
+          // 3) EMPTY-CREAM PAUSE (~270ms) — the cream cover is still up, nothing on it
+          setTimeout(function () {
+            creamSeam.destroy();
+            // 4) OPEN — dark panel rips open centre->edges, power2.in (hairline dwell + accelerate)
+            var darkSeam = CenterSeamSplit.create(document.body, { fill: dark, z: 9998 });
+            darkSeam.set(0);
+            darkSeam.open({ duration: 0.93, ease: 'power2.in', onComplete: function () {
+              darkSeam.destroy();
+              // 5) CASCADE the hero content (awards already first in the stage list)
+              cascade.play();
+            }});
+          }, 270);
+        });
+      }});
+    }
+
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 600);
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

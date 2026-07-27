@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>design-composition — atom v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#141b19; }
+  * { box-sizing:border-box; }
+  #stage { position:relative; width:100%; height:100vh; overflow:hidden; }
+
+  /* ---- grain + vignette helpers (static, non-animated surfaces) ---- */
+  .grain::after {
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:3;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.55'/></svg>");
+    background-size:160px 160px; opacity:.06; mix-blend-mode:overlay;
+  }
+  .vignette::before {
+    content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:radial-gradient(120% 120% at 50% 42%, rgba(0,0,0,0) 55%, rgba(58,42,26,.20) 100%);
+  }
+
+  /* ---- layer 0: previous (dark) section ---- */
+  #dark {
+    position:absolute; inset:0; z-index:1;
+    background:
+      radial-gradient(90% 70% at 78% 18%, rgba(198,150,96,.28), rgba(198,150,96,0) 60%),
+      linear-gradient(200deg, #35423d 0%, #22302b 48%, #16201d 100%),
+      radial-gradient(120% 100% at 15% 100%, #101917, #1c2823 70%);
+  }
+  #dark .ghost {
+    position:absolute; left:6vw; bottom:9vh;
+    font:italic 500 11vw/1 "Cormorant Garamond", Georgia, serif;
+    color:rgba(233,221,196,.9); letter-spacing:.01em;
+  }
+  #dark .ghost-sub {
+    position:absolute; left:6.4vw; bottom:5.6vh;
+    font:400 10px/1 "Helvetica Neue", Arial, sans-serif;
+    color:rgba(233,221,196,.55); letter-spacing:.42em; text-transform:uppercase;
+  }
+
+  /* ---- layer 1: beige ground (wipes up, clip set by GSAP) ---- */
+  #beige {
+    position:absolute; inset:0; z-index:2;
+    background:
+      radial-gradient(120% 90% at 72% 8%, rgba(255,246,226,.85), rgba(255,246,226,0) 58%),
+      radial-gradient(140% 120% at 18% 100%, rgba(214,192,153,.75), rgba(214,192,153,0) 65%),
+      linear-gradient(168deg, #efe3cc 0%, #e9dcc0 46%, #decba8 100%);
+  }
+
+  /* ---- picture wrappers: STATIC, overflow hidden = the exit-behind law ---- */
+  .pw { position:absolute; overflow:hidden; z-index:4; }
+  #w1 { width:26vw; height:52vh; right:12vw; bottom:0; }
+  #w2 { width:20vw; height:34vh; left:5vw;  top:6vh; }
+  #wb1 { width:36vw; height:62vh; right:4vw; bottom:0; }
+  #wb2 { width:26vw; height:42vh; left:6vw;  bottom:0; }
+
+  .plate { position:absolute; inset:0; }
+  #p1 {
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, rgba(255,255,255,0) 2px 58px),
+      repeating-linear-gradient(180deg, rgba(46,28,20,0) 0 44px, rgba(46,28,20,.20) 44px 48px),
+      radial-gradient(85% 48% at 28% 10%, rgba(255,232,198,.85), rgba(255,232,198,0) 60%),
+      linear-gradient(180deg, #ecc79e 0%, #dca277 30%, #a96a4e 64%, #6d4535 100%);
+  }
+  #p2 {
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, rgba(255,255,255,0) 2px 44px),
+      repeating-linear-gradient(180deg, rgba(52,34,26,0) 0 30px, rgba(52,34,26,.18) 30px 33px),
+      radial-gradient(80% 45% at 70% 8%, rgba(255,238,214,.9), rgba(255,238,214,0) 62%),
+      linear-gradient(186deg, #f2dabd 0%, #d3ab8b 52%, #8f6a52 100%);
+  }
+  #b1 {
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, rgba(255,255,255,0) 2px 72px),
+      repeating-linear-gradient(180deg, rgba(44,26,20,0) 0 58px, rgba(44,26,20,.22) 58px 63px),
+      radial-gradient(90% 50% at 22% 6%, rgba(255,224,182,.9), rgba(255,224,182,0) 58%),
+      linear-gradient(180deg, #f3cfa3 0%, #dfa677 36%, #9b6146 74%, #5e3c30 100%);
+  }
+  #b2 {
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 2px, rgba(255,255,255,0) 2px 50px),
+      repeating-linear-gradient(180deg, rgba(58,36,28,0) 0 38px, rgba(58,36,28,.17) 38px 42px),
+      radial-gradient(80% 42% at 60% 6%, rgba(255,240,220,.85), rgba(255,240,220,0) 60%),
+      linear-gradient(182deg, #f6ddc7 0%, #d9ab8e 50%, #a06f59 100%);
+  }
+  .plate::before {
+    content:""; position:absolute; inset:0; z-index:2;
+    background:radial-gradient(115% 115% at 50% 40%, rgba(0,0,0,0) 58%, rgba(48,30,18,.24) 100%);
+  }
+
+  /* ---- paragraph (text 1) ---- */
+  #para {
+    position:absolute; left:50%; top:36vh; width:30vw; z-index:5;
+    text-align:center; color:#463726;
+    font:500 clamp(18px,1.55vw,30px)/1.5 "Cormorant Garamond", Georgia, serif;
+  }
+  .tmask { display:block; overflow:hidden; }
+  .tline { display:block; }
+
+  /* ---- diagonal cascade ---- */
+  .cmask { position:absolute; overflow:hidden; z-index:5; padding:.05em .08em; }
+  #cm1 { left:6vw;    top:13vh; }
+  #cm2 { left:13.5vw; top:25vh; }
+  #cm3 { left:21vw;   top:37vh; }
+  .cline {
+    display:block; white-space:nowrap;
+    font:italic 500 6.8vw/1.05 "Cormorant Garamond", Georgia, serif;
+    color:#3f3223; letter-spacing:.005em;
+  }
+
+  /* ---- static facade header ---- */
+  #hdr {
+    position:absolute; inset:0 auto auto 0; width:100%; z-index:30;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:24px 40px; pointer-events:none;
+    mix-blend-mode:difference; color:#e9dfcb;
+  }
+  #hdr .side { display:flex; align-items:center; gap:16px; width:160px;
+    font:400 10px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing:.38em; text-transform:uppercase; }
+  #hdr .side.r { justify-content:flex-end; }
+  #hdr .burger { display:flex; flex-direction:column; gap:5px; }
+  #hdr .burger i { display:block; width:22px; height:1px; background:currentColor; }
+  #hdr .mono {
+    width:40px; height:40px; border:1px solid currentColor; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font:italic 500 18px/1 "Cormorant Garamond", Georgia, serif;
+  }
+</style>
+</head>
+<body>
+<section id="stage">
+  <div id="dark" class="grain vignette">
+    <div class="ghost">Atrium</div>
+    <div class="ghost-sub">Inspired architecture</div>
+  </div>
+
+  <div id="beige" class="grain vignette"></div>
+
+  <div id="w1" class="pw"><div id="p1" class="plate grain"></div></div>
+  <div id="w2" class="pw"><div id="p2" class="plate grain"></div></div>
+  <div id="wb1" class="pw"><div id="b1" class="plate grain"></div></div>
+  <div id="wb2" class="pw"><div id="b2" class="plate grain"></div></div>
+
+  <div id="para">
+    <span class="tmask"><span class="tline">Each level opens to a wider</span></span>
+    <span class="tmask"><span class="tline">horizon — a glass line drawn</span></span>
+    <span class="tmask"><span class="tline">between garden and sky.</span></span>
+  </div>
+
+  <div class="cmask" id="cm1"><span class="cline">Quiet lines,</span></div>
+  <div class="cmask" id="cm2"><span class="cline">warm stone,</span></div>
+  <div class="cmask" id="cm3"><span class="cline">open light.</span></div>
+
+  <header id="hdr">
+    <div class="side"><span class="burger"><i></i><i></i><i></i></span> Menu</div>
+    <div class="mono">T</div>
+    <div class="side r">Contact us</div>
+  </header>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger, CustomEase);
+const EASE = CustomEase.create("shape", "0.25,0.74,0.22,0.99");
+
+/* Lenis wiring (per DoD) */
+const lenis = new Lenis();
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(t => lenis.raf(t * 1000));
+gsap.ticker.lagSmoothing(0);
+
+/* Initial states — GSAP owns every transform/clip */
+gsap.set('#beige', { clipPath: 'inset(100% 0% 0% 0%)' });
+gsap.set('#p1',    { clipPath: 'inset(100% 0% 0% 0%)' }); /* bottom-up reveal */
+gsap.set('#p2',    { clipPath: 'inset(0% 0% 100% 0%)' }); /* top-down reveal */
+gsap.set('#b1',    { clipPath: 'inset(100% 0% 0% 0%)' });
+gsap.set('#b2',    { clipPath: 'inset(100% 0% 0% 0%)' });
+gsap.set('.tline', { yPercent: 110 });
+gsap.set('.cline', { yPercent: 110 });
+gsap.set('#para',  { xPercent: -50, x: '-9vw' }); /* center-left; re-centers later */
+
+/* ONE master timeline, ONE pinned ScrollTrigger. Total duration = 1 → p maps 1:1 */
+const tl = gsap.timeline({
+  defaults: { ease: EASE },
+  scrollTrigger: {
+    trigger: '#stage',
+    start: 'top top',
+    end: '+=700%',
+    scrub: 1,
+    pin: true,
+    anticipatePin: 1
+  }
+});
+
+tl
+  /* 1. p0.00–0.14 — beige cover wipes up + first pic reveals bottom-up */
+  .to('#beige', { clipPath: 'inset(0% 0% 0% 0%)', duration: .14 }, 0)
+  .to('#p1',    { clipPath: 'inset(0% 0% 0% 0%)', duration: .14 }, 0)
+  /* 2. p0.06–0.20 — counter pic reveals top-down (opposite boundaries at once) */
+  .to('#p2',    { clipPath: 'inset(0% 0% 0% 0%)', duration: .14 }, 0.06)
+  /* 3. p0.20–0.30 — paragraph rises from line masks */
+  .to('.tline', { yPercent: 0, duration: .07, stagger: .018 }, 0.20)
+  /* 4. p0.34–0.48 — EXIT BEHIND: inner plates swallowed by static wrappers */
+  .to('#p1',    { yPercent: -108, duration: .14 }, 0.34)
+  .to('#p2',    { yPercent:  108, duration: .14 }, 0.34)
+  .to('#para',  { x: 0, duration: .14 }, 0.34)   /* paragraph re-centers */
+  /* 5. p0.52–0.70 — paragraph exits up WHILE big pair chases in */
+  .to('#para',  { y: '-80vh', duration: .10 }, 0.52)
+  .to('#b1',    { clipPath: 'inset(0% 0% 0% 0%)', duration: .13 }, 0.545)
+  .to('#b2',    { clipPath: 'inset(0% 0% 0% 0%)', duration: .11 }, 0.597) /* at ~40% of b1 */
+  /* 6. p0.72–0.88 — diagonal cascade on clear beige, line by line */
+  .to('.cline', { yPercent: 0, duration: .09, stagger: .0315 }, 0.72)
+  /* 7. hold → pad exact total to 1.0 */
+  .to({}, { duration: .127 }, 0.873);
+
+/* Required hooks */
+window.render = function (p) {
+  p = Math.min(1, Math.max(0, Number(p) || 0));
+  tl.progress(p);
+  return p;
+};
+window.__ATOM_OK__ = true;
+</script>
+</body>
+</html>

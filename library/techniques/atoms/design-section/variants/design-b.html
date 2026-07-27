@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>design-b · springs Design — crossfade drift</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>window.__ATOM_OK__=false;window.render=function(){};</script>
+<style>
+  @font-face{font-display:swap;font-family:"Victor Serif";font-style:normal;font-weight:400;src:url(assets/fonts/VictorSerif-40Regular.woff2) format("woff2");}
+  @font-face{font-display:swap;font-family:"Victor Serif";font-style:italic;font-weight:400;src:url(assets/fonts/VictorSerif-45RegularItalic.woff2) format("woff2");}
+  @font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:400;src:url(assets/fonts/TT_Commons_Pro_Regular.woff2) format("woff2");}
+  @font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:500;src:url(assets/fonts/TTCommonsPro-Md.woff2) format("woff2");}
+  :root{
+    --spr-serif:"Victor Serif",Georgia,"Times New Roman",serif;
+    --spr-sans:"TT Commons Pro",Helvetica,Arial,sans-serif;
+    --cream:#e0d1b6; --cream-lite:#f5e8d1; --ink:#162d24; --green:#16322a; --green-deep:#0e241d;
+    --ease:cubic-bezier(.25,.74,.22,.99);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--green-deep);}
+  body{font-family:var(--spr-sans);color:var(--cream);overflow-x:hidden;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+
+  .hdr{position:fixed;top:0;left:50%;transform:translateX(-50%);width:min(390px,100%);z-index:100;
+    display:flex;align-items:flex-start;justify-content:space-between;
+    padding:calc(env(safe-area-inset-top,0px) + 17px) 20px 16px;color:var(--cream-lite);pointer-events:none;}
+  .hdr .bg{position:absolute;left:0;right:0;top:0;bottom:0;z-index:-1;}
+  .hdr .bg.blur{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+    -webkit-mask-image:linear-gradient(180deg,#000 42%,transparent);mask-image:linear-gradient(180deg,#000 42%,transparent);}
+  .hdr .bg.dark{background:linear-gradient(180deg,rgba(14,36,29,.48),rgba(14,36,29,0));}
+  .hdr .bg.cream{background:linear-gradient(180deg,rgba(245,232,209,.92),rgba(245,232,209,0));opacity:0;}
+  .brand{display:flex;align-items:flex-start;gap:6px;}
+  .wm{font-family:var(--spr-serif);font-weight:400;font-size:26px;line-height:1;color:currentColor;letter-spacing:.2px;}
+  .mark{width:19px;height:19px;transform:translateY(2px);color:currentColor;}
+  .tools{display:flex;align-items:center;gap:15px;padding-top:6px;}
+  .caps{font-family:var(--spr-sans);font-weight:500;font-size:12px;letter-spacing:.15em;color:currentColor;text-transform:uppercase;}
+  .heart{width:21px;height:21px;color:currentColor;}
+  .burger{display:flex;flex-direction:column;justify-content:center;gap:5px;width:23px;height:15px;}
+  .burger i{height:1.5px;width:100%;background:currentColor;border-radius:2px;}
+
+  /* scroll model: tall track drives a fixed stage; 4 beats cross-dissolve as layers */
+  .track{position:relative;height:420vh;}
+  .stage{position:fixed;top:0;left:50%;transform:translateX(-50%);width:min(390px,100%);height:100vh;overflow:hidden;background:var(--green-deep);z-index:1;}
+  .beat{position:absolute;inset:0;width:100%;height:100vh;overflow:hidden;}
+  .b1{z-index:1;} .b2{z-index:2;} .b3{z-index:3;} .b4{z-index:4;}
+
+  .render{background:#241f16;}
+  .photo{position:absolute;inset:-9% 0;background-position:center;background-size:cover;background-repeat:no-repeat;will-change:transform;}
+  .b1 .photo{background-image:url(assets/tower-hero.jpg);}
+  .b3 .photo{background-image:url(assets/tower-dusk.jpg);}
+  .tint{position:absolute;inset:0;pointer-events:none;}
+  .b1 .tint{background:linear-gradient(180deg,rgba(10,20,14,.32) 0%,rgba(10,20,14,0) 19%,rgba(10,20,14,0) 45%,rgba(10,20,14,.52) 78%,rgba(8,17,11,.86) 100%);}
+  .b3 .tint{background:linear-gradient(180deg,rgba(24,17,9,.30) 0%,rgba(24,17,9,0) 26%,rgba(24,17,9,0) 72%,rgba(24,17,9,.34) 100%);}
+
+  .title{position:absolute;right:22px;top:33%;text-align:right;will-change:transform,opacity;}
+  .title h1{font-family:var(--spr-serif);font-weight:400;font-size:78px;line-height:.84;letter-spacing:-1.2px;color:rgba(245,232,209,.9);text-shadow:0 2px 36px rgba(8,16,10,.34);}
+  .title .caps{margin-top:10px;font-family:var(--spr-sans);font-weight:500;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:rgba(224,209,182,.68);}
+  .lede{position:absolute;left:23px;right:36px;bottom:7.5%;font-family:var(--spr-sans);font-weight:400;font-size:15px;line-height:1.5;letter-spacing:.1px;color:rgba(243,239,229,.94);text-shadow:0 1px 20px rgba(5,14,9,.62);will-change:transform,opacity;}
+
+  .cream{background:var(--cream-lite);display:flex;align-items:center;justify-content:center;padding:0 40px;}
+  .q{font-family:var(--spr-serif);font-weight:400;color:var(--ink);will-change:transform;text-wrap:pretty;}
+  .b2 .q{font-size:31px;line-height:1.16;letter-spacing:-.4px;text-align:center;max-width:315px;}
+  .b4 .q{font-size:26px;line-height:1.24;letter-spacing:-.3px;text-align:left;max-width:340px;}
+</style>
+</head>
+<body>
+  <header class="hdr" id="hdr">
+    <span class="bg blur"></span><span class="bg dark"></span><span class="bg cream"></span>
+    <div class="brand">
+      <span class="wm">Springs</span>
+      <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="10.4" stroke="currentColor" stroke-width="1" opacity=".5"/>
+        <path d="M7.6 15.4c0-3 2-4.1 4.4-4.1s4.4-1.1 4.4-4.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M16.4 8.6c0 3-2 4.1-4.4 4.1s-4.4 1.1-4.4 4.1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="tools">
+      <span class="caps">Residences</span>
+      <svg class="heart" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-6.9-4.5-6.9-9.1A3.65 3.65 0 0 1 12 8.2 3.65 3.65 0 0 1 18.9 10.9c0 4.6-6.9 9.1-6.9 9.1Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      <span class="burger"><i></i><i></i></span>
+    </div>
+  </header>
+
+  <div class="track">
+    <div class="stage">
+      <section class="beat render b1">
+        <div class="photo"></div><div class="tint"></div>
+        <div class="title"><h1>Design</h1><div class="caps">Inspired Architecture</div></div>
+        <p class="lede">A standalone crystal building soaring above the treetops. A secluded tower resembling a glassy waterfall with flowing cascades of greenery-framed loggia.</p>
+      </section>
+      <section class="beat cream b2">
+        <p class="q">Each floor reflects boundless perspectives in its glistening waves, inviting you to look farther with a fuller palette of possibilities.</p>
+      </section>
+      <section class="beat render b3">
+        <div class="photo"></div><div class="tint"></div>
+      </section>
+      <section class="beat cream b4">
+        <p class="q">Tabanlioglu, the renowned architectural bureau, emphasizes the bold asymmetry of balconies in a chessboard pattern. Three vertical partitions divide the translucent façade, creating the effect of weightless volume. Freedom of expression, elegance of intelligence, and visual lightness.</p>
+      </section>
+    </div>
+  </div>
+
+<script>
+(function(){
+  if(!window.gsap||!window.ScrollTrigger){ return; }
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  var spr=CustomEase.create('spr','M0,0 C0.25,0.74 0.22,0.99 1,1');
+  var clamp=function(v,a,b){return v<a?a:(v>b?b:v);};
+  var lerp=function(a,b,t){return a+(b-a)*t;};
+  var ss=function(t){t=clamp(t,0,1);return t*t*(3-2*t);};
+  var CREAM=[245,232,209], INK=[22,45,36];
+  function mixc(a,b,t){return 'rgb('+Math.round(lerp(a[0],b[0],t))+','+Math.round(lerp(a[1],b[1],t))+','+Math.round(lerp(a[2],b[2],t))+')';}
+
+  var stage=document.querySelector('.stage'),
+      hdr=document.getElementById('hdr'), hdrCream=hdr.querySelector('.bg.cream'),
+      b1=document.querySelector('.b1'), b2=document.querySelector('.b2'), b3=document.querySelector('.b3'), b4=document.querySelector('.b4'),
+      photo1=document.querySelector('.b1 .photo'), photo3=document.querySelector('.b3 .photo'),
+      title=document.querySelector('.title'), lede=document.querySelector('.lede'),
+      q2=document.querySelector('.b2 .q'), q4=document.querySelector('.b4 .q');
+  var cream=[0,1,0,1];
+
+  function render(p){
+    p=clamp((typeof p==='number'&&isFinite(p))?p:0,0,1);
+    var vh=stage.clientHeight||window.innerHeight||844;
+
+    // crossfading layer opacities
+    var op1=1-ss((p-0.22)/0.08);
+    var op2=ss((p-0.20)/0.10)*(1-ss((p-0.44)/0.08));
+    var op3=ss((p-0.44)/0.08)*(1-ss((p-0.70)/0.08));
+    var op4=ss((p-0.70)/0.08);
+    gsap.set(b1,{autoAlpha:op1}); gsap.set(b2,{autoAlpha:op2});
+    gsap.set(b3,{autoAlpha:op3}); gsap.set(b4,{autoAlpha:op4});
+
+    // beat 1 — hero ken-burns + title drifts up & out as beat 2 rises
+    var sI=spr(clamp(p/0.07,0,1)), kb=ss(clamp((p-0.07)/0.23,0,1));
+    gsap.set(photo1,{scale:lerp(1.08,1.0,sI)+kb*0.07, y:-ss(clamp(p/0.30,0,1))*0.06*vh, transformOrigin:'50% 42%'});
+    var tI=spr(clamp(p/0.06,0,1)), dT=ss(clamp((p-0.15)/0.15,0,1));
+    gsap.set(title,{y:(1-tI)*26-dT*90, autoAlpha:tI*(1-dT)});
+    var lI=spr(clamp((p-0.02)/0.07,0,1)), dL=ss(clamp((p-0.12)/0.14,0,1));
+    gsap.set(lede,{y:(1-lI)*20-dL*56, autoAlpha:lI*(1-dL)});
+
+    // beat 2 — text rises as it dissolves in
+    var e2=ss(clamp((p-0.20)/0.12,0,1));
+    gsap.set(q2,{y:(1-e2)*44});
+
+    // beat 3 — dusk render slow ken-burns while passing
+    var pr3=clamp((p-0.44)/0.34,0,1);
+    gsap.set(photo3,{scale:lerp(1.12,1.0,ss(pr3)), y:lerp(-0.05*vh,0.035*vh,pr3), transformOrigin:'50% 45%'});
+
+    // beat 4 — text rises in
+    var e4=ss(clamp((p-0.70)/0.12,0,1));
+    gsap.set(q4,{y:(1-e4)*44});
+
+    // header colour — composite cream-ness from the top layer down
+    var op=[op1,op2,op3,op4], hc=0, rem=1;
+    for(var i=3;i>=0;i--){ var a=clamp(op[i],0,1)*rem; hc+=cream[i]*a; rem-=a; if(rem<=0){break;} }
+    hdr.style.color=mixc(CREAM,INK,clamp(hc,0,1));
+    gsap.set(hdrCream,{opacity:clamp(hc,0,1)});
+  }
+  window.render=render;
+
+  var lenis=new Lenis({lerp:0.1});
+  lenis.on('scroll',ScrollTrigger.update);
+  gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+  gsap.ticker.lagSmoothing(0);
+
+  function scrolled(){ return (window.scrollY||document.documentElement.scrollTop||0)>3; }
+  var introDone=false;
+  ScrollTrigger.create({trigger:'.track',start:'top top',end:'bottom bottom',scrub:0.7,
+    onUpdate:function(s){ if(!scrolled()&&!introDone) return; render(s.progress); }});
+
+  render(0);
+  gsap.to({t:0},{t:1,duration:1.6,delay:0.2,ease:spr,
+    onUpdate:function(){ if(!scrolled()) render(this.targets()[0].t*0.06); },
+    onComplete:function(){ introDone=true; }});
+
+  window.addEventListener('resize',function(){ ScrollTrigger.refresh(); });
+  window.__ATOM_OK__=true;
+})();
+</script>
+</body>
+</html>

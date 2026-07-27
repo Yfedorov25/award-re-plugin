@@ -1,0 +1,232 @@
+{
+  "atomId": "amenities-parking",
+  "ts": "2026-07-26T10:19:12.506Z",
+  "pass": true,
+  "url": "http://localhost:8879/atoms/amenities-parking/variants/parking.html",
+  "tool": "self-check.mjs",
+  "version": 2,
+  "thresholdsVersion": 10,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "harnessHash": "e3bf425f371a48009d465f7c5d87dd01786fcce76d087596b4fb0309b68d9b2a",
+  "configSha": "265e0434a0f1d6897b61cfe958570b647f62c09244de3f10f918023b061ba9b1",
+  "expectationsSha": "36972411f9e7a406e550888adcd3ed1c3bf00fa5003e63c9d30c5df9768727c3",
+  "inputsHash": "6e2b200f4cccfc3063daac9d542ef296f1a9f675d230f3cc86010fb0915f9189",
+  "calibration": {
+    "ok": true,
+    "ts": "2026-07-26T08:00:33.350Z"
+  },
+  "coverage": {
+    "dimensionsRun": [
+      "render-api",
+      "purity",
+      "census",
+      "motion-direction",
+      "geometry",
+      "channel-identity",
+      "timing",
+      "surface-parity",
+      "structure-parity",
+      "mechanic-class",
+      "composition-static",
+      "console-errors",
+      "http-status"
+    ],
+    "movers": 3,
+    "declared": 3,
+    "basisSelf": 0
+  },
+  "summary": "green (live:25 / self-regression:0); unchecked:2 — нове судить око Єгора",
+  "checks": [
+    {
+      "dimension": "render-api",
+      "name": "render-api",
+      "pass": true,
+      "detail": "window.render(p) присутній",
+      "basis": "live"
+    },
+    {
+      "dimension": "purity",
+      "name": "render-p-pure",
+      "pass": true,
+      "detail": "render(p) чиста (снапшоти збігаються після стрибків; transition=0 на 3 мōверах)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "census-movers",
+      "pass": true,
+      "detail": "3 рухомих елементів, усі задекларовані (targets/ignore)",
+      "basis": "live"
+    },
+    {
+      "dimension": "motion-direction",
+      "name": "wipe:panel",
+      "pass": true,
+      "detail": "UP-wipe: visible-top 871→-43px, jitter 0.0px",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:none",
+      "pass": true,
+      "detail": "card-таргетів нема (атом без картки)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:photo",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=595px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:plate",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=342px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:panel",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=914px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:photo.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.348 vs очікуване 0.36 ±0.03 [CHOREO Ф4/Ф5 + q2: реліз піна після zoom-complete (page -409..-420 з 1135 = p 0.36-0.37; photo_shift==dcum з f204 повного ролика)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:photo.motion.end",
+      "pass": true,
+      "detail": "виміряно 1.000 vs очікуване 1 ±0.02 [CHOREO Ф5: фото page-locked до кінця тіла (f258 повного = кінець liveScope)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:plate.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.000 vs очікуване 0 ±0.03 [закон: plate page-locked ×1.1 з нульового p (лінійний); live тримає пін перші ~17% ТІЛА ролика бо сторінка стоїть (пауза руки f100-127 повного, нудж -15px) — час-домен не копіюємо (live-tempo-nonlinear), шлях той самий: 88.3dvh → вгору]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:plate.motion.end",
+      "pass": true,
+      "detail": "виміряно 0.340 vs очікуване 0.34 ±0.03 [CHOREO Ф4 + вердикт Єгора S50: скраб-fade завершено до zoom-complete (верифікатор: зник до f189 = page -409 = p0.36); після op=0 рух невидимий]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:panel.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.000 vs очікуване 0 ±0.03 [панель page-locked слайд-овер: вхід боундарі p≈0.03 (page -30, cream-край f130 повного @98.4dvh контенту), рух лінійний від p0]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:panel.motion.end",
+      "pass": true,
+      "detail": "виміряно 1.000 vs очікуване 1 ±0.02 [панель їде весь атом (анкер f244: боундарі 13.2dvh при p0.83; фінал f258: боундарі вище хедера)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.02",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.5",
+      "pass": true,
+      "waived": true,
+      "detail": "WAIVED (розбіжність зафіксована, судить Єгор): верх панелі: наш 49.1% vs live 71.7% (Δ22.6 > 10) [темп руки нелінійний (пауза f150-166 повного ролика всередині тіла): лінійна t-мапа стану p0.5 не відповідає page-позиції (Δ233px за пейдж-рулером dense-zoom); стан лишено ВИДИМИМ для ока в компараторі; механіка p-середини покрита structure-parity (time-незалежна) + вердикт Єгора S50]",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.95",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.97",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:panel",
+      "pass": true,
+      "detail": "послідовність подій збігається: []",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:photo",
+      "pass": true,
+      "detail": "послідовність подій збігається: []",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "mechanic-class-parity",
+      "pass": true,
+      "detail": "клас механіки збігається: strip",
+      "basis": "live"
+    },
+    {
+      "dimension": "mechanic-class",
+      "name": "class-vs-live",
+      "pass": true,
+      "detail": "config.mechanicClass=\"strip\" = клас з live",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-static",
+      "name": "comp:specblock@p1",
+      "pass": true,
+      "detail": "композиція збігається: 2 розділювач(ів), 3 текст-рядк(ів) [лінії live 44.27%, 55.73%]",
+      "basis": "live"
+    },
+    {
+      "dimension": "console-errors",
+      "name": "console-errors",
+      "pass": true,
+      "detail": "0 console-error",
+      "basis": "live"
+    },
+    {
+      "dimension": "http-status",
+      "name": "http-status",
+      "pass": true,
+      "detail": "0 HTTP>=400",
+      "basis": "live"
+    }
+  ],
+  "unchecked": [
+    {
+      "dimension": "media-type",
+      "target": "media",
+      "reason": "waived",
+      "detail": "photo-first плейсхолдер до заміни на відео [наш асет = СЕКВЕНЦІЯ з 43 кадрів (variants/assets/seq/*.webp), скрабована render(p), а НЕ <video>; вимір media-type перевіряє саме програвання <video> і до scrub-секвенції не застосовний. 🔴 S53 ВИПРАВЛЕНО ХИБНЕ ТВЕРДЖЕННЯ: попередній текст казав «live = статичний рендер (не відео)» — це НЕПРАВДА, у live рух камери у 3D (паралакс близький/далекий 2.8:1, S52). Ідентичність медіа судить око Єгора на компараторі.]"
+    },
+    {
+      "dimension": "surface-parity",
+      "target": "surf@p0.5",
+      "reason": "waived",
+      "detail": "WAIVED (розбіжність зафіксована, судить Єгор): верх панелі: наш 49.1% vs live 71.7% (Δ22.6 > 10) [темп руки нелінійний (пауза f150-166 повного ролика всередині тіла): лінійна t-мапа стану p0.5 не відповідає page-позиції (Δ233px за пейдж-рулером dense-zoom); стан лишено ВИДИМИМ для ока в компараторі; механіка p-середини покрита structure-parity (time-незалежна) + вердикт Єгора S50]"
+    }
+  ],
+  "uncheckedCount": 2
+}

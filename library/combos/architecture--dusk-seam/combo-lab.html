@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--dusk-seam · Дім, що зустрічає присмерк</title>
+<!--
+  SECTION VARIANT, architecture--dusk-seam (role: architecture).
+  Shape = MANUAL-ATOM: the harness owns ONE pin; daynight-center-seam is a PURE set(t) atom
+  driven by that pin. The WHOLE EXTERIOR crosses day -> dusk down a centre seam as you scroll.
+  This is the proof pattern applied to the building itself, the true architecture beat
+  (the proof used an interior; this is the exterior). The night render has lit windows and
+  path lights, so the dusk reveal lands emotionally. A sparse serif caption rides the same pin.
+  __LAB_OK__ (combo-scaffold.js) passes only if: 1 pin, the cited real atom ran, a
+  [data-render-surface] painted a decoded image, 0 real console errors.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/daynight-engine/component.css">
+<link rel="stylesheet" href="../../components/daynight-center-seam/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* variant SKIN only (scaffold owns the rails). transform/opacity/filter only. */
+
+  /* the architecture render reads as the hero, push the type to the rails, leave the
+     building all the air it wants. caption hangs low-left, eyebrow sits top-left. */
+  .dusk__eyebrow {
+    position: absolute; z-index: 6;
+    top: clamp(22px, 5vh, 56px); left: clamp(20px, 4vw, 64px);
+    font: 600 .68rem/1 var(--combo-sans);
+    letter-spacing: .26em; text-transform: uppercase;
+    color: var(--combo-cream); opacity: .68;
+    text-shadow: 0 1px 14px rgba(0,0,0,.45);
+    pointer-events: none;
+  }
+
+  .dusk__cap {
+    position: absolute; z-index: 6;
+    left: clamp(20px, 4vw, 64px); bottom: clamp(26px, 8vh, 80px);
+    max-width: 18ch;
+    color: var(--combo-cream);
+    text-shadow: 0 2px 24px rgba(0,0,0,.5);
+    pointer-events: none;
+  }
+  .dusk__title {
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(2.3rem, 6vw, 5rem);
+    line-height: .96; letter-spacing: -.02em;
+    margin: 0;
+  }
+  /* the one quiet line that earns its place: the building tells the time of day */
+  .dusk__hint {
+    margin-top: clamp(.9rem, 2vh, 1.4rem);
+    font: 500 .72rem/1.5 var(--combo-sans);
+    letter-spacing: .04em; opacity: .58; max-width: 22ch;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dusk__cap, .dusk__eyebrow { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--dusk-seam">
+    <div id="seamHost" data-render-surface></div>   <!-- daynight-center-seam injects .dn + the real exterior <img> here -->
+
+    <div class="dusk__eyebrow">вул. Замкова</div>
+
+    <div class="dusk__cap" data-spine>
+      <h2 class="dusk__title">Присмерк<br>над домом</h2>
+      <p class="dusk__hint">Світло вмикається у вікнах, і стіни знаходять свій вечірній колір.</p>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms (canon FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/daynight-engine/component.js"></script>
+  <script src="../../components/daynight-center-seam/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var seam;
+      // RENDER + SEAM job: the real exterior day/dusk pair, manual (PURE set(t)).
+      SectionHarness.ranOK('daynight-center-seam', function () {
+        seam = window.DayNightCenterSeam.create('#seamHost', {
+          dayMedia: 'renders/dn-ext-day.webp',
+          nightMedia: 'renders/dn-ext-night.webp',
+          labels: ['Вдень', 'Ввечері']
+        });
+        window.__seam = seam;
+      });
+      // ONE section pin (harness). seam.set(p) crosses the building day->dusk; the caption
+      // drifts up and warms on the same progress bus (transform/opacity only).
+      var st = SectionHarness.pin('#combo', { length: '+=130%', scrub: 0.8 });
+      if (st) st.onUpdate = function (p) {
+        if (seam && seam.set) seam.set(p);
+        if (window.gsap) {
+          window.gsap.set('[data-spine]', { y: (0.5 - p) * 36, opacity: 0.6 + p * 0.4 });
+        }
+      };
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['daynight-center-seam']
+      });
+    })();
+  </script>
+</body>
+</html>

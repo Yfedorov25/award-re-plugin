@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · hero-title-to-nav-pill · 11tanjung (giant cursive scrolls into a frosted pill top-centre)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · hero-title-to-nav-pill
+================================================================================
+  11tanjung's signature — the full-screen cursive hero wordmark scroll-scrubs scale +
+  translateY down into a small frosted-glass pill fixed at top-centre (same DOM node).
+  A readability scrim under the big title fades as it shrinks. Harvested from
+  D_11tanjung (a016 full title -> a024 docked pill). OUR QUADRO render. NO WebGL.
+  window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --ink:#f4f1ea; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#1e1a17;color:var(--ink);font-family:var(--sans)}
+  .spacer{height:120vh;display:grid;place-items:center;background:#1e1a17;color:#f4f1ea;opacity:.5;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+
+  .htp-mark .word{font-family:var(--serif);font-style:italic;font-weight:400;color:#fff;
+    font-size:clamp(3rem,11vw,9rem);letter-spacing:-.01em;white-space:nowrap;
+    text-shadow:0 2px 30px rgba(0,0,0,.25)}
+  /* hero UI corners */
+  .htp-ui{position:absolute;z-index:4;color:#f0eee8;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+  .htp-ui.tl{left:24px;top:84px} .htp-ui.tr{right:24px;top:84px;text-align:right}
+  .htp-ui.bc{left:50%;bottom:24px;transform:translateX(-50%)} .htp-ui.br{right:24px;bottom:24px;text-align:right;max-width:30ch}
+</style>
+</head>
+<body>
+
+  <section class="htp-stage" id="hero">
+    <div class="htp-render"><img src="renders/terrace.webp" alt="QUADRO"></div>
+    <div class="htp-scrim"></div>
+    <div class="htp-pill"></div>
+    <div class="htp-mark"><div class="word">11 tanjung</div></div>
+    <div class="htp-ui tl">Власний берег, Україна<br>503.21 · 34.21</div>
+    <div class="htp-ui tr">+380 67 989 12 51<br>HEY@QUADRO.HOUSE</div>
+    <div class="htp-ui bc">scroll to explore ↓</div>
+    <div class="htp-ui br">/наш одинадцятий/<br>преміальний орієнтир</div>
+  </section>
+
+  <div class="spacer">скрол ↓ — title збирається у frosted pill зверху</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    HeroTitleToNavPill.create('#hero', { pillScale:0.17, pillY:-43, pinFactor:1.0, ease:'power2.inOut', scrim:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

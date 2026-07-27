@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LAB · room-pick-day-scrub · оберіть кімнату, проживіть її день (Модель C)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · room-pick-day-scrub  (SECTION A1c / MODEL C)
+================================================================================
+  A grid of rooms. Click one and it FLIPs to full-screen, where you scrub its OWN full day
+  07:00 -> 23:00 with a draggable time slider (or wheel). Back closes it; pick another room.
+  Each room gets its complete day, by choice, one at a time. The slider position IS the lighting
+  (clock == light), so no desync is possible.
+
+  Thin orchestrator over daynight-engine (the opened room is one instance, slider drives set(t)).
+  NO WebGL, no pin, no scroll-hijack. window.__LAB_OK__ on init.
+================================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../daynight-engine/component.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --rpd-sans:'Inter',system-ui,sans-serif; --rpd-serif:'Fraunces',Georgia,serif; }
+  *{margin:0;box-sizing:border-box}
+  html,body{min-height:100%}
+  body{background:#16121a;color:#f3f1ec;font-family:var(--rpd-sans)}
+  .wrap{max-width:1180px;margin:0 auto;padding:clamp(3rem,9vh,7rem) clamp(1rem,3vw,2rem)}
+  .head{margin-bottom:1.6rem}
+  .head .eyebrow{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;opacity:.55}
+  .head h2{font-family:var(--rpd-serif);font-weight:300;font-size:clamp(1.8rem,3vw,2.8rem);line-height:1.04;margin-top:.5rem}
+  .head p{opacity:.78;margin-top:.6rem;max-width:46ch;font-size:.96rem}
+  .rpd__grid{--rpd-cols:2}
+</style>
+</head>
+<body>
+  <section class="rpd" data-rpd-state="grid">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Інтер'єр · оберіть кімнату</p>
+        <h2>Оберіть кімнату. Проживіть її день.</h2>
+        <p>Клікніть будь-яку кімнату і протягніть час від ранку до ночі. Світло змінюється під рукою.</p>
+      </div>
+
+      <div class="rpd__grid" data-rpd-grid></div>
+    </div>
+
+    <!-- full-screen opened-room overlay -->
+    <div class="rpd__overlay" data-rpd-overlay hidden>
+      <div class="rpd__stage" data-rpd-stage></div>
+      <div class="rpd__chrome" data-rpd-chrome>
+        <div class="rpd__title"><b data-rpd-name>Кімната</b><span data-rpd-area>її день</span></div>
+        <button class="rpd__close" data-rpd-close type="button" aria-label="Закрити">✕</button>
+        <div class="rpd__bar">
+          <div class="rpd__hour"><b data-rpd-hour>07:00</b> · <span data-rpd-phase>ранок</span></div>
+          <input class="rpd__range" data-rpd-slider type="range" min="0" max="1" step="0.001" value="0.18" aria-label="Час доби">
+          <div class="rpd__barhint">протягніть час: ранок → ніч</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<script src="../daynight-engine/component.js"></script>
+<script src="component.js"></script>
+<script>
+  (function () {
+    var R = 'renders/';
+    var ROOMS = [
+      { day: R+'a1-r1-day.webp', night: R+'a1-r1-night.webp', name: 'Вітальня', area: 'диван біля вікна' },
+      { day: R+'a1-r2-day.webp', night: R+'a1-r2-night.webp', name: 'Кухня',    area: 'робоча зона' },
+      { day: R+'a1-r3-day.webp', night: R+'a1-r3-night.webp', name: 'Простір',  area: 'відкрите планування' },
+      { day: R+'a1-r4-day.webp', night: R+'a1-r4-night.webp', name: 'Їдальня',  area: 'стіл при лампах' }
+    ];
+
+    // build the grid tiles
+    var grid = document.querySelector('[data-rpd-grid]');
+    ROOMS.forEach(function (r, i) {
+      var tile = document.createElement('button');
+      tile.className = 'rpd__tile'; tile.type = 'button'; tile.setAttribute('data-rpd-tile', '');
+      tile.setAttribute('aria-label', r.name + ', прожити день');
+      tile.innerHTML = '<img src="' + r.day + '" alt="" loading="lazy" decoding="async">' +
+        '<span class="rpd__tilecap"><b>' + r.name + '</b><span>' + r.area + '</span></span>';
+      grid.appendChild(tile);
+    });
+
+    var nameEl = document.querySelector('[data-rpd-name]');
+    var areaEl = document.querySelector('[data-rpd-area]');
+    var hourEl = document.querySelector('[data-rpd-hour]');
+    var phaseEl = document.querySelector('[data-rpd-phase]');
+
+    var rpd = window.RoomPickDayScrub.create('.rpd', {
+      rooms: ROOMS,
+      hours: [7, 23],
+      onState: function (openIdx, t, hour) {
+        if (openIdx < 0) return;
+        var r = ROOMS[openIdx];
+        nameEl.textContent = r.name; areaEl.textContent = r.area;
+        var hh = Math.floor(hour), mm = Math.round((hour - hh) * 60);
+        if (mm === 60) { mm = 0; hh += 1; }
+        hourEl.textContent = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+        phaseEl.textContent = hh < 12 ? 'ранок' : hh < 17 ? 'день' : hh < 21 ? 'вечір' : 'ніч';
+      }
+    });
+
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

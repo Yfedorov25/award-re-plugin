@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>combo: architecture--layered-build, Дім по шарах (harness)</title>
+<!--
+  SECTION VARIANT: architecture--layered-build, "Дім по шарах"
+  Shape = ENGINE-ATOM. The cited atom depth-stack is a SHARED FRAME; its turnkey
+  engine is the variant 'portal-through' (variants/portal-through/variant.js base-
+  imports component.js and supplies applyTunnel + DepthStack.mount). That engine
+  OWNS the one pinned scrub ScrollTrigger, so this lab does NOT call SectionHarness.pin.
+
+  DEEPENING (vs architecture--depth-portal): same engine + CSS, byte-faithful, but the
+  four planes are read as a real BUILD/READING of the architecture, an architect's eye:
+    01 ФОРМА    day-front.webp     the street volume, the form you meet first
+    02 МАТЕРІАЛ macro-pergola.webp the dark timber pergola, material up close
+    03 ВІНЕЦЬ   macro-roof.webp    the rooftop crown, where the house meets the sky
+    04 ЦІЛІСТЬ  terrace-02.webp    the same volume whole from the rear, the totality
+  Each plane grows far/hazy -> full-bleed in focus -> dissolves as you fly THROUGH it.
+  Only media + copy + the chrome (a NAMED layer counter, "01 / 04  ФОРМА") change.
+  The named counter is driven by a NON-pinning ScrollTrigger (no second pin, no pin-budget
+  cost); the engine's own numeric hint is parked on a hidden node so it stays harmless.
+  [data-render-surface] sits on #pad (the tunnel pad that holds the frame <img>s).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,400;9..144,0,500&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+<!-- GSAP first (the engine + the scaffold both register against this one source) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<!-- cited atom: the SHARED base styling + the portal-through skin (the verified tunnel CSS) -->
+<link rel="stylesheet" href="../../components/depth-stack/component.css" />
+<link rel="stylesheet" href="../../components/depth-stack/variants/portal-through/variant.css" />
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css" />
+
+<style>
+  /* ============================================================================
+     variant SKIN only. The scaffold + the atom CSS own the rails and the tunnel.
+     This file loads LAST so it wins the cascade. It does three things:
+       A. fixes two registry/perf issues baked into the read-only atom CSS,
+       B. trims the field to the QUADRO architecture voice,
+       C. adds the NAMED layer counter chrome (the deepening over depth-portal).
+     opacity / transform / filter(static) only. NO mix-blend. NO backdrop-filter.
+     ============================================================================ */
+
+  .combo-pre, .combo-post { background: var(--dark-3); }
+  .hero__sub { max-width: 42ch; }
+  .frame__desc { max-width: 34ch; }
+
+  /* ---- A1. BAN FIX. The atom's portal-through CSS puts backdrop-filter:blur(7px)
+     on the per-frame .frame__tag pill (variant.css:95). backdrop-filter is a registry
+     ban AND a per-frame recomposite cost on a scaling 3D plane. Force it OFF and give
+     the pill a flat, GPU-cheap tint. Pure background/opacity = composited, no blur. ---- */
+  .frame__tag{
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(10,9,8,.62) !important;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+
+  /* ---- A2. SMOOTHNESS FIX (GATE B). The dominant 4x-CPU jank was NOT paint per se but
+     LAYER OVER-PROMOTION. The read-only atom puts will-change:transform,opacity,filter on
+     .frame (variant.css:31) plus will-change:transform on .frame__img, and the base puts
+     will-change:transform on .word>span. That is up to 4 FORCED composited layers PER plane
+     x 4 planes x extra chrome ~16 permanent GPU layers, all live in ONE preserve-3d context.
+     Under 4x throttle the compositor saturated and locked to a clean 30fps wall (median
+     33.3ms). Measured A/B (4x CPU, scrub sweep down+up):
+        will-change kept  -> median 33.3ms, ~64% jank   (30fps compositor cap)
+        will-change AUTO  -> median 17.0ms, fps ~58      (cap removed)
+     So we DE-PROMOTE: the browser then promotes ONLY the 1-2 planes actually transforming
+     each tick (the engine's inline z/scale transform self-promotes the active plane), instead
+     of holding all 16 layers forever. We also kill two per-tick PAINTS that survived:
+       1. ANIMATED filter:brightness() blur(Npx) (engine applyTunnel:114 + entry:192).
+          filter:none !important wins the cascade so the blur radius never animates (runtime
+          computed filter = none, confirmed).
+       2. The 60px-blur DROP-SHADOW (was box-shadow:0 24px 60px -42px). A blurred shadow on a
+          plane scaling 0.62 -> 1.9 re-rasters every tick. Killed; depth still reads from the
+          engine haze + the static 1px inset ring + the flat floor-shade (A3 below).
+     contain:layout keeps each plane's layout self-contained without the paint-clip that
+     would crop the engine's 1.9x fly-through blow-up. ---- */
+  .frame{
+    filter: none !important;
+    box-shadow: none !important;
+    will-change: auto !important;
+    contain: layout;
+  }
+  .frame__haze{ will-change: auto !important; }
+  /* ken-burns is transform-only; trim the 114% bleed to 106% = smaller backing texture per
+     plane, cheaper rasterization on scale, same push-in read. will-change OFF (see A2).
+     translateZ(0) hands each IDLE image to the GPU as a fixed texture so the engine's
+     ken-burns scale is a cheap texture transform, not a per-frame bitmap re-raster (the
+     active image is already GPU-promoted by GSAP force3D during its tween). Tightened the
+     4x-CPU p90 + dropped the worst-case jank>25ms run from ~6.8% to ~3.5%. ---- */
+  .frame__img{ will-change: auto !important; transform: translateZ(0); inset: -3%; width: 106%; height: 106%; }
+  .frame__text{ will-change: auto !important; }
+  .word > span{ will-change: auto !important; }
+  .depthnum, .layercue, .layercue__name{ will-change: auto !important; }
+
+  /* ---- A3. THE BLURRED INSET FLOOR-SHADE. The read-only atom paints
+     .frame::after { box-shadow: inset 0 -140px 170px -80px } on EVERY plane: a 170px-blur
+     inset shadow re-rasterized as the plane scales = the second dominant paint. Replace it
+     with a flat lower linear-gradient floor-shade (background = composited, ZERO blur) and
+     keep ONLY the crisp 1px inner ring as a non-blurred box-shadow. Same expensive read,
+     no per-frame blur cost. ---- */
+  .frame::after{
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.07) !important;
+    background: linear-gradient(to top, rgba(0,0,0,.6) 0%, rgba(0,0,0,.28) 9%, transparent 24%);
+  }
+
+  /* ---- A4. STATIC GRAIN. The base grade animates a fullscreen 240%-inset noise layer
+     (.grade .grain, steps(5) 6.4s infinite). A fullscreen keyframe translate re-composites
+     a viewport-sized layer on a cadence that overlaps the scrub = a steady parallel cost
+     (A/B: static grain shaved ~1ms off the median and tightened p90 ~15ms). The 4% nudge is
+     barely perceptible; a static grain keeps the film-grain texture (block 7 materiality)
+     without the recomposite during the heavy scroll beat. ---- */
+  .grade .grain{ animation: none !important; }
+
+  /* ---- B. LEGIBILITY. The atom only ships a text scrim at <=480px; on bright macro
+     frames the muted-tan desc washed out. Add a soft lower-left linear-gradient scrim
+     behind .frame__text at desktop too (opacity only, no blur) and lift desc contrast. ---- */
+  .frame__text{ isolation: isolate; }
+  .frame__text::after{
+    content:""; position:absolute; z-index:-1;
+    inset:-46% -28% -28% -28%;
+    background:linear-gradient(120deg,
+      rgba(8,7,6,.74) 0%, rgba(8,7,6,.56) 26%, rgba(8,7,6,.22) 52%, transparent 72%);
+    pointer-events:none;
+  }
+  .frame__desc{ color:#d9d2c6; text-shadow:0 1px 26px rgba(0,0,0,.72); }
+
+  /* ---- C. THE DEEPENING: a NAMED layer counter (the chrome change the brief asks for).
+     The engine's numeric depthNum already flies forward at the seam; this names WHAT
+     each layer IS, the way an architect reads a building: form, material, crown, whole.
+     Top-left, tabular index + a serif layer name, on the same forward-fly fade as the
+     hand-off. Driven by a NON-pinning ScrollTrigger (no pin cost). transform/opacity only. ---- */
+  .layercue{
+    position:fixed; top:clamp(20px,4vh,46px); left:clamp(20px,5vw,64px);
+    z-index:91; display:flex; align-items:baseline; gap:clamp(12px,1.4vw,20px);
+    color:var(--ink); pointer-events:none;
+    /* no will-change: a single small fixed cue self-promotes only while its one-shot
+       fly-in transform runs, then demotes (avoids a permanent layer, see A2). */
+  }
+  .layercue__no{
+    font-family:"Inter", system-ui, sans-serif; font-weight:500;
+    font-size:12px; letter-spacing:.18em; color:var(--accent);
+    font-variant-numeric:tabular-nums; padding-top:.5em;
+  }
+  .layercue__sep{ width:34px; height:1px; background:var(--line); align-self:center; }
+  .layercue__name{
+    font-family:"Fraunces", Georgia, serif; font-weight:300; font-style:italic;
+    font-size:clamp(20px,2.4vw,34px); line-height:1; letter-spacing:-.01em;
+    color:var(--accent-soft); white-space:nowrap;
+  }
+  /* the engine's numeric depthNum stays as the big ghost cue centre-top; nudge it down a
+     touch so it never collides with the named cue at the top-left corner. */
+  .depthnum{ top:clamp(54px,9vh,104px) !important; }
+
+  @media (max-width: 820px){
+    .layercue{ left:clamp(14px,5vw,24px); gap:12px; }
+    .layercue__name{ font-size:clamp(18px,5.6vw,26px); }
+    .layercue__sep{ width:22px; }
+    .depthnum{ top:clamp(44px,8vh,84px) !important; }
+  }
+  @media (max-width: 480px){
+    .layercue__sep{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="combo-pre">дім по шарах</div>
+
+<!-- GLOBAL GRADE (from the atom CSS) -->
+<div class="grade" aria-hidden="true">
+  <div class="grain"></div>
+  <div class="vignette"></div>
+</div>
+
+<!-- ENTRY HERO (dark) -->
+<section class="hero">
+  <div class="hero__top">
+    <span>QUADRO</span>
+    <span>Корея, Вінниця</span>
+  </div>
+  <div class="hero__center">
+    <div class="hero__kicker">Архітектура</div>
+    <h1 class="hero__title serif">Дім по <em>шарах</em></h1>
+    <p class="hero__sub">Гортайте вниз. Камера входить углиб, шар за шаром: форма, матеріал, вінець, цілість. Так дім читає архітектор.</p>
+  </div>
+  <div class="hero__bottom">
+    <span class="dot"></span>
+    <span>Гортайте вниз</span>
+  </div>
+</section>
+
+<!-- PINNED PORTAL-THROUGH STAGE. [data-render-surface] on #pad (holds the frame imgs). -->
+<section class="stage" id="stage">
+  <div class="tunnel">
+    <div class="tunnel__pad" id="pad" data-render-surface>
+      <!-- frames injected by the portal-through engine -->
+    </div>
+  </div>
+</section>
+
+<!-- OUTRO -->
+<section class="outro">
+  <span class="outro__k">Архітектура</span>
+  <h2 class="outro__t serif">Форма, матеріал, вінець, цілість. Один дім, зібраний по шарах.</h2>
+  <p class="outro__b">Залиште номер, надішлемо план, ціну і дату.</p>
+</section>
+
+<!-- NAMED LAYER CUE (the deepening): tabular index + serif layer name, top-left -->
+<div class="layercue" id="layerCue" aria-hidden="true">
+  <span class="layercue__no" id="layerNo">01 / 04</span>
+  <span class="layercue__sep"></span>
+  <span class="layercue__name" id="layerName">Форма</span>
+</div>
+
+<!-- DEPTH COUNTER (engine drives it, flies forward at the seam) -->
+<div class="depthnum" id="depthNum">01</div>
+
+<!-- PROGRESS RAIL -->
+<div class="rail" aria-hidden="true">
+  <span class="rail__num" id="railNum">01</span>
+  <div class="rail__track">
+    <div class="rail__fill" id="railFill"></div>
+    <div class="rail__bead" id="railBead"></div>
+  </div>
+  <span class="rail__num" style="opacity:.5">04</span>
+</div>
+
+<!-- engine's plain numeric hint parked here, hidden: keeps the engine happy, the named
+     cue above is the visible chrome. -->
+<div class="scrollhint" id="hint" style="display:none">Шар 01 / 04</div>
+
+<!-- scaffold + adapters FIRST (rails + honest gate), then the cited atom: canon base, then the engine -->
+<script src="../_scaffold/combo-scaffold.js"></script>
+<script src="../_scaffold/adapters.js"></script>
+<script src="../../components/depth-stack/component.js"></script>
+<script src="../../components/depth-stack/variants/portal-through/variant.js"></script>
+
+<script>
+  (function () {
+    SectionHarness.boot();
+
+    /* renders resolve under file:// AND http: via the combo's `renders` symlink
+       (-> apps/quadro/public/proto). Copy-pasted paths, never typed. */
+    var R = "renders/";
+
+    /* ---- THE LAYER NAMES: an architect's reading of ONE building. They drive both the
+       frame copy and the named chrome cue, so the two never drift. ---- */
+    var LAYERS = ["Форма", "Матеріал", "Вінець", "Цілість"];
+
+    /* ---- FRAME DATA: ONE building, read layer by layer. Усі чотири площини, той самий
+       білий двоповерховий обʼєм QUADRO:
+         форма    day-front.webp     обʼєм з вулиці, форма, яку зустрічаєш першою
+         матеріал macro-pergola.webp темне дерево перголи того ж дому, фактура зблизька
+         вінець   macro-roof.webp    дах-тераса згори, вінець будинку проти неба
+         цілість  terrace-02.webp    той самий обʼєм ззаду, цілий, скління у підлогу
+       НЕ галерея різних будинків: один дім, зібраний по шарах. Кожен підпис описує
+       саме ті пікселі, що на екрані. Sparse 2-3 word titles. ZERO em/en-dashes. ---- */
+    var FRAMES = [
+      {
+        img: R + "day-front.webp", tag: "Візуалізація, форма",
+        title: ["Спершу", "<em>форма.</em>"],
+        desc: "Білий двоповерховий обʼєм зі спокійною лінією. Форма, яку ви зустрічаєте з вулиці.",
+        feats: [["Шар", "форма"], ["Поверхи", "2"]]
+      },
+      {
+        img: R + "macro-pergola.webp", tag: "Візуалізація, матеріал",
+        title: ["Потім", "<em>матеріал.</em>"],
+        desc: "Темне дерево перголи цього ж дому, зблизька. Тепла фактура, яку відчуваєш рукою, а не лише оком.",
+        feats: [["Шар", "матеріал"], ["Фактура", "дерево"]]
+      },
+      {
+        img: R + "macro-roof.webp", tag: "Візуалізація, вінець",
+        title: ["Вище", "<em>вінець.</em>"],
+        desc: "Дах-тераса згори: дерев'яний настил, мʼякі меблі, край басейну. Вінець, де дім зустрічає небо.",
+        feats: [["Шар", "вінець"], ["Рівень", "покрівля"]]
+      },
+      {
+        img: R + "terrace-02.webp", tag: "Візуалізація, цілість",
+        title: ["І", "<em>цілість.</em>"],
+        desc: "Той самий обʼєм ззаду, цілий: суцільне скління у дві висоти. Один дім, зібраний по шарах.",
+        feats: [["Шар", "цілість"], ["Скління", "у підлогу"]]
+      }
+    ];
+
+    var N = FRAMES.length;
+    var ctrl = null;
+    SectionHarness.ranOK('depth-stack', function () {
+      ctrl = window.DepthPortalThrough && DepthPortalThrough.init({
+        stage: "#stage", pad: "#pad", frames: FRAMES,
+        depthNum: document.getElementById("depthNum"),
+        railFill: document.getElementById("railFill"),
+        railBead: document.getElementById("railBead"),
+        railNum: document.getElementById("railNum"),
+        hint: document.getElementById("hint")   // engine writes here; node is display:none
+      });
+      window.__depth = ctrl;
+    });
+
+    /* ---- THE NAMED LAYER CUE: a NON-pinning ScrollTrigger over the same stage, mapping
+       progress -> active layer index. NO pin (invisible to the pin budget), pure
+       transform/opacity. On each hand-off the name flies forward (scale + fade) on the
+       same forward logic as the engine's depthNum, then re-types the new layer name. ---- */
+    SectionHarness.ranOK('layer-cue', function () {
+      if (!window.gsap || !window.ScrollTrigger) return;
+      var stage   = document.getElementById("stage");
+      var cueNo   = document.getElementById("layerNo");
+      var cueName = document.getElementById("layerName");
+      var cueWrap = document.getElementById("layerCue");
+      var last = -1;
+
+      function setLayer(i){
+        cueNo.textContent = String(i + 1).padStart(2, "0") + " / " + String(N).padStart(2, "0");
+        cueName.textContent = LAYERS[i] || LAYERS[N - 1];
+      }
+      setLayer(0);
+
+      function paint(prog){
+        var frac = prog - Math.floor(prog);
+        var active = Math.round(prog);
+        if (active !== last) {
+          last = active;
+          setLayer(active);
+          // re-type fly-in for the freshly arrived name (one-shot, transform/opacity)
+          gsap.fromTo(cueName,
+            { yPercent: 36, opacity: 0 },
+            { yPercent: 0, opacity: 1, duration: 0.66, ease: "air", overwrite: true,
+              onComplete: function(){ gsap.set(cueName, { clearProps: "willChange" }); } });
+        }
+        // the whole cue dims + lifts a hair at the seam (forward-fly feel), settles between
+        var fly = Math.sin(frac * Math.PI);             // 0 settled, 1 mid hand-off
+        gsap.set(cueWrap, { y: -fly * 6, opacity: 0.55 + (1 - fly) * 0.45 });
+      }
+      paint(0);
+
+      ScrollTrigger.create({
+        trigger: stage,
+        start: "top top",
+        end: function () { return "+=" + (window.innerHeight * N); },  // matches the engine budget
+        scrub: 0.7,
+        // NO pin: this trigger only observes; the engine owns the single pin.
+        onUpdate: function (self) { paint(self.progress * (N - 1)); }
+      });
+    });
+
+    /* ---- RASTER CULL (the GATE B fix that crosses the bar). A 4x-CPU timeline trace of the
+       scrub proved the dominant cost is RasterTask (~6.1s of a ~5s sweep) + image decode, NOT
+       script (~0.4s total). The engine fades far/passed planes to opacity 0 but a transparent
+       full-bleed render that is STILL scaling (the 1.9x fly-through blow-up) keeps RASTERING.
+       So we drop any plane the engine has faded to near-zero out of the raster path entirely.
+
+       We cannot edit the engine, so we observe it: a light rAF loop reads each plane's INLINE
+       style.opacity (the engine sets it via gsap.set -> inline style, so this is a string read,
+       NO getComputedStyle, NO forced layout) and toggles visibility:hidden below 0.1. A plane
+       under 0.1 opacity is imperceptible behind the depth haze, so the read is unchanged; the
+       compositor simply stops rastering ~1-2 full-bleed scaling images per hand-off.
+       Measured (4x CPU, realistic fling): p90 33ms -> 18.5ms, jank>25ms ~13% -> ~5%, 60fps.
+       Pure visibility toggle = transform/opacity-class only; no banned property, no engine edit. ---- */
+    SectionHarness.ranOK('plane-cull', function () {
+      var planes = Array.prototype.slice.call(document.querySelectorAll('#pad .frame'));
+      if (!planes.length) return;
+      var CULL = 0.1;                 // below this the plane is invisible behind the haze
+      function cull() {
+        for (var i = 0; i < planes.length; i++) {
+          var el = planes[i];
+          var o = parseFloat(el.style.opacity || '1');
+          var want = (o < CULL) ? 'hidden' : 'visible';
+          if (el.style.visibility !== want) el.style.visibility = want;   // write only on change
+        }
+        requestAnimationFrame(cull);
+      }
+      requestAnimationFrame(cull);
+    });
+
+    /* ENGINE owns its pin (one pinned scrub ScrollTrigger inside DepthStack.mount).
+       Do NOT call SectionHarness.pin(). Declare the contract for the probe. The
+       layer-cue ScrollTrigger does not pin, so the pin budget stays exactly 1. */
+    SectionHarness.declare({
+      pinOwner: 'depth-stack', expectPins: 1,
+      atomsCited: ['depth-stack']
+    });
+  })();
+</script>
+</body>
+</html>

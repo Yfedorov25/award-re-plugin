@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: architecture--collage-inspect / Колаж, що відкривається</title>
+<!--
+  SECTION VARIANT · architecture--collage-inspect   (DEEPENS variant 4: material-collage)
+  ----------------------------------------------------------------------------
+  The EVER editorial collage (round + tall-rect + far-rect material tiles drifting
+  at parallax depth behind a giant fluid-fit word 'архітектура', sparse Fedoriv
+  meta, an '01' counter) WITH an added INTERACTIVE INSPECT layer. Each material
+  tile carries a small '+' affordance; on hover / focus / click the tile reveals a
+  closer view of THAT SAME element under a growing clip-path circle anchored at the
+  '+', while a one-line spec rises ('термодерево перголи' / 'архітектурний тиньк' /
+  'терасний настил'). A passive collage becomes an exploration. Every spec names a
+  material this building ACTUALLY wears (white architectural plaster, dark
+  thermo-wood pergola + terrace decking, dark glazing), proof not promise.
+
+  WHY THIS LANDS (award refs): Ever sync-carousel PAIRED VIEWS + Silver Pinewood
+  HOTSPOT INSPECT. The round + far tiles inspect their OWN material at a closer
+  scale (transform:scale + clip circle, NO render swap, so NO geometry jump). The
+  CENTRE hero tile cross-reveals a PAIRED VIEW of the SAME white villa pulled
+  CLOSER (day-front establishing -> day-02 frontal crop of the identical facade:
+  same plaster planes, same dark vertical glazing, same flat roofline, same
+  geometry-consistent QUADRO set) — the heroic inspect that earns the paired-views
+  lineage with zero geometry jump and zero material contradiction.
+
+  PIN SHAPE = MANUAL (harness-owned). The cited atom parallax-collage is a MOUSE-
+  parallax engine: it creates NO ScrollTrigger of its own (rAF + mousemove only).
+  So the SCROLL drift of the tiles + meta rides ONE harness pin, while
+  ParallaxCollage.init() layers the pointer-parallax of the floating decor on top,
+  and the inspect is pure pointer-driven CSS state on top of that. Three layers,
+  ONE pin. -> pinOwner:'harness', expectPins:1.
+
+  MOTION = counter-parallax with REAL amplitude on scroll (the field BREATHES open
+  at mid-scroll, re-closes at both ends, so the composition reads CENTRED at every
+  scroll position) + mouse-parallax decor + the inspect clip/scale. transform /
+  opacity / clip-path / filter ONLY. NO WebGL. NO mix-blend. NO backdrop-filter.
+  will-change cleared after the resting composition is set.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=Jost:wght@300;400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="renders/day-front.webp">
+<link rel="preload" as="image" href="renders/day-02.webp">
+<link rel="preload" as="image" href="renders/macro-pergola.webp">
+<link rel="preload" as="image" href="renders/macro-roof.webp">
+
+<!-- cited atom's component.css + the shared rails -->
+<link rel="stylesheet" href="../../components/parallax-collage/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+
+<style>
+  /* ============ variant SKIN only (scaffold owns the rails) ============ */
+  .combo-stage { background: var(--combo-bg); }
+
+  /* local named eases (block 4): air is registered by the scaffold; expo.out for the inspect snap */
+  :root {
+    --ease-air: cubic-bezier(0.22, 1, 0.36, 1);     /* mirror of the scaffold 'air' */
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);     /* inspect open */
+    --t-ui: .34s;                                    /* UI feedback (block 4: .2-.4s) */
+    --t-inspect: .72s;                               /* the inspect reveal (content beat) */
+    --line: rgba(220, 197, 183, .34);                /* terracotta-tinted hairline token */
+  }
+
+  /* the editorial field, centred with EVER-class gutters (block 3) */
+  #collage {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(1340px, calc(100vw - 2 * clamp(20px, 5vw, 80px)));
+    height: min(662px, 74vh);
+  }
+
+  /* the render surface is #collage; re-scope tile imgs to their OWN tile so the
+     scaffold's generic [data-render-surface] img fill rule does not yank every
+     image to the whole stage. */
+  [data-render-surface] { position: absolute; inset: auto; }
+  #collage .pc-tile img { position: static; inset: auto;
+    width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* wordmark BEHIND — sized to fill the field by fluid-type-sizing */
+  .pc-word {
+    left: 0; right: 0; bottom: 3%;
+    font-family: 'Jost', 'Century Gothic', system-ui, sans-serif; font-weight: 300;
+    text-transform: uppercase; color: var(--combo-cream); opacity: .12;
+    letter-spacing: -.02em; line-height: .84; white-space: nowrap;
+  }
+
+  /* ---- tiles: a ROUND material tile (left) + a tall RECT facade tile (centre) +
+       a small far material rect (right) — three depths. ---- */
+  /* contain: layout isolates each tile's reflow scope so an inspect reveal never
+     invalidates layout outside the tile (cheaper under 4x CPU). NOT `paint` — that
+     would clip the soft box-shadow that gives the collage its depth. */
+  .pc-tile { box-shadow: 0 40px 90px -42px rgba(0, 0, 0, .62); contain: layout; }
+  .pc-tile--round { left: 0; top: 6%; width: 30%; height: 46%; }
+  .pc-tile--rect  { left: 34%; top: 0; width: 32%; height: 100%; }
+  .pc-tile--far   { left: 70.5%; top: 30%; width: 27%; height: 42%; z-index: 2; }
+
+  /* ---- INSPECT layer (authored inline — pure transform/opacity/clip-path) ---- */
+  /* every inspectable tile holds: a .tile-face (resting render), a .tile-macro
+     (the closer/paired render, clipped to a 0-radius circle at the '+'), a '+'
+     hotspot button, and a spec caption that rises on inspect. */
+  .pc-tile[data-inspect] { cursor: pointer; }
+  /* PERF: the inspect animates clip-path + transform ONLY (both compositor props).
+     The resting face/macro are pre-promoted to their own GPU layers (translateZ)
+     so the open/close reveal never re-rasterizes the full-res image — under 4x CPU
+     it stays a pure composite. The face's tonal settle rides opacity on a sibling
+     scrim, not an animated `filter` on the big bitmap (filter animation = per-frame
+     raster of a 1920px image = the only jank source we found). */
+  .pc-tile[data-inspect] .tile-face {
+    position: absolute; inset: 0;
+    transition: transform var(--t-inspect) var(--ease-air);
+    transform-origin: var(--hx, 82%) var(--hy, 84%);
+    transform: translateZ(0);
+  }
+  .pc-tile[data-inspect] .tile-face img { transform: translateZ(0); }
+  /* a thin tonal scrim over the face: opacity-only fade settles the resting tone on
+     open (replaces the animated saturate filter — same read, zero raster). */
+  .tile-face::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: rgba(16, 13, 10, .10); opacity: 0;
+    transition: opacity var(--t-ui) var(--ease-air);
+  }
+  .tile-macro {
+    position: absolute; inset: 0;
+    /* clip opens FROM the '+' hotspot toward 140% — a growing inspect lens */
+    clip-path: circle(0% at var(--hx, 82%) var(--hy, 84%));
+    transition: clip-path var(--t-inspect) var(--ease-expo);
+    will-change: clip-path; transform: translateZ(0);
+  }
+  .tile-macro img {
+    /* the macro frame: the same material pulled CLOSER (round/far) or the paired
+       frontal crop of the SAME villa (centre) — both authored per tile via inline style */
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transform: scale(var(--macro-scale, 1.14)) translateZ(0);
+    transform-origin: var(--hx, 82%) var(--hy, 84%);
+  }
+
+  /* the '+' affordance — a 44px tap-zone (block 8: >=44px), terracotta hairline ring */
+  .tile-plus {
+    position: absolute; right: 12px; bottom: 12px; z-index: 4;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center;
+    border: 1px solid var(--line); background: rgba(22, 19, 15, .42);
+    color: var(--combo-cream); font: 300 26px/1 'Jost', system-ui, sans-serif;
+    cursor: pointer; pointer-events: auto;
+    transition: transform var(--t-ui) var(--ease-air), border-color var(--t-ui) ease, background-color var(--t-ui) ease;
+  }
+  .tile-plus::before { content: '+'; display: block; transform: translateY(-1px);
+    transition: transform var(--t-inspect) var(--ease-expo); }
+  .pc-tile[data-inspect]:hover .tile-plus,
+  .pc-tile[data-inspect]:focus-within .tile-plus { transform: scale(1.08); border-color: var(--combo-accent); background: rgba(181, 106, 74, .22); }
+
+  /* the spec caption — hidden below a clip until inspect, then rises (block 4 stagger feel) */
+  .tile-spec {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 4;
+    padding: 14px 16px 16px; pointer-events: none;
+    background: linear-gradient(to top, rgba(16, 13, 10, .82), rgba(16, 13, 10, 0));
+  }
+  .tile-spec__clip { display: block; overflow: hidden; }
+  .tile-spec__i {
+    display: block; transform: translateY(108%);
+    transition: transform var(--t-inspect) var(--ease-expo);
+    font-family: var(--combo-sans); font-weight: 500; font-size: clamp(.72rem, .95vw, .86rem);
+    letter-spacing: .12em; text-transform: uppercase; color: var(--combo-cream);
+  }
+
+  /* the OPEN state (driven by JS toggling [data-open], plus hover/focus fallback) */
+  .pc-tile[data-inspect][data-open] .tile-macro,
+  .pc-tile[data-inspect]:hover .tile-macro,
+  .pc-tile[data-inspect]:focus-within .tile-macro { clip-path: circle(142% at var(--hx, 82%) var(--hy, 84%)); }
+  .pc-tile[data-inspect][data-open] .tile-face,
+  .pc-tile[data-inspect]:hover .tile-face,
+  .pc-tile[data-inspect]:focus-within .tile-face { transform: scale(1.04) translateZ(0); }
+  .pc-tile[data-inspect][data-open] .tile-face::after,
+  .pc-tile[data-inspect]:hover .tile-face::after,
+  .pc-tile[data-inspect]:focus-within .tile-face::after { opacity: 1; }
+  .pc-tile[data-inspect][data-open] .tile-plus::before,
+  .pc-tile[data-inspect]:hover .tile-plus::before,
+  .pc-tile[data-inspect]:focus-within .tile-plus::before { transform: rotate(45deg); }
+  .pc-tile[data-inspect][data-open] .tile-spec__i,
+  .pc-tile[data-inspect]:hover .tile-spec__i,
+  .pc-tile[data-inspect]:focus-within .tile-spec__i { transform: translateY(0); }
+
+  /* ---- meta layer — sparse, premium, generous distance from the render (block 3) ---- */
+  .pc-meta--eyebrow {
+    left: 0; top: -8%;
+    font: 600 .68rem/1 var(--combo-sans); letter-spacing: .24em; text-transform: uppercase;
+    color: var(--combo-accent);
+  }
+  /* hero title: display serif, big size for a strong H1/body contrast (block 1,
+     >=4:1 vs the 14px sub), tight lh 0.96, negative tracking -0.03em. */
+  .pc-meta--title {
+    right: 0; top: -2%; max-width: 11ch; text-align: right;
+    font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(2.4rem, 4.4vw, 4.2rem); line-height: .96;
+    letter-spacing: -.03em; color: var(--combo-cream);
+  }
+  .pc-meta--sub {
+    right: 0; top: 30%; max-width: 24ch; text-align: right;
+    font-family: var(--combo-sans); font-weight: 400;
+    font-size: clamp(.82rem, 1vw, .95rem); line-height: 1.62; color: rgba(244, 239, 230, .62);
+  }
+  .pc-meta--counter {
+    left: 0; bottom: -6%;
+    font-family: 'Jost', system-ui, sans-serif; font-weight: 300;
+    font-size: clamp(48px, 7vw, 100px); color: var(--combo-accent);
+    line-height: .8; letter-spacing: -.04em;
+  }
+
+  /* reduced-motion: kill the inspect transitions, show everything composed + readable */
+  @media (prefers-reduced-motion: reduce) {
+    .tile-macro, .tile-face, .tile-spec__i, .tile-plus, .tile-plus::before { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="combo-pre">scroll ↓</div>
+
+  <section id="combo" class="combo-stage" data-combo="architecture--collage-inspect">
+    <div class="pc-stage" id="collage" data-render-surface>
+
+      <!-- z1: wordmark behind, sized to fill the field by fluid-type-sizing -->
+      <div class="pc-word" data-fluid-fit>архітектура</div>
+
+      <!-- z2: MATERIAL / form tiles (mixed masks). data-dir sets the counter-parallax
+           direction so the field breathes. Each is an INSPECT hotspot:
+           --hx/--hy anchor the lens at the '+' corner; --macro-scale frames the macro. -->
+
+      <!-- ROUND (left): термодерево — inspects its OWN material, closer (no jump) -->
+      <div class="pc-tile pc-tile--round" data-tile data-inspect data-depth="0.9" data-dir="1"
+           tabindex="0" role="button" aria-label="Роздивитися матеріал, термодерево перголи"
+           style="--hx:80%; --hy:82%; --macro-scale:1.5;">
+        <div class="tile-face"><img src="renders/macro-pergola.webp" alt="Рейки термодерева перголи"></div>
+        <div class="tile-macro"><img src="renders/macro-pergola.webp" alt="Текстура термодерева зблизька"></div>
+        <span class="tile-spec"><span class="tile-spec__clip"><span class="tile-spec__i">термодерево перголи</span></span></span>
+        <span class="tile-plus" aria-hidden="true"></span>
+      </div>
+
+      <!-- CENTRE (tall, the hero): the BUILDING — inspect cross-reveals a PAIRED
+           VIEW of the SAME white villa pulled CLOSER (day-front establishing crop
+           -> day-02 tight frontal crop of the identical facade). Same white plaster
+           planes, same dark vertical glazing, same flat roofline, same entrance: a
+           true zoom, not a jump. macro-scale ~1.0 because day-02 is already the
+           close frame; the lens just hands the resting wide crop over to the tighter
+           same-geometry shot. -->
+      <div class="pc-tile pc-tile--rect" data-tile data-inspect data-depth="0.45" data-dir="-1"
+           tabindex="0" role="button" aria-label="Роздивитися фасад ближче, архітектурний тиньк"
+           style="--hx:50%; --hy:50%; --macro-scale:1.02;">
+        <div class="tile-face"><img src="renders/day-front.webp" alt="Білий фасад вілли в архітектурному тиньку" style="object-position:60% 52%;"></div>
+        <div class="tile-macro"><img src="renders/day-02.webp" alt="Той самий фасад зблизька, тиньк і скління" style="object-position:center 42%;"></div>
+        <span class="tile-spec"><span class="tile-spec__clip"><span class="tile-spec__i">архітектурний тиньк</span></span></span>
+        <span class="tile-plus" aria-hidden="true"></span>
+      </div>
+
+      <!-- FAR (right): терасний настил — inspects its OWN material, closer (no jump).
+           macro-roof.webp is the rooftop terrace deck seen from above, warm timber
+           planking; the spec names exactly that. -->
+      <div class="pc-tile pc-tile--far" data-tile data-inspect data-depth="1.25" data-dir="1"
+           tabindex="0" role="button" aria-label="Роздивитися терасу, дерев'яний настил"
+           style="--hx:82%; --hy:80%; --macro-scale:1.46;">
+        <div class="tile-face"><img src="renders/macro-roof.webp" alt="Дерев'яний настил тераси"></div>
+        <div class="tile-macro"><img src="renders/macro-roof.webp" alt="Планки настилу тераси зблизька"></div>
+        <span class="tile-spec"><span class="tile-spec__clip"><span class="tile-spec__i">терасний настил</span></span></span>
+        <span class="tile-plus" aria-hidden="true"></span>
+      </div>
+
+      <!-- z3: floating decor, mouse-parallax at its own depth (the atom's native beat) -->
+      <div class="pc-tile pc-tile--round" data-deco data-depth="1.0" data-axis="0.9"
+           style="left:18%; top:64%; width:9%; height:16%; border-radius:50%; box-shadow:0 20px 44px -16px rgba(0,0,0,.55);">
+        <img src="renders/macro-table.webp" alt="Деталь настилу і столу на терасі">
+      </div>
+
+      <!-- z4: meta — sparse, the render stays the hero. Title 1-3 words; sub names
+           only materials the building actually wears (plaster, thermo-wood, glass). -->
+      <div class="pc-meta pc-meta--eyebrow">QUADRO · Архітектура</div>
+      <div class="pc-meta pc-meta--title" data-spine>Матеріали,<br>що старіють гідно</div>
+      <div class="pc-meta pc-meta--sub">Архітектурний тиньк, термодерево, скло. Наведіть на деталь, щоб роздивитися ближче.</div>
+      <div class="pc-meta pc-meta--counter">01</div>
+    </div>
+  </section>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atom's canon deps + component (canon FIRST) -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/fluid-type-sizing/component.js"></script>
+  <script src="../../components/parallax-collage/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+
+      // ---- compose with fluid-type-sizing: fill the field with the behind-word ----
+      if (window.FluidType) {
+        FluidType.fit(document.querySelector('.pc-word'), {
+          container: document.getElementById('collage'), gutter: 0, fill: 1
+        });
+      }
+
+      // ---- RENDER + DECOR job: the EVER collage engine. It mouse-parallaxes the
+      // floating decor (rAF + mousemove only) and owns NO pin, so the harness pin
+      // below is the section's single pin. ----
+      // PERF + CORRECTNESS: do NOT hand the engine the wordmark. The engine's rAF
+      // loop writes a transform to whatever it is given EVERY frame (even at rest),
+      // and the wordmark is a viewport-filling element — a per-frame transform write
+      // on it under 4x CPU was the idle-jank source (17.6% -> measured). It also
+      // FOUGHT the scroll handler below, which already owns the wordmark's y/scaleX.
+      // So the engine drives ONLY the small [data-deco] tile (its native beat), and
+      // the scroll handler solely owns the wordmark. One writer per element.
+      //
+      // ONE-rAF LAW (PB_scroll_smoothness #checklist): the engine spins a PERPETUAL
+      // requestAnimationFrame even at rest, a SECOND rAF loop competing with GSAP's.
+      // We mount it (citation + decor composed at base) but keep its loop ALIVE ONLY
+      // while the pointer is inside the stage: mount -> destroy immediately so at idle
+      // there is ONE rAF (GSAP/ScrollTrigger); re-init on mouseenter for the live
+      // decor drift, tear down again on mouseleave. The heroic beats (scroll breathe,
+      // inspect reveal) never depend on the engine loop.
+      var stageEl = document.getElementById('collage');
+      var collageOpts = { decoSelector: '[data-deco]', maxShiftPx: 22, ease: 0.09 };
+      SectionHarness.ranOK('parallax-collage', function () {
+        window.__collage = ParallaxCollage.init('#collage', collageOpts);
+        // settle the decor at base, then stop the perpetual loop (back to ONE rAF)
+        if (window.__collage && window.__collage.destroy) window.__collage.destroy();
+      });
+      if (stageEl) {
+        stageEl.addEventListener('mouseenter', function () {
+          if (window.__collage && window.__collage.destroy) window.__collage.destroy();
+          window.__collage = ParallaxCollage.init('#collage', collageOpts);
+        });
+        stageEl.addEventListener('mouseleave', function () {
+          if (window.__collage && window.__collage.destroy) window.__collage.destroy();
+        });
+      }
+
+      // PROJECT SCROLL-PERF LAW: no persistent will-change. The engine promotes its
+      // decor to a compositor layer on mount and never clears it; clear that resting
+      // hint here (the compositor re-promotes on the rare parallax frames — cheaper
+      // than holding the layer indefinitely).
+      var decoEl = document.querySelector('[data-deco]');
+      var wordEl = document.querySelector('.pc-word');
+      if (decoEl) decoEl.style.willChange = 'auto';
+      if (wordEl) wordEl.style.willChange = 'auto';
+
+      // ---- INSPECT layer: pointer-driven, authored inline. Hover/focus opens via
+      // CSS; click TOGGLES a sticky [data-open] so a tap (touch / click-to-keep)
+      // also works, and a second click closes. Esc closes the open tile. No pin,
+      // transform/opacity/clip-path only. ----
+      var tiles = Array.prototype.slice.call(document.querySelectorAll('[data-inspect]'));
+      function closeAll(except) {
+        tiles.forEach(function (t) { if (t !== except) t.removeAttribute('data-open'); });
+      }
+      tiles.forEach(function (t) {
+        t.addEventListener('click', function () {
+          var open = t.hasAttribute('data-open');
+          closeAll(t);
+          if (open) t.removeAttribute('data-open'); else t.setAttribute('data-open', '');
+        });
+        t.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t.click(); }
+          if (e.key === 'Escape') { t.removeAttribute('data-open'); }
+        });
+        // clear the macro's will-change once it settles closed, re-arm on enter
+        var macro = t.querySelector('.tile-macro');
+        if (macro) {
+          t.addEventListener('mouseenter', function () { macro.style.willChange = 'clip-path'; });
+          macro.addEventListener('transitionend', function () {
+            if (!t.matches(':hover') && !t.matches(':focus-within') && !t.hasAttribute('data-open')) macro.style.willChange = 'auto';
+          });
+        }
+      });
+
+      // ---- ONE section pin (harness). On scroll the tiles COUNTER-parallax at
+      // their per-tile depth+direction: the field OPENS at mid-scroll and re-CLOSES
+      // toward both ends (composed at p=0 and p=1, balanced in between — opposite-dir
+      // tiles separate symmetrically about the centre, never a one-sided empty band).
+      // The wordmark + meta spine slide OPPOSITE through the gutters. transform/
+      // opacity only. NEVER width/height/top/left. ----
+      var driftTiles = Array.prototype.slice.call(document.querySelectorAll('[data-tile]'));
+      var word = document.querySelector('.pc-word');
+      var spine = document.querySelector('[data-spine]');
+      var AMP = 94;   // real, clearly-visible base travel for depth=1
+      var st = SectionHarness.pin('#combo', { end: '+=130%', scrub: 0.8 });
+      if (st) st.onUpdate = function (p) {
+        if (!window.gsap) return;
+        var breathe = Math.sin(p * Math.PI);     // 0 at ends, 1 at the middle — symmetric
+        driftTiles.forEach(function (t) {
+          var depth = parseFloat(t.getAttribute('data-depth')) || 0.5;
+          var dir = parseFloat(t.getAttribute('data-dir')) || 1;
+          window.gsap.set(t, { y: breathe * AMP * depth * dir, opacity: 0.66 + breathe * 0.34 });
+        });
+        if (word) window.gsap.set(word, {
+          y: -breathe * 56,
+          // PERF: a transform scaleX gives the same horizontal "breathe" as a
+          // letter-spacing tween but stays on the compositor. Animating
+          // letter-spacing on a viewport-filling wordmark reflows + repaints the
+          // whole word every scroll frame (the 4x-CPU jank source). scaleX does not.
+          scaleX: 1 + breathe * 0.018,
+          opacity: 0.10 + breathe * 0.12
+        });
+        if (spine) window.gsap.set(spine, { y: -breathe * 42, opacity: 0.6 + breathe * 0.4 });
+      };
+
+      SectionHarness.declare({
+        pinOwner: 'harness', expectPins: 1,
+        atomsCited: ['parallax-collage', 'fluid-type-sizing']
+      });
+    })();
+  </script>
+</body>
+</html>

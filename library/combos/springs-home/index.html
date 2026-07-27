@@ -1,0 +1,2579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>springs — статичний каркас ПО СПЕЦІ (S2c, генерат)</title>
+<link rel="stylesheet" href="/skeleton.css">
+<link rel="stylesheet" href="/scene.css">
+<script defer src="/springs-engine.js"></script>
+</head>
+<body>
+<!-- ===== header ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="header" data-sk-vp="desktop">
+ <header class="header is-hidden--print js-header header--sticky ui-dark header--landing gd-0">
+  <div class="header__background gd-1"></div>
+  <div class="header__content px-layout gd-2">
+   <div class="header__left header-animation-logo is-hidden--md-up gd-3">
+    <a class="header__logo--mobile gd-4">
+     <svg class="gd-5"></svg>
+    </a>
+   </div>
+   <div class="header__left header-animation-link is-hidden--sm-down gd-6">
+    <a class="btn btn--text-small btn--link btn--icon-spacing-large btn-container is-hidden--sm-down gd-7">
+     <span class="btn__content gd-8">
+      <span class="btn__icon gd-9">
+       <svg class="gd-10">
+        <use class="gd-11" href="/assets/images/icons.svg#menu"></use>
+       </svg>
+      </span>
+      <span class="btn__text btn__text--has-content gd-12">
+       <span class="btn btn--text-small btn--link btn--clone btn--full gd-13">
+        <span class="btn__content gd-14">
+         <span class="btn__text gd-15">Menu</span>
+        </span>
+       </span>
+      </span>
+     </span>
+    </a>
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--no-hover gd-16">
+     <span class="btn__content gd-17">
+      <span class="btn__text gd-18">Residences</span>
+     </span>
+    </a>
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--hover gd-19">
+     <span class="btn__content gd-20">
+      <span class="btn__text gd-21">Residences</span>
+     </span>
+    </a>
+   </div>
+   <div class="header__center is-hidden--sm-down gd-22">
+    <a class="header__logo gd-23">
+     <span class="header__logo__inner header-animation-logo gd-24">
+      <span class="header__logo__left gd-25">
+       <svg class="gd-26">
+        <use class="gd-27" href="/assets/images/icons.svg#logo-left"></use>
+       </svg>
+      </span>
+      <span class="header__logo__right gd-28">
+       <svg class="gd-29">
+        <use class="gd-30" href="/assets/images/icons.svg#logo-right"></use>
+       </svg>
+      </span>
+     </span>
+    </a>
+   </div>
+   <div class="header__right header-animation-link gd-31">
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--md-up gd-32">
+     <span class="btn__content gd-33">
+      <span class="btn__text gd-34">Residences</span>
+     </span>
+    </a>
+    <div class="favourite-btn is-hidden--md-up gd-35">
+     <a class="btn btn btn--text-small btn--link btn--square btn--sm gd-36">
+      <span class="btn__content gd-37">
+       <span class="btn__icon gd-38">
+        <svg class="gd-39"></svg>
+       </span>
+      </span>
+     </a>
+     <span class="favourite-btn__counter text-c2 is-hidden gd-40"></span>
+    </div>
+    <a class="btn btn--text-small btn--link is-hidden--md-up gd-41">
+     <span class="btn__content gd-42">
+      <span class="btn__icon gd-43">
+       <svg class="gd-44"></svg>
+      </span>
+     </span>
+    </a>
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--sm-down gd-45">
+     <span class="btn__content gd-46">
+      <span class="btn__text gd-47">Contact us</span>
+     </span>
+    </a>
+    <div class="favourite-btn is-hidden--sm-down gd-48">
+     <a class="btn btn--sm btn--text-small gd-49">
+      <span class="btn__content gd-50">
+       <span class="btn__icon gd-51">
+        <svg class="gd-52">
+         <use class="gd-53" href="/assets/images/icons.svg#heart"></use>
+        </svg>
+       </span>
+      </span>
+     </a>
+     <span class="favourite-btn__counter text-c2 is-hidden gd-54"></span>
+    </div>
+   </div>
+  </div>
+ </header>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="header" data-sk-vp="mobile">
+ <header class="header is-hidden--print js-header header--sticky ui-dark header--landing gm-55">
+  <div class="header__background gm-56"></div>
+  <div class="header__content px-layout gm-57">
+   <div class="header__left header-animation-logo is-hidden--md-up gm-58">
+    <a class="header__logo--mobile gm-59">
+     <svg class="gm-60">
+      <use class="gm-61" href="/assets/images/icons.svg#logo-mobile"></use>
+     </svg>
+    </a>
+   </div>
+   <div class="header__left header-animation-link is-hidden--sm-down gm-62">
+    <a class="btn btn--text-small btn--link btn--icon-spacing-large btn-container is-hidden--sm-down gm-63">
+     <span class="btn__content gm-64">
+      <span class="btn__icon gm-65">
+       <svg class="gm-66"></svg>
+      </span>
+      <span class="btn__text btn__text--has-content gm-67">
+       <span class="btn btn--text-small btn--link btn--clone btn--full gm-68">
+        <span class="btn__content gm-69">
+         <span class="btn__text gm-70">Menu</span>
+        </span>
+       </span>
+      </span>
+     </span>
+    </a>
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--no-hover gm-71">
+     <span class="btn__content gm-72">
+      <span class="btn__text gm-73">Residences</span>
+     </span>
+    </a>
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--hover gm-74">
+     <span class="btn__content gm-75">
+      <span class="btn__text gm-76">Residences</span>
+     </span>
+    </a>
+   </div>
+   <div class="header__center is-hidden--sm-down gm-77">
+    <a class="header__logo gm-78">
+     <span class="header__logo__inner header-animation-logo gm-79">
+      <span class="header__logo__left gm-80">
+       <svg class="gm-81"></svg>
+      </span>
+      <span class="header__logo__right gm-82">
+       <svg class="gm-83"></svg>
+      </span>
+     </span>
+    </a>
+   </div>
+   <div class="header__right header-animation-link gm-84">
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--md-up gm-85">
+     <span class="btn__content gm-86">
+      <span class="btn__text gm-87">Residences</span>
+     </span>
+    </a>
+    <div class="favourite-btn is-hidden--md-up gm-88">
+     <a class="btn btn btn--text-small btn--link btn--square btn--sm gm-89">
+      <span class="btn__content gm-90">
+       <span class="btn__icon gm-91">
+        <svg class="gm-92">
+         <use class="gm-93" href="/assets/images/icons.svg#heart"></use>
+        </svg>
+       </span>
+      </span>
+     </a>
+     <span class="favourite-btn__counter text-c2 is-hidden gm-94"></span>
+    </div>
+    <a class="btn btn--text-small btn--link is-hidden--md-up gm-95">
+     <span class="btn__content gm-96">
+      <span class="btn__icon gm-97">
+       <svg class="gm-98">
+        <use class="gm-99" href="/assets/images/icons.svg#menu-mobile"></use>
+       </svg>
+      </span>
+     </span>
+    </a>
+    <a class="btn btn--text-small btn--link btn--clone is-hidden--sm-down gm-100">
+     <span class="btn__content gm-101">
+      <span class="btn__text gm-102">Contact us</span>
+     </span>
+    </a>
+    <div class="favourite-btn is-hidden--sm-down gm-103">
+     <a class="btn btn--sm btn--text-small gm-104">
+      <span class="btn__content gm-105">
+       <span class="btn__icon gm-106">
+        <svg class="gm-107"></svg>
+       </span>
+      </span>
+     </a>
+     <span class="favourite-btn__counter text-c2 is-hidden gm-108"></span>
+    </div>
+   </div>
+  </div>
+ </header>
+</div>
+<!-- ===== gallery-split ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="gallery-split" data-sk-vp="desktop">
+ <div class="l-gallery__split row background background--cover gd-109">
+  <div class="col col--xs-4 col--md-6 gd-110">
+   <div class="l-gallery__item__mask-list gd-111">
+    <div class="l-gallery__item__mask-list__item gallery-animation-item gd-112">
+     <picture class="gd-113">
+      <img class="gd-114" src="/assets/images/media/landing/0.preloader/preloader-left-1@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="l-gallery__item__mask-list__item gallery-animation-item gd-115">
+     <picture class="gd-116">
+      <img class="gd-117" src="/assets/images/media/landing/0.preloader/preloader-left-2@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="l-gallery__item__mask-list__item gallery-animation-item gd-118">
+     <picture class="gd-119">
+      <img class="gd-120" src="/assets/images/media/landing/0.preloader/preloader-left-3@xxl.webp" alt="">
+     </picture>
+    </div>
+   </div>
+  </div>
+  <div class="col col--xs-4 col--md-6 gd-121">
+   <div class="l-gallery__item__mask-list gd-122">
+    <div class="l-gallery__item__mask-list__item gallery-animation-item gd-123">
+     <picture class="gd-124">
+      <img class="gd-125" src="/assets/images/media/landing/0.preloader/preloader-right-1@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="l-gallery__item__mask-list__item gallery-animation-item gd-126">
+     <picture class="gd-127">
+      <img class="gd-128" src="/assets/images/media/landing/0.preloader/preloader-right-2@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="l-gallery__item__mask-list__item gallery-animation-item gd-129">
+     <picture class="gd-130">
+      <img class="gd-131" src="/assets/images/media/landing/0.preloader/preloader-right-3@xxl.webp" alt="">
+     </picture>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== hero-gallery ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="hero-gallery" data-sk-vp="desktop">
+ <div class="l-gallery gd-132">
+  <div class="l-gallery__content js-gallery-container gd-133">
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-134">
+    <div class="is-hidden--sm-down gd-135">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-136">
+      <img class="gd-137" src="/assets/images/media/landing/0.gallery/gallery-1@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-138">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-139"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-140">
+    <div class="is-hidden--sm-down gd-141">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-142">
+      <img class="gd-143" src="/assets/images/media/landing/0.gallery/gallery-16@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-144">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-145"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-146">
+    <div class="is-hidden--sm-down gd-147">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-148">
+      <img class="gd-149" src="/assets/images/media/landing/0.gallery/gallery-7@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-150">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-151"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-152">
+    <div class="is-hidden--sm-down gd-153">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-154">
+      <img class="gd-155" src="/assets/images/media/landing/0.gallery/gallery-4@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-156">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-157"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-158">
+    <div class="is-hidden--sm-down gd-159">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-160">
+      <img class="gd-161" src="/assets/images/media/landing/0.gallery/gallery-5@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-162">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-163"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-164">
+    <div class="is-hidden--sm-down gd-165">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-166">
+      <img class="gd-167" src="/assets/images/media/landing/0.gallery/gallery-6@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-168">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-169"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-170">
+    <div class="is-hidden--sm-down gd-171">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-172">
+      <img class="gd-173" src="/assets/images/media/landing/0.gallery/gallery-3@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-174">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-175"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-176">
+    <div class="is-hidden--sm-down gd-177">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-178">
+      <img class="gd-179" src="/assets/images/media/landing/0.gallery/gallery-11@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-180">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-181"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-182">
+    <div class="is-hidden--sm-down gd-183">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-184">
+      <img class="gd-185" src="/assets/images/media/landing/0.gallery/gallery-9@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-186">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-187"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-188">
+    <div class="is-hidden--sm-down gd-189">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-190">
+      <img class="gd-191" src="/assets/images/media/landing/0.gallery/gallery-10@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-192">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-193"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-194">
+    <div class="is-hidden--sm-down gd-195">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-196">
+      <img class="gd-197" src="/assets/images/media/landing/0.gallery/gallery-8@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-198">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-199"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-200">
+    <div class="is-hidden--sm-down gd-201">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-202">
+      <img class="gd-203" src="/assets/images/media/landing/0.gallery/gallery-12@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-204">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-205"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-206">
+    <div class="is-hidden--sm-down gd-207">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-208">
+      <img class="gd-209" src="/assets/images/media/landing/0.gallery/gallery-13@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-210">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-211"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-212">
+    <div class="is-hidden--sm-down gd-213">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-214">
+      <img class="gd-215" src="/assets/images/media/landing/0.gallery/gallery-14@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-216">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-217"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-218">
+    <div class="is-hidden--sm-down gd-219">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-220">
+      <img class="gd-221" src="/assets/images/media/landing/0.gallery/gallery-15@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-222">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-223"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-224">
+    <div class="is-hidden--sm-down gd-225">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-226">
+      <img class="gd-227" src="/assets/images/media/landing/0.gallery/gallery-2@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-228">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-229"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-230">
+    <div class="is-hidden--sm-down gd-231">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-232">
+      <img class="gd-233" src="/assets/images/media/landing/0.gallery/gallery-17@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-234">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-235"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-236">
+    <div class="is-hidden--sm-down gd-237">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-238">
+      <img class="gd-239" src="/assets/images/media/landing/0.gallery/gallery-18@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-240">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-241"></picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gd-242">
+    <div class="is-hidden--sm-down gd-243">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-244">
+      <img class="gd-245" src="/assets/images/media/landing/0.gallery/gallery-19@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="is-hidden--md-up gd-246">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-247"></picture>
+    </div>
+   </div>
+  </div>
+  <div class="l-gallery__caption pr-layout gd-248">
+   <div class="col col--xs-3 col--md-3 col--xxxl-2 offset--md-2 pl-layout pl-0:md pt-7:md gd-249">
+    <p class="text-t1 leading-trim gd-250">Exclusive residence with a rich wellness infrastructure next to Nature Park</p>
+   </div>
+   <div class="l-gallery__title col col--md-6 text-right gd-251">
+    <h1 class="h0 leading-trim gd-252">Splendor of Renewal</h1>
+   </div>
+   <a class="btn l-gallery-next btn--outline btn--square btn--sm is-hidden--md-down gd-253">
+    <span class="btn__content gd-254">
+     <span class="btn__icon gd-255">
+      <svg class="gd-256">
+       <use class="gd-257" href="/assets/images/icons.svg#arrow-down"></use>
+      </svg>
+     </span>
+    </span>
+   </a>
+   <a class="btn l-gallery-next btn--outline btn--square btn--sm is-hidden--lg-up gd-258">
+    <span class="btn__content gd-259">
+     <span class="btn__icon gd-260">
+      <svg class="gd-261"></svg>
+     </span>
+    </span>
+   </a>
+  </div>
+  <div class="l-gallery__gradient gd-262">
+   <div class="gd-263"></div>
+   <div class="gd-264"></div>
+   <div class="gd-265"></div>
+   <div class="gd-266"></div>
+   <div class="gd-267"></div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="hero-gallery" data-sk-vp="mobile">
+ <div class="l-gallery gm-268">
+  <div class="l-gallery__content js-gallery-container gm-269">
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-270">
+    <div class="is-hidden--sm-down gm-271">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-272"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-273">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-274">
+      <img class="gm-275" src="/assets/images/media/landing/0.gallery/gallery-1@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-276">
+    <div class="is-hidden--sm-down gm-277">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-278"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-279">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-280">
+      <img class="gm-281" src="/assets/images/media/landing/0.gallery/gallery-16@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-282">
+    <div class="is-hidden--sm-down gm-283">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-284"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-285">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-286">
+      <img class="gm-287" src="/assets/images/media/landing/0.gallery/gallery-7@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-288">
+    <div class="is-hidden--sm-down gm-289">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-290"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-291">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-292">
+      <img class="gm-293" src="/assets/images/media/landing/0.gallery/gallery-4@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-294">
+    <div class="is-hidden--sm-down gm-295">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-296"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-297">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-298">
+      <img class="gm-299" src="/assets/images/media/landing/0.gallery/gallery-5@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-300">
+    <div class="is-hidden--sm-down gm-301">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-302"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-303">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-304">
+      <img class="gm-305" src="/assets/images/media/landing/0.gallery/gallery-6@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-306">
+    <div class="is-hidden--sm-down gm-307">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-308"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-309">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-310">
+      <img class="gm-311" src="/assets/images/media/landing/0.gallery/gallery-3@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-312">
+    <div class="is-hidden--sm-down gm-313">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-314"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-315">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-316">
+      <img class="gm-317" src="/assets/images/media/landing/0.gallery/gallery-11@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-318">
+    <div class="is-hidden--sm-down gm-319">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-320"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-321">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-322">
+      <img class="gm-323" src="/assets/images/media/landing/0.gallery/gallery-9@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-324">
+    <div class="is-hidden--sm-down gm-325">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-326"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-327">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-328">
+      <img class="gm-329" src="/assets/images/media/landing/0.gallery/gallery-10@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-330">
+    <div class="is-hidden--sm-down gm-331">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-332"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-333">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-334">
+      <img class="gm-335" src="/assets/images/media/landing/0.gallery/gallery-8@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-336">
+    <div class="is-hidden--sm-down gm-337">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-338"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-339">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-340">
+      <img class="gm-341" src="/assets/images/media/landing/0.gallery/gallery-12@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-342">
+    <div class="is-hidden--sm-down gm-343">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-344"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-345">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-346">
+      <img class="gm-347" src="/assets/images/media/landing/0.gallery/gallery-13@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-348">
+    <div class="is-hidden--sm-down gm-349">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-350"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-351">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-352">
+      <img class="gm-353" src="/assets/images/media/landing/0.gallery/gallery-14@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-354">
+    <div class="is-hidden--sm-down gm-355">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-356"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-357">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-358">
+      <img class="gm-359" src="/assets/images/media/landing/0.gallery/gallery-15@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-360">
+    <div class="is-hidden--sm-down gm-361">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-362"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-363">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-364">
+      <img class="gm-365" src="/assets/images/media/landing/0.gallery/gallery-2@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-366">
+    <div class="is-hidden--sm-down gm-367">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-368"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-369">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-370">
+      <img class="gm-371" src="/assets/images/media/landing/0.gallery/gallery-17@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-372">
+    <div class="is-hidden--sm-down gm-373">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-374"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-375">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-376">
+      <img class="gm-377" src="/assets/images/media/landing/0.gallery/gallery-18@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-gallery__item col col--xs-2 col--md-6 col--lg-3 js-gallery-item gm-378">
+    <div class="is-hidden--sm-down gm-379">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-380"></picture>
+    </div>
+    <div class="is-hidden--md-up gm-381">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-382">
+      <img class="gm-383" src="/assets/images/media/landing/0.gallery/gallery-19@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+  </div>
+  <div class="l-gallery__caption pr-layout gm-384">
+   <div class="col col--xs-3 col--md-3 col--xxxl-2 offset--md-2 pl-layout pl-0:md pt-7:md gm-385">
+    <p class="text-t1 leading-trim gm-386">Exclusive residence with a rich wellness infrastructure next to Nature Park</p>
+   </div>
+   <div class="l-gallery__title col col--md-6 text-right gm-387">
+    <h1 class="h0 leading-trim gm-388">Splendor of Renewal</h1>
+   </div>
+   <a class="btn l-gallery-next btn--outline btn--square btn--sm is-hidden--md-down gm-389">
+    <span class="btn__content gm-390">
+     <span class="btn__icon gm-391">
+      <svg class="gm-392"></svg>
+     </span>
+    </span>
+   </a>
+   <a class="btn l-gallery-next btn--outline btn--square btn--sm is-hidden--lg-up gm-393">
+    <span class="btn__content gm-394">
+     <span class="btn__icon gm-395">
+      <svg class="gm-396">
+       <use class="gm-397" href="/assets/images/icons.svg#arrow-down"></use>
+      </svg>
+     </span>
+    </span>
+   </a>
+  </div>
+  <div class="l-gallery__gradient gm-398">
+   <div class="gm-399"></div>
+   <div class="gm-400"></div>
+   <div class="gm-401"></div>
+   <div class="gm-402"></div>
+   <div class="gm-403"></div>
+  </div>
+ </div>
+</div>
+<!-- ===== intro ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="intro" data-sk-vp="desktop">
+ <div class="sticky sticky--full-height sticky--under-previous sticky--under-next l-intro ui-background is-hidden--md-down gd-404">
+  <div class="sticky__layer sticky__layer--sticky sticky--full-height gd-405">
+   <div class="l-intro__opening pt-2.5 gd-406">
+    <div class="col col--md-4 mb-1 ml-layout gd-407">
+     <p class="h1 leading-trim text-color-primary gd-408">Premium Living with Unrivaled Views</p>
+    </div>
+    <div class="col col--md-3 offset--md-2 gd-409">
+     <p class="l-intro__opening-subtitle text-c1 leading-trim text-color-primary gd-410">Apartments, terraced townhouses, and duplex penthouses in a quiet, green neighborhood.</p>
+    </div>
+   </div>
+   <div class="l-intro__gradient flicker-fix gd-411"></div>
+   <div class="l-intro__image l-intro__image--first gd-412">
+    <div class="gd-413">
+     <div class="l-intro__image--first__background gd-414">
+      <img class="is-invisible--js is-hidden--no-js gd-415" src="/assets/images/media/landing/1.intro/intro-image@md.webp" alt="">
+     </div>
+    </div>
+   </div>
+   <div class="l-intro__image l-intro__image--second col col--md-6 mr-0 ml-auto gd-416">
+    <picture class="is-invisible--js is-hidden--no-js img-full parallax-image-move gd-417">
+     <img class="gd-418" src="/assets/images/media/landing/1.intro/opening-1@xxxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="dim dim--top gd-419"></div>
+   <div class="l-intro__image l-intro__image--second col col--md-6 mr-0 ml-auto gd-420">
+    <picture class="is-invisible--js is-hidden--no-js img-full parallax-image-move gd-421">
+     <img class="gd-422" src="/assets/images/media/landing/1.intro/opening-3@xxxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="dim dim--top gd-423"></div>
+  </div>
+  <div class="sticky__layer sticky__layer--sticky sticky--full-height l-intro__content ui-dark gd-424">
+   <div class="l-intro__content-title col col--md-4 offset--md-2 pr-1 gd-425">
+    <h2 class="h2 leading-trim gd-426">Open the doors of Springs and step into your true self</h2>
+   </div>
+   <div class="l-intro__content-image ml-layout gd-427">
+    <picture class="is-invisible--js is-hidden--no-js img-full parallax-image-move gd-428">
+     <img class="gd-429" src="/assets/images/media/landing/1.intro/opening-2@xxxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="l-intro__content-text mt-2 ml-layout gd-430">
+    <p class="leading-trim gd-431">Enclave of peace and quiet, your personal happy place, where deep relaxation helps you connect to your thoughts and feelings. Here, you will unveil hidden possibilities that the future holds just for you.</p>
+   </div>
+  </div>
+  <div class="l-intro__anchor gd-432"></div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="intro" data-sk-vp="mobile">
+ <div class="l-intro is-hidden--lg-up sticky sticky--full-height gm-433">
+  <div class="sticky__layer sticky__layer--sticky sticky--full-height gm-434">
+   <div class="l-intro__image l-intro__image--first gm-435">
+    <div class="l-intro__image--first__background gm-436">
+     <img class="is-invisible--js is-hidden--no-js gm-437" src="/assets/images/media/landing/1.intro/intro-image-xs.webp" alt="">
+    </div>
+   </div>
+   <div class="l-intro__opening pt-2.5 gm-438">
+    <div class="col col--xs-3 mb-1 pl-layout gm-439">
+     <p class="h1 leading-trim text-color-primary gm-440">Premium Living with Unrivaled Views</p>
+    </div>
+    <div class="col col--xs-2 pl-layout gm-441">
+     <p class="l-intro__opening-subtitle text-c1 leading-trim text-color-primary gm-442">Apartments, terraced townhouses, and duplex penthouses in a quiet, green neighborhood.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== wellness ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="wellness" data-sk-vp="desktop">
+ <div class="l-wellness sticky sticky--full-height sticky--under-previous sticky--under-next is-hidden--md-down gd-443">
+  <div class="sticky__layer sticky__layer--sticky gd-444">
+   <div class="l-wellness__webgl ui-background ui-dark gd-445">
+    <div class="l-wellness__webgl-inner gd-446">
+     <div class="gd-447">
+      <canvas class="js-wellness-canvas is-active gd-448"></canvas>
+      <div class="l-wellness__webgl-circle gd-449">
+       <span class="gd-450"></span>
+       <span class="gd-451"></span>
+       <span class="gd-452"></span>
+      </div>
+     </div>
+     <div class="background background--bottom background--cover gd-453">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gd-454">
+       <img class="gd-455" src="/assets/images/media/landing/2.wellness/wellness-webgl-gradient@xxl.avif" alt="">
+      </picture>
+     </div>
+    </div>
+    <div class="l-wellness__webgl-caption pt-7 gd-456">
+     <p class="col col--md-3 offset--md-2 text-t1 leading-trim gd-457">Springs brings wellness right into your home. With a thoughtfully designed infrastructure for relaxation, it rejuvenates your body and mind, leaving you refreshed and perfectly balanced.</p>
+     <div class="col l-wellness__webgl-title text-right gd-458">
+      <p class="text-c1 leading-trim gd-459">Essence of Self-Care</p>
+      <h2 class="g1 leading-trim gd-460">Wellness</h2>
+     </div>
+    </div>
+   </div>
+   <div class="l-wellness__slider row gd-461">
+    <div class="col col--md-6 gd-462">
+     <div class="l-wellness__slider__images gd-463">
+      <div class="content-animation gd-464">
+       <div class="gd-465">
+        <picture class="is-invisible--js is-hidden--no-js img-cover gd-466">
+         <img class="gd-467" src="/media/cache/homepage_wellness_slider_xxl/assets/images/media/landing/2.wellness/wellness-slider-md-1%40xxxl.webp" alt="">
+        </picture>
+       </div>
+       <div class="is-hidden gd-468">
+        <picture class="is-invisible--js is-hidden--no-js img-cover gd-469"></picture>
+       </div>
+       <div class="is-hidden gd-470">
+        <picture class="is-invisible--js is-hidden--no-js img-cover gd-471"></picture>
+       </div>
+       <div class="is-hidden gd-472">
+        <picture class="is-invisible--js is-hidden--no-js img-cover gd-473"></picture>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="l-wellness__slider__caption col col--md-6 ui-dark gd-474">
+     <div class="js-wellness-controller-selector gd-475">
+      <div class="l-wellness__slider__caption-titles col col--md-2 ml-auto mr-0 text-right pr-layout pt-3 gd-476">
+       <a class="js-content-animation-link is-active gd-477">
+        <p class="h2 leading-trim gd-478">Spa</p>
+       </a>
+       <a class="js-content-animation-link gd-479">
+        <p class="h2 leading-trim gd-480">Yoga</p>
+       </a>
+       <a class="js-content-animation-link gd-481">
+        <p class="h2 leading-trim gd-482">Fitness</p>
+       </a>
+       <a class="js-content-animation-link gd-483">
+        <p class="h2 leading-trim gd-484">Café</p>
+       </a>
+      </div>
+      <div class="l-wellness__slider__caption-text content-animation col col--md-4 gd-485">
+       <div class="gd-486">
+        <p class="text-t1 leading-trim gd-487">Let your thoughts flow freely as you immerse yourself in our crystal-clear spa pool that offers a view of the garden. Soft glare on the water, a cup of herbal tea in the fragrant warmth of the hammam — and just like that, you leave the day’s worries behind.</p>
+       </div>
+       <div class="is-hidden gd-488">
+        <p class="text-t1 leading-trim gd-489">Relaxing yoga session mellows the mind and makes your body feel light and responsive. Finding balance is easy.</p>
+       </div>
+       <div class="is-hidden gd-490">
+        <p class="text-t1 leading-trim gd-491">Get ready to face the day guided by your personal trainer in our modern fitness center. Exercise at your convenience, because the gym is just a few steps away — right up the stairs</p>
+       </div>
+       <div class="is-hidden gd-492">
+        <p class="text-t1 leading-trim gd-493">Do you sense the aroma of espresso adorned with creamy milk foam? Now you can experience your favorite flavors without leaving the house. Cozy up on the terrace of our wellness-café and relax to the sounds of ambient music.</p>
+       </div>
+      </div>
+     </div>
+     <div class="l-wellness__slider-gradient flicker-fix gd-494">
+      <div class="gd-495"></div>
+      <div class="gd-496"></div>
+      <div class="gd-497"></div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="wellness" data-sk-vp="mobile">
+ <div class="l-wellness sticky sticky--full-height sticky--under-previous sticky--under-next is-hidden--lg-up ui-dark ui-background gm-498">
+  <div class="sticky__layer sticky__layer--sticky gm-499">
+   <div class="l-wellness__webgl ui-background ui-dark gm-500">
+    <div class="l-wellness__webgl-inner gm-501">
+     <div class="background background--cover gm-502">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-503">
+       <img class="gm-504" src="/assets/images/media/landing/2.wellness/wellness-bg-xs.webp" alt="">
+      </picture>
+     </div>
+    </div>
+    <div class="l-wellness__webgl-caption px-layout pt-3 gm-505">
+     <p class="col col--md-6 text-t1 leading-trim gm-506">Springs brings wellness right into your home. With a thoughtfully designed infrastructure for relaxation, it rejuvenates your body and mind, leaving you refreshed and perfectly balanced.</p>
+     <div class="col l-wellness__webgl-title text-right gm-507">
+      <p class="g1 leading-trim gm-508">Wellness</p>
+      <p class="text-c1 leading-trim mt-1 gm-509">Essence of Self-Care</p>
+     </div>
+    </div>
+    <div class="l-wellness__webgl-gradient background background--cover gm-510">
+     <div class="gm-511"></div>
+     <div class="gm-512"></div>
+     <div class="gm-513"></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== wellness-slider ===== -->
+<div class="sk-vp sk-vp-mobile" data-sk-section="wellness-slider" data-sk-vp="mobile">
+ <div class="l-wellness__slider-container is-hidden--lg-up ui-dark ui-background gm-514">
+  <div class="l-wellness__slider row pt-3 gm-515">
+   <div class="l-wellness__slider-gradient gm-516">
+    <div class="gm-517"></div>
+    <div class="gm-518"></div>
+    <div class="gm-519"></div>
+   </div>
+   <div class="l-wellness__slider__images p-relative mx-layout js-wellness-content-animation-controller gm-520">
+    <ul class="mobile-scrollable col col--md-auto mx-auto gm-521">
+     <li class="mobile-scrollable__item carousel__list__item--gradient-large gm-522">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-523">
+       <img class="gm-524" src="/media/cache/homepage_wellness_slider_xs/assets/images/media/landing/2.wellness/wellness-slider-xs-1%40xs.webp" alt="">
+      </picture>
+     </li>
+     <li class="mobile-scrollable__item carousel__list__item--gradient-large gm-525">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-526">
+       <img class="gm-527" src="/media/cache/homepage_wellness_slider_xs/assets/images/media/landing/2.wellness/wellness-slider-xs-2%40xs.webp" alt="">
+      </picture>
+     </li>
+     <li class="mobile-scrollable__item carousel__list__item--gradient-large gm-528">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-529">
+       <img class="gm-530" src="/media/cache/homepage_wellness_slider_xs/assets/images/media/landing/2.wellness/wellness-slider-xs-3%40xs.webp" alt="">
+      </picture>
+     </li>
+     <li class="mobile-scrollable__item carousel__list__item--gradient-large gm-531">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-532">
+       <img class="gm-533" src="/media/cache/homepage_wellness_slider_xs/assets/images/media/landing/2.wellness/wellness-slider-xs-4%40xs.webp" alt="">
+      </picture>
+     </li>
+    </ul>
+    <div class="carousel__thumb group group--nowrap px-layout gm-534">
+     <a class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail leading-trim is-active gm-535">
+      <span class="carousel__thumb__item__text gm-536">Spa</span>
+     </a>
+     <a class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail leading-trim gm-537">
+      <span class="carousel__thumb__item__text gm-538">Yoga</span>
+     </a>
+     <a class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail leading-trim gm-539">
+      <span class="carousel__thumb__item__text gm-540">Fitness</span>
+     </a>
+     <a class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail leading-trim gm-541">
+      <span class="carousel__thumb__item__text gm-542">Café</span>
+     </a>
+    </div>
+   </div>
+   <div class="l-wellness__slider__caption col col--xs-4 col--md-12 ui-dark gm-543">
+    <div class="gm-544">
+     <div class="l-wellness__slider__caption-text content-animation col col--md-6 gm-545">
+      <div class="gm-546">
+       <div class="mb-1 gm-547">
+        <p class="h3 leading-trim gm-548">Spa</p>
+       </div>
+       <p class="text-t1 leading-trim gm-549">Let your thoughts flow freely as you immerse yourself in our crystal-clear spa pool that offers a view of the garden. Soft glare on the water, a cup of herbal tea in the fragrant warmth of the hammam — and just like that, you leave the day’s worries behind.</p>
+      </div>
+      <div class="is-hidden gm-550">
+       <div class="mb-1 gm-551">
+        <p class="h3 leading-trim gm-552">Yoga</p>
+       </div>
+       <p class="text-t1 leading-trim gm-553">Relaxing yoga session mellows the mind and makes your body feel light and responsive. Finding balance is easy.</p>
+      </div>
+      <div class="is-hidden gm-554">
+       <div class="mb-1 gm-555">
+        <p class="h3 leading-trim gm-556">Fitness</p>
+       </div>
+       <p class="text-t1 leading-trim gm-557">Get ready to face the day guided by your personal trainer in our modern fitness center. Exercise at your convenience, because the gym is just a few steps away — right up the stairs</p>
+      </div>
+      <div class="is-hidden gm-558">
+       <div class="mb-1 gm-559">
+        <p class="h3 leading-trim gm-560">Café</p>
+       </div>
+       <p class="text-t1 leading-trim gm-561">Do you sense the aroma of espresso adorned with creamy milk foam? Now you can experience your favorite flavors without leaving the house. Cozy up on the terrace of our wellness-café and relax to the sounds of ambient music.</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== nature ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="nature" data-sk-vp="desktop">
+ <div class="l-nature sticky sticky--full-height sticky--under-previous sticky--under-next is-hidden--md-down gd-562">
+  <div class="l-place-anchor gd-563"></div>
+  <div class="sticky__layer sticky__layer--sticky gd-564">
+   <div class="l-nature__caption gd-565">
+    <div class="l-nature__caption__inner row gd-566">
+     <div class="col col--md-6 ui-dark ui-background px-1 py-1 px-layout:md gd-567">
+      <div class="l-nature__caption__text gd-568">
+       <h3 class="h3 leading-trim gd-569">Enjoy nature’s embrace that shields you from the world outside. Climbing rooftop plants, winding layouts of flowerbeds, emerald lawns. Springs lets you learn the art of leisure.</h3>
+      </div>
+     </div>
+     <div class="col col--md-3 col--xxxl-2 offset--md-2 offset--xxxl-3 pb-3:md gd-570">
+      <div class="vimeo-background gd-571">
+       <div class="background background--cover gd-572">
+        <picture class="is-invisible--js is-hidden--no-js img-cover gd-573">
+         <img class="gd-574" src="/assets/images/media/landing/3.nature/nature-video@xxl.webp" alt="">
+        </picture>
+       </div>
+       <div class="background--cover background gd-575">
+        <iframe class="gd-576"></iframe>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="l-nature__slider row gd-577">
+    <div class="col col--md-6 ui-background gd-578">
+     <div class="l-nature__slider__images offset--md-1 pl-1 pb-3 gd-579">
+      <div class="content-animation gd-580">
+       <div class="gd-581">
+        <picture class="is-invisible--js is-hidden--no-js img-full parallax-image-move gd-582">
+         <img class="gd-583" src="/media/cache/homepage_nature_slider_xxl/assets/images/media/landing/3.nature/nature-slider-md-1%40xxxl.webp" alt="">
+        </picture>
+       </div>
+       <div class="is-hidden gd-584">
+        <picture class="is-invisible--js is-hidden--no-js img-full parallax-image-move gd-585"></picture>
+       </div>
+       <div class="is-hidden gd-586">
+        <picture class="is-invisible--js is-hidden--no-js img-full parallax-image-move gd-587"></picture>
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="col col--md-6 gd-588">
+     <div class="l-nature__slider-caption offset--md-2 js-nature-controller-selector gd-589">
+      <div class="content-animation mb-0.5 gd-590">
+       <div class="gd-591">
+        <p class="text-t1 leading-trim gd-592">Landscaped terraces with topiary trees, framed with glass, create the atmosphere of a miniature park floating above the City.</p>
+       </div>
+       <div class="is-hidden gd-593">
+        <p class="text-t1 leading-trim gd-594">Shady leafy-coniferous garden that evokes winding paths, branchy trees, and sunlit glades of forests surrounding the City.</p>
+       </div>
+       <div class="is-hidden gd-595">
+        <p class="text-t1 leading-trim gd-596">Artfully designed recreation areas that delight you with diverse botanical decor: cascading garlands of runners, asymmetrical lawns, and exotic flowers.</p>
+       </div>
+      </div>
+      <div class="group group--small gd-597">
+       <a class="btn btn--outline btn--sm btn--square js-content-animation-prev gd-598">
+        <span class="btn__content gd-599">
+         <span class="btn__icon gd-600">
+          <svg class="gd-601">
+           <use class="gd-602" href="/assets/images/icons.svg#arrow-left"></use>
+          </svg>
+         </span>
+        </span>
+       </a>
+       <a class="btn btn--outline btn--sm btn--square js-content-animation-next gd-603">
+        <span class="btn__content gd-604">
+         <span class="btn__icon gd-605">
+          <svg class="gd-606">
+           <use class="gd-607" href="/assets/images/icons.svg#arrow-right"></use>
+          </svg>
+         </span>
+        </span>
+       </a>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="nature" data-sk-vp="mobile">
+ <div class="l-nature sticky sticky sticky--full-height sticky--under-previous is-hidden--lg-up ui-dark ui-background gm-608">
+  <div class="sticky__layer sticky__layer--sticky gm-609">
+   <div class="l-nature__caption gm-610">
+    <div class="l-nature__caption__inner col col--xs-4 row pl-layout gm-611">
+     <div class="col col--xs-2 mr-layout ml-auto mb-4 gm-612">
+      <div class="vimeo-background background background--cover gm-613">
+       <iframe class="gm-614"></iframe>
+      </div>
+     </div>
+     <div class="l-nature__caption__text col col--xs-4 ui-dark ui-background px-1 py-1 gm-615">
+      <h3 class="h3 leading-trim gm-616">Enjoy nature’s embrace that shields you from the world outside. Climbing rooftop plants, winding layouts of flowerbeds, emerald lawns. Springs lets you learn the art of leisure.</h3>
+      <div class="mt-1.5 gm-617"></div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== place-bg ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="place-bg" data-sk-vp="desktop">
+ <div class="l-nature-bg gd-618">
+  <div class="l-nature-bg-item background gd-619">
+   <div class="background background--cover gd-620">
+    <div class="gd-621">
+     <canvas class="js-nature-canvas is-active gd-622"></canvas>
+     <div class="l-wellness__webgl-circle gd-623">
+      <span class="gd-624"></span>
+      <span class="gd-625"></span>
+      <span class="gd-626"></span>
+     </div>
+    </div>
+   </div>
+   <div class="col col--md-12 l-nature-bg-caption pt-6:md pt-4:xxxl pl-layout gd-627">
+    <h2 class="g1 leading-trim gd-628">Nature</h2>
+    <div class="mt-1 gd-629">
+     <p class="l-nature-bg-caption__subtitle text-c1 leading-trim gd-630">Lightness of Breathing</p>
+    </div>
+    <div class="l-nature-bg-caption__text mr-0 ml-auto col col--md-4 mt-3 gd-631">
+     <p class="text-t1 leading-trim gd-632">Here, nature merges with architecture and becomes an integral part of your home. Nature takes the spotlight, embodied in the painterly curves of our gardens and the green silhouettes of the façade terraces. Nature becomes your companion on meditative walks and at family gatherings, providing a soothing backdrop.</p>
+    </div>
+   </div>
+   <div class="l-nature-bg-gradient flicker-fix gd-633"></div>
+  </div>
+  <div class="l-nature-bg-item background gd-634">
+   <picture class="is-invisible--js is-hidden--no-js img-full gd-635">
+    <img class="gd-636" src="/assets/images/media/landing/3.nature/nature-caption@xxl.webp" alt="">
+   </picture>
+  </div>
+  <div class="l-nature-bg-item background gd-637">
+   <div class="l-nature-bg-item__gradient flicker-fix gd-638">
+    <div class="gd-639"></div>
+    <div class="gd-640"></div>
+   </div>
+   <div class="background background--cover gd-641">
+    <picture class="is-invisible--js is-hidden--no-js img-full gd-642">
+     <img class="gd-643" src="/assets/images/media/landing/4.place/place-bg@xxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="gd-644">
+    <div class="js-tree-canvas-container background gd-645">
+     <canvas class="js-tree-canvas is-active gd-646"></canvas>
+     <div class="l-place-webgl__spiral-container background gd-647">
+      <div class="l-place-webgl__spiral background gd-648">
+       <picture class="is-invisible--js is-hidden--no-js gd-649">
+        <img class="gd-650" src="/assets/images/media/landing/4.place/t12@xxl.webp" alt="">
+       </picture>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="place-bg" data-sk-vp="mobile">
+ <div class="l-nature-bg gm-651">
+  <div class="l-nature-bg-item--webgl l-nature-bg-item gm-652">
+   <div class="background background--cover gm-653">
+    <picture class="is-invisible--js is-hidden--no-js img-full gm-654">
+     <img class="gm-655" src="/assets/images/media/landing/3.nature/nature-bg-xs.webp" alt="">
+    </picture>
+   </div>
+   <div class="col col--xs-4 l-nature-bg-caption px-layout pb-4 gm-656">
+    <h2 class="g1 leading-trim text-right gm-657">Nature</h2>
+    <div class="mt-1 gm-658">
+     <p class="l-nature-bg-caption__subtitle text-c1 leading-trim text-right gm-659">Lightness of Breathing</p>
+    </div>
+    <div class="l-nature-bg-caption__text col col--md-6 mt-3 gm-660">
+     <p class="text-t1 leading-trim gm-661">Here, nature merges with architecture and becomes an integral part of your home. Nature takes the spotlight, embodied in the painterly curves of our gardens and the green silhouettes of the façade terraces. Nature becomes your companion on meditative walks and at family gatherings, providing a soothing backdrop.</p>
+    </div>
+   </div>
+   <div class="l-nature-bg-gradient gm-662"></div>
+  </div>
+  <div class="l-nature-bg-item background gm-663">
+   <picture class="is-invisible--js is-hidden--no-js img-cover gm-664">
+    <img class="gm-665" src="/assets/images/media/landing/3.nature/nature-caption-xs.webp" alt="">
+   </picture>
+  </div>
+ </div>
+</div>
+<!-- ===== place ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="place" data-sk-vp="desktop">
+ <div class="l-place sticky__layer gd-666">
+  <div class="l-place-webgl gd-667">
+   <div class="l-place-webgl-caption pt-6:md pt-4:xxxl px-layout gd-668">
+    <h2 class="text-right g1 leading-trim gd-669">Place</h2>
+    <div class="mt-1 gd-670">
+     <p class="l-place-webgl-caption__subtitle text-c1 text-right leading-trim gd-671">Essence of Contemplation</p>
+    </div>
+   </div>
+   <div class="px-layout gd-672">
+    <div class="l-place-webgl__text mt-3 col col--md-4 gd-673">
+     <p class="text-t1 leading-trim gd-674">Springs is situated in the prestigious Western District of the capital, surrounded by parks and close to the embankment. It is adjacent to the highway, one of the most ecological areas of the City.</p>
+    </div>
+   </div>
+  </div>
+  <div class="l-place-description pr-layout pb-layout gd-675">
+   <h3 class="h3 mt-6 offset--md-6 leading-trim gd-676">Breathe in the air and open space. Do you feel like running? Don’t hold back. As you are running along the embankment, delight in the kaleidoscope of shifting panoramas that will leave you impressed. Set your pace and change it at your desire.</h3>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="place" data-sk-vp="mobile">
+ <div class="l-place-mobile pt-3 is-hidden--lg-up gm-677">
+  <div class="l-nature__slider__images col js-nature-content-animation-controller gm-678">
+   <div class="col col--xs-4 col--md-6 ui-dark mb-2 px-layout gm-679">
+    <div class="gm-680">
+     <div class="content-animation gm-681">
+      <div class="gm-682">
+       <p class="text-t1 leading-trim gm-683">Landscaped terraces with topiary trees, framed with glass, create the atmosphere of a miniature park floating above the City.</p>
+      </div>
+      <div class="is-hidden gm-684">
+       <p class="text-t1 leading-trim gm-685">Shady leafy-coniferous garden that evokes winding paths, branchy trees, and sunlit glades of forests surrounding the City.</p>
+      </div>
+      <div class="is-hidden gm-686">
+       <p class="text-t1 leading-trim gm-687">Artfully designed recreation areas that delight you with diverse botanical decor: cascading garlands of runners, asymmetrical lawns, and exotic flowers.</p>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="mx-layout p-relative gm-688">
+    <ul class="mobile-scrollable col col--md-auto mx-auto gm-689">
+     <li class="mobile-scrollable__item gm-690">
+      <img class="img-cover is-invisible--js is-hidden--no-js gm-691" src="/media/cache/homepage_nature_slider_xs/assets/images/media/landing/3.nature/nature-slider-xs-1%40xs.webp" alt="">
+     </li>
+     <li class="mobile-scrollable__item gm-692">
+      <img class="img-cover is-invisible--js is-hidden--no-js gm-693" src="/media/cache/homepage_nature_slider_xs/assets/images/media/landing/3.nature/nature-slider-xs-2%40xs.webp" alt="">
+     </li>
+     <li class="mobile-scrollable__item gm-694">
+      <img class="img-cover is-invisible--js is-hidden--no-js gm-695" src="/media/cache/homepage_nature_slider_xs/assets/images/media/landing/3.nature/nature-slider-xs-3%40xs.webp" alt="">
+     </li>
+    </ul>
+    <div class="carousel__thumb group group--nowrap px-layout gm-696">
+     <div class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail is-active gm-697"></div>
+     <div class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail gm-698"></div>
+     <div class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail gm-699"></div>
+    </div>
+   </div>
+  </div>
+  <div class="l-place-webgl__gradient background gm-700">
+   <div class="gm-701"></div>
+   <div class="gm-702"></div>
+   <div class="gm-703"></div>
+   <div class="gm-704"></div>
+   <div class="gm-705"></div>
+  </div>
+  <div class="pt-3.5 col col--xs-4 l-place-bg-caption gm-706">
+   <div class="l-place-webgl__spiral background background--cover gm-707">
+    <picture class="is-invisible--js is-hidden--no-js gm-708">
+     <img class="gm-709" src="/assets/images/media/landing/4.place/spiral-mobile@xs.webp" alt="">
+    </picture>
+   </div>
+   <div class="px-layout gm-710">
+    <div class="gm-711">
+     <h2 class="g1 leading-trim text-right gm-712">Place</h2>
+     <p class="l-nature-bg-caption__subtitle text-c1 leading-trim text-right mt-1 gm-713">Essence of Contemplation</p>
+    </div>
+    <div class="l-nature-bg-caption__text col col--md-6 mt-3 gm-714">
+     <p class="text-t1 leading-trim gm-715">Springs is situated in the prestigious Western District of the capital, surrounded by parks and close to the embankment. It is adjacent to the highway, one of the most ecological areas of the City.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== place-video ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="place-video" data-sk-vp="desktop">
+ <div class="l-place-video-container sticky sticky--under-next sticky--full-height is-hidden--md-down gd-716">
+  <div class="l-place-video pb-2 sticky__layer sticky__layer--sticky gd-717">
+   <div class="l-place-video__caption col col--md-3 offset--md-8 gd-718">
+    <div class="l-place-video__caption-item gd-719">
+     <div class="gd-720">
+      <picture class="is-invisible--js is-hidden--no-js img-full gd-721">
+       <img class="gd-722" src="/assets/images/media/landing/4.place/place-caption-1@xxl.webp" alt="">
+      </picture>
+     </div>
+     <div class="mt-0.3 gd-723">
+      <p class="h0 leading-trim gd-724">3</p>
+     </div>
+     <div class="mt-0.5 gd-725">
+      <p class="text-c1 text-right leading-trim gd-726">minute walk to Nature Park</p>
+     </div>
+    </div>
+    <div class="l-place-video__caption-item gd-727">
+     <div class="gd-728">
+      <picture class="is-invisible--js is-hidden--no-js img-full gd-729">
+       <img class="gd-730" src="/assets/images/media/landing/4.place/place-caption-3@xxl.webp" alt="">
+      </picture>
+     </div>
+     <div class="mt-0.3 gd-731">
+      <p class="h0 leading-trim gd-732">9</p>
+     </div>
+     <div class="mt-0.5 gd-733">
+      <p class="text-c1 text-right leading-trim gd-734">minute walk to the embankment</p>
+     </div>
+    </div>
+    <div class="l-place-video__caption-item gd-735">
+     <div class="gd-736">
+      <picture class="is-invisible--js is-hidden--no-js img-full gd-737">
+       <img class="gd-738" src="/assets/images/media/landing/4.place/place-caption-2@xxl.webp" alt="">
+      </picture>
+     </div>
+     <div class="mt-0.3 gd-739">
+      <p class="h0 leading-trim gd-740">16</p>
+     </div>
+     <div class="mt-0.5 gd-741">
+      <p class="text-c1 text-right leading-trim gd-742">minutes by car to the MIBC</p>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="place-video" data-sk-vp="mobile">
+ <div class="l-place-video gm-743">
+  <div class="l-place-video__caption pl-layout gm-744">
+   <div class="l-place-video__caption-item col col--xs-3 pr-1.5 gm-745">
+    <div class="gm-746">
+     <picture class="is-invisible--js is-hidden--no-js img-full gm-747">
+      <img class="gm-748" src="/media/cache/homepage_nature_slider_xs/assets/images/media/landing/4.place/place-caption-1%40xxxl.webp" alt="">
+     </picture>
+    </div>
+    <p class="l-place-video__caption-item__title h0 leading-trim gm-749">3</p>
+    <p class="text-c1 leading-trim mt-2 gm-750">minute walk to Nature Park</p>
+   </div>
+  </div>
+  <div class="background background--cover gm-751">
+   <picture class="is-invisible--js is-hidden--no-js background background--cover img-cover gm-752">
+    <img class="gm-753" src="/assets/images/media/landing/4.place/place-bg-2-xs@xs.webp" alt="">
+   </picture>
+   <div class="dim dim--full gm-754"></div>
+  </div>
+ </div>
+</div>
+<!-- ===== map ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="map" data-sk-vp="desktop">
+ <div class="l-map sticky sticky--full-height sticky--under-previous is-hidden--md-down gd-755">
+  <div class="sticky__layer sticky__layer--sticky gd-756">
+   <div class="background background--cover gd-757">
+    <picture class="is-invisible--js is-hidden--no-js img-cover gd-758">
+     <img class="gd-759" src="/assets/images/media/landing/5.map/map-bg@xxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="l-map-caption gd-760">
+    <div class="col col--md-9 col--xxxl-7 ui-light ui-background gd-761">
+     <picture class="is-invisible--js is-hidden--no-js img-full gd-762">
+      <img class="gd-763" src="/assets/images/media/landing/5.map/map-eng@xxl.webp" alt="">
+     </picture>
+     <div class="l-map-caption__text col col--md-5 pl-layout py-layout gd-764">
+      <h3 class="h3 leading-trim gd-765">Easy access to Nature Park. Landscapes of watercolor tenderness that belong only to you.</h3>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="map" data-sk-vp="mobile">
+ <div class="l-map sticky sticky--full-height sticky--under-previous is-hidden--lg-up gm-766">
+  <div class="sticky__layer sticky__layer--sticky gm-767">
+   <div class="background background--cover gm-768">
+    <picture class="is-invisible--js is-hidden--no-js img-cover gm-769">
+     <img class="gm-770" src="/assets/images/media/landing/5.map/map-bg-xs.webp" alt="">
+    </picture>
+   </div>
+  </div>
+  <div class="sticky__layer gm-771">
+   <div class="l-map-caption ml-layout pb-5 gm-772">
+    <div class="col col--xs-4 col--md-12 gm-773"></div>
+    <div class="col col--xs-4 col--md-12 ui-light ui-background gm-774">
+     <div class="l-map-caption__text col col--md-6 px-layout pt-layout gm-775">
+      <h3 class="h3 leading-trim mb-1 gm-776">Easy access to Nature Park. Landscapes of watercolor tenderness that belong only to you.</h3>
+     </div>
+     <div class="l-map-caption__map gm-777">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-778">
+       <img class="gm-779" src="/assets/images/media/landing/5.map/map-xs-eng.webp" alt="">
+      </picture>
+     </div>
+     <svg class="gm-780">
+      <use class="gm-781" href="/assets/images/icons.svg#scroll"></use>
+     </svg>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== design-1 ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="design-1" data-sk-vp="desktop">
+ <div class="l-design__slide l-design__slide--1 sticky sticky--full-height sticky--under-previous sticky--under-next is-hidden--md-down gd-782">
+  <div class="sticky__layer sticky__layer--sticky gd-783">
+   <div class="background background--cover gd-784">
+    <picture class="is-invisible--js is-hidden--no-js img-cover gd-785">
+     <img class="gd-786" src="/assets/images/media/landing/6.design/design-bg@xxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="l-design__caption gd-787">
+    <div class="l-design__caption-title px-layout gd-788">
+     <h2 class="text-right g1 leading-trim gd-789">Design</h2>
+     <div class="mt-1 gd-790">
+      <p class="l-design__caption__subtitle text-c1 text-right leading-trim gd-791">Inspired Architecture</p>
+     </div>
+    </div>
+    <div class="px-layout gd-792">
+     <div class="l-design__caption__text mt-3 col col--md-4 gd-793">
+      <p class="text-t1 leading-trim gd-794">A standalone crystal building soaring above the treetops. Secluded tower resembling a glassy waterfall with flowing cascades of greenery-framed loggia.</p>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="design-1" data-sk-vp="mobile">
+ <div class="l-design__slide l-design__slide--1 sticky sticky--full-height sticky--under-previous is-hidden--lg-up gm-795">
+  <div class="sticky__layer sticky__layer--sticky gm-796">
+   <div class="l-design__slide__bg gm-797">
+    <div class="background background--cover gm-798">
+     <picture class="is-invisible--js is-hidden--no-js img-cover gm-799">
+      <img class="gm-800" src="/assets/images/media/landing/6.design/design-bg-xs@xs.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="dim dim--design gm-801"></div>
+   <div class="l-design__caption pb-4 gm-802">
+    <div class="pr-layout gm-803">
+     <h2 class="text-right g1 leading-trim gm-804">Design</h2>
+     <div class="mt-1 gm-805">
+      <p class="l-design__caption__subtitle text-c1 leading-trim text-right gm-806">Inspired Architecture</p>
+     </div>
+    </div>
+    <div class="l-design__caption__text mt-3 col col--md-4 gm-807">
+     <p class="text-t1 leading-trim gm-808">A standalone crystal building soaring above the treetops. Secluded tower resembling a glassy waterfall with flowing cascades of greenery-framed loggia.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== design-2 ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="design-2" data-sk-vp="desktop">
+ <div class="l-design__slide l-design__slide--2 sticky sticky--under-previous sticky--full-height ui-light is-hidden--md-down gd-809">
+  <div class="gd-810"></div>
+  <div class="sticky__layer sticky__layer--sticky gd-811">
+   <div class="row row--between-xs gd-812">
+    <div class="col col--md-4 gd-813">
+     <picture class="is-invisible--js is-hidden--no-js img-cover parallax-image-move gd-814">
+      <img class="gd-815" src="/assets/images/media/landing/6.design/design-1@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="col col--md-4 offset--md-4 mt-auto gd-816">
+     <picture class="is-invisible--js is-hidden--no-js img-cover parallax-image-move gd-817">
+      <img class="gd-818" src="/assets/images/media/landing/6.design/design-2@xxl.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-design__title col col--md-5 mx-auto gd-819">
+    <h3 class="h3 leading-trim text-center gd-820">Each floor reflects boundless perspectives in its glistening waves, inviting you to look farther with a fuller palette of possibilities.</h3>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="design-2" data-sk-vp="mobile">
+ <div class="l-design__slide l-design__slide--2 ui-light is-hidden--lg-up py-2.5 px-layout gm-821">
+  <div class="l-design__title col col--md-5 mx-auto gm-822">
+   <h3 class="h3 leading-trim text-center gm-823">Each floor reflects boundless perspectives in its glistening waves, inviting you to look farther with a fuller palette of possibilities.</h3>
+  </div>
+  <div class="carousel carousel--md-up carousel--not-ready js-carousel mt-2.5 gm-824">
+   <div class="p-relative gm-825">
+    <ul class="mobile-scrollable col col--md-auto mx-auto gm-826">
+     <li class="mobile-scrollable__item gm-827">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-828">
+       <img class="gm-829" src="/media/cache/homepage_design_slider_xs/assets/images/media/landing/6.design/design-xs-1.webp" alt="">
+      </picture>
+     </li>
+     <li class="mobile-scrollable__item gm-830">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-831">
+       <img class="gm-832" src="/media/cache/homepage_design_slider_xs/assets/images/media/landing/6.design/design-xs-2.webp" alt="">
+      </picture>
+     </li>
+    </ul>
+   </div>
+   <div class="carousel__thumb group group--nowrap px-layout gm-833">
+    <div class="col col--xs-2 carousel__thumb__item js-mobile-scrollable-thumbnail is-active gm-834"></div>
+    <div class="col col--xs-2 carousel__thumb__item js-mobile-scrollable-thumbnail gm-835"></div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== design-3 ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="design-3" data-sk-vp="desktop">
+ <div class="l-design__slide l-design__slide--3 sticky sticky--full-height sticky--under-previous sticky--under-next ui-light is-hidden--md-down gd-836">
+  <div class="sticky__layer sticky__layer--sticky gd-837">
+   <div class="l-design__slide-images col col--md-6 mr-0 ml-auto gd-838">
+    <div class="l-design__slide-images__item gd-839">
+     <picture class="is-invisible--js is-hidden--no-js img-full background background--cover background--bottom gd-840">
+      <img class="gd-841" src="/assets/images/media/landing/6.design/design-4@xxl.webp" alt="">
+     </picture>
+    </div>
+   </div>
+  </div>
+  <div class="sticky__layer gd-842">
+   <div class="row col col--md-6 l-design__slide-content pt-3 pt-2:md gd-843">
+    <div class="l-design__slide-images__item l-design__slide-images__item--small col col--md-2 ml-auto mr-layout gd-844">
+     <picture class="is-invisible--js is-hidden--no-js parallax-image-move img-cover gd-845">
+      <img class="gd-846" src="/assets/images/media/landing/6.design/design-3@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="col col--md-6 mt-2.5 mt-3.5:md px-layout gd-847">
+     <h3 class="h3 leading-trim gd-848">Tabanlioglu, the renowned architectural bureau, emphasizes the bold asymmetry of balconies in a chessboard pattern. Three vertical partitions divide the translucent façade, creating the effect of weightless volume. Freedom of expression, elegance of intelligence, and visual lightness.</h3>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="design-3" data-sk-vp="mobile">
+ <div class="l-design__slide l-design__slide--3 ui-light sticky sticky--full-height is-hidden--lg-up gm-849">
+  <div class="l-design__theme gm-850"></div>
+  <div class="sticky__layer sticky__layer--sticky gm-851">
+   <div class="background background--cover gm-852">
+    <picture class="is-invisible--js is-hidden--no-js img-cover gm-853">
+     <img class="gm-854" src="/media/cache/homepage_design_slider_xs/assets/images/media/landing/6.design/design-4%40xxxl.webp" alt="">
+    </picture>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== design-4 ===== -->
+<div class="sk-vp sk-vp-mobile" data-sk-section="design-4" data-sk-vp="mobile">
+ <div class="l-design__slide l-design__slide--4 ui-light row pt-layout is-hidden--lg-up gm-855">
+  <div class="l-design__theme gm-856"></div>
+  <div class="px-layout gm-857">
+   <h3 class="h3 leading-trim gm-858">Tabanlioglu, the renowned architectural bureau, emphasizes the bold asymmetry of balconies in a chessboard pattern. Three vertical partitions divide the translucent façade, creating the effect of weightless volume. Freedom of expression, elegance of intelligence, and visual lightness.</h3>
+  </div>
+  <div class="pl-0.5 col col--xs-3 mr-0 ml-auto mt-4 gm-859">
+   <picture class="is-invisible--js is-hidden--no-js img-cover gm-860">
+    <img class="gm-861" src="/media/cache/homepage_design_slider_xs/assets/images/media/landing/6.design/design-3%40xxxl.webp" alt="">
+   </picture>
+  </div>
+ </div>
+</div>
+<!-- ===== residences ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="residences" data-sk-vp="desktop">
+ <div class="l-residences sticky sticky--full-height sticky--under-previous sticky--under-next is-hidden--md-down gd-862">
+  <div class="sticky__layer sticky__layer--sticky gd-863">
+   <div class="l-residences__slide l-residences__webgl gd-864">
+    <div class="background background--cover background--bottom gd-865">
+     <picture class="is-invisible--js is-hidden--no-js img-cover parallax-image-move gd-866">
+      <img class="gd-867" src="/assets/images/media/landing/7.residence/residence-tree@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="l-residences__webgl-caption pt-6:md pt-4:xxxl px-layout gd-868">
+     <div class="col gd-869">
+      <p class="g1 leading-trim gd-870">Residences</p>
+      <div class="mt-1 gd-871">
+       <p class="text-c1 leading-trim gd-872">Collection of premium living spaces</p>
+      </div>
+     </div>
+    </div>
+   </div>
+   <div class="l-residences__slide gd-873">
+    <div class="background background--cover gd-874">
+     <picture class="is-invisible--js is-hidden--no-js img-cover parallax-image-move gd-875">
+      <img class="gd-876" src="/media/cache/homepage_residences_slider_xxl/assets/images/media/landing/7.residence/residence-1%40xxxl.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-residences__slide gd-877">
+    <div class="background background--cover gd-878">
+     <picture class="is-invisible--js is-hidden--no-js img-cover parallax-image-move gd-879">
+      <img class="gd-880" src="/media/cache/homepage_residences_slider_xxl/assets/images/media/landing/7.residence/residence-2%40xxxl.webp" alt="">
+     </picture>
+    </div>
+   </div>
+   <div class="l-residences__slide gd-881">
+    <div class="background background--cover gd-882">
+     <picture class="is-invisible--js is-hidden--no-js img-cover parallax-image-move gd-883">
+      <img class="gd-884" src="/media/cache/homepage_residences_slider_xxl/assets/images/media/landing/7.residence/residence-3%40xxxl.webp" alt="">
+     </picture>
+    </div>
+   </div>
+  </div>
+  <div class="sticky__layer sticky__layer--sticky gd-885">
+   <div class="l-residences__caption col col--md-3 offset--md-9 gd-886">
+    <div class="l-residences__caption__line gd-887">
+     <div class="l-residences__caption__line-progress js-residences-progress-line gd-888"></div>
+    </div>
+    <div class="l-residences__caption__content-animation js-residences-content gd-889">
+     <div class="content-animation gd-890">
+      <div class="ui-background ui-dark gd-891">
+       <div class="l-residences__caption__card ui-background gd-892">
+        <div class="l-residences__caption__card-content gd-893">
+         <p class="l-residences__caption__type text-t1 leading-trim gd-894">Flats</p>
+         <p class="l-residences__caption__description text-color-small text-small leading-trim gd-895">Designer finishings</p>
+         <div class="l-residences__caption__item gd-896">
+          <p class="h3 leading-trim gd-897">138</p>
+          <div class="l-residences__caption__item__text gd-898">
+           <p class="text-small leading-trim gd-899">panoramic view flats</p>
+          </div>
+         </div>
+         <div class="l-residences__caption__item gd-900">
+          <p class="h3 leading-trim gd-901">3.1
+           <span class="gd-902">up to</span>
+           <span class="gd-903">m</span>
+          </p>
+          <div class="l-residences__caption__item__text gd-904">
+           <p class="text-small leading-trim gd-905">Ceiling height</p>
+          </div>
+         </div>
+        </div>
+        <div class="l-residences__caption__button group group--button group--nowrap group--middle ui-background gd-906">
+         <a class="btn btn--text-small btn--sm btn--outline btn--clone gd-907">
+          <span class="btn__content gd-908">
+           <span class="btn__text gd-909">Search flats</span>
+          </span>
+         </a>
+        </div>
+       </div>
+      </div>
+      <div class="ui-background ui-dark is-hidden gd-910">
+       <div class="l-residences__caption__card ui-background gd-911">
+        <div class="l-residences__caption__card-content gd-912">
+         <p class="l-residences__caption__type text-t1 leading-trim gd-913">Townhouses</p>
+         <p class="l-residences__caption__description text-color-small text-small leading-trim gd-914">Private patios</p>
+         <div class="l-residences__caption__item gd-915">
+          <p class="h3 leading-trim gd-916">5</p>
+          <div class="l-residences__caption__item__text gd-917">
+           <p class="text-small leading-trim gd-918">townhouses</p>
+          </div>
+         </div>
+         <div class="l-residences__caption__item gd-919">
+          <p class="h3 leading-trim gd-920">4.1</p>
+          <div class="l-residences__caption__item__text gd-921">
+           <p class="text-small leading-trim gd-922">Ceiling height</p>
+          </div>
+         </div>
+        </div>
+        <div class="l-residences__caption__button group group--button group--nowrap group--middle ui-background gd-923">
+         <a class="btn btn--text-small btn--sm btn--outline btn--clone gd-924">
+          <span class="btn__content gd-925">
+           <span class="btn__text gd-926">Available soon</span>
+          </span>
+         </a>
+        </div>
+       </div>
+      </div>
+      <div class="ui-background ui-dark is-hidden gd-927">
+       <div class="l-residences__caption__card ui-background gd-928">
+        <div class="l-residences__caption__card-content gd-929">
+         <p class="l-residences__caption__type text-t1 leading-trim gd-930">Penthouses</p>
+         <p class="l-residences__caption__description text-color-small text-small leading-trim gd-931">Green terraces</p>
+         <div class="l-residences__caption__item gd-932">
+          <p class="h3 leading-trim gd-933">7</p>
+          <div class="l-residences__caption__item__text gd-934">
+           <p class="text-small leading-trim gd-935">Penthouses</p>
+          </div>
+         </div>
+         <div class="l-residences__caption__item gd-936">
+          <p class="h3 leading-trim gd-937">4.1</p>
+          <div class="l-residences__caption__item__text gd-938">
+           <p class="text-small leading-trim gd-939">Ceiling height</p>
+          </div>
+         </div>
+        </div>
+        <div class="l-residences__caption__button group group--button group--nowrap group--middle ui-background gd-940">
+         <a class="btn btn--text-small btn--sm btn--outline btn--clone gd-941">
+          <span class="btn__content gd-942">
+           <span class="btn__text gd-943">Available soon</span>
+          </span>
+         </a>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="gd-944"></div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="residences" data-sk-vp="mobile">
+ <div class="l-residences__webgl-container sticky sticky--full-height sticky--under-previous sticky--under-next is-hidden--lg-up ui-dark ui-background gm-945">
+  <div class="sticky__layer sticky__layer--sticky gm-946">
+   <div class="l-residences__webgl pt-3 gm-947">
+    <div class="background background--cover gm-948">
+     <picture class="is-invisible--js is-hidden--no-js img-cover gm-949">
+      <img class="gm-950" src="/assets/images/media/landing/7.residence/residence-bg-xs@xs.webp" alt="">
+     </picture>
+    </div>
+    <div class="l-residences__webgl-caption px-layout gm-951">
+     <div class="col gm-952">
+      <p class="g1 leading-trim gm-953">Residences</p>
+      <div class="col col--xs-2 mt-1 gm-954">
+       <p class="text-c1 leading-trim gm-955">Collection of premium living spaces</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="gm-956"></div>
+  <div class="l-residences__theme gm-957"></div>
+ </div>
+</div>
+<!-- ===== residences-slider ===== -->
+<div class="sk-vp sk-vp-mobile" data-sk-section="residences-slider" data-sk-vp="mobile">
+ <div class="l-residences__slider-container is-hidden--lg-up ui-dark ui-background gm-958">
+  <div class="l-residences__slider__gradient gm-959">
+   <div class="gm-960"></div>
+  </div>
+  <div class="l-residences__slider pt-3 gm-961">
+   <div class="l-residences__slider__images mx-layout js-residences-content-animation-controller gm-962">
+    <div class="p-relative gm-963">
+     <ul class="mobile-scrollable col col--md-auto mx-auto gm-964">
+      <li class="mobile-scrollable__item gm-965">
+       <picture class="is-invisible--js is-hidden--no-js img-cover gm-966">
+        <img class="gm-967" src="/media/cache/homepage_residences_slider_xs/assets/images/media/landing/7.residence/residence-xs-1%40xs.webp" alt="">
+       </picture>
+      </li>
+      <li class="mobile-scrollable__item gm-968">
+       <picture class="is-invisible--js is-hidden--no-js img-cover gm-969">
+        <img class="gm-970" src="/media/cache/homepage_residences_slider_xs/assets/images/media/landing/7.residence/residence-xs-2%40xs.webp" alt="">
+       </picture>
+      </li>
+      <li class="mobile-scrollable__item gm-971">
+       <picture class="is-invisible--js is-hidden--no-js img-cover gm-972">
+        <img class="gm-973" src="/media/cache/homepage_residences_slider_xs/assets/images/media/landing/7.residence/residence-xs-3%40xs.webp" alt="">
+       </picture>
+      </li>
+     </ul>
+    </div>
+    <div class="carousel__thumb group group--nowrap px-layout gm-974">
+     <a class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail is-active leading-trim gm-975">
+      <span class="carousel__thumb__item__text gm-976">Flats</span>
+     </a>
+     <a class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail leading-trim gm-977">
+      <span class="carousel__thumb__item__text gm-978">Townhouses</span>
+     </a>
+     <a class="col col--xs-2 text-c1 carousel__thumb__item js-mobile-scrollable-thumbnail leading-trim gm-979">
+      <span class="carousel__thumb__item__text gm-980">Penthouses</span>
+     </a>
+    </div>
+   </div>
+   <div class="l-residences__caption col col--xs-4 ui-dark gm-981">
+    <div class="gm-982">
+     <div class="l-residences__caption-text content-animation col col--md-12 gm-983">
+      <div class="l-residences__caption__item px-layout pt-layout pb-2 ui-background ui-dark gm-984">
+       <div class="l-residences__caption__top gm-985">
+        <p class="l-residences__caption__type h2 leading-trim gm-986">Flats</p>
+        <p class="l-residences__caption__description text-color-small text-small leading-trim gm-987">Designer finishings</p>
+        <a class="btn btn--text-small btn--sm btn--outline btn--clone gm-988">
+         <span class="btn__content gm-989">
+          <span class="btn__text gm-990">Search flats</span>
+         </span>
+        </a>
+       </div>
+       <div class="row row--nowrap mt-3 gm-991">
+        <div class="col col--xs-full l-residences__caption__item-inner gm-992">
+         <p class="l-residences__caption__item-title h3 text-h3-stc leading-trim gm-993">138</p>
+         <div class="col col--xs-full mt-0.5 gm-994">
+          <p class="l-residences__caption__item-text text-small text-color-small leading-trim gm-995">panoramic view flats</p>
+         </div>
+        </div>
+        <div class="col col--xs-full l-residences__caption__item-inner gm-996">
+         <p class="l-residences__caption__item-title h3 text-h3-stc leading-trim gm-997">3.1
+          <span class="gm-998">up to</span>
+          <span class="gm-999">m</span>
+         </p>
+         <div class="col col--xs-full mt-0.5 gm-1000">
+          <p class="l-residences__caption__item-text text-small text-color-small leading-trim gm-1001">Ceiling height</p>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="l-residences__caption__item px-layout pt-layout pb-2 ui-background ui-dark is-hidden gm-1002">
+       <div class="l-residences__caption__top gm-1003">
+        <p class="l-residences__caption__type h2 leading-trim gm-1004">Townhouses</p>
+        <p class="l-residences__caption__description text-color-small text-small leading-trim gm-1005">Private patios</p>
+        <a class="btn btn--text-small btn--sm btn--outline btn--clone gm-1006">
+         <span class="btn__content gm-1007">
+          <span class="btn__text gm-1008">Available soon</span>
+         </span>
+        </a>
+       </div>
+       <div class="row row--nowrap mt-3 gm-1009">
+        <div class="col col--xs-full l-residences__caption__item-inner gm-1010">
+         <p class="l-residences__caption__item-title h3 text-h3-stc leading-trim gm-1011">5</p>
+         <div class="col col--xs-full mt-0.5 gm-1012">
+          <p class="l-residences__caption__item-text text-small text-color-small leading-trim gm-1013">townhouses</p>
+         </div>
+        </div>
+        <div class="col col--xs-full l-residences__caption__item-inner gm-1014">
+         <p class="l-residences__caption__item-title h3 text-h3-stc leading-trim gm-1015">4.1</p>
+         <div class="col col--xs-full mt-0.5 gm-1016">
+          <p class="l-residences__caption__item-text text-small text-color-small leading-trim gm-1017">Ceiling height</p>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="l-residences__caption__item px-layout pt-layout pb-2 ui-background ui-dark is-hidden gm-1018">
+       <div class="l-residences__caption__top gm-1019">
+        <p class="l-residences__caption__type h2 leading-trim gm-1020">Penthouses</p>
+        <p class="l-residences__caption__description text-color-small text-small leading-trim gm-1021">Green terraces</p>
+        <a class="btn btn--text-small btn--sm btn--outline btn--clone gm-1022">
+         <span class="btn__content gm-1023">
+          <span class="btn__text gm-1024">Available soon</span>
+         </span>
+        </a>
+       </div>
+       <div class="row row--nowrap mt-3 gm-1025">
+        <div class="col col--xs-full l-residences__caption__item-inner gm-1026">
+         <p class="l-residences__caption__item-title h3 text-h3-stc leading-trim gm-1027">7</p>
+         <div class="col col--xs-full mt-0.5 gm-1028">
+          <p class="l-residences__caption__item-text text-small text-color-small leading-trim gm-1029">Penthouses</p>
+         </div>
+        </div>
+        <div class="col col--xs-full l-residences__caption__item-inner gm-1030">
+         <p class="l-residences__caption__item-title h3 text-h3-stc leading-trim gm-1031">4.1</p>
+         <div class="col col--xs-full mt-0.5 gm-1032">
+          <p class="l-residences__caption__item-text text-small text-color-small leading-trim gm-1033">Ceiling height</p>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== interiors ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="interiors" data-sk-vp="desktop">
+ <div class="l-interiors sticky sticky--full-height sticky--under-previous is-hidden--md-down gd-1034">
+  <div class="sticky__layer sticky__layer--sticky gd-1035">
+   <div class="l-interiors__intro gd-1036">
+    <div class="gd-1037"></div>
+    <div class="background background--cover gd-1038">
+     <picture class="is-invisible--js is-hidden--no-js img-cover parallax-image-move gd-1039">
+      <img class="gd-1040" src="/assets/images/media/landing/8.interiors/interiors-bg@xxl.webp" alt="">
+     </picture>
+    </div>
+    <div class="px-layout l-interiors__intro-caption gd-1041">
+     <h2 class="text-right g1 leading-trim gd-1042">Interiors</h2>
+     <div class="mt-1 gd-1043">
+      <p class="text-c1 text-right leading-trim gd-1044">Beauty in the Essence of Things</p>
+     </div>
+    </div>
+    <div class="px-layout gd-1045">
+     <div class="l-interiors__intro__text mt-3 col col--md-4 gd-1046">
+      <p class="text-t1 leading-trim gd-1047">Our designs are chosen with a delicate treatment of materials and time; time that will soon become history, a story of family generations. Natural stone, warm wood, aged metal, and textured textiles. This is how we create a visual and tactile space for authentically high-class comfort.</p>
+     </div>
+    </div>
+   </div>
+   <div class="l-interiors__slider row ui-light gd-1048">
+    <div class="content-animation col col--md-6 gd-1049">
+     <div class="col col--md-12 gd-1050">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gd-1051">
+       <img class="gd-1052" src="/media/cache/homepage_interiors_slider_xxl/assets/images/media/landing/8.interiors/interiors-slider-3%40xxxl.webp" alt="">
+      </picture>
+     </div>
+     <div class="col col--md-12 is-hidden gd-1053">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gd-1054"></picture>
+     </div>
+     <div class="col col--md-12 is-hidden gd-1055">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gd-1056"></picture>
+     </div>
+     <div class="col col--md-12 is-hidden gd-1057">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gd-1058"></picture>
+     </div>
+     <div class="col col--md-12 is-hidden gd-1059">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gd-1060"></picture>
+     </div>
+    </div>
+    <div class="l-interiors__slider-thumb col col--md-6 px-1 py-1 px-layout:lg py-layout:lg gd-1061">
+     <div class="l-interiors__slider-thumb__links mb-2:md mb-3:xxxl gd-1062">
+      <div class="l-interiors__slider-thumb__links__item js-content-animation-link is-active gd-1063">
+       <img class="img-full is-invisible--js is-hidden--no-js gd-1064" src="/media/cache/homepage_interiors_slider_thumb/assets/images/media/landing/8.interiors/interiors-thumb-3.webp" alt="">
+      </div>
+      <div class="l-interiors__slider-thumb__links__item js-content-animation-link gd-1065">
+       <img class="img-full is-invisible--js is-hidden--no-js gd-1066" src="/media/cache/homepage_interiors_slider_thumb/assets/images/media/landing/8.interiors/interiors-thumb-5.webp" alt="">
+      </div>
+      <div class="l-interiors__slider-thumb__links__item js-content-animation-link gd-1067">
+       <img class="img-full is-invisible--js is-hidden--no-js gd-1068" src="/media/cache/homepage_interiors_slider_thumb/assets/images/media/landing/8.interiors/interiors-thumb-4.webp" alt="">
+      </div>
+      <div class="l-interiors__slider-thumb__links__item js-content-animation-link gd-1069">
+       <img class="img-full is-invisible--js is-hidden--no-js gd-1070" src="/media/cache/homepage_interiors_slider_thumb/assets/images/media/landing/8.interiors/interiors-thumb-1.webp" alt="">
+      </div>
+      <div class="l-interiors__slider-thumb__links__item js-content-animation-link gd-1071">
+       <img class="img-full is-invisible--js is-hidden--no-js gd-1072" src="/media/cache/homepage_interiors_slider_thumb/assets/images/media/landing/8.interiors/interiors-thumb-2.webp" alt="">
+      </div>
+     </div>
+     <div class="l-interiors__slider__caption gd-1073">
+      <div class="mb-0.5 gd-1074">
+       <p class="text-t1 leading-trim gd-1075">The acclaimed Quadro Room studio collaborated with UNIQ Development to create exquisitely refined finishing style, in which natural beauty seamlessly flows from today to tomorrow and remains timeless. Each residence offers a complete turnkey experience, so that you can enjoy the beauty of your new life from the very first moments. Muted palette, arched portals, smooth curves. Refinement is the new</p>
+      </div>
+     </div>
+    </div>
+    <div class="l-interiors__anchor gd-1076"></div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="interiors" data-sk-vp="mobile">
+ <div class="l-interiors__intro is-hidden--lg-up sticky sticky sticky--full-height sticky--under-previous gm-1077">
+  <div class="sticky__layer sticky__layer--sticky sticky--full-height gm-1078">
+   <div class="l-interiors__anchor gm-1079"></div>
+   <div class="background background--cover gm-1080">
+    <picture class="is-invisible--js is-hidden--no-js img-cover gm-1081">
+     <img class="gm-1082" src="/assets/images/media/landing/8.interiors/interiors-bg-xs.webp" alt="">
+    </picture>
+   </div>
+   <div class="px-layout l-interiors__intro-caption pb-4 gm-1083">
+    <div class="mt-0.3 gm-1084">
+     <h2 class="text-right g1 leading-trim gm-1085">Interiors</h2>
+    </div>
+    <p class="mt-1 text-c1 leading-trim text-right gm-1086">Beauty in the Essence of Things</p>
+    <div class="l-interiors__intro__text gm-1087">
+     <p class="text-t1 leading-trim gm-1088">Our designs are chosen with a delicate treatment of materials and time; time that will soon become history, a story of family generations. Natural stone, warm wood, aged metal, and textured textiles. This is how we create a visual and tactile space for authentically high-class comfort.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== interiors-slider ===== -->
+<div class="sk-vp sk-vp-mobile" data-sk-section="interiors-slider" data-sk-vp="mobile">
+ <div class="l-interiors__slider ui-light ui-background py-3 px-layout is-hidden--lg-up gm-1089">
+  <div class="carousel carousel--md-up carousel--not-ready js-carousel mt-2.5 gm-1090">
+   <div class="p-relative gm-1091">
+    <ul class="mobile-scrollable col col--md-auto mx-auto js-carousel-list gm-1092">
+     <li class="mobile-scrollable__item gm-1093">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-1094">
+       <img class="gm-1095" src="/media/cache/homepage_interiors_slider_xs/assets/images/media/landing/8.interiors/interiors-slider-3%40xxxl.webp" alt="">
+      </picture>
+      <div class="dim dim--lighter gm-1096"></div>
+     </li>
+     <li class="mobile-scrollable__item gm-1097">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-1098">
+       <img class="gm-1099" src="/media/cache/homepage_interiors_slider_xs/assets/images/media/landing/8.interiors/interiors-slider-5%40xxxl.webp" alt="">
+      </picture>
+      <div class="dim dim--lighter gm-1100"></div>
+     </li>
+     <li class="mobile-scrollable__item gm-1101">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-1102">
+       <img class="gm-1103" src="/media/cache/homepage_interiors_slider_xs/assets/images/media/landing/8.interiors/interiors-slider-4%40xxxl.webp" alt="">
+      </picture>
+      <div class="dim dim--lighter gm-1104"></div>
+     </li>
+     <li class="mobile-scrollable__item gm-1105">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-1106">
+       <img class="gm-1107" src="/media/cache/homepage_interiors_slider_xs/assets/images/media/landing/8.interiors/interiors-slider-1%40xxxl.webp" alt="">
+      </picture>
+      <div class="dim dim--lighter gm-1108"></div>
+     </li>
+     <li class="mobile-scrollable__item gm-1109">
+      <picture class="is-invisible--js is-hidden--no-js img-cover gm-1110">
+       <img class="gm-1111" src="/media/cache/homepage_interiors_slider_xs/assets/images/media/landing/8.interiors/interiors-slider-2%40xxxl.webp" alt="">
+      </picture>
+      <div class="dim dim--lighter gm-1112"></div>
+     </li>
+    </ul>
+   </div>
+   <div class="carousel__thumb group group--nowrap px-layout gm-1113">
+    <div class="col col--xs-2 carousel__thumb__item js-mobile-scrollable-thumbnail is-active gm-1114"></div>
+    <div class="col col--xs-2 carousel__thumb__item js-mobile-scrollable-thumbnail gm-1115"></div>
+    <div class="col col--xs-2 carousel__thumb__item js-mobile-scrollable-thumbnail gm-1116"></div>
+    <div class="col col--xs-2 carousel__thumb__item js-mobile-scrollable-thumbnail gm-1117"></div>
+    <div class="col col--xs-2 carousel__thumb__item js-mobile-scrollable-thumbnail gm-1118"></div>
+   </div>
+  </div>
+  <div class="mt-1 gm-1119">
+   <div class="mb-1 gm-1120">
+    <p class="text-t1 leading-trim gm-1121">The acclaimed Quadro Room studio collaborated with UNIQ Development to create exquisitely refined finishing style, in which natural beauty seamlessly flows from today to tomorrow and remains timeless. Each residence offers a complete turnkey experience, so that you can enjoy the beauty of your new life from the very first moments. Muted palette, arched portals, smooth curves. Refinement is the new</p>
+   </div>
+  </div>
+ </div>
+</div>
+<!-- ===== footer ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="footer" data-sk-vp="desktop">
+ <footer class="section section--no-overflow ui-dark ui-background footer is-hidden--print gd-1122">
+  <div class="gd-1123">
+   <div class="px-layout footer__content gd-1124">
+    <div class="row row--between-xs pt-1 footer-relative footer__padding gd-1125">
+     <a class="btn btn--outline btn--square btn--sm gd-1126">
+      <span class="btn__content gd-1127">
+       <span class="btn__icon gd-1128">
+        <svg class="gd-1129">
+         <use class="gd-1130" href="/assets/images/icons.svg#arrow-top"></use>
+        </svg>
+       </span>
+      </span>
+     </a>
+    </div>
+    <div class="row row--between-xs gd-1131">
+     <div class="col col--xs-4 col--md-12 group group--center pt-4 pb-5 py-2:md gd-1132">
+      <a class="footer__logo gd-1133">
+       <img class="img-full gd-1134" src="/assets/images/media/logo-footer.svg" alt="">
+      </a>
+     </div>
+    </div>
+    <div class="row row--between-xs gd-1135">
+     <div class="col col--xs-4 row row--nowrap row--between-xs footer-relative gd-1136">
+      <div class="col col--xs-2 col--md-6 gd-1137">
+       <a class="text-c2-small leading-trim text-color-small gd-1138">legal information</a>
+      </div>
+      <div class="col col--xs-2 col--md-6 row row--end-xs gd-1139">
+       <a class="text-c2-small leading-trim row row--middle-xs text-color-small text-right gd-1140">Site by Vide Infra
+        <svg class="gd-1141">
+         <use class="gd-1142" href="/assets/images/icons.svg#vig-logo"></use>
+        </svg>
+       </a>
+      </div>
+     </div>
+    </div>
+    <div class="footer__bottom gd-1143">
+     <p class="text-c2-small leading-trim text-color-small gd-1144">Visual representations of the property, layout plans, and other materials are for illustration purposes only. All information on this website is provided for general informational use and does not constitute an offer or any form of binding commitment. All materials on this website, including design elements, are the intellectual property of the Organization. Any copying, reproduction, distribution</p>
+    </div>
+    <div class="footer__gradient gd-1145">
+     <div class="gradients-container blur-fix gd-1146">
+      <div class="g3 gd-1147"></div>
+      <div class="interactive gd-1148"></div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="footer__theme gd-1149"></div>
+ </footer>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="footer" data-sk-vp="mobile">
+ <footer class="section section--no-overflow ui-dark ui-background footer is-hidden--print gm-1150">
+  <div class="gm-1151">
+   <div class="px-layout footer__content gm-1152">
+    <div class="row row--between-xs pt-1 footer-relative footer__padding gm-1153">
+     <a class="btn btn--outline btn--square btn--sm gm-1154">
+      <span class="btn__content gm-1155">
+       <span class="btn__icon gm-1156">
+        <svg class="gm-1157">
+         <use class="gm-1158" href="/assets/images/icons.svg#arrow-top"></use>
+        </svg>
+       </span>
+      </span>
+     </a>
+    </div>
+    <div class="row row--between-xs gm-1159">
+     <div class="col col--xs-4 col--md-12 group group--center pt-4 pb-5 py-2:md gm-1160">
+      <a class="footer__logo gm-1161">
+       <img class="img-full gm-1162" src="/assets/images/media/logo-footer.svg" alt="">
+      </a>
+     </div>
+    </div>
+    <div class="row row--between-xs gm-1163">
+     <div class="col col--xs-4 row row--nowrap row--between-xs footer-relative gm-1164">
+      <div class="col col--xs-2 col--md-6 gm-1165">
+       <a class="text-c2-small leading-trim text-color-small gm-1166">legal information</a>
+      </div>
+      <div class="col col--xs-2 col--md-6 row row--end-xs gm-1167">
+       <a class="text-c2-small leading-trim row row--middle-xs text-color-small text-right gm-1168">Site by Vide Infra
+        <svg class="gm-1169">
+         <use class="gm-1170" href="/assets/images/icons.svg#vig-logo"></use>
+        </svg>
+       </a>
+      </div>
+     </div>
+    </div>
+    <div class="footer__bottom gm-1171">
+     <p class="text-c2-small leading-trim text-color-small gm-1172">Visual representations of the property, layout plans, and other materials are for illustration purposes only. All information on this website is provided for general informational use and does not constitute an offer or any form of binding commitment. All materials on this website, including design elements, are the intellectual property of the Organization. Any copying, reproduction, distribution</p>
+    </div>
+    <div class="footer__gradient gm-1173">
+     <div class="gradients-container blur-fix gm-1174">
+      <div class="g3 gm-1175"></div>
+      <div class="interactive gm-1176"></div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="footer__theme gm-1177"></div>
+ </footer>
+</div>
+<div class="js-modal sk-modal">
+<div class="modal">
+<!-- ===== callback ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="callback" data-sk-vp="desktop">
+ <div class="l-callback row ui-dark js-callback gd-1178">
+  <div class="l-callback__background is-hidden--sm-down gd-1179">
+   <div class="l-callback__gradient background background--cover js-tree-canvas-container is-hidden--sm-down gd-1180">
+    <canvas class="js-tree-canvas is-active gd-1181"></canvas>
+   </div>
+   <div class="l-callback__spiral background background--cover is-hidden--md-down gd-1182">
+    <picture class="is-invisible--js is-hidden--no-js gd-1183">
+     <img class="gd-1184" src="/assets/images/media/landing/callback/spiral@xxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="l-callback__title-container col col--xs-4 col--md-6 gd-1185">
+    <p class="l-callback__title h1 leading-trim js-form-content gd-1186">Submit a request</p>
+    <div class="is-hidden js-form-success l-callback__success gd-1187">
+     <p class="h1 leading-trim gd-1188">Thank you for your request! We have received your application and will contact you soon!</p>
+    </div>
+   </div>
+  </div>
+  <div class="l-callback__col col col--md-6 ui-dark ui-background mr-0 ml-auto px-layout gd-1189">
+   <div class="l-callback__tablist gd-1190">
+    <a class="btn btn--outline btn--clone btn--md btn--text-small is-active gd-1191">
+     <span class="btn__content gd-1192">
+      <span class="btn__text gd-1193">request</span>
+     </span>
+    </a>
+    <a class="btn btn--outline btn--clone btn--md btn--text-small gd-1194">
+     <span class="btn__content gd-1195">
+      <span class="btn__text gd-1196">callback</span>
+     </span>
+    </a>
+   </div>
+   <div class="tabs-contents gd-1197">
+    <div class="tabs-contents__content ui-background js-tab gd-1198">
+     <form class="l-callback__form-container ui-dark ui-background pt-3:md pb-1:md gd-1199">
+      <div class="col col--xs-4 col--md-6 l-callback__form gd-1200">
+       <div class="sr-only gd-1201">
+        <label class="form-label text-c1 text-color-small leading-trim gd-1202">Message</label>
+        <input class="gd-1203">
+       </div>
+       <div class="l-callback__group gd-1204">
+        <div class="col col--md-12 mb-2 mb-1:md gd-1205">
+         <div class="form-control form-control--input form-control--float gd-1206">
+          <input class="gd-1207">
+          <label class="form-label text-c1 text-color-small gd-1208">Name</label>
+          <svg class="gd-1209">
+           <use class="gd-1210" href="/assets/images/icons.svg#form-success"></use>
+          </svg>
+          <svg class="gd-1211">
+           <use class="gd-1212" href="/assets/images/icons.svg#form-error"></use>
+          </svg>
+          <span class="form-control__line gd-1213"></span>
+          <span class="form-control__progress gd-1214"></span>
+         </div>
+        </div>
+        <div class="col col--md-12 mb-2 mb-1:md gd-1215">
+         <div class="form-control form-control--input form-control--float gd-1216">
+          <input class="gd-1217">
+          <label class="form-label text-c1 text-color-small gd-1218">Phone</label>
+          <svg class="gd-1219">
+           <use class="gd-1220" href="/assets/images/icons.svg#form-success"></use>
+          </svg>
+          <svg class="gd-1221">
+           <use class="gd-1222" href="/assets/images/icons.svg#form-error"></use>
+          </svg>
+          <span class="form-control__line gd-1223"></span>
+          <span class="form-control__progress gd-1224"></span>
+         </div>
+        </div>
+        <div class="col col--md-12 gd-1225">
+         <div class="form-control form-control--input form-control--float gd-1226">
+          <input class="gd-1227">
+          <label class="form-label text-c1 text-color-small gd-1228">Message</label>
+          <svg class="gd-1229">
+           <use class="gd-1230" href="/assets/images/icons.svg#form-success"></use>
+          </svg>
+          <svg class="gd-1231">
+           <use class="gd-1232" href="/assets/images/icons.svg#form-error"></use>
+          </svg>
+          <span class="form-control__line gd-1233"></span>
+          <span class="form-control__progress gd-1234"></span>
+         </div>
+        </div>
+        <div class="error-message is-hidden js-form-error-message text-left l-callback__limited-width gd-1235"></div>
+       </div>
+       <div class="l-callback__buttons row row--nowrap row--middle-xs row--between-xs mt-1:lg gd-1236">
+        <button class="btn btn--primary btn--clone btn--text-small is-hidden--sm-down gd-1237">
+         <span class="btn__content gd-1238">
+          <span class="btn__text gd-1239">submit a request</span>
+         </span>
+        </button>
+        <button class="btn btn--sm btn--primary btn--text-small is-hidden--md-up gd-1240">
+         <span class="btn__content gd-1241">
+          <span class="btn__text gd-1242">submit a request</span>
+         </span>
+        </button>
+        <div class="text l-callback__limited-width ml-layout gd-1243">
+         <p class="leading-trim text-color-small text-c2-small text-right:md gd-1244">By clicking the button, you agree to our
+          <a class="btn--link btn--clone text-c2-small mt-1 gd-1245">privacy policy</a>
+         </p>
+        </div>
+       </div>
+      </div>
+     </form>
+    </div>
+    <div class="tabs-contents__content ui-background js-tab gd-1246">
+     <form class="l-callback__form-container ui-dark ui-background pt-3:md pb-1:md gd-1247">
+      <div class="col col--xs-4 col--md-6 l-callback__form gd-1248">
+       <div class="sr-only gd-1249">
+        <label class="form-label text-c1 text-color-small leading-trim gd-1250">Message</label>
+       </div>
+       <div class="l-callback__group gd-1251">
+        <div class="col col--md-12 mb-2 mb-1:md gd-1252">
+         <div class="form-control form-control--input form-control--float gd-1253">
+          <label class="form-label text-c1 text-color-small gd-1254">Name</label>
+          <svg class="gd-1255"></svg>
+          <svg class="gd-1256"></svg>
+          <span class="form-control__line gd-1257"></span>
+          <span class="form-control__progress gd-1258"></span>
+         </div>
+        </div>
+        <div class="form-group group mb-2 mb-1:md gd-1259">
+         <div class="col gd-1260">
+          <div class="form-control form-control--input form-control--float gd-1261">
+           <label class="form-label text-c1 text-color-small gd-1262">Phone</label>
+           <svg class="gd-1263"></svg>
+           <svg class="gd-1264"></svg>
+           <span class="form-control__line gd-1265"></span>
+           <span class="form-control__progress gd-1266"></span>
+          </div>
+         </div>
+         <div class="col gd-1267">
+          <div class="form-control form-control--select form-control--input form-control--with-label form-control--float is-not-empty gd-1268">
+           <div class="form-control__close js-form-control-select-close gd-1269"></div>
+           <div class="form-control__content gd-1270">
+            <select class="gd-1271"></select>
+            <span class="js-input-select-fake-value form-control__fake-input gd-1272">
+             <span class="js-input-select-fake-value-text leading-trim gd-1273">9:00 — 12:00</span>
+            </span>
+            <label class="form-label text-c1 text-color-small gd-1274">call time</label>
+            <span class="form-control__arrow js-form-control-select-close gd-1275">
+             <svg class="gd-1276"></svg>
+            </span>
+           </div>
+           <span class="form-control__line gd-1277"></span>
+           <span class="form-control__progress gd-1278"></span>
+          </div>
+         </div>
+        </div>
+        <div class="error-message is-hidden js-form-error-message text-left l-callback__limited-width gd-1279"></div>
+       </div>
+       <div class="l-callback__buttons row row--nowrap row--middle-xs row--between-xs mt-1:lg gd-1280">
+        <button class="btn btn--primary btn--text-small is-hidden--sm-down gd-1281">
+         <span class="btn__content gd-1282">
+          <span class="btn__text gd-1283">submit a request</span>
+         </span>
+        </button>
+        <button class="btn btn--sm btn--primary btn--text-small is-hidden--md-up gd-1284">
+         <span class="btn__content gd-1285">
+          <span class="btn__text gd-1286">submit a request</span>
+         </span>
+        </button>
+        <div class="text l-callback__limited-width ml-layout gd-1287">
+         <p class="leading-trim text-color-small text-c2-small text-right:md gd-1288">By clicking the button, you agree to our
+          <a class="btn--link btn--clone text-c2-small mt-1 gd-1289">privacy policy</a>
+         </p>
+        </div>
+       </div>
+      </div>
+     </form>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="callback" data-sk-vp="mobile">
+ <div class="l-callback row ui-dark js-callback gm-1290">
+  <div class="l-callback__background is-hidden--sm-down gm-1291">
+   <div class="l-callback__gradient background background--cover js-tree-canvas-container is-hidden--sm-down gm-1292">
+    <canvas class="js-tree-canvas is-active gm-1293"></canvas>
+   </div>
+   <div class="l-callback__spiral background background--cover is-hidden--md-down gm-1294">
+    <picture class="is-invisible--js is-hidden--no-js gm-1295"></picture>
+   </div>
+   <div class="l-callback__title-container col col--xs-4 col--md-6 gm-1296">
+    <p class="l-callback__title h1 leading-trim js-form-content gm-1297">Submit a request</p>
+    <div class="is-hidden js-form-success l-callback__success gm-1298">
+     <p class="h1 leading-trim gm-1299">Thank you for your request! We have received your application and will contact you soon!</p>
+    </div>
+   </div>
+  </div>
+  <div class="l-callback__col col col--md-6 ui-dark ui-background mr-0 ml-auto px-layout gm-1300">
+   <div class="l-callback__tablist gm-1301">
+    <a class="btn btn--outline btn--clone btn--md btn--text-small is-active gm-1302">
+     <span class="btn__content gm-1303">
+      <span class="btn__text gm-1304">request</span>
+     </span>
+    </a>
+    <a class="btn btn--outline btn--clone btn--md btn--text-small gm-1305">
+     <span class="btn__content gm-1306">
+      <span class="btn__text gm-1307">callback</span>
+     </span>
+    </a>
+   </div>
+   <div class="tabs-contents gm-1308">
+    <div class="tabs-contents__content ui-background js-tab gm-1309">
+     <form class="l-callback__form-container ui-dark ui-background pt-3:md pb-1:md gm-1310">
+      <div class="col col--xs-4 col--md-6 l-callback__form gm-1311">
+       <div class="sr-only gm-1312">
+        <label class="form-label text-c1 text-color-small leading-trim gm-1313">Message</label>
+        <input class="gm-1314">
+       </div>
+       <div class="l-callback__group gm-1315">
+        <div class="col col--md-12 mb-2 mb-1:md gm-1316">
+         <div class="form-control form-control--input form-control--float gm-1317">
+          <input class="gm-1318">
+          <label class="form-label text-c1 text-color-small gm-1319">Name</label>
+          <svg class="gm-1320">
+           <use class="gm-1321" href="/assets/images/icons.svg#form-success"></use>
+          </svg>
+          <svg class="gm-1322">
+           <use class="gm-1323" href="/assets/images/icons.svg#form-error"></use>
+          </svg>
+          <span class="form-control__line gm-1324"></span>
+          <span class="form-control__progress gm-1325"></span>
+         </div>
+        </div>
+        <div class="col col--md-12 mb-2 mb-1:md gm-1326">
+         <div class="form-control form-control--input form-control--float gm-1327">
+          <input class="gm-1328">
+          <label class="form-label text-c1 text-color-small gm-1329">Phone</label>
+          <svg class="gm-1330">
+           <use class="gm-1331" href="/assets/images/icons.svg#form-success"></use>
+          </svg>
+          <svg class="gm-1332">
+           <use class="gm-1333" href="/assets/images/icons.svg#form-error"></use>
+          </svg>
+          <span class="form-control__line gm-1334"></span>
+          <span class="form-control__progress gm-1335"></span>
+         </div>
+        </div>
+        <div class="col col--md-12 gm-1336">
+         <div class="form-control form-control--input form-control--float gm-1337">
+          <input class="gm-1338">
+          <label class="form-label text-c1 text-color-small gm-1339">Message</label>
+          <svg class="gm-1340">
+           <use class="gm-1341" href="/assets/images/icons.svg#form-success"></use>
+          </svg>
+          <svg class="gm-1342">
+           <use class="gm-1343" href="/assets/images/icons.svg#form-error"></use>
+          </svg>
+          <span class="form-control__line gm-1344"></span>
+          <span class="form-control__progress gm-1345"></span>
+         </div>
+        </div>
+        <div class="error-message is-hidden js-form-error-message text-left l-callback__limited-width gm-1346"></div>
+       </div>
+       <div class="l-callback__buttons row row--nowrap row--middle-xs row--between-xs mt-1:lg gm-1347">
+        <button class="btn btn--primary btn--clone btn--text-small is-hidden--sm-down gm-1348">
+         <span class="btn__content gm-1349">
+          <span class="btn__text gm-1350">submit a request</span>
+         </span>
+        </button>
+        <button class="btn btn--sm btn--primary btn--text-small is-hidden--md-up gm-1351">
+         <span class="btn__content gm-1352">
+          <span class="btn__text gm-1353">submit a request</span>
+         </span>
+        </button>
+        <div class="text l-callback__limited-width ml-layout gm-1354">
+         <p class="leading-trim text-color-small text-c2-small text-right:md gm-1355">By clicking the button, you agree to our
+          <a class="btn--link btn--clone text-c2-small mt-1 gm-1356">privacy policy</a>
+         </p>
+        </div>
+       </div>
+      </div>
+     </form>
+    </div>
+    <div class="tabs-contents__content ui-background js-tab gm-1357">
+     <form class="l-callback__form-container ui-dark ui-background pt-3:md pb-1:md gm-1358">
+      <div class="col col--xs-4 col--md-6 l-callback__form gm-1359">
+       <div class="sr-only gm-1360">
+        <label class="form-label text-c1 text-color-small leading-trim gm-1361">Message</label>
+       </div>
+       <div class="l-callback__group gm-1362">
+        <div class="col col--md-12 mb-2 mb-1:md gm-1363">
+         <div class="form-control form-control--input form-control--float gm-1364">
+          <label class="form-label text-c1 text-color-small gm-1365">Name</label>
+          <svg class="gm-1366"></svg>
+          <svg class="gm-1367"></svg>
+          <span class="form-control__line gm-1368"></span>
+          <span class="form-control__progress gm-1369"></span>
+         </div>
+        </div>
+        <div class="form-group group mb-2 mb-1:md gm-1370">
+         <div class="col gm-1371">
+          <div class="form-control form-control--input form-control--float gm-1372">
+           <label class="form-label text-c1 text-color-small gm-1373">Phone</label>
+           <svg class="gm-1374"></svg>
+           <svg class="gm-1375"></svg>
+           <span class="form-control__line gm-1376"></span>
+           <span class="form-control__progress gm-1377"></span>
+          </div>
+         </div>
+         <div class="col gm-1378">
+          <div class="form-control form-control--select form-control--input form-control--with-label form-control--float is-not-empty gm-1379">
+           <div class="form-control__close js-form-control-select-close gm-1380"></div>
+           <div class="form-control__content gm-1381">
+            <select class="gm-1382"></select>
+            <span class="js-input-select-fake-value form-control__fake-input gm-1383">
+             <span class="js-input-select-fake-value-text leading-trim gm-1384">9:00 — 12:00</span>
+            </span>
+            <label class="form-label text-c1 text-color-small gm-1385">call time</label>
+            <span class="form-control__arrow js-form-control-select-close gm-1386">
+             <svg class="gm-1387"></svg>
+            </span>
+           </div>
+           <span class="form-control__line gm-1388"></span>
+           <span class="form-control__progress gm-1389"></span>
+          </div>
+         </div>
+        </div>
+        <div class="error-message is-hidden js-form-error-message text-left l-callback__limited-width gm-1390"></div>
+       </div>
+       <div class="l-callback__buttons row row--nowrap row--middle-xs row--between-xs mt-1:lg gm-1391">
+        <button class="btn btn--primary btn--text-small is-hidden--sm-down gm-1392">
+         <span class="btn__content gm-1393">
+          <span class="btn__text gm-1394">submit a request</span>
+         </span>
+        </button>
+        <button class="btn btn--sm btn--primary btn--text-small is-hidden--md-up gm-1395">
+         <span class="btn__content gm-1396">
+          <span class="btn__text gm-1397">submit a request</span>
+         </span>
+        </button>
+        <div class="text l-callback__limited-width ml-layout gm-1398">
+         <p class="leading-trim text-color-small text-c2-small text-right:md gm-1399">By clicking the button, you agree to our
+          <a class="btn--link btn--clone text-c2-small mt-1 gm-1400">privacy policy</a>
+         </p>
+        </div>
+       </div>
+      </div>
+     </form>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+</div>
+</div>
+<div class="js-modal sk-modal">
+<div class="modal">
+<!-- ===== favorites ===== -->
+<div class="sk-vp sk-vp-desktop" data-sk-section="favorites" data-sk-vp="desktop">
+ <div class="l-favorites row ui-dark sticky sticky--full-height gd-1401">
+  <div class="sticky__layer sticky__layer--sticky gd-1402">
+   <div class="background background--cover js-tree-canvas-container is-hidden--sm-down gd-1403">
+    <canvas class="js-tree-canvas is-active gd-1404"></canvas>
+   </div>
+   <div class="l-favorites__spiral background background--cover is-hidden--md-down gd-1405">
+    <picture class="is-invisible--js is-hidden--no-js gd-1406">
+     <img class="gd-1407" src="/assets/images/media/landing/callback/spiral@xxl.webp" alt="">
+    </picture>
+   </div>
+   <div class="l-favorites__title-container col col--md-4 is-hidden--md-down gd-1408">
+    <div class="l-favorites__title gd-1409">
+     <p class="leading-trim text-small pb-0.5 js-favourite-list-wrapper-list gd-1410">
+      <span class="js-favourite-counter-text gd-1411"></span>
+     </p>
+     <p class="h1 leading-trim gd-1412">Favorites</p>
+    </div>
+   </div>
+  </div>
+  <div class="sticky__layer gd-1413">
+   <a class="btn btn--primary btn--square modal__close js-modal-close gd-1414">
+    <span class="btn__content gd-1415">
+     <span class="btn__icon gd-1416">
+      <svg class="gd-1417">
+       <use class="gd-1418" href="/assets/images/icons.svg#close"></use>
+      </svg>
+     </span>
+    </span>
+   </a>
+   <div class="l-favorites__gradient is-hidden--lg-up gd-1419"></div>
+   <div class="l-favorites__col col col--md-8 ui-dark ui-background mr-0 ml-auto px-layout gd-1420">
+    <div class="flats__empty js-favourite-list-empty is-hidden gd-1421">
+     <div class="col col--md-4 h3 leading-trim pb-1 pr-1.5 pr-0:md gd-1422"></div>
+     <a class="btn btn--sm btn--outline gd-1423">
+      <span class="btn__content gd-1424">
+       <span class="btn__text gd-1425">select residence</span>
+      </span>
+     </a>
+    </div>
+    <div class="js-favourite-list-wrapper-list is-hidden gd-1426">
+     <div class="group group--small mb-2 gd-1427">
+      <a class="btn btn--square btn--outline gd-1428">
+       <span class="btn__content gd-1429">
+        <span class="btn__text gd-1430">pdf</span>
+       </span>
+      </a>
+      <a class="btn btn--square btn--outline gd-1431">
+       <span class="btn__content gd-1432">
+        <span class="btn__icon gd-1433">
+         <svg class="gd-1434"></svg>
+        </span>
+       </span>
+      </a>
+     </div>
+     <div class="l-favorites__title-container col col--md-4 is-hidden--lg-up mb-1 gd-1435">
+      <div class="l-favorites__title gd-1436">
+       <p class="h1 leading-trim pb-1 gd-1437">Favorites</p>
+       <p class="leading-trim text-small gd-1438">
+        <span class="js-favourite-counter-text gd-1439"></span>
+       </p>
+      </div>
+     </div>
+     <ul class="l-favorites__list flats__list js-favourite-list-list ui-light is-hidden gd-1440">
+      <div class="js-favourite-list-single gd-1441">
+       <li class="gd-1442">
+        <a class="ui-dark card card--apartment card--more gd-1443">
+         <div class="card__sizer gd-1444"></div>
+         <div class="card__content gd-1445">
+          <div class="card__top gd-1446">
+           <p class="gd-1447">Find more matching residences</p>
+          </div>
+          <div class="card__footer gd-1448">
+           <div class="group group--nowrap group--bottom group--between gd-1449">
+            <div class="card__footer-text leading-trim gd-1450"></div>
+            <div class="card__feature gd-1451">
+             <svg class="gd-1452"></svg>
+            </div>
+           </div>
+          </div>
+         </div>
+        </a>
+       </li>
+      </div>
+     </ul>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="sk-vp sk-vp-mobile" data-sk-section="favorites" data-sk-vp="mobile">
+ <div class="l-favorites row ui-dark sticky sticky--full-height gm-1453">
+  <div class="sticky__layer sticky__layer--sticky gm-1454">
+   <div class="background background--cover js-tree-canvas-container is-hidden--sm-down gm-1455">
+    <canvas class="js-tree-canvas is-active gm-1456"></canvas>
+   </div>
+   <div class="l-favorites__spiral background background--cover is-hidden--md-down gm-1457">
+    <picture class="is-invisible--js is-hidden--no-js gm-1458"></picture>
+   </div>
+   <div class="l-favorites__title-container col col--md-4 is-hidden--md-down gm-1459">
+    <div class="l-favorites__title gm-1460">
+     <p class="leading-trim text-small pb-0.5 js-favourite-list-wrapper-list gm-1461">
+      <span class="js-favourite-counter-text gm-1462"></span>
+     </p>
+     <p class="h1 leading-trim gm-1463">Favorites</p>
+    </div>
+   </div>
+  </div>
+  <div class="sticky__layer gm-1464">
+   <a class="btn btn--primary btn--square modal__close js-modal-close gm-1465">
+    <span class="btn__content gm-1466">
+     <span class="btn__icon gm-1467">
+      <svg class="gm-1468">
+       <use class="gm-1469" href="/assets/images/icons.svg#close"></use>
+      </svg>
+     </span>
+    </span>
+   </a>
+   <div class="l-favorites__gradient is-hidden--lg-up gm-1470">
+    <div class="gm-1471"></div>
+    <div class="gm-1472"></div>
+   </div>
+   <div class="l-favorites__col col col--md-8 ui-dark ui-background mr-0 ml-auto px-layout gm-1473">
+    <div class="flats__empty js-favourite-list-empty is-hidden gm-1474">
+     <div class="col col--md-4 h3 leading-trim pb-1 pr-1.5 pr-0:md gm-1475"></div>
+     <a class="btn btn--sm btn--outline gm-1476">
+      <span class="btn__content gm-1477">
+       <span class="btn__text gm-1478">select residence</span>
+      </span>
+     </a>
+    </div>
+    <div class="js-favourite-list-wrapper-list is-hidden gm-1479">
+     <div class="group group--small mb-2 gm-1480">
+      <a class="btn btn--square btn--outline gm-1481">
+       <span class="btn__content gm-1482">
+        <span class="btn__text gm-1483">pdf</span>
+       </span>
+      </a>
+      <a class="btn btn--square btn--outline gm-1484">
+       <span class="btn__content gm-1485">
+        <span class="btn__icon gm-1486">
+         <svg class="gm-1487"></svg>
+        </span>
+       </span>
+      </a>
+     </div>
+     <div class="l-favorites__title-container col col--md-4 is-hidden--lg-up mb-1 gm-1488">
+      <div class="l-favorites__title gm-1489">
+       <p class="h1 leading-trim pb-1 gm-1490">Favorites</p>
+       <p class="leading-trim text-small gm-1491">
+        <span class="js-favourite-counter-text gm-1492"></span>
+       </p>
+      </div>
+     </div>
+     <ul class="l-favorites__list flats__list js-favourite-list-list ui-light is-hidden gm-1493">
+      <div class="js-favourite-list-single gm-1494">
+       <li class="gm-1495">
+        <a class="ui-dark card card--apartment card--more gm-1496">
+         <div class="card__sizer gm-1497"></div>
+         <div class="card__content gm-1498">
+          <div class="card__top gm-1499">
+           <p class="gm-1500">Find more matching residences</p>
+          </div>
+          <div class="card__footer gm-1501">
+           <div class="group group--nowrap group--bottom group--between gm-1502">
+            <div class="card__footer-text leading-trim gm-1503"></div>
+            <div class="card__feature gm-1504">
+             <svg class="gm-1505"></svg>
+            </div>
+           </div>
+          </div>
+         </div>
+        </a>
+       </li>
+      </div>
+     </ul>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+</div>
+</div>
+</body>
+</html>

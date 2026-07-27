@@ -1,0 +1,289 @@
+/* ============================================================
+   COMPONENT — slide-out-img-text   ("slide-out deck handoff")
+   ------------------------------------------------------------
+   TRUE 1:1 reproduction of the ZERA STUDIO portfolio handoff,
+   ported to the NAHIRNA voice. ONE pinned, scroll-scrubbed
+   timeline drives a 7-PHASE choreography (not just the middle
+   fan-out beat the old version shipped):
+
+     P1 drawer handoff   — prior section's plate slides UP+out,
+                           stage crossfades light->black, deck
+                           pre-staged COLLAPSED dead-centre.
+     P2 hero beat        — centre portrait card rises forward.
+     P3 slide-out        — 3 siblings deal OUT toward the corners
+                           (staggered), hero drifts toward TL.
+     P4 lock + overshoot — all 4 snap to corner anchors with a
+                           tiny back.out scale overshoot.
+     P5 centre reveal    — headline reveals, rule draws scaleX,
+                           CTA + scroll-dot fade in.
+     P6 hold / read      — climax dwell, micro-parallax only.
+     P7 exit / next      — whole pinned wrap translates UP and
+                           out, revealing the next section.
+
+   Stack: vanilla + GSAP 3.12.5 + ScrollTrigger + CustomEase
+          + guarded Lenis. NO WebGL.
+   Motion lives ONLY on transform / opacity / clip-path.
+   Never animate left/top/width. Never scrub video.currentTime.
+   The ONE site ease here is the easeOutQuad-family "slideOut"
+   (fast-out, long-settle) — registered in JS, mirrored below
+   as the CSS fallback var for hover/static transitions.
+   ============================================================ */
+
+:root{
+  --sofi-ink:#0B0A09;          /* section background          */
+  --sofi-paper:#F2EDE4;        /* type / hairlines            */
+  --sofi-mid:#8C857A;          /* muted captions              */
+  --sofi-bronze:#B5895A;       /* single accent (dot)         */
+
+  --sofi-serif:"PP Editorial New","Times New Roman",Georgia,serif;
+  --sofi-sans:"Helvetica Neue","Inter",system-ui,-apple-system,sans-serif;
+
+  --sofi-mx:56px;              /* outer margin / rail width    */
+  --sofi-card-radius:4px;
+
+  --sofi-rim-ghost:0.12;       /* rim ghost words base         */
+  --sofi-ghost-wm:0.18;        /* centre ghost wordmark base   */
+
+  /* the ONE ease — registered in JS as CustomEase "slideOut".
+     this var is only the CSS-side fallback for hover/static. */
+  --sofi-slideout:cubic-bezier(0.22,1,0.36,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+.sofi *,.next *{box-sizing:border-box}
+
+/* ============================================================
+   SECTION SKELETON (.sofi) — the pinned wrap.
+   Children leave TOGETHER in P7 (exit), so the whole stage is
+   one transform target. overflow:hidden clips the slide-out.
+   ============================================================ */
+.sofi{
+  position:relative;
+  width:100vw;
+  min-height:100vh;
+  overflow:hidden;
+  background:var(--sofi-ink);
+  color:var(--sofi-paper);
+  font-family:var(--sofi-sans);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* P1: stage colour crossfades light -> black via two stacked
+   backdrop layers; JS fades the LIGHT one OUT 1 -> 0. */
+.sofi__bg{
+  position:absolute;inset:0;z-index:0;
+  background:radial-gradient(120% 90% at 50% 40%, #16140f 0%, var(--sofi-ink) 64%);
+}
+.sofi__bg-light{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(180deg,#EFE9DE 0%, #E6DECF 100%);
+}
+
+/* vertical rails + section index (static chrome) */
+.sofi__rail-l,.sofi__rail-r{
+  position:absolute;top:0;bottom:0;width:var(--sofi-mx);z-index:9;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;
+  font-family:var(--sofi-sans);font-size:.6rem;letter-spacing:.34em;
+  text-transform:uppercase;opacity:.42;pointer-events:none;
+}
+.sofi__rail-l{left:0;transform:rotate(180deg)}
+.sofi__rail-r{right:0}
+
+.sofi__index{
+  position:absolute;top:var(--sofi-mx);right:calc(var(--sofi-mx) + 28px);z-index:9;
+  font-family:var(--sofi-serif);font-size:1rem;letter-spacing:.04em;opacity:.5;
+}
+
+/* the stage = pinned 100vh box; place-items:center is the card ORIGIN */
+.sofi__stage{
+  position:relative;
+  width:100%;
+  height:100vh;
+  display:grid;
+  place-items:center;
+  z-index:2;
+}
+
+/* ---------- P1 DRAWER HANDOFF plate (prior section) ---------- */
+.sofi__drawer{
+  position:absolute;left:50%;top:0;z-index:8;
+  width:min(82vw,1040px);height:140px;
+  transform:translateX(-50%);
+  /* JS drives translateY 0 -> -110% of own height + opacity */
+  background:linear-gradient(180deg,#F6F1E8 0%,#ECE4D6 100%);
+  border-radius:0 0 14px 14px;
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.55);
+}
+.sofi__drawer-label{
+  position:absolute;top:34px;left:46px;
+  font-family:var(--sofi-sans);font-size:.62rem;letter-spacing:.34em;
+  text-transform:uppercase;color:#6b6256;
+}
+.sofi__drawer-dot{
+  position:absolute;top:30px;right:46px;
+  width:7px;height:7px;border-radius:50%;background:#6b6256;opacity:.55;
+}
+.sofi__drawer-line{
+  position:absolute;left:46px;right:46px;top:62px;height:1px;
+  background:rgba(60,52,40,.28);
+}
+
+/* ---------- GHOST layer (texture behind everything) ---------- */
+.sofi__ghost{
+  position:absolute;inset:0;z-index:1;
+  display:grid;place-items:center;pointer-events:none;
+}
+.sofi__ghost-letter{
+  grid-area:1 / 1;
+  font-family:var(--sofi-serif);font-weight:300;color:var(--sofi-bronze);
+  font-size:clamp(22rem,48vw,54rem);line-height:.8;
+  opacity:0;                       /* JS: 0 -> .10 in P1 */
+}
+.sofi__ghost-wm{
+  grid-area:1 / 1;
+  font-family:var(--sofi-serif);font-weight:300;color:var(--sofi-paper);
+  font-size:clamp(4rem,11vw,9rem);line-height:.84;letter-spacing:-.02em;
+  text-align:center;opacity:0;     /* state A wordmark — JS 0->peak->0 */
+}
+.sofi__ghost-wm2{
+  grid-area:1 / 1;
+  font-family:var(--sofi-serif);font-weight:300;color:var(--sofi-paper);
+  font-size:clamp(3rem,8.5vw,7rem);line-height:.92;letter-spacing:-.01em;
+  text-align:center;opacity:0;     /* state B wordmark — JS 0->peak (P4) */
+}
+
+/* rim ghost words (the BRAND/LED/EXPER/IENCE equivalent) */
+.sofi__rim{
+  position:absolute;z-index:1;pointer-events:none;
+  font-family:var(--sofi-serif);font-weight:300;color:var(--sofi-paper);
+  font-size:clamp(3rem,7vw,6rem);letter-spacing:.06em;line-height:.9;
+  opacity:0;                       /* JS: 0 -> rim peak in P1 */
+}
+.sofi__rim.tl{top:18%;left:var(--sofi-mx)}
+.sofi__rim.tr{top:18%;right:var(--sofi-mx);text-align:right}
+.sofi__rim.bl{bottom:18%;left:var(--sofi-mx)}
+.sofi__rim.br{bottom:18%;right:var(--sofi-mx);text-align:right}
+
+/* ---------- DECK (cards) ---------- */
+.sofi__deck{
+  position:absolute;inset:0;z-index:3;
+}
+.sofi__card{
+  position:absolute;top:50%;left:50%;
+  /* per-card props the JS tweens (transform-only travel) */
+  --tx:0px; --ty:0px; --scl:1; --hv:1;
+  transform:
+    translate(-50%,-50%)
+    translate(var(--tx),var(--ty))
+    scale(calc(var(--scl) * var(--hv)));
+  transform-origin:center center;
+  will-change:transform;
+  border-radius:var(--sofi-card-radius);
+  overflow:hidden;
+  background:#15120e;
+  box-shadow:0 34px 80px -34px rgba(0,0,0,.85), 0 2px 0 rgba(255,255,255,.04) inset;
+  cursor:pointer;
+}
+/* ALL renders in the dataset are TRUE portrait 9:16; every card is 9:16 so
+   object-fit:cover never crops a portrait into a landscape box (G7).
+   Hero reads larger than the 3 siblings for hierarchy, same ratio. */
+.sofi__card.is-tall{ width:clamp(190px,21vw,310px); aspect-ratio:9 / 16; }
+.sofi__card.is-sib { width:clamp(150px,16vw,232px); aspect-ratio:9 / 16; }
+
+.sofi__card-inner{
+  position:absolute;inset:0;overflow:hidden;
+}
+.sofi__card-inner img{
+  width:100%;height:100%;object-fit:cover;
+  transform:scale(1.12);          /* JS counter-parallax relaxes to 1.0 */
+  will-change:transform;
+}
+.sofi__card-label{
+  position:absolute;left:0;right:0;bottom:0;z-index:2;
+  padding:.9rem 1rem .8rem;
+  font-family:var(--sofi-serif);font-size:.92rem;letter-spacing:.22em;
+  text-transform:uppercase;
+  background:linear-gradient(to top, rgba(8,7,6,.82), transparent);
+}
+.sofi__card-cap{
+  display:block;margin-top:.25rem;
+  font-family:var(--sofi-sans);font-size:.52rem;letter-spacing:.16em;
+  text-transform:uppercase;opacity:.66;font-weight:400;
+}
+
+/* ---------- CENTRE CONTENT (P5) ---------- */
+.sofi__copy{
+  position:absolute;inset:0;z-index:5;
+  display:grid;place-items:center;pointer-events:none;
+}
+.sofi__center{
+  grid-area:1 / 1;text-align:center;pointer-events:auto;
+}
+.sofi__center h2{
+  font-family:var(--sofi-serif);font-weight:400;
+  font-size:clamp(2.6rem,6.4vw,5.4rem);line-height:1.0;letter-spacing:-.02em;
+  opacity:0;                      /* JS reveal */
+}
+.sofi__cta-wrap{ margin-top:1.4rem; opacity:0; } /* JS reveal */
+.sofi__rule{
+  width:min(34vw,460px);height:1px;margin:0 auto;
+  background:rgba(242,237,228,.55);
+  transform:scaleX(0);transform-origin:center;  /* JS draws scaleX 0->1 */
+}
+.sofi__cta{
+  display:inline-block;margin-top:1rem;
+  font-family:var(--sofi-sans);font-size:.66rem;letter-spacing:.4em;
+  text-transform:uppercase;color:var(--sofi-paper);opacity:.82;
+}
+.sofi__dot{
+  position:absolute;left:50%;bottom:calc(var(--sofi-mx) - 4px);z-index:6;
+  transform:translateX(-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:var(--sofi-bronze);opacity:0;
+}
+
+/* ---------- P7 NEXT SECTION (revealed on exit) ---------- */
+.next{
+  position:relative;
+  width:100vw;min-height:100vh;
+  background:#0a0908;
+  overflow:hidden;
+  display:flex;align-items:center;
+}
+.next__bust{
+  position:absolute;left:7vw;bottom:0;z-index:2;
+  width:min(28vw,360px);
+  filter:grayscale(.2) brightness(1.02);
+  transform:translateY(40px);opacity:0;  /* JS: rises in from below */
+}
+.next__bust .ph{
+  width:100%;aspect-ratio:3 / 4;border-radius:6px;
+  background:
+    radial-gradient(60% 50% at 50% 30%, #cfc7b8 0%, #6f685c 70%, #2a2620 100%);
+  box-shadow:0 30px 70px -30px rgba(0,0,0,.8);
+}
+.next__wm{
+  position:absolute;left:0;right:0;bottom:8%;z-index:1;text-align:center;
+  font-family:var(--sofi-serif);font-weight:300;color:var(--sofi-paper);
+  font-size:clamp(4rem,13vw,12rem);line-height:.85;letter-spacing:-.02em;
+  opacity:0;transform:translateY(60px);  /* JS rises in from bottom */
+}
+
+/* ============================================================
+   MOBILE (<=760px): NO pin, clean stacked reveal (C6/C7 mobile law)
+   ============================================================ */
+@media (max-width:760px){
+  :root{--sofi-mx:18px;}
+  .sofi__index{right:var(--sofi-mx)}
+  .sofi__center h2{font-size:clamp(2rem,9vw,3rem)}
+  .sofi__ghost-letter{font-size:clamp(16rem,72vw,26rem)}
+  .sofi__rim{font-size:clamp(2rem,9vw,3rem)}
+  .sofi__card.is-tall{width:46vw}
+  .sofi__card.is-sib {width:40vw}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<!--
+  PASSPORT · A3 «З чого збудований»  (ROUND 2 - СУПЕРКОМПОЗИЦІЯ)
+  Питання: З ЧОГО?  (дім 2, QUADRO-модерн) - ПОСТЕР, нуль кліків
+  Граматика збірки = collage-inspect (bundle-6), але БЕЗ inspect-лінзи (це постер).
+  atoms_used (>=3, код перенесено ДОСЛІВНО, конфігуровано через опції/розмітку):
+    1. parallax-collage - ЯДРО постера. ParallaxCollage.init(stage,{decoSelector,wordmark}) -
+       статична драбина плиток (scale-ритм) + великий wordmark-план ПОЗАДУ + глибинний
+       pointer-дрейф плиток на per-element data-depth амплітудах (ambient, нуль кліків).
+    2. split-word-headline - заголовок: SplitWordHeadline.create(h1) -> per-word rise з-під
+       clip (translateY 120->0)+opacity, house 'air' ease. Rest-safe фолбек set(1).
+    3. de-bleed - едиторіал-поля (кода): DeBleed.init(stage) full-bleed -> контейнер-картка,
+       wordmark позаду відкривається у полях на скролі.
+  Типо: Fraunces + Inter (house). Ease: house air (--aw-ease-air / 'air').
+  Закони: копі дослівно; нуль em/en-dash; нуль колізій підписів; rest = завершений постер;
+  тільки видиме (дерево/настил/білі площини/камінь); NO WebGL/mix-blend/backdrop; один дім
+  (QUADRO); renders/ відносні.
+-->
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>З чого збудований</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- atom stylesheets (verbatim) -->
+<link rel="stylesheet" href="technique-code/_tokens.css">
+<link rel="stylesheet" href="technique-code/parallax-collage/component.css">
+<link rel="stylesheet" href="technique-code/split-word-headline/component.css">
+<link rel="stylesheet" href="technique-code/de-bleed/component.css">
+<style>
+  :root{
+    --serif:"Fraunces",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
+    --paper:var(--aw-cream); --ink:var(--aw-ink); --muted:#6c6456; --copper:var(--aw-warm-accent);
+    --air:var(--aw-ease-air);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  img{display:block}
+
+  /* ---------- masthead ---------- */
+  .masthead{max-width:1500px;margin:0 auto;padding:clamp(48px,8vw,120px) clamp(24px,5vw,90px) clamp(20px,3vw,44px)}
+  .eyebrow{display:flex;align-items:center;gap:16px;font-size:var(--aw-type-eyebrow);letter-spacing:.36em;
+    text-transform:uppercase;color:var(--copper);font-weight:600;margin-bottom:clamp(20px,2.6vw,34px)}
+  .eyebrow::before{content:"";width:54px;height:1px;background:var(--copper);opacity:.75}
+  .masthead h1{font-family:var(--serif);font-weight:300;font-size:clamp(40px,7.6vw,128px);line-height:.98;
+    letter-spacing:var(--aw-tracking-tight);max-width:15ch}
+
+  /* ---------- collage poster (parallax-collage skin: composition is ours) ---------- */
+  .pc-stage{max-width:1500px;margin:0 auto;padding:0 clamp(24px,5vw,90px) clamp(60px,9vw,130px)}
+  .pc-plate{position:relative;width:100%;aspect-ratio:1/1.5}
+
+  /* the wordmark plane BEHIND the tiles (shows through the gutters) */
+  .pc-word{position:absolute;z-index:1;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .pc-word span{font-family:var(--serif);font-weight:300;font-style:italic;
+    font-size:clamp(64px,15vw,240px);letter-spacing:-.01em;color:rgba(20,19,15,0.07);white-space:nowrap;line-height:1}
+
+  /* a collage cell = a masked frame + its caption, drifting together (data-deco) */
+  .pc-cell{position:absolute;z-index:2;will-change:transform;backface-visibility:hidden}
+  .pc-frame{width:100%;overflow:hidden;background:#ddd6ca;box-shadow:0 30px 70px -40px rgba(20,19,15,.55)}
+  .pc-frame img{width:100%;height:100%;object-fit:cover}
+  .pc-cap{display:flex;align-items:baseline;gap:12px;margin-top:16px}
+  .pc-cap .no{font-family:var(--serif);font-size:clamp(15px,1.4vw,21px);color:var(--copper);font-weight:500;min-width:2.2ch}
+  .pc-cap .lbl{font-family:var(--serif);font-weight:500;font-size:clamp(19px,2vw,32px);line-height:1.02;letter-spacing:.004em}
+  .pc-cap .lbl i{font-style:italic;color:var(--muted);font-weight:400}
+
+  /* scale-ladder placement (NOT four equal tiles) */
+  .c-pergola{left:0%;   top:0%;  width:50%}
+  .c-pergola .pc-frame{aspect-ratio:4/3}
+  .c-roof{   left:58%;  top:3%;  width:40%}
+  .c-roof .pc-frame{aspect-ratio:1/1}
+  .c-facade{ left:20%;  top:36%; width:64%}
+  .c-facade .pc-frame{aspect-ratio:16/9}
+  .c-table{  left:4%;   top:66%; width:42%}
+  .c-table .pc-frame{aspect-ratio:4/3}
+
+  /* ---------- de-bleed coda ---------- */
+  .db-stage{background:#0c0b09}
+  .db-word span{font-family:var(--serif);font-weight:300;font-size:clamp(70px,17vw,300px);
+    letter-spacing:-.02em;color:rgba(236,229,216,0.10);line-height:1}
+  .db-media img{object-position:50% 46%}
+  .coda-note{right:clamp(28px,6vw,90px);bottom:clamp(40px,8vh,90px);text-align:right;max-width:26ch}
+  .coda-note .eyebrow{justify-content:flex-end;color:var(--aw-gold-accent)}
+  .coda-note .eyebrow::before{background:var(--aw-gold-accent)}
+  .coda-note p{font-family:var(--serif);font-weight:300;font-style:italic;font-size:clamp(22px,3vw,44px);
+    line-height:1.08;color:#f4ede1;letter-spacing:var(--aw-tracking-tight)}
+
+  @media (max-width:760px){
+    .pc-plate{aspect-ratio:auto;display:flex;flex-direction:column;gap:38px}
+    .pc-cell{position:relative!important;left:auto!important;top:auto!important;width:100%!important;transform:none!important}
+    .pc-word{display:none}
+  }
+</style>
+</head>
+<body>
+
+  <header class="masthead">
+    <div class="eyebrow">Дім 2 · QUADRO модерн</div>
+    <h1 data-swh>Матеріали, які видно з порога.</h1>
+  </header>
+
+  <!-- ===== ATOM 1: parallax-collage poster (composition ours) ===== -->
+  <section class="pc-stage" id="pcStage">
+    <div class="pc-plate" id="pcPlate">
+      <div class="pc-word"><span>Матеріали</span></div>
+
+      <figure class="pc-cell c-pergola" data-deco data-depth="0.9" data-axis="0.7">
+        <div class="pc-frame"><img src="renders/macro-pergola.webp" alt="Пергола, дерево"></div>
+        <figcaption class="pc-cap"><span class="no">01</span><span class="lbl">Пергола. <i>Дерево.</i></span></figcaption>
+      </figure>
+
+      <figure class="pc-cell c-roof" data-deco data-depth="0.5" data-axis="0.9">
+        <div class="pc-frame"><img src="renders/macro-roof.webp" alt="Тераса на даху, дощаний настил"></div>
+        <figcaption class="pc-cap"><span class="no">02</span><span class="lbl">Тераса на даху. <i>Дощаний настил.</i></span></figcaption>
+      </figure>
+
+      <figure class="pc-cell c-facade" data-deco data-depth="0.72" data-axis="0.6">
+        <div class="pc-frame"><img src="renders/day-front.webp" alt="Фасад, білі площини і скло"></div>
+        <figcaption class="pc-cap"><span class="no">03</span><span class="lbl">Фасад. <i>Білі площини і скло.</i></span></figcaption>
+      </figure>
+
+      <figure class="pc-cell c-table" data-deco data-depth="0.34" data-axis="0.9">
+        <div class="pc-frame"><img src="renders/macro-table.webp" alt="Тераса, камінь і дерево"></div>
+        <figcaption class="pc-cap"><span class="no">04</span><span class="lbl">Тераса. <i>Камінь і дерево.</i></span></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ===== ATOM 3: de-bleed coda ===== -->
+  <section class="db-stage" id="dbCoda">
+    <div class="db-word"><span>QUADRO</span></div>
+    <div class="db-media"><img src="renders/day-34.webp" alt="QUADRO модерн"></div>
+    <div class="db-around coda-note">
+      <div class="eyebrow">Дім 2 · QUADRO модерн</div>
+      <p>Так виглядає дім зблизька.</p>
+    </div>
+  </section>
+
+<!-- deps + atoms (verbatim) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="technique-code/parallax-collage/component.js"></script>
+<script src="technique-code/split-word-headline/component.js"></script>
+<script src="technique-code/de-bleed/component.js"></script>
+<script>
+(function(){
+  // register the house 'air' ease for split-word-headline (CustomEase available)
+  try { if (window.gsap && window.CustomEase) { window.gsap.registerPlugin(window.CustomEase); window.CustomEase.create('air','0.25,0.74,0.22,0.99'); } } catch(e){}
+
+  // === ATOM 1: parallax-collage — pointer depth-drift of the cells + wordmark plane ===
+  window.ParallaxCollage.init('#pcPlate', { decoSelector:'[data-deco]', wordmark:'.pc-word', maxShiftPx:22, ease:0.08 });
+
+  // === ATOM 2: split-word-headline — the masthead, per-word rise (house air) ===
+  var swh = window.SplitWordHeadline.create('[data-swh]', { ease:'air', stagger:0.08, dur:0.9, start:'top 90%' });
+  // rest-safe: if the ticker is throttled and words never rose, force them shown
+  setTimeout(function(){
+    var w = document.querySelector('[data-swh] .swh-word');
+    if (w && (parseFloat(getComputedStyle(w).opacity)||0) < 0.1 && swh && swh.set) swh.set(1);
+  }, 1500);
+
+  // === ATOM 3: de-bleed — the coda (full-bleed -> contained card, wordmark behind) ===
+  window.DeBleed.init('#dbCoda', { insetX:18, insetY:12, siblings:'.coda-note', pinFactor:1.0 });
+})();
+</script>
+</body>
+</html>

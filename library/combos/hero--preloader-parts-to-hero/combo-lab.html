@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>combo: hero--preloader-parts-to-hero — «Очікування як ритуал» (award hero, load-in, no pin)</title>
+<!--
+  HERO VARIANT · hero--preloader-parts-to-hero · «Очікування як ритуал»
+  ============================================================================
+  THE WAIT IS THE BRAND. A band-collapse preloader (live 0->100 counter + brand
+  wordmark over a dark panel) holds as a REAL network/decode gate over the heavy
+  hero render. The render <img> is force-decoded; ONLY when img.decode() resolves
+  (and a minimum ritual hold passes) does preloader.ready() fire -> the dark panel
+  collapses to a centre band and vanishes -> the CENTRE SEAM (a cream cover over the
+  render) OPENS, doors parting from the centre outward to unveil the building ->
+  the title rises line-by-line from under its masks and the content cascades in.
+
+  DECODE-GUARD (vital, failure #1 on heroes): the seam never opens onto an undecoded
+  image. ready() is gated on img.decode(); the cream cover stays solid until then,
+  so there is NO black flicker at the unveil.
+
+  MECHANIC ROOT (distinctness): a counted, gated WAIT that resolves into DOORS that
+  PART FROM THE CENTRE. No other hero opens with a live counter -> centre-seam doors.
+  It is unmistakable in a screenshot mid-open (two cream halves retreating from a
+  centre line) and is welded to its own root — not "big title over full-bleed media".
+
+  ATOMS (cite ids, never inline atom code):
+    preloader-band-collapse  — the gate: counter + wordmark + dark panel collapse
+    center-seam-split        — the doors: cream cover OPENS from centre (the unveil)
+    mask-up-title            — the title rises line-by-line from baseline masks
+    content-stage-cascade    — eyebrow -> body -> meta -> CTA cascade (chrome last)
+
+  PINS: none. The preloader + seam + cascade are TIMELINES (set/play), not scrubs.
+  expectPins:0. The hero is a load-in; the page scrolls natively after the reveal.
+  NO WebGL · NO mix-blend · NO backdrop · motion = clip-path/transform/opacity only.
+  ============================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../../components/preloader-band-collapse/component.css">
+<link rel="stylesheet" href="../../components/center-seam-split/component.css">
+<link rel="stylesheet" href="../../components/mask-up-title/component.css">
+<link rel="stylesheet" href="../../components/content-stage-cascade/component.css">
+<link rel="stylesheet" href="../_scaffold/combo-scaffold.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<!-- smooth-scroll (criterion 22): guarded Lenis 1.1.13, wired gsap.ticker -> ScrollTrigger.update after the reveal -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  /* ---- variant SKIN only (scaffold owns the rails) ---------------------- */
+
+  /* the hero stage is dark so the doors read as light parting over a dark field */
+  #hero { background: var(--combo-bg); }
+
+  /* the decoded render lives in the render surface; a quiet grade + slow ambient drift */
+  #renderSurface img { object-position: 50% 38%; filter: saturate(1.02) contrast(1.03); }
+
+  /* a one-shot settle on the render as the doors open so a static hero never reads dead.
+     NO permanent will-change: the layer is promoted ONLY while the finite settle runs (GSAP
+     toggles will-change for its duration) and dropped on complete — no idle GPU layer. */
+  .ppth__media { position: absolute; inset: -2.4% -2.4%; }
+  .ppth__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* a soft top+bottom vignette for type legibility (gradient = paint, not a blend mode) */
+  #hero::after { content: ""; position: absolute; inset: 0; z-index: 4; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(12,10,8,.46) 0%, rgba(12,10,8,0) 26%, rgba(12,10,8,0) 52%, rgba(12,10,8,.66) 100%); }
+
+  /* ---- the spine: eyebrow, masked title, body, meta row, CTA ------------- */
+  .ppth__spine { position: absolute; z-index: 6; left: clamp(20px,5vw,80px); right: clamp(20px,5vw,80px);
+    bottom: clamp(28px,8vh,84px); color: var(--combo-cream); pointer-events: none;
+    text-shadow: 0 2px 30px rgba(0,0,0,.42); }
+
+  .ppth__eyebrow { font: 500 clamp(11px,1.05vw,13px)/1 var(--combo-sans); letter-spacing: .22em;
+    text-transform: uppercase; opacity: .82; display: inline-flex; align-items: center; gap: .7em; }
+  .ppth__eyebrow::before { content: ""; width: 30px; height: 1px; background: var(--combo-cream); opacity: .6; display: inline-block; }
+
+  /* title: two lines, each in a mask (mask-up-title contract: .mut-line wrapper, moving child first) */
+  #title { margin: clamp(.5rem,1.6vh,1.1rem) 0 0; }
+  #title .mut-line { display: block; overflow: hidden; }
+  #title .mut-line > span { display: block; font-family: var(--combo-serif); font-weight: 300;
+    font-size: clamp(40px,7.4vw,118px); line-height: .92; letter-spacing: -.035em; }
+  #title .mut-line > span em { font-style: italic; font-weight: 400; color: var(--combo-accent); }
+
+  .ppth__body { margin: clamp(.7rem,1.9vh,1.3rem) 0 0; max-width: 42ch;
+    font: 400 clamp(14px,1.18vw,17px)/1.55 var(--combo-sans); color: rgba(244,239,230,.92); }
+
+  .ppth__row { margin-top: clamp(1rem,2.6vh,1.7rem); display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: clamp(18px,3vw,44px); }
+  .ppth__meta { font: 500 clamp(11px,1vw,13px)/1.4 var(--combo-sans); letter-spacing: .04em; color: rgba(244,239,230,.74); }
+  .ppth__meta b { display: block; color: var(--combo-cream); font-weight: 600; letter-spacing: .01em; margin-bottom: .25em; }
+
+  .ppth__cta { pointer-events: auto; margin-left: auto; display: inline-flex; align-items: center; gap: .8em;
+    color: var(--combo-cream); text-decoration: none; font: 500 clamp(12px,1.05vw,14px)/1 var(--combo-sans);
+    letter-spacing: .12em; text-transform: uppercase; }
+  .ppth__cta .ppth__rule { width: 46px; height: 1px; background: var(--combo-cream); transform-origin: left center;
+    display: inline-block; transition: transform .34s cubic-bezier(.22,1,.36,1); }
+  .ppth__cta:hover .ppth__rule { transform: scaleX(1.55); }
+
+  /* corner chrome (top labels) — quietest layer, cascades in last */
+  .ppth__top { position: absolute; z-index: 6; top: clamp(20px,4vh,40px); left: clamp(20px,5vw,80px);
+    right: clamp(20px,5vw,80px); display: flex; justify-content: space-between; align-items: flex-start;
+    color: var(--combo-cream); pointer-events: none; }
+  .ppth__top span { font: 500 clamp(10px,.9vw,12px)/1.5 var(--combo-sans); letter-spacing: .16em;
+    text-transform: uppercase; opacity: .8; text-align: right; }
+  .ppth__top span:first-child { text-align: left; }
+
+  /* ---- the preloader gate skin (atom contract: .pbc-panel / .pbc-mark / .pbc-counter) ---- */
+  #pre { z-index: 9990; }
+  .pbc-mark .ppth__wordmark { font-family: var(--combo-serif); font-weight: 300; color: var(--pbc-ink, #f4f1ea);
+    font-size: clamp(2.4rem,8.5vw,7rem); letter-spacing: -.02em; line-height: 1; }
+  .pbc-mark .ppth__wordmark em { font-style: italic; font-weight: 400; }
+  .pbc-counter { font: 500 .8rem/1 var(--combo-sans); letter-spacing: .14em; display: flex; align-items: center; gap: .7em;
+    font-variant-numeric: tabular-nums; }
+  .pbc-counter::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--pbc-ink, #f4f1ea); opacity: .85; }
+  .pbc-label { position: absolute; right: clamp(20px,3vw,40px); bottom: clamp(20px,4vh,40px); z-index: 4;
+    color: var(--pbc-ink, #f4f1ea); font: 500 .72rem/1 var(--combo-sans); letter-spacing: .18em; text-transform: uppercase; opacity: .85; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ppth__media { inset: 0; transform: none !important; }
+  }
+</style>
+</head>
+<body>
+  <!-- HERO is the FIRST screen (no-pin load-in); no lead spacer above it. -->
+  <section id="hero" class="combo-stage" data-combo="hero--preloader-parts-to-hero">
+
+    <!-- THE RENDER (decode-guarded): the building is the hero. [data-render-surface] for the probe. -->
+    <div id="renderSurface" data-render-surface>
+      <div class="ppth__media">
+        <img id="heroImg" alt="Таунхауси на вул. Замковій, денний вид" decoding="async">
+      </div>
+    </div>
+
+    <!-- top chrome (cascades in LAST — first the building, then the interface) -->
+    <div class="ppth__top">
+      <span>вул. Замкова</span>
+      <span>6 таунхаусів<br>82 м²</span>
+    </div>
+
+    <!-- the spine -->
+    <div class="ppth__spine">
+      <div class="ppth__eyebrow" id="eyebrow">Власний квартал</div>
+
+      <div id="title">
+        <span class="mut-line"><span>Очікування</span></span>
+        <span class="mut-line"><span>як <em>ритуал</em></span></span>
+      </div>
+
+      <p class="ppth__body" id="body">Шість будинків і власна сотка під ключ. Кава на терасі, а не коробка з сусідами за стіною.</p>
+
+      <div class="ppth__row">
+        <div class="ppth__meta" id="metaA"><b>1.5 сотки</b>двір, що належить вам</div>
+        <div class="ppth__meta" id="metaB"><b>82 м²</b>два рівні, готові до життя</div>
+        <a class="ppth__cta" id="cta" href="#plan">Дивитись план <span class="ppth__rule"></span></a>
+      </div>
+    </div>
+
+    <!-- the SEAM cover (cream doors) is injected by center-seam-split over #renderSurface -->
+  </section>
+
+  <!-- the preloader gate: dark panel + brand wordmark + live counter (atom DOM contract) -->
+  <div class="pbc-stage" id="pre">
+    <div class="pbc-panel"></div>
+    <div class="pbc-mark"><div class="ppth__wordmark">ЕРУ<em>дім</em></div></div>
+    <div class="pbc-counter">0%</div>
+    <div class="pbc-label">вул. Замкова</div>
+  </div>
+
+  <div class="combo-post">наступна секція</div>
+
+  <!-- scaffold + adapters, then the cited atoms, then ONE inline orchestration script -->
+  <script src="../_scaffold/combo-scaffold.js"></script>
+  <script src="../_scaffold/adapters.js"></script>
+  <script src="../../components/preloader-band-collapse/component.js"></script>
+  <script src="../../components/center-seam-split/component.js"></script>
+  <script src="../../components/mask-up-title/component.js"></script>
+  <script src="../../components/content-stage-cascade/component.js"></script>
+
+  <script>
+    (function () {
+      SectionHarness.boot();
+      var gsap = window.gsap;
+      var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // expo.out token (for the ambient drift), in addition to the registered 'air'
+      if (window.CustomEase && gsap && !gsap.parseEase('expoOut')) {
+        try { window.CustomEase.create('expoOut', '0.16,1,0.3,1'); } catch (e) {}
+      }
+
+      var HERO_SRC = 'renders/day-34.webp';   // clean 1920x1080 landscape, cars-free (asset-truth)
+      var img = document.getElementById('heroImg');
+
+      // ---- atom instances (each wired in its own ranOK) ----
+      var preloader, seam, title, cascade;
+
+      // GATE: the cream doors over the render. Starts CLOSED (covering) — the render is
+      // hidden behind it until decode resolves, so no undecoded frame is ever shown.
+      SectionHarness.ranOK('center-seam-split', function () {
+        seam = window.CenterSeamSplit.create('#renderSurface', {
+          axis: 'x',                 // vertical seam -> doors part left+right from centre
+          fill: '#f4efe6',           // cream doors over the render
+          duration: 1.15, ease: 'power2.in',   // Saisei open: hairline dwells, then rips open
+          z: 30
+        });
+        seam.set(0);                 // fully covering: the render is masked behind the cream
+      });
+
+      // TITLE: two masked lines that rise from the baseline on reveal (PURE play()).
+      SectionHarness.ranOK('mask-up-title', function () {
+        title = window.MaskUpTitle.create('#title', {
+          lineSelector: '.mut-line', stagger: 0.14, duration: 1.0, ease: 'expo.out', from: 116
+        });
+        // primed hidden by create(); held until the doors finish opening
+      });
+
+      // CASCADE: chrome reveals in a FIXED order, header/CTA LAST (Saisei rule).
+      SectionHarness.ranOK('content-stage-cascade', function () {
+        cascade = window.ContentStageCascade.create({
+          gap: 0.13,
+          stages: [
+            { el: '#eyebrow', kind: 'fade',    dur: 0.7 },
+            { el: '#title',   kind: 'fn',      fn: function () { title && title.play(); } },
+            { el: '#body',    kind: 'fade',    dur: 0.8, gapAfter: 0.22 },
+            { el: '#metaA',   kind: 'slide-x', from: 26, dur: 0.7 },
+            { el: '#metaB',   kind: 'slide-x', from: 26, dur: 0.7, gapAfter: 0.2 },
+            { el: '#cta',     kind: 'fade',    dur: 0.6 },
+            { el: '.ppth__top span', kind: 'fade', dur: 0.7, stagger: 0.08 }   // chrome LAST
+          ]
+        });
+      });
+
+      // PRELOADER: the gate — counter + wordmark over a dark panel that collapses on ready().
+      SectionHarness.ranOK('preloader-band-collapse', function () {
+        preloader = window.PreloaderBandCollapse.create('#pre', {
+          bg: '#16130f', ink: '#f4efe6',
+          collapseDur: 1.05, collapseEase: 'expo.out',
+          counter: true, counterDur: 1.3, minHold: 700,
+          markHandoff: { from: 1, to: 1.04 }    // wordmark eases up a touch as the panel parts
+        });
+        window.__ppth = { preloader: preloader, seam: seam };
+      });
+
+      // -------- one-shot settle on the render (transform only; finite, then layer dropped) --------
+      // A slow scale/x settle riding in WITH the doors so a static hero never reads dead. It is a
+      // true one-shot (NOT repeat:-1): will-change is set only for its duration, then cleared, so
+      // there is no permanently-promoted idle layer (acceptance: will-change cleared after one-shots).
+      function startAmbient() {
+        if (reduced || !gsap) return;
+        var media = document.querySelector('.ppth__media');
+        gsap.fromTo(media,
+          { scale: 1.07, xPercent: -0.8, willChange: 'transform' },
+          { scale: 1.0, xPercent: 0, duration: 2.6, ease: 'expoOut',
+            onComplete: function () { gsap.set(media, { willChange: 'auto' }); } });
+      }
+
+      // clear lingering will-change the ATOMS set (css-cover, pbc panel/mark, title inners) once
+      // their one-shots are done — the atoms have no completion hook to do it and must not be edited,
+      // so the orchestration clears it. Acceptance: "will-change cleared after one-shots."
+      function clearWillChange(elOrSel) {
+        var el = typeof elOrSel === 'string' ? document.querySelector(elOrSel) : elOrSel;
+        if (el && el.style) el.style.willChange = 'auto';
+      }
+      function clearTitleWillChange() {
+        var inners = document.querySelectorAll('#title .mut-line > *');
+        for (var i = 0; i < inners.length; i++) inners[i].style.willChange = 'auto';
+      }
+
+      // -------- the reveal choreography (load-in; gated on a REAL decode) --------
+      var markEl = document.querySelector('#pre .pbc-mark');
+      function reveal() {
+        // 1) the dark preloader panel collapses to a centre band and clears
+        preloader.run(function onPanelCleared() {
+          // 2) the cream DOORS open from the centre (the heroic unveil) onto the decoded render.
+          //    the brand wordmark hands off (fades up a touch) as the doors part — no linger.
+          startAmbient();
+          // preloader one-shots are done: drop its panel + mark layers (will-change cleared)
+          clearWillChange('#pre .pbc-panel');
+          if (markEl && gsap) gsap.to(markEl, { opacity: 0, y: -24, duration: 0.7, ease: 'power2.out',
+            onComplete: function () { clearWillChange(markEl);
+              var pre = document.getElementById('pre'); if (pre) pre.style.display = 'none'; } });
+          if (seam && seam.open) {
+            seam.open({ onComplete: function () {
+              // the seam is fully open and never animates again: drop its GPU layer
+              if (seam.el) clearWillChange(seam.el);
+              // 3) once the building stands clear, the content cascades in (title rises, chrome last)
+              if (cascade && cascade.play) cascade.play(onCascadeDone);
+              else onCascadeDone();
+            }});
+          } else {
+            if (cascade && cascade.play) cascade.play(onCascadeDone); else onCascadeDone();
+          }
+        });
+      }
+
+      // after the whole load-in finishes: clear the title's will-change (its rise is done) and
+      // arm smooth-scroll. The hero is a one-shot reveal; nothing animates idle from here.
+      function onCascadeDone() {
+        clearTitleWillChange();
+        armSmoothScroll();
+      }
+
+      // -------- smooth-scroll (criterion 22): guarded Lenis, wired to GSAP's ticker --------
+      // Armed only AFTER the reveal so it never fights the load-in; reduced-motion stays native.
+      var lenis = null;
+      function armSmoothScroll() {
+        if (lenis || reduced || !gsap || !window.Lenis) return;   // guarded: degrade to native scroll
+        try {
+          lenis = new window.Lenis({ lerp: 0.1, smoothWheel: true });
+          lenis.on('scroll', function () { if (window.ScrollTrigger) window.ScrollTrigger.update(); });
+          gsap.ticker.add(function (time) { lenis.raf(time * 1000); });
+          gsap.ticker.lagSmoothing(0);
+        } catch (e) { lenis = null; }   // any failure -> native scroll, no throw
+      }
+
+      // DECODE-GUARD: assign src, force-decode, and only THEN tell the preloader we are ready.
+      // The cream doors stay solid until this resolves -> the seam never opens on a black frame.
+      function gateOnDecode() {
+        img.src = HERO_SRC;
+        var done = function () { try { preloader.ready(); } catch (e) {} };
+        if (img.decode) {
+          img.decode().then(done).catch(function () {
+            // fallback: load/error still lets the ritual complete (no hard hang)
+            if (img.complete && img.naturalWidth > 0) done();
+            else img.addEventListener('load', done, { once: true });
+            img.addEventListener('error', done, { once: true });
+          });
+        } else {
+          if (img.complete && img.naturalWidth > 0) done();
+          else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
+        }
+      }
+
+      // kick the ritual: start the counter immediately, gate ready() on decode.
+      if (reduced) {
+        // reduced-motion: instant, honest state — render shown, doors open, content visible, no panel.
+        // native scroll is correct here (no Lenis). Clear any will-change the atoms primed on init.
+        img.src = HERO_SRC;
+        if (seam && seam.set) seam.set(1);
+        if (preloader && preloader.set) preloader.set(1);
+        var pre = document.getElementById('pre'); if (pre) pre.style.display = 'none';
+        if (title && title.set) title.set(1);
+        if (cascade && cascade.play) cascade.play();
+        if (seam && seam.el) clearWillChange(seam.el);
+        clearWillChange('#pre .pbc-panel'); clearWillChange('#pre .pbc-mark'); clearTitleWillChange();
+      } else {
+        reveal();        // preloader.run() starts the counter + holds
+        gateOnDecode();  // resolves -> preloader.ready() -> panel collapse -> seam open -> cascade
+      }
+
+      // CONTRACT: no pin. preloader + seam + cascade are timelines. expectPins:0.
+      SectionHarness.declare({
+        pinOwner: 'none', expectPins: 0,
+        atomsCited: ['preloader-band-collapse', 'center-seam-split', 'mask-up-title', 'content-stage-cascade']
+      });
+    })();
+  </script>
+</body>
+</html>

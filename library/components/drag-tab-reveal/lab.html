@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · drag-tab-reveal · gapsy ("Pull Me" edge tab drags out a panel)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · drag-tab-reveal
+================================================================================
+  gapsystudio's "Pull Me" drawer — an edge-anchored panel sits mostly off-screen with a
+  grab-tab on its visible edge. Drag the tab to pull the panel out (follows the pointer);
+  release past a threshold => snap open, else snap back. Click to toggle. Label flips.
+  Pointer move/up on WINDOW (F-08 lesson). Harvested from D_gapsy (C /about). NO WebGL.
+  window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+
+<style>
+  :root{ --studio:#f2f2f0; --ink:#16150f; --red:#f0473e; --warm-white:#f4f1ea;
+         --display:'Anton',sans-serif; --script:'Caveat',cursive; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--studio);color:var(--ink);font-family:var(--sans);overflow:hidden}
+
+  /* a page behind the drawer (QUADRO render + a hint) */
+  .page{position:fixed;inset:0;display:grid;place-items:center;text-align:center}
+  .page img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5}
+  .page .hint{position:relative;z-index:1}
+  .page .hint .k{font-family:var(--script);font-size:1.6rem;color:var(--red)}
+  .page .hint h1{font-family:var(--display);font-size:7vw;line-height:.95;margin-top:.3rem}
+  .page .hint p{margin-top:1rem;opacity:.75;font-size:.9rem;letter-spacing:.08em;text-transform:uppercase}
+
+  .dtr-stage{ --dtr-w:380px; --dtr-bg:#16150f; --dtr-ink:#f4f1ea; --dtr-tab-bg:#16150f; --dtr-tab-ink:#f4f1ea; }
+  .dtr-content h2{font-family:var(--display);font-size:2.4rem;line-height:1;margin-bottom:1.4rem}
+  .dtr-content .row{display:block;font-size:1.05rem;margin:.6rem 0;color:var(--warm-white);text-decoration:none}
+  .dtr-content .row:hover{color:var(--red)}
+  .dtr-content .lbl{font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;opacity:.5;margin:1.8rem 0 .4rem}
+</style>
+</head>
+<body>
+
+  <div class="page">
+    <img src="renders/aerial.webp" alt="QUADRO">
+    <div class="hint">
+      <div class="k">потягни вкладку зліва →</div>
+      <h1>Pull Me</h1>
+      <p>drag / click / Enter</p>
+    </div>
+  </div>
+
+  <div class="dtr-stage" id="drawer">
+    <aside class="dtr-panel">
+      <button class="dtr-tab"><span class="dtr-tab-label">Pull Me</span></button>
+      <div class="dtr-content">
+        <h2>Напишіть нам</h2>
+        <a class="row" href="#">info@gapsystudio.com</a>
+        <a class="row" href="#">+380 73 038 90 63</a>
+        <div class="lbl">Наші соцмережі</div>
+        <a class="row" href="#">Facebook</a>
+        <a class="row" href="#">Behance</a>
+        <a class="row" href="#">Dribbble</a>
+        <a class="row" href="#">Instagram</a>
+        <div class="lbl">Більше про нас</div>
+        <a class="row" href="#">↓ Презентація компанії</a>
+      </div>
+    </aside>
+  </div>
+
+<script src="component.js"></script>
+<script>
+  window.__dtr = DragTabReveal.create('#drawer', { side:'left', threshold:0.4, duration:460, ease:'cubic-bezier(.22,1,.36,1)', openLabel:'Close', closedLabel:'Pull Me' });
+</script>
+</body>
+</html>

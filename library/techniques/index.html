@@ -1,0 +1,259 @@
+<style>
+  :root{
+    --bg:#0d1712; --panel:#131f18; --panel-2:#0f1a14;
+    --ink:#ece0c8; --ink-dim:#b6c3b2; --muted:#7f9488;
+    --accent:#5fae7d; --accent-soft:rgba(95,174,125,.14); --accent-line:rgba(95,174,125,.35);
+    --amber:#d3ac6e; --amber-soft:rgba(211,172,110,.13);
+    --line:#233229; --code:#0a120d;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  :root[data-theme="light"]{
+    --bg:#f4efe3; --panel:#fbf7ec; --panel-2:#f0e9d8;
+    --ink:#1c2b22; --ink-dim:#3a4a40; --muted:#5f7266;
+    --accent:#2f7a4f; --accent-soft:rgba(47,122,79,.1); --accent-line:rgba(47,122,79,.3);
+    --amber:#9a7328; --amber-soft:rgba(154,115,40,.12);
+    --line:#ddd3bf; --code:#efe8d6;
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg:#f4efe3; --panel:#fbf7ec; --panel-2:#f0e9d8;
+      --ink:#1c2b22; --ink-dim:#3a4a40; --muted:#5f7266;
+      --accent:#2f7a4f; --accent-soft:rgba(47,122,79,.1); --accent-line:rgba(47,122,79,.3);
+      --amber:#9a7328; --amber-soft:rgba(154,115,40,.12);
+      --line:#ddd3bf; --code:#efe8d6;
+    }
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;margin:0;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px;margin:0 auto;padding:0 20px 96px}
+  a{color:var(--accent)}
+  ::selection{background:var(--accent-soft)}
+
+  /* hero */
+  header{padding:72px 0 44px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(32px,7vw,58px);line-height:1.02;letter-spacing:-.015em;margin:0;text-wrap:balance}
+  h1 em{font-style:italic;color:var(--accent)}
+  .sub{color:var(--ink-dim);font-size:clamp(16px,2.4vw,19px);margin:20px 0 0;max-width:60ch}
+  .facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .fact{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 13px;background:var(--panel-2)}
+  .fact b{color:var(--ink)}
+
+  /* section */
+  section{padding-top:60px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  h2{font-family:var(--serif);font-weight:600;font-size:clamp(23px,3.6vw,30px);letter-spacing:-.01em;margin:8px 0 6px;text-wrap:balance}
+  .lead{color:var(--muted);max-width:64ch;margin:0 0 26px;font-size:15.5px}
+
+  /* pipeline = real sequence → numbered */
+  .flow{display:grid;gap:14px}
+  @media(min-width:680px){.flow{grid-template-columns:repeat(2,1fr)}}
+  .step{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 22px 20px}
+  .step .num{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em}
+  .step h3{font-family:var(--serif);font-size:19px;font-weight:600;margin:6px 0 8px}
+  .step p{color:var(--ink-dim);font-size:14.5px;margin:0 0 10px}
+  .step .trick{color:var(--muted);font-size:13.5px;margin:0}
+  .step .trick b{color:var(--accent)}
+  .path{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:12px;word-break:break-word;border-top:1px dashed var(--line);padding-top:10px}
+
+  /* technique catalog = not a sequence → no numbers, chips carry state */
+  .cat{display:grid;gap:14px}
+  @media(min-width:680px){.cat{grid-template-columns:repeat(2,1fr)}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column}
+  .card .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
+  .card h3{font-size:16px;font-weight:650;margin:0;letter-spacing:-.005em}
+  .card p{color:var(--ink-dim);font-size:14px;margin:0 0 9px}
+  .card .trick{color:var(--muted);font-size:13.5px;margin:0}
+  .card .trick b{color:var(--accent)}
+  .card .foot{margin-top:auto;padding-top:12px}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;padding:3px 9px;border-radius:6px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
+  .chip{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;padding:3px 8px;border-radius:5px;white-space:nowrap}
+  .chip.done{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
+  .chip.ceil{background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber)}
+  .tag{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+
+  /* fixes grid — compact */
+  .fixes{display:grid;gap:12px}
+  @media(min-width:560px){.fixes{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:860px){.fixes{grid-template-columns:repeat(3,1fr)}}
+  .fix{background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:15px 16px}
+  .fix h4{font-size:14px;margin:0 0 5px;font-weight:650}
+  .fix p{color:var(--muted);font-size:13px;margin:0 0 8px}
+
+  /* limits note */
+  .note{background:var(--code);border-left:3px solid var(--amber);border-radius:0 11px 11px 0;padding:16px 20px;margin:0 0 22px;color:var(--ink-dim);font-size:14.5px}
+  .note b{color:var(--ink)}
+
+  code{font-family:var(--mono);font-size:12.5px;background:var(--code);border:1px solid var(--line);padding:1px 5px;border-radius:5px;color:var(--ink-dim)}
+
+  footer{margin-top:64px;padding-top:30px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+  footer b{color:var(--ink)}
+  footer p{margin:0 0 12px;max-width:70ch}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Field guide · екстракційний метод</div>
+    <h1>Бібліотека <em>прийомів</em> реплікації</h1>
+    <p class="sub">Техніки, витягнуті конвеєром зі springs.estate — стек Locomotive + Barba + WebGL, відтворений нашими шарами без WebGL. Переносна база для повторення десятків анімованих сайтів.</p>
+    <div class="facts">
+      <span class="fact">джерело · <b>springs.estate</b></span>
+      <span class="fact">метод · <b>екстракція → криві → choreo → движок</b></span>
+      <span class="fact">доказ · <b>gallery 7/7 pass</b></span>
+      <span class="fact">mobile hero · <b>32% → 2%</b></span>
+    </div>
+  </header>
+
+  <section>
+    <div class="kicker">Ядро · послідовність</div>
+    <h2>Екстракційний конвеєр</h2>
+    <p class="lead">Кожна сторінка будується детермінованим пайплайном — жодного числа руками. Це фундамент; усе інше стоїть на ньому. Порядок тут — справжня послідовність.</p>
+    <div class="flow">
+      <div class="step">
+        <div class="num">01 — extract</div>
+        <h3>token-extractor</h3>
+        <p>Знімає spec сайту: дерево вузлів × computed-стилі × два вьюпорти. Конфіг-драйв (сайти × секції), самоперевірки.</p>
+        <p class="trick"><b>Прийом:</b> перетин класів архів∩живе + позиційний fallback; lazy data-src форс; nbsp зберігається (керує переносами заголовків).</p>
+        <div class="path">scripts/token-extractor.mjs</div>
+      </div>
+      <div class="step">
+        <div class="num">02 — map</div>
+        <h3>scene-map + animation-map</h3>
+        <p>Уся сторінка одним прогоном: снап-драбина, rest-офсети, per-section травели. Плюс криві руху за скрол-фазою.</p>
+        <p class="trick"><b>Прийом:</b> CDP synthesizeScrollGesture(mouse) — єдиний драйвер virtual-scroll; transient-семпли під час lerp; лерп у wall-time.</p>
+        <div class="path">scripts/scene-map.mjs · animation-map.mjs</div>
+      </div>
+      <div class="step">
+        <div class="num">03 — generate</div>
+        <h3>choreo-gen</h3>
+        <p>scene + карти → choreo.json (біндінги з матрицями й кривими) + scene.css. Усе генерат.</p>
+        <p class="trick"><b>Прийом:</b> нормалізація осі карти → сторінковий скрол; iEnd екстраполяцією; коліно піна вставкою точки зламу.</p>
+        <div class="path">scripts/choreo-gen.mjs</div>
+      </div>
+      <div class="step">
+        <div class="num">04 — render</div>
+        <h3>springs-engine (движок)</h3>
+        <p>wheel-перехват → снап-лерп у нативний scrollTop; вербатим-повтор live-матриць + boot-fix; травели; reveal-латчі.</p>
+        <p class="trick"><b>Прийом:</b> повністю data-driven із choreo → переносний на будь-яку сторінку. Gallery це довів.</p>
+        <div class="path">library/combos/*/springs-engine.js</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Каталог · рух і хореографія</div>
+    <h2>Прийоми руху</h2>
+    <p class="lead">Це каталог, не послідовність — тому без нумерації. Чіп праворуч кодує стан: доведено пікселем чи межа методу.</p>
+    <div class="cat">
+      <div class="card">
+        <div class="top"><h3>Rotated-matrix колаж</h3><span class="chip done">доведено</span></div>
+        <p>Hero-колаж повернутий ~28° <code>matrix(.883,-.469,.469,.883)</code>. Axis-aligned translate не відтворює.</p>
+        <p class="trick"><b>Прийом:</b> зберігати повну матрицю [a,b,c,d,tx,ty], повторювати покадрово.</p>
+        <div class="foot"><span class="tag">пастка 17</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Mobile-колаж auto-drift</h3><span class="chip done">32 → 2%</span></div>
+        <p>Mobile hero авто-грає за часом — item дрейфує при стоячому скролі. Відтворюється timing-каналом.</p>
+        <p class="trick"><b>Прийом:</b> intro-timing --vp mobile (rAF-рекордер) → introGate&#123;auto&#125; → движок грає auto-block по wall-time; поза <code>?intro=0&idt=MS</code> + ambient-drift на буті.</p>
+        <div class="foot"><span class="badge">mobile-intro0 1.99% PASS</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Sticky-slider hero</h3><span class="chip done">доведено</span></div>
+        <p>Пінна секція, контент вертикально скролить через 6 слайдів. Криві-гейт + travel.</p>
+        <p class="trick"><b>Прийом:</b> section-root травел (пін до s, потім реліз); min-height = curve.h для bg-покриття без scale дітей.</p>
+        <div class="foot"><span class="badge">gallery s989 / s1980 pass</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Інтро-морф часовою віссю</h3><span class="chip done">доведено</span></div>
+        <p>Desktop інтро-морф — часовий (авто-фаза ~9.5 с), не функція скролу.</p>
+        <p class="trick"><b>Прийом:</b> same-run baseline (baseline + timing ділять клок); пози <code>?intro=I&idt=MS</code>; wall-time playback.</p>
+        <div class="foot"><span class="tag">пастка 49</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Reveal-латчі</h3><span class="chip done">доведено</span></div>
+        <p>Reveal = подія тригера + часовий перехід, не функція s. На осілих позах — завжди фінал.</p>
+        <p class="trick"><b>Прийом:</b> rising-o степ по тригеру; clip-вайп степ по геометрії; binary-flip → геометричний reveal.</p>
+        <div class="foot"><span class="tag">пастка 23</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Ancestor-clip вайпи</h3><span class="chip done">доведено</span></div>
+        <p>Вайп under-previous = статичний CSS-clip кореня секції; шар піниться повз статичну clip-лінію.</p>
+        <p class="trick"><b>Прийом:</b> ancestorClips (computed clipPath від кореня вгору) → широкий polygon-clip мінус власний травел.</p>
+        <div class="foot"><span class="tag">пастка 40</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Каталог · шари та композиція</div>
+    <h2>Прийоми шарів</h2>
+    <div class="cat">
+      <div class="card">
+        <div class="top"><h3>Z-order після прунінгу</h3><span class="chip done">27 → 3.7%</span></div>
+        <p>Прунінг робить бг-секцію сиблінгом контент-секції → бг малюється поверх каптіона за DOM-порядком.</p>
+        <p class="trick"><b>Прийом:</b> точковий z-lift обгортки (nature над place-bg), не глобальний z-max — той регресить.</p>
+        <div class="foot"><span class="tag">пастка 64 · s9180</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>WebGL texture-underlay</h3><span class="chip done">доведено</span></div>
+        <p>Канвас-секції (жінка wellness): справжні webgl-текстури live як underlay-стек, no-WebGL.</p>
+        <p class="trick"><b>Прийом:</b> сніфер текстур → шари в просторі канваса 1:1 (2× бокса), background-size:100% 100% + mask.</p>
+        <div class="foot"><span class="tag">пастка 42</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Shell-bg (фарба оболонок)</h3><span class="chip done">доведено</span></div>
+        <p>Фарба секцій живе на предках поза коренем спеки — каркас лишався порожнім.</p>
+        <p class="trick"><b>Прийом:</b> shell-bg екстрактор (найближчий пофарбований предок) → слаби-підкладки + body-бг.</p>
+        <div class="foot"><span class="tag">пастка 33 / 45</span></div>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Collapsed-reveal (title-swap)</h3><span class="chip done">доведено</span></div>
+        <p>Елементи 0×0 у каркасі, що реаляться повним розміром на своєму слайді (Architecture → Infrastructure → Residencies).</p>
+        <p class="trick"><b>Прийом:</b> revealSize → explicit w/h/pos + display-toggle is-hidden wrapper + neutralize offsetParent до пінного слота.</p>
+        <div class="foot"><span class="tag">пастка 65</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">База · переносне</div>
+    <h2>Загальні фікси конвеєра</h2>
+    <p class="lead">Шість фіксів, що служать усім майбутнім сторінкам — саме вони роблять базу переносною. Кожен із нульовим регресом.</p>
+    <div class="fixes">
+      <div class="fix"><h4>SNAPSHOT 0×0-класовий лист</h4><p>0×0-лист із класом зберігається → matcher не дерейлить.</p><span class="tag">пастка 61</span></div>
+      <div class="fix"><h4>Scale-gate варіативності</h4><p>sw/sh лише коли dim реально анімується вздовж кривої.</p><span class="tag">пастка 62</span></div>
+      <div class="fix"><h4>Odometer per-site</h4><p>sOdoSelector у конфізі → драйвери працюють на будь-якій сторінці.</p><span class="tag">пастка 63</span></div>
+      <div class="fix"><h4>Sticky-scope drivenSecs</h4><p>sticky→relative лише в секціях із хореографією.</p><span class="tag">пастка 66</span></div>
+      <div class="fix"><h4>Min-height bg-покриття</h4><p>Пінна секція min-height = curve.h → бг покриває viewport без scale дітей.</p><span class="tag">пастка 67</span></div>
+      <div class="fix"><h4>flexWrap у STYLE_KEYS</h4><p>Знімається flex-wrap → wrapped-flex лейаути (mobile-стек) вірні.</p><span class="tag">пастка 68</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Чесно · межі методу</div>
+    <h2>Що недосяжне no-JS реплікацією</h2>
+    <div class="note">Це не недоробки, а <b>фундаментальні межі</b> — виявлені й доведені тестами, не здогадками.</div>
+    <div class="cat">
+      <div class="card">
+        <div class="top"><h3>Splitting-текст</h3><span class="chip ceil">стеля</span></div>
+        <p>Live рахує позиції гліфів JS-рантаймом (Splitting.js). Char-span реплікацію <b>побудовано й протестовано</b> → погіршило: бокс уже збігається (720×248), spans пертурбують. Перцептивно 1-в-1 (2–4%).</p>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Вбудоване відео / WebGL springs</h3><span class="chip ceil">зараховано</span></div>
+        <p>Vimeo-відео + WebGL-канвас — ассети springs недосяжні. Композиція, геометрія, розташування — 1-в-1; різниця лише в контенті відео → зараховано.</p>
+      </div>
+      <div class="card">
+        <div class="top"><h3>Same-run фазова точність</h3><span class="chip ceil">асимптота</span></div>
+        <p>Пікс-точність кожної фази авто-анімації потребує same-run per-pose. Прийом доведено на s=0; scroll-фази — та сама механіка, інші фази.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Стан треку.</b> Движок генералізації доведено пікселем: gallery — 7/7 pass на обох вьюпортах, mobile hero-колаж 32% → ~2%. Конвеєр витримав другу сторінку без переписування — база переносна, наступні сайти йдуть швидше.</p>
+    <p>Повна документація кожного прийому, діагнози та 68 пасток — у <b>KAI/STATE-springs.md</b> (репо award-re-springs, гілка springs-pipeline-v0).</p>
+    <p style="color:var(--muted)">Згенеровано з реального досвіду реплікації springs.estate.</p>
+  </footer>
+</div>

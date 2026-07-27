@@ -1,0 +1,49 @@
+{
+  "$id": "slicer-reveal/vertical-line-sweep",
+  "$extends": "slicer-reveal",
+  "$note": "Knob diff ONLY over the slicer-reveal base. The base slices the CONTAINED render with a HORIZONTAL L->R clip on a per-beat scrubbed ScrollTrigger; this variant turns the axis VERTICAL (top->bottom): a luminous warm scan-line descends and the render is painted in its wake (clip-path BOTTOM-inset --sweep:1->0), on the same clean cream field, contained render + serif. Recorded 1:1 from apps/quadro/public/slide-lab/slc-v3-topdown-line-sweep.html. The family invariants are UNCHANGED and inherited from the base: cream-paper SAISEI restraint (>=55% cream), NO-PLATE (.frame backing IS --cream + eager-preload), NO video / NO WebGL, transform/opacity/clip-path on scrub ONLY, reduced-motion + narrow => static legible (slices fully open), ZERO image overlap. The engine is byte-faithful to slc-v3; these are the only knobs that differ from the horizontal base.",
+  "overrides": {
+    "axis": {
+      "from": "horizontal L->R clip slice (clip-path inset(0 100% 0 0) -> inset(0 0 0 0))",
+      "to": "vertical top->bottom line-sweep (clip-path inset(0 0 calc(--eff*100%) 0), --sweep 1 -> 0)",
+      "meaning": "THE delta. Instead of a hard vertical cut travelling left->right, a luminous warm line descends from the top edge and the render is REVEALED IN ITS WAKE downward. The vertical cousin of the horizontal architectural slice."
+    },
+    "reveal": {
+      "from": "hard-edged architectural clip (sliceEase expo.out, light-line on the leading right edge)",
+      "to": "line-sweep paint (paint ease 0.30,0.00,0.10,1.00; luminous --line warm scan-line on the leading bottom edge + a soft 'develop' wash band below it; --lineOn fades the line out as it reaches the bottom)",
+      "meaning": "A scanner painting the render downward rather than a clean cut. The line glows (box-shadow), a develop gradient band trails just below it, and the line leaves the frame at full open."
+    },
+    "trigger": {
+      "from": "per-beat scrubbed ScrollTrigger over a tall band + CSS sticky stage (start 'top top' / end 'bottom bottom'), NO ScrollTrigger pin",
+      "to": "per-panel scrubbed ScrollTrigger PIN (start 'top top' / end '+=len%', pin:.pin, pinSpacing:true, scrub:0.85, anticipatePin:1) + an instant --active gate (onToggle) that forces every non-active render fully closed",
+      "meaning": "Each panel pins for its arrival window; the sweep runs 0->1 within the first portion, then captions resolve, then it holds before unpin. The --active gate keeps ZERO-OVERLAP immune to scrub lag at the pin hand-off seams. (The HERO is a one-time autoplay line-sweep on load, NOT pinned.)"
+    },
+    "serif": {
+      "from": "Fraunces (base headlines)",
+      "to": "Fraunces (unchanged — '.display'/'.serif'/'.feat__t' all Fraunces, Georgia fallback)",
+      "meaning": "Serif family is UNCHANGED from the base — Fraunces display + Inter meta. Recorded as in slc-v3."
+    },
+    "sweepEase": {
+      "type": "ease",
+      "default": "paint (CustomEase 0.30,0.00,0.10,1.00)",
+      "meaning": "The line-sweep reveal ease — decelerates into the bottom edge, no jerky crawl. Distinct from the base's expo.out horizontal slice ease."
+    },
+    "scrub": {
+      "type": "number",
+      "default": 0.85,
+      "meaning": "ScrollTrigger scrub on each pinned panel sweep — smoothing only, buttery on reverse too. (Base uses 0.8 on its sticky-stage per-beat timelines.)"
+    },
+    "panelLen": {
+      "type": "map",
+      "default": { "col": 150, "breather": 130, "show": 165, "quote": 150 },
+      "unit": "% of viewport scroll the panel stays pinned",
+      "meaning": "Per-panel pin length (end '+=len%'). The SHOWPIECE climax pins longest (165%) so its line lingers and the render breathes UP. Byte-faithful to slc-v3."
+    },
+    "kbParallax": {
+      "type": "map",
+      "default": { "hero": "1.12->1.0", "col": "1.08->1.0", "breather": "1.10->1.0", "show": "1.06->1.045", "quote": "1.08->1.0" },
+      "unit": "scale (--kb)",
+      "meaning": "Per-panel micro-parallax start->end scale on the painted render (transform-origin 50% 38%, world-space static). The showpiece settles to 1.045 (still breathing) for the climax; others settle to 1.0."
+    }
+  }
+}

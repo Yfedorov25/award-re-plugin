@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>LAB · focus-render-switch — full 8-phase 1:1 (video hero → black handoff → light reveal → concave stepper → navy)</title>
+
+<!-- ============================================================================
+     TECHNIQUE  ·  focus-render-switch   (TRUE 1:1 of Naveera / NEMT)
+     ----------------------------------------------------------------------------
+     SOURCE has TWO macro-phases across 8 motion beats:
+
+       MACRO A  ·  full-bleed dark HERO (beats 1-2)
+         A pinned, edge-to-edge media background under a dark-glass header.
+         A stack of white headlines CYCLES; inside the active line a TEAL accent
+         sweeps the keyword(s) word-by-word as you scroll. A black scrim ramps
+         0->1 so the media "goes to black"; the final statement lands on solid
+         black. The media autoplays its OWN timeline — currentTime is NEVER scrubbed.
+
+       HANDOFF  ·  black hero exits up, light section revealed (beat 3)
+         Pin releases; the black panel scrolls up off the top edge; a near-white
+         section is uncovered beneath (vertical reveal, NOT a colour crossfade).
+
+       LIGHT STATEMENT  ·  progressive ink reveal (beat 4)
+         A dark-on-light statement resolves left-to-right, grey -> brief teal ->
+         ink, keywords settling teal. Scroll-scrubbed per word.
+
+       MACRO B  ·  concave-seam STEPPER (beats 5-6-7)
+         A pinned two-column stepper. LEFT = a tall portrait render behind a FIXED
+         inward-notched concave seam; RIGHT = a heading+body ticker. Six steps;
+         each boundary swaps the LEFT image and ticks the RIGHT text up. The seam
+         shape never animates — it is the visual switch device.
+
+       FINALE  ·  navy reveal (beat 8)
+         Stepper unpins, the two-column block scrolls out the top, a deep-navy
+         section rises beneath with a thin ambient teal light-streak.
+
+     SINGLE HOUSE EASES
+       'air'  = CustomEase M0,0 C0.22,1 0.36,1 1,1   (~expo.out) — keyword sweeps,
+                per-word reveals: snap in fast, settle (confident, not floaty).
+       'calm' = CustomEase M0,0 C0.25,0.1 0.25,1 1,1 (~power2.out) — line swaps,
+                photo-panel rise.
+       Photo crossfade between steps: 0.5s opacity power1.inOut.
+       Pin scrubs: scrub:1 so the sweep tracks scroll without seek jitter.
+
+     STACK
+       Vanilla GSAP 3.12.5 + ScrollTrigger + CustomEase + guarded Lenis. NO WebGL.
+       transform / opacity / clip-path / colour only. Never scrub video.currentTime.
+       Max 2 video decoders (here the hero uses a Ken-Burns STILL, 0 decoders).
+
+     REDUCED MOTION / NARROW
+       All pins + scrubs + sweeps dropped. Every statement renders fully composed
+       (final ink+teal). Photos become a static stacked list. No autoplay.
+
+     ASSETS  (real nahirna portrait renders, 9:16, figure-free)
+       Path differs by host dir, so ASSET_BASE is resolved at runtime by probing
+       both candidate prefixes — keeps THIS file byte-identical in
+         NAHIRNA-METHOD/labs/   and
+         award-re-plugin/library/components/focus-render-switch/
+       The TERRACE filename is Cyrillic and is encodeURI-d.
+     ============================================================================ -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+/* ============================================================
+   GRADE / TOKENS  — single source of truth
+   ============================================================ */
+:root{
+  --ink:#10171d;          /* dark ink (light-section headings, passed words) */
+  --paper:#f4f3ef;        /* near-white light section */
+  --mid:#b9bdc0;          /* dim / un-revealed words + ghost preview */
+  --accent:#1aa6c7;       /* teal sweep / keyword colour */
+  --navy:#0a1320;         /* finale deep navy */
+  --hero-bg:#070b0f;      /* hero base behind media */
+  --radius:22px;
+  --mx:clamp(20px,4vw,64px);
+  --frs-media-col:46%;    /* LEFT media column width in the stepper */
+  --sans:"Helvetica Neue","Inter Tight",system-ui,-apple-system,sans-serif;
+  --serif:"Nyght Serif","Times New Roman",Georgia,serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{
+  background:var(--paper);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;
+}
+img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* fixed dark-glass header (matches the source f_001 header) */
+.frs-header{
+  position:fixed;top:0;left:0;right:0;z-index:60;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--mx);color:#eef2f4;
+  background:rgba(8,12,16,.42);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.frs-header b{font-weight:600;letter-spacing:.02em;font-size:.95rem}
+.frs-header .frs-header__cue{font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;opacity:.6}
+
+/* spacer pads so pins live in a real document */
+.pad{
+  height:80vh;display:flex;align-items:center;justify-content:center;
+  color:var(--mid);font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;
+}
+
+/* ============================================================
+   MACRO A — full-bleed dark video/still hero (beats 1-2)
+   ============================================================ */
+.hero{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--hero-bg)}
+.hero__media{position:absolute;inset:0;overflow:hidden}
+.hero__media img{transform:scale(1.06);will-change:transform} /* ken-burns seed */
+/* base darkening so white type reads even on a bright still */
+.hero__veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,11,.30),rgba(5,8,11,.55));pointer-events:none}
+/* the black scrim that ramps 0->1 across beats 1-2 ("video goes to black") */
+.hero__scrim{position:absolute;inset:0;background:#04070a;opacity:0;will-change:opacity;pointer-events:none}
+
+/* translucent HUD/data cards that crossfade in then out over the media (beat 2) */
+.hero__hud{position:absolute;inset:0;pointer-events:none;z-index:3}
+.hero__card{
+  position:absolute;opacity:0;will-change:transform,opacity;
+  background:rgba(18,30,40,.34);
+  border:1px solid rgba(120,200,220,.22);
+  border-radius:14px;backdrop-filter:none; /* never blur over scrubbed surface */
+  padding:14px 16px;color:#cfe9f2;min-width:150px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.hero__card .k{font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:#7fcfe0;opacity:.85}
+.hero__card .v{font-size:1.2rem;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+.hero__card .vsub{font-size:.62rem;color:#9fb6c0;margin-top:3px;letter-spacing:.04em}
+.hero__card--a{left:7%;top:24%}
+.hero__card--b{right:9%;top:38%}
+.hero__card--c{left:14%;bottom:22%}
+
+/* headline stack: lines cycle, teal keyword sweeps word-by-word */
+.hero__textwrap{position:absolute;left:0;right:0;bottom:18vh;z-index:4;display:flex;justify-content:center;padding:0 var(--mx)}
+.hero__stack{position:relative;width:100%;max-width:20ch;text-align:center}
+.hero__line{
+  position:absolute;left:0;right:0;top:0;margin:0 auto;
+  font-family:var(--serif);font-weight:500;color:#fff;
+  font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.08;letter-spacing:-.01em;
+  opacity:0;will-change:transform,opacity;
+}
+.hero__line .w{color:#fff}
+.hero__line .w.lit{color:var(--accent)}
+.hero__line .w.done{color:var(--accent)}   /* swept keyword stays teal */
+.hero__line .w.plain.done{color:#fff}       /* non-keyword stays white */
+.hero__cue{
+  position:absolute;left:0;right:0;bottom:7vh;z-index:4;text-align:center;
+  color:rgba(255,255,255,.7);font-size:.6rem;letter-spacing:.34em;text-transform:uppercase;
+  will-change:opacity;
+}
+
+/* ============================================================
+   BEAT 4 — light progressive-ink statement
+   ============================================================ */
+.reveal{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--paper);padding:0 var(--mx)}
+.reveal__line{
+  max-width:16ch;text-align:left;
+  font-family:var(--serif);font-weight:500;color:var(--ink);
+  font-size:clamp(2.1rem,5vw,4rem);line-height:1.1;letter-spacing:-.012em;
+}
+.reveal__line .w{color:var(--mid);transition:none}
+.reveal__line .w.lit{color:var(--accent)}
+.reveal__line .w.done{color:var(--ink)}
+.reveal__line .w.kw.done{color:var(--accent)}  /* keywords settle teal */
+
+/* ============================================================
+   MACRO B — concave-seam stepper (beats 5-7)
+   ============================================================ */
+.frs{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--paper)}
+.frs__grid{
+  position:absolute;inset:0;display:grid;
+  grid-template-columns:var(--frs-media-col) calc(100% - var(--frs-media-col));
+  align-items:center;
+}
+/* LEFT media frame — fixed inward concave seam on its RIGHT edge.
+   Two radial bites (top-right + bottom-right) SUBTRACTED from the rect.
+   Mask is STATIC, never animated. Only the image inside swaps. */
+.frs__media{
+  position:relative;height:88vh;overflow:hidden;
+  border-radius:0 var(--radius) var(--radius) 0;background:var(--hero-bg);
+  -webkit-mask:
+     radial-gradient(120px 150px at 100% 16%, transparent 99%, #000 100%),
+     radial-gradient(120px 150px at 100% 84%, transparent 99%, #000 100%),
+     linear-gradient(#000,#000);
+  -webkit-mask-composite:source-out, source-out;
+          mask-composite:subtract, subtract;
+}
+.frs__slide{position:absolute;inset:0;opacity:0;will-change:opacity}
+.frs__slide.is-active{opacity:1}
+.frs__slide img{transform:scale(1.05);will-change:transform}
+
+.frs__count{
+  position:absolute;left:calc(var(--frs-media-col) - 16px);top:50%;z-index:5;
+  transform:translateY(-50%);
+  font-size:.62rem;letter-spacing:.18em;color:var(--mid);font-variant-numeric:tabular-nums;
+}
+
+/* RIGHT heading+body ticker */
+.frs__text{position:relative;height:88vh;display:flex;align-items:center;padding:0 var(--mx) 0 clamp(28px,5vw,80px)}
+.frs__stack{position:relative;width:100%;max-width:22ch}
+.frs__step{position:absolute;left:0;top:50%;width:100%;opacity:0;will-change:transform,opacity}
+.frs__head{
+  font-family:var(--serif);font-weight:500;color:var(--mid);
+  font-size:clamp(1.7rem,3vw,2.6rem);line-height:1.1;letter-spacing:-.01em;margin-bottom:.5em;
+}
+.frs__head .w{color:inherit}
+.frs__head .w.lit{color:var(--accent)}
+.frs__head .w.done{color:var(--ink)}
+.frs__head .w.kw.done{color:var(--accent)}
+.frs__body{
+  font-size:clamp(.95rem,1.15vw,1.12rem);line-height:1.5;color:var(--mid);max-width:30ch;
+}
+.frs__body .w{color:var(--mid)}
+.frs__body .w.lit{color:var(--accent)}
+.frs__body .w.done{color:#33424c}
+.frs__body .w.kw.done{color:var(--accent)}
+
+/* ============================================================
+   BEAT 8 — navy finale with ambient teal streak
+   ============================================================ */
+.finale{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--navy);display:flex;align-items:center;justify-content:center}
+.finale__streak{
+  position:absolute;left:50%;top:-30%;width:2px;height:60%;
+  background:linear-gradient(180deg,transparent,rgba(45,190,220,.9),transparent);
+  filter:blur(.5px);transform:translateX(-50%);
+  animation:streak 5.5s linear infinite;
+}
+@keyframes streak{0%{top:-40%;opacity:0}12%{opacity:1}88%{opacity:1}100%{top:120%;opacity:0}}
+.finale__label{position:relative;z-index:2;color:#5e7a8a;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase}
+
+/* ============================================================
+   REDUCED MOTION  — pins dropped, fully-composed static layout
+   ============================================================ */
+@media (prefers-reduced-motion: reduce){
+  .hero{height:auto;min-height:70vh}
+  .hero__scrim{display:none}.hero__hud{display:none}.hero__cue{display:none}.hero__veil{opacity:.5}
+  .hero__textwrap{position:relative;bottom:auto;padding:18vh var(--mx)}
+  .hero__stack{max-width:none}
+  .hero__line{position:relative;opacity:1;transform:none;margin:.35em auto}
+  .hero__line .w{color:#fff}.hero__line .w.kw{color:var(--accent)}
+  .reveal__line .w{color:var(--ink)}.reveal__line .w.kw{color:var(--accent)}
+  .frs{height:auto}
+  .frs__grid{position:relative;grid-template-columns:1fr}
+  .frs__media{height:50vh;border-radius:var(--radius);-webkit-mask:none;mask:none}
+  .frs__slide{position:relative;opacity:1}.frs__slide+.frs__slide{display:none}
+  .frs__text{height:auto;padding:32px var(--mx)}
+  .frs__stack{max-width:none}
+  .frs__step{position:relative;top:auto;opacity:1;transform:none;margin:1.4em 0}
+  .frs__head .w{color:var(--ink)}.frs__head .w.kw{color:var(--accent)}
+  .frs__body .w{color:#33424c}.frs__body .w.kw{color:var(--accent)}
+  .frs__count{display:none}
+  .finale{height:50vh}.finale__streak{animation:none}
+}
+
+/* ============================================================
+   NARROW  — stack, drop pins (also no-op'd in JS)
+   ============================================================ */
+@media (max-width:820px){
+  .hero__textwrap{bottom:14vh}
+  .hero__hud{display:none}
+  .frs__grid{position:relative;grid-template-columns:1fr;align-content:center;gap:18px;padding:42px 0}
+  .frs__media{height:46vh;border-radius:var(--radius);-webkit-mask:none;mask:none}
+  .frs__slide{position:relative}.frs__slide+.frs__slide{display:none}
+  .frs__count{display:none}
+  .frs__text{height:auto;padding:0 var(--mx)}
+  .frs__stack{max-width:none}
+  .frs__step{position:relative;top:auto;opacity:1;transform:none;margin:1.4em 0}
+  .frs__head .w{color:var(--ink)}.frs__head .w.kw{color:var(--accent)}
+  .frs__body .w{color:#33424c}.frs__body .w.kw{color:var(--accent)}
+}
+</style>
+</head>
+<body>
+
+<header class="frs-header">
+  <b>NAHIRNA</b>
+  <span class="frs-header__cue">villa over the river</span>
+</header>
+
+<!-- ============================================================
+     MACRO A — full-bleed dark hero (beats 1-2)
+     data-kw on each line marks which 1-based word indices are keywords.
+     ============================================================ -->
+<section class="hero" id="hero">
+  <div class="hero__media" id="heroMedia">
+    <img data-asset="01-HERO/01-hero-day-to-night-v1.png" alt="нічна вілла над рікою" />
+  </div>
+  <div class="hero__veil"></div>
+
+  <!-- translucent HUD cards (beat 2) -->
+  <div class="hero__hud" id="heroHud">
+    <div class="hero__card hero__card--a"><div class="k">ділянка</div><div class="v">0.42 га</div><div class="vsub">власний берег</div></div>
+    <div class="hero__card hero__card--b"><div class="k">до води</div><div class="v">18 м</div><div class="vsub">від тераси до Бугу</div></div>
+    <div class="hero__card hero__card--c"><div class="k">світло</div><div class="v">наскрізне</div><div class="vsub">схід та захід</div></div>
+  </div>
+
+  <div class="hero__scrim" id="heroScrim"></div>
+
+  <div class="hero__textwrap">
+    <div class="hero__stack" id="heroStack">
+      <h1 class="hero__line" data-kw="5,6">Ми збудували не дім а власний берег</h1>
+      <h1 class="hero__line" data-kw="2,4">від ріки до порога</h1>
+      <h1 class="hero__line" data-kw="4,5">дім що живе у ритмі води</h1>
+      <h1 class="hero__line" data-kw="1,2,4,5">Тиша Вода Світло кожного ранку кожного вечора</h1>
+    </div>
+  </div>
+  <div class="hero__cue" id="heroCue">прокрутіть, щоб відкрити</div>
+</section>
+
+<!-- ============================================================
+     BEAT 4 — light progressive-ink statement
+     ============================================================ -->
+<section class="reveal" id="reveal">
+  <h2 class="reveal__line" data-kw="5,6,9,10">Уяви свій дім як міст що тихо звязує тебе з рікою</h2>
+</section>
+
+<!-- ============================================================
+     MACRO B — concave-seam stepper (beats 5-7)
+     slides count === steps count, same order.
+     ============================================================ -->
+<section class="frs" id="frs">
+  <div class="frs__grid">
+    <div class="frs__media" id="frsMedia">
+      <div class="frs__slide is-active"><img loading="eager" data-asset="01-HERO/03-villa-34-day-v1FULL.png" alt="дім на власному березі вдень" /></div>
+      <div class="frs__slide"><img loading="eager" data-asset="06-TERRACE/01-тераса-вид-на-ріку-день.png" alt="тераса з видом на ріку" /></div>
+      <div class="frs__slide"><img loading="eager" data-asset="07-INTERIOR/02-kitchen-living-wide-day-v3.png" alt="кухня-вітальня в денному світлі" /></div>
+      <div class="frs__slide"><img loading="eager" data-asset="02-ARCH/01-clinker-macro-raking-v2FULL.png" alt="фасад із натурального клінкеру" /></div>
+      <div class="frs__slide"><img loading="eager" data-asset="03-RIVER/01-riverbank-reeds-golden-v2FULL.png" alt="берег річки в очереті" /></div>
+      <div class="frs__slide"><img loading="eager" data-asset="08-CTA/01-night-facade-wide-v1FULL.png" alt="нічний фасад над рікою" /></div>
+    </div>
+
+    <span class="frs__count" id="frsCount">01</span>
+
+    <div class="frs__text">
+      <div class="frs__stack" id="frsStack">
+        <div class="frs__step">
+          <h3 class="frs__head" data-kw="">Дім на власному березі</h3>
+          <p class="frs__body" data-kw="1,2,4,5">Власний вихід до Бугу від тераси до води</p>
+        </div>
+        <div class="frs__step">
+          <h3 class="frs__head" data-kw="1,2">Тераса над рікою</h3>
+          <p class="frs__body" data-kw="3,4,6,7">Кава з краєвидом на воду щоранку</p>
+        </div>
+        <div class="frs__step">
+          <h3 class="frs__head" data-kw="">Світло крізь увесь дім</h3>
+          <p class="frs__body" data-kw="4,5">Кухня-вітальня залита денним світлом</p>
+        </div>
+        <div class="frs__step">
+          <h3 class="frs__head" data-kw="">Клінкер що дихає</h3>
+          <p class="frs__body" data-kw="3,4,6,7">Фасад із натурального клінкеру на покоління</p>
+        </div>
+        <div class="frs__step">
+          <h3 class="frs__head" data-kw="">Берег тільки твій</h3>
+          <p class="frs__body" data-kw="2,3,6,7">Очерет вода і тиша замість сусідів за стіною</p>
+        </div>
+        <div class="frs__step">
+          <h3 class="frs__head" data-kw="">І той самий дім увечері</h3>
+          <p class="frs__body" data-kw="4,5,7">Те саме місце коли над рікою сходить ніч</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     BEAT 8 — navy finale
+     ============================================================ -->
+<section class="finale" id="finale">
+  <div class="finale__streak"></div>
+  <div class="finale__label">наступний розділ</div>
+</section>
+
+<section class="pad">кінець технічного блоку</section>
+
+<script>
+/* ============================================================
+   ASSET BASE RESOLUTION
+   THIS file must be byte-identical in two dirs at different depths.
+   We probe both candidate prefixes and use whichever loads. Until the
+   probe resolves we still set a synchronous best-guess so first paint works.
+   ============================================================ */
+const ASSET_CANDIDATES = [
+  "../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/",      // NAHIRNA-METHOD/labs/
+  "../../../../NAHIRNA-MEDIA-SITE/cinema-proto/media/DATASET/" // award-re-plugin/library/components/<id>/
+];
+function assetUrl(base, rel){
+  // encodeURI handles the Cyrillic TERRACE filename safely
+  return base + rel.split("/").map(encodeURIComponent).join("/");
+}
+function resolveAssetBase(){
+  return new Promise((resolve)=>{
+    let i = 0;
+    const probeRel = "01-HERO/01-hero-day-to-night-v1.png";
+    const tryNext = ()=>{
+      if (i >= ASSET_CANDIDATES.length){ resolve(ASSET_CANDIDATES[0]); return; }
+      const base = ASSET_CANDIDATES[i++];
+      const im = new Image();
+      im.onload = ()=>resolve(base);
+      im.onerror = tryNext;
+      im.src = assetUrl(base, probeRel);
+    };
+    tryNext();
+  });
+}
+function applyAssets(base){
+  document.querySelectorAll("img[data-asset]").forEach(img=>{
+    img.src = assetUrl(base, img.dataset.asset);
+  });
+}
+
+/* ============================================================
+   WORD SPLIT  — wrap each word in <span class="w">; keywords get .kw
+   data-kw="2,4" = 1-based indices of the keyword words on that element.
+   ============================================================ */
+function splitWords(el){
+  if (el.dataset.split) return;
+  const kw = new Set((el.dataset.kw||"").split(",").map(s=>parseInt(s.trim(),10)).filter(Boolean));
+  const words = el.textContent.trim().split(/\s+/);
+  el.textContent = "";
+  words.forEach((w,i)=>{
+    const span = document.createElement("span");
+    span.className = "w" + (kw.has(i+1) ? " kw" : " plain");
+    span.textContent = w + (i < words.length-1 ? " " : "");
+    el.appendChild(span);
+  });
+  el.dataset.split = "1";
+}
+
+/* sweep words of one element by sub-progress 0..1.
+   word passes: lit (teal, being read) -> done. Non-keyword .done reverts to base
+   colour via CSS (.plain.done / no .kw), keyword .done stays teal. */
+function sweepWords(el, sub){
+  if (!el) return;
+  const words = el.querySelectorAll(".w");
+  const cut = sub * words.length;
+  words.forEach((w,i)=>{
+    w.classList.toggle("done", i < cut - 1);
+    w.classList.toggle("lit",  i >= cut - 1 && i < cut);
+  });
+}
+function composeWords(el){ // fully-revealed final state
+  if (!el) return;
+  el.querySelectorAll(".w").forEach(w=>{ w.classList.add("done"); w.classList.remove("lit"); });
+}
+
+/* ============================================================
+   GSAP / EASES
+   ============================================================ */
+const reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+const narrow = matchMedia("(max-width:820px)").matches;
+
+function registerEases(){
+  if (window.CustomEase && CustomEase.create){
+    try{ CustomEase.create("air",  "M0,0 C0.22,1 0.36,1 1,1"); }catch(e){}
+    try{ CustomEase.create("calm", "M0,0 C0.25,0.1 0.25,1 1,1"); }catch(e){}
+  }
+}
+
+/* ============================================================
+   PHASE 1-2  ·  HERO  (pinned, scrubbed): line-cycle + keyword sweep
+   + black-scrim ramp + HUD crossfade
+   ============================================================ */
+function initHero(){
+  const root  = document.querySelector("#hero");
+  const lines = Array.from(root.querySelectorAll(".hero__line"));
+  const scrim = root.querySelector("#heroScrim");
+  const cue   = root.querySelector("#heroCue");
+  const cards = Array.from(root.querySelectorAll(".hero__card"));
+  const heroImg = root.querySelector("#heroMedia img");
+  const N = lines.length;
+  lines.forEach(splitWords);
+
+  if (reduce || narrow){
+    lines.forEach(l=>{ gsap.set(l,{opacity:1,y:0}); composeWords(l); });
+    gsap.set(scrim,{opacity:0});
+    return;
+  }
+
+  // continuous slow ken-burns push-in (decorative, not scrubbed) on the still
+  gsap.fromTo(heroImg,{scale:1.06},{scale:1.14,duration:24,ease:"none",repeat:-1,yoyo:true});
+
+  // position each line for fractional focus p (0..N-1): old fades out -24px,
+  // new rises in +24->0 (per choreography phase 1).
+  const layout = (p)=>{
+    lines.forEach((l,i)=>{
+      const d = i - p, ad = Math.abs(d);
+      let opacity, yPx;
+      if (ad >= 1){ opacity = 0; yPx = d > 0 ? 24 : -24; }
+      else { opacity = 1 - ad; yPx = d * 24; }
+      gsap.set(l,{opacity,y:yPx});
+    });
+  };
+
+  gsap.set(scrim,{opacity:0});
+
+  ScrollTrigger.create({
+    trigger: root, start:"top top",
+    end: ()=>"+=" + (N * 0.95) * innerHeight,
+    pin:true, pinSpacing:true, scrub:1,
+    onUpdate:(self)=>{
+      const prog = self.progress * (N - 1);   // 0..N-1
+      layout(prog);
+
+      // keyword sweep on the focused line (centred sub-progress)
+      const focus = gsap.utils.clamp(0, N-1, Math.round(prog));
+      const sub = gsap.utils.clamp(0,1, (prog - focus + 0.5));
+      lines.forEach((l,i)=> i===focus ? sweepWords(l, sub) : (i<focus ? composeWords(l) : sweepWords(l,0)));
+
+      // black scrim ramps across the SECOND half (beat 2 -> media to black)
+      const t = self.progress;
+      const scrimOp = gsap.utils.clamp(0,1,(t - 0.45) / 0.5);
+      gsap.set(scrim,{opacity:scrimOp});
+
+      // cue fades out after the first beat
+      gsap.set(cue,{opacity: gsap.utils.clamp(0,1, 1 - t*4)});
+
+      // HUD cards crossfade IN around the middle then OUT toward black
+      const hud = t < 0.5
+        ? gsap.utils.clamp(0,1,(t - 0.25)/0.2)        // fade in 0.25..0.45
+        : gsap.utils.clamp(0,1,1 - (t - 0.5)/0.2);    // fade out 0.50..0.70
+      cards.forEach((c,i)=> gsap.set(c,{opacity:hud, y:(1-hud)*18 + 0}));
+    }
+  });
+
+  layout(0);
+  sweepWords(lines[0], 0.5);
+}
+
+/* ============================================================
+   PHASE 4  ·  LIGHT statement progressive ink reveal (scrubbed)
+   ============================================================ */
+function initReveal(){
+  const line = document.querySelector("#reveal .reveal__line");
+  splitWords(line);
+  if (reduce || narrow){ composeWords(line); return; }
+  ScrollTrigger.create({
+    trigger:"#reveal", start:"top 78%", end:"bottom 60%", scrub:1,
+    onUpdate:(self)=> sweepWords(line, self.progress)
+  });
+}
+
+/* ============================================================
+   PHASE 5-7  ·  concave-seam STEPPER (pinned, scrubbed)
+   ============================================================ */
+function initStepper(){
+  const root   = document.querySelector("#frs");
+  const slides = Array.from(root.querySelectorAll(".frs__slide"));
+  const steps  = Array.from(root.querySelectorAll(".frs__step"));
+  const heads  = steps.map(s=>s.querySelector(".frs__head"));
+  const bodies = steps.map(s=>s.querySelector(".frs__body"));
+  const counter= root.querySelector("#frsCount");
+  const N = Math.min(slides.length, steps.length);
+  heads.forEach(splitWords); bodies.forEach(splitWords);
+
+  if (reduce || narrow){
+    slides.forEach((s,i)=> gsap.set(s,{opacity:i===0?1:0}));
+    steps.forEach((s,i)=> gsap.set(s,{opacity:1,position:"relative",top:"auto",y:0}));
+    heads.forEach(composeWords); bodies.forEach(composeWords);
+    return;
+  }
+
+  const HOLD = 0.78;          // hold current photo before flip
+  let lastIdx = -1;
+  const setSlide = (idx)=>{
+    slides.forEach((s,i)=>{
+      const on = i===idx;
+      gsap.to(s,{opacity:on?1:0,duration:0.5,ease:"power1.inOut",overwrite:"auto"});
+      s.classList.toggle("is-active",on);
+    });
+    if (counter) counter.textContent = String(idx+1).padStart(2,"0");
+  };
+
+  // heading/body conveyor for fractional p
+  const layout = (p)=>{
+    steps.forEach((s,i)=>{
+      const d = i - p, ad = Math.abs(d);
+      let opacity, yPx;
+      if (ad >= 1.4){ opacity = 0; yPx = (d>0?1:-1)*44; }
+      else { opacity = gsap.utils.clamp(0,1, 1 - ad); yPx = d * 40; }
+      gsap.set(s,{opacity,y:yPx});
+    });
+  };
+
+  ScrollTrigger.create({
+    trigger:root, start:"top top",
+    end: ()=>"+=" + (N * 0.95) * innerHeight,
+    pin:true, pinSpacing:true, scrub:1,
+    onUpdate:(self)=>{
+      const prog = self.progress * (N - 1);
+      const frac = prog - Math.floor(prog);
+      // discrete photo swap gated on HOLD (snap, no smear)
+      const want = frac > HOLD ? Math.ceil(prog) : Math.floor(prog);
+      const idx = gsap.utils.clamp(0,N-1,want);
+      if (idx !== lastIdx){ setSlide(idx); lastIdx = idx; }
+      // continuous text conveyor
+      layout(prog);
+      // per-word sweep on the focused step (heading + body share sub)
+      const focus = gsap.utils.clamp(0,N-1,Math.round(prog));
+      const sub = gsap.utils.clamp(0,1,(prog - focus + 0.5));
+      heads.forEach((h,i)=> i===focus ? sweepWords(h,sub) : (i<focus?composeWords(h):sweepWords(h,0)));
+      bodies.forEach((b,i)=> i===focus ? sweepWords(b,sub) : (i<focus?composeWords(b):sweepWords(b,0)));
+    }
+  });
+
+  setSlide(0); layout(0);
+  sweepWords(heads[0],0.5); sweepWords(bodies[0],0.5);
+}
+
+/* ============================================================
+   LENIS GUARD
+   ============================================================ */
+function lenisGuard(){
+  if (reduce || typeof Lenis === "undefined") return;
+  try{
+    const lenis = new Lenis({ duration:1.1, smoothWheel:true });
+    function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }
+    requestAnimationFrame(raf);
+    lenis.on("scroll", ScrollTrigger.update);
+  }catch(e){}
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+window.addEventListener("load", async ()=>{
+  // resolve + apply real renders first (so pin heights measure with images in flow)
+  const base = await resolveAssetBase();
+  applyAssets(base);
+
+  if (window.gsap && window.ScrollTrigger){
+    gsap.registerPlugin(ScrollTrigger);
+    registerEases();
+    initHero();
+    initReveal();
+    initStepper();
+    lenisGuard();
+    // images decode async -> recompute pin heights once they settle (D16)
+    Promise.all(
+      Array.from(document.images).map(im=> im.complete
+        ? Promise.resolve()
+        : new Promise(r=>{ im.addEventListener("load",r,{once:true}); im.addEventListener("error",r,{once:true}); }))
+    ).then(()=> ScrollTrigger.refresh());
+  }
+});
+
+let rT;
+window.addEventListener("resize", ()=>{ clearTimeout(rT); rT = setTimeout(()=>ScrollTrigger.refresh(), 200); });
+</script>
+<!-- ── __LAB_OK__ acceptance probe (added by library migration; additive) ──
+     Sets window.__LAB_OK__ = true once the technique has booted and no error
+     fired: GSAP + ScrollTrigger present, ≥1 ScrollTrigger (or reduced-motion
+     fallback) live, and zero console.error. scripts/library-verify.mjs reads
+     this headless. Real per-phase assertions live in the RECIPE acceptance[]. -->
+<script>(function(){
+  var errs=0; var _e=console.error; console.error=function(){var s=Array.prototype.join.call(arguments," "); if(!/Failed to load resource|ERR_FILE_NOT_FOUND|net::ERR/.test(s)) errs++; return _e.apply(console,arguments);};
+  window.__LAB_ERRORS=function(){return errs;};
+  function ready(){
+    try{
+      var reduce = matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
+      var hasGsap = !!window.gsap;
+      var stCount = (window.ScrollTrigger && ScrollTrigger.getAll) ? ScrollTrigger.getAll().length : 0;
+      var ok = errs===0 && hasGsap && (reduce || stCount>0 || document.body.querySelector('[class*="static"],[class*="reduced"]'));
+      window.__LAB_OK__ = !!ok;
+      if(!ok && tries<40){ tries++; return setTimeout(ready,150); }
+    }catch(e){ window.__LAB_OK__=false; }
+  }
+  var tries=0;
+  window.addEventListener('load',function(){ setTimeout(ready,400); });
+})();</script>
+
+</body>
+</html>

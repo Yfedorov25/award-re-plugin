@@ -1,0 +1,59 @@
+/* ============================================================
+   OFFICE-UNIT-CARD · component.css
+   Живі величини /office/AR-1-18: office-tabs--vertical (frosted),
+   крива 0.6s air; T-431 toggle тільки на Office plan.
+   ============================================================ */
+[data-ouc] { display: grid; grid-template-columns: minmax(280px, 4fr) 8fr; gap: 2.5vw; }
+@media (max-width: 768px) { [data-ouc] { grid-template-columns: 1fr; } }
+
+.ouc-title { font-size: clamp(28px, 3.4vw, 46px); font-weight: 300; margin-bottom: 3vh; }
+.ouc-dl { display: flex; flex-direction: column; gap: 10px; margin-bottom: 3vh; }
+.ouc-dl div { display: flex; justify-content: space-between; gap: 2em; font-size: 13px;
+  border-bottom: 1px solid rgba(17, 17, 16, .12); padding-bottom: 8px; }
+.ouc-dl dt { color: #55544f; }
+[data-ouc-price] { display: flex; align-items: baseline; gap: 12px; margin-bottom: 3vh; }
+[data-ouc-price] b { font-weight: 300; font-size: clamp(22px, 2.4vw, 34px); }
+[data-ouc-price] del { font-size: 13px; color: #8b8a86; }
+.ouc-cta { display: flex; gap: 10px; }
+[data-ouc-reserve] { flex: 1; display: inline-flex; justify-content: space-between;
+  font: inherit; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 14px 16px; border-radius: 4px; background: #111110; color: #f4f2ee;
+  border: 1px solid #111110; cursor: pointer; }
+[data-ouc-fav] { width: 46px; border-radius: 4px; font-size: 16px;
+  border: 1px solid rgba(17, 17, 16, .3); background: none; cursor: pointer;
+  transition: background-color .2s ease-out, color .2s ease-out; }
+[data-ouc-fav].is-active { background: #111110; color: #f4f2ee; }
+
+/* таби (живий office-tabs--vertical: frosted-колонка ліворуч від сцени) */
+.ouc-tabsbox { display: grid; grid-template-columns: 170px 1fr; border-radius: 6px;
+  background: rgba(236, 235, 230, .8); backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); overflow: clip; }
+@media (max-width: 768px) { .ouc-tabsbox { grid-template-columns: 1fr; } }
+[data-ouc-tabs] { display: flex; flex-direction: column; gap: 2px; padding: 14px;
+  border-right: 1px solid rgba(17, 17, 16, .1); }
+[data-ouc-tabs] a { padding: 11px 12px; border-radius: 4px; font-size: 12px;
+  color: #55544f; cursor: pointer;
+  transition: background-color .6s cubic-bezier(.25,.74,.22,.99),
+              color .6s cubic-bezier(.25,.74,.22,.99); }
+[data-ouc-tabs] a.is-active { background: #111110; color: #f4f2ee; }
+[data-ouc-panels] { position: relative; min-height: 380px; }
+.ouc-stage { display: grid; place-items: center; height: 100%; padding: 20px; }
+.ouc-plan-img { width: 100%; max-width: 540px; aspect-ratio: 540 / 420; object-fit: contain;
+  background: #fff; border-radius: 4px; } /* живі 540×420 — резерв до декоду, нуль CLS */
+.ouc-stub { color: #8b8a86; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+[data-ouc-toggle] { display: flex; gap: 6px; padding: 0 14px 14px; }
+[data-ouc-toggle] button { font: inherit; font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; padding: 8px 10px; border-radius: 4px;
+  border: 1px solid rgba(17, 17, 16, .3); background: none; cursor: pointer; }
+[data-ouc-toggle] button.is-active { background: #111110; color: #f4f2ee; }
+
+/* T-523 similar: плани-превʼю */
+[data-ouc-similar] { list-style: none; margin: 5vh 0 0; padding: 0; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px;
+  grid-column: 1 / -1; }
+.ouc-sim { display: flex; flex-direction: column; gap: 8px; padding: 14px;
+  border-radius: 6px; background: #ecebe6; color: #111110; text-decoration: none;
+  font-size: 12px; transition: background-color .6s cubic-bezier(.25,.74,.22,.99); }
+.ouc-sim:hover { background: #e3e1db; }
+.ouc-sim img { width: 100%; aspect-ratio: 540 / 420; object-fit: contain; background: #fff; border-radius: 4px; }
+.ouc-sim-price { font-weight: 400; }

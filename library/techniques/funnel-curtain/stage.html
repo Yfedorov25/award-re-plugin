@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>funnel-curtain · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root{
+    --green:#16322a;--green-deep:#0e241d;--slate:#9fb0a6;--line:#26463c;
+    --fc-hub:url('img/hub.webp'); --fc-next:url('img/next.webp');
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  /* springs-точні шрифти/кольори з _springs-tokens.css */
+  html,body{background:var(--green-deep);color:var(--spr-cream);font-family:var(--spr-sans);
+    font-size:var(--spr-body-size);letter-spacing:var(--spr-body-ls);min-height:100%}
+  .fc-stage{ height:100vh; }
+  .fc-eyebrow{font-family:var(--spr-sans);font-size:var(--spr-label-size);font-weight:var(--spr-label-weight);
+    letter-spacing:var(--spr-label-ls);line-height:var(--spr-label-lh);text-transform:uppercase;color:var(--spr-cream);opacity:.9;}
+  .fc-title{margin-top:.35em;font-family:var(--spr-serif);font-weight:var(--spr-hero-weight);
+    font-size:clamp(2.2rem,7.4vw,4.8rem);letter-spacing:var(--spr-hero-ls);line-height:var(--spr-hero-lh);
+    color:var(--spr-cream);max-width:100%;overflow-wrap:break-word;}
+  .fc-sub{margin-top:.9em;max-width:min(46ch,100%);color:var(--spr-cream);opacity:.85;
+    font-family:var(--spr-sans);line-height:var(--spr-body-lh);letter-spacing:var(--spr-body-ls);font-size:clamp(.95rem,1.5vw,1.08rem);}
+  /* the "lead-form-ish" CTA cluster the curtain resolves */
+  .fc-form{display:flex;flex-direction:column;gap:12px;max-width:min(30ch,100%);}
+  .fc-input{background:rgba(8,18,14,.5);border:1px solid var(--line);border-radius:8px;
+    padding:13px 15px;color:var(--spr-cream);font-family:var(--spr-sans);font-size:.95rem;letter-spacing:var(--spr-body-ls);}
+  .fc-input::placeholder{color:var(--slate);}
+  .fc-cta{cursor:pointer;border:0;border-radius:999px;padding:15px 26px;
+    font-family:var(--spr-sans);font-weight:var(--spr-label-weight);font-size:var(--spr-label-size);
+    letter-spacing:var(--spr-label-ls);text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:10px;justify-content:center;
+    background:var(--spr-cream);color:var(--green-deep);}
+  .fc-cta.ghost{background:transparent;color:var(--spr-cream);border:1px solid var(--line);}
+  .fc-cta .x{font-family:var(--spr-serif);}
+  .fc-note{font-family:var(--spr-sans);font-size:.72rem;color:var(--slate);letter-spacing:.02em;}
+  .fc-next-inner .fc-title{max-width:16ch;margin-inline:auto;}
+  .badge{position:fixed;top:10px;left:10px;z-index:9;font-family:ui-monospace,Menlo,monospace;
+    font-size:.62rem;color:#7fd8b0;background:rgba(8,22,17,.72);border:1px solid #26463c;
+    border-radius:999px;padding:4px 10px;pointer-events:none;}
+</style></head><body>
+  <div class="badge" id="badge">…</div>
+
+  <section class="fc-stage" id="stage">
+    <!-- HUB page: the l-callback funnel — CTA + lead form -->
+    <div class="fc-page fc-hub is-on">
+      <div class="fc-hub-inner">
+        <div>
+          <div class="fc-eyebrow">SPRINGS · воронка · l-callback</div>
+          <div class="fc-title">Знайди<br>свою квартиру</div>
+          <p class="fc-sub">Дев'ять шляхів у воронку сходяться тут. Обери — і чорна штора з бренд-рядком підійме тебе в інший простір.</p>
+        </div>
+        <form class="fc-form" onsubmit="return false">
+          <input class="fc-input" type="tel" placeholder="Твій телефон" inputmode="tel">
+          <button class="fc-cta" data-fc-cta data-fc-swap=".fc-next" data-fc-mode="continuous">SEARCH FLATS <span class="x">✛</span></button>
+          <button class="fc-cta ghost" data-fc-cta data-fc-swap=".fc-next" data-fc-mode="continuous">AVAILABLE SOON</button>
+          <span class="fc-note">Передзвонимо протягом 15 хвилин.</span>
+        </form>
+      </div>
+    </div>
+    <!-- NEXT page: revealed under full coverage (the funnel opened) -->
+    <div class="fc-page fc-next">
+      <div class="fc-next-inner">
+        <div class="fc-eyebrow">SPRINGS · воронка відкрита</div>
+        <div class="fc-title">Обери поверх</div>
+        <p class="fc-sub" style="margin-inline:auto">Ти переступив поріг. Далі — дріл: комплекс → поверх → юніт.</p>
+        <div style="margin-top:20px"><button class="fc-cta ghost" data-fc-cta data-fc-swap=".fc-hub" data-fc-mode="flash">← назад до воронки (flash)</button></div>
+      </div>
+    </div>
+  </section>
+
+<script src="engine.js"></script><script src="component.js"></script>
+<script>
+  var r = FunnelCurtainDual.init('#stage', { platform:'auto', wordmark:'ДІМ',
+    bg:'#0e241d', ink:'#e0d1b6' });  /* springs: темно-зелена штора + кремовий wordmark */
+  document.getElementById('badge').textContent =
+    r.platform==='desktop' ? 'desktop · tap-funnel (wide 2-col)' : 'mobile · tap-funnel (1-col full-bleed)';
+</script></body></html>

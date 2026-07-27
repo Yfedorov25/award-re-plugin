@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · center-focus-carousel / air-courtyards · двори AIR (скіс замість WebGL)</title>
+<!--
+================================================================================
+  VARIANT LAB · center-focus-carousel / air-courtyards
+  Живий оригінал: l-people-carousel aircenter.space = carouselWebGl (єдиний
+  WebGL головної). Переклад no-WebGL: центр-фото рівне, бічні підняті ребром
+  perspective(1100px) rotateY(±24°) на ВНУТРІШНЬОМУ .cfc-panel-img; спіраль-деко
+  з живим парадаксом −15svh→+15svh; стрілки 48px; моб = нативна стрічка бази.
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability: CLS < 0.1 + дрейф якоря <= 4px;
+  2. вхід: панелі видимі (opacity > .9 у центру після заходу);
+  3. скіс: внутрішній wrapper бічних панелей має 3d-transform (matrix3d),
+     центральний — рівний (none/2d); після next() ротація класів: новий
+     центр рівний, старий отримує скіс;
+  4. лічильник бази оновився (01→02);
+  5. деко-парадакс: ty на двох скрол-позиціях різний і слідує
+     −15svh→+15svh (transform-only);
+  6. console errors == 0.
+  Живий перегляд (без ?probe) = НУЛЬ автоскролів (закон PROBE_MODE).
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--sans); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .intro, .outro { min-height: 88vh; display: flex; align-items: center; padding: 0 6vw; color: #6b6b68; }
+
+  .lead { padding: 10vh 6vw 6vh; }
+  .lead p { font-size: clamp(19px, 2vw, 30px); font-weight: 300; line-height: 1.35;
+            max-width: 44ch; margin-left: auto; }
+  .lead p::before { content: ""; display: inline-block; width: 4.5em; }
+
+  /* ---- AIR-скін поверх бази (дельта тільки CSS-змінними і класами) ---- */
+  #yards { position: relative; padding: 4vh 0 8vh; }
+  .cfc-stage { --cfc-ground: transparent; --cfc-ink: #111110; --cfc-line: #b9b7b1;
+    --cfc-serif: var(--sans); --cfc-sans: var(--sans);
+    --cfc-panel-w: 54vw; --cfc-aspect: 1.75; --cfc-gap: 10px; --cfc-cap: 0px; }
+  .cfc-panel-cap { display: none; }               /* живі двори без капшенів */
+  .cfc-panel { background: transparent; }
+  .cfc-panel::after { display: none; }            /* caption-градієнт бази глушиться */
+  .cfc-panel-img { border-radius: 6px; overflow: clip; }
+  /* скіс БЕЗПЕРЕРВНИЙ ПОЗИЦІЙНИЙ (rAF від центру, фікс-кол 1 2026-07-06:
+     WebGL-оригінал гне панель пропорційно відстані КОЖЕН кадр руху —
+     дискретні класи по індексу давали кашу в польоті). transition нема. */
+
+  /* стрілки 48px (матриця §4) + лічильник */
+  .cfc-nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 4vh; }
+  .cfc-prev, .cfc-next { width: 48px; height: 48px; border-radius: 4px;
+    border: 1px solid #c9c7c1; background: none; color: #111110; font-size: 18px; cursor: pointer; }
+  .cfc-counter { font-size: 13px; color: #6b6b68; min-width: 5em; text-align: center; }
+
+  /* спіраль-деко за каруселлю (живий l-people-carousel-deco) */
+  .deco { position: absolute; left: 4vw; top: 50%; width: 30vw; aspect-ratio: 1;
+          z-index: 0; pointer-events: none; opacity: .55; will-change: transform; }
+  .deco .coil { position: absolute; inset: 0; border-radius: 50%;
+    background: repeating-conic-gradient(from 8deg, rgba(17,17,16,.08) 0 7deg, transparent 7deg 14deg);
+    -webkit-mask-image: radial-gradient(circle, transparent 34%, #000 35% 70%, transparent 71%);
+            mask-image: radial-gradient(circle, transparent 34%, #000 35% 70%, transparent 71%); }
+  .cfc-viewport, .cfc-nav { position: relative; z-index: 1; }
+
+  /* фото-заглушки дворів (лаба без зовнішніх фото) */
+  .ph { width: 100%; height: 100%; }
+  .ph-1 { background: linear-gradient(165deg, #cfd6cf 0%, #9fae9d 45%, #5d6d5c 100%); }
+  .ph-2 { background: linear-gradient(200deg, #d9d4c8 0%, #b0a893 50%, #6e6654 100%); }
+  .ph-3 { background: linear-gradient(150deg, #c7cdd4 0%, #8f9aa6 55%, #4d5763 100%); }
+  .ph-4 { background: linear-gradient(215deg, #d6cfc6 0%, #a3927e 55%, #5c5044 100%); }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · center-focus-carousel / air-courtyards · тисни ‹ › (моб: свайп)</div>
+
+<section class="intro"><p>… скроль: двори — центр рівний, сусіди ребром; спіраль пливе за ними …</p></section>
+
+<section id="yards">
+  <div class="lead">
+    <p>Тут славлять свободу і самодостатність. Вежі навмисно не з'єднані спільним подіумом · замість нього затишні відкриті подвір'я.</p>
+  </div>
+  <div class="deco" id="deco"><div class="coil"></div></div>
+  <div class="cfc-stage" id="cfc">
+    <div class="cfc-viewport">
+      <div class="cfc-rail">
+        <div class="cfc-panel"><div class="cfc-panel-img"><div class="ph ph-1"></div></div><div class="cfc-panel-cap"></div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><div class="ph ph-2"></div></div><div class="cfc-panel-cap"></div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><div class="ph ph-3"></div></div><div class="cfc-panel-cap"></div></div>
+        <div class="cfc-panel"><div class="cfc-panel-img"><div class="ph ph-4"></div></div><div class="cfc-panel-cap"></div></div>
+      </div>
+    </div>
+    <div class="cfc-nav">
+      <button class="cfc-prev" aria-label="попереднє подвір'я">‹</button>
+      <span class="cfc-counter">01 / 04</span>
+      <button class="cfc-next" aria-label="наступне подвір'я">›</button>
+    </div>
+  </div>
+</section>
+
+<section class="outro"><p>… кінець проби …</p></section>
+
+<script src="../../component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var api = window.CenterFocusCarousel.create('#cfc', { loop: true });
+  window.__CFC = api;
+  /* база ставить __LAB_OK__ на init — у пробі вердикт варіанта авторитетний */
+  if (PM) { try { delete window.__LAB_OK__; } catch (e) { window.__LAB_OK__ = undefined; } }
+
+  var stage = document.getElementById('cfc');
+  var panels = Array.prototype.slice.call(stage.querySelectorAll('.cfc-panel'));
+  var counterEl = stage.querySelector('.cfc-counter');
+
+  /* ---- дельта 1: скіс БЕЗПЕРЕРВНИЙ ПОЗИЦІЙНИЙ (база незаймана) ----
+     кожна панель гнеться пропорційно відстані її центру від центру
+     в'юпорта КОЖЕН кадр руху рейки; rAF гейтований IO (перф-закон) */
+  var viewportEl = stage.querySelector('.cfc-viewport');
+  var reducedT = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var TILT_MAX = 24, wide = window.matchMedia('(min-width: 821px)');
+  var tActive = false, tRunning = false;
+  function tiltFrame() {
+    if (!tActive || !wide.matches || reducedT) {
+      panels.forEach(function (pn) {
+        pn.querySelector('.cfc-panel-img').style.transform = '';
+        pn.dataset.roty = '0';
+      });
+      tRunning = false;
+      return;
+    }
+    var vr = viewportEl.getBoundingClientRect();
+    var cx = vr.left + vr.width / 2;
+    var half = Math.max(1, vr.width / 2);
+    panels.forEach(function (pn) {
+      var r = pn.getBoundingClientRect();
+      var d = (r.left + r.width / 2 - cx) / half;
+      var rot = Math.max(-TILT_MAX, Math.min(TILT_MAX, d * TILT_MAX * 1.15));
+      pn.querySelector('.cfc-panel-img').style.transform =
+        'perspective(1100px) rotateY(' + (-rot).toFixed(2) + 'deg)';
+      pn.dataset.roty = rot.toFixed(2);
+    });
+    requestAnimationFrame(tiltFrame);
+  }
+  function tiltStart() { if (!tRunning && tActive) { tRunning = true; requestAnimationFrame(tiltFrame); } }
+  new IntersectionObserver(function (en) {
+    tActive = en[0].isIntersecting;
+    tiltStart();
+  }, { rootMargin: '25% 0%' }).observe(viewportEl);
+  wide.addEventListener ? wide.addEventListener('change', tiltStart) : wide.addListener(tiltStart);
+
+  /* ---- дельта 2: деко-парадакс (живий −15svh→+15svh, rAF, transform-only) ---- */
+  var yards = document.getElementById('yards');
+  var deco = document.getElementById('deco');
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function decoTy() {
+    var r = yards.getBoundingClientRect();
+    var vh = innerHeight;
+    var p = Math.max(0, Math.min(1, (vh - r.top) / (r.height + vh)));
+    return -15 + 30 * p; /* svh */
+  }
+  var lastQ = -1, ticking = false;
+  function renderDeco() {
+    var t = decoTy();
+    var q = Math.round(t * 20);
+    if (q === lastQ) return;
+    lastQ = q;
+    deco.style.transform = 'translateY(-50%) translateY(' + t.toFixed(2) + 'svh)';
+  }
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () { ticking = false; renderDeco(); });
+  }
+  if (!reduced) {
+    addEventListener('scroll', onScroll, { passive: true });
+    renderDeco();
+  } else {
+    deco.style.transform = 'translateY(-50%)';
+  }
+
+  /* ---- проби ---- */
+  var report = { stability: null, enter: null, tilt: null, rotate: null, deco: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function is3d(el) {
+    var t = getComputedStyle(el).transform || 'none';
+    return t.indexOf('matrix3d') === 0;
+  }
+
+  async function run() {
+    if (!PM) return; /* база сама виставляє __LAB_OK__ на init; без автоскролів */
+    var ok = true;
+
+    var anchor = document.querySelector('.lead p');
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* моб/static: рівна нативна стрічка (живий AIR) — скіс відсутній */
+    if (window.matchMedia('(max-width: 820px)').matches || api.static) {
+      var vpEl = stage.querySelector('.cfc-viewport');
+      report.enter = {
+        static: !!api.static || stage.classList.contains('cfc-static'),
+        scrollable: /auto|scroll/.test(getComputedStyle(vpEl).overflowX),
+        flat: !is3d(panels[0].querySelector('.cfc-panel-img'))
+      };
+      report.enter.ok = report.enter.static && report.enter.scrollable && report.enter.flat;
+      report.errors = errs;
+      window.__LAB_OK__ = !!(ok && report.enter.ok && errs === 0);
+      console.log('[lab:cfc/air-courtyards:mobile]', JSON.stringify(report));
+      return;
+    }
+
+    /* 2: вхід — стейдж у в'юпорт */
+    window.scrollTo(0, stage.getBoundingClientRect().top + scrollY - innerHeight * 0.25);
+    await delay(1300);
+    var centreOp = parseFloat(getComputedStyle(panels[1]).opacity);
+    report.enter = { centreOpacity: centreOp, ok: centreOp > 0.9 };
+    ok = report.enter.ok && ok;
+
+    /* 3: скіс позиційний — центр (idx 0) ~0°, сусіди помітно гнуться */
+    function roty(i) { return Math.abs(parseFloat(panels[i].dataset.roty || '0')); }
+    report.tilt = { c0: roty(0), r1: roty(1), r2: roty(2) };
+    report.tilt.ok = report.tilt.c0 < 6 && report.tilt.r1 > 10 && report.tilt.r2 > 10;
+    ok = report.tilt.ok && ok;
+
+    /* 4: ротація — next(): 01→02; після твіну НОВИЙ центр (p1) розгинається
+       БЕЗПЕРЕРВНО до ~0°, старий (p0) загинається */
+    var before = counterEl.textContent;
+    stage.querySelector('.cfc-next').click();
+    await delay(1100);
+    report.rotate = { before: before, after: counterEl.textContent,
+                      newCentre: roty(1), oldCentre: roty(0) };
+    report.rotate.ok = before !== report.rotate.after &&
+                       report.rotate.newCentre < 6 && report.rotate.oldCentre > 10;
+    ok = report.rotate.ok && ok;
+
+    /* 5: деко-парадакс слідує прогресу */
+    var ty1 = deco.style.transform;
+    window.scrollTo(0, scrollY + innerHeight * 0.4);
+    await delay(300);
+    var ty2 = deco.style.transform;
+    report.deco = { ty1: ty1, ty2: ty2, ok: reduced ? true : ty1 !== ty2 };
+    ok = report.deco.ok && ok;
+
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:cfc/air-courtyards]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

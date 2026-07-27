@@ -1,0 +1,32 @@
+/* ============================================================
+   VERTICAL-CURTAIN-WIPE · component.css
+   A panel wiping in L->R to the column split, while the outgoing image crop-zooms.
+   Panel colour/content + image are composition; the engine drives the clip + zoom.
+   + pin-wrap / sticky scaffold (BOTH platforms scroll-pin, S19g).
+   ============================================================ */
+
+.vcw-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+
+/* the outgoing full-bleed media (crop-zooms as its column narrows) */
+.vcw-out { position: absolute; inset: 0; z-index: 1; overflow: hidden; }
+.vcw-out img { width: 100%; height: 100%; object-fit: cover; display: block;
+  will-change: transform; backface-visibility: hidden; transform-origin: 75% 50%; }
+
+/* the entering panel (clip-revealed L->R to the park column) */
+.vcw-panel { position: absolute; inset: 0; z-index: 2; will-change: clip-path; backface-visibility: hidden; }
+
+/* NO mix-blend / NO backdrop over the scrubbed surface. clip-path + transform only. */
+
+/* 🔴 PIN scaffold — BOTH platforms pin; the stage sticks while scroll drives the wipe.
+   .pin-wrap gives the scroll length; the stage sticks to the top and the seam wipes
+   by scroll-progress. Mobile keeps the pin too (S19g) — only the layout is full-bleed. */
+.pin-wrap { position: relative; }
+.vcw-stage { position: sticky; top: 0; height: 100vh; }
+
+/* MOBILE (vertical seam): the panel rises bottom->top full-width, text at its bottom edge;
+   the photo stays composed at the TOP as the panel covers from below. Shift the crop-zoom
+   origin upward so the revealed top of the image is the kept region. */
+.vcw-stage[data-vcw-mech="wipe-vertical"] .vcw-out img { transform-origin: 50% 25%; }
+.vcw-stage[data-vcw-mech="wipe-vertical"] .vcw-panel { justify-content: flex-end; }
+
+/* reduced-motion / <=820px: rest with the panel parked + image composed (engine sets it) */

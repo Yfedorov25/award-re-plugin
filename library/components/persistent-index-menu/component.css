@@ -1,0 +1,32 @@
+/* ============================================================
+   PERSISTENT-INDEX-MENU · component.css
+   Split amenity menu: media LEFT (push-swap window) + persistent serif index +
+   bottom-anchored copy RIGHT, over a constant gradient glow. Palette/photos/copy
+   are composition.
+   ============================================================ */
+
+.pim-stage { position: relative; width: 100%; height: 100vh; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
+
+/* LEFT — the media push-swap window (a hard rectangle) */
+.pim-media { position: relative; overflow: hidden; }
+.pim-layer { position: absolute; inset: 0; will-change: transform; backface-visibility: hidden; }
+.pim-layer img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pim-layer--a { z-index: 2; }
+.pim-layer--b { z-index: 1; transform: translateY(100%); }
+
+/* RIGHT — persistent index (fixed stack) + bottom-anchored copy, over a STATIC glow */
+.pim-right { position: relative; display: flex; flex-direction: column; padding: clamp(28px,5vw,90px); }
+.pim-index { margin-top: clamp(40px,9vh,120px); display: flex; flex-direction: column; align-items: flex-end; gap: .1em; }
+.pim-word { background: none; border: 0; cursor: pointer; text-align: right;
+  font-family: inherit; line-height: 1.05; transition: opacity .35s ease; padding: 0;
+  will-change: opacity; }
+.pim-copy { margin-top: auto; will-change: transform, opacity; max-width: 36ch; align-self: flex-end; text-align: right; }
+
+/* the glow is a STATIC gradient on the right column — never animated (cohesion).
+   NO mix-blend / NO backdrop over the moving media. transform + opacity only. */
+
+/* reduced-motion: hard swaps (engine handles); layout unchanged */
+@media (max-width: 820px) {
+  .pim-stage { grid-template-columns: 1fr; height: auto; }
+  .pim-media { height: 60vh; }
+}

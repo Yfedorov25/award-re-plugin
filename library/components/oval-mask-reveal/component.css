@@ -1,0 +1,41 @@
+/* OVAL-MASK-REVEAL · component.css
+   r1864 section media-reveal: an arched/oval mask over a photo that animates open (slit -> arch)
+   on enter, media parallaxing inside, a kicker + serif title settling. clip-path(inset round) +
+   transform + opacity only. NO mix-blend. NO WebGL. */
+
+.omr-stage { min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2.2rem; padding: 12vh 6vw; text-align: center;
+  background: var(--omr-bg, #211c1b); color: var(--omr-ink, #e7e2d6); }
+
+.omr-frame {
+  position: relative; width: var(--omr-w, 46vw); height: var(--omr-h, 78vh);
+  max-width: 720px; overflow: hidden; will-change: clip-path;
+  /* a fallback rounded shape before JS clips it */
+  border-radius: var(--omr-arch-top, 48%) var(--omr-arch-top, 48%) var(--omr-arch-bottom, 14%) var(--omr-arch-bottom, 14%);
+}
+.omr-media { position: absolute; inset: 0; transform-origin: 50% 50%; will-change: transform; }
+.omr-media img, .omr-media video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.omr-kicker {
+  font-family: var(--omr-sans, 'Inter', system-ui, sans-serif); font-size: .68rem;
+  letter-spacing: .26em; text-transform: uppercase; opacity: 0; color: var(--omr-ink, #e7e2d6);
+}
+.omr-title {
+  font-family: var(--omr-serif, 'Playfair Display', Georgia, serif); font-weight: 400;
+  text-transform: uppercase; font-size: var(--omr-title, 3vw); line-height: 1.1;
+  letter-spacing: .04em; margin: 0; opacity: 0; will-change: transform, opacity;
+}
+
+/* overlay variant: kicker/title centred OVER the frame instead of below */
+.omr-stage--overlay .omr-frame { width: var(--omr-w, 60vw); max-width: 980px; }
+.omr-stage--overlay .omr-meta { position: absolute; z-index: 2; left: 0; right: 0; top: 50%; transform: translateY(-50%); }
+
+/* static fallback */
+.omr-static .omr-frame { clip-path: none !important; -webkit-clip-path: none !important; }
+.omr-static .omr-media { transform: none !important; }
+.omr-static .omr-kicker, .omr-static .omr-title { opacity: 1 !important; transform: none !important; }
+
+@media (max-width: 820px) {
+  .omr-frame { width: 86vw; height: 64vh; }
+  .omr-title { font-size: 8vw; }
+}

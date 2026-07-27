@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · office-unit-card · A-13 + T-431 + T-523 (unit на живих планах)</title>
+<!--
+================================================================================
+  LAB: office-unit-card — A-13 unit на ЖИВОМУ офісі AR-1-18 (плани
+  plans/ і plans-furnished/ hotlink; ціна жива 39 611 870).
+  Контракт: жива /office/AR-1-18: office-tabs--vertical (Office plan /
+  On the floor / Master plan), T-431 toggle ЛИШЕ на табі Office plan
+  (закон T-M31), специфікація + ціна + Reserve + ♡, T-523 similar-грід
+  з ПЛАНАМИ-превʼю (клік = handoff).
+
+  ГЕЙТ (PROBE_MODE):
+  1. loadStability; 2. старт: таб plan активний, img = plans/ (не
+  furnished), toggle видимий; 3. FURNISHED → img src містить
+  plans-furnished/; 4. таб floor → toggle ЗНИКАЄ (T-M31), панель інша;
+  назад plan → furnished-стан збережений; 5. Reserve → gate.reserved=1;
+  ♡ → is-active; 6. similar: 3 картки, клік → handoff nr без переходу;
+  errors == 0.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --sans: 'Inter', system-ui, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: var(--sans); background: #f4f2ee; color: #111110; }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  header.vs { display: flex; justify-content: space-between; padding: 16px 3vw; }
+  header.vs .logo { letter-spacing: .32em; font-weight: 500; }
+  .wrap { max-width: 1150px; margin: 2vh auto 10vh; padding: 0 3vw; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · office-unit-card · a-13 + t-431 + t-523 · клікай таби і furnished</div>
+<header class="vs"><span class="logo">AIR</span>
+  <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8b8a86">Home / Offices / AR-1-18</span></header>
+
+<div class="wrap">
+  <div data-ouc id="unit">
+    <div>
+      <div data-ouc-spec></div>
+      <div data-ouc-price></div>
+      <div class="ouc-cta">
+        <button type="button" data-ouc-reserve>Reserve <span>✛</span></button>
+        <button type="button" data-ouc-fav aria-label="Favourite">♡</button>
+      </div>
+    </div>
+    <div class="ouc-tabsbox">
+      <div>
+        <nav data-ouc-tabs role="tablist"></nav>
+        <div data-ouc-toggle></div>
+      </div>
+      <div data-ouc-panels></div>
+    </div>
+    <ul data-ouc-similar></ul>
+  </div>
+</div>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var A = 'https://aircenter.space';
+  var handoffs = [];
+  var ouc = window.OfficeUnitCard.create('#unit', {
+    nr: '18', code: 'AR-1-18', area: 59.9, floor: 9, building: 1, price: 39611870,
+    plan: A + '/assets/images/offices/plans/k1/floor_9/1_9_18.svg',
+    planFurnished: A + '/assets/images/offices/plans-furnished/k1/floor_9/1_9_18.svg',
+    similar: [
+      { nr: '20', area: 77.3, floor: 9, price: 48227470, plan: A + '/assets/images/offices/plans/k1/floor_9/1_9_20.svg', href: '/office/AR-1-20' },
+      { nr: '46', area: 60, floor: 11, price: 43728000, plan: A + '/assets/images/offices/plans/k1/floor_11/1_11_46.svg', href: '/office/AR-1-46' },
+      { nr: '3', area: 77, floor: 7, price: 50573600, plan: A + '/assets/images/offices/plans/k1/floor_7/1_7_3.svg', href: '/office/AR-1-3' }
+    ]
+  }, { onHandoff: function (nr) { handoffs.push(nr); } });
+  window.__OUC = ouc;
+
+  var report = { stability: null, start: null, furn: null, tabs: null,
+                 cta: null, similar: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function img() { return document.querySelector('.ouc-plan-img'); }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    if (document.fonts && document.fonts.ready) await document.fonts.ready; /* фонт-своп ≠ механіка */
+    await delay(120);
+    var anchor = document.querySelector('.ouc-title');
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (l) {
+        l.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift' }); /* без buffered: вікно старту ПІСЛЯ fonts.ready */
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    report.stability = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                         ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    ok = report.stability.ok && ok;
+
+    /* 2 */
+    report.start = {
+      tab: document.querySelector('[data-ouc-tab].is-active').getAttribute('data-ouc-tab'),
+      unfurn: img().src.indexOf('plans-furnished') < 0 && img().src.indexOf('/plans/') > 0,
+      toggle: document.querySelectorAll('[data-ouc-furn]').length === 2
+    };
+    report.start.ok = report.start.tab === 'plan' && report.start.unfurn && report.start.toggle;
+    ok = report.start.ok && ok;
+
+    /* 3: FURNISHED */
+    document.querySelector('[data-ouc-furn="1"]').click();
+    await delay(60);
+    report.furn = { src: /plans-furnished/.test(img().src), ok: /plans-furnished/.test(img().src) };
+    ok = report.furn.ok && ok;
+
+    /* 4: таб floor → toggle зникає (T-M31); назад — furnished збережений */
+    document.querySelector('[data-ouc-tab="floor"]').click();
+    await delay(60);
+    var toggleGone = document.querySelectorAll('[data-ouc-furn]').length === 0;
+    document.querySelector('[data-ouc-tab="plan"]').click();
+    await delay(60);
+    report.tabs = { toggleGone: toggleGone, furnKept: /plans-furnished/.test(img().src) };
+    report.tabs.ok = toggleGone && report.tabs.furnKept;
+    ok = report.tabs.ok && ok;
+
+    /* 5: Reserve + ♡ */
+    document.querySelector('[data-ouc-reserve]').click();
+    document.querySelector('[data-ouc-fav]').click();
+    report.cta = { reserved: ouc.gate.reserved, fav: ouc.gate.fav,
+                   favActive: document.querySelector('[data-ouc-fav]').classList.contains('is-active') };
+    report.cta.ok = ouc.gate.reserved === 1 && ouc.gate.fav && report.cta.favActive;
+    ok = report.cta.ok && ok;
+
+    /* 6: similar handoff */
+    var sims = document.querySelectorAll('.ouc-sim');
+    sims[1].dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    report.similar = { count: sims.length, handoff: handoffs.join(','),
+                       ok: sims.length === 3 && handoffs.length === 1 && handoffs[0] === '46' };
+    ok = report.similar.ok && ok;
+
+    report.errors = errs;
+    window.__LAB_OK__ = !!(ok && errs === 0);
+    console.log('[lab:office-unit-card]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

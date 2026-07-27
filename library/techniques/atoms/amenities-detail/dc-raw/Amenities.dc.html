@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:400;src:url(fonts/TT_Commons_Pro_Regular.woff2) format("woff2");}
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:500;src:url(fonts/TTCommonsPro-Md.woff2) format("woff2");}
+@font-face{font-display:swap;font-family:"TT Commons Pro";font-style:normal;font-weight:700;src:url(fonts/TTCommonsPro-Md.woff2) format("woff2");}
+@font-face{font-display:swap;font-family:"Victor Serif";font-style:normal;font-weight:400;src:url(fonts/VictorSerif-40Regular.woff2) format("woff2");}
+@font-face{font-display:swap;font-family:"Victor Serif";font-style:italic;font-weight:400;src:url(fonts/VictorSerif-45RegularItalic.woff2) format("woff2");}
+:root{--cream:#e0d1b6;--cream2:#f5e8d1;--ink:#162d24;--green:#16322a;--green2:#0e241d;--teal:#0E3A34;--teal2:#0d2b28;--serif:"Victor Serif",Georgia,"Times New Roman",serif;--sans:"TT Commons Pro",Helvetica,Arial,sans-serif;--e:cubic-bezier(.25,.74,.22,.99);--vh:1vh;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:#0e241d;overflow-x:hidden;font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+img{display:block;max-width:100%;}
+a{color:var(--cream);text-decoration:none;}
+a:hover{opacity:.72;}
+::selection{background:#e0d1b6;color:#162d24;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(7px);}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function(){
+  if (window.__SPRINGS_CTRL) return;
+  var C = window.__SPRINGS_CTRL = { variant: 'A', booted: false, hdrMode: null, lenis: null, iv: 0, praf: 0 };
+  var VMAP = {
+    A: { heroY: -4, scale: 1, stagger: 0.06, cardY: 40, cardDur: 0.9, rule: false, label: 'A \u00b7 Calm flow' },
+    B: { heroY: -8, scale: 1.04, stagger: 0.09, cardY: 54, cardDur: 1.15, rule: false, label: 'B \u00b7 Deeper parallax' },
+    C: { heroY: -5, scale: 1, stagger: 0.07, cardY: 44, cardDur: 0.95, rule: true, label: 'C \u00b7 Designer take' }
+  };
+  function V(){ return VMAP[C.variant] || VMAP.A; }
+  var E = 'cubic-bezier(.25,.74,.22,.99)';
+  var reduced = false; try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+  function setVH(){ try { document.documentElement.style.setProperty('--vh', (window.innerHeight*0.01)+'px'); } catch(e){} }
+  function applyHdr(mode){ C.hdrMode=mode; var h=document.querySelector('[data-hdr-el]'); if (h){ var c = mode==='light' ? '#162d24' : '#e0d1b6'; if (h.style.color!==c) h.style.color=c; } }
+  function paintUI(){
+    document.querySelectorAll('[data-vbtn]').forEach(function(b){ var on=b.getAttribute('data-vbtn')===C.variant; b.style.background=on?'#e0d1b6':'transparent'; b.style.color=on?'#162d24':'#e0d1b6'; });
+    var l=document.querySelector('[data-vlabel]'); if (l) l.textContent = V().label;
+  }
+  function resetFlags(){ document.querySelectorAll('[data-rv]').forEach(function(el){ el.removeAttribute('data-rv'); }); }
+  function forceVisible(){
+    document.querySelectorAll('[data-reveal]').forEach(function(el){ el.style.opacity='1'; el.style.transform='translateY(0)'; });
+    document.querySelectorAll('[data-card]').forEach(function(el){ el.style.transform='translateY(0)'; });
+    document.querySelectorAll('[data-rule]').forEach(function(el){ el.style.transform='scaleX(1)'; });
+  }
+  function tick(){
+    C._tc=(C._tc||0)+1;
+    var vh = window.innerHeight || 800, v = V();
+    if (!reduced){
+      document.querySelectorAll('[data-revgroup]').forEach(function(g){
+        if (g.getAttribute('data-rv')==='shown') return;
+        var items=g.querySelectorAll('[data-reveal]'); if(!items.length) return;
+        if (g.getAttribute('data-rv')!=='init'){ for(var k=0;k<items.length;k++){ items[k].style.transition='opacity .9s '+E+', transform .9s '+E; items[k].style.opacity='0'; items[k].style.transform='translateY(20px)'; } g.setAttribute('data-rv','init'); }
+        if (g.getBoundingClientRect().top <= vh*0.62){ for(var j=0;j<items.length;j++){ items[j].style.transitionDelay=(j*v.stagger)+'s'; items[j].style.opacity='1'; items[j].style.transform='translateY(0)'; } g.setAttribute('data-rv','shown'); }
+      });
+      document.querySelectorAll('[data-card]').forEach(function(c){
+        if (c.getAttribute('data-rv')==='shown') return;
+        if (c.getAttribute('data-rv')!=='init'){ c.style.transition='transform '+v.cardDur+'s '+E; c.style.transform='translateY('+v.cardY+'px)'; c.setAttribute('data-rv','init'); }
+        if (c.getBoundingClientRect().top <= vh*0.82){ c.style.transform='translateY(0)'; c.setAttribute('data-rv','shown'); }
+      });
+      document.querySelectorAll('[data-rule]').forEach(function(r){
+        if (!v.rule){ r.style.display='none'; return; }
+        r.style.display='block';
+        if (r.getAttribute('data-rv')==='shown') return;
+        if (r.getAttribute('data-rv')!=='init'){ r.style.transformOrigin='left center'; r.style.transition='transform .9s '+E; r.style.transform='scaleX(0)'; r.setAttribute('data-rv','init'); }
+        if (r.getBoundingClientRect().top <= vh*0.90){ r.style.transform='scaleX(1)'; r.setAttribute('data-rv','shown'); }
+      });
+      document.querySelectorAll('[data-kicker]').forEach(function(k){
+        if (!v.rule){ k.style.letterSpacing='0.96px'; return; }
+        if (k.getAttribute('data-rv')==='shown') return;
+        if (k.getAttribute('data-rv')!=='init'){ k.style.transition='letter-spacing 1s '+E; k.style.letterSpacing='0.22em'; k.setAttribute('data-rv','init'); }
+        if (k.getBoundingClientRect().top <= vh*0.88){ k.style.letterSpacing='0.15em'; k.setAttribute('data-rv','shown'); }
+      });
+    } else { forceVisible(); }
+    var s=document.querySelectorAll('[data-hdr]');
+    for (var i=0;i<s.length;i++){ var rr=s[i].getBoundingClientRect(); if (rr.top<=64 && rr.bottom>64){ applyHdr(s[i].getAttribute('data-hdr')); break; } }
+  }
+  function praf(){
+    C.praf = requestAnimationFrame(praf);
+    var vh = window.innerHeight || 800, v = V();
+    document.querySelectorAll('[data-parallax]').forEach(function(w){
+      var img=w.__img || (w.__img=w.querySelector('img')); if(!img) return;
+      var pr=w.getBoundingClientRect();
+      if (pr.bottom>-100 && pr.top<vh+100){
+        var prog=(vh - pr.top)/(vh + pr.height); if(prog<0)prog=0; if(prog>1)prog=1;
+        var sc = v.scale>1 ? (v.scale - (v.scale-1)*Math.min(1,prog*2)) : 1;
+        img.style.transform = 'translate3d(0,'+(v.heroY*prog).toFixed(2)+'%,0)' + (sc!==1 ? ' scale('+sc.toFixed(3)+')' : '');
+      }
+    });
+  }
+  function initMotion(){
+    var touch = matchMedia('(hover:none)').matches || ('ontouchstart' in window);
+    var embedded = window.top !== window.self;
+    if (C.lenis){ try { C.lenis.destroy(); } catch(e){} C.lenis=null; }
+    if (!touch && !embedded && window.Lenis){
+      try { C.lenis = new Lenis({ duration:1.1, easing:function(t){ return 1-Math.pow(1-t,3); } });
+        var lraf=function(t){ if (C.lenis){ C.lenis.raf(t); requestAnimationFrame(lraf); } }; requestAnimationFrame(lraf); } catch(e){}
+    }
+    resetFlags();
+    if (C.iv) clearInterval(C.iv);
+    C.iv = setInterval(tick, 120);
+    if (!C._safety){ C._safety = setTimeout(function(){ if ((C._tc||0) < 8){ forceVisible(); var s=document.querySelectorAll('[data-hdr]'); for (var i=0;i<s.length;i++){ var rr=s[i].getBoundingClientRect(); if (rr.top<=64 && rr.bottom>64){ applyHdr(s[i].getAttribute('data-hdr')); break; } } } }, 3500); }
+    if (!C._sc){ C._sc = function(){ tick(); }; window.addEventListener('scroll', C._sc, { passive:true }); window.addEventListener('touchmove', C._sc, { passive:true }); window.addEventListener('wheel', C._sc, { passive:true }); }
+    tick();
+    if (!C.praf) C.praf = requestAnimationFrame(praf);
+  }
+  C.setVariant = function(v){ v=(v||'A').toString().toUpperCase(); if (v===C.variant) return; C.variant=v; paintUI(); if (C.booted) initMotion(); };
+  C.scrollTop = function(){ if (C.lenis) C.lenis.scrollTo(0); else window.scrollTo({top:0,behavior:'smooth'}); };
+  window.addEventListener('resize', setVH);
+  setVH();
+  var n=0;
+  (function wait(){
+    if (document.querySelector('[data-vbtn]') && document.querySelector('[data-revgroup]') && document.querySelector('[data-hdr]')){
+      C.booted=true; paintUI();
+      document.querySelectorAll('[data-vbtn]').forEach(function(b){ b.addEventListener('click', function(){ C.setVariant(b.getAttribute('data-vbtn')); }); });
+      initMotion();
+      window.__PAGE_OK__=true;
+    } else if (n++ < 250){ setTimeout(wait, 40); }
+    else { forceVisible(); window.__PAGE_OK__=true; }
+  })();
+})();
+</script>
+</helmet>
+
+<header data-hdr-el style="position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:space-between;padding:15px 20px 13px;color:var(--cream);transition:color .8s var(--e);">
+  <div style="display:flex;align-items:center;gap:9px;">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" style="flex:none;"><path d="M16 7.2c-1.7-1.9-4.9-1.7-6.3.3-1.2 1.7-.9 4 .7 5.3 2 1.7 5.2.7 5.9-1.9.8-3.1-1.9-6-5-6-3.6 0-6.4 3.1-5.7 6.7.7 4.1 5.3 6.3 9.1 4.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <span style="font-family:var(--serif);font-size:23px;letter-spacing:-.6px;line-height:1;">Springs</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:15px;">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 20s-6.8-4.2-6.8-9.1C5.2 8.1 7.1 6.3 9.3 6.3c1.5 0 2.3.8 2.7 1.4.4-.6 1.2-1.4 2.7-1.4 2.2 0 4.1 1.8 4.1 4.6C18.8 15.8 12 20 12 20z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+    <span style="display:flex;flex-direction:column;gap:5px;">
+      <span style="display:block;width:21px;height:1.5px;background:currentColor;"></span>
+      <span style="display:block;width:21px;height:1.5px;background:currentColor;"></span>
+    </span>
+  </div>
+</header>
+
+<section data-screen-label="Hero" data-hdr="dark" style="position:relative;height:calc(var(--vh)*94);min-height:640px;overflow:hidden;background:var(--green2);">
+  <div data-parallax style="position:absolute;top:-7%;left:0;right:0;height:114%;">
+    <img src="assets/01-hero-amenities.webp" alt="Springs clubhouse" style="width:100%;height:100%;object-fit:cover;object-position:52% 42%;"/>
+  </div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,36,29,.36) 0%,rgba(14,36,29,0) 24%,rgba(14,36,29,0) 50%,rgba(14,36,29,.66) 100%);"></div>
+  <div style="position:absolute;left:22px;right:22px;bottom:12.5%;">
+    <span data-rule style="display:block;width:44px;height:1px;background:var(--cream);opacity:.8;margin-bottom:18px;transform-origin:left center;"></span>
+    <h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(46px,14.5vw,64px);letter-spacing:-2px;line-height:1.0;color:var(--cream);margin:0;">Amenities</h1>
+    <div data-kicker style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;line-height:18px;color:var(--cream);margin-top:15px;opacity:.92;">BEAUTY AT YOUR FINGERTIPS</div>
+  </div>
+  <div style="position:absolute;right:22px;bottom:11%;width:52px;height:52px;border-radius:50%;border:1px solid rgba(224,209,182,.55);display:flex;align-items:center;justify-content:center;color:var(--cream);animation:bob 2.6s var(--e) infinite;">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 4v15M6 13l6 6 6-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</section>
+
+<section data-screen-label="Statement" data-hdr="light" data-revgroup style="background:var(--cream2);padding:94px 24px 96px;">
+  <span data-rule style="display:block;width:44px;height:1px;background:var(--ink);opacity:.55;margin-bottom:26px;transform-origin:left center;"></span>
+  <p data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(27px,7.4vw,33px);line-height:1.26;letter-spacing:-.5px;color:var(--ink);margin:0;text-wrap:pretty;">Springs is a rational choice that you make with your heart. Listen: City's pulse steadies and synchronizes with the rhythm of your life.</p>
+</section>
+
+<section data-screen-label="Where Change Becomes Art" data-hdr="dark" data-revgroup style="background:var(--green);padding:82px 24px 34px;">
+  <span data-rule style="display:block;width:44px;height:1px;background:var(--cream);opacity:.55;margin-bottom:24px;transform-origin:left center;"></span>
+  <h2 data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(43px,12.8vw,58px);line-height:1.01;letter-spacing:-1.6px;color:var(--cream);margin:0 0 34px;text-wrap:pretty;">Where Change Becomes Art</h2>
+  <div data-card style="position:relative;border-radius:3px;overflow:hidden;aspect-ratio:3/4;box-shadow:0 34px 66px rgba(0,0,0,.4);">
+    <img src="assets/03-swim-still.webp" alt="Swimming pool" style="width:100%;height:100%;object-fit:cover;object-position:50% 82%;"/>
+  </div>
+  <p data-reveal style="font-family:var(--sans);font-size:20px;line-height:26px;letter-spacing:-.4px;color:var(--cream);margin:32px 0 0;text-wrap:pretty;">The capital feels smaller when you look at it from a distance and even slightly from above. Simultaneously, it grows closer when you are heading to a cafe, to a fitness center, or going for a walk with your family. What will you choose today?</p>
+</section>
+
+<section data-screen-label="Wellness" data-hdr="dark" data-revgroup style="background:var(--green);padding:58px 24px 96px;">
+  <p data-reveal style="font-family:var(--sans);font-size:20px;line-height:26px;letter-spacing:-.4px;color:var(--cream);margin:0;text-wrap:pretty;">Our elegant Wellness-center is a crown jewel of Springs, possessing it keeps you youthful. Warm and inviting light of the lobby transports you to a carefree resort. Marbles steps of the pool, caressing steam of the hammam, light appetizers at the waterside cafe — here relaxation originates.</p>
+  <p data-reveal style="font-family:var(--sans);font-size:20px;line-height:26px;letter-spacing:-.4px;color:var(--cream);margin:26px 0 0;text-wrap:pretty;">Our yoga space is meant for thoughtful relaxation, and our fitness center — for active recovery. Step onto the fitness terrace after an energizing workout and recline on a sun lounger among flower beds. It's easy to show yourself love.</p>
+</section>
+
+<section data-screen-label="Amenities carousel" data-hdr="dark" style="position:relative;background:var(--teal);">
+  <div data-cx="a" ref="{{ refA }}" style="position:relative;height:calc(var(--vh)*100);min-height:660px;overflow:hidden;">
+    <div data-cslide style="position:absolute;inset:0;opacity:1;transition:opacity .42s var(--e);"><img src="assets/05a-pool.webp" alt="Swimming pool" style="width:100%;height:100%;object-fit:cover;object-position:50% 46%;"/></div>
+    <div data-cslide style="position:absolute;inset:0;opacity:0;transition:opacity .42s var(--e);"><img src="assets/05b-fitness.webp" alt="Fitness center" style="width:100%;height:100%;object-fit:cover;object-position:52% 52%;"/></div>
+    <div data-cslide style="position:absolute;inset:0;opacity:0;transition:opacity .42s var(--e);"><img src="assets/05c-beauty.webp" alt="Beauty lounge" style="width:100%;height:100%;object-fit:cover;object-position:50% 46%;"/></div>
+    <div data-cslide style="position:absolute;inset:0;opacity:0;transition:opacity .42s var(--e);"><img src="assets/05d-hammam.webp" alt="Stone hammam" style="width:100%;height:100%;object-fit:cover;object-position:50% 38%;"/></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,43,40,.5) 0%,rgba(13,43,40,0) 20%,rgba(13,43,40,.12) 44%,rgba(13,43,40,.9) 86%);pointer-events:none;"></div>
+    <button aria-label="Previous amenity" onClick="{{ aPrev }}" style="position:absolute;left:16px;top:calc(50% - 24px);width:46px;height:46px;border-radius:50%;border:1px solid rgba(224,209,182,.5);background:rgba(13,43,40,.2);color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;transition:transform .3s var(--e);" style-active="transform:scale(1.06);" style-focus="transform:scale(1.06);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button aria-label="Next amenity" onClick="{{ aNext }}" style="position:absolute;right:16px;top:calc(50% - 24px);width:46px;height:46px;border-radius:50%;border:1px solid rgba(224,209,182,.5);background:rgba(13,43,40,.2);color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;transition:transform .3s var(--e);" style-active="transform:scale(1.06);" style-focus="transform:scale(1.06);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div style="position:absolute;left:24px;right:24px;bottom:30px;color:var(--cream);z-index:2;">
+      <div style="display:grid;">
+        <div data-ccap style="grid-area:1/1;opacity:1;transition:opacity .42s var(--e),transform .42s var(--e);">
+          <div style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;opacity:.7;margin-bottom:12px;">01 / 04</div>
+          <h3 style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,8.6vw,38px);line-height:1.05;letter-spacing:-1px;margin:0 0 12px;text-wrap:pretty;">Spacious Swimming Pool</h3>
+          <p style="font-family:var(--sans);font-size:17px;line-height:23px;letter-spacing:-.3px;margin:0;opacity:.94;text-wrap:pretty;">Imagine diving into a crystal-clear pool, feeling light and refreshed with every cell. Splashing water washes your worries away. Emerge and feel pleasant coolness on your skin.</p>
+        </div>
+        <div data-ccap style="grid-area:1/1;opacity:0;transition:opacity .42s var(--e),transform .42s var(--e);">
+          <div style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;opacity:.7;margin-bottom:12px;">02 / 04</div>
+          <h3 style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,8.6vw,38px);line-height:1.05;letter-spacing:-1px;margin:0 0 12px;text-wrap:pretty;">Fitness Center with Panoramic Windows</h3>
+          <p style="font-family:var(--sans);font-size:17px;line-height:23px;letter-spacing:-.3px;margin:0;opacity:.94;text-wrap:pretty;">Our state-of-the-art equipment supports your health and well-being. Panoramic windows and comfortable environment guarantee your full satisfaction.</p>
+        </div>
+        <div data-ccap style="grid-area:1/1;opacity:0;transition:opacity .42s var(--e),transform .42s var(--e);">
+          <div style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;opacity:.7;margin-bottom:12px;">03 / 04</div>
+          <h3 style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,8.6vw,38px);line-height:1.05;letter-spacing:-1px;margin:0 0 12px;text-wrap:pretty;">Beauty Lounge with Massage Parlour</h3>
+          <p style="font-family:var(--sans);font-size:17px;line-height:23px;letter-spacing:-.3px;margin:0;opacity:.94;text-wrap:pretty;">Springs beauty lounge and its unique care programs help you end your day on a finest note.</p>
+        </div>
+        <div data-ccap style="grid-area:1/1;opacity:0;transition:opacity .42s var(--e),transform .42s var(--e);">
+          <div style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;opacity:.7;margin-bottom:12px;">04 / 04</div>
+          <h3 style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,8.6vw,38px);line-height:1.05;letter-spacing:-1px;margin:0 0 12px;text-wrap:pretty;">Luxurious Stone Hammam</h3>
+          <p style="font-family:var(--sans);font-size:17px;line-height:23px;letter-spacing:-.3px;margin:0;opacity:.94;text-wrap:pretty;">Soft light, delicate textures of natural stone walls, and warm glowing steam that can make your body light and your thoughts — airy.</p>
+        </div>
+      </div>
+      <div style="margin-top:24px;">
+        <div style="display:flex;gap:6px;">
+          <button data-ctab onClick="{{ aTab0 }}" style="flex:1;text-align:left;background:none;border:none;padding:0 0 10px;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;color:var(--cream);cursor:pointer;">POOL</button>
+          <button data-ctab onClick="{{ aTab1 }}" style="flex:1;text-align:left;background:none;border:none;padding:0 0 10px;font-family:var(--sans);font-weight:400;font-size:12px;letter-spacing:.96px;color:rgba(224,209,182,.5);cursor:pointer;">FITNESS</button>
+          <button data-ctab onClick="{{ aTab2 }}" style="flex:1;text-align:left;background:none;border:none;padding:0 0 10px;font-family:var(--sans);font-weight:400;font-size:12px;letter-spacing:.96px;color:rgba(224,209,182,.5);cursor:pointer;">BEAUTY</button>
+          <button data-ctab onClick="{{ aTab3 }}" style="flex:1;text-align:left;background:none;border:none;padding:0 0 10px;font-family:var(--sans);font-weight:400;font-size:12px;letter-spacing:.96px;color:rgba(224,209,182,.5);cursor:pointer;">HAMMAM</button>
+        </div>
+        <div style="position:relative;height:1px;background:rgba(224,209,182,.24);">
+          <div data-cunder style="position:absolute;top:0;left:0;height:1px;width:25%;background:var(--cream);transform:translateX(0);transition:transform .42s var(--e),width .42s var(--e);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Riverside Promenade" data-hdr="dark" style="position:relative;height:calc(var(--vh)*96);min-height:640px;overflow:hidden;background:var(--green);">
+  <div data-parallax style="position:absolute;top:-7%;left:0;right:0;height:114%;">
+    <img src="assets/07-promenade.webp" alt="Riverside promenade" style="width:100%;height:100%;object-fit:cover;object-position:64% 42%;"/>
+  </div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,36,29,.28) 0%,rgba(14,36,29,0) 26%,rgba(14,36,29,.1) 46%,rgba(14,36,29,.82) 84%);pointer-events:none;"></div>
+  <div data-revgroup style="position:absolute;left:24px;right:24px;bottom:9%;">
+    <span data-rule style="display:block;width:44px;height:1px;background:var(--cream);opacity:.6;margin-bottom:20px;transform-origin:left center;"></span>
+    <h2 data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(34px,9.6vw,44px);line-height:1.04;letter-spacing:-1.2px;color:var(--cream);margin:0 0 20px;text-wrap:pretty;">Riverside Promenade at Your Doorstep</h2>
+    <p data-reveal style="font-family:var(--sans);font-size:18px;line-height:24px;letter-spacing:-.35px;color:var(--cream);margin:0;opacity:.95;text-wrap:pretty;">Winding paths, paved with gray granite, resemble creeks and riverbeds that flow gently around Springs. White froth of hydrangeas and slender torsos of shadberries, suspended above invisible water, become a picturesque backdrop for a riverside walk.</p>
+  </div>
+</section>
+
+<section data-screen-label="Forest garden carousel" data-hdr="light" data-revgroup style="background:var(--cream2);padding:84px 24px 90px;">
+  <div data-cx="b" ref="{{ refB }}">
+    <div data-card style="position:relative;aspect-ratio:4/5;border-radius:3px;overflow:hidden;box-shadow:0 28px 56px rgba(22,45,36,.22);border:1px solid rgba(22,45,36,.08);">
+      <div data-cslide style="position:absolute;inset:0;opacity:1;transition:opacity .42s var(--e);"><img src="assets/09a-forest-park.webp" alt="Private forest park" style="width:100%;height:100%;object-fit:cover;object-position:50% 44%;"/></div>
+      <div data-cslide style="position:absolute;inset:0;opacity:0;transition:opacity .42s var(--e);"><img src="assets/09b-forest-layers.webp" alt="Multiple forest layers" style="width:100%;height:100%;object-fit:cover;object-position:50% 30%;"/></div>
+      <div data-cslide style="position:absolute;inset:0;opacity:0;transition:opacity .42s var(--e);"><img src="assets/09c-blossom.webp" alt="Neutral palette of blossoms" style="width:100%;height:100%;object-fit:cover;object-position:50% 52%;"/></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:22px;">
+      <button aria-label="Previous" onClick="{{ bPrev }}" style="width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(22,45,36,.4);background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s var(--e);" style-active="transform:scale(1.06);" style-focus="transform:scale(1.06);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div style="display:grid;flex:1;text-align:center;">
+        <div data-ccap style="grid-area:1/1;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;color:var(--ink);opacity:1;transition:opacity .42s var(--e);">PRIVATE FOREST PARK</div>
+        <div data-ccap style="grid-area:1/1;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;color:var(--ink);opacity:0;transition:opacity .42s var(--e);">MULTIPLE FOREST LAYERS</div>
+        <div data-ccap style="grid-area:1/1;font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;color:var(--ink);opacity:0;transition:opacity .42s var(--e);">NEUTRAL PALETTE OF BLOSSOMS</div>
+      </div>
+      <button aria-label="Next" onClick="{{ bNext }}" style="width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(22,45,36,.4);background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s var(--e);" style-active="transform:scale(1.06);" style-focus="transform:scale(1.06);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </div>
+  <p data-reveal style="font-family:var(--sans);font-size:20px;line-height:26px;letter-spacing:-.4px;color:var(--ink);margin:38px 0 0;text-wrap:pretty;">Man-made forest garden features towering pine trees adorned with bushy crowns, verdant juniper, and delicate clusters of fieldfares. Step out of the shimmering shade into a forest clearing and hold the sunshine in your hands.</p>
+</section>
+
+<section data-screen-label="Garden of Forking Paths" data-hdr="dark" data-revgroup style="background:var(--green);padding:86px 24px 66px;">
+  <span data-rule style="display:block;width:44px;height:1px;background:var(--cream);opacity:.55;margin-bottom:24px;transform-origin:left center;"></span>
+  <p data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(26px,7.2vw,32px);line-height:1.24;letter-spacing:-.5px;color:var(--cream);margin:0;text-wrap:pretty;">In The Garden of Forking Paths, a short story by Borges, the author created a world of endless possibilities. At Springs, the acclaimed design bureau WowHouse paved artistic paths towards your goals.</p>
+</section>
+
+<section data-screen-label="Garden recreation" data-hdr="light" data-revgroup style="background:var(--cream2);padding:30px 24px 44px;">
+  <p data-reveal style="font-family:var(--sans);font-size:20px;line-height:26px;letter-spacing:-.4px;color:var(--ink);margin:0 0 20px;">Sit down to read under ivy-covered awning</p>
+  <div data-card style="position:relative;aspect-ratio:1/1;border-radius:3px;overflow:hidden;box-shadow:0 24px 50px rgba(22,45,36,.2);border:1px solid rgba(22,45,36,.08);">
+    <img src="assets/10-ivy-awning.webp" alt="Ivy-covered awning" style="width:100%;height:100%;object-fit:cover;object-position:50% 34%;"/>
+  </div>
+  <p data-reveal style="font-family:var(--sans);font-size:20px;line-height:26px;letter-spacing:-.4px;color:var(--ink);margin:46px 0 20px;">Bring the little ones to a landscaped playground</p>
+  <div data-card style="position:relative;aspect-ratio:1/1;border-radius:3px;overflow:hidden;box-shadow:0 24px 50px rgba(22,45,36,.2);border:1px solid rgba(22,45,36,.08);">
+    <img src="assets/11-playground.webp" alt="Landscaped playground" style="width:100%;height:100%;object-fit:cover;object-position:50% 40%;"/>
+  </div>
+  <p data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(26px,7.4vw,32px);line-height:1.12;letter-spacing:-.6px;color:var(--ink);margin:48px 0 0;text-align:center;">Meditate on our softest lawns</p>
+</section>
+
+<section data-screen-label="Mosaic" data-hdr="light" data-revgroup style="background:var(--cream2);padding:30px 24px 92px;">
+  <p data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(29px,8.4vw,38px);line-height:1.12;letter-spacing:-.9px;color:var(--ink);margin:0 auto 38px;text-align:center;max-width:320px;text-wrap:pretty;">Springs creates a mosaic of beautiful reality.</p>
+  <div data-card style="position:relative;aspect-ratio:4/5;border-radius:3px;overflow:hidden;box-shadow:0 26px 54px rgba(22,45,36,.22);border:1px solid rgba(22,45,36,.08);">
+    <img src="assets/12-yoga-mosaic.webp" alt="Yoga on the lawn" style="width:100%;height:100%;object-fit:cover;object-position:50% 32%;"/>
+  </div>
+  <div data-reveal style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;color:var(--ink);opacity:.7;margin-top:16px;">PORTABLE OUTDOOR FURNITURE</div>
+</section>
+
+<section data-screen-label="Private Forest Land" data-hdr="dark" style="position:relative;height:calc(var(--vh)*92);min-height:600px;overflow:hidden;background:var(--green2);">
+  <div data-parallax style="position:absolute;top:-7%;left:0;right:0;height:114%;">
+    <img src="assets/13-forest-land.webp" alt="Pine needles" style="width:100%;height:100%;object-fit:cover;object-position:50% 66%;"/>
+  </div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,36,29,.6) 0%,rgba(14,36,29,.05) 34%,rgba(14,36,29,0) 60%,rgba(14,36,29,.72) 100%);pointer-events:none;"></div>
+  <div data-revgroup style="position:absolute;left:24px;right:24px;top:14%;">
+    <span data-rule style="display:block;width:44px;height:1px;background:var(--cream);opacity:.6;margin-bottom:20px;transform-origin:left center;"></span>
+    <h2 data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(40px,11.8vw,52px);line-height:1.02;letter-spacing:-1.4px;color:var(--cream);margin:0;text-wrap:pretty;">Private Forest Land</h2>
+  </div>
+  <div data-revgroup style="position:absolute;left:24px;right:24px;bottom:9%;">
+    <p data-reveal style="font-family:var(--sans);font-size:18px;line-height:24px;letter-spacing:-.35px;color:var(--cream);margin:0;opacity:.95;text-wrap:pretty;">Forest whispers, provides cool relief, saturates with an ephemeral cocktail pine needle, flower, and birch bud aromas. Only two minutes away from your home.</p>
+  </div>
+</section>
+
+<section data-screen-label="Panoramic Terraces carousel" data-hdr="dark" style="position:relative;background:var(--teal2);">
+  <div data-cx="c" ref="{{ refC }}" style="position:relative;height:calc(var(--vh)*100);min-height:680px;overflow:hidden;">
+    <div data-parallax style="position:absolute;top:-6%;left:0;right:0;height:112%;">
+      <img src="assets/14-terraces.webp" alt="Panoramic terrace at sunset" style="width:100%;height:100%;object-fit:cover;object-position:50% 68%;"/>
+    </div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,43,40,.5) 0%,rgba(13,43,40,.05) 26%,rgba(13,43,40,0) 50%,rgba(13,43,40,.86) 88%);pointer-events:none;"></div>
+    <div data-revgroup style="position:absolute;left:24px;right:24px;top:13%;">
+      <span data-rule style="display:block;width:44px;height:1px;background:var(--cream);opacity:.6;margin-bottom:20px;transform-origin:left center;"></span>
+      <h2 data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(40px,11.8vw,52px);line-height:1.02;letter-spacing:-1.4px;color:var(--cream);margin:0;text-wrap:pretty;">Panoramic Terraces</h2>
+    </div>
+    <div style="position:absolute;left:24px;right:24px;bottom:30px;color:var(--cream);z-index:2;">
+      <div style="display:grid;margin-bottom:16px;">
+        <div data-ccap style="grid-area:1/1;display:flex;align-items:center;gap:12px;opacity:1;transition:opacity .42s var(--e);">
+          <span style="width:40px;height:40px;flex:none;border-radius:50%;border:1px solid rgba(224,209,182,.6);display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 1 4 10.5c-.7.6-1 1-1 1.8H9c0-.8-.3-1.2-1-1.8A6 6 0 0 1 12 3z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;">INTEGRATED LIGHTING</span>
+        </div>
+        <div data-ccap style="grid-area:1/1;display:flex;align-items:center;gap:12px;opacity:0;transition:opacity .42s var(--e);">
+          <span style="width:40px;height:40px;flex:none;border-radius:50%;border:1px solid rgba(224,209,182,.6);display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 20c0-7 4-12 14-13-1 9-6 13-12 13m1-3c1.5-3 4-5 7-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;">DECORATIVE CLIMBING PLANTS</span>
+        </div>
+        <div data-ccap style="grid-area:1/1;display:flex;align-items:center;gap:12px;opacity:0;transition:opacity .42s var(--e);">
+          <span style="width:40px;height:40px;flex:none;border-radius:50%;border:1px solid rgba(224,209,182,.6);display:flex;align-items:center;justify-content:center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4zM4 12h16M9 6v12M15 6v12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;">TRANSPARENT PANORAMIC RAILING</span>
+        </div>
+      </div>
+      <p data-reveal style="font-family:var(--sans);font-size:17px;line-height:23px;letter-spacing:-.3px;margin:0 0 20px;opacity:.94;text-wrap:pretty;">Light plays delicately across the viewing fences, hiding among flowers, shimmering in treetops, arranging a quiet dance of shadows. Let nothing distract you from the twinkle of distant stars or the loving sparks in the eyes of your close ones.</p>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <button aria-label="Previous" onClick="{{ cPrev }}" style="width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(224,209,182,.5);background:rgba(13,43,40,.2);color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s var(--e);" style-active="transform:scale(1.06);" style-focus="transform:scale(1.06);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button aria-label="Next" onClick="{{ cNext }}" style="width:46px;height:46px;flex:none;border-radius:50%;border:1px solid rgba(224,209,182,.5);background:rgba(13,43,40,.2);color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s var(--e);" style-active="transform:scale(1.06);" style-focus="transform:scale(1.06);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span data-ccount style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;opacity:.7;margin-left:auto;">01 / 03</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Park-like Parking" data-hdr="dark" style="position:relative;height:calc(var(--vh)*90);min-height:560px;overflow:hidden;background:var(--green);">
+  <div data-parallax style="position:absolute;top:-7%;left:0;right:0;height:114%;">
+    <img src="assets/15-parking-garage.webp" alt="Designer car park" style="width:100%;height:100%;object-fit:cover;object-position:50% 46%;"/>
+  </div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,36,29,.34) 0%,rgba(14,36,29,0) 30%,rgba(14,36,29,.12) 52%,rgba(14,36,29,.82) 86%);pointer-events:none;"></div>
+  <div data-revgroup style="position:absolute;left:24px;right:24px;bottom:9%;">
+    <span data-rule style="display:block;width:44px;height:1px;background:var(--cream);opacity:.6;margin-bottom:20px;transform-origin:left center;"></span>
+    <h2 data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(40px,11.6vw,52px);line-height:1.02;letter-spacing:-1.4px;color:var(--cream);margin:0;">Park-like Parking</h2>
+  </div>
+</section>
+<section data-screen-label="Parking detail" data-hdr="light" data-revgroup style="background:var(--cream2);padding:30px 0 0;">
+  <div data-card style="position:relative;margin:0 24px;aspect-ratio:4/3;border-radius:3px;overflow:hidden;box-shadow:0 24px 50px rgba(22,45,36,.2);border:1px solid rgba(22,45,36,.08);">
+    <img src="assets/16-parking-interior.webp" alt="Parking interior" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;"/>
+  </div>
+  <p data-reveal style="font-family:var(--sans);font-size:20px;line-height:26px;letter-spacing:-.4px;color:var(--ink);margin:0;padding:36px 24px 0;text-wrap:pretty;">At Springs, everything has been marked by designer's hand that turned utility spaces aesthetic objects. Our two-level designer car park is framed with a natural stone fence, its textures subtly accentuated by a chain of opalescent sconces. Encircled by trees and dramatic silhouettes of flowerbeds, this parking will make your car sparkle like a jewel meant for the opulent lifestyle.</p>
+  <div style="padding:38px 24px 88px;">
+    <div data-reveal style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-top:1px solid rgba(22,45,36,.2);">
+      <span style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,8.2vw,36px);letter-spacing:-.8px;color:var(--ink);">Designed interior</span>
+    </div>
+    <div data-reveal style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-top:1px solid rgba(22,45,36,.2);">
+      <span style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,8.2vw,36px);letter-spacing:-.8px;color:var(--ink);">Two levels</span>
+    </div>
+    <div data-reveal style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-top:1px solid rgba(22,45,36,.2);border-bottom:1px solid rgba(22,45,36,.2);">
+      <span style="font-family:var(--serif);font-weight:400;font-size:clamp(30px,8.2vw,36px);letter-spacing:-.8px;color:var(--ink);">176 parking spaces</span>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="Location" data-hdr="dark" style="position:relative;height:calc(var(--vh)*100);min-height:640px;overflow:hidden;background:linear-gradient(158deg,#0E3A34 0%,#124039 52%,#16322a 100%);">
+  <div style="position:absolute;top:0;bottom:0;left:0;width:60%;overflow:hidden;">
+    <img src="assets/17-location-flower.webp" alt="Alstroemeria flower" style="width:100%;height:100%;object-fit:cover;object-position:18% 40%;"/>
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,58,52,0) 34%,#0E3A34 92%);"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,58,52,.2) 0%,rgba(14,58,52,0) 30%,rgba(14,58,52,.35) 100%);"></div>
+  </div>
+  <div data-revgroup style="position:absolute;right:22px;left:36%;top:39%;">
+    <div data-reveal style="font-family:var(--sans);font-weight:500;font-size:12px;letter-spacing:.96px;line-height:18px;color:var(--cream);opacity:.9;margin-bottom:14px;">NATURAL OASIS IN THE HEART OF THE CITY</div>
+    <h2 data-reveal style="font-family:var(--serif);font-weight:400;font-size:clamp(42px,11.6vw,54px);line-height:1;letter-spacing:-1.6px;color:var(--cream);margin:0;">Location</h2>
+  </div>
+  <a href="#" aria-label="Explore location" style="position:absolute;right:28px;bottom:16%;width:70px;height:70px;border-radius:50%;border:1px solid rgba(224,209,182,.6);display:flex;align-items:center;justify-content:center;color:var(--cream);transition:transform .3s var(--e);" style-active="transform:scale(1.06);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  <div style="position:absolute;left:24px;right:24px;bottom:5.5%;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:.9px;color:var(--cream);opacity:.75;">HOMEPAGE / INFRASTRUCTURE</span>
+    <button aria-label="Back to top" onClick="{{ toTop }}" style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(224,209,182,.5);background:transparent;color:var(--cream);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .3s var(--e);" style-active="transform:scale(1.06);" style-focus="transform:scale(1.06);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 20V5M6 11l6-6 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+</section>
+
+<section data-screen-label="Footer" data-hdr="dark" style="background:var(--green2);padding:64px 24px 52px;overflow:hidden;">
+  <div style="font-family:var(--serif);font-weight:400;font-size:clamp(64px,22vw,96px);line-height:.9;letter-spacing:-3px;color:var(--cream);">Springs</div>
+  <div style="height:1px;background:rgba(224,209,182,.18);margin:36px 0 22px;"></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;">
+    <span style="font-family:var(--sans);font-size:12px;letter-spacing:.4px;line-height:18px;color:var(--cream);opacity:.6;">© 2026 Springs.<br/>All rights reserved.</span>
+    <span style="font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:.9px;color:var(--cream);opacity:.55;">AMENITIES</span>
+  </div>
+</section>
+
+<div data-vlabel style="position:fixed;left:50%;bottom:58px;transform:translateX(-50%);z-index:80;font-family:var(--sans);font-weight:500;font-size:10px;letter-spacing:1.1px;color:rgba(224,209,182,.72);text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 6px rgba(0,0,0,.5);pointer-events:none;">A · Calm flow</div>
+<div style="position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:81;display:flex;gap:3px;background:rgba(14,36,29,.72);backdrop-filter:blur(12px);border:1px solid rgba(224,209,182,.28);border-radius:999px;padding:4px;">
+  <button data-vbtn="A" onClick="{{ setA }}" style="width:34px;height:30px;border:none;border-radius:999px;background:var(--cream);color:var(--ink);font-family:var(--sans);font-weight:500;font-size:13px;cursor:pointer;transition:background .3s var(--e),color .3s var(--e);">A</button>
+  <button data-vbtn="B" onClick="{{ setB }}" style="width:34px;height:30px;border:none;border-radius:999px;background:transparent;color:var(--cream);font-family:var(--sans);font-weight:500;font-size:13px;cursor:pointer;transition:background .3s var(--e),color .3s var(--e);">B</button>
+  <button data-vbtn="C" onClick="{{ setC }}" style="width:34px;height:30px;border:none;border-radius:999px;background:transparent;color:var(--cream);font-family:var(--sans);font-weight:500;font-size:13px;cursor:pointer;transition:background .3s var(--e),color .3s var(--e);">C</button>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Choreography&quot;,&quot;label&quot;:&quot;Scroll variant&quot;}}">
+class Component extends DCLogic {
+  state = { variant: (this.props.variant || 'A').toString().toUpperCase() };
+
+  lens = { a: 4, b: 3, c: 3 };
+  idx = { a: 0, b: 0, c: 0 };
+  reduced = false;
+  lenis = null;
+
+  refA = (el) => { this.stageA = el; };
+  refB = (el) => { this.stageB = el; };
+  refC = (el) => { this.stageC = el; };
+
+  V(v) {
+    const map = {
+      A: { heroY: -4, scale: 1.0, stagger: 0.06, cardY: 40, cardDur: 0.9, rule: false, label: 'A · Calm flow' },
+      B: { heroY: -8, scale: 1.04, stagger: 0.09, cardY: 54, cardDur: 1.15, rule: false, label: 'B · Deeper parallax' },
+      C: { heroY: -5, scale: 1.0, stagger: 0.07, cardY: 44, cardDur: 0.95, rule: true, label: 'C · Designer take' }
+    };
+    return map[v] || map.A;
+  }
+
+  stageOf(which) { return which === 'a' ? this.stageA : which === 'b' ? this.stageB : this.stageC; }
+
+  step(which, dir) {
+    const n = this.lens[which];
+    this.idx[which] = (this.idx[which] + dir + n) % n;
+    this.paint(which);
+  }
+  go(which, i) { this.idx[which] = i; this.paint(which); }
+
+  paint(which) {
+    const stage = this.stageOf(which);
+    if (!stage) return;
+    const i = this.idx[which];
+    stage.querySelectorAll('[data-cslide]').forEach((el, k) => { el.style.opacity = k === i ? '1' : '0'; });
+    stage.querySelectorAll('[data-ccap]').forEach((el, k) => { el.style.opacity = k === i ? '1' : '0'; });
+    const tabs = stage.querySelectorAll('[data-ctab]');
+    tabs.forEach((el, k) => {
+      el.style.color = k === i ? '#e0d1b6' : 'rgba(224,209,182,.5)';
+      el.style.fontWeight = k === i ? '500' : '400';
+    });
+    const und = stage.querySelector('[data-cunder]');
+    if (und && tabs.length) { und.style.width = (100 / tabs.length) + '%'; und.style.transform = 'translateX(' + (i * 100) + '%)'; }
+    const cnt = stage.querySelector('[data-ccount]');
+    if (cnt) cnt.textContent = '0' + (i + 1) + ' / 0' + this.lens[which];
+  }
+
+  onKey = (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const dir = e.key === 'ArrowRight' ? 1 : -1;
+    const cy = window.innerHeight / 2;
+    let best = null, bd = 1e9;
+    ['a', 'b', 'c'].forEach((w) => {
+      const el = this.stageOf(w); if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < window.innerHeight) {
+        const d = Math.abs((r.top + r.bottom) / 2 - cy);
+        if (d < bd) { bd = d; best = w; }
+      }
+    });
+    if (best) { e.preventDefault(); this.step(best, dir); }
+  };
+
+  setVH = () => { document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px'); };
+
+  scrollTop = () => {
+    if (window.__SPRINGS_CTRL) window.__SPRINGS_CTRL.scrollTop();
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  setVariant = (v) => {
+    v = (v || 'A').toString().toUpperCase();
+    this._variant = v;
+    this.paintVariantUI();
+    if (window.__SPRINGS_CTRL) window.__SPRINGS_CTRL.setVariant(v);
+  };
+
+  paintVariantUI() {
+    const v = this._variant;
+    document.querySelectorAll('[data-vbtn]').forEach((b) => {
+      const on = b.getAttribute('data-vbtn') === v;
+      b.style.background = on ? '#e0d1b6' : 'transparent';
+      b.style.color = on ? '#162d24' : '#e0d1b6';
+    });
+    const lbl = document.querySelector('[data-vlabel]');
+    if (lbl) lbl.textContent = this.V(v).label;
+  }
+
+  applyHdr(mode) {
+    if (mode === this.hdrMode) return;
+    this.hdrMode = mode;
+    const h = document.querySelector('[data-hdr-el]');
+    if (h) h.style.color = mode === 'light' ? '#162d24' : '#e0d1b6';
+  }
+
+  syncHdr() {
+    const secs = document.querySelectorAll('[data-hdr]');
+    for (let i = 0; i < secs.length; i++) {
+      const r = secs[i].getBoundingClientRect();
+      if (r.top <= 62 && r.bottom > 62) { this.applyHdr(secs[i].getAttribute('data-hdr')); return; }
+    }
+  }
+
+  track(tw) {
+    if (!tw) return tw;
+    if (tw.scrollTrigger) this._triggers.push(tw.scrollTrigger);
+    else this._triggers.push(tw);
+    return tw;
+  }
+
+  killMine() {
+    (this._triggers || []).forEach((t) => { try { t.kill(); } catch (e) {} });
+    this._triggers = [];
+    try { gsap.killTweensOf('[data-parallax] img, [data-card], [data-reveal], [data-rule], [data-kicker]'); } catch (e) {}
+  }
+
+  forceVisible() {
+    try {
+      gsap.set('[data-reveal]', { opacity: 1, y: 0, clearProps: 'transform' });
+      gsap.set('[data-card]', { y: 0, clearProps: 'transform' });
+      gsap.set('[data-rule]', { scaleX: 1 });
+    } catch (e) {
+      document.querySelectorAll('[data-reveal]').forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; });
+      document.querySelectorAll('[data-card]').forEach((el) => { el.style.transform = 'none'; });
+    }
+  }
+
+  componentDidMount() {
+    this._mounted = true;
+    this._triggers = [];
+    this._pollId = null;
+    this._variant = (this.props.variant || 'A').toString().toUpperCase();
+    this.reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.setVH();
+    window.addEventListener('resize', this.setVH);
+    window.addEventListener('keydown', this.onKey);
+    if (this.reduced) {
+      ['a', 'b', 'c'].forEach((w) => {
+        const s = this.stageOf(w);
+        if (s) s.querySelectorAll('[data-cslide],[data-ccap]').forEach((el) => { el.style.transition = 'none'; });
+      });
+    }
+    this.paint('a'); this.paint('b'); this.paint('c');
+    this.paintVariantUI();
+    if (window.__SPRINGS_CTRL) window.__SPRINGS_CTRL.setVariant(this._variant);
+  }
+
+  componentDidUpdate() {
+    const pv = (this.props.variant || 'A').toString().toUpperCase();
+    if (pv !== this._variant) this.setVariant(pv);
+  }
+
+  componentWillUnmount() {
+    this._mounted = false;
+    window.removeEventListener('keydown', this.onKey);
+    window.removeEventListener('resize', this.setVH);
+  }
+
+  startWatchdog() {
+    let n = 0;
+    this._wd = setInterval(() => {
+      if (!this._mounted) { clearInterval(this._wd); this._wd = null; return; }
+      n++;
+      if (window.gsap && window.ScrollTrigger) {
+        if (ScrollTrigger.getAll().length === 0) { this.initMotion(); }
+        else { clearInterval(this._wd); this._wd = null; return; }
+      }
+      if (n >= 14) { clearInterval(this._wd); this._wd = null; if (!window.ScrollTrigger || ScrollTrigger.getAll().length === 0) this.forceVisible(); }
+    }, 500);
+  }
+
+  waitGSAP() {
+    let n = 0;
+    const tick = () => {
+      if (!this._mounted) return;
+      if (window.gsap && window.ScrollTrigger) { this.boot(); }
+      else if (n++ < 150) { this._pollId = setTimeout(tick, 40); }
+      else { window.__PAGE_OK__ = true; }
+    };
+    tick();
+  }
+
+  boot() {
+    if (!this._mounted) return;
+    try { gsap.registerPlugin(ScrollTrigger); } catch (e) {}
+    this.initMotion();
+    window.__PAGE_OK__ = true;
+  }
+
+  initMotion() {
+    if (!this._mounted || !window.gsap || !window.ScrollTrigger) { this.forceVisible(); return; }
+    try {
+      const V = this.V(this._variant);
+      this.killMine();
+
+      const touch = matchMedia('(hover:none)').matches || ('ontouchstart' in window);
+      const embedded = window.top !== window.self;
+      if (this.lenis) { this.lenis.destroy(); this.lenis = null; }
+      if (!touch && !embedded && window.Lenis) {
+        this.lenis = new Lenis({ duration: 1.1, easing: (t) => 1 - Math.pow(1 - t, 3) });
+        const raf = (t) => { if (this.lenis) { this.lenis.raf(t); requestAnimationFrame(raf); } };
+        requestAnimationFrame(raf);
+        this.lenis.on('scroll', ScrollTrigger.update);
+      }
+      const scrub = touch ? 0.25 : true;
+
+      gsap.utils.toArray('[data-parallax]').forEach((w) => {
+        const img = w.querySelector('img'); if (!img) return;
+        this.track(gsap.fromTo(img, { yPercent: 0 }, { yPercent: V.heroY, ease: 'none', scrollTrigger: { trigger: w, start: 'top bottom', end: 'bottom top', scrub: scrub } }));
+        if (V.scale > 1) this.track(gsap.fromTo(img, { scale: V.scale }, { scale: 1, ease: 'power2.out', duration: 1.2, scrollTrigger: { trigger: w, start: 'top 88%' } }));
+      });
+
+      const vh0 = window.innerHeight || 800;
+      const pastLine = (el, frac) => el.getBoundingClientRect().top <= vh0 * frac;
+
+      if (this.reduced) {
+        this.forceVisible();
+      } else {
+        gsap.utils.toArray('[data-revgroup]').forEach((g) => {
+          const items = Array.from(g.querySelectorAll('[data-reveal]'));
+          if (!items.length) return;
+          gsap.set(items, { opacity: 0, y: 20 });
+          const reveal = () => gsap.to(items, { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', stagger: V.stagger, overwrite: 'auto' });
+          this._triggers.push(ScrollTrigger.create({ trigger: g, start: 'top 62%', onEnter: reveal, onEnterBack: reveal }));
+          if (pastLine(g, 0.62)) reveal();
+        });
+        gsap.utils.toArray('[data-card]').forEach((c) => {
+          gsap.set(c, { y: V.cardY });
+          const settle = () => gsap.to(c, { y: 0, duration: V.cardDur, ease: 'power3.out', overwrite: 'auto' });
+          this._triggers.push(ScrollTrigger.create({ trigger: c, start: 'top 82%', onEnter: settle, onEnterBack: settle }));
+          if (pastLine(c, 0.82)) settle();
+        });
+      }
+
+      const rules = gsap.utils.toArray('[data-rule]');
+      if (V.rule && !this.reduced) {
+        rules.forEach((r) => {
+          r.style.display = 'block';
+          gsap.set(r, { scaleX: 0, transformOrigin: 'left center' });
+          const draw = () => gsap.to(r, { scaleX: 1, duration: 0.9, ease: 'power2.out', overwrite: 'auto' });
+          this._triggers.push(ScrollTrigger.create({ trigger: r, start: 'top 90%', onEnter: draw, onEnterBack: draw }));
+          if (pastLine(r, 0.90)) draw();
+        });
+        gsap.utils.toArray('[data-kicker]').forEach((k) => {
+          gsap.set(k, { letterSpacing: '0.22em' });
+          const settle = () => gsap.to(k, { letterSpacing: '0.15em', duration: 1.0, ease: 'power2.out', overwrite: 'auto' });
+          this._triggers.push(ScrollTrigger.create({ trigger: k, start: 'top 88%', onEnter: settle, onEnterBack: settle }));
+          if (pastLine(k, 0.88)) settle();
+        });
+      } else {
+        rules.forEach((r) => { r.style.display = 'none'; });
+        try { gsap.set('[data-kicker]', { clearProps: 'letterSpacing' }); } catch (e) {}
+      }
+
+      gsap.utils.toArray('[data-hdr]').forEach((sec) => {
+        const st = ScrollTrigger.create({
+          trigger: sec, start: 'top 62', end: 'bottom 62',
+          onToggle: (self) => { if (self.isActive) this.applyHdr(sec.getAttribute('data-hdr')); }
+        });
+        this._triggers.push(st);
+      });
+
+      ScrollTrigger.refresh();
+      this.syncHdr();
+    } catch (err) {
+      console.warn('[amenities] initMotion failed:', (err && err.stack) || (err && err.message) || err);
+      this.forceVisible();
+    }
+  }
+
+  renderVals() {
+    return {
+      refA: this.refA, refB: this.refB, refC: this.refC,
+      aPrev: () => this.step('a', -1), aNext: () => this.step('a', 1),
+      aTab0: () => this.go('a', 0), aTab1: () => this.go('a', 1), aTab2: () => this.go('a', 2), aTab3: () => this.go('a', 3),
+      bPrev: () => this.step('b', -1), bNext: () => this.step('b', 1),
+      cPrev: () => this.step('c', -1), cNext: () => this.step('c', 1),
+      toTop: this.scrollTop,
+      setA: () => this.setVariant('A'), setB: () => this.setVariant('B'), setC: () => this.setVariant('C')
+    };
+  }
+}
+</script>
+</body>
+</html>

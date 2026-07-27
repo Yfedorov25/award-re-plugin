@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>menu-modal B — split reveal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Cormorant+Garamond:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#efe7d5;
+  --ink:#182a20;
+  --cream:#f2ecdb;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink)}
+body{font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+a:hover{color:inherit}
+.serif{font-family:'Cormorant Garamond',serif}
+.caps{font-family:'Archivo',sans-serif;text-transform:uppercase;letter-spacing:.22em;font-size:11px;font-weight:500}
+
+/* ---------- base page (behind overlay) ---------- */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:26px 40px;mix-blend-mode:normal}
+.site-header .wordmark{position:absolute;left:50%;transform:translateX(-50%);font-size:26px;font-weight:500;letter-spacing:.01em}
+.menu-btn{background:none;border:none;cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:10px}
+.menu-btn .bars{display:inline-flex;flex-direction:column;gap:4px}
+.menu-btn .bars i{display:block;width:22px;height:1.5px;background:currentColor}
+.link-caps{opacity:.75}
+main{position:relative;z-index:1}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 40px;max-width:1100px}
+.hero .eyebrow{opacity:.55;margin-bottom:30px}
+.hero h1{font-size:clamp(44px,7vw,104px);font-weight:300;line-height:1.02;letter-spacing:-.01em;max-width:16ch}
+.hero .sub{margin-top:34px;opacity:.6;max-width:44ch;font-size:15px;line-height:1.7}
+.hero .scroll-hint{margin-top:70px;opacity:.5}
+.intro{min-height:92vh;display:flex;align-items:center;justify-content:center;padding:0 40px;border-top:1px solid rgba(24,42,32,.12)}
+.intro p{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(26px,3.6vw,52px);line-height:1.28;max-width:20ch;text-align:center}
+.outro{min-height:60vh;display:flex;align-items:flex-end;justify-content:space-between;padding:0 40px 44px;border-top:1px solid rgba(24,42,32,.12)}
+.outro .caps{opacity:.5}
+
+/* ---------- overlay ---------- */
+.overlay{position:fixed;inset:0;z-index:90;visibility:hidden}
+.overlay-inner{position:absolute;inset:0;display:flex;will-change:clip-path}
+.panel{position:relative;width:50vw;height:100vh;overflow:hidden;color:var(--cream);
+  background:
+    radial-gradient(115% 90% at 26% 122%, #a9cb64 0%, rgba(169,203,100,0) 44%),
+    radial-gradient(95% 85% at 4% -6%, rgba(8,38,31,.92) 0%, rgba(8,38,31,0) 52%),
+    radial-gradient(140% 120% at 92% 40%, rgba(9,40,32,.55) 0%, rgba(9,40,32,0) 60%),
+    linear-gradient(152deg,#0e3a2e 0%,#1a5236 40%,#3c7940 74%,#679a44 100%);
+}
+.panel .grain{position:absolute;inset:0;background-image:var(--grain);background-size:140px;opacity:.09;mix-blend-mode:overlay;pointer-events:none}
+.panel .bloom{position:absolute;inset:0;background:radial-gradient(60% 55% at 34% 60%, rgba(174,214,110,.9), rgba(174,214,110,0) 62%);mix-blend-mode:screen;pointer-events:none;will-change:opacity,transform}
+.menu{position:relative;z-index:2;margin:18vh 0 auto 7.2vw;padding-left:34px}
+.menu .marker{position:absolute;left:0;width:2px;background:var(--cream);top:0;height:0;will-change:top,height,opacity}
+.menu .kicker{position:absolute;top:-46px;left:34px;opacity:.5}
+.item{display:block;overflow:hidden;will-change:opacity}
+.item .word{display:block;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:clamp(38px,4.6vw,70px);line-height:1.16;color:var(--cream);will-change:transform,opacity}
+.panel-meta{position:absolute;left:calc(7.2vw + 34px);bottom:46px;z-index:2;display:flex;gap:26px;color:var(--cream);opacity:0}
+.panel-meta .caps{opacity:.6}
+
+.preview{position:relative;flex:1;height:100vh;overflow:hidden;background:#cdc2aa;will-change:clip-path,opacity,transform}
+.plate{position:absolute;inset:0;will-change:clip-path,transform}
+.plate.p0{background:radial-gradient(92% 72% at 80% 14%, rgba(255,250,236,.92), rgba(255,250,236,0) 60%),radial-gradient(70% 60% at 18% 92%, rgba(150,128,92,.3), rgba(150,128,92,0) 60%),linear-gradient(165deg,#efe8d8 0%,#e6dac4 50%,#cfbe9f 100%)}
+.plate.p1{background:radial-gradient(100% 66% at 50% 4%, #f1ccb1 0%, rgba(241,204,177,0) 56%),radial-gradient(80% 40% at 50% 60%, rgba(255,214,158,.5), rgba(255,214,158,0) 62%),linear-gradient(180deg,#d9b7c4 0%,#c9a8be 22%,#d7b28d 52%,#b58c72 74%,#6d5d55 100%)}
+.plate.p2{background:radial-gradient(60% 30% at 50% 72%, rgba(210,196,168,.55), rgba(210,196,168,0) 70%),linear-gradient(180deg,#a8c8db 0%,#bcd6e2 40%,#d7e2de 66%,#ccbea4 100%)}
+.plate.p3{background:radial-gradient(52% 22% at 42% 76%, rgba(150,196,196,.75), rgba(150,196,196,0) 60%),radial-gradient(62% 42% at 82% 38%, rgba(202,185,150,.36), rgba(202,185,150,0) 60%),linear-gradient(180deg,#bccfd9 0%,#b6c9af 26%,#7e9d65 60%,#5a7c4b 100%)}
+.plate.p4{background:radial-gradient(72% 62% at 62% 40%, rgba(216,184,132,.42), rgba(216,184,132,0) 56%),linear-gradient(160deg,#2c332d 0%,#232a26 46%,#161c19 100%)}
+.plate.p5{background:linear-gradient(115deg, rgba(0,0,0,0) 46%, rgba(233,236,226,.5) 48.5%, rgba(233,236,226,.5) 50.5%, rgba(0,0,0,0) 53%),radial-gradient(66% 48% at 30% 30%, rgba(147,169,166,.6), rgba(147,169,166,0) 60%),linear-gradient(150deg,#c4c9b7 0%,#aeb6a2 46%,#96a190 100%)}
+.seam{position:absolute;left:0;right:0;top:100%;height:2px;z-index:6;pointer-events:none;opacity:0;background:linear-gradient(90deg, rgba(242,236,219,0) 0%, rgba(242,236,219,.95) 50%, rgba(242,236,219,0) 100%);box-shadow:0 0 18px 2px rgba(242,236,219,.55)}
+
+.overlay-head{position:absolute;top:0;left:0;right:0;z-index:8;display:flex;align-items:center;justify-content:space-between;padding:26px 40px;color:var(--cream);will-change:opacity,transform}
+.overlay-head .center{position:absolute;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500}
+.overlay-head .left{display:flex;align-items:center;gap:18px}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--cream);width:26px;height:26px;position:relative;flex:none}
+.close-btn::before,.close-btn::after{content:'';position:absolute;left:2px;right:2px;top:50%;height:1.5px;background:currentColor}
+.close-btn::before{transform:rotate(45deg)}
+.close-btn::after{transform:rotate(-45deg)}
+.overlay-head .active-label{opacity:.7}
+.overlay-head .right{opacity:.75}
+@media (max-width:720px){
+  .panel{width:58vw}
+  .menu{margin-left:6vw}
+  .hero h1{font-size:12vw}
+}
+</style>
+</head>
+<body data-variant="B">
+
+  <header class="site-header">
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu"><span class="bars"><i></i><i></i></span><span class="caps">Menu</span></button>
+    <span class="wordmark serif">Springs</span>
+    <a href="#" class="caps link-caps">Contact&nbsp;Us</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <span class="eyebrow caps">Springs Estate — Riverside</span>
+      <h1 class="serif">A quiet address, composed above the water.</h1>
+      <p class="sub">Twenty-one residences and a garden podium, held between the river and the sky. A single tower, unhurried in its detailing.</p>
+      <span class="scroll-hint caps">Scroll — or open the menu ↗</span>
+    </section>
+    <section class="intro">
+      <p>Every threshold is a held breath before the view.</p>
+    </section>
+    <section class="outro">
+      <span class="caps">© 2026 Springs Estate</span>
+      <span class="caps">Interactive atom — menu-modal · B</span>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay">
+    <div class="overlay-inner" id="overlayInner">
+      <div class="panel" id="panel">
+        <div class="bloom" id="bloom"></div>
+        <div class="grain"></div>
+        <nav class="menu" id="menu">
+          <span class="marker" id="marker"></span>
+          <span class="kicker caps">Six sections</span>
+          <a class="item" href="#" data-i="0"><span class="word serif">Residences</span></a>
+          <a class="item" href="#" data-i="1"><span class="word serif">Design</span></a>
+          <a class="item" href="#" data-i="2"><span class="word serif">Location</span></a>
+          <a class="item" href="#" data-i="3"><span class="word serif">Amenities</span></a>
+          <a class="item" href="#" data-i="4"><span class="word serif">Gallery</span></a>
+          <a class="item" href="#" data-i="5"><span class="word serif">About</span></a>
+        </nav>
+        <div class="panel-meta">
+          <span class="caps">Springs Estate</span>
+          <span class="caps">Est. 2026</span>
+        </div>
+      </div>
+      <div class="preview" id="preview">
+        <div class="plate p0"></div>
+        <div class="plate p1"></div>
+        <div class="plate p2"></div>
+        <div class="plate p3"></div>
+        <div class="plate p4"></div>
+        <div class="plate p5"></div>
+        <div class="seam" id="seam"></div>
+      </div>
+    </div>
+    <div class="overlay-head" id="overlayHead">
+      <div class="left">
+        <button class="close-btn" id="closeBtn" aria-label="Close menu"></button>
+        <span class="active-label caps" id="activeLabel">Residences</span>
+      </div>
+      <span class="center serif">Springs</span>
+      <a href="#" class="right caps">Contact&nbsp;Us</a>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script>
+(function(){
+  const VARIANT = 'B';   // A = panel wipe-up · B = split reveal · C = designer's cut
+  const OFFY = VARIANT==='A' ? '118%' : (VARIANT==='B' ? '42%' : '32%');
+
+  gsap.registerPlugin(ScrollTrigger, CustomEase);
+  CustomEase.create('wipe','0.72,0,0.16,1');
+  CustomEase.create('settle','0.16,1,0.3,1');
+
+  const LenisCtor = window.Lenis || (window.lenis && window.lenis.default);
+  let lenis;
+  if(typeof LenisCtor === 'function'){
+    lenis = new LenisCtor({ lerp:0.1, smoothWheel:true });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((t)=> lenis.raf(t*1000));
+    gsap.ticker.lagSmoothing(0);
+    gsap.to('.hero h1', { yPercent:-14, ease:'none', scrollTrigger:{ trigger:'.hero', start:'top top', end:'bottom top', scrub:true } });
+  } else {
+    lenis = { stop(){ document.documentElement.style.overflow='hidden'; }, start(){ document.documentElement.style.overflow=''; } };
+  }
+
+  const items = [
+    {name:'Residences', label:'Residences'},
+    {name:'Design',     label:'Design'},
+    {name:'Location',   label:'Location'},
+    {name:'Amenities',  label:'Amenities'},
+    {name:'Gallery',    label:'Gallery'},
+    {name:'About',      label:'About'},
+  ];
+
+  const overlay     = document.getElementById('overlay');
+  const overlayInner= document.getElementById('overlayInner');
+  const panel       = document.getElementById('panel');
+  const preview     = document.getElementById('preview');
+  const bloom       = document.getElementById('bloom');
+  const marker      = document.getElementById('marker');
+  const seam        = document.getElementById('seam');
+  const ohead       = document.getElementById('overlayHead');
+  const pmeta       = document.querySelector('.panel-meta');
+  const activeLabel = document.getElementById('activeLabel');
+  const itemsEls    = Array.from(document.querySelectorAll('.item'));
+  const wordEls     = itemsEls.map(it=> it.querySelector('.word'));
+  const plates      = Array.from(document.querySelectorAll('.plate'));
+
+  let isOpen = false;
+  let active = 0;
+  let curIndex = 0;
+  let swapTL = null;
+
+  function finalizePlate(i){
+    plates.forEach((p,idx)=> gsap.set(p, idx===i
+      ? {zIndex:2, clipPath:'inset(0% 0% 0% 0%)', scale:1}
+      : {zIndex:1, clipPath:'inset(100% 0% 0% 0%)', scale:1}));
+    gsap.set(seam,{opacity:0});
+    curIndex = i; swapTL = null;
+  }
+  function showPlate(i, opts){
+    opts = opts || {};
+    const instant = !!opts.instant;
+    if(i===curIndex && !instant && !swapTL) return;
+    if(swapTL){ swapTL.kill(); swapTL=null; }
+    const prev = plates[curIndex];
+    const inc  = plates[i];
+    gsap.set(prev,{zIndex:1, clipPath:'inset(0% 0% 0% 0%)', scale:1});
+    if(i===curIndex){ gsap.set(inc,{zIndex:2, clipPath:'inset(0% 0% 0% 0%)', scale:1}); finalizePlate(i); return; }
+    gsap.set(inc,{zIndex:2, clipPath:'inset(100% 0% 0% 0%)', scale: VARIANT==='B'?1.06:1, transformOrigin:'50% 56%'});
+    curIndex = i;
+    if(instant){ gsap.set(inc,{clipPath:'inset(0% 0% 0% 0%)', scale:1}); finalizePlate(i); return; }
+    swapTL = gsap.timeline({ onComplete:()=>finalizePlate(i) });
+    swapTL.to(inc,{clipPath:'inset(0% 0% 0% 0%)', duration:0.72, ease:'wipe'}, 0);
+    if(VARIANT==='B') swapTL.to(inc,{scale:1, duration:0.9, ease:'settle'}, 0);
+    if(VARIANT==='C'){
+      gsap.set(seam,{opacity:0, top:'100%'});
+      swapTL.to(seam,{top:'0%', duration:0.72, ease:'wipe'}, 0)
+            .to(seam,{opacity:0.9, duration:0.22, ease:'power1.out'}, 0)
+            .to(seam,{opacity:0, duration:0.32, ease:'power1.in'}, 0.4);
+    }
+  }
+
+  function applyHighlight(i){
+    wordEls.forEach((w,k)=> gsap.to(w,{opacity: k===i?1:0.3, duration:0.3, ease:'power2.out'}));
+    if(VARIANT==='C') markerTo(i, true);
+  }
+  function markerTo(i, animate){
+    const it = itemsEls[i];
+    const h  = it.offsetHeight*0.52;
+    const top= it.offsetTop + it.offsetHeight/2 - h/2;
+    if(animate) gsap.to(marker,{top:top, height:h, duration:0.4, ease:'settle'});
+    else gsap.set(marker,{top:top, height:h});
+  }
+  function updateActiveLabel(i){
+    gsap.to(activeLabel,{opacity:0, duration:0.14, onComplete:()=>{
+      activeLabel.textContent = items[i].label;
+      gsap.to(activeLabel,{opacity:0.7, duration:0.2});
+    }});
+  }
+  function setDisplay(i){ applyHighlight(i); showPlate(i); updateActiveLabel(i); }
+  function setActive(i){ i=((i%6)+6)%6; active=i; setDisplay(active); }
+
+  function resetClosed(){
+    gsap.set(overlay,{pointerEvents:'none', visibility:'hidden'});
+    gsap.set(ohead,{opacity:0, y:-10});
+    gsap.set(pmeta,{opacity:0});
+    gsap.set(itemsEls,{opacity:0});
+    gsap.set(wordEls,{y:OFFY});
+    wordEls.forEach((w,k)=> gsap.set(w,{opacity: k===active?1:0.3}));
+    plates.forEach((p,idx)=> gsap.set(p, idx===active
+      ? {zIndex:2, clipPath:'inset(0% 0% 0% 0%)', scale:1}
+      : {zIndex:1, clipPath:'inset(100% 0% 0% 0%)', scale:1}));
+    curIndex = active;
+    gsap.set(seam,{opacity:0, top:'100%'});
+    gsap.set([panel,preview],{clearProps:'transform'});
+    if(VARIANT==='A'){
+      gsap.set(overlayInner,{clipPath:'inset(100% 0% 0% 0%)'});
+      gsap.set([panel,preview],{clipPath:'inset(0% 0% 0% 0%)', opacity:1, scale:1});
+    } else if(VARIANT==='B'){
+      gsap.set(overlayInner,{clipPath:'inset(0% 0% 0% 0%)'});
+      gsap.set(panel,{clipPath:'inset(0% 100% 0% 0%)', opacity:1});
+      gsap.set(preview,{clipPath:'inset(0% 0% 0% 100%)', opacity:1});
+    } else {
+      gsap.set(overlayInner,{clipPath:'inset(0% 0% 0% 0%)'});
+      gsap.set(panel,{clipPath:'inset(0% 0% 0% 0%)', opacity:0, y:16});
+      gsap.set(preview,{clipPath:'inset(0% 0% 0% 0%)', opacity:0, scale:1.04, transformOrigin:'50% 50%'});
+      gsap.set(bloom,{opacity:0, scale:0.7, transformOrigin:'34% 60%'});
+      gsap.set(marker,{opacity:0});
+    }
+  }
+
+  function openSeq(){
+    const tl = gsap.timeline();
+    if(VARIANT==='A'){
+      tl.to(overlayInner,{clipPath:'inset(0% 0% 0% 0%)', duration:0.85, ease:'wipe'}, 0);
+    } else if(VARIANT==='B'){
+      tl.to(panel,{clipPath:'inset(0% 0% 0% 0%)', duration:0.8, ease:'wipe'}, 0)
+        .to(preview,{clipPath:'inset(0% 0% 0% 0%)', duration:0.8, ease:'wipe'}, 0);
+    } else {
+      tl.to(panel,{opacity:1, y:0, duration:0.7, ease:'settle'}, 0)
+        .to(preview,{opacity:1, scale:1, duration:0.9, ease:'settle'}, 0)
+        .fromTo(bloom,{opacity:0, scale:0.7},{opacity:0.85, scale:1.05, duration:0.7, ease:'settle'}, 0)
+        .to(bloom,{opacity:0.4, duration:0.6, ease:'power1.out'}, 0.55)
+        .to(marker,{opacity:1, duration:0.4}, 0.4);
+    }
+    const d = VARIANT==='A' ? 0.22 : 0.12;
+    tl.to(ohead,{opacity:1, y:0, duration:0.55, ease:'settle'}, d*0.6)
+      .to(itemsEls,{opacity:1, duration:0.5, ease:'power2.out', stagger:0.055}, d)
+      .to(wordEls,{y:'0%', duration:0.7, ease:'settle', stagger:0.055}, d)
+      .to(pmeta,{opacity:1, duration:0.5}, '-=0.3');
+    if(VARIANT==='C') tl.add(()=> markerTo(active,true), 0.34);
+    return tl;
+  }
+  function closeSeq(done){
+    const tl = gsap.timeline({ onComplete:done });
+    tl.to(wordEls,{y:OFFY, duration:0.35, ease:'power2.in', stagger:0.025}, 0)
+      .to(itemsEls,{opacity:0, duration:0.3}, 0.05)
+      .to(ohead,{opacity:0, y:-10, duration:0.3}, 0)
+      .to(pmeta,{opacity:0, duration:0.25}, 0);
+    if(VARIANT==='C') tl.to(marker,{opacity:0, duration:0.25}, 0);
+    if(VARIANT==='A'){
+      tl.to(overlayInner,{clipPath:'inset(100% 0% 0% 0%)', duration:0.55, ease:'wipe'}, 0.12);
+    } else if(VARIANT==='B'){
+      tl.to(panel,{clipPath:'inset(0% 100% 0% 0%)', duration:0.5, ease:'wipe'}, 0.12)
+        .to(preview,{clipPath:'inset(0% 0% 0% 100%)', duration:0.5, ease:'wipe'}, 0.12);
+    } else {
+      tl.to(panel,{opacity:0, y:16, duration:0.4}, 0.1)
+        .to(preview,{opacity:0, scale:1.04, duration:0.4}, 0.1)
+        .to(bloom,{opacity:0, duration:0.3}, 0);
+    }
+    return tl;
+  }
+
+  function openMenu(){
+    if(isOpen) return; isOpen=true;
+    gsap.set(overlay,{pointerEvents:'auto', visibility:'visible'});
+    lenis.stop();
+    applyHighlight(active); showPlate(active,{instant:true}); updateActiveLabel(active);
+    if(VARIANT==='C') markerTo(active,false);
+    openSeq();
+  }
+  function closeMenu(){
+    if(!isOpen) return; isOpen=false;
+    closeSeq(()=>{ gsap.set(overlay,{pointerEvents:'none', visibility:'hidden'}); lenis.start(); });
+  }
+
+  document.getElementById('menuBtn').addEventListener('click', openMenu);
+  document.getElementById('closeBtn').addEventListener('click', closeMenu);
+  itemsEls.forEach((it,i)=>{
+    it.addEventListener('mouseenter', ()=>{ if(isOpen) setDisplay(i); });
+    it.addEventListener('focus',      ()=>{ if(isOpen) setDisplay(i); });
+    it.addEventListener('click', (e)=>{ e.preventDefault(); if(isOpen) setActive(i); });
+  });
+  document.getElementById('menu').addEventListener('mouseleave', ()=>{ if(isOpen) setDisplay(active); });
+  overlay.addEventListener('wheel', (e)=>{ e.preventDefault(); }, {passive:false});
+  overlay.addEventListener('touchmove', (e)=>{ e.preventDefault(); }, {passive:false});
+  window.addEventListener('keydown', (e)=>{
+    if(!isOpen) return;
+    if(e.key==='Escape'){ closeMenu(); }
+    else if(e.key==='ArrowDown'||e.key==='ArrowRight'){ e.preventDefault(); setActive(active+1); }
+    else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){ e.preventDefault(); setActive(active-1); }
+  });
+
+  function init(){
+    resetClosed();
+    if(VARIANT==='C') markerTo(active,false);
+    window.openMenu = openMenu;
+    window.closeMenu = closeMenu;
+    window.setActive = setActive;
+    window.__ATOM_OK__ = true;
+  }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(init); } else { init(); }
+  setTimeout(()=>{ if(!window.__ATOM_OK__) init(); }, 600);
+})();
+</script>
+</body>
+</html>

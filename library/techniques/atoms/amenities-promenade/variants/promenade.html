@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>amenities-promenade · render-scroll-hero-fade + band</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:auto;}
+  body{ font-family:var(--spr-sans,"TT Commons Pro",sans-serif); background:#142820; }
+
+  /* scroll driver: tall page, promenade pinned as sticky stage */
+  .wrap{ height:260vh; position:relative; }
+  .stage{
+    position:sticky; top:0;
+    height:100dvh; width:100%;
+    overflow:hidden;
+    background:#142820;
+  }
+
+  /* full-bleed 3:4 render; drifts up and is COVERED by the rising band (seam travels) */
+  .facade{
+    position:absolute; left:0; top:0;
+    width:100%; height:110%;
+    background:url(assets/promenade.webp) center 30% / cover no-repeat;
+    will-change:transform;
+    transform-origin:55% 30%;   /* S54: центр зуму = точка, де потік нульовий (виміряно scene-walk:
+                                   нерухома точка на 54.7% ширини; по вертикалі = та сама точка,
+                                   що вже стоїть у background-position) */
+  }
+  /* top scrim for header legibility */
+  .scrim{
+    position:absolute; left:0; top:0; width:100%; height:120px;
+    background:linear-gradient(180deg,rgba(14,36,29,.55),rgba(14,36,29,0));
+    z-index:3; pointer-events:none;
+  }
+
+  .hdr{
+    position:absolute; left:0; top:0; width:100%;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; z-index:4;
+    color:var(--spr-cream-lite,#f5e8d1);
+  }
+  .hdr .logo{ font-family:var(--spr-serif,"Victor Serif",serif); font-size:22px; letter-spacing:.5px; }
+  .hdr .nav{ display:flex; gap:16px; align-items:center; opacity:.92; }
+  .hdr .burger{ width:22px; height:12px; display:flex; flex-direction:column; justify-content:space-between; }
+  .hdr .burger i{ display:block; height:1.4px; background:currentColor; }
+  .hdr .heart{ width:20px; height:20px; }
+
+  /* title lower-left: HOLDS then fades in place (scroll-coupled opacity) */
+  .titleblock{
+    position:absolute; left:20px; bottom:96px;
+    z-index:2; color:var(--spr-cream-lite,#f5e8d1);
+    will-change:opacity,transform;
+  }
+  .title{
+    font-family:var(--spr-serif,"Victor Serif",serif);
+    font-weight:400;
+    font-size:44px;
+    line-height:1.04;
+    letter-spacing:-.6px;
+    max-width:5.2em;
+  }
+
+  /* 🔴 СУЦІЛЬНА ПАНЕЛЬ (band) — окрема поверхня, шов травелить угору (закон з live-профайлера:
+     rgb(20,40,32); шов 100%→~15% над p0.36→1.0; copy і плитки ЛЕЖАТЬ на панелі, їдуть з нею).
+     Це і був баг ітерації 1: текст на фото зі скримом замість панелі. */
+  .band{
+    position:absolute; left:0; top:0;
+    width:100%; height:160%;
+    background:#142820;                     /* виміряно live: rgb(20,40,32) */
+    transform:translateY(100dvh);           /* парковка нижче кадру (dvh: шов = позиція верху панелі у vh) */
+    will-change:transform;
+    z-index:2;
+    padding:26px 20px 0;
+  }
+  .band .copy{
+    font-family:var(--spr-sans,"TT Commons Pro",sans-serif);
+    font-weight:400; font-size:16.5px; line-height:1.42; letter-spacing:.1px;
+    color:var(--spr-cream-lite,#f5e8d1); opacity:.92;
+    max-width:560px;
+  }
+  /* 🔴 M7 botanical СВАЙП-СТРІЧКА (шов S06 → блок 07). Вимір повного ролика: ≥3 плитки,
+     горизонтальний touch-swipe + iOS momentum + rubber-band + snap (НЕ auto, НЕ scroll-scrub).
+     Нативний scroll-snap-x: трек переповнений (scrollWidth>clientWidth), ~2 видно, візирає ~1/3
+     наступної = свайп-кью. Це виправило баг ітерації-1 (2 статичні картинки). */
+  .tiles{
+    display:flex; gap:12px; margin-top:26px;
+    overflow-x:auto; overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;          /* iOS momentum + rubber-band */
+    scrollbar-width:none;                       /* Firefox: сховати скролбар */
+    padding-bottom:2px;                         /* дихання під плиткою */
+    touch-action:pan-x;                         /* горизонтальний свайп не краде вертикаль сторінки */
+    overscroll-behavior-x:contain;
+  }
+  .tiles::-webkit-scrollbar{ display:none; }    /* WebKit: сховати скролбар */
+  .tile{
+    position:relative; flex:0 0 66%;            /* ~2 видно, ~1/3 наступної визирає */
+    aspect-ratio:3/4.4; overflow:hidden;
+    scroll-snap-align:start;
+    background:#0e241d center/cover no-repeat;
+  }
+  .tile.t1{ background-image:url(assets/tile-trees.webp); }
+  .tile.t2{ background-image:url(assets/tile-flowers.webp); }
+  .tile.t3{ background-image:url(assets/tile-zones.webp); }
+  .tile .cap{
+    position:absolute; left:12px; bottom:12px;
+    font-size:9.5px; font-weight:500; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--spr-cream-lite,#f5e8d1); opacity:.95;
+    text-shadow:0 1px 6px rgba(0,0,0,.5);       /* читабельність підпису над фото */
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .facade,.titleblock,.band{ transition:none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage" id="stage">
+      <div class="facade" id="facade"></div>
+      <div class="scrim"></div>
+      <header class="hdr">
+        <span class="logo">Springs</span>
+        <span class="nav">
+          <svg class="heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s-7-4.6-9.3-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.3 6.5C19 16.4 12 21 12 21z"/></svg>
+          <span class="burger"><i></i><i></i></span>
+        </span>
+      </header>
+
+      <div class="titleblock" id="titleblock">
+        <div class="title">Riverside Promenade at Your Doorstep</div>
+      </div>
+
+      <div class="band" id="band">
+        <p class="copy">Winding paths, paved with gray granite, resemble creeks and riverbeds that flow gently around Springs. White froth of hydrangeas and slender torsos of shadberries, suspended above invisible water, become a picturesque backdrop for a riverside walk.</p>
+        <div class="tiles" id="tiles">
+          <div class="tile t1"><span class="cap">Luscious Trees</span></div>
+          <div class="tile t2"><span class="cap">Decorative Flowerbeds</span></div>
+          <div class="tile t3"><span class="cap">Botanical Zones</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var wrap=document.querySelector('.wrap');
+  var facade=document.getElementById('facade');
+  var titleblock=document.getElementById('titleblock');
+  var band=document.getElementById('band');
+
+  function clamp(v){ return v<0?0:v>1?1:v; }
+  function lerp(a,b,t){ return a+(b-a)*t; }
+
+  /* 🔴 S54 ГОРИЗОНТАЛЬНИЙ ЗАКОН (борг, який знайшов гейт pan-parity: live відкривається ×1.45,
+     а ми не відкривались ЗОВСІМ, наш зиск був ×1.00).
+     ЩО САМЕ РОБИТЬ LIVE — з'ясовано виміром з ДОВЕДЕНИМ розділенням, а не на око:
+     «чи є ранній кадр підпрямокутником пізнього» (bestPatchFit). Контроль на двох ВІДОМИХ
+     відповідях: чистий зум статики → NCC 0.934, live parking = рух камери → NCC 0.366.
+     Live promenade дав NCC 0.843 і масштаб 0.68 ⇒ це ЗУМ-АУТ СТАТИЧНОГО ФОТО ×1.47.
+     Незалежне підтвердження: зиск зали (scene-walk) на тій самій фазі дав ×1.45.
+     ⚠️ Ознака «відношення близький/далекий» тут ПРОВАЛИЛА калібрацію (відома статика 1.037
+     проти відомого руху камери 1.003 — не розділяє) і викинута, висновків з неї не робилось.
+     ФАЗА: зум тримається до p0.35, далі розкривається до p0.90 (крива G(live), phase.mjs). */
+  var ZOOM0 = 1.47, PAN_A = 0.35, PAN_B = 0.90;
+
+  function render(p){                       // p = scroll progress 0..1
+    // facade: м'який parallax-drift угору (панель накриває його знизу) + зум-аут по фазі
+    var zoom = lerp(ZOOM0, 1, clamp((p - PAN_A) / (PAN_B - PAN_A)));
+    facade.style.transform = 'translateY(' + (-p*8) + '%) scale(' + zoom.toFixed(4) + ')';
+    // title HOLDS до p0.48, fade до p0.62 (виміряно live fade-zoom; панель уже заходить під ним)
+    var fade = clamp(1 - (p-0.48)/0.14);
+    titleblock.style.opacity = fade;
+    titleblock.style.transform = 'translateY(' + (-p*20) + 'px)';
+    // ПАНЕЛЬ: шов травелить 100%→15% (закон live-профайлера, piecewise під чекпоінти:
+    // вхід p0.36 → 70% на p0.57 (live 75.8) → 15% на p1.0 (live 19 на p0.96); паузи скролу не копіюємо)
+    var seam;
+    if (p < 0.36) seam = 100;
+    else if (p < 0.57) seam = lerp(100, 70, (p-0.36)/0.21);
+    else seam = lerp(70, 15, (p-0.57)/0.43);
+    band.style.transform = 'translateY(' + seam + 'dvh)';
+    window.__PROM_P__ = p;
+  }
+
+  function onScroll(){
+    var rect=wrap.getBoundingClientRect();
+    var total=wrap.offsetHeight - window.innerHeight;
+    var p=clamp((-rect.top)/total);
+    render(p);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+
+  window.render = render;
+  window.__PROM_API__ = { get:function(){return window.__PROM_P__||0;} };
+  render(0);
+})();
+</script>
+</body>
+</html>

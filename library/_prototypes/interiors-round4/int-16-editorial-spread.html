@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!--
+  int-16 «Розворот» - DE-BLEED EDITORIAL SPREAD + MIRROR LAW (Ever P2, set A)
+  PASSPORT:
+   (a) archetype: de-bleed editorial spread - full-bleed insets into a contained card, giant word slides BEHIND (P10), mirrored second spread (Ever mirror law), re-bleed arrival
+   (b) media count: 1 full-bleed / 1 contained card per spread
+   (c) copy position: card-caption beside the card, handedness flips per spread
+   (d) day/night cell: drag x center-seam (THE RITUAL: drag dusk across the room; past 55% it commits and locks; spring back early; failsafe at exit)
+   (e) interaction: drag ritual + scroll-triggered
+  STAGE MAP (5 true stages):
+   1 statement, two serif lines split by a hairline [an open book] -> curtain (relay: the hairline widening into the photo edge)
+   2 full-bleed heart day [the heart, wide] -> DE-BLEED seam (relay: the photo contracting into the card while «Всередині» slides behind)
+   3 spread A: contained card + word behind + copy right [the room, held] -> mirror seam (relay: the wordmark flipping fill and side)
+   4 spread B mirrored: vitalnia card, copy left, outline word + THE DUSK RITUAL [drag the evening] -> RE-BLEED (relay: the night card expanding)
+   5 full-bleed evening arrival [home lit within]
+  Set A. Frame-matched ritual pair: day-01-vitalnia / night-01-vitalnia. Zero em/en-dash. No WebGL.
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Всередині - Розворот</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--paper:#F3EEE5;--ink:#2A231C;--sub:#87796a;--terra:#A9663A;--eve:#150f08;--hs:cubic-bezier(.25,.74,.22,.99)}
+  body{font-family:"Jost",sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .st{min-height:100vh;position:relative;overflow:hidden;display:flex;align-items:center;padding:0 clamp(40px,6vw,110px)}
+  .eyebrow{font-size:13px;letter-spacing:.34em;text-transform:uppercase;color:var(--terra)}
+  .title{font-family:"Cormorant Garamond",serif;font-weight:500;letter-spacing:-.012em;line-height:1.05}
+  .line{font-size:clamp(15px,1.15vw,18px);line-height:1.72;color:var(--sub);font-weight:300}
+
+  .s1{flex-direction:column;justify-content:center;text-align:center;gap:26px}
+  .s1 .title{font-size:clamp(38px,5vw,86px)}
+  .s1 .hair{width:min(380px,44vw);height:1px;background:rgba(42,35,28,.35)}
+  .scrollcue{position:absolute;bottom:32px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sub)}
+
+  .bleed{padding:0}
+  .bleed .frame{position:absolute;inset:0;overflow:hidden}
+  .bleed .frame img{width:100%;height:100%;object-fit:cover}
+  .bleed .frame::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,7,3,.55),rgba(10,7,3,0) 52%)}
+  .bleed .ov{position:absolute;z-index:5;left:clamp(40px,6vw,110px);bottom:12vh;max-width:600px}
+  .bleed .eyebrow{color:#e9c9a0}
+  .bleed .title{font-size:clamp(32px,4vw,60px);color:#fff;margin:16px 0}
+  .bleed .line{color:#e6d8c6;max-width:40ch}
+
+  /* spreads */
+  .spread{background:var(--paper)}
+  .spread .wrap{display:grid;grid-template-columns:1.5fr .9fr;gap:clamp(36px,4vw,80px);width:100%;align-items:center;position:relative;z-index:2}
+  .spread.mir .wrap{grid-template-columns:.9fr 1.5fr}
+  .spread .card{position:relative;overflow:hidden;aspect-ratio:4/3;box-shadow:0 60px 120px -50px rgba(30,20,12,.5);z-index:2}
+  .spread .card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .spread.mir .card{order:1}
+  .spread.mir .copy{order:0;text-align:right}
+  .spread.mir .copy .line{margin-left:auto}
+  .word{position:absolute;z-index:0;font-family:"Cormorant Garamond",serif;font-weight:500;font-style:italic;
+    font-size:clamp(110px,15vw,240px);line-height:.8;letter-spacing:-.02em;pointer-events:none;user-select:none;white-space:nowrap}
+  .s3 .word{right:-2vw;bottom:6vh;color:rgba(42,35,28,.08)}
+  .s4 .word{left:-2vw;top:8vh;color:transparent;-webkit-text-stroke:1px rgba(42,35,28,.22)}
+  .copy .eyebrow{margin-bottom:20px}
+  .copy .title{font-size:clamp(34px,3.6vw,58px);margin-bottom:20px}
+  .copy .line{max-width:34ch}
+
+  /* the dusk ritual chrome */
+  .card .nightL{clip-path:inset(0 0 0 var(--split,100%))}
+  .seamline{position:absolute;top:0;bottom:0;left:var(--split,100%);width:2px;background:#f2e8dd;z-index:4;box-shadow:0 0 18px rgba(0,0,0,.35);opacity:0;transition:opacity .6s}
+  .grip{position:absolute;top:50%;left:var(--split,100%);transform:translate(-50%,-50%);z-index:5;width:44px;height:44px;border-radius:50%;
+    background:#f2e8dd;color:#2a231c;display:grid;place-items:center;font-size:15px;cursor:grab;opacity:0;pointer-events:none;transition:opacity .6s}
+  .grip:active{cursor:grabbing}
+  .card.armed .seamline,.card.armed .grip{opacity:1}
+  .card.armed .grip{pointer-events:auto}
+  .card.committed .seamline,.card.committed .grip{opacity:0!important;pointer-events:none!important}
+  .tag{position:absolute;z-index:4;bottom:12px;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#f2e8dd;text-shadow:0 1px 8px rgba(0,0,0,.55);opacity:0;transition:opacity .6s}
+  .tag.d{left:14px}.tag.n{right:14px}
+  .card.armed .tag{opacity:1}
+  .card.committed .tag{opacity:0!important}
+  .dhint{position:absolute;z-index:5;top:12px;left:14px;font-size:11.5px;letter-spacing:.12em;color:#f2e8dd;text-shadow:0 1px 8px rgba(0,0,0,.55);opacity:0;transition:opacity .6s}
+  .card.armed .dhint{opacity:1}
+  .dhint.gone,.card.committed .dhint{opacity:0!important}
+
+  .s5{padding:0;background:var(--eve);color:#efe1d0}
+  .s5 .frame::after{background:linear-gradient(to top,rgba(9,6,3,.68),rgba(9,6,3,0) 50%,rgba(9,6,3,.28))}
+  .s5 .eyebrow{color:#e6b878}
+  .pill{display:inline-block;margin-top:26px;font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#c9bcab;border:1px solid rgba(233,225,214,.28);padding:9px 16px;border-radius:40px}
+</style>
+</head>
+<body>
+<div class="film">
+
+  <section class="st s1">
+    <div class="eyebrow rise">Всередині</div>
+    <h1 class="title rise d1">Дім читається,</h1>
+    <div class="hair rule d2"></div>
+    <h1 class="title rise d2">як розворот книги.</h1>
+    <div class="scrollcue rise d3">Перегорніть</div>
+  </section>
+
+  <section class="st bleed s2">
+    <div class="frame portal"><img src="assets/interiors/day-05-zahalnyi.webp" alt="Кухня-вітальня вдень"></div>
+    <div class="ov">
+      <div class="eyebrow rise d1">Кухня-вітальня</div>
+      <h2 class="title rise d2">Тут пахне кавою<br>і зібралися всі.</h2>
+      <p class="line rise d3">Одна велика кімната на цілий день. Тепла теракота, дубова підлога.</p>
+    </div>
+  </section>
+
+  <section class="st spread s3">
+    <div class="word">Всередині</div>
+    <div class="wrap">
+      <div class="card cC"><img src="assets/interiors/day-04-vikno.webp" alt="Стіл біля вікна"></div>
+      <div class="copy">
+        <div class="eyebrow rise d1">Біля вікна</div>
+        <h2 class="title rise d2">Світло сідає<br>за твій стіл.</h2>
+        <p class="line rise d3">Панорамне вікно і стіл, за яким минає ранок. Місто далеко, кава поруч.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="st spread mir s4" id="s4">
+    <div class="word">Вечір</div>
+    <div class="wrap">
+      <div class="copy">
+        <div class="eyebrow rise d1">Вітальня</div>
+        <h2 class="title rise d2">Кімната, де день<br>нарешті стихає.</h2>
+        <p class="line rise d3">Потягни за край, і в кімнату прийде вечір. Він уже не піде.</p>
+      </div>
+      <div class="card cC" id="ritual">
+        <img class="dayL" src="assets/interiors/day-01-vitalnia.webp" alt="Вітальня вдень">
+        <img class="nightL" src="assets/interiors/night-01-vitalnia.webp" alt="Вітальня ввечері">
+        <i class="seamline"></i>
+        <button class="grip" id="grip" aria-label="Потягнути вечір">&#8646;</button>
+        <span class="dhint" id="dhint">потягни</span>
+        <span class="tag d">День</span><span class="tag n">Вечір</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="st bleed s5" id="s5">
+    <div class="frame cV"><img src="assets/interiors/night-01-vitalnia.webp" alt="Вітальня ввечері"></div>
+    <div class="ov">
+      <div class="eyebrow rise d1">Коли темніє</div>
+      <h2 class="title rise d2">А ввечері дім<br>світиться зсередини.</h2>
+      <p class="line rise d3">Світло тепле і низьке, під стелею. Ти вдома, і нікуди не поспішаєш.</p>
+      <div class="pill rise d4">Ремонт під ключ. Меблі на візуалізації для прикладу.</div>
+    </div>
+  </section>
+
+</div>
+<script>
+(function(){
+  var sts=[].slice.call(document.querySelectorAll('.st'));
+  var SEL='.rise,.fade,.cL,.cR,.cU,.cD,.cC,.cV,.portal,.cover,.scale,.rule';
+  function ease(t){return 1-Math.pow(1-t,3);}
+  function dOf(el){return el.classList.contains('d4')?0.64:el.classList.contains('d3')?0.48:el.classList.contains('d2')?0.3:el.classList.contains('d1')?0.14:0;}
+  function kOf(el){var c=el.classList;return c.contains('cV')?'cV':c.contains('cC')?'cC':c.contains('portal')?'portal':c.contains('rule')?'rule':c.contains('fade')?'fade':'rise';}
+  function set(el,k,e){var i=1-e;
+    if(k==='rise'){el.style.opacity=e;el.style.transform='translateY('+(38*i).toFixed(1)+'px)';}
+    else if(k==='fade'){el.style.opacity=e;}
+    else if(k==='cV'){el.style.clipPath='inset('+(i*50).toFixed(2)+'% 0 '+(i*50).toFixed(2)+'% 0)';}
+    else if(k==='cC'){el.style.clipPath='inset(0 '+(i*50).toFixed(2)+'% 0 '+(i*50).toFixed(2)+'%)';}
+    else if(k==='portal'){var p=(i*40).toFixed(2);el.style.clipPath='inset('+p+'% '+p+'% '+p+'% '+p+'%)';}
+    else if(k==='rule'){el.style.transformOrigin='center';el.style.transform='scaleX('+e.toFixed(3)+')';}
+  }
+  function anim(el){var k=kOf(el),delay=dOf(el)*1000,dur=(k==='rise'||k==='rule'||k==='fade')?900:1350,t0=null;
+    function step(ts){if(t0===null)t0=ts;var m=ts-t0-delay;if(m<0){requestAnimationFrame(step);return;}var p=Math.min(1,m/dur);set(el,k,ease(p));if(p<1)requestAnimationFrame(step);}
+    requestAnimationFrame(step);setTimeout(function(){set(el,k,1);},delay+dur+150);}
+  var played=[];
+  function play(st){if(played.indexOf(st)>-1)return;played.push(st);
+    [].slice.call(st.querySelectorAll(SEL)).forEach(anim);
+    if(st.id==='s4')setTimeout(armRitual,1650);
+    if(st.id==='s5')failsafe();}
+  sts.forEach(function(st){[].slice.call(st.querySelectorAll(SEL)).forEach(function(el){set(el,kOf(el),0);});});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)play(e.target);});},{threshold:0.25});
+  sts.forEach(function(s,i){if(i===0){setTimeout(function(){play(s);},40);}else io.observe(s);});
+  function checkStages(){var vh=innerHeight;sts.forEach(function(s){var r=s.getBoundingClientRect();if(r.top<vh*0.72&&r.bottom>vh*0.2)play(s);});}
+  window.addEventListener('scroll',checkStages,{passive:true});
+  setTimeout(checkStages,600);
+
+  /* THE DUSK RITUAL: drag x center-seam; past 55% commits and locks */
+  var card=document.getElementById('ritual'),grip=document.getElementById('grip');
+  var night=card.querySelector('.nightL');if(night.decode)night.decode().catch(function(){});
+  var sp={v:100},dragging=false,committed=false,armed=false,rect=null;
+  function apply(){card.style.setProperty('--split',sp.v+'%');}
+  apply();
+  function tw(from,to,dur,done){var t0=null;
+    function step(){var now=performance.now();if(t0===null)t0=now;var p=Math.min(1,(now-t0)/dur);var e=1-Math.pow(1-p,3);sp.v=from+(to-from)*e;apply();if(p<1)requestAnimationFrame(step);else if(done)done();}
+    requestAnimationFrame(step);setTimeout(function(){sp.v=to;apply();if(done)done();},dur+120);}
+  function armRitual(){
+    if(armed||committed)return;armed=true;
+    sp.v=100;apply();card.classList.add('armed');
+    // one autonomous demonstration: the seam drifts in and back
+    setTimeout(function(){if(!dragging&&!committed)tw(100,88,900,function(){if(!dragging&&!committed)tw(88,100,900);});},500);
+  }
+  function commit(){
+    if(committed)return;committed=true;
+    card.classList.add('committed');
+    tw(sp.v,0,900); // evening arrives and stays
+    document.getElementById('dhint').classList.add('gone');
+  }
+  function onMove(x){
+    if(!dragging||committed)return;
+    if(!rect)rect=card.getBoundingClientRect();
+    sp.v=Math.max(0,Math.min(100,((x-rect.left)/rect.width)*100));apply();
+  }
+  function onUp(){
+    if(!dragging)return;dragging=false;
+    if(committed)return;
+    var nightShare=100-sp.v;
+    if(nightShare>=55)commit();
+    else tw(sp.v,100,700); // spring back to day
+  }
+  grip.addEventListener('mousedown',function(e){if(!armed||committed)return;dragging=true;rect=card.getBoundingClientRect();e.preventDefault();});
+  window.addEventListener('mousemove',function(e){onMove(e.clientX);});
+  window.addEventListener('mouseup',onUp);
+  grip.addEventListener('touchstart',function(e){if(!armed||committed)return;dragging=true;rect=card.getBoundingClientRect();},{passive:true});
+  window.addEventListener('touchmove',function(e){if(dragging)onMove(e.touches[0].clientX);},{passive:true});
+  window.addEventListener('touchend',onUp);
+  document.getElementById('dhint').addEventListener('transitionend',function(){});
+  var hintFaded=false;
+  grip.addEventListener('mousedown',function(){if(!hintFaded){hintFaded=true;setTimeout(function(){document.getElementById('dhint').classList.add('gone');},1500);}});
+  function failsafe(){ if(!committed){committed=true;card.classList.add('committed');sp.v=0;apply();} }
+})();
+</script>
+</body>
+</html>

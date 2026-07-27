@@ -1,0 +1,60 @@
+/* THEMED-CONTACT-MAP · component.css
+   r1864 /contacts: the river-tinted map dialect stripped to a single ОФИС ПРОДАЖ pin + a contact
+   panel. transform + opacity only. NO mix-blend. NO WebGL. */
+
+.tcm-stage { position: relative; min-height: 100vh; display: grid;
+  grid-template-columns: var(--tcm-split, 1.6fr 1fr);
+  background: var(--tcm-bg, #2b2622); color: var(--tcm-ink, #e9e3db); overflow: hidden; }
+
+/* the drawn map (left / main) */
+.tcm-map { position: relative; overflow: hidden; min-height: 100vh; background: var(--tcm-bg, #2b2622); }
+.tcm-map svg { position: absolute; inset: 0; width: 100%; height: 100%; transform-origin: 50% 50%;
+  will-change: opacity, transform; }
+
+/* the residence disc marker */
+.tcm-disc { position: absolute; left: var(--tcm-disc-x, 52%); top: var(--tcm-disc-y, 46%);
+  width: var(--tcm-disc-size, 92px); height: var(--tcm-disc-size, 92px); border-radius: 50%;
+  display: grid; place-items: center; transform: translate(-50%, -50%);
+  background: var(--tcm-disc-bg, #b06a3e); color: #f3ece2; z-index: 3; opacity: 0;
+  will-change: transform, opacity; font-family: var(--tcm-serif, 'Playfair Display', serif);
+  font-size: 1rem; letter-spacing: .04em; }
+
+/* the single sales-office pin */
+.tcm-pin { position: absolute; left: var(--tcm-pin-x, 38%); top: var(--tcm-pin-y, 58%);
+  transform: translate(-50%, -100%); z-index: 4; opacity: 0; will-change: transform, opacity;
+  display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.tcm-pin-ring { position: absolute; bottom: 6px; left: 50%; margin-left: -22px; width: 44px; height: 44px;
+  border-radius: 50%; border: 1.5px solid var(--tcm-pin, #c98a5e); opacity: 0; }
+.tcm-pin-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--tcm-pin, #c98a5e);
+  box-shadow: 0 0 0 5px rgba(201,138,94,.22); position: relative; z-index: 2; }
+.tcm-pin-lbl { margin-top: .5rem; font-family: var(--tcm-sans, 'Inter', system-ui, sans-serif);
+  font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; white-space: nowrap;
+  color: var(--tcm-ink, #e9e3db); background: rgba(20,18,16,.55); padding: .3rem .6rem; border-radius: 2px; }
+
+/* the contact panel (right) */
+.tcm-panel { display: flex; flex-direction: column; justify-content: center; gap: 1.5rem;
+  padding: 12vh 4vw; background: var(--tcm-panel-bg, #242019); }
+.tcm-panel-h { font-family: var(--tcm-serif, 'Playfair Display', Georgia, serif); font-weight: 400;
+  text-transform: uppercase; font-size: var(--tcm-h, 2.2vw); letter-spacing: .03em; margin: 0 0 .5rem; opacity: 0; }
+.tcm-line { font-family: var(--tcm-sans, 'Inter', system-ui, sans-serif); font-size: .82rem;
+  line-height: 1.7; letter-spacing: .04em; color: var(--tcm-dim, #c4bcae); opacity: 0; will-change: transform, opacity; }
+.tcm-line strong { color: var(--tcm-ink, #e9e3db); font-weight: 500; display: block; font-size: .64rem;
+  letter-spacing: .18em; text-transform: uppercase; margin-bottom: .25rem; }
+.tcm-cta { display: inline-flex; align-self: flex-start; align-items: center; gap: .6rem; margin-top: .6rem;
+  padding: 1rem 2.2rem; border: 1px solid var(--tcm-ink, #e9e3db); color: var(--tcm-ink, #e9e3db);
+  text-decoration: none; font-family: var(--tcm-sans, 'Inter', system-ui, sans-serif); font-size: .72rem;
+  letter-spacing: .16em; text-transform: uppercase; opacity: 0; will-change: transform, opacity;
+  transition: background .24s, color .24s; }
+.tcm-cta:hover { background: var(--tcm-ink, #e9e3db); color: var(--tcm-bg, #2b2622); }
+
+/* static fallback */
+.tcm-static .tcm-map svg, .tcm-static .tcm-disc, .tcm-static .tcm-pin,
+.tcm-static .tcm-panel-h, .tcm-static .tcm-line, .tcm-static .tcm-cta { opacity: 1 !important; }
+.tcm-static .tcm-disc { transform: translate(-50%, -50%) !important; }
+.tcm-static .tcm-pin { transform: translate(-50%, -100%) !important; }
+
+@media (max-width: 820px) {
+  .tcm-stage { grid-template-columns: 1fr; }
+  .tcm-map { min-height: 56vh; }
+  .tcm-panel-h { font-size: 6.5vw; }
+}

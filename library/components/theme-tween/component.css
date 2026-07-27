@@ -1,0 +1,22 @@
+/* ============================================================
+   THEME-TWEEN · component.css
+   The per-section color engine consumes CSS custom properties. This file shows the
+   CONTRACT: everything themed reads var(--bg/--ink/--accent); the engine tweens
+   those vars on :root as sections enter. No visual rules of its own beyond the
+   default vars + the bindings a host would use.
+   ============================================================ */
+
+:root {
+  --bg: #313E48;     /* tweened by the engine */
+  --ink: #DCC5B7;
+  --accent: #AC7E65;
+}
+
+/* a host binds chrome to the vars; the engine recolors them across seams. Modals
+   that read these same vars inherit the active section's theme for free. */
+.tt-bg    { background: var(--bg); }
+.tt-ink   { color: var(--ink); }
+.tt-accent{ color: var(--accent); }
+.tt-accent-bg { background: var(--accent); }
+
+/* theme-tween only animates COLOR custom-properties — no layout, no transform. */

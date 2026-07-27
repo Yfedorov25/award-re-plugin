@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CIMA — On board</title>
+<style>
+  :root{
+    --bg:#0d1117; --ink:#f2f1ee; --ink-dim:rgba(242,241,238,.55); --ink-faint:rgba(242,241,238,.3);
+    --accent:#d9a066; --hair:rgba(242,241,238,.08);
+    --serif:"Didot","Bodoni MT","Playfair Display",Georgia,"Times New Roman",serif;
+    --grot:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --ease:cubic-bezier(.25,.74,.22,.99);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    background:
+      radial-gradient(1100px 700px at 88% -8%, rgba(217,160,102,.07), transparent 60%),
+      radial-gradient(900px 700px at -6% 100%, rgba(36,48,66,.4), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:var(--grot); font-size:15px; line-height:1.7; -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--ink); text-decoration:none; transition:color .3s var(--ease)}
+  a:hover{color:var(--accent)}
+  .label{font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:var(--ink-dim)}
+  .wrap{max-width:1480px; margin:0 auto; padding:0 56px}
+  /* intro */
+  .intro{padding:96px 0 90px}
+  .intro .grid{display:grid; grid-template-columns:minmax(0,7fr) minmax(0,4fr); gap:72px; align-items:end}
+  .intro h1{font-family:var(--serif); font-weight:400; font-size:clamp(56px,6.2vw,116px); line-height:.96; letter-spacing:-.01em; margin-top:26px; text-wrap:balance}
+  .intro h1 em{font-style:italic; color:var(--accent)}
+  .intro p{color:var(--ink-dim); max-width:42ch}
+  .intro .meta{margin-top:22px; display:flex; gap:28px}
+  /* act */
+  .act{position:relative; overflow:clip; padding:100px 0 120px; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);
+    background:linear-gradient(165deg, #0e131a 0%, #0d1117 45%, #0b0e13 100%)}
+  .ridge{position:absolute; inset:auto 0 0 0; width:100%; height:62%; pointer-events:none}
+  .ridge path{fill:none; stroke:rgba(242,241,238,.06); stroke-width:1.2}
+  .grainlayer{position:absolute; inset:0; pointer-events:none; opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.07'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .acthead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:54px}
+  .acthead h2{font-family:var(--serif); font-weight:400; font-size:clamp(30px,2.6vw,46px)}
+  /* cards */
+  .cards{position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:26px}
+  .card{position:relative; overflow:hidden; min-height:300px; padding:28px 26px 24px; border-radius:8px;
+    background:rgba(255,255,255,.045); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(242,241,238,.09); display:flex; flex-direction:column;
+    box-shadow:0 30px 60px -30px rgba(0,0,0,.5);
+    transition:border-color .3s var(--ease)}
+  .card:hover{border-color:rgba(242,241,238,.22)}
+  .glyph{width:72px; height:72px; stroke:rgba(242,241,238,.28); stroke-width:1.4; fill:none; stroke-linecap:round;
+    transition:transform .3s var(--ease), opacity .35s var(--ease)}
+  .card:hover .glyph{transform:translateY(-4px)}
+  .card.open .glyph{opacity:.1}
+  .card .row{display:flex; justify-content:space-between; align-items:flex-end; margin-top:auto; padding-top:30px}
+  .card .ct{font-size:11px; letter-spacing:.3em; text-transform:uppercase; color:var(--ink)}
+  .card .ci{display:block; font-size:10px; letter-spacing:.3em; color:var(--ink-faint); margin-top:8px}
+  .chip{width:30px; height:30px; border-radius:7px; background:rgba(255,255,255,.12); border:0; cursor:pointer;
+    display:grid; place-items:center; position:relative; z-index:3; flex:none;
+    transition:background .25s var(--ease), transform .3s var(--ease)}
+  .chip:hover{background:rgba(255,255,255,.22)}
+  .chip svg{width:12px; height:12px; stroke:var(--ink); stroke-width:1.6; stroke-linecap:round}
+  .card.open .chip{transform:rotate(45deg)}
+  .overlay{position:absolute; inset:0; z-index:2; padding:28px 26px 70px; display:flex; flex-direction:column; justify-content:flex-end;
+    background:rgba(0,0,0,.6); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    opacity:0; pointer-events:none; transition:opacity .35s var(--ease)}
+  .card.open .overlay{opacity:1; pointer-events:auto}
+  .overlay .ol{font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--accent); margin-bottom:12px}
+  .overlay p{font-size:13.5px; line-height:1.7; color:var(--ink-dim)}
+  /* outro */
+  .outro{padding:88px 0 0}
+  .outro .takeaway{font-family:var(--serif); font-size:clamp(24px,2.4vw,38px); font-style:italic; max-width:28ch; line-height:1.25; text-wrap:balance}
+  .outro .takeaway b{color:var(--accent); font-weight:400}
+  .outro .rule{height:1px; background:var(--hair); margin:54px 0 26px}
+  footer .row{display:flex; justify-content:space-between; align-items:baseline; gap:24px; flex-wrap:wrap; padding-bottom:34px}
+  footer nav{display:flex; gap:34px}
+  footer nav a{font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--ink-dim)}
+  footer .legal{font-size:11px; color:var(--ink-faint)}
+  @media (prefers-reduced-motion: reduce){
+    .overlay,.chip,.glyph,.card{transition:none!important}
+    .card.open .chip{transform:none}
+  }
+  @media (max-width:1100px){ .cards{grid-template-columns:1fr 1fr} }
+</style>
+</head>
+<body>
+
+<header class="intro">
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <span class="label" style="color:var(--ink)">CIMA · On Board</span>
+        <h1>Half the journey <em>is the mountain</em></h1>
+      </div>
+      <div>
+        <p>CIMA flies short hops across the Alps — forty minutes, rarely more — so everything on board is tuned for altitude, not distance. Quiet cabins, food grown above five hundred metres, crews who read ridgelines the way others read menus. Press ✛ on any card for the fine print.</p>
+        <div class="meta"><span class="label">14 routes · 6 peaks</span><span class="label">Fleet of ATR-72</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="act">
+  <svg class="ridge" viewBox="0 0 1440 420" preserveAspectRatio="none">
+    <path d="M 0 300 L 180 220 L 320 280 L 470 160 L 620 260 L 800 120 L 960 240 L 1130 170 L 1280 250 L 1440 190"/>
+    <path d="M 0 330 L 200 260 L 350 310 L 500 210 L 660 300 L 830 180 L 990 280 L 1160 220 L 1310 290 L 1440 240"/>
+    <path d="M 0 358 L 220 300 L 380 340 L 540 260 L 700 335 L 860 240 L 1020 320 L 1190 270 L 1340 325 L 1440 290"/>
+    <path d="M 0 386 L 240 340 L 410 370 L 580 310 L 740 368 L 890 300 L 1050 355 L 1220 320 L 1370 358 L 1440 335"/>
+    <path d="M 0 410 L 260 380 L 440 400 L 620 360 L 780 398 L 920 355 L 1080 390 L 1250 365 L 1440 388"/>
+  </svg>
+  <div class="grainlayer"></div>
+  <div class="wrap" style="position:relative">
+    <div class="acthead">
+      <h2>Six things we insist on</h2>
+      <span class="label">Services · Winter 2026</span>
+    </div>
+    <div class="cards" id="cards">
+      <article class="card">
+        <svg class="glyph" viewBox="0 0 72 72"><path d="M 24 12 L 24 44 L 50 44"/><path d="M 24 30 L 44 30 C 48 30, 50 33, 50 37 L 50 44"/><path d="M 20 52 L 54 52"/></svg>
+        <div class="row"><div><span class="ct">Cabin silence</span><span class="ci">01</span></div><button class="chip" aria-label="Details"><svg viewBox="0 0 12 12"><path d="M 6 0.5 L 6 11.5 M 0.5 6 L 11.5 6"/></svg></button></div>
+        <div class="overlay"><span class="ol">Cabin silence</span><p>No announcements above the Alps unless safety asks. The cabin is tuned to 62 decibels — quieter than the lounge you left. Conversations stay at their own tables.</p></div>
+      </article>
+      <article class="card">
+        <svg class="glyph" viewBox="0 0 72 72"><path d="M 22 14 L 50 14 L 36 36 Z"/><path d="M 36 36 L 36 56"/><path d="M 26 58 L 46 58"/></svg>
+        <div class="row"><div><span class="ct">Alpine catering</span><span class="ci">02</span></div><button class="chip" aria-label="Details"><svg viewBox="0 0 12 12"><path d="M 6 0.5 L 6 11.5 M 0.5 6 L 11.5 6"/></svg></button></div>
+        <div class="overlay"><span class="ol">Alpine catering</span><p>Cheese from the Aosta co-op, bread baked at four in Sion. A wine list of nine, all grown above five hundred metres. Served on stone, never plastic.</p></div>
+      </article>
+      <article class="card">
+        <svg class="glyph" viewBox="0 0 72 72"><path d="M 44 12 C 32 16, 24 26, 24 38 C 24 50, 32 58, 42 60 C 28 62, 14 52, 14 36 C 14 22, 28 10, 44 12 Z"/><path d="M 52 22 L 52 34 M 46 28 L 58 28"/></svg>
+        <div class="row"><div><span class="ct">Night routes</span><span class="ci">03</span></div><button class="chip" aria-label="Details"><svg viewBox="0 0 12 12"><path d="M 6 0.5 L 6 11.5 M 0.5 6 L 11.5 6"/></svg></button></div>
+        <div class="overlay"><span class="ol">Night routes</span><p>Late departures ride the calm air after sunset. Cabin lights fall to ember an hour in; landing is announced by the smell of coffee, not a chime.</p></div>
+      </article>
+      <article class="card">
+        <svg class="glyph" viewBox="0 0 72 72"><path d="M 16 28 L 48 28 C 48 44, 42 52, 32 52 C 22 52, 16 44, 16 28 Z"/><path d="M 48 32 C 56 32, 56 42, 47 43"/><path d="M 12 60 L 52 60"/></svg>
+        <div class="row"><div><span class="ct">Lounge access</span><span class="ci">04</span></div><button class="chip" aria-label="Details"><svg viewBox="0 0 12 12"><path d="M 6 0.5 L 6 11.5 M 0.5 6 L 11.5 6"/></svg></button></div>
+        <div class="overlay"><span class="ol">Lounge access</span><p>Every fare opens the Cima Room: showers, a fire, a long table of maps. Arrive early — the espresso machine is the fastest thing in the terminal.</p></div>
+      </article>
+      <article class="card">
+        <svg class="glyph" viewBox="0 0 72 72"><rect x="14" y="24" width="44" height="32" rx="4"/><path d="M 28 24 L 28 16 L 44 16 L 44 24"/><path d="M 14 38 L 58 38"/></svg>
+        <div class="row"><div><span class="ct">Ski cargo</span><span class="ci">05</span></div><button class="chip" aria-label="Details"><svg viewBox="0 0 12 12"><path d="M 6 0.5 L 6 11.5 M 0.5 6 L 11.5 6"/></svg></button></div>
+        <div class="overlay"><span class="ol">Ski cargo</span><p>Skis, boards and boots fly free in padded lockers below deck. Checked at the kerb, waiting at the rack — waxed on request between legs.</p></div>
+      </article>
+      <article class="card">
+        <svg class="glyph" viewBox="0 0 72 72"><path d="M 8 56 L 28 22 L 40 42 L 48 30 L 64 56 Z"/><path d="M 24 30 L 30 38 L 34 32"/></svg>
+        <div class="row"><div><span class="ct">Crew</span><span class="ci">06</span></div><button class="chip" aria-label="Details"><svg viewBox="0 0 12 12"><path d="M 6 0.5 L 6 11.5 M 0.5 6 L 11.5 6"/></svg></button></div>
+        <div class="overlay"><span class="ol">Crew</span><p>Most of our crew grew up above the tree line. They read weather like a menu and will tell you, honestly, which side of the plane to sit on.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="outro">
+  <div class="wrap">
+    <p class="takeaway">Forty minutes in the air, <b>arranged like a good refuge</b> — warm, quiet, pointed at the peaks.</p>
+    <div class="rule"></div>
+    <footer>
+      <div class="row">
+        <nav><a href="#">Routes</a><a href="#">Fleet</a><a href="#">Cima Room</a><a href="#">Book</a></nav>
+        <span class="legal">© 2026 CIMA Alpine Air SA — services listed for the winter 2026 schedule.</span>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+  var cards=Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var open=null;
+  var reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+  window.__PLUS={ open:function(){return open} };
+  function setOpen(i){
+    if(open!==null) cards[open].classList.remove('open');
+    open=i;
+    if(i!==null) cards[i].classList.add('open');
+  }
+  cards.forEach(function(card,i){
+    var chip=card.querySelector('.chip');
+    chip.addEventListener('click',function(e){
+      e.stopPropagation();
+      setOpen(open===i ? null : i);
+    });
+    /* фікс: hover-open прибрано — конфліктував з кліком (hover відкривав, клік одразу закривав).
+       Закон M-таблиці станів: перший tap/клік = відкрити, повторний = згорнути. */
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+/* ============================================================================
+   vertical-slide/component.css — the track / slide / frame / caption / void CSS
+   ----------------------------------------------------------------------------
+   Extracted 1:1 from apps/quadro/public/slide-lab/vs3-parallax-depth-layers.html.
+   The ZERO-OVERLAP geometry lives here as two custom properties:
+
+     --pitch : 200vh   distance between two render CENTRES (slide height)
+     --frameH:  76vh   the photo's height (centred in its slide)
+
+   clear void GAP between one frame's BOTTOM and the next frame's TOP
+     = PITCH - FRAME = 200 - 76 = 124vh  >  one viewport (100vh)
+   => the outgoing cel fully exits the TOP edge (clipped by .stage overflow:hidden)
+      BEFORE the incoming cel's top reaches the BOTTOM edge. At the mid-step the
+      viewport is a solid graded VOID. Two render photos are NEVER partially
+      visible at once. Do NOT change these two numbers without re-proving the gap.
+
+   The moody TWILIGHT grade (cooler blue-bronze) is the recorded skin; swap via
+   the --aw-* surface if integrating, but the structural rules below are the
+   technique and must not be diluted.
+   ========================================================================== */
+
+:root{
+  /* moody TWILIGHT grade — cooler blue-bronze, deeper shadows than base */
+  --ink:#0c1016;
+  --bg-0:#0e1320;
+  --bg-1:#161d2c;
+  --bg-2:#080b12;
+  --paper:#eef1f6;
+  --cream:#dde3ee;
+  --bronze:#c4915a;
+  --bronze-soft:#dcb27e;
+  --steel:#8fa2c2;
+  --serif:"Fraunces",Georgia,serif;
+  --sans:"Inter",system-ui,sans-serif;
+  --mx:clamp(20px,4.4vw,68px);
+
+  /* ── THE GEOMETRY THAT GUARANTEES SINGLE-IMAGE VISIBILITY ──
+     pitch (centre-to-centre) - frame height = clear void gap > 1 viewport,
+     with a FAT margin so the parallax offsets AND the climax growth never
+     break it. gap = 200 - 76 = 124vh => 24vh of margin per side at rest. */
+  --pitch:200vh;    /* distance between two render centres            */
+  --frameH:76vh;    /* the photo's height (centred in its slide)      */
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg-2);color:var(--cream)}
+body{
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+img{display:block}
+
+/* ===== intro · twilight mood before the descent ===== */
+.intro{
+  position:relative;
+  min-height:64vh;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:clamp(34px,7vh,90px) var(--mx) clamp(26px,5vh,58px);
+  background:
+    radial-gradient(120% 92% at 50% -8%, #1c2740 0%, var(--bg-0) 44%, var(--bg-2) 100%);
+}
+.intro__kicker{
+  font-size:.74rem;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--bronze-soft);opacity:.92;
+  display:flex;align-items:center;gap:.85rem;
+}
+.intro__kicker::before{content:"";width:30px;height:1px;background:var(--bronze)}
+.intro__title{
+  font-family:var(--serif);font-weight:300;
+  font-size:clamp(2.6rem,7.4vw,6.2rem);
+  line-height:.98;letter-spacing:-.02em;
+  margin-top:.5em;max-width:16ch;
+  color:var(--paper);
+}
+.intro__title em{font-style:italic;color:var(--bronze-soft);font-weight:400}
+.intro__lede{
+  margin-top:1.5em;max-width:44ch;
+  font-size:clamp(1rem,1.25vw,1.16rem);line-height:1.55;
+  color:#b9c4d8;opacity:.95;
+}
+
+/* ===== the pinned stage — a clean clip box, ONE column moves inside ===== */
+.stage{
+  position:relative;
+  width:100vw;height:100vh;
+  overflow:hidden;                      /* the old render is clipped away — GONE */
+  background:
+    radial-gradient(130% 112% at 50% 46%, var(--bg-1) 0%, var(--bg-0) 52%, var(--bg-2) 100%);
+  opacity:0;                            /* hidden until build() composes state */
+  --peak:0;                             /* scrub-driven climax dissolve (reversible) */
+}
+body.ready .stage{opacity:1;transition:opacity .5s ease}
+
+/* the single rigid column. animated by ONE property only: translateY. */
+.track{
+  position:absolute;left:0;top:0;width:100%;
+  will-change:transform;
+}
+
+/* each slide is PITCH tall; the render frame is centred inside it, leaving a
+   full void above & below so consecutive photos can never share the screen.
+   image AND caption live inside the frame => one rigid block. */
+.slide{
+  position:relative;
+  width:100%;
+  height:var(--pitch);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* the breathing render frame — the MASTER PLANE. Rides the track exactly.
+   A bounded per-leg scale-settle (--settle) lets it "land" as it reaches
+   centre. Nothing TRANSLATES the frame except track.y => owns zero-overlap. */
+.frame{
+  position:relative;
+  height:var(--frameH);
+  width:min(90vw, calc(var(--frameH) * 1.46));
+  max-width:calc(100vw - 2 * clamp(20px,4.4vw,72px));
+  overflow:hidden;                      /* image NEVER escapes its frame box */
+  border-radius:10px;
+  background:#070a10;
+  --settle:0;                           /* 0 at edges → 1 at centre (per leg) */
+  transform:scale(calc(0.972 + 0.028 * var(--settle)));
+  transform-origin:50% 50%;
+  box-shadow:
+    0 56px 140px -54px rgba(0,0,0,.9),
+    0 8px 30px -18px rgba(0,0,0,.6),
+    inset 0 1px 0 0 rgba(208,222,248,.08);
+  will-change:transform;
+}
+/* the DEEP PLANE — the photo. --par is a small bounded vertical lag so the
+   image drifts SLOWER than the frame (depth). ken-burns scale on top. */
+.frame__img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  --kb:1.07;--par:0vh;
+  transform:translateY(var(--par)) scale(var(--kb));
+  transform-origin:50% 46%;             /* per-slide origin set inline by JS */
+  will-change:transform;
+  /* twilight cinematic grade — STATIC, baked once, not re-evaluated per scrub */
+  filter:saturate(1.04) contrast(1.07) brightness(.985) hue-rotate(-4deg);
+}
+.frame__shade{
+  position:absolute;inset:0;pointer-events:none;z-index:2;
+  box-shadow:
+    inset 0 0 170px -50px rgba(6,9,16,.7),
+    inset 0 1px 0 0 rgba(208,222,248,.10);
+  border-radius:10px;
+}
+.frame__scrim{
+  position:absolute;inset:0;pointer-events:none;z-index:2;border-radius:10px;
+  --sx:8%; --sy:90%;
+  background:radial-gradient(122% 98% at var(--sx) var(--sy),
+    rgba(5,8,14,.82) 0%, rgba(5,8,14,.46) 32%, rgba(5,8,14,.12) 56%, transparent 74%);
+}
+
+/* caption lives INSIDE the frame => rigid with its render. It is the NEAR
+   PLANE: --capPar leads the frame slightly (closer to the lens). Bounded so
+   it never leaves the frame. */
+.cap{
+  position:absolute;left:clamp(24px,4vw,52px);bottom:clamp(26px,5vh,56px);
+  z-index:3;max-width:min(42ch,46vw);pointer-events:none;
+  --capPar:0vh;
+  transform:translateY(var(--capPar));
+  will-change:transform;
+}
+.cap.is-right{
+  left:auto;right:clamp(24px,4vw,52px);text-align:right;
+}
+.cap.is-right .cap__eye{flex-direction:row-reverse}
+.cap.is-right .cap__sub{margin-left:auto}
+.cap__eye{
+  font-size:.72rem;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--bronze-soft);
+  display:flex;align-items:center;gap:.8rem;margin-bottom:.85rem;
+}
+.cap__eye::before{content:"";width:24px;height:1px;background:var(--bronze);flex:0 0 auto}
+.cap__title{
+  font-family:var(--serif);font-weight:300;
+  font-size:clamp(2.1rem,4.6vw,4rem);
+  line-height:1.0;letter-spacing:-.018em;color:var(--paper);
+  text-shadow:0 2px 44px rgba(0,0,0,.5);
+}
+.cap__title em{font-style:italic;color:var(--bronze-soft);font-weight:400}
+.cap__sub{
+  margin-top:.85em;font-size:clamp(.95rem,1.1vw,1.08rem);
+  line-height:1.5;color:#d3dcec;max-width:32ch;
+  text-shadow:0 1px 26px rgba(0,0,0,.5);
+}
+
+/* ===== the quiet chapter-break VOID between renders — NOT a photo =====
+   a thin centred hairline + an ordinal. It is the only thing on screen at the
+   mid-step, which is exactly why no two photos can co-exist. The ordinal
+   parallaxes OPPOSITE the rise (--brkPar) so the void reads as depth between
+   film planes. It sits in the gap, attached to the TOP of each slide. */
+.brk{
+  position:absolute;left:0;right:0;top:0;
+  height:calc(var(--pitch) - var(--frameH));   /* the full void above a frame */
+  transform:translateY(calc(-1 * (var(--pitch) - var(--frameH)) / 2 - var(--frameH) / 2));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.1rem;pointer-events:none;z-index:1;
+}
+.slide:first-child .brk{display:none}
+.brk__inner{
+  --brkPar:0vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.1rem;transform:translateY(var(--brkPar));will-change:transform;
+}
+.brk__line{width:1px;height:clamp(40px,9vh,96px);
+  background:linear-gradient(to bottom, transparent, var(--bronze) 30%, var(--bronze) 70%, transparent);
+  opacity:.66}
+.brk__num{font-family:var(--serif);font-style:italic;font-weight:300;
+  font-size:clamp(1.1rem,2vw,1.6rem);color:var(--bronze-soft);letter-spacing:.04em;opacity:.85}
+.brk__word{font-size:.64rem;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--steel);opacity:.78}
+
+/* ===== CLIMAX slide — the terrace frame opens biggest; deepest push =====
+   Growth capped at 94vh so even with the ≤2.4vh image lag the total reach
+   (≤96.4vh) stays well inside the 124vh void budget (>100vh clear at peak).
+   Growth is gated to the stationary HOLD in JS so it never grows while the
+   previous render is still leaving. */
+.slide.is-climax .frame{
+  height:calc(var(--frameH) + (94vh - var(--frameH)) * var(--peak));
+  width:min(92vw,
+            calc((var(--frameH) + (94vh - var(--frameH)) * var(--peak)) * 0.80));
+  max-width:calc(100vw - (1 - var(--peak)) * 2 * clamp(14px,4vw,56px));
+  transform:scale(calc(0.972 + 0.028 * var(--settle)));
+}
+.slide.is-climax .cap__title{ font-size:clamp(2.7rem,5.9vw,5.1rem); }
+.slide.is-climax .cap{ max-width:min(46ch,52vw); bottom:clamp(34px,9vh,90px); }
+.slide.is-climax .frame__shade{
+  box-shadow:
+    inset 0 0 calc(170px - var(--peak)*66px) -50px rgba(6,9,16,.7),
+    inset 0 1px 0 0 rgba(208,222,248,calc(.10 + var(--peak)*.06));
+}
+
+/* ===== scroll progress (thin bronze line, right edge) ===== */
+.prog{
+  position:absolute;right:calc(var(--mx) * .5);top:18%;bottom:18%;
+  width:2px;z-index:9;background:rgba(208,222,248,.12);border-radius:2px;
+  opacity:calc(1 - var(--peak));
+}
+.prog__fill{
+  position:absolute;left:0;top:0;width:100%;height:100%;
+  background:linear-gradient(to bottom,var(--bronze-soft),var(--bronze));
+  transform:scaleY(0);transform-origin:top center;border-radius:2px;
+}
+.hint{
+  position:absolute;left:50%;bottom:clamp(16px,3.4vh,34px);
+  transform:translateX(-50%);z-index:9;
+  font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--bronze-soft);
+  display:flex;flex-direction:column;align-items:center;gap:.6rem;
+  opacity:calc((1 - var(--peak)) * var(--hint-base, 1));
+}
+.hint::after{content:"";width:1px;height:18px;background:var(--bronze-soft);
+  animation:hb 1.7s ease-in-out infinite}
+@keyframes hb{0%,100%{transform:scaleY(.4);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+.is-finished .hint{--hint-base:0;transition:opacity .5s}
+.prog,.hint{transition:opacity .12s linear}
+
+/* ===== outro ===== */
+.outro{
+  min-height:54vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:clamp(40px,9vh,110px) var(--mx);
+  background:radial-gradient(120% 100% at 50% 120%, #1a2236 0%, var(--bg-0) 50%, var(--bg-2) 100%);
+}
+.outro__title{font-family:var(--serif);font-weight:300;
+  font-size:clamp(2rem,5vw,4rem);line-height:1.02;color:var(--paper);max-width:18ch}
+.outro__title em{font-style:italic;color:var(--bronze-soft);font-weight:400}
+.outro__note{margin-top:1.4em;font-size:.82rem;letter-spacing:.05em;color:#93a1bd}
+
+/* ===== STATIC fallback: reduced-motion + narrow — BIG legible stack ===== */
+.static{display:none}
+@media (prefers-reduced-motion:reduce),(max-width:760px){
+  .stage,.prog,.hint{display:none !important}
+  .static{display:block;padding:0 0 6vh}
+  .static__shot{position:relative;width:100%;margin-bottom:2px;background:#070a10;
+    max-height:124vh;overflow:hidden}
+  .static__shot img{width:100%;height:auto;display:block;
+    filter:saturate(1.04) contrast(1.07) brightness(.985) hue-rotate(-4deg)}
+  .static__cap{position:absolute;left:clamp(16px,5vw,40px);right:clamp(16px,5vw,40px);
+    bottom:clamp(18px,5vw,42px);
+    text-shadow:0 2px 30px rgba(0,0,0,.7)}
+  .static__cap .e{font-size:.68rem;letter-spacing:.36em;text-transform:uppercase;
+    color:var(--bronze-soft);display:block;margin-bottom:.5rem}
+  .static__cap .t{font-family:var(--serif);font-weight:300;
+    font-size:clamp(1.8rem,7vw,3rem);line-height:1.02;color:var(--paper)}
+  .static__cap .t em{font-style:italic;color:var(--bronze-soft);font-weight:400}
+  .static__shot::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(to top,rgba(5,8,14,.74) 0%,rgba(5,8,14,.10) 44%,transparent 78%)}
+  .intro{min-height:auto}
+}

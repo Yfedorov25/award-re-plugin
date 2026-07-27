@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>interiors-cycle — atom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Archivo:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#141210;font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#4a4438}a:hover{color:#2e2a22}
+
+  #stage{position:relative;height:100vh;overflow:hidden}
+
+  /* ---------- shared plate furniture ---------- */
+  .veil{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 100% at 50% 42%, rgba(0,0,0,0) 55%, rgba(30,26,20,.38) 100%)}
+  .grain{position:absolute;inset:0;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+    background-size:180px 180px}
+
+  /* ---------- room art (gradient plates) ---------- */
+  .art{position:absolute;inset:0;background-repeat:no-repeat;will-change:transform}
+
+  .art-intro{
+    background-image:
+      repeating-linear-gradient(180deg, rgba(250,250,248,.07) 0 2px, rgba(0,0,0,0) 2px 16px),
+      radial-gradient(75% 60% at 68% 26%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
+      radial-gradient(52% 30% at 30% 74%, rgba(236,233,226,.34) 0%, rgba(236,233,226,0) 70%),
+      radial-gradient(40% 26% at 74% 68%, rgba(222,218,210,.28) 0%, rgba(222,218,210,0) 70%),
+      linear-gradient(180deg, #999690 0%, #8b8880 42%, #7c786f 70%, #6b675f 100%);
+    background-size:100% 30%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-position:top, center, center, center, center}
+
+  .art-living{
+    background-image:
+      repeating-linear-gradient(180deg, rgba(90,95,98,.10) 0 3px, rgba(0,0,0,0) 3px 18px),
+      radial-gradient(70% 85% at 14% 42%, rgba(240,244,245,.85) 0%, rgba(240,244,245,0) 62%),
+      radial-gradient(46% 24% at 40% 74%, rgba(246,242,232,.75) 0%, rgba(246,242,232,0) 72%),
+      linear-gradient(180deg, #c3ced4 0%, #d3d5d0 34%, #d8d2c4 52%, #c0b39c 70%, #a4947a 88%, #92826a 100%);
+    background-size:100% 26%, 100% 100%, 100% 100%, 100% 100%;
+    background-position:top, center, center, center}
+
+  .art-study{
+    background-image:
+      repeating-linear-gradient(90deg, rgba(74,50,30,.22) 0 2px, rgba(0,0,0,0) 2px 54px),
+      repeating-linear-gradient(180deg, rgba(74,50,30,.16) 0 2px, rgba(0,0,0,0) 2px 44px),
+      radial-gradient(34% 42% at 26% 40%, rgba(255,224,168,.50) 0%, rgba(255,224,168,0) 70%),
+      radial-gradient(60% 50% at 70% 30%, rgba(230,196,146,.35) 0%, rgba(230,196,146,0) 70%),
+      linear-gradient(180deg, #c2a071 0%, #b18a5c 40%, #93683f 72%, #6f4c2d 100%);
+    background-size:58% 74%, 58% 74%, 100% 100%, 100% 100%, 100% 100%;
+    background-position:right 12% top 6%, right 12% top 6%, center, center, center}
+
+  .art-bed{
+    background-image:
+      repeating-linear-gradient(90deg, rgba(120,104,88,.12) 0 8px, rgba(0,0,0,0) 8px 26px),
+      radial-gradient(80% 55% at 50% 12%, rgba(242,236,226,.40) 0%, rgba(242,236,226,0) 60%),
+      radial-gradient(56% 26% at 48% 78%, rgba(242,235,223,.65) 0%, rgba(242,235,223,0) 74%),
+      linear-gradient(180deg, #b3a493 0%, #a89884 45%, #8f7f6c 75%, #77685a 100%);
+    background-size:26% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-position:right top, center, center, center}
+
+  .art-bath{
+    background-image:
+      repeating-linear-gradient(92deg, rgba(255,255,255,.07) 0 2px, rgba(0,0,0,0) 2px 22px),
+      linear-gradient(90deg, rgba(0,0,0,0) 43%, rgba(250,240,220,.28) 50%, rgba(0,0,0,0) 57%),
+      radial-gradient(9% 26% at 37% 38%, rgba(255,214,160,.55) 0%, rgba(255,214,160,0) 70%),
+      radial-gradient(9% 26% at 63% 38%, rgba(255,214,160,.55) 0%, rgba(255,214,160,0) 70%),
+      linear-gradient(180deg, #a9aba4 0%, #999b93 40%, #83857d 70%, #6c6e66 100%);
+    background-size:100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+    background-position:center}
+
+  /* ---------- intro layer ---------- */
+  #intro{position:absolute;inset:0;z-index:1;overflow:hidden}
+  #introTitle{position:absolute;right:6vw;top:50%;margin-top:-14vw;text-align:right;z-index:2}
+  .word-mask{overflow:hidden}
+  #word{font-family:'Cormorant Garamond',serif;font-weight:400;color:#ece2cc;
+    font-size:clamp(96px,15vw,230px);line-height:1.04;letter-spacing:.01em;will-change:transform}
+  #sub{display:block;margin-top:16px;color:rgba(236,226,204,.85);
+    font-size:11px;font-weight:400;letter-spacing:.34em;text-transform:uppercase}
+  #introCopy{position:absolute;left:48px;bottom:48px;width:min(420px,42vw);z-index:2;
+    color:#e7e3da;font-size:15px;font-weight:300;line-height:1.62;text-wrap:pretty}
+  #introCopy::before{content:'';position:absolute;inset:-40px -56px;z-index:-1;
+    background:radial-gradient(62% 72% at 42% 58%, rgba(26,24,21,.38) 0%, rgba(26,24,21,0) 76%)}
+
+  /* ---------- cycle sheet ---------- */
+  #sheet{position:absolute;inset:0;z-index:2;will-change:clip-path}
+  #mask{position:absolute;left:0;top:0;width:50%;height:100%;overflow:hidden}
+  .plate{position:absolute;inset:0;will-change:clip-path}
+  #panel{position:absolute;left:50%;right:0;top:0;bottom:0;overflow:hidden;
+    background:linear-gradient(180deg,#f2e9d6 0%,#ece2cc 100%);
+    display:flex;align-items:center}
+  #panel .grain{opacity:.16;mix-blend-mode:multiply}
+  #panelCopy{position:relative;margin:14vh 152px 0 clamp(48px,7vw,120px);max-width:46ch}
+  #kicker{display:block;color:#8a7d63;font-size:11px;font-weight:500;
+    letter-spacing:.28em;text-transform:uppercase;margin-bottom:24px}
+  #panelText{color:#4a4438;font-size:15.5px;font-weight:300;line-height:1.7;text-wrap:pretty}
+
+  /* ---------- thumbnail rail ---------- */
+  #rail{position:absolute;right:40px;top:0;bottom:0;z-index:3;
+    display:flex;flex-direction:column;justify-content:center;gap:12px}
+  .thumb{position:relative;width:56px;height:72px;padding:3px;cursor:pointer;
+    border:1px solid rgba(244,238,222,0)}
+  .thumb.active{border-color:rgba(248,242,228,.95)}
+  .t-art{position:absolute;inset:3px;background-repeat:no-repeat}
+  .t-veil{position:absolute;inset:3px;pointer-events:none;
+    background:radial-gradient(120% 100% at 50% 45%, rgba(0,0,0,0) 55%, rgba(30,26,20,.30) 100%)}
+</style>
+</head>
+<body>
+
+<section id="stage" data-screen-label="interiors-cycle">
+  <!-- INTRO STATE -->
+  <div id="intro">
+    <div class="art art-intro"></div>
+    <div class="veil"></div>
+    <div class="grain"></div>
+    <div id="introTitle">
+      <div class="word-mask"><h1 id="word">Atelier</h1></div>
+      <span id="sub">Craft in quiet proportion</span>
+    </div>
+    <p id="introCopy">Our rooms are drawn around the way a day actually unfolds &mdash; morning light on pale stone, the weight of a linen curtain, a chair worn soft by use. Natural materials are chosen to age with the house: oak, travertine, brushed metal and textured plaster, composed for an unhurried, high&#8209;comfort life.</p>
+  </div>
+
+  <!-- CYCLE STATE (one sheet: mask + panel + rail) -->
+  <div id="sheet">
+    <div id="mask">
+      <div class="plate" data-room="0"><div class="art art-living"></div><div class="veil"></div><div class="grain"></div></div>
+      <div class="plate" data-room="1"><div class="art art-study"></div><div class="veil"></div><div class="grain"></div></div>
+      <div class="plate" data-room="2"><div class="art art-intro"></div><div class="veil"></div><div class="grain"></div></div>
+      <div class="plate" data-room="3"><div class="art art-bed"></div><div class="veil"></div><div class="grain"></div></div>
+      <div class="plate" data-room="4"><div class="art art-bath"></div><div class="veil"></div><div class="grain"></div></div>
+    </div>
+    <div id="panel">
+      <div class="grain"></div>
+      <div id="panelCopy">
+        <span id="kicker">The residences &mdash; interior programme</span>
+        <p id="panelText">The Atelier interior programme was developed with the Harven studio to carry one calm register through every residence. Muted palettes, arched portals and smooth curves let each room flow into the next, while oak, honed stone and softened light keep the whole house quiet. Every residence is delivered turnkey &mdash; finished to the last hinge &mdash; so the first evening in a new home already feels like the hundredth.</p>
+      </div>
+    </div>
+    <div id="rail">
+      <div class="thumb" data-i="0"><div class="t-art art-living"></div><div class="t-veil"></div></div>
+      <div class="thumb" data-i="1"><div class="t-art art-study"></div><div class="t-veil"></div></div>
+      <div class="thumb" data-i="2"><div class="t-art art-intro"></div><div class="t-veil"></div></div>
+      <div class="thumb" data-i="3"><div class="t-art art-bed"></div><div class="t-veil"></div></div>
+      <div class="thumb" data-i="4"><div class="t-art art-bath"></div><div class="t-veil"></div></div>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+(function(){
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* Lenis wiring (exact per spec) */
+  const lenis = new Lenis();
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  const plates = gsap.utils.toArray('.plate');
+  const arts   = plates.map(p => p.querySelector('.art'));
+  const thumbs = gsap.utils.toArray('.thumb');
+
+  /* initial states — transforms owned by GSAP only */
+  gsap.set('#word',      { yPercent: 112 });
+  gsap.set('#sub',       { opacity: 0, y: 14 });
+  gsap.set('#introCopy', { opacity: 0, y: 36 });
+  gsap.set('#sheet',     { clipPath: 'inset(100% 0% 0% 0%)' });
+  gsap.set(arts[0],      { scale: 1 });
+  for (let i = 1; i < 5; i++) {
+    gsap.set(plates[i], { clipPath: 'inset(100% 0% 0% 0%)' });
+    gsap.set(arts[i],   { scale: 1.06 });
+  }
+  gsap.set(thumbs, { opacity: 0.55 });
+
+  /* rail state = pure function of p */
+  const TH = [0.424, 0.564, 0.704, 0.844];   // swap start + 80% of swap window
+  let lastIdx = -1, hoverIdx = -1;
+  function idxFor(p){ let i = 0; for (const t of TH) if (p >= t) i++; return i; }
+  function syncRail(){
+    const i = idxFor(tl.progress());
+    if (i === lastIdx) return;
+    lastIdx = i;
+    thumbs.forEach((th, k) => {
+      th.classList.toggle('active', k === i);
+      if (k === hoverIdx && k !== i) return;      // let hover tween own it
+      gsap.killTweensOf(th);
+      gsap.set(th, { opacity: k === i ? 1 : 0.55 });
+    });
+  }
+
+  /* ONE master timeline on ONE pinned ScrollTrigger (100 units = full band) */
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    onUpdate: syncRail,
+    scrollTrigger: {
+      trigger: '#stage',
+      start: 'top top',
+      end: '+=700%',
+      pin: true,
+      scrub: 1,
+      anticipatePin: 1,
+      invalidateOnRefresh: true
+    }
+  });
+
+  /* 1 — INTRO p0.00–0.18: word clip wipe-up + settle, sub, paragraph */
+  tl.to('#word',      { yPercent: 0, duration: 8, ease: 'power3.out' }, 1.5);
+  tl.to('#sub',       { opacity: 1, y: 0, duration: 5, ease: 'power2.out' }, 4);
+  tl.to('#introCopy', { opacity: 1, y: 0, duration: 6, ease: 'power2.out' }, 6.5);
+
+  /* 2 — COVER p0.18–0.30: sheet wipes BOTTOM-UP over intro, hard seam */
+  tl.to('#sheet', { clipPath: 'inset(0% 0% 0% 0%)', duration: 12 }, 18);
+  /* інтро чесно гаситься щойно накрите (воно ПІД непрозорим sheet; реверсивно на тому ж годиннику) */
+  tl.to('#intro', { autoAlpha: 0, duration: 1 }, 30);
+  tl.to(['#sub', '#introCopy', '#word'], { opacity: 0, duration: 1 }, 30);
+  /* текст панелі осідає в останній третині накриття (до того панель ще перетинає шов) */
+  tl.fromTo(['#kicker', '#panelText'], { opacity: 0 }, { opacity: 1, duration: 4, immediateRender: true }, 26);
+
+  /* 3 — ROOM CYCLE p0.30–0.86: bottom-up clip wipes inside the STATIC mask */
+  const SWAPS = [36, 50, 64, 78];
+  SWAPS.forEach((t, n) => {
+    const i = n + 1;
+    tl.to(plates[i], { clipPath: 'inset(0% 0% 0% 0%)', duration: 8 }, t);          // boundary rides scroll
+    tl.to(arts[i],   { scale: 1, duration: 8, ease: 'power1.out' }, t);            // counter-settle 1.06→1
+  });
+  /* holds: subtle linear zoom on the held room */
+  tl.fromTo(arts[0], { scale: 1 }, { scale: 1.06, duration: 14, immediateRender: false }, 30);
+  tl.fromTo(arts[1], { scale: 1 }, { scale: 1.06, duration: 14, immediateRender: false }, 44);
+  tl.fromTo(arts[2], { scale: 1 }, { scale: 1.06, duration: 14, immediateRender: false }, 58);
+  tl.fromTo(arts[3], { scale: 1 }, { scale: 1.06, duration: 14, immediateRender: false }, 72);
+  /* 4 — HOLD p0.86–1.00: room 5 held, slow zoom, nothing exits */
+  tl.fromTo(arts[4], { scale: 1 }, { scale: 1.06, duration: 14, immediateRender: false }, 86);
+
+  /* thumbnail interaction: click = Lenis scroll-jump onto the same clock */
+  const BAND = [0.32, 0.465, 0.605, 0.745, 0.92];   // hold positions per room
+  thumbs.forEach((th, k) => {
+    th.addEventListener('click', () => {
+      const st = tl.scrollTrigger;
+      lenis.scrollTo(st.start + BAND[k] * (st.end - st.start),
+        { duration: 1.6, easing: t => 1 - Math.pow(1 - t, 3) });
+    });
+    th.addEventListener('mouseenter', () => {
+      hoverIdx = k;
+      if (k !== lastIdx) gsap.to(th, { opacity: 0.8, duration: 0.2, overwrite: 'auto' });
+    });
+    th.addEventListener('mouseleave', () => {
+      hoverIdx = -1;
+      gsap.to(th, { opacity: k === lastIdx ? 1 : 0.55, duration: 0.2, overwrite: 'auto' });
+    });
+  });
+
+  syncRail();
+
+  /* required hooks */
+  window.render = function(p){
+    p = Number(p); if (!isFinite(p)) p = 0;
+    tl.progress(Math.max(0, Math.min(1, p)));
+  };
+  window.__ATOM_OK__ = true;
+})();
+</script>
+</body>
+</html>

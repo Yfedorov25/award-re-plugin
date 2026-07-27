@@ -1,0 +1,355 @@
+{
+  "atomId": "amenities-wellness",
+  "ts": "2026-07-26T18:45:58.846Z",
+  "pass": true,
+  "url": "http://localhost:8879/atoms/amenities-wellness/variants/wellness.html",
+  "tool": "self-check.mjs",
+  "version": 2,
+  "thresholdsVersion": 10,
+  "thresholdsSha": "3c1e92491b648630c8279ade51063c76b3b8b201bdf67e6193ba4dae19e35248",
+  "harnessHash": "fc08c1462041ce8c24c3946f8db764529ec383235b6fc48af838d01f20e99cd9",
+  "configSha": "fc7aa9061885b34e4cf55b8b83b0bfa7d5dac038ce4252a565b1c4ace27b550e",
+  "expectationsSha": "c505cad8d06c549b576a98583896b683501d09a7d16a7614debeb2248b360f7b",
+  "inputsHash": "c668b58699158a14a4e59e61bb0cad2896c4e62a29a0e73fb9ee7f7e7f22d817",
+  "calibration": {
+    "ok": true,
+    "ts": "2026-07-26T17:19:58.570Z"
+  },
+  "coverage": {
+    "dimensionsRun": [
+      "render-api",
+      "purity",
+      "census",
+      "motion-direction",
+      "geometry",
+      "channel-identity",
+      "timing",
+      "ordering",
+      "parallelism",
+      "plateau",
+      "composition-overlap",
+      "typography-reveal",
+      "surface-parity",
+      "structure-parity",
+      "mechanic-class",
+      "console-errors",
+      "http-status"
+    ],
+    "movers": 5,
+    "declared": 5,
+    "basisSelf": 5
+  },
+  "summary": "green (live:36 / self-regression:5); unchecked:3 — нове судить око Єгора",
+  "checks": [
+    {
+      "dimension": "render-api",
+      "name": "render-api",
+      "pass": true,
+      "detail": "window.render(p) присутній",
+      "basis": "live"
+    },
+    {
+      "dimension": "purity",
+      "name": "render-p-pure",
+      "pass": true,
+      "detail": "render(p) чиста (снапшоти збігаються після стрибків; transition=0 на 5 мōверах)",
+      "basis": "live"
+    },
+    {
+      "dimension": "census",
+      "name": "census-movers",
+      "pass": true,
+      "detail": "5 рухомих елементів, усі задекларовані (targets/ignore)",
+      "basis": "live"
+    },
+    {
+      "dimension": "motion-direction",
+      "name": "wipe:v1",
+      "pass": true,
+      "detail": "UP-wipe: visible-top 844→0px, jitter 0.0px",
+      "basis": "live"
+    },
+    {
+      "dimension": "motion-direction",
+      "name": "wipe:handoff",
+      "pass": true,
+      "detail": "UP-wipe: visible-top 844→0px, jitter 0.0px",
+      "basis": "live"
+    },
+    {
+      "dimension": "geometry",
+      "name": "geo:card",
+      "pass": true,
+      "detail": "горизонтальні межі на всьому треку: left 20px (≥-2), right 370px (≤392)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:card",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=2058px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:v1",
+      "pass": true,
+      "detail": "clip-механізм: Δclip=844px (≥100), Δtranslate=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:handoff",
+      "pass": true,
+      "detail": "translate-механізм: Δtranslate=844px (≥100), Δclip=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:p1",
+      "pass": true,
+      "detail": "clip-механізм: Δclip=347px (≥100), Δtranslate=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "channel-identity",
+      "name": "mech:p2",
+      "pass": true,
+      "detail": "clip-механізм: Δclip=101px (≥100), Δtranslate=0.0px (≤2)",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:card.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.160 vs очікуване 0.16 ±0.02 [SPEC.md:16 Ф2 (0.16–0.50) картка вилазить ← CHOREO f25]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:card.plateau.value",
+      "pass": true,
+      "detail": "виміряно 38.000 vs очікуване 38 ±2 [SPEC.md:24 M3 pin ~38dvh]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:card.plateau.start",
+      "pass": true,
+      "detail": "виміряно 0.380 vs очікуване 0.38 ±0.02 [render-math wellness.html:130 lerp(100,38) кінець 0.38]",
+      "basis": "self"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:card.plateau.end",
+      "pass": true,
+      "detail": "виміряно 0.520 vs очікуване 0.52 ±0.02 [render-math wellness.html:132 travel з 0.52]",
+      "basis": "self"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:p1.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.160 vs очікуване 0.16 ±0.02 [SPEC.md:26 M4 P1 reveal 0.16–0.36]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:p1.motion.end",
+      "pass": true,
+      "detail": "виміряно 0.360 vs очікуване 0.36 ±0.02 [SPEC.md:26 M4 P1 reveal 0.16–0.36]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:p2.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.440 vs очікуване 0.44 ±0.02 [render-math wellness.html:137 (🔴 КОНФЛІКТ зі SPEC.md:26 M5=0.50 — прийнятий код 0.44; на підпис Єгору)]",
+      "basis": "self"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:v1.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.500 vs очікуване 0.5 ±0.02 [SPEC.md:25 M2 band 0.50]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:handoff.motion.start",
+      "pass": true,
+      "detail": "виміряно 0.660 vs очікуване 0.66 ±0.02 [SPEC.md:5 «виміряно f89/56.3с коли P1cream→0» + wellness.html:124 коментар-вимір]",
+      "basis": "live"
+    },
+    {
+      "dimension": "timing",
+      "name": "t:handoff.motion.end",
+      "pass": true,
+      "detail": "виміряно 0.920 vs очікуване 0.92 ±0.02 [render-math wellness.html:144 0.66+0.26=0.92]",
+      "basis": "self"
+    },
+    {
+      "dimension": "ordering",
+      "name": "ord:handoff-after-card@-34dvh",
+      "pass": true,
+      "detail": "handoff.start=0.660 vs перетин=0.660 (gap 0.000, ліміт −0.02) [ЗАКОН live SPEC.md:5 «новий фон ТІЛЬКИ коли картка дійшла до P2-only» (f89/56.3с); waypoint -34dvh = P2-only (render-math wellness.html:132)]",
+      "basis": "live"
+    },
+    {
+      "dimension": "parallelism",
+      "name": "par:p2×v1",
+      "pass": true,
+      "detail": "коротке вікно: overlap=0.020 (≥0.01); A=[0.44,0.52] B=[0.50,0.62] [CHOREO-MAP Ф3 (кадри 61-89): фото вилазить + P2 додається ПАРАЛЕЛЬНО]",
+      "basis": "live"
+    },
+    {
+      "dimension": "plateau",
+      "name": "pin-плато",
+      "pass": true,
+      "detail": "плато 38.0dvh на [0.38,0.52] (довж 0.14≥0.1) [SPEC.md:24 M3 pin ~38]",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-overlap",
+      "name": "card-pin-top",
+      "pass": true,
+      "detail": "pin=38.0dvh vs 38±2 [SPEC.md:24 M3 pin ~38]",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-overlap",
+      "name": "олив-канва",
+      "pass": true,
+      "detail": "bg=rgb(93,108,45) vs rgb(93,108,45) ±6/канал [SPEC.md:4 олив-полотно #5d6c2d]",
+      "basis": "live"
+    },
+    {
+      "dimension": "composition-overlap",
+      "name": "pic-контейнер-не-full-bleed",
+      "pass": true,
+      "detail": "pic top=16.0% h=52.0% vs 16/52 ±2 [render-math wellness.html:37 (концепт «картинка в полях, не full-bleed» = SPEC.md:4)]",
+      "basis": "self"
+    },
+    {
+      "dimension": "typography-reveal",
+      "name": "текст-уходить-не-пінится",
+      "pass": true,
+      "detail": "ty(0.6)=-3.1dvh → ty(1.0)=-143.8dvh, хід 140.7dvh (≥8) [SPEC.md:5 «текст УХОДИТЬ (не пінится)»]",
+      "basis": "live"
+    },
+    {
+      "dimension": "typography-reveal",
+      "name": "reveal-порядок:p1→p2",
+      "pass": true,
+      "detail": "p1.start=0.16, p2.start=0.44 [SPEC.md:26 M5 «P2 reveal ПІЗНІШЕ за P1»]",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.25",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.5",
+      "pass": true,
+      "waived": true,
+      "detail": "WAIVED (розбіжність зафіксована, судить Єгор): live має панель (верх @88.5%), у нас ПАНЕЛІ НЕМА — текст на фото/скримі? [S46-c РЕТРОАКТИВНА ЗНАХІДКА surface-виміру: live Ф3+ = фото-картки В ПОЛЯХ на канві, наш прийнятий атом = full-bleed slide-up. Атом ПРИЙНЯТО оком Єгора S45 (7 ітерацій). Рішення про перебудову за Єгором]",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.75",
+      "pass": true,
+      "detail": "панелі нема в обох (full-bleed стан)",
+      "basis": "live"
+    },
+    {
+      "dimension": "surface-parity",
+      "name": "surf@p0.95",
+      "pass": true,
+      "waived": true,
+      "detail": "WAIVED (розбіжність зафіксована, судить Єгор): у нас панель @68%, а в live на цьому стані панелі нема [те саме: live олив+框-картки композиція ширша ніж наш handoff; прийнято оком S45; судить Єгор]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:lower",
+      "pass": true,
+      "detail": "послідовність подій збігається: [COVERED-BY]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:lower.COVERED-BY",
+      "pass": true,
+      "detail": "COVERED-BY у зоні lower: live=1 vs наш=1",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "seq:upper",
+      "pass": true,
+      "detail": "послідовність подій збігається: [COVERED-BY]",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "count:upper.COVERED-BY",
+      "pass": true,
+      "detail": "COVERED-BY у зоні upper: live=1 vs наш=1",
+      "basis": "live"
+    },
+    {
+      "dimension": "structure-parity",
+      "name": "mechanic-class-parity",
+      "pass": true,
+      "detail": "клас механіки збігається: stack+cover",
+      "basis": "live"
+    },
+    {
+      "dimension": "mechanic-class",
+      "name": "class-vs-live",
+      "pass": true,
+      "detail": "config.mechanicClass=\"stack+cover\" = клас з live",
+      "basis": "live"
+    },
+    {
+      "dimension": "console-errors",
+      "name": "console-errors",
+      "pass": true,
+      "detail": "0 console-error",
+      "basis": "live"
+    },
+    {
+      "dimension": "http-status",
+      "name": "http-status",
+      "pass": true,
+      "detail": "0 HTTP>=400",
+      "basis": "live"
+    }
+  ],
+  "unchecked": [
+    {
+      "dimension": "media-type",
+      "target": "media",
+      "reason": "waived",
+      "detail": "photo-first плейсхолдер до заміни на відео [SPEC.md:36 «Зараз jog-фото як плейсхолдер» — photo-first рішення Єгора; вимір media-type увімкнеться при заміні на kling-відео (declared:'video')]"
+    },
+    {
+      "dimension": "surface-parity",
+      "target": "surf@p0.5",
+      "reason": "waived",
+      "detail": "WAIVED (розбіжність зафіксована, судить Єгор): live має панель (верх @88.5%), у нас ПАНЕЛІ НЕМА — текст на фото/скримі? [S46-c РЕТРОАКТИВНА ЗНАХІДКА surface-виміру: live Ф3+ = фото-картки В ПОЛЯХ на канві, наш прийнятий атом = full-bleed slide-up. Атом ПРИЙНЯТО оком Єгора S45 (7 ітерацій). Рішення про перебудову за Єгором]"
+    },
+    {
+      "dimension": "surface-parity",
+      "target": "surf@p0.95",
+      "reason": "waived",
+      "detail": "WAIVED (розбіжність зафіксована, судить Єгор): у нас панель @68%, а в live на цьому стані панелі нема [те саме: live олив+框-картки композиція ширша ніж наш handoff; прийнято оком S45; судить Єгор]"
+    }
+  ],
+  "uncheckedCount": 3
+}

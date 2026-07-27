@@ -1,0 +1,191 @@
+/* ============================================================================
+   depth-stack / deal-fan — variant.css  (the DEAL/FAN skin, byte-faithful to d2)
+   ----------------------------------------------------------------------------
+   The per-variant 3D geometry + card chrome for the deal-fan engine: the felt
+   "table" with a low-angle perspective, the deck-origin glow, the dealt card's
+   3D context + transform-origin, cream/dark themes, asymmetric split, feats,
+   card pip, and the rail's tilted dealt-card handle. The shared dark grade,
+   hero, outro, progress-rail scaffolding and .serif=Fraunces come from the base
+   component.css (loaded before this file in the lab).
+   ========================================================================== */
+:root{
+  --cream:#efe9df;
+  --cream-ink:#1b1814;
+  --cream-sub:#5a5247;
+  --felt:#11100c;          /* the "table" the cards are dealt on */
+}
+
+/* ============ PINNED FELT STAGE ============ */
+.felt{
+  position:absolute; inset:0;
+  /* a faintly lit "table" under the deck — gives the dealt cards somewhere to land */
+  background:
+    radial-gradient(78% 64% at 50% 60%, #181410 0%, var(--felt) 58%, var(--dark-2) 100%);
+  perspective:1850px;
+  perspective-origin:50% 40%;
+  overflow:hidden;
+}
+/* deck origin marker — the corner the cards are dealt from (top, slightly right) */
+.felt__deck-glow{
+  position:absolute; top:-6%; left:62%; width:46%; height:42%;
+  background:radial-gradient(closest-side, rgba(176,123,62,.14), transparent 72%);
+  pointer-events:none;
+}
+
+.deck__pad{
+  position:absolute; inset:var(--pad);
+  transform-style:preserve-3d;
+}
+
+.card{
+  position:absolute; inset:0;
+  border-radius:var(--radius);
+  overflow:hidden;
+  /* pivot near the centre so rotateX/rotateZ don't perspective-drop the body;
+     the upward fan offset is carried by FAN_Y in screen space instead */
+  transform-origin:60% 50%;
+  will-change:transform, opacity;
+  backface-visibility:hidden;
+}
+.card--cream{ background:var(--cream); color:var(--cream-ink); }
+.card--dark{ background:var(--dark); color:var(--ink); }
+
+/* asymmetric split - render dominant, text deliberate column */
+.card__grid{
+  position:absolute; inset:0;
+  display:grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr); /* asymmetry, never 1fr 1fr */
+  height:100%;
+}
+.card--flip .card__grid{ grid-template-columns: minmax(0,1.3fr) minmax(0,0.9fr); }
+
+.card__text{
+  position:relative;
+  padding:clamp(26px,3.4vw,58px);
+  display:flex; flex-direction:column; justify-content:space-between;
+  z-index:3;
+}
+.card--flip .card__text{ order:2; }
+.card--flip .card__media{ order:1; }
+
+.card__eyebrow{
+  display:flex; align-items:center; gap:14px;
+  font-size:12px; letter-spacing:.2em; text-transform:uppercase;
+}
+.card--cream .card__eyebrow{ color:var(--cream-sub); }
+.card--dark .card__eyebrow{ color:var(--sub); }
+.card__count{ font-variant-numeric:tabular-nums; }
+.card__count b{ font-weight:500; color:var(--accent); }
+.card__rule{ flex:1; height:1px; }
+.card--cream .card__rule{ background:rgba(27,24,20,.16); }
+.card--dark .card__rule{ background:var(--line); }
+
+.card__head{ margin:clamp(20px,2.6vw,38px) 0 0; }
+.card__title{
+  font-size:clamp(31px, 4.5vw, 72px); line-height:.99; font-weight:300;
+  max-width:13ch;
+}
+.card__title em{ font-style:italic; }
+.card--cream .card__title em{ color:#8a6a3c; }
+.card--dark .card__title em{ color:var(--accent-soft); }
+
+.card__desc{
+  margin-top:clamp(16px,1.7vw,24px);
+  font-size:clamp(14px,1.05vw,16px); line-height:1.55; max-width:34ch;
+}
+.card--cream .card__desc{ color:var(--cream-sub); }
+.card--dark .card__desc{ color:var(--sub); }
+
+.card__feats{
+  margin-top:clamp(20px,2.4vw,32px);
+  display:flex; flex-direction:column; gap:0;
+  border-top:1px solid; max-width:38ch;
+}
+.card--cream .card__feats{ border-color:rgba(27,24,20,.16); }
+.card--dark .card__feats{ border-color:var(--line); }
+.feat{
+  display:flex; justify-content:space-between; align-items:baseline; gap:18px;
+  padding:11px 0; border-bottom:1px solid;
+  font-size:13px;
+}
+.card--cream .feat{ border-color:rgba(27,24,20,.16); }
+.card--dark .feat{ border-color:var(--line); }
+.feat span:first-child{ letter-spacing:.02em; }
+.feat span:last-child{ font-family:"Fraunces", serif; font-size:15px; }
+.card--cream .feat span:last-child{ color:var(--cream-ink); }
+.card--dark .feat span:last-child{ color:var(--ink); }
+
+.card__cta{
+  display:flex; align-items:center; gap:12px;
+  font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+  margin-top:clamp(18px,2vw,26px);
+}
+.card--cream .card__cta{ color:var(--cream-sub); }
+.card--dark .card__cta{ color:var(--sub); }
+.card__cta .arrow{
+  width:34px; height:34px; border-radius:50%; border:1px solid currentColor;
+  display:grid; place-items:center; opacity:.7;
+}
+.card__cta .arrow svg{ width:13px; height:13px; }
+
+/* MEDIA zone - render holds ~78% of its zone */
+.card__media{
+  position:relative; overflow:hidden;
+  margin:clamp(16px,2vw,28px);
+  border-radius:calc(var(--radius) - 7px);
+  background:#0a0908;
+}
+.card__media::after{ /* inner depth edge */
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -90px 120px -60px rgba(0,0,0,.55);
+  pointer-events:none; z-index:2;
+}
+.card__img{
+  position:absolute; inset:-6%;          /* bleed for ken-burns */
+  width:112%; height:112%;
+  object-fit:cover;
+  will-change:transform;
+}
+.card__tag{
+  position:absolute; left:16px; bottom:14px; z-index:3;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:rgba(255,255,255,.82);
+  padding:6px 11px; border-radius:999px;
+  background:rgba(0,0,0,.32); backdrop-filter:blur(6px);
+}
+/* corner index — a "card pip", reinforces the dealt-card metaphor */
+.card__pip{
+  position:absolute; top:clamp(16px,2vw,26px); right:clamp(18px,2.4vw,32px);
+  z-index:4; font-family:"Fraunces", serif; font-style:italic;
+  font-size:clamp(22px,2.6vw,34px); line-height:1; opacity:.5;
+  font-variant-numeric:tabular-nums;
+}
+.card--cream .card__pip{ color:var(--cream-ink); }
+.card--dark .card__pip{ color:var(--ink); }
+
+/* ============ the rail handle is a little tilted card that "deals" downward ============ */
+.rail__chip{
+  position:absolute; left:50%; top:0; transform:translate(-50%,-50%) rotate(-8deg);
+  width:13px; height:17px; border-radius:3px;
+  background:var(--dark-2); border:1.4px solid var(--accent);
+  box-shadow:0 0 0 4px rgba(176,123,62,.12);
+}
+
+/* ============ RESPONSIVE - 390px ============ */
+@media (max-width: 820px){
+  .felt{ perspective:1400px; perspective-origin:50% 38%; }
+  .card{ transform-origin:70% 118%; }
+  .card__grid{ grid-template-columns:1fr; grid-template-rows: 1.05fr 1fr; }
+  .card--flip .card__grid{ grid-template-columns:1fr; }
+  .card__text{ order:2 !important; padding:clamp(18px,5vw,26px); justify-content:flex-start; gap:14px; }
+  .card__media{ order:1 !important; margin:clamp(12px,3.5vw,18px); }
+  .card__head{ margin-top:14px; }
+  .card__title{ font-size:clamp(28px,9vw,46px); max-width:16ch; }
+  .card__feats{ margin-top:16px; }
+  .feat{ padding:9px 0; font-size:12px; }
+  .card__desc{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .card__pip{ top:12px; right:14px; font-size:24px; }
+}
+@media (max-width: 480px){
+  .card__cta{ display:none; }
+}

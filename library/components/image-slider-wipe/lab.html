@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · image-slider-wipe · T-512 + T-M23 (слайдер 1/2, шов-кліп)</title>
+<!--
+================================================================================
+  LAB: image-slider-wipe — слайдер 1/2 з лічильником + T-512 wipe + T-M23.
+  Контракт: ЖИВИЙ shared.js/DOM aircenter.space (витяг 2026-07-06):
+  пін 100svh+(N−1)·step; index=floor(p·N); wipe = polygon-кліпи 1s ease-out
+  (старе колапсує до краю, нове розкривається від протилежного — шов
+  краєм-до-краю, НЕ «з центру»); лічильник свапається НА СТАРТІ; ticks =
+  безперервний translateX-fill; текст blur-swap delay 0.25 + 60ms/рядок.
+  Моб (T-M23, живий mobileScrollable): snap-стрічка + [← N/M →], тап →
+  лічильник ОДРАЗУ → smooth-scroll ~0.4с (push справа→наліво).
+
+  ГЕЙТ (PROBE_MODE):
+  desktop:
+  1. loadStability: CLS < 0.1 + дрейф якоря <= 4px;
+  2. пін: mid-прохід — шар прилип (top 0 ±2), слайд 1, лічильник «1»;
+  3. ticks p≈0.25: fill0 ≈ −50% (±14), fill1 = −100% (±2);
+  4. свап vперед (p 0.25→0.7): лічильник «2» ОДРАЗУ (~80ms), вхідний слайд
+     у польоті кліпом ЗНИЗУ (всі y полігона > 55%); через 1.3s — повний,
+     старий схований;
+  5. свап назад: лічильник «1» одразу, вхідний кліпом ЗГОРИ (y < 45%);
+     ticks реверсивні (fill0 знову ≈ −50%);
+  6. console errors == 0.
+  mobile (прогін 390px, tap-режим):
+  7. стрічка scroll-snap x mandatory; prev.is-disabled на старті;
+  8. тап next → лічильник «2» СИНХРОННО (до завершення скролу),
+     scrollLeft осідає ≈ крок (±30); на останньому next.is-disabled.
+  Живий перегляд (без ?probe) = НУЛЬ автоскролів (закон PROBE_MODE).
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .intro, .outro { min-height: 90vh; display: flex; align-items: center; padding: 0 6vw; color: #6b6b68; }
+
+  /* ---- Status-акт (жива композиція: h2 + слайдер 8/4) ---- */
+  #act { padding: 0 3vw; }
+  #act .head { padding: 9vh 3vw 5vh; text-align: center; }
+  #act .head h2 { font-size: clamp(30px, 4.6vw, 68px); font-weight: 300; line-height: 1.08; }
+  #act .head p { max-width: 46ch; margin: 3vh auto 0; font-size: 14px;
+                 line-height: 1.55; color: #6b6b68; }
+
+  #isw [data-isw-layer] { padding-bottom: 3vh; }
+  .isw-row { display: flex; gap: 10px; height: 84svh; align-items: stretch; }
+  #iswStage { flex: 0 0 66%; border-radius: 6px; overflow: clip; }
+  .isw-card { flex: 1; display: flex; flex-direction: column; border-radius: 6px;
+              padding: 4vh 2.4vw; background: rgba(24, 24, 23, .82);
+              backdrop-filter: blur(24px); color: #f2f1ee; }
+  .isw-card [data-isw-ticks] { color: #f2f1ee; }
+  .isw-counter { display: flex; justify-content: space-between; align-items: baseline;
+                 margin: 4.5vh 0 0; }
+  .isw-counter [data-isw-count] { font-size: clamp(44px, 4.4vw, 84px); font-weight: 300;
+                                  line-height: 1; }
+  .isw-counter [data-isw-total] { font-size: 13px; color: rgba(242, 241, 238, .5); }
+  .isw-texts { flex: 1; display: grid; align-content: center; } /* стек свапу без CLS */
+  .isw-texts p { font-size: 14px; font-weight: 300; line-height: 1.55; color: #c9c7c2; }
+  .isw-cta { margin-top: 3vh; display: grid; }
+  .isw-cta a { display: inline-flex; justify-content: space-between; gap: 2em; width: 100%;
+               padding: 14px 16px; border: 1px solid rgba(242, 241, 238, .25);
+               border-radius: 4px; color: #f2f1ee; text-decoration: none;
+               font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+  .isw-nav { display: none; }
+
+  /* слайди: інтер'єрні градієнти (лаба без зовнішніх фото) */
+  .ph { position: absolute; inset: 0; }
+  #ph1 { background: linear-gradient(160deg, #b9c2c6 0%, #8d979c 34%, #5d676d 68%, #343c41 100%); }
+  #ph1::after { content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(115deg, transparent 0 90px, rgba(244,242,238,.16) 90px 96px); }
+  #ph2 { background: linear-gradient(200deg, #6d5b4a 0%, #8a7660 30%, #4a3f34 70%, #241f1a 100%); }
+  #ph2::after { content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 64px, rgba(244,242,238,.12) 64px 67px); }
+
+  @media (pointer: coarse), (max-width: 768px) {
+    .isw-row { display: block; height: auto; }
+    #iswStage { border-radius: 0; overflow-x: scroll; overflow-y: hidden; }
+    .isw-strip [data-isw-slide] { height: 58svh; border-radius: 6px; overflow: clip; }
+    .isw-card { margin: 12px 0 0; padding: 3.4vh 5vw; }
+    .isw-counter { display: none; }             /* великий лічильник живе в nav */
+    .isw-nav { display: flex; align-items: center; justify-content: center;
+               gap: 18px; margin-top: 2.6vh; }
+    .isw-nav button { width: 44px; height: 44px; border-radius: 4px;
+                      border: 1px solid rgba(242, 241, 238, .3); background: none;
+                      color: #f2f1ee; font-size: 16px; }
+    .isw-nav .nn { font-size: 13px; color: #f2f1ee; min-width: 3.4em; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · image-slider-wipe · t-512 + t-m23 · скроль (моб: тапай стрілки)</div>
+
+<section class="intro"><p>… скроль: пін-слайдер 1/2, шов-кліп на свапі, лічильник на старті …</p></section>
+
+<section id="act">
+  <div class="head">
+    <h2>Відчутний статус</h2>
+    <p>Фасади нагадують застиглі хвилі. Бюро продовжує цю метафору стихії в дизайні лобі.</p>
+  </div>
+
+  <div id="isw">
+    <div data-isw-layer>
+      <div class="isw-row">
+        <div data-isw-stage id="iswStage">
+          <figure data-isw-slide><div class="ph isw-fill" id="ph1"></div></figure>
+          <figure data-isw-slide><div class="ph isw-fill" id="ph2"></div></figure>
+        </div>
+        <div class="isw-card" data-isw-card>
+          <div data-isw-ticks></div>
+          <p class="isw-counter">
+            <span data-isw-count>1</span>
+            <span data-isw-total>/ 2</span>
+          </p>
+          <div class="isw-texts">
+            <p data-isw-text>Скляні хвилясті форми на стелях роблять інтер'єр продовженням архітектури. Стелі до восьми метрів на унікальних похилих колонах дають лобі відчуття легкості й монументальності.</p>
+            <p data-isw-text class="is-off">Дерев'яні стінові панелі, медіаекрани, підлога з природного каменю та преміальні меблі говорять про статус резидентів ще до того, як гість дійде до офісів.</p>
+          </div>
+          <div class="isw-cta">
+            <div data-isw-extra><a href="#про">Дізнатися більше <span>→</span></a></div>
+            <div data-isw-extra class="is-off"><a href="#про">Дізнатися більше <span>→</span></a></div>
+          </div>
+          <div class="isw-nav">
+            <button data-isw-prev aria-label="попереднє фото">←</button>
+            <span class="nn"><span id="navCount">1</span> / 2</span>
+            <button data-isw-next aria-label="наступне фото">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="outro"><p>… кінець проби …</p></section>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var touch = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+  /* моб-nav дублює лічильник у пілюлю [← N/M →] */
+  var navCount = document.getElementById('navCount');
+  var mainCount = document.querySelector('[data-isw-count]');
+  if (touch && navCount) {
+    new MutationObserver(function () { navCount.textContent = mainCount.textContent; })
+      .observe(mainCount, { childList: true, characterData: true, subtree: true });
+  }
+
+  var isw = window.ImageSliderWipe.create('#isw', {});
+  window.__ISW = isw;
+
+  var root = document.getElementById('isw');
+  var layer = root.querySelector('[data-isw-layer]');
+  var stage = document.getElementById('iswStage');
+  var slides = root.querySelectorAll('[data-isw-slide]');
+  var report = { stability: null, drift: null, pin: null, ticks: null, fwd: null,
+                 back: null, tap: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function tickX(i) {
+    var f = root.querySelectorAll('.isw-tick-fill')[i];
+    var m = /translateX\((-?\d*\.?\d+)/.exec(f && f.style.transform || '');
+    return m ? parseFloat(m[1]) : null;
+  }
+  function clipYs(el) { /* y-координати computed-полігона, % */
+    var c = getComputedStyle(el).clipPath || '';
+    var m = c.match(/polygon\(([^)]*)\)/);
+    if (!m) return null;
+    return m[1].split(',').map(function (pt) {
+      return parseFloat(pt.trim().split(/\s+/)[1]);
+    });
+  }
+  function yTo(p) { /* scrollY для прогресу піна p */
+    var top = root.getBoundingClientRect().top + window.scrollY;
+    return top + p * (root.offsetHeight - window.innerHeight);
+  }
+
+  async function probeStability(anchor) {
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+    var a1 = anchor.getBoundingClientRect().top;
+    await delay(600);
+    var a2 = anchor.getBoundingClientRect().top;
+    var out = { cls: Math.round(cls * 1000) / 1000, drift: Math.abs(a2 - a1),
+                ok: cls < 0.1 && Math.abs(a2 - a1) <= 4 };
+    report.stability = out;
+    return out.ok;
+  }
+
+  async function runDesktop() {
+    var ok = await probeStability(document.querySelector('#act h2'));
+
+    /* 1b: дрейф фото (живий imageSliderImage): на підльоті ty < 0,
+       у піні ≈ 0, на відпусканні знову < 0 */
+    var rootTop = root.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo(0, rootTop - window.innerHeight * 0.55);
+    await delay(250);
+    var dEnter = isw.gate.driftTy;
+    window.scrollTo(0, yTo(0.25));
+    await delay(250);
+    var dPin = isw.gate.driftTy;
+    window.scrollTo(0, yTo(1) + window.innerHeight * 0.5);
+    await delay(250);
+    var dExit = isw.gate.driftTy;
+    report.drift = { enter: dEnter, pin: dPin, exit: dExit,
+                     ok: dEnter < -6 && Math.abs(dPin) < 1.5 && dExit < -6 };
+    ok = report.drift.ok && ok;
+
+    /* 2: пін + вихідний стан */
+    window.scrollTo(0, yTo(0.25));
+    await delay(350);
+    var lt = layer.getBoundingClientRect().top;
+    report.pin = { layerTop: Math.round(lt), idx: isw.index(),
+                   count: mainCount.textContent,
+                   ok: Math.abs(lt) <= 2 && isw.index() === 0 && mainCount.textContent === '1' };
+    ok = report.pin.ok && ok;
+
+    /* 3: ticks на p≈0.25 → fill0 ≈ −50, fill1 = −100 */
+    report.ticks = { t0: tickX(0), t1: tickX(1) };
+    report.ticks.ok = report.ticks.t0 !== null && Math.abs(report.ticks.t0 + 50) <= 14 &&
+                      Math.abs(report.ticks.t1 + 100) <= 2;
+    ok = report.ticks.ok && ok;
+
+    /* 4: свап вперед — лічильник НА СТАРТІ, кліп знизу */
+    window.scrollTo(0, yTo(0.7));
+    await delay(80);
+    var ys = clipYs(slides[1]);
+    var minY = ys ? Math.min.apply(null, ys) : -1;
+    var early = { count: mainCount.textContent, minY: Math.round(minY),
+                  animating: slides[1].getAnimations && slides[1].getAnimations().length > 0 };
+    await delay(1300);
+    var late = { s2visible: !slides[1].classList.contains('is-off') &&
+                            getComputedStyle(slides[1]).visibility !== 'hidden',
+                 s1off: slides[0].classList.contains('is-off'),
+                 clipDone: !clipYs(slides[1]) || Math.min.apply(null, clipYs(slides[1])) <= 1 };
+    report.fwd = { early: early, late: late,
+                   ok: early.count === '2' && minY > 55 && early.animating &&
+                       late.s2visible && late.s1off && late.clipDone };
+    ok = report.fwd.ok && ok;
+
+    /* 5: свап назад — кліп згори; ticks реверсивні */
+    window.scrollTo(0, yTo(0.25));
+    await delay(80);
+    var ys2 = clipYs(slides[0]);
+    var maxY = ys2 ? Math.max.apply(null, ys2) : 999;
+    var backEarly = { count: mainCount.textContent, maxY: Math.round(maxY) };
+    await delay(1300);
+    report.back = { early: backEarly, t0: tickX(0),
+                    s1visible: !slides[0].classList.contains('is-off'),
+                    s2off: slides[1].classList.contains('is-off') };
+    report.back.ok = backEarly.count === '1' && maxY < 45 &&
+                     report.back.s1visible && report.back.s2off &&
+                     Math.abs(report.back.t0 + 50) <= 14;
+    ok = report.back.ok && ok;
+    return ok;
+  }
+
+  async function runMobile() {
+    var ok = await probeStability(document.querySelector('#act h2'));
+    var prev = root.querySelector('[data-isw-prev]');
+    var next = root.querySelector('[data-isw-next]');
+    var snap = (getComputedStyle(stage).scrollSnapType || '').indexOf('x') >= 0;
+
+    /* 7: стрічка + краї */
+    var t7 = { mode: isw.mode === 'tap', snap: snap,
+               prevDisabled: prev.classList.contains('is-disabled') };
+
+    /* 8: тап → лічильник СИНХРОННО, скрол осідає в snap-ціль слайда 2.
+       Стрічку — у в'юпорт (smooth-скрол off-screen контейнера не їде) */
+    window.scrollTo(0, stage.getBoundingClientRect().top + window.scrollY -
+                       window.innerHeight * 0.2);
+    await delay(250);
+    var goal = isw.targetFor(1);               /* ціль ДО старту руху */
+    next.click();
+    var countNow = mainCount.textContent;      /* той самий тік */
+    await delay(60);
+    var slEarly = stage.scrollLeft;            /* скрол ще в польоті */
+    await delay(900);
+    var slLate = stage.scrollLeft;
+    var t8 = { countNow: countNow, slEarly: Math.round(slEarly),
+               slLate: Math.round(slLate), goal: Math.round(goal),
+               nextDisabled: next.classList.contains('is-disabled'),
+               navSync: navCount.textContent === '2' };
+    report.tap = { t7: t7, t8: t8 };
+    report.tap.ok = t7.mode && t7.snap && t7.prevDisabled &&
+                    countNow === '2' && slEarly < goal * 0.8 &&
+                    Math.abs(slLate - goal) <= 30 && t8.nextDisabled && t8.navSync;
+    return ok && report.tap.ok;
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; } /* без автоскролів */
+    var ok = touch ? await runMobile() : await runDesktop();
+    report.errors = errs;
+    ok = ok && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:image-slider-wipe]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

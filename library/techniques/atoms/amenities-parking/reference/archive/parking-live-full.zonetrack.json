@@ -1,0 +1,815 @@
+{
+  "tool": "zone-track.mjs",
+  "version": 1,
+  "ts": "2026-07-24T19:44:13.659Z",
+  "video": "parking-live.mp4",
+  "videoSha": "57b10e0bf9525565ea53099ee80e95f96ce0fb5fc0f0e579d591815e3f5ca7cd",
+  "zonesSha": "ce4510338ed757db20eeeae44605b0b2b5b0c54ac92cc60bb8f28f51179cbb07",
+  "fps": 12,
+  "frames": 359,
+  "thresholdsSha": "89c59b1d7c5f922a82767cef29207d3a08db3f446f4f8274d8cf5536739a25d8",
+  "cuts": {
+    "topPct": 5.5,
+    "botPct": 11.7
+  },
+  "zones": [
+    {
+      "id": "photo",
+      "rectPct": [
+        5,
+        6,
+        95,
+        45
+      ],
+      "note": "фото-рендер паркінгу: ОДИН рендер, старт = ~3.4x кроп темного кута (edge-NCC f100-128 scale 3.4-3.55 поза (18,240) ncc 0.62-0.69), зум-аут скрабом до 1.0 (~f187 ncc 0.97), потім page-locked і йде вгору (q2: photo_shift==dcum f204+). Скриму нема (люма-ratio 1.07/0.97/0.89). Верхня смуга: структури не транслюються — зум міняє контент на місці ЗУМ = MEDIA-внутрішній рух (доктрина: поза EVENT-доменом, судить surface-parity по чекпоінт-станах + око)",
+      "kind": "media"
+    },
+    {
+      "id": "panel",
+      "rectPct": [
+        5,
+        52,
+        95,
+        84
+      ],
+      "note": "cream-панель: параграф «At Springs, everything has been marked…» + спекс-лист (Designed interior / Two levels / 176 parking spaces, hairline). ЖОРСТКИЙ page-locked блок: офсети спекс-до-параграфа 330/458/569px КОНСТАНТНІ з першого кадру появи (f212/224/228), ncc 1.0 одразу = нуль entry-анімацій",
+      "kind": "text"
+    }
+  ],
+  "liveScope": {
+    "range": [
+      0.279,
+      0.719
+    ],
+    "src": "f100/359..f258/359: f100 = terraces повністю пішов (кадри f88-102 чисті, паркінг+nameplate пінені, cum=0), f258 = спекс-блок повністю у в'юпорті перед входом Location-тизера (пауза руки f258-264 = чистий якір). Прологи (terraces-виїзд f6-88) і епілог (location/футер f265+) = шви сусідів, НЕ тіло атома (урок borges S47)"
+  },
+  "scopeFrames": [
+    100,
+    258
+  ],
+  "windows": {
+    "photo": [
+      {
+        "f0": 126,
+        "f1": 147
+      },
+      {
+        "f0": 166,
+        "f1": 189
+      },
+      {
+        "f0": 201,
+        "f1": 229
+      },
+      {
+        "f0": 238,
+        "f1": 252
+      },
+      {
+        "f0": 265,
+        "f1": 287
+      },
+      {
+        "f0": 295,
+        "f1": 306
+      },
+      {
+        "f0": 316,
+        "f1": 329
+      },
+      {
+        "f0": 336,
+        "f1": 343
+      }
+    ],
+    "panel": [
+      {
+        "f0": 126,
+        "f1": 147
+      },
+      {
+        "f0": 166,
+        "f1": 191
+      },
+      {
+        "f0": 201,
+        "f1": 229
+      },
+      {
+        "f0": 238,
+        "f1": 252
+      },
+      {
+        "f0": 266,
+        "f1": 288
+      },
+      {
+        "f0": 295,
+        "f1": 306
+      },
+      {
+        "f0": 316,
+        "f1": 324
+      }
+    ]
+  },
+  "verdicts": [
+    {
+      "zone": "panel",
+      "f0": 16,
+      "f1": 172,
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 0.71,
+      "numbers": {
+        "front": "top",
+        "frontEnd": 0.71,
+        "accumulated": true
+      }
+    },
+    {
+      "zone": "panel",
+      "f0": 126,
+      "f1": 147,
+      "numbers": {
+        "driftPct": -7.4,
+        "pagePct": -17.7,
+        "confMin": 0.95,
+        "changedFrac": 0.87,
+        "bandsFrac": 0.75,
+        "gridDist": 55.7,
+        "ink": [
+          116,
+          32,
+          32
+        ],
+        "texVar": [
+          967,
+          505
+        ],
+        "front": "top",
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -39
+        },
+        "pageLocked": "22.9<55.7"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 7.4
+    },
+    {
+      "zone": "photo",
+      "f0": 126,
+      "f1": 147,
+      "numbers": {
+        "driftPct": -2.9,
+        "pagePct": -17.7,
+        "confMin": 0.93,
+        "changedFrac": 0.7,
+        "bandsFrac": 0.54,
+        "gridDist": 23.2,
+        "ink": [
+          144,
+          144,
+          153
+        ],
+        "texVar": [
+          858,
+          983
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": "25.5<23.2"
+      },
+      "verdict": "MEDIA"
+    },
+    {
+      "zone": "panel",
+      "f0": 166,
+      "f1": 191,
+      "numbers": {
+        "driftPct": -15.8,
+        "pagePct": -17.7,
+        "confMin": 0.97,
+        "changedFrac": 0.86,
+        "bandsFrac": 0.21,
+        "gridDist": 64.1,
+        "ink": [
+          32,
+          7,
+          76
+        ],
+        "texVar": [
+          494,
+          531
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "27.9<64.1"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 15.8
+    },
+    {
+      "zone": "photo",
+      "f0": 166,
+      "f1": 189,
+      "numbers": {
+        "driftPct": -5.7,
+        "pagePct": -17.4,
+        "confMin": 0.89,
+        "changedFrac": 0.73,
+        "bandsFrac": 0.5,
+        "gridDist": 34.7,
+        "ink": [
+          153,
+          93,
+          93
+        ],
+        "texVar": [
+          989,
+          877
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "29.4<34.7"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 5.7
+    },
+    {
+      "zone": "panel",
+      "f0": 201,
+      "f1": 229,
+      "numbers": {
+        "driftPct": -31.5,
+        "pagePct": -33.9,
+        "confMin": 0.82,
+        "changedFrac": 0.54,
+        "bandsFrac": 0.5,
+        "gridDist": 44.9,
+        "ink": [
+          76,
+          40,
+          43
+        ],
+        "texVar": [
+          531,
+          553
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.97,
+          "dPx": -130
+        },
+        "pageLocked": null
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 31.5
+    },
+    {
+      "zone": "photo",
+      "f0": 201,
+      "f1": 229,
+      "numbers": {
+        "driftPct": -32.7,
+        "pagePct": -33.9,
+        "confMin": 0.85,
+        "changedFrac": 0.96,
+        "bandsFrac": 0.17,
+        "gridDist": 72.3,
+        "ink": [
+          95,
+          95,
+          110
+        ],
+        "texVar": [
+          868,
+          583
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "6.1<72.3"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 32.7
+    },
+    {
+      "zone": "panel",
+      "f0": 238,
+      "f1": 252,
+      "numbers": {
+        "driftPct": -33.7,
+        "pagePct": -33.9,
+        "confMin": 0.64,
+        "changedFrac": 0.41,
+        "bandsFrac": 0.42,
+        "gridDist": 48.6,
+        "ink": [
+          43,
+          25,
+          37
+        ],
+        "texVar": [
+          554,
+          309
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 33.7
+    },
+    {
+      "zone": "photo",
+      "f0": 238,
+      "f1": 252,
+      "numbers": {
+        "driftPct": -33.9,
+        "pagePct": -33.9,
+        "confMin": 0.6,
+        "changedFrac": 0.69,
+        "bandsFrac": 0.04,
+        "gridDist": 51.9,
+        "ink": [
+          110,
+          55,
+          60
+        ],
+        "texVar": [
+          584,
+          662
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "1.3<51.9"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 33.9
+    },
+    {
+      "zone": "photo",
+      "f0": 265,
+      "f1": 287,
+      "numbers": {
+        "driftPct": -37,
+        "pagePct": -37,
+        "confMin": 0.82,
+        "changedFrac": 0.39,
+        "bandsFrac": 0.04,
+        "gridDist": 36.8,
+        "ink": [
+          60,
+          26,
+          37
+        ],
+        "texVar": [
+          662,
+          302
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "3.1<36.8"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 37
+    },
+    {
+      "zone": "panel",
+      "f0": 266,
+      "f1": 324,
+      "numbers": {
+        "driftPct": -34.6,
+        "pagePct": -36.8,
+        "confMin": 0.27,
+        "changedFrac": 0.8,
+        "bandsFrac": 0.42,
+        "gridDist": 113,
+        "ink": [
+          39,
+          39,
+          60
+        ],
+        "texVar": [
+          318,
+          531
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.97,
+          "dPx": -149
+        },
+        "pageLocked": null
+      },
+      "verdict": "COVERED-BY",
+      "dir": "bottom",
+      "frontEnd": 0.67,
+      "enterMerged": 2
+    },
+    {
+      "zone": "photo",
+      "f0": 295,
+      "f1": 306,
+      "numbers": {
+        "driftPct": -24.6,
+        "pagePct": -24.1,
+        "confMin": 0.93,
+        "changedFrac": 0.71,
+        "bandsFrac": 0.04,
+        "gridDist": 101.8,
+        "ink": [
+          39,
+          39,
+          88
+        ],
+        "texVar": [
+          306,
+          485
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "5.7<101.8"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 24.6
+    },
+    {
+      "zone": "photo",
+      "f0": 316,
+      "f1": 329,
+      "numbers": {
+        "driftPct": -33.4,
+        "pagePct": -33.4,
+        "confMin": 0.33,
+        "changedFrac": 0.6,
+        "bandsFrac": 0.04,
+        "gridDist": 43.3,
+        "ink": [
+          88,
+          11,
+          11
+        ],
+        "texVar": [
+          485,
+          174
+        ],
+        "front": "top",
+        "oldLayerT": {
+          "s": 0.94,
+          "dPx": -144
+        },
+        "pageLocked": "8.3<43.3"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 33.4,
+      "pageLocked": true
+    },
+    {
+      "zone": "photo",
+      "f0": 336,
+      "f1": 343,
+      "numbers": {
+        "driftPct": -20.3,
+        "pagePct": -20.3,
+        "confMin": 0.86,
+        "changedFrac": 0.56,
+        "bandsFrac": 0,
+        "gridDist": 21.8,
+        "ink": [
+          10,
+          2,
+          2
+        ],
+        "texVar": [
+          166,
+          48
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "0.4<21.8"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 20.3
+    },
+    {
+      "zone": "panel",
+      "f0": 342,
+      "f1": 358,
+      "verdict": "EXITS",
+      "numbers": {
+        "ink": [
+          23,
+          0,
+          0
+        ]
+      },
+      "inkEvent": true
+    }
+  ],
+  "verdictsScoped": [
+    {
+      "zone": "panel",
+      "f0": 16,
+      "f1": 172,
+      "verdict": "COVERED-BY",
+      "dir": "top",
+      "frontEnd": 0.71,
+      "numbers": {
+        "front": "top",
+        "frontEnd": 0.71,
+        "accumulated": true
+      }
+    },
+    {
+      "zone": "panel",
+      "f0": 126,
+      "f1": 147,
+      "numbers": {
+        "driftPct": -7.4,
+        "pagePct": -17.7,
+        "confMin": 0.95,
+        "changedFrac": 0.87,
+        "bandsFrac": 0.75,
+        "gridDist": 55.7,
+        "ink": [
+          116,
+          32,
+          32
+        ],
+        "texVar": [
+          967,
+          505
+        ],
+        "front": "top",
+        "oldLayerT": {
+          "s": 0.88,
+          "dPx": -39
+        },
+        "pageLocked": "22.9<55.7"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 7.4
+    },
+    {
+      "zone": "photo",
+      "f0": 126,
+      "f1": 147,
+      "numbers": {
+        "driftPct": -2.9,
+        "pagePct": -17.7,
+        "confMin": 0.93,
+        "changedFrac": 0.7,
+        "bandsFrac": 0.54,
+        "gridDist": 23.2,
+        "ink": [
+          144,
+          144,
+          153
+        ],
+        "texVar": [
+          858,
+          983
+        ],
+        "front": null,
+        "oldLayerT": null,
+        "pageLocked": "25.5<23.2"
+      },
+      "verdict": "MEDIA"
+    },
+    {
+      "zone": "panel",
+      "f0": 166,
+      "f1": 191,
+      "numbers": {
+        "driftPct": -15.8,
+        "pagePct": -17.7,
+        "confMin": 0.97,
+        "changedFrac": 0.86,
+        "bandsFrac": 0.21,
+        "gridDist": 64.1,
+        "ink": [
+          32,
+          7,
+          76
+        ],
+        "texVar": [
+          494,
+          531
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": "27.9<64.1"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 15.8
+    },
+    {
+      "zone": "photo",
+      "f0": 166,
+      "f1": 189,
+      "numbers": {
+        "driftPct": -5.7,
+        "pagePct": -17.4,
+        "confMin": 0.89,
+        "changedFrac": 0.73,
+        "bandsFrac": 0.5,
+        "gridDist": 34.7,
+        "ink": [
+          153,
+          93,
+          93
+        ],
+        "texVar": [
+          989,
+          877
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "29.4<34.7"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 5.7
+    },
+    {
+      "zone": "panel",
+      "f0": 201,
+      "f1": 229,
+      "numbers": {
+        "driftPct": -31.5,
+        "pagePct": -33.9,
+        "confMin": 0.82,
+        "changedFrac": 0.54,
+        "bandsFrac": 0.5,
+        "gridDist": 44.9,
+        "ink": [
+          76,
+          40,
+          43
+        ],
+        "texVar": [
+          531,
+          553
+        ],
+        "front": "bottom",
+        "oldLayerT": {
+          "s": 0.97,
+          "dPx": -130
+        },
+        "pageLocked": null
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 31.5
+    },
+    {
+      "zone": "photo",
+      "f0": 201,
+      "f1": 229,
+      "numbers": {
+        "driftPct": -32.7,
+        "pagePct": -33.9,
+        "confMin": 0.85,
+        "changedFrac": 0.96,
+        "bandsFrac": 0.17,
+        "gridDist": 72.3,
+        "ink": [
+          95,
+          95,
+          110
+        ],
+        "texVar": [
+          868,
+          583
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "6.1<72.3"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 32.7
+    },
+    {
+      "zone": "panel",
+      "f0": 238,
+      "f1": 252,
+      "numbers": {
+        "driftPct": -33.7,
+        "pagePct": -33.9,
+        "confMin": 0.64,
+        "changedFrac": 0.41,
+        "bandsFrac": 0.42,
+        "gridDist": 48.6,
+        "ink": [
+          43,
+          25,
+          37
+        ],
+        "texVar": [
+          554,
+          309
+        ],
+        "front": "top",
+        "oldLayerT": null,
+        "pageLocked": null
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 33.7
+    },
+    {
+      "zone": "photo",
+      "f0": 238,
+      "f1": 252,
+      "numbers": {
+        "driftPct": -33.9,
+        "pagePct": -33.9,
+        "confMin": 0.6,
+        "changedFrac": 0.69,
+        "bandsFrac": 0.04,
+        "gridDist": 51.9,
+        "ink": [
+          110,
+          55,
+          60
+        ],
+        "texVar": [
+          584,
+          662
+        ],
+        "front": "bottom",
+        "oldLayerT": null,
+        "pageLocked": "1.3<51.9"
+      },
+      "verdict": "TRAVELS",
+      "dir": "up",
+      "movePct": 33.9
+    }
+  ],
+  "tokens": {
+    "seq": {
+      "panel": [
+        "COVERED-BY",
+        "TRAVELS:up",
+        "COVERED-BY",
+        "EXITS"
+      ],
+      "photo": [
+        "TRAVELS:up"
+      ]
+    },
+    "counters": {
+      "panel": {
+        "COVERED-BY": 2,
+        "TRAVELS": 1,
+        "EXITS": 1
+      },
+      "photo": {
+        "TRAVELS": 1
+      }
+    }
+  },
+  "tokensScoped": {
+    "seq": {
+      "panel": [
+        "COVERED-BY",
+        "TRAVELS:up"
+      ],
+      "photo": [
+        "TRAVELS:up"
+      ]
+    },
+    "counters": {
+      "panel": {
+        "COVERED-BY": 1,
+        "TRAVELS": 1
+      },
+      "photo": {
+        "TRAVELS": 1
+      }
+    }
+  },
+  "mechanicClass": {
+    "class": "stack+cover",
+    "evidence": [
+      "зона COVERED-BY/ENTERS без swap-тексту"
+    ]
+  },
+  "unknownCount": 0,
+  "note": "вердикти-кандидати З LIVE (закритий словник). CHOREO-CLAIMS цитує ці числа (src=zonetrack:...). UNKNOWN = автоматичний борд-блокер Єгору. Порівняння з нашим render — ТІЛЬКИ EVENT-домен (structure-parity)."
+}

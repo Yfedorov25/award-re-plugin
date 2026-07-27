@@ -1,0 +1,107 @@
+# PB_media — МЕДІА/ЗОБРАЖЕННЯ award-ЖК (що, як кадровано, яка обробка) ★★★
+> ЖИВИЙ зонд media-пайплайну 5 Vide Infra сайтів (ERA·AIR·Springs·Silver·Ever), 2026-06-09.
+> Відповідає: які зображення/відео/SVG потрібні ЖК-сайту, які співвідношення, яка обробка. Споріднено: [PB_color](../../re-color/references/PB_color.md) [PB_site_architecture](../../re-architecture/references/PB_site_architecture) [PB_media](PB_media) [PB_hero](../../re-sections/references/PB_hero.md).
+
+## 0. ОДИН ПАЙПЛАЙН (всі 5)
+Однаковий Vide Infra media-движок: `media/cache/{preset}_{breakpoint}/...`, папки `media/landing/N.section-name/`, брейки `@xs/@md/@xxl/@xxxl`. Тобто «медіа-словник» нижче = готовий spec.
+
+## 1. ЛІЧИЛЬНИКИ (головна, унікальні фото після згортання 4 брейків)
+| Сайт | унік.фото | формат | відео | svg | canvas |
+|---|---|---|---|---|---|
+| ERA | ~59 | WebP+JPEG, PNG-cutout | 0 (canvas frame-seq!) | sprite 34 use | 1 |
+| AIR | ~21 | WebP | 0 (WebGL slider) | sprite 31 | 0 |
+| Springs | ~74 | WebP (+AVIF gradient) | 0 (WebGL slider) | sprite 63 | 5 |
+| Silver | ~50 | WebP | 0 | sprite 47 | 0 |
+| Ever | ~78 | **JPEG+PNG (no WebP!)** | **2 .mp4 loop** | sprite 113 | 0 |
+> Сирий `<img>` ×4 роздутий бо кожне = `<picture>` з 4 art-directed `<source>` × (WebP+JPEG fallback).
+
+## 2. ФОРМАТИ (правило)
+**WebP стандарт + JPEG `<source>` fallback у тому ж `<picture>`.** AVIF лише для синтетичних градієнт-текстур (не фото). PNG лише для прозорих cutout (будівлі/декор) і карт. (Ever — старіший білд, JPEG+PNG без WebP.)
+
+## 3. RESPONSIVE (ідентичний усюди) — art-directed `<picture>`, 4 named брейки
+- `@xxxl` → `(min-width:1920px) and (min-height:700px)`
+- `@xxl` → `(min-width:1440px) and (min-height:700px)`
+- `@md` → `(min-width:568px)…(980px)`
+- `@xs` → без media (мобіл/дефолт `<img src>`)
+**НЕ width-descriptors (`Nw`)** — art-direction через `media`-query, не density. Кожен брейк = WebP+JPEG.
+**Lazy:** НЕ native `loading=lazy`. JS-патерн: реальний URL у `data-src`/`data-srcset`, плейсхолдер `px.gif`(1×1)/`px-2x1.gif` тримає layout. **Hero = виняток: eager + `fetchpriority="high"`.**
+
+## 4. ВІДЕО
+- Лише **Ever** має контент-відео: 2 `.mp4` loop — hero-bg (`intro/ever_intro.mp4`) + section-bg (`location/background.mp4`). Атрибути `autoplay muted playsinline loop disablePictureInPicture preload`, lazy `<source data-src>`, `data-plugin="videoAutoPlay"`.
+- **ERA замінює hero-відео на scroll-scrub frame-sequence на `<canvas>`** (§7).
+- Springs/Silver/AIR — 0 відео; рух = CSS parallax-zoom + reveal (+Springs/AIR WebGL slider).
+- `manifest.webm` на всіх — PWA-ассет, не контент.
+
+## 5. SVG (переважно icon-sprite, не ілюстрація)
+- Один sprite `/assets/images/icons.svg#id`, через `<use href>`. Словник: arrow-right/left/down, favourite/heart, close, plus, play, menu, logo(left/right/mobile), phone, scroll, comparison, form-success/error.
+- Inline SVG: animated button-border (Silver `btn__outline` 36×), decor pattern, preloader-logo.
+- **Карти РАСТРОВІ, не SVG** на homepage (map-era PNG/WebP + scroll-plugin + DOM POI-піни). АЛЕ окрема /infrastructure-карта = inline-SVG (Silver — див. [PB_interactive_map](../../re-interactive-map/references/PB_interactive_map)). Floor-plans = зображення в слоті `aspect-ratio:var(--plan-ratio)`, `object-fit:contain`.
+
+## 6. СПІВВІДНОШЕННЯ + КАДРУВАННЯ
+`aspect-ratio` всюди (кожен слот має locked-ratio щоб плейсхолдер тримав місце). Реальні значення:
+| Ratio | ~ | Вжиток |
+|---|---|---|
+| 1/1 | 1.0 | square gallery-tiles, team-портрети (360×360) |
+| 16:10 / 16:9 (320/200, 960/540) | 1.3-1.78 | landscape слайдер-стіли, video-poster |
+| 4:5 / 4:3 portrait (480/600, 480/520) | 0.8-0.92 | tall interior/lifestyle картки |
+| tall portrait (1440/2334, 263/320) | 0.6-0.82 | full-height hero / sticky-intro, menu-header |
+| var(--plan-ratio) | dynamic | floor-plans (contain, не cover) |
+**Кадрування:** `object-fit:cover` дефолт для фото (cover-crop у locked-ratio); `contain` лише plans/logos. Backgrounds full-bleed cover (`img{height:120%}`). Кути ПЕРЕВАЖНО квадратні/full-bleed; border-radius легкий (8-11 правил). **Luxury = чіткі прямокутники, не pill-rounded.**
+
+## 7. ОБРОБКА (підписи «дорогого вигляду»)
+1. **Parallax-zoom pan (ядро-підпис):** `.parallax-image-move{overflow:hidden}` + inner `img{width:120%;height:120%;object-fit:cover;margin:-16.66%}` → повільний pan/zoom у фіксованому кропі на скролі.
+   ★ **Механізм руху = inline scroll-keyframe** (sweep, [_TECHNIQUE_REGISTRY](../../variants-prototyping/references/_TECHNIQUE_REGISTRY.md) §2): VI ставлять `data-parallax-{FROM}-{TO}='{"transform":"scale(1.2)"}'`→`{"scale(1)"}` (FROM/TO = scroll-% крізь viewport-pass), значення з calc()-design-токенів (не magic-px). НАШ переклад: GSAP fromTo scrub по тих самих %.
+2. **Ken-Burns scale-reveal:** `transform:scale(1.25)→scale(1)` (також 1.13/1.10/1.03) на `data-reveal` — зображення їде із зуму в нейтраль при вході.
+3. **Clip-path reveals:** curtain-wipe-up `clip-path:polygon(...)`, iris `ellipse(10%...)→ellipse(160%...)`, `inset(0)`.
+4. **Gradient-scrim для тексту:** `linear-gradient(180deg,rgba(0,0,0,.1-.3))` лише де текст. Низька alpha.
+5. **БЕЗ photo-filters:** `filter:` майже не вживається на фото (0 grain/noise/brightness). Колор-грейд у продакшні, не в браузері. Обробка = геометрія+рух, не фільтри.
+6. **Cutout-PNG parallax-шари:** прозорі PNG будівлі/декору (architecture_building.png, deco-*.png 33×) над фоном, рух з іншим parallax-rate → фейк-3D глибина БЕЗ WebGL.
+
+## 8. ЩО ПОКАЗУЮТЬ ФОТО (subject-matter = контент-spec)
+Зі структури папок/alt усіх 5: **intro/hero** (будівля/lifestyle, full-height) · **architecture/facade** (екстерʼєр-рендери, тераси, дах) · **interiors** (інтерʼєри, стелі, матеріали close-up) · **lobby** (3-img vertical stack) · **amenities/wellness/sport** (басейн/спа/фітнес) · **territory/courtyard/landscape** (двір, набережна) · **location/POI** (карта+іконки з часами) · **apartments/plans** (фото+інтерактивні плани+модалки) · **gallery** (mixed grid/slider) · **team/partners** (архітектор/девелопер лого+люди) · **lifestyle/people** (аспіраційні шоти).
+
+## 9. IMAGE-TYPE ЧЕК-ЛІСТ (скільки чого на 1 лендінг)
+| Тип | К-ть | Ratio | Обробка |
+|---|---|---|---|
+| Hero (екстер-рендер/відео) | 1 | tall ~3:4 / full-vp | full-bleed, fetchpriority=high, clip-in+parallax |
+| Section full-bleed bg | 4-6 | full-vp cover | img@120%, scrim якщо текст |
+| Architecture/facade | 2-4 | 16:9 + portrait | parallax-zoom; cutout-PNG для глибини |
+| Interiors | 4-6 | 4:5 + 16:9 | Ken-Burns scale-reveal |
+| Lobby | 3 (stack) | portrait | vertical stack reveal |
+| Amenities/wellness | 3-5 | 16:9/16:10 slider | per-section slider |
+| Courtyard/landscape | 3-5 | 16:9 + portrait | parallax |
+| Gallery | 5-19 | square+16:9 | masonry/slider |
+| Location map | 1 (+POI overlay) | wide | растер+scroll+DOM-піни АБО inline-SVG |
+| Floor-plans | 1/тип | --plan-ratio, contain | інтерактивний фільтр |
+| Material close-ups | 2-4 | square/portrait | статичні, чіткі |
+| Team/partner logos | 5+N | square | square |
+| Cutout-PNG decor | 2-33 | прозорі | parallax-шар |
+| Icons | 15-25 symbols | — | один SVG-sprite `<use>` |
+
+## 10. NO-WEBGL ПЕРЕКЛАД (як дати їх 3D/sequence-feel canvas-2D + стіли)
+1. **Обліт будівлі** → Blender orbit → ~120-150 PNG-кадрів → WebP (~150KB/кадр, ~24MB разом як ERA) → draw на `<canvas>`, scrub frame-index по scroll. = ERA `data-sequence-*`, 0 WebGL.
+2. **«WebGL»-slider-переходи** → CSS `clip-path` iris/curtain + `scale()` crossfade між 2 стілами. 90% враження, 0 кошту.
+3. **Глибина/parallax** → cutout-PNG будівлі над фоном, різні scroll-rate. Псевдо-3D, чистий transform.
+4. **Hero-рух** → muted autoplay loop `.mp4` (Ever) АБО canvas frame-sequence (ERA). Для рендер-орбіти sequence читається «архітектурніше»; для готової будівлі відео-луп дешевше.
+5. **Ken-Burns на кожному стілі** → `scale(1.05-1.25)` за scroll-pinned тривалість = «все ледь живе» без 3D.
+
+## ★ 11.0 FULL-BLEED — НАЙВАЖЛИВІШЕ ПРАВИЛО (провал Phoenix vs VI)
+Дельта Phoenix(4) vs VI(9) майже ВСЯ тут. VI: усі секції медіа = **full-bleed `100vw/100vh` edge-to-edge**, текст ВПЕЧЕНИЙ у зображення з scrim. Phoenix: `100vw`=0 разів, медіа в `max-width`-колонці як `aspect-ratio` бордер-бокс radius:3px = мініатюра-марка в океані порожнечі.
+- ✅ ДЕФОЛТ: секція з медіа = `width:100vw; height:100vh; object-fit:cover` edge-to-edge.
+- ❌ ЗАБОРОНА: медіа в `max-width:1320px` колонці + clamp-боки + бордер-бокс (це Phoenix-провал).
+- ✅ Текст НА медіа з градієнт-scrim (hero+≥3 секції), НЕ «фото-колонка+текст-колонка».
+- Виняток (framed) лише: gallery-тайли, дрібні product-thumbnails — і то зі свідомою причиною.
+→ детальніше [_ANTISLOP_design](../../re-art-direction/references/_ANTISLOP_design.md) §1, [_COMPOSITION_CRITIQUE](../../re-art-direction/references/_COMPOSITION_CRITIQUE.md) ЛІНЗА 4.
+
+## 11. ПРАВИЛА ОБРОБКИ (копіюй)
+- Кожне зображення у фіксованому `aspect-ratio`-слоті; плейсхолдер тримає; реальний URL через `data-src` (JS lazy); hero = eager + fetchpriority=high.
+- `object-fit:cover` для фото; `contain` лише plans/logos.
+- **Full-bleed за замовчуванням** для hero+section-bg (§11.0); framed (square-corner) ЛИШЕ для gallery-тайлів зі свідомою причиною.
+- Scrim лише де текст, alpha .1-.3.
+- Parallax-zoom: container overflow:hidden + img 120% зсув -16.6%, рух на скролі.
+- Reveal: scale(1.25)→1 та/або clip-path curtain/iris на вхід.
+- БЕЗ CSS color-filters / grain — грейд джерела.
+- WebP + JPEG `<source>` fallback; PNG лише cutout; AVIF лише градієнт-текстури.
+
+## 12. ЧЕК
+☐ кожне фото в locked aspect-ratio-слоті + data-src lazy + hero eager ☐ WebP+JPEG fallback ☐ object-fit:cover (contain лише plans) ☐ scrim лише під текстом ☐ parallax-zoom (img@120%) + Ken-Burns scale-reveal ☐ БЕЗ photo-filters (грейд джерела) ☐ cutout-PNG для глибини ☐ один flagship-рух (canvas frame-seq АБО hero-video) ☐ icon-sprite через `<use>` ☐ покрито всі 13 image-types зі спису.

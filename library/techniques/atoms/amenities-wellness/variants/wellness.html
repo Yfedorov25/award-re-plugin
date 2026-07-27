@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>amenities-wellness · scroll-card-over-media</title>
+<link rel="stylesheet" href="_springs-tokens.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{ font-family:var(--spr-sans,"TT Commons Pro",sans-serif); background:#0e241d; }
+
+  .wrap{ height:640vh; position:relative; }
+  .stage{ position:sticky; top:0; height:100dvh; overflow:hidden; background:#0e241d; }
+
+  /* ---- PHASE 1: full-bleed video/photo layer ---- */
+  .fullmedia{ position:absolute; inset:0; z-index:0; }
+  .fullmedia .fb{
+    position:absolute; inset:0;
+    background-size:cover; background-position:center;
+    clip-path:inset(100% 0 0 0);           /* hidden, wipes up */
+  }
+  .fullmedia .fb.base{ clip-path:inset(0 0 0 0); }
+  .fb.v0{ background-image:url(assets/jog.webp); }       /* "video" phase */
+  .fb.v1{ background-image:url(assets/meadow.webp); }    /* first full photo: pool+meadow */
+
+  /* ---- HANDOFF: olive canvas holding ONE whole picture, rises as a single block
+         (translateY, NOT clip-reveal) — this is the first carousel-05 card. ---- */
+  .handoff{
+    position:absolute; left:0; top:0; width:100%; height:100%;
+    background:#5d6c2d;                     /* olive canvas */
+    transform:translateY(100%);            /* parked below, rises whole */
+    will-change:transform;
+    z-index:1;
+  }
+  .handoff .pic{
+    position:absolute; left:0; width:100%;
+    top:16%; height:52%;                    /* whole picture centred on olive, olive shows above+below */
+    background:url(assets/marble.webp) center/cover no-repeat;
+  }
+  .handoff .tabs{
+    position:absolute; left:20px; right:20px; bottom:10%;
+    display:flex; justify-content:space-between;
+    font-family:var(--spr-sans,"TT Commons Pro",sans-serif);
+    font-size:11px; letter-spacing:.08em; color:rgba(245,232,209,.85); text-transform:uppercase;
+  }
+  .handoff .tabs span{ opacity:.7; } .handoff .tabs span:first-child{ opacity:1; }
+
+  .scrim{ position:absolute; left:0; top:0; width:100%; height:110px; z-index:4; pointer-events:none;
+    background:linear-gradient(180deg,rgba(14,36,29,.5),rgba(14,36,29,0)); }
+  .hdr{ position:absolute; left:0; top:0; width:100%; display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; z-index:5; color:var(--spr-cream-lite,#f5e8d1); }
+  .hdr .logo{ font-family:var(--spr-serif,"Victor Serif",serif); font-size:22px; letter-spacing:.5px; }
+  .hdr .burger{ width:22px; height:12px; display:flex; flex-direction:column; justify-content:space-between; }
+  .hdr .burger i{ display:block; height:1.4px; background:currentColor; }
+
+  /* ---- CARD: rises, P1 reveals, pins; then whole card TRAVELS UP and leaves (no sticky) ---- */
+  .card{
+    position:absolute; left:20px; right:20px;
+    z-index:2;
+    background:#16322a;
+    padding:32px 28px 28px;
+    will-change:transform;
+    box-shadow:0 24px 70px rgba(0,0,0,.28);
+  }
+  .card .p1{
+    font-family:var(--spr-serif,"Victor Serif",serif);
+    font-weight:400; font-size:25px; line-height:1.26; letter-spacing:-.3px;
+    color:var(--spr-cream,#e0d1b6);
+    clip-path:inset(0 0 var(--p1clip,100%) 0);
+  }
+  .card .p2{
+    margin-top:24px;
+    font-family:var(--spr-sans,"TT Commons Pro",sans-serif);
+    font-weight:400; font-size:13.5px; line-height:1.5; letter-spacing:.1px;
+    color:rgba(224,209,182,.62);
+    clip-path:inset(0 0 var(--p2clip,100%) 0);
+  }
+
+  @media (prefers-reduced-motion:reduce){ .fb,.handoff{transition:none;} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage" id="stage">
+      <div class="fullmedia">
+        <div class="fb v0 base"></div>
+        <div class="fb v1"></div>
+      </div>
+
+      <!-- olive canvas + whole picture rises as one block (handoff to carousel 05) -->
+      <div class="handoff" id="handoff">
+        <div class="pic"></div>
+        <div class="tabs"><span>Pool</span><span>Fitness</span><span>Beauty</span><span>Hammam</span></div>
+      </div>
+
+      <div class="scrim"></div>
+      <header class="hdr">
+        <span class="logo">Springs</span>
+        <span class="burger"><i></i><i></i></span>
+      </header>
+
+      <div class="card" id="card">
+        <p class="p1" id="p1">Our elegant Wellness-center is a crown jewel of Springs, possessing it keeps you youthful. Warm and inviting light of the lobby transports you to a carefree resort. Marbles steps of the pool, caressing steam of the hammam, light appetizers at the waterside cafe here relaxation originates.</p>
+        <p class="p2" id="p2">Our yoga space is meant for thoughtful relaxation, and our fitness center for active recovery. Step onto the fitness terrace after an energizing workout and recline on a sun lounger among flower beds. It's easy to show yourself love.</p>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var wrap=document.querySelector('.wrap');
+  var v1=document.querySelector('.fb.v1');
+  var handoff=document.getElementById('handoff');
+  var card=document.getElementById('card');
+  var p1=document.getElementById('p1'), p2=document.getElementById('p2');
+  var clamp=function(v){return v<0?0:v>1?1:v;};
+  var lerp=function(a,b,t){return a+(b-a)*t;};
+
+  // Timeline (PARALLEL, not step-by-step):
+  //  0.00–0.16  A/B  video (v0) plays, no card
+  //  0.16–0.38  C    card rises, P1 reveals line-by-line
+  //  0.38–0.52  D/E  card PINS ~38%; P2 reveals; first photo (v1) wipes up under it
+  //  0.52–0.66  G1   card travels up SO THAT big P1 clips off top — until only the small P2 band left
+  //  0.66       🔴   olive+picture starts rising ONLY NOW (measured: olive appears when P1 gone, f89/56.3s)
+  //  0.66–0.92  G2/H olive+picture rises WHILE P2 band still lingers at top, then P2 also leaves
+  function render(p){
+    // CARD: rise → pin → travel up. Two-stage: first P1 clips off (0.52→0.66), then P2 leaves (0.66→0.92).
+    var cardT;
+    if(p<0.16){ cardT=100; }
+    else if(p<0.38){ cardT=lerp(100,38,(p-0.16)/0.22); }
+    else if(p<0.52){ cardT=38; }
+    else if(p<0.66){ cardT=lerp(38,-34,(p-0.52)/0.14); }    // P1 clips off top; only P2 band remains by 0.66
+    else { cardT=lerp(-34,-118,(p-0.66)/0.26); }            // P2 band then leaves too
+    card.style.transform='translateY('+cardT+'dvh)';
+
+    p1.style.setProperty('--p1clip',(100-clamp((p-0.16)/0.20)*100)+'%');
+    p2.style.setProperty('--p2clip',(100-clamp((p-0.44)/0.08)*100)+'%');
+
+    // first full photo wipes up over video (F, while pinned)
+    v1.style.clipPath='inset('+((1-clamp((p-0.50)/0.12))*100)+'% 0 0 0)';
+
+    // HANDOFF olive+picture rises ONLY AFTER the card reached P2-only (p0.66), NOT while P1 still full.
+    // Measured: in live the next bg appears at f89/56.3s exactly when P1cream dropped to ~0 (P1 gone).
+    var h=clamp((p-0.66)/0.26);                             // 0.66→0.92 rise, overlaps the lingering P2 band
+    handoff.style.transform='translateY('+((1-h)*100)+'%)';
+
+    window.__WELL_P__=p;
+  }
+
+  function onScroll(){
+    var total=wrap.offsetHeight-window.innerHeight;
+    var p=clamp((-wrap.getBoundingClientRect().top)/total);
+    render(p);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll);
+  window.render=render;
+  window.__WELL_API__={ get:function(){return window.__WELL_P__||0;} };
+  render(0);
+})();
+</script>
+</body>
+</html>

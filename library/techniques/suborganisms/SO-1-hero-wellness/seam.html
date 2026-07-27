@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SO-1 seam · Hero → Wellness (live-verified: drifting rotated mosaic)</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<link rel="stylesheet" href="../../rotated-matrix-collage/component.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* ── LIVE-VERIFIED mechanic (extraction/live-ref/SO-1-hero-wellness/sheet.png) ──
+     springs Hero→Wellness is NOT a text-swap. "Splendor of Renewal" HOLDS the whole
+     transition; there is NO act-word, NO clip-line "slicer", NO empty phase. What moves
+     is the TILTED PHOTO-MOSAIC (rotated-matrix-collage) drifting + reshuffling as you
+     scroll — hero imagery (woman/leaf) gives way to wellness imagery (nature/water).
+     This file rebuilds SO-1 on that real mechanic. ──────────────────────────────── */
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);overflow-x:clip}
+  .rmc-bg{ background: radial-gradient(120% 100% at 50% 30%, var(--green) 0%, var(--green-deep) 100%); }
+  .rmc-wash{ background: var(--green); }
+
+  /* pin the mosaic scene for the length of the seam scroll (one continuous context) */
+  .track{ height:340vh; position:relative; }
+  .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+  .rmc-stage{ position:absolute; inset:0; }
+
+  /* content shell over the plane — header + sustained headline (bottom-right, like live) */
+  .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#cfe0d6; }
+  .head .nav{ display:flex; gap:26px; } .head .nav b{ font-weight:600; }
+  .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+  .head .r{ display:flex; gap:22px; align-items:center; }
+  @media (max-width:700px){ .head .nav span,.head .r span{ display:none; } }
+
+  /* copy on the mosaic (holds through the seam, like the live 'Exclusive residence…') */
+  .copy{ position:absolute; left:clamp(20px,5vw,90px); top:46%; z-index:5; max-width:26ch;
+    color:#e8efe9; font-size:clamp(.95rem,1.4vw,1.15rem); line-height:1.5;
+    opacity:var(--copyO,1); text-shadow:0 2px 20px rgba(0,0,0,.4); }
+  /* sustained headline bottom-right; crossfades copy from hero-line to wellness-line at the very end */
+  .title{ position:absolute; right:clamp(20px,5vw,80px); bottom:clamp(40px,10vh,110px); z-index:5;
+    text-align:right; font-family:var(--serif); font-weight:400; line-height:.98; letter-spacing:-.015em;
+    font-size:clamp(2.6rem,7.5vw,6.2rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.35); }
+  .title .t1{ position:absolute; right:0; bottom:0; white-space:nowrap; opacity:var(--t1,1); }
+  .title .t2{ position:absolute; right:0; bottom:0; white-space:nowrap; opacity:var(--t2,0);
+    font-size:.82em; }
+  .title .anchor{ visibility:hidden; }
+  .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#9fb0a6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+</style>
+</head>
+<body>
+  <div class="track" id="track">
+    <div class="pin">
+      <section class="rmc-stage" id="collage">
+        <div class="rmc-bg"></div>
+        <div class="rmc-plane"><div class="rmc-grid"></div><div class="rmc-wash"></div></div>
+      </section>
+      <header class="head">
+        <div class="nav"><span>Menu</span> <span>Residences</span></div>
+        <div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+      <div class="copy" id="copy">Exclusive residence with a rich wellness infrastructure next to Nature Park.</div>
+      <div class="title">
+        <span class="anchor">Splendor<br>of Renewal</span>
+        <span class="t1" id="t1">Splendor<br>of Renewal</span>
+        <span class="t2" id="t2">A place<br>to breathe</span>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — mosaic drifts hero → wellness</div>
+
+<script src="../../rotated-matrix-collage/component.js"></script>
+<script>
+  // real springs tiles from the module (self-contained). Ordered so hero-ish imagery
+  // sits top, and the drift brings the lower/nature tiles up as we scroll → wellness.
+  var TILES = ['../../rotated-matrix-collage/tiles/macro-table.webp','../../rotated-matrix-collage/tiles/day-front.webp',
+               '../../rotated-matrix-collage/tiles/macro-roof.webp','../../rotated-matrix-collage/tiles/dn-ext-day.webp',
+               '../../rotated-matrix-collage/tiles/terrace-02.webp','../../rotated-matrix-collage/tiles/macro-pergola.webp',
+               '../../rotated-matrix-collage/tiles/day-34.webp','../../rotated-matrix-collage/tiles/dn-ext-night.webp',
+               '../../rotated-matrix-collage/tiles/day-front.webp','../../rotated-matrix-collage/tiles/terrace-02.webp',
+               '../../rotated-matrix-collage/tiles/macro-roof.webp','../../rotated-matrix-collage/tiles/day-34.webp'];
+
+  // We drive the plane ourselves off the pinned-track progress (not window scroll),
+  // so the mosaic drift is bound to the seam. forceMotion so the phone frame also travels.
+  var r = RotatedMatrixCollage.init('#collage', {
+    tiles: TILES, cols: 4, rows: 3, angle: -11, scale: 1.5, wash: 0.5, gutter: 10,
+    parallax: 0, platform: 'desktop'   // we drive drift manually below
+  });
+  var plane = document.querySelector('.rmc-plane');
+  var t1=document.getElementById('t1'), t2=document.getElementById('t2'),
+      copy=document.getElementById('copy'), cue=document.getElementById('cue'),
+      track=document.getElementById('track');
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+
+  var smooth=0;
+  function render(p){
+    // ONE motion: the tilted plane drifts up the whole seam (tiles reshuffle into view).
+    // No act-word, no clip-line. Drift range tuned so lower nature tiles rise into frame.
+    var d=easeInOut(p);
+    plane.style.setProperty('--rmc-y', lerp(0,-260,d)+'px');
+    // headline HOLDS, then a soft crossfade of its copy near the end (hero→wellness line)
+    var out1=seg(p,0.70,0.82), in2=seg(p,0.84,0.96);
+    t1.style.opacity=(1-out1).toFixed(3); t2.style.opacity=in2.toFixed(3);
+    // the standing copy gently fades as we leave hero context
+    copy.style.setProperty('--copyO', (1-seg(p,0.55,0.8)).toFixed(3));
+    cue.style.setProperty('--cueO', (0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  function frame(){
+    var rct=track.getBoundingClientRect();
+    var total=track.offsetHeight-window.innerHeight;
+    var target=clamp((-rct.top)/total,0,1);
+    smooth += (target-smooth)*0.08;   // springs-like smooth catch-up
+    if(Math.abs(target-smooth)<0.0002) smooth=target;
+    render(smooth);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__SO1_OK__=true;
+</script>
+</body>
+</html>

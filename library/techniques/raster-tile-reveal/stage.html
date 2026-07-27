@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>raster-tile-reveal · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root{--green:#16322a;--green-deep:#0e241d;--cream:var(--spr-cream);--slate:#9fb0a6;--accent:#e8c98a;--serif:var(--spr-serif);--body:var(--spr-sans);}
+  *{margin:0;padding:0;box-sizing:border-box} html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);min-height:100%}
+  /* the stage token knobs (springs palette) */
+  .rtr-stage{ --rtr-bg:#0e241d; --rtr-ink:#ece4d3; --rtr-accent:#e8c98a; --rtr-sans:var(--body);
+    --rtr-ratio:3/4; --rtr-radius:0; --rtr-dot:11px; width:100%; max-width:100%; }
+  .rtr-mosaic{ max-width:520px; }
+  /* LAB slice: each tile shows its piece of the ONE render via object-position (set ONCE,
+     never animated; the reveal animates only opacity + scale). Production swaps real tiles. */
+  .rtr-tile img{ object-fit:cover; width:300%; height:400%; }
+  .rtr-tile{ display:grid; place-items:center; }
+  .rtr-tile[data-c="0"] img{ object-position: 0%   var(--oy); }
+  .rtr-tile[data-c="1"] img{ object-position: 50%  var(--oy); }
+  .rtr-tile[data-c="2"] img{ object-position: 100% var(--oy); }
+  .rtr-tile[data-r="0"]{ --oy:0%; } .rtr-tile[data-r="1"]{ --oy:33.3%; }
+  .rtr-tile[data-r="2"]{ --oy:66.6%; } .rtr-tile[data-r="3"]{ --oy:100%; }
+  .cap{position:absolute;left:0;bottom:0;z-index:3;padding:clamp(20px,6vw,64px);pointer-events:none;max-width:100%;}
+  .cap .eyebrow{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:var(--cream);opacity:.85;}
+  .cap .title{margin-top:.3em;font-family:var(--serif);font-weight:400;font-size:clamp(1.9rem,7vw,4rem);line-height:1.02;max-width:100%;overflow-wrap:break-word;}
+  .badge{position:fixed;top:10px;left:10px;z-index:9;font-family:ui-monospace,Menlo,monospace;font-size:.62rem;color:#7fd8b0;background:rgba(8,22,17,.72);border:1px solid #26463c;border-radius:999px;padding:4px 10px;pointer-events:none;}
+</style></head><body>
+  <div class="badge" id="badge">…</div>
+  <div class="pin-wrap" id="pinwrap">
+    <section class="rtr-stage" id="map">
+      <div class="cap"><div class="eyebrow">SPRINGS · вид зверху</div><div class="title">Район, з висоти</div></div>
+    </section>
+  </div>
+<script src="engine.js"></script><script src="component.js"></script>
+<script>
+  (function(){
+    var COLS=3, ROWS=4, SRC='img/photo.webp', tiles=[];
+    for(var r=0;r<ROWS;r++){ for(var c=0;c<COLS;c++) tiles.push({src:SRC,col:c,row:r}); }
+    /* 6 real Агрономічне POIs (osm-agronomichne.js), projected to % of the mosaic box */
+    var pois=[
+      { x:53.8, y:87.5, label:'Траш!' },
+      { x:10.9, y:39.7, label:'Аврора' },
+      { x:33.0, y:10.9, label:'Грош Експрес' },
+      { x:48.1, y:89.1, label:'Нова Пошта' },
+      { x:37.6, y:40.7, label:'Подорожник' },
+      { x:49.1, y:64.3, label:'Школа · садок' }
+    ];
+    var r = RasterTileRevealDual.init('#map', { platform:'auto', tiles:tiles, pois:pois, cols:COLS, rows:ROWS, stagger:0.04, scaleFrom:1.04, ease:'air' });
+    /* tag the injected tiles so the slice CSS can target them */
+    document.querySelectorAll('#map .rtr-tile').forEach(function(cell,i){
+      cell.setAttribute('data-c', tiles[i].col); cell.setAttribute('data-r', tiles[i].row);
+    });
+    document.getElementById('badge').textContent = r.platform==='desktop'?'desktop · scroll-reveal':'mobile · scroll-reveal';
+    document.getElementById('pinwrap').style.height='200vh';
+    if(window.Lenis){var l=new Lenis({lerp:0.1,smoothWheel:true});requestAnimationFrame(function raf(t){l.raf(t);requestAnimationFrame(raf);});}
+  })();
+</script></body></html>

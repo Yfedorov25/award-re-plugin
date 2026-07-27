@@ -1,0 +1,16 @@
+/* ============================================================
+   PLUS-TOGGLE-CARDS · component.css
+   T-M24: крос-фейд face↔popup ~0.35s air; ✛→− rotation 45°;
+   стани незалежні (клас is-active на картці).
+   ============================================================ */
+[data-ptc-card] { position: relative; overflow: clip; cursor: pointer; }
+[data-ptc-face], [data-ptc-popup] {
+  transition: opacity .35s cubic-bezier(.25,.74,.22,.99); }
+[data-ptc-face] { position: relative; }
+[data-ptc-popup] { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+[data-ptc-card].is-active [data-ptc-face] { opacity: 0; }
+[data-ptc-card].is-active [data-ptc-popup] { opacity: 1; pointer-events: auto; }
+[data-ptc-plus] { display: inline-grid; place-items: center; width: 36px; height: 36px;
+  border: 1px solid rgba(127, 127, 127, .35); border-radius: 4px;
+  transition: transform .35s cubic-bezier(.25,.74,.22,.99); }
+[data-ptc-card].is-active [data-ptc-plus] { transform: rotate(45deg); } /* ✛ → × (−) */

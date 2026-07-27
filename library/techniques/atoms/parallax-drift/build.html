@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>parallax-drift — flow atom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; }
+  html.lenis, html.lenis body { height:auto; }
+  .lenis.lenis-smooth { scroll-behavior:auto !important; }
+  body { background:#0d1f16; color:#e9e4d6; font-family:'Cormorant Garamond', Georgia, serif; overflow-x:hidden; }
+  .label { font-family:"Helvetica Neue", Helvetica, sans-serif; font-size:11px; letter-spacing:.32em; text-transform:uppercase; font-weight:500; }
+  .grain::after { content:''; position:absolute; inset:0; pointer-events:none; opacity:.16; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .vignette::before { content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.38) 100%); }
+  /* bands */
+  .quiet { height:60vh; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; text-align:center; }
+  .quiet .label { color:rgba(233,228,214,.55); }
+  .quiet p { font-size:22px; font-style:italic; color:rgba(233,228,214,.75); margin:0; }
+  .band { position:relative; height:140vh; overflow:hidden; }
+  .layer-back { position:absolute; left:0; right:0; top:-25%; height:150%; }
+  .slab { position:absolute; width:min(34vw, 520px); padding:48px 40px; box-sizing:border-box; }
+  .slab p { margin:0; font-size:clamp(20px, 1.6vw, 27px); line-height:1.55; }
+  .slab .label { display:block; margin-bottom:24px; }
+  .card { position:absolute; width:30vw; aspect-ratio:4/3; }
+  .card-art { position:absolute; inset:0; }
+  .caption { position:absolute; }
+  .caption .rule { display:block; width:56px; height:1px; margin-bottom:16px; }
+  /* Band A — deep botanical green */
+  .band-a { background:#0d1f16; }
+  .band-a .layer-back { background:
+    radial-gradient(90% 70% at 68% 30%, rgba(126,174,107,.5) 0%, transparent 60%),
+    radial-gradient(70% 90% at 20% 75%, rgba(34,80,52,.85) 0%, transparent 65%),
+    linear-gradient(160deg, #16301f 0%, #0d1f16 45%, #081510 100%),
+    conic-gradient(from 200deg at 60% 55%, #10251a, #1c3b26, #0d1f16, #10251a); }
+  .band-a .slab { left:8vw; top:32%; background:rgba(7,17,12,.9); box-shadow:0 32px 64px rgba(0,0,0,.35); }
+  .band-a .slab p { color:#dfe8d0; }
+  .band-a .slab .label { color:#8fae7a; }
+  .band-a .card { right:10vw; top:24%; box-shadow:0 40px 80px rgba(0,0,0,.45); }
+  .band-a .card-art { background:
+    radial-gradient(80% 80% at 30% 25%, rgba(214,232,176,.55) 0%, transparent 55%),
+    radial-gradient(90% 90% at 75% 80%, rgba(20,50,32,.9) 0%, transparent 70%),
+    linear-gradient(135deg, #4d7a4f 0%, #274a30 55%, #14291d 100%); }
+  .band-a .caption { left:12vw; bottom:14%; color:rgba(233,228,214,.85); }
+  .band-a .caption .rule { background:#8fae7a; }
+  /* Band B — warm cream architectural */
+  .band-b { background:#e9e0cf; color:#2b241a; }
+  .band-b .layer-back { background:
+    radial-gradient(85% 65% at 30% 28%, rgba(255,250,236,.9) 0%, transparent 60%),
+    radial-gradient(75% 85% at 80% 78%, rgba(203,178,140,.65) 0%, transparent 65%),
+    linear-gradient(170deg, #f0e8d8 0%, #e6dcc7 50%, #d9cbaf 100%),
+    linear-gradient(150deg, #efe7d6 0%, #e2d6bf 60%, #d3c3a5 100%); }
+  .band-b .slab { right:8vw; left:auto; top:30%; background:rgba(248,243,232,.94); box-shadow:0 32px 64px rgba(90,70,40,.18); }
+  .band-b .slab p { color:#3a3126; }
+  .band-b .slab .label { color:#9c7f4e; }
+  .band-b .card { left:10vw; top:26%; box-shadow:0 40px 80px rgba(90,70,40,.28); }
+  .band-b .card-art { background:
+    radial-gradient(85% 75% at 70% 20%, rgba(255,240,214,.85) 0%, transparent 55%),
+    radial-gradient(80% 90% at 25% 85%, rgba(150,120,80,.55) 0%, transparent 65%),
+    linear-gradient(140deg, #d9c6a4 0%, #bfa987 50%, #97805e 100%); }
+  .band-b .caption { right:12vw; bottom:16%; color:#5c4e38; }
+  .band-b .caption .rule { background:#9c7f4e; }
+  /* Band C — dusk amber */
+  .band-c { background:#241811; }
+  .band-c .layer-back { background:
+    radial-gradient(90% 70% at 60% 25%, rgba(224,158,94,.5) 0%, transparent 60%),
+    radial-gradient(75% 90% at 18% 80%, rgba(60,32,20,.9) 0%, transparent 65%),
+    linear-gradient(165deg, #3a2417 0%, #241811 50%, #150d09 100%),
+    conic-gradient(from 30deg at 55% 60%, #2c1c12, #4a2e1a, #241811, #2c1c12); }
+  .band-c .slab { left:10vw; top:52%; background:rgba(18,11,7,.92); box-shadow:0 32px 64px rgba(0,0,0,.4); }
+  .band-c .slab p { color:#eadbc4; }
+  .band-c .slab .label { color:#cf9a5e; }
+  .band-c .card { right:14vw; top:14%; width:22vw; box-shadow:0 40px 80px rgba(0,0,0,.5); }
+  .band-c .card-art { background:
+    radial-gradient(80% 75% at 35% 22%, rgba(245,196,130,.7) 0%, transparent 55%),
+    radial-gradient(85% 85% at 70% 85%, rgba(40,20,10,.9) 0%, transparent 70%),
+    linear-gradient(130deg, #b06f3a 0%, #6f4222 55%, #38200f 100%); }
+  .band-c .caption { right:12vw; bottom:12%; color:rgba(234,219,196,.85); }
+  .band-c .caption .rule { background:#cf9a5e; }
+</style>
+</head>
+<body>
+
+  <section class="quiet">
+    <span class="label">Flow atom 01 — parallax-drift</span>
+    <p>Layers breathe against one another, coupled only to your scroll.</p>
+  </section>
+
+  <section class="band band-a">
+    <div class="layer-back grain vignette" data-drift="18"></div>
+    <div class="slab" data-drift="10">
+      <span class="label">Scene 01 — The Orchard</span>
+      <p>Beneath the canopy the estate keeps its own hours. Rows of quince and old pear
+      hold the morning fog, and the paths remember every unhurried walk taken through them.</p>
+    </div>
+    <div class="card" data-drift="-14"><div class="card-art grain vignette"></div></div>
+    <div class="caption" data-drift="24">
+      <span class="rule"></span>
+      <span class="label">Elevation I — south terrace</span>
+    </div>
+  </section>
+
+  <section class="band band-b">
+    <div class="layer-back grain vignette" data-drift="14"></div>
+    <div class="slab" data-drift="-8">
+      <span class="label">Scene 02 — The Colonnade</span>
+      <p>Limestone facades take the afternoon plainly, without ornament. What moves here
+      is light itself — measured across balconies, one storey at a time.</p>
+    </div>
+    <div class="card" data-drift="12"><div class="card-art grain vignette"></div></div>
+    <div class="caption" data-drift="-20">
+      <span class="rule"></span>
+      <span class="label">Elevation II — west court</span>
+    </div>
+  </section>
+
+  <section class="band band-c">
+    <div class="layer-back grain vignette" data-drift="16"></div>
+    <div class="slab" data-drift="9">
+      <span class="label">Scene 03 — Dusk Line</span>
+      <p>At the blue hour the gardens lower their voices. Windows warm one by one,
+      and the horizon keeps a thin amber seam until it is asked to let go.</p>
+    </div>
+    <div class="card" data-drift="-18"><div class="card-art grain vignette"></div></div>
+    <div class="caption" data-drift="22">
+      <span class="rule"></span>
+      <span class="label">Elevation III — evening walk</span>
+    </div>
+  </section>
+
+  <section class="quiet">
+    <span class="label">End of study</span>
+    <p>Scroll back — every layer retraces its drift exactly.</p>
+  </section>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+  const lenis = new Lenis();
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  document.querySelectorAll('[data-drift]').forEach(el => {
+    const v = parseFloat(el.dataset.drift);
+    gsap.fromTo(el, { yPercent: v }, {
+      yPercent: -v, ease: 'none',
+      scrollTrigger: { trigger: el.closest('.band'), start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  });
+
+  window.render = function (p) {
+    p = Math.max(0, Math.min(1, p));
+    window.scrollTo(0, p * (document.documentElement.scrollHeight - innerHeight));
+    ScrollTrigger.update();
+  };
+  window.__ATOM_OK__ = true;
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+/* CORNER-FRAME-META · component.css
+   Small all-caps tracked labels at the 4 corners of a full-bleed frame. Position them
+   with CSS (top/bottom + left/right); the engine fades them in. opacity + transform only. */
+[data-corner]{position:absolute;font-size:11px;letter-spacing:.16em;text-transform:uppercase;will-change:opacity,transform}
+[data-corner="tl"]{left:clamp(24px,4vw,56px);top:clamp(24px,5vh,56px)}
+[data-corner="bl"]{left:clamp(24px,4vw,56px);bottom:clamp(28px,5vh,56px)}
+[data-corner="br"]{right:clamp(24px,4vw,56px);bottom:clamp(28px,5vh,56px);text-align:right}
+[data-corner="rc"]{right:clamp(24px,4vw,56px);top:50%;transform:translateY(-50%)}

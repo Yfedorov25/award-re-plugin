@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AIR hero (CD result, self-contained)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --air-sans:"Onest","Helvetica Neue",Helvetica,Arial,sans-serif; }
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; background:#d2d3d6; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  body{ font-family:var(--air-sans); }
+  img,video{ display:block; }
+  a{ color:#0a0a0a; text-decoration:none; } a:hover{ color:#5a5a5a; }
+  .is-off{ visibility:hidden!important; }
+  [data-isw-ticks]{ display:flex; gap:12px; }
+  .isw-tick{ flex:1; height:2px; background:#dcdcdc; border-radius:2px; overflow:hidden; }
+  .isw-tick-fill{ height:100%; background:#0a0a0a; transform:translateX(-100%); }
+</style>
+<script src="engine-isw.js"></script>
+</head>
+<body>
+<div style="width:100%;max-width:390px;margin:0 auto;position:relative;background:#ffffff;box-shadow:0 2px 60px rgba(0,0,0,.18);font-family:var(--air-sans);color:#0a0a0a;">
+
+  <!-- persistent header -->
+  <div data-header style="position:fixed;top:0;left:0;right:0;z-index:300;pointer-events:none;">
+    <div style="max-width:390px;margin:0 auto;padding:13px 16px 0;display:flex;justify-content:flex-end;gap:9px;">
+      <button data-save aria-label="Save" style="pointer-events:auto;width:47px;height:40px;display:flex;align-items:flex-end;justify-content:center;gap:1px;padding:0 0 8px;border:1px solid rgba(10,10,10,.16);border-radius:11px;background:rgba(255,255,255,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#0a0a0a;cursor:pointer;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" style="margin-bottom:-1px;"><path d="M12 20s-7-4.4-9.4-8.7C1 8.1 2.3 4.6 5.4 4.3 7.5 4.1 9 5.3 12 8c3-2.7 4.5-3.9 6.6-3.7 3.1.3 4.4 3.8 2.8 7C19 15.6 12 20 12 20Z"/></svg>
+        <span style="font:600 10px/1 var(--air-sans);">2</span>
+      </button>
+      <button data-menu aria-label="Menu" style="pointer-events:auto;width:62px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#0a0a0a;cursor:pointer;">
+        <span style="width:23px;height:2px;background:#fff;border-radius:2px;"></span>
+        <span style="width:23px;height:2px;background:#fff;border-radius:2px;"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- B0 wordmark -->
+  <section id="b0" style="position:relative;min-height:100svh;overflow:hidden;background:#fff;display:flex;flex-direction:column;">
+    <div data-spiral style="position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;">
+      <img src="assets/spiral-vertical.jpg" alt="" style="position:absolute;top:-14%;right:-46%;width:126%;transform:rotate(22deg);mix-blend-mode:multiply;">
+      <img src="assets/spiral-vertical.jpg" alt="" style="position:absolute;top:22%;left:-58%;width:120%;transform:rotate(-156deg);mix-blend-mode:multiply;opacity:.94;">
+    </div>
+    <div style="position:relative;z-index:2;flex:1;display:flex;flex-direction:column;padding:0 20px 34px;">
+      <p data-reveal style="opacity:0;text-align:center;margin:30svh 0 0;font:400 21px/1.14 var(--air-sans);letter-spacing:-.01em;text-transform:uppercase;color:#000;">The architecture<br>of new success</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding:0 4px;">
+        <span data-air-letter style="font:700 122px/.78 var(--air-sans);color:#0a0a0a;">A</span>
+        <span data-air-letter style="font:700 122px/.78 var(--air-sans);color:#0a0a0a;">I</span>
+        <span data-air-letter style="font:700 122px/.78 var(--air-sans);color:#0a0a0a;">R</span>
+      </div>
+      <p data-reveal style="opacity:0;text-align:center;margin:28px 0 0;font:500 13px/1.5 var(--air-sans);letter-spacing:.05em;text-transform:uppercase;color:#8d8d8d;">Class (A)<br>premium business<br>center</p>
+      <div style="flex:1;min-height:26px;"></div>
+      <div style="display:flex;justify-content:flex-end;">
+        <span style="width:40px;height:40px;border-radius:10px;background:#f1f1f1;display:flex;align-items:center;justify-content:center;color:#0a0a0a;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- B1 tower -->
+  <section id="b1" style="position:relative;background:#fff;padding-bottom:16svh;">
+    <div style="position:relative;height:62svh;overflow:hidden;background:#0a0a0a;">
+      <img src="assets/photo-tower-crop.jpg" alt="AIR glass tower" style="width:100%;height:100%;object-fit:cover;object-position:center 22%;">
+      <span style="position:absolute;top:16px;left:20px;font:800 30px/1 var(--air-sans);letter-spacing:-.01em;color:#0a0a0a;">AIR</span>
+    </div>
+    <div style="padding:46px 22px 0;">
+      <h2 style="margin:0;font:400 42px/1.07 var(--air-sans);letter-spacing:-.02em;text-transform:uppercase;color:#000;">The momentum<br>to rise higher</h2>
+      <p data-reveal style="opacity:0;margin:118px 0 0 auto;max-width:29ch;font:500 13px/1.23 var(--air-sans);letter-spacing:normal;text-transform:uppercase;color:#8d8d8d;text-wrap:pretty;">AIR is a new generation of offices that brings a new level of premium quality and style to Class A business real estate.</p>
+    </div>
+  </section>
+
+  <!-- B2 lobby -->
+  <section id="b2" style="position:relative;background:#fff;padding-bottom:16svh;">
+    <div style="position:relative;height:54svh;overflow:hidden;background:#0a0a0a;">
+      <img src="assets/photo-lobby-crop.jpg" alt="AIR lobby" style="width:100%;height:100%;object-fit:cover;object-position:center 78%;">
+    </div>
+    <div style="padding:48px 22px 0;">
+      <p data-reveal style="opacity:0;margin:0;font:400 21px/1.14 var(--air-sans);letter-spacing:-.01em;text-transform:uppercase;color:#000;text-wrap:pretty;">Efficient layouts and premium infrastructure, panoramic glazing and impressive views, luxurious lobbies, and forward-looking facades set a new benchmark for business environment.</p>
+      <p data-reveal style="opacity:0;margin:62px 0 0;font:500 14px/1.42 var(--air-sans);letter-spacing:.04em;text-transform:uppercase;color:#8d8d8d;">At this level,<br>AIR has no competitors.</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:110px;">
+        <div style="position:relative;width:236px;height:70px;background:rgba(18,18,20,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:12px;">
+          <span style="position:absolute;top:14px;left:16px;font:600 10.5px/1.2 var(--air-sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.82);">About the project</span>
+          <svg style="position:absolute;bottom:12px;right:13px;" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="1.4"><path d="M12 4v5M12 15v5M4 12h5M15 12h5"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- B3 spiral (scroll-pin, engine-isw) -->
+  <section id="b3" style="position:relative;background:#fff;">
+    <div data-isw-layer style="position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:#fff;">
+      <div data-isw-stage style="position:absolute;inset:0;overflow:hidden;background:radial-gradient(125% 85% at 50% 26%, #f1f1f3 0%, #f8f8f9 46%, #ffffff 74%);">
+        <figure data-isw-slide style="position:absolute;inset:0;margin:0;display:flex;align-items:flex-start;justify-content:center;padding:10svh 24px 0;">
+          <img class="isw-fill" src="assets/spiral-vertical.jpg" alt="AIR spiral sculpture" style="width:auto;height:60svh;max-width:84%;object-fit:contain;object-position:center top;filter:contrast(1.16) brightness(.965);">
+        </figure>
+        <figure data-isw-slide style="position:absolute;inset:0;margin:0;display:flex;align-items:flex-start;justify-content:center;padding:10svh 24px 0;">
+          <img class="isw-fill" src="assets/spiral-vertical.jpg" alt="" style="width:auto;height:60svh;max-width:84%;object-fit:contain;object-position:center top;filter:contrast(1.16) brightness(.965);transform:scaleX(-1);">
+        </figure>
+      </div>
+      <div style="position:relative;z-index:3;padding:0 22px calc(148px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:26px;">
+        <div style="display:grid;">
+          <p data-isw-text style="grid-area:1/1;margin:0;font:500 13px/1.23 var(--air-sans);letter-spacing:normal;text-transform:uppercase;color:#8d8d8d;max-width:40ch;">Three towers ranging from 14 to 34 floors reflect the dynamic character of office life through their expressive forms. They symbolize one of the capital&rsquo;s key business districts.</p>
+          <p data-isw-text style="grid-area:1/1;margin:0;font:500 13px/1.23 var(--air-sans);letter-spacing:normal;text-transform:uppercase;color:#8d8d8d;max-width:40ch;">The smooth rotation of the facades around a central axis adds movement and energy to the overall silhouette. The rotational effect creates a distinctive architectural rhythm.</p>
+        </div>
+        <div data-isw-ticks></div>
+        <p style="display:none;"><span data-isw-count>1</span><span data-isw-total>/ 2</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- B4 format -->
+  <section id="b4" style="position:relative;background:#fff;padding:16svh 22px 0;">
+    <h2 style="margin:0;font:400 42px/1.07 var(--air-sans);letter-spacing:-.02em;text-transform:uppercase;color:#000;">A new premium<br>format</h2>
+    <p data-reveal style="opacity:0;margin:78px auto 88px;max-width:33ch;text-align:center;font:500 13px/1.23 var(--air-sans);letter-spacing:normal;text-transform:uppercase;color:#8d8d8d;text-wrap:pretty;">AIR is not only a new generation of offices but also a strong architectural statement by ADM Architects.</p>
+    <div style="height:44svh;overflow:hidden;background:#0a0a0a;">
+      <img src="assets/photo-tower-crop.jpg" alt="ADM glass towers" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;">
+    </div>
+  </section>
+
+  <!-- B5 brand-object -->
+  <section id="b5" style="position:relative;height:210svh;background:#0a0a0a;">
+    <div style="position:sticky;top:0;height:100svh;overflow:hidden;background:#0a0a0a;">
+      <img src="assets/photo-tower-crop.jpg" alt="AIR curved glass towers" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 46%;">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,10,18,.04) 40%,rgba(8,10,18,.4));"></div>
+      <div data-b5-panel style="position:absolute;left:13px;right:13px;bottom:13px;height:75svh;transform:translateY(102%);border-radius:16px;background:rgba(90,93,102,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.16);overflow:hidden;">
+        <p data-b5-text style="opacity:0;position:absolute;top:26px;left:24px;right:24px;margin:0;font:400 21px/1.14 var(--air-sans);letter-spacing:-.01em;text-transform:uppercase;color:#fff;">An intelligent harmony of curved glass and radiant metal</p>
+        <div data-b5-sphere style="opacity:0;position:absolute;left:50%;top:53%;width:80%;transform:translate(-50%,-50%) scale(.86);">
+          <div style="position:relative;width:100%;padding-top:100%;overflow:hidden;">
+            <video src="assets/sphere-loop.mp4" poster="assets/sphere-still.jpg" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:120%;object-fit:cover;object-position:center top;"></video>
+          </div>
+        </div>
+        <div style="position:absolute;left:16px;bottom:16px;width:212px;height:62px;border:1px solid rgba(255,255,255,.2);border-radius:11px;background:rgba(255,255,255,.06);">
+          <span style="position:absolute;top:12px;left:14px;font:600 10px/1.2 var(--air-sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.86);">About the project</span>
+          <svg style="position:absolute;bottom:11px;right:12px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.82)" stroke-width="1.4"><path d="M12 4v5M12 15v5M4 12h5M15 12h5"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- B6 dark act -->
+  <section id="b6" data-theme-dark style="position:relative;min-height:120svh;background:#0a0a0a;color:#fff;padding:15svh 22px 0;overflow:hidden;">
+    <p style="position:absolute;top:66px;right:22px;margin:0;text-align:right;font:400 14px/1.28 var(--air-sans);letter-spacing:-.01em;text-transform:uppercase;color:#8d8d8d;">At the heart<br>of business</p>
+    <h2 data-reveal style="opacity:0;margin:0;font:400 46px/1.02 var(--air-sans);letter-spacing:-.025em;text-transform:uppercase;color:#fff;">At the center<br>of life</h2>
+    <p data-reveal style="opacity:0;margin:15svh 0 0;font:400 21px/1.14 var(--air-sans);letter-spacing:-.01em;text-transform:uppercase;color:#fff;text-wrap:pretty;">The premium AIR business center is designed to become a symbol the city, a large-scale area spanning one of the city&rsquo;s primary business districts.</p>
+    <div style="height:40svh;overflow:hidden;margin:56px -22px 0;background:#0a0a0a;">
+      <img src="assets/photo-tower-crop.jpg" alt="AIR towers by day" style="width:100%;height:100%;object-fit:cover;object-position:center 16%;">
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* self-contained init (DC-logic converted to vanilla; same behavior) */
+(function(){
+  'use strict';
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var EASE='cubic-bezier(.22,.61,.36,1)';
+
+  // reveals (word-split blur-reveal, IO threshold .18)
+  (function initReveals(){
+    var blocks=document.querySelectorAll('[data-reveal]');
+    function mk(w,i){ var s=document.createElement('span'); s.textContent=w; s.style.display='inline-block';
+      if(!reduced){ s.style.opacity='0'; s.style.filter='blur(12px)'; s.style.transform='translateY(6px)'; s.style.willChange='filter,opacity,transform';
+        var d=i*42; s.style.transition='opacity 1s '+EASE+' '+d+'ms, filter 1s '+EASE+' '+d+'ms, transform 1s '+EASE+' '+d+'ms'; }
+      return s; }
+    blocks.forEach(function(el){ var kids=Array.prototype.slice.call(el.childNodes); el.textContent=''; var i=0;
+      kids.forEach(function(node){ if(node.nodeType===3){ node.nodeValue.split(/(\s+)/).forEach(function(w){ if(w==='')return;
+        if(/^\s+$/.test(w)){ el.appendChild(document.createTextNode(w)); return; } el.appendChild(mk(w,i++)); }); }
+        else { el.appendChild(node.cloneNode(true)); } }); el.style.opacity='1'; });
+    if(reduced) return;
+    var io=new IntersectionObserver(function(ents){ ents.forEach(function(e){ if(e.isIntersecting){
+      Array.prototype.forEach.call(e.target.children,function(s){ s.style.opacity='1'; s.style.filter='none'; s.style.transform='none'; });
+      io.unobserve(e.target); } }); },{ threshold:0.18, rootMargin:'0px 0px -12% 0px' });
+    blocks.forEach(function(el){ io.observe(el); });
+  })();
+
+  // B0 letters entrance
+  (function initAirLetters(){
+    var ls=document.querySelectorAll('[data-air-letter]');
+    if(reduced){ ls.forEach(function(el){ el.style.opacity='1'; }); return; }
+    ls.forEach(function(el,i){ el.style.opacity='0'; el.style.filter='blur(16px)'; el.style.transform='translateY(12px)'; el.style.willChange='filter,opacity,transform';
+      var d=240+i*150; el.style.transition='opacity 1.1s '+EASE+' '+d+'ms, filter 1.1s '+EASE+' '+d+'ms, transform 1.1s '+EASE+' '+d+'ms'; });
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ ls.forEach(function(el){ el.style.opacity='1'; el.style.filter='none'; el.style.transform='none'; }); }); });
+  })();
+
+  // B3 spiral scroll-pin (engine-isw.js)
+  (function initSpiral(){ var tries=0; (function boot(){
+    if(!window.ImageSliderWipe){ if(tries++>200)return; return setTimeout(boot,30); }
+    if(document.querySelector('#b3') && !window.__AIR_ISW){
+      window.__AIR_ISW=window.ImageSliderWipe.create('#b3',{ mobile:'scroll-pin', stepSvh:90, driftPct:0, wipeMs:1000, textDelayMs:250, blurPx:10 }); }
+  })(); })();
+
+  // B5 panel slide-up + sphere
+  (function initB5(){
+    var sec=document.querySelector('#b5'); if(!sec)return;
+    var panel=sec.querySelector('[data-b5-panel]'), sphere=sec.querySelector('[data-b5-sphere]'), text=sec.querySelector('[data-b5-text]');
+    var clamp=function(v){ return Math.max(0,Math.min(1,v)); };
+    if(reduced){ if(panel)panel.style.transform='translateY(0)'; if(sphere){ sphere.style.opacity='1'; sphere.style.transform='translate(-50%,-50%) scale(1)'; } if(text)text.style.opacity='1'; return; }
+    var ticking=false;
+    function render(){ var r=sec.getBoundingClientRect(); var span=r.height-window.innerHeight; var p=span>0?clamp(-r.top/span):0;
+      var slide=clamp(p/0.5); var ease=1-Math.pow(1-slide,3);
+      if(panel)panel.style.transform='translateY('+((1-ease)*102)+'%)';
+      if(text)text.style.opacity=String(clamp((p-0.12)/0.22));
+      if(sphere){ var so=clamp((p-0.3)/0.28); sphere.style.opacity=String(so); sphere.style.transform='translate(-50%,-50%) scale('+(0.86+0.14*so)+')'; } }
+    window.addEventListener('scroll',function(){ if(ticking)return; ticking=true; requestAnimationFrame(function(){ ticking=false; render(); }); },{passive:true});
+    render();
+  })();
+
+  // header theme flip over dark act
+  (function initHeaderTheme(){
+    var header=document.querySelector('[data-header]'), dark=document.querySelector('#b6'); if(!header||!dark)return;
+    var save=header.querySelector('[data-save]'), menu=header.querySelector('[data-menu]');
+    var ticking=false;
+    function render(){ var r=dark.getBoundingClientRect(); var over=r.top<=60 && r.bottom>=60;
+      if(over){ if(save){ save.style.color='#0a0a0a'; save.style.borderColor='rgba(255,255,255,0)'; save.style.background='rgba(255,255,255,.92)'; }
+        if(menu){ menu.style.background='rgba(255,255,255,.92)'; menu.style.borderColor='rgba(255,255,255,0)'; menu.querySelectorAll('span').forEach(function(s){ s.style.background='#0a0a0a'; }); } }
+      else { if(save){ save.style.color='#0a0a0a'; save.style.borderColor='rgba(10,10,10,.16)'; save.style.background='rgba(255,255,255,.5)'; }
+        if(menu){ menu.style.background='#0a0a0a'; menu.style.borderColor='rgba(255,255,255,.12)'; menu.querySelectorAll('span').forEach(function(s){ s.style.background='#fff'; }); } } }
+    window.addEventListener('scroll',function(){ if(ticking)return; ticking=true; requestAnimationFrame(function(){ ticking=false; render(); }); },{passive:true});
+    render();
+  })();
+
+  window.__HERO_OK__=true;
+})();
+</script>
+</body>
+</html>

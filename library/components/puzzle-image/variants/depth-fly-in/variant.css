@@ -1,0 +1,225 @@
+/* ============================================================
+   puzzle-image / depth-fly-in — variant.css   (variant skin delta)
+   Re-extracted BYTE-FAITHFULLY from
+     apps/quadro/public/slide-lab/pz3-depth-fly-in.html
+
+   The DELTA over the base center-out skin:
+     • a dark CINEMATIC field (near-black) instead of the lifted dark field,
+     • CSS perspective on the .stage so tiles fly home from real Z-DEPTH,
+     • a .grid with transform-style:preserve-3d to hold the depth tiles,
+     • a faint physical edge on each chip so they read as fragments in the dark,
+     • a thin progress cue line (NOT a count-up),
+     • a static .fallback block for reduced-motion / narrow.
+
+   SHARED with the base (intentionally identical contract): the cover is ONE
+   DOM unit (.coverWrap > .cover) that GROWS via transform:scale; the ghost
+   wordmark + captions are children so they scale WITH it; the photo + scrim
+   fade in UNDER the tiles; transform/opacity/filter ONLY; no mix-blend /
+   backdrop over the scrubbed surface; the LEFT headline never fades.
+   ============================================================ */
+:root{
+  --pz-ink:#0E0C0B;          /* cinematic near-black field */
+  --pz-ink-2:#080706;
+  --pz-ink-glow:#1A1612;
+  --pz-paper:#EFE7DA;        /* warm light text */
+  --pz-mid:#8A8174;
+  --pz-bronze:#B5895A;
+  --pz-serif:"Fraunces","Times New Roman",Georgia,serif;
+  --pz-sans:"Inter",system-ui,-apple-system,sans-serif;
+  --pz-air:cubic-bezier(0.25,0.74,0.22,0.99);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--pz-ink);color:var(--pz-paper);}
+body{font-family:var(--pz-sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+
+/* scroll INTO the pinned stage and back out */
+.lead,.tail{
+  height:100vh;display:grid;place-items:center;
+  background:var(--pz-ink);color:var(--pz-mid);
+  font-family:var(--pz-sans);font-size:.6rem;letter-spacing:.34em;
+  text-transform:uppercase;
+}
+.lead span,.tail span{opacity:.45}
+
+/* ============================================================
+   STAGE — pinned wrap (one viewport). The perspective lives here so the
+   tiles fly home from real Z-depth. overflow:hidden so the MODEST grow
+   crops top/bottom only.
+   ============================================================ */
+.stage{
+  position:relative;height:100vh;width:100%;
+  overflow:hidden;
+  background:
+    radial-gradient(120% 100% at 50% 42%, var(--pz-ink-glow) 0%, var(--pz-ink) 52%, var(--pz-ink-2) 100%);
+  perspective:1300px;
+  perspective-origin:50% 47%;
+}
+
+/* the left headline — z ABOVE the cover, NEVER faded out */
+.headline{
+  position:absolute;left:6.2vw;top:50%;transform:translateY(-50%);
+  z-index:6;max-width:30vw;pointer-events:none;
+  mix-blend-mode:normal;          /* explicit: no blend over scrub */
+}
+.headline h1{
+  font-family:var(--pz-serif);font-weight:300;
+  font-size:clamp(2.2rem,4.2vw,4.4rem);line-height:0.98;
+  letter-spacing:-0.01em;color:var(--pz-paper);
+}
+.headline h1 em{font-style:italic;color:var(--pz-bronze);font-weight:300;}
+.headline .sub{
+  margin-top:1.5rem;max-width:24ch;
+  font-family:var(--pz-sans);font-weight:300;
+  font-size:clamp(.78rem,1vw,.95rem);line-height:1.55;
+  color:var(--pz-mid);
+}
+
+/* right meta block — also above the cover, also never faded */
+.meta{
+  position:absolute;right:6.2vw;top:50%;transform:translateY(-50%);
+  z-index:6;text-align:right;pointer-events:none;max-width:18vw;
+}
+.meta .m-eye{
+  font-family:var(--pz-sans);font-size:.6rem;letter-spacing:.4em;
+  text-transform:uppercase;color:var(--pz-bronze);margin-bottom:.9rem;
+}
+.meta .m-line{
+  font-family:var(--pz-sans);font-weight:300;font-size:.72rem;
+  letter-spacing:.05em;line-height:1.7;color:var(--pz-mid);
+}
+
+/* ============================================================
+   COVER — ONE DOM unit. .coverWrap is what GROWS (scale).
+   Inside: depth-grid of sprite tiles + a seamless photo layer that
+   fades in UNDER the tiles at seat so the seams vanish. Wordmark
+   (ghost serif across the top) + captions are baked into the cover
+   so they scale WITH it.
+   ============================================================ */
+.coverWrap{
+  position:absolute;left:50%;top:50%;
+  width:78vw;                       /* WIDE at rest — near full width */
+  aspect-ratio:16/9;                /* matches day-front 1920x1080 */
+  transform:translate(-50%,-50%);
+  transform-origin:50% 50%;
+  z-index:3;
+  will-change:transform;
+}
+.cover{
+  position:absolute;inset:0;
+  border-radius:3px;
+  overflow:hidden;
+  background:#0A0908;
+  box-shadow:0 40px 120px rgba(0,0,0,0.55), 0 2px 0 rgba(255,255,255,0.03) inset;
+}
+
+/* seamless photo + scrim under the tiles (fades in at seat) */
+.cover__photo{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;
+  opacity:0;will-change:opacity;
+}
+.cover__scrim{
+  position:absolute;inset:0;opacity:0;will-change:opacity;
+  background:
+    linear-gradient(180deg, rgba(8,7,6,0.30) 0%, rgba(8,7,6,0) 26%, rgba(8,7,6,0) 56%, rgba(8,7,6,0.55) 100%),
+    linear-gradient(90deg, rgba(8,7,6,0.34) 0%, rgba(8,7,6,0) 34%);
+}
+
+/* the depth grid that holds the sprite tiles */
+.grid{
+  position:absolute;inset:0;
+  transform-style:preserve-3d;
+}
+.tile{
+  position:absolute;
+  background-repeat:no-repeat;
+  will-change:transform,opacity,filter;
+  backface-visibility:hidden;
+  /* faint physical edge so chips read as fragments in the dark */
+  box-shadow:0 0 0 0.5px rgba(0,0,0,0.45);
+}
+
+/* ghost wordmark — huge serif across the TOP of the cover */
+.cover__wordmark{
+  position:absolute;left:0;right:0;top:5%;
+  text-align:center;
+  font-family:var(--pz-serif);font-weight:300;
+  font-size:13vw;line-height:1;letter-spacing:0.12em;
+  color:rgba(239,231,218,0.30);
+  opacity:0;will-change:opacity;
+  pointer-events:none;z-index:2;
+  text-indent:0.12em;               /* balance the trailing letterspacing */
+}
+
+/* baked captions — lower-left on the cover */
+.cover__caption{
+  position:absolute;left:5%;bottom:7%;
+  text-align:left;opacity:0;will-change:opacity;
+  z-index:2;pointer-events:none;
+}
+.cover__caption .cap{
+  display:block;
+  font-family:var(--pz-sans);font-weight:400;
+  font-size:0.95rem;letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--pz-paper);line-height:1.5;
+}
+.cover__caption .issue{
+  display:block;margin-top:0.7rem;
+  font-family:var(--pz-sans);font-weight:400;
+  font-size:0.62rem;letter-spacing:0.32em;text-transform:uppercase;
+  color:rgba(239,231,218,0.55);
+}
+
+/* progress cue — a thin filling line (NOT a count-up) */
+.cue{
+  position:absolute;left:50%;bottom:4.2vh;transform:translateX(-50%);
+  width:26vw;max-width:340px;height:2px;
+  background:rgba(255,255,255,0.09);
+  border-radius:2px;overflow:hidden;z-index:7;
+}
+.cue i{
+  position:absolute;left:0;top:0;height:100%;width:100%;
+  transform:scaleX(0);transform-origin:left;
+  background:linear-gradient(90deg,rgba(181,137,90,0.25),var(--pz-bronze));
+}
+
+/* ============================================================
+   STATIC FALLBACK — reduced-motion / narrow.
+   The assembled cover, NO scatter, NO pin, NO scrub.
+   ============================================================ */
+.fallback{display:none;}
+@media (max-width:760px), (prefers-reduced-motion:reduce){
+  .stage{display:none;}
+  .lead,.tail{display:none;}
+  .fallback{
+    display:block;background:var(--pz-ink);
+    padding:8vh 5vw 11vh;
+  }
+  .fallback .fhead{
+    font-family:var(--pz-serif);font-weight:300;
+    font-size:clamp(1.9rem,8vw,2.8rem);line-height:1.04;
+    color:var(--pz-paper);margin-bottom:.5rem;
+  }
+  .fallback .fhead em{font-style:italic;color:var(--pz-bronze);}
+  .fallback .feye{
+    font-family:var(--pz-sans);font-size:.6rem;letter-spacing:.4em;
+    text-transform:uppercase;color:var(--pz-bronze);margin-bottom:2rem;
+  }
+  .fallback .fcover{
+    position:relative;width:100%;aspect-ratio:16/9;
+    border-radius:3px;overflow:hidden;background:#0A0908;
+    box-shadow:0 24px 60px rgba(0,0,0,0.5);
+  }
+  .fallback .fcover img{display:block;width:100%;height:100%;object-fit:cover;}
+  .fallback .fmark{
+    position:absolute;left:0;right:0;top:5%;text-align:center;
+    font-family:var(--pz-serif);font-weight:300;font-size:13vw;line-height:1;
+    letter-spacing:0.12em;color:rgba(239,231,218,0.32);text-indent:0.12em;
+  }
+  .fallback .fcap{
+    position:absolute;left:5%;bottom:7%;
+    font-family:var(--pz-sans);font-size:.7rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--pz-paper);
+  }
+}

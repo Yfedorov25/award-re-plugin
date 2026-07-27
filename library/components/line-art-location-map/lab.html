@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · line-art-location-map · 11tanjung (monochrome line-art map; roads draw, target ⊙, POIs ladder up by leader-lines)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · line-art-location-map
+================================================================================
+  11tanjung's WHERE beat — a hand-authored MONOCHROME line-art district map: thin (~1px)
+  cream strokes on a brown field (NO Google / NO Mapbox, NO fills). Roads draw in
+  (stroke-dashoffset), a target-marker ⊙ marks the project, and POI labels on leader-lines
+  fade + rise in with a bottom-to-top stagger on scroll-into-view. Harvested from
+  D_11tanjung (D2). NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<style>
+  :root{ --warm-black:#1e1a17; --warm-white:#f4f1ea; --brown:#6b5e4f; --cream:#e6e0d4;
+         --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:var(--brown);color:var(--warm-white);font-family:var(--sans)}
+  .spacer{height:120vh;display:grid;place-items:center;background:var(--brown);color:var(--warm-white);opacity:.5;
+    font-size:.8rem;letter-spacing:.2em;text-transform:uppercase}
+
+  #map.lam-stage{ --lam-bg:#6b5e4f; --lam-stroke:#e6e0d4; --lam-ink:#f4f1ea; --lam-w:1; }
+  .lam-head{position:absolute;top:8vh;left:6vw;z-index:5}
+  .lam-head .kicker{font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;opacity:.8}
+  .lam-head h2{font-family:var(--serif);font-style:italic;font-weight:400;font-size:3vw;line-height:1.05;margin-top:.6rem}
+  .lam-label b{font-family:var(--serif);font-style:italic;font-weight:400}
+  /* street variant theme + head color */
+  .lam--street{ --lam-serif:'Playfair Display',Georgia,serif; }
+  .lam--street .lam-head.street{color:#5a5f50}
+  .lam--street .lam-head h2{font-style:italic}
+</style>
+</head>
+<body>
+
+  <div class="spacer">скрол ↓ — дороги малюються, ⊙ зʼявляється, POI піднімаються знизу-вгору по leader-lines</div>
+
+  <section class="lam-stage" id="map">
+    <div class="lam-head">
+      <div class="kicker">/ Where — 02</div>
+      <h2>Квартал, що тримає<br>усе поруч</h2>
+    </div>
+
+    <!-- hand-authored line-art map: thin cream strokes on brown, NO fills -->
+    <svg class="lam-map" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+      <!-- main roads -->
+      <path class="lam-road" data-draw d="M -20 360 C 280 320 520 470 760 440 C 1020 408 1240 520 1480 470"/>
+      <path class="lam-road" data-draw d="M 740 -20 C 700 220 820 430 760 640 C 720 800 800 940 760 1000"/>
+      <path class="lam-road" data-draw d="M -20 700 C 300 660 540 760 820 720 C 1100 680 1300 760 1480 720"/>
+      <!-- minor roads -->
+      <path class="lam-road lam-road--minor" data-draw d="M 300 -20 C 320 180 240 340 360 460 C 460 560 380 760 420 920"/>
+      <path class="lam-road lam-road--minor" data-draw d="M 1080 -20 C 1060 200 1160 380 1080 560 C 1020 700 1100 860 1060 1000"/>
+      <path class="lam-road lam-road--minor" data-draw d="M -20 520 C 240 500 360 560 520 540"/>
+
+      <!-- target-marker (the project) ⊙ — OUTER g positions (SVG translate, untouched by JS),
+           INNER [data-target] g gets only the scale/opacity so the position is preserved -->
+      <g transform="translate(760 470)">
+        <g data-target>
+          <circle class="ring" r="22"/>
+          <circle class="ring" r="11"/>
+          <circle class="core" r="3.2"/>
+          <line x1="-30" y1="0" x2="-26" y2="0" stroke="#f4f1ea" stroke-width="1.2"/>
+          <line x1="26" y1="0" x2="30" y2="0" stroke="#f4f1ea" stroke-width="1.2"/>
+          <line x1="0" y1="-30" x2="0" y2="-26" stroke="#f4f1ea" stroke-width="1.2"/>
+          <line x1="0" y1="26" x2="0" y2="30" stroke="#f4f1ea" stroke-width="1.2"/>
+        </g>
+      </g>
+    </svg>
+
+    <!-- POIs: each = a leader-line + a dot + a label; positioned by left/top; ladder up bottom-to-top -->
+    <div class="lam-poi" data-poi style="left:21%;top:80%"><span class="lam-leader"></span><span class="lam-dot"></span><span class="lam-label"><b>Набережна</b><span class="dist">7 хв пішки</span></span></div>
+    <div class="lam-poi" data-poi style="left:70%;top:72%"><span class="lam-leader"></span><span class="lam-dot"></span><span class="lam-label"><b>Школа</b><span class="dist">5 хв</span></span></div>
+    <div class="lam-poi" data-poi style="left:40%;top:40%"><span class="lam-leader"></span><span class="lam-dot"></span><span class="lam-label"><b>Парк</b><span class="dist">3 хв</span></span></div>
+    <div class="lam-poi" data-poi style="left:82%;top:34%"><span class="lam-leader"></span><span class="lam-dot"></span><span class="lam-label"><b>Центр</b><span class="dist">12 хв авто</span></span></div>
+  </section>
+
+  <div class="spacer">↓ ВАРІАНТ .lam--street (finest look — світле поле, hatching, label-pill, named-POI)</div>
+
+  <!-- VARIANT: the finest "street-map" look — sage strokes on warm paper, vineyard hatching,
+       a label-PILL project marker, named POI pins. Same engine, .lam--street theme. -->
+  <section class="lam-stage lam--street" id="map2">
+    <div class="lam-head street"><div class="kicker">/ Lage · Grinzing</div><h2>У серці виноградників</h2></div>
+    <svg class="lam-map" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <pattern id="vine" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+          <line x1="0" y1="0" x2="0" y2="10" stroke="#9aa285" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <!-- vineyard hatching blocks -->
+      <path data-hatch class="lam-hatch" fill="url(#vine)" stroke="none" d="M 820 60 L 1240 100 L 1180 360 L 760 300 Z"/>
+      <path data-hatch class="lam-hatch" fill="url(#vine)" stroke="none" d="M 120 520 L 460 560 L 400 820 L 80 760 Z"/>
+      <!-- a park + water area -->
+      <path class="lam-park" d="M 540 360 C 660 340 760 420 740 540 C 600 560 520 500 540 360 Z"/>
+      <!-- streets -->
+      <path class="lam-road" data-draw d="M -20 300 C 300 280 560 420 860 380 C 1120 346 1300 440 1480 410"/>
+      <path class="lam-road" data-draw d="M 620 -20 C 600 240 700 460 660 700 C 640 840 700 940 680 1000"/>
+      <path class="lam-road lam-road--minor" data-draw d="M -20 640 C 320 620 560 700 860 660 C 1140 624 1320 700 1480 670"/>
+      <path class="lam-road lam-road--minor" data-draw d="M 980 -20 C 960 220 1040 420 980 620 C 940 760 1000 880 980 1000"/>
+      <!-- (no SVG crosshair here — the project marker is the HTML label-pill below) -->
+    </svg>
+
+    <!-- label-PILL project marker (finest) — positioned by left/top -->
+    <div class="lam-pin" style="left:30%;top:66%"><span class="pill">finest</span><span class="stem"></span></div>
+
+    <!-- named POI pins with icons (finest look) -->
+    <div class="lam-poi" data-poi style="left:64%;top:78%"><span class="lam-leader"></span><span class="lam-ico">⌖</span><span class="lam-dot"></span><span class="lam-label"><b>Heuriger Wolff</b><span class="dist">6 хв</span></span></div>
+    <div class="lam-poi" data-poi style="left:78%;top:52%"><span class="lam-leader"></span><span class="lam-ico">⌖</span><span class="lam-dot"></span><span class="lam-label"><b>Weingut Reisenberg</b><span class="dist">9 хв</span></span></div>
+    <div class="lam-poi" data-poi style="left:46%;top:36%"><span class="lam-leader"></span><span class="lam-ico">⌖</span><span class="lam-dot"></span><span class="lam-label"><b>Olympiapark</b><span class="dist">4 хв</span></span></div>
+    <div class="lam-poi" data-poi style="left:18%;top:46%"><span class="lam-leader"></span><span class="lam-ico">⌖</span><span class="lam-dot"></span><span class="lam-label"><b>Schnellbahn S45</b><span class="dist">11 хв</span></span></div>
+  </section>
+
+  <div class="spacer">кінець</div>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    if (window.Lenis && window.gsap) {
+      var lenis = new Lenis({ lerp:0.1, smoothWheel:true });
+      lenis.on('scroll', function(){ if(window.ScrollTrigger) ScrollTrigger.update(); });
+      gsap.ticker.add(function(t){ lenis.raf(t*1000); }); gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;
+    }
+    window.__lam = LineArtLocationMap.create('#map', { draw:true, stagger:0.09, duration:0.7, ease:'power2.out', start:'top 78%', once:true, manageLenis:false });
+    window.__lam2 = LineArtLocationMap.create('#map2', { draw:true, stagger:0.09, duration:0.7, ease:'power2.out', start:'top 78%', once:true, manageLenis:false });
+  })();
+</script>
+</body>
+</html>

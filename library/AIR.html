@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIR — увесь сайт (хаб зборок)</title>
+<meta name="theme-color" content="#111110">
+<style>
+  :root { --paper:#f4f2ee; --ink:#111110; --sub:#8b8a86; --sans:'Inter','Onest',system-ui,-apple-system,sans-serif; }
+  * { margin:0; box-sizing:border-box; }
+  html { background:var(--paper); }
+  body { font-family:var(--sans); background:var(--paper); color:var(--ink); padding:8vh 6vw 12vh; }
+  h1 { font-size:clamp(40px,7vw,96px); font-weight:300; letter-spacing:.28em; }
+  .sub { color:var(--sub); font-size:14px; margin-top:14px; max-width:60ch; line-height:1.6; }
+  .warn { margin-top:18px; font-size:12px; color:#a5643c; letter-spacing:.02em; max-width:60ch; line-height:1.6; }
+  h2 { font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--sub); margin:6vh 0 14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+  a.card { display:block; padding:24px; background:#fff; border:1px solid rgba(17,17,16,.1);
+    border-radius:12px; text-decoration:none; color:var(--ink);
+    transition:transform .35s cubic-bezier(.25,.74,.22,.99), box-shadow .35s cubic-bezier(.25,.74,.22,.99); }
+  a.card:hover { transform:translateY(-4px); box-shadow:0 14px 40px rgba(17,17,16,.08); }
+  a.card .t { font-size:19px; font-weight:400; }
+  a.card .d { font-size:13px; color:var(--sub); margin-top:8px; line-height:1.5; }
+  a.card .path { font-size:11px; color:#b7b6b1; margin-top:12px; letter-spacing:.04em; }
+  .foot { margin-top:8vh; font-size:12px; color:var(--sub); }
+  .foot a { color:var(--ink); }
+</style>
+</head>
+<body>
+  <h1>AIR</h1>
+  <p class="sub">Хаб усіх зборок AIR-репліки. Кожна сторінка — окрема прототип-зборка (combo-lab), верифікована й закомічена. Відкривай на десктопі, звіряй поруч із живим aircenter.space.</p>
+  <p class="warn" style="color:#5a8a4c">✅ Сайт зшитий: меню, breadcrumbs, CTA і news-картки ведуть на реальні сторінки — ходи по сайту з будь-якої сторінки. (Project management / Investment поки ведуть на Home — окремих сторінок ще немає.)</p>
+
+  <h2>Головні сторінки-екзамени</h2>
+  <div class="grid">
+    <a class="card" href="/combos/home-air/combo-lab.html"><div class="t">Home</div><div class="d">Головна: kinetic-hero, T-207 бренд-лупи, двори, Format-пін</div><div class="path">/combos/home-air/</div></a>
+    <a class="card" href="/combos/funnel-air/combo-lab.html"><div class="t">Funnel</div><div class="d">Фунел: 3 сценарії вибору</div><div class="path">/combos/funnel-air/</div></a>
+    <a class="card" href="/combos/location-air/combo-lab.html"><div class="t">Location</div><div class="d">Карта + аеро-журней + транспорт</div><div class="path">/combos/location-air/</div></a>
+    <a class="card" href="/combos/about-air/combo-lab.html"><div class="t">About</div><div class="d">Hero + revolves + ✛-пари + площі-акордеон</div><div class="path">/combos/about-air/</div></a>
+  </div>
+
+  <h2>Сервісні сторінки (спринт-7)</h2>
+  <div class="grid">
+    <a class="card" href="/combos/documents-air/combo-lab.html"><div class="t">Documents</div><div class="d">h1 + спіраль + порожній список (1-в-1 з живим)</div><div class="path">/combos/documents-air/</div></a>
+    <a class="card" href="/combos/developer-air/combo-lab.html"><div class="t">About the developer</div><div class="d">TEKTA…GROUP спред + команда (✛-картки)</div><div class="path">/combos/developer-air/</div></a>
+    <a class="card" href="/combos/news-air/combo-lab.html"><div class="t">News and offers</div><div class="d">Спред + 3 картки-лінки (живі фото)</div><div class="path">/combos/news-air/</div></a>
+    <a class="card" href="/combos/progress-air/combo-lab.html"><div class="t">Construction progress</div><div class="d">3-спред + галерея + місяць-слайдер ‹ ›</div><div class="path">/combos/progress-air/</div></a>
+    <a class="card" href="/combos/parking-air/combo-lab.html"><div class="t">Parking</div><div class="d">Таби LEVEL ONE/TWO + інтерактивний план</div><div class="path">/combos/parking-air/</div></a>
+  </div>
+
+  <h2>Атоми / звірки на вердикт</h2>
+  <div class="grid">
+    <a class="card" href="/components/air-menu-overlay/lab.html"><div class="t">Меню-оверлей</div><div class="d">Звірка №9: desktop без гіганта, 690px картка</div><div class="path">/components/air-menu-overlay/</div></a>
+    <a class="card" href="/components/gravity-well/lab.html"><div class="t">Gravity-well (T-509)</div><div class="d">М'який магніт скролу (НЕ trap) — скроль повільно</div><div class="path">/components/gravity-well/</div></a>
+    <a class="card" href="/components/revolves-carousel/lab.html"><div class="t">Revolves-carousel</div><div class="d">Desktop slide-push (виправлення №8)</div><div class="path">/components/revolves-carousel/</div></a>
+    <a class="card" href="/components/cookie-consent/lab.html"><div class="t">Cookie-consent</div><div class="d">Жива пігулка (accept = remove)</div><div class="path">/components/cookie-consent/</div></a>
+  </div>
+
+  <p class="foot">award-re library · порт 8820 · спринт-індекси: <a href="/s7.html">s7</a> · <a href="/s6.html">s6</a> · <a href="/s5.html">s5</a></p>
+</body>
+</html>

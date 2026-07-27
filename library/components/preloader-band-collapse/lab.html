@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · preloader-band-collapse · 11tanjung intro (dark panel collapses to a band, hero revealed top+bottom)</title>
+
+<!--
+================================================================================
+  TECHNIQUE LAB · preloader-band-collapse
+================================================================================
+  11tanjung's intro — a dark preloader (cursive wordmark + fake 0->100 counter)
+  COLLAPSES VERTICALLY into a thin centre band and vanishes, revealing the hero from
+  top AND bottom at once; the wordmark persists across the seam. Harvested from
+  D_11tanjung (d010 6% -> d014 collapsing -> d018 thin line -> gone).
+  OUR QUADRO render. NO WebGL. window.__LAB_OK__.
+================================================================================
+-->
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+  :root{ --pbc-bg:#1e1a17; --pbc-ink:#f4f1ea; --serif:'Playfair Display',Georgia,serif; --sans:'Inter',system-ui,sans-serif; }
+  *{margin:0;box-sizing:border-box} html,body{height:100%}
+  body{background:#1e1a17;font-family:var(--sans);overflow:hidden}
+
+  /* hero behind the preloader (revealed as the band collapses) */
+  .hero{position:fixed;inset:0;z-index:1;overflow:hidden}
+  .hero img{width:100%;height:100%;object-fit:cover;display:block}
+  .hero .htitle{position:absolute;inset:0;display:grid;place-items:center;
+    font-family:var(--serif);font-style:italic;font-weight:400;color:#fff;
+    font-size:clamp(3rem,11vw,9rem);mix-blend-mode:screen;letter-spacing:-.01em}
+  .hero .ui{position:absolute;color:#f0eee8;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+  .hero .ui.tl{left:24px;top:84px} .hero .ui.tr{right:24px;top:84px;text-align:right}
+  .hero .ui.bc{left:50%;bottom:24px;transform:translateX(-50%)} .hero .ui.br{right:24px;bottom:24px;text-align:right;max-width:30ch}
+
+  /* the preloader stage */
+  .pbc-mark .mark{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--pbc-ink);
+    font-size:clamp(3rem,11vw,9rem);letter-spacing:-.01em;white-space:nowrap}
+  .pbc-counter{font:500 .8rem/1 var(--sans);letter-spacing:.1em;display:flex;align-items:center;gap:.6em}
+  .pbc-counter::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--pbc-ink);opacity:.8}
+  .pbc-imperio{position:absolute;right:clamp(20px,3vw,40px);bottom:clamp(20px,4vh,40px);z-index:4;
+    color:var(--pbc-ink);font:500 .72rem/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+
+  .replay{position:fixed;z-index:10000;left:50%;bottom:14px;transform:translateX(-50%);color:#1e1a17;
+    background:#f4f1ea;border:0;padding:.5rem 1rem;font:600 .68rem/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+</style>
+</head>
+<body>
+
+  <!-- hero behind -->
+  <section class="hero">
+    <img src="renders/terrace.webp" alt="QUADRO">
+    <div class="htitle">11 tanjung</div>
+    <div class="ui tl">Власний берег, Україна<br>503.21 · 34.21</div>
+    <div class="ui tr">+380 67 989 12 51<br>HEY@QUADRO.HOUSE</div>
+    <div class="ui bc">scroll to explore</div>
+    <div class="ui br">/наш одинадцятий/<br>преміальний орієнтир</div>
+  </section>
+
+  <!-- preloader stage on top -->
+  <div class="pbc-stage" id="pre">
+    <div class="pbc-panel"></div>
+    <div class="pbc-mark"><div class="mark">11 tanjung</div></div>
+    <div class="pbc-counter">0%</div>
+    <div class="pbc-imperio">BY IMPERIO</div>
+  </div>
+
+  <button class="replay" id="replay">▶ програти інтро</button>
+
+<script src="component.js"></script>
+<script>
+  (function () {
+    var current = null;
+    function build() {
+      // recreate the stage each run (destroy removes it)
+      var old = document.getElementById('pre');
+      if (!old) {
+        old = document.createElement('div'); old.id = 'pre'; old.className = 'pbc-stage';
+        old.innerHTML = '<div class="pbc-panel"></div><div class="pbc-mark"><div class="mark">11 tanjung</div></div><div class="pbc-counter">0%</div><div class="pbc-imperio">BY IMPERIO</div>';
+        document.body.insertBefore(old, document.querySelector('.replay'));
+      }
+      return old;
+    }
+    function play() {
+      if (current) { try { current.destroy(); } catch(e){} current = null; }
+      build();
+      current = PreloaderBandCollapse.create('#pre', { bg:'#1e1a17', ink:'#f4f1ea', collapseDur:1.0, collapseEase:'expo.out', counterDur:1.0, minHold:500 });
+      current.run(function(){ /* hero now revealed */ });
+      setTimeout(function(){ current.ready(); }, 1100); // simulate load complete
+    }
+    document.getElementById('replay').addEventListener('click', play);
+    setTimeout(play, 400);
+    try { window.__LAB_OK__ = true; } catch (e) {}
+  })();
+</script>
+</body>
+</html>

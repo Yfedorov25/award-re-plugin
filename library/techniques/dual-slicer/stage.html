@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uk"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>dual-slicer · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root{--green:#16322a;--green-deep:#0e241d;--cream:var(--spr-cream);--slate:#9fb0a6;--serif:var(--spr-serif);--body:var(--spr-sans);}
+  *{margin:0;padding:0;box-sizing:border-box} html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);min-height:100%}
+  /* BOTH platforms pin; mobile keeps single-column layout but still sticks (S19g) */
+  .pin-wrap{position:relative;} .ds-stage{position:sticky;top:0;height:100vh;}
+  @media(max-width:1023px){.ds-stage{flex-direction:column;}.ds-left{flex:0 0 auto;height:auto;}.ds-right{flex:1 1 auto;}}
+  .ds-left{display:flex;flex-direction:column;justify-content:center;padding:clamp(24px,5vw,70px);}
+  .ds-head{max-width:100%;}
+  .ds-line__i{font-family:var(--serif);font-weight:400;font-size:clamp(2.2rem,6vw,4.4rem);line-height:1.04;color:var(--cream);}
+  .ds-eyebrow{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:var(--slate);margin-bottom:clamp(14px,3vh,26px);}
+  .ds-render{position:absolute;inset:0;} .ds-render img{width:100%;height:100%;object-fit:cover;display:block;}
+  .badge{position:fixed;top:10px;left:10px;z-index:9;font-family:ui-monospace,Menlo,monospace;font-size:.62rem;color:#7fd8b0;background:rgba(8,22,17,.72);border:1px solid #26463c;border-radius:999px;padding:4px 10px;pointer-events:none;}
+</style></head><body>
+  <div class="badge" id="badge">…</div>
+  <div class="pin-wrap" id="pinwrap"><section class="ds-stage" id="stage">
+    <div class="ds-left">
+      <div class="ds-eyebrow">QUADRO · архітектура</div>
+      <div class="ds-head">
+        <span class="ds-line"><span class="ds-line__i">Форма,</span></span>
+        <span class="ds-line"><span class="ds-line__i">що слідує</span></span>
+        <span class="ds-line"><span class="ds-line__i">за світлом</span></span>
+      </div>
+      <div class="ds-inset"><img src="img/c.webp" alt=""></div>
+    </div>
+    <div class="ds-right">
+      <div class="ds-render"><img src="img/a.webp" alt=""></div>
+      <div class="ds-render"><img src="img/b.webp" alt=""></div>
+      <div class="ds-render"><img src="img/c.webp" alt=""></div>
+    </div>
+  </section></div>
+<script src="engine.js"></script><script src="component.js"></script>
+<script>
+  var r = DualSlicerDual.init('#stage', { platform:'auto', holdMs:1000, moveMs:950 });
+  document.getElementById('badge').textContent = r.platform==='desktop'?'desktop · scroll-slice':'mobile · scroll-slice';
+  { document.getElementById('pinwrap').style.height=((r.count||3)*100+50)+'vh';
+    if(window.Lenis){var l=new Lenis({lerp:0.1,smoothWheel:true});requestAnimationFrame(function raf(t){l.raf(t);requestAnimationFrame(raf);});} }
+</script></body></html>

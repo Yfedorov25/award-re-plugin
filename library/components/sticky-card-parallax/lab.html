@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · sticky-card-parallax · T-215 + T-M17 (картка замерзає, фон пливе)</title>
+<!--
+================================================================================
+  LAB: sticky-card-parallax — T-215 + T-M17 дзеркало.
+  Контракт: живий shared.js AIR (landingHarmonyBackground): фон пливе
+  -40svh → +40svh лінійно за прохід секції; картка sticky по центру.
+  Мобільне дзеркало (T-M17): фото замерзає, glass-картка їде поверх.
+
+  ГЕЙТ (PROBE_MODE):
+  desktop:
+  1. вхід у секцію: картка по центру (±10vh), фон зсунутий вниз від
+     центру дрейфу (ty < 0);
+  2. mid-прохід: картка ЗАМЕРЗЛА (top стабільний ±2px між двома скрол-
+     позиціями), фон ПОПЛИВ (ty змінився за формулою -40+80p ±15%);
+  3. reversible: назад до p → ty збігається (±1svh);
+  4. transform-only: CLS < 0.1; errors == 0.
+  mobile (прогін 390px):
+  5. mirror:true — фото sticky (top 0 при наїзді), картка поверх
+     (z-index 2), НУЛЬ transform на фоні.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .intro, .outro { min-height: 90vh; display: flex; align-items: center; padding: 0 6vw; color: #6b6b68; }
+
+  #scp { overflow: clip; }
+  #scpBg { display: block; }
+  #scpBg .grad { position: absolute; inset: 0;
+    background: linear-gradient(175deg, #2a2c2e 0%, #4a4d50 30%, #7d8184 55%, #b9bcbe 80%, #dcdedf 100%); }
+  #scpBg .band { position: absolute; left: 0; right: 0; height: 18svh; opacity: .25; background: #f4f2ee; }
+  #scpCard { max-width: min(560px, 86vw); margin: 0 auto; padding: 5.5vh 5vw;
+             background: rgba(244, 242, 238, .82); backdrop-filter: blur(14px);
+             border-radius: 6px; }
+  #scpCard .kicker { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+                     color: #6b6b68; margin-bottom: 2vh; }
+  #scpCard h2 { font-size: clamp(24px, 3vw, 40px); font-weight: 300; line-height: 1.2;
+                margin-bottom: 2vh; }
+  #scpCard p { font-size: 14px; line-height: 1.55; color: #3c3b39; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · sticky-card-parallax · t-215 + t-m17 · скроль</div>
+
+<section class="intro"><p>… скроль: картка замерзне по центру, фон попливе …</p></section>
+
+<section id="scp">
+  <div data-scp-bg id="scpBg">
+    <div class="grad"></div>
+    <div class="band" style="top:22%"></div>
+    <div class="band" style="top:58%"></div>
+    <div class="band" style="top:86%"></div>
+  </div>
+  <div data-scp-card id="scpCard">
+    <p class="kicker">Про проєкт</p>
+    <h2>Умови без дрібного шрифту</h2>
+    <p>Житла тут будують більше, ніж магазинів. Цей розрив і є ваш прибуток. Картка стоїть, фон пливе на 80svh — глибина без жодного WebGL.</p>
+  </div>
+</section>
+
+<section class="outro"><p>… кінець проби …</p></section>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var report = { enter: null, frozen: null, reversible: null, mirror: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  var scp = window.StickyCardParallax.create('#scp', {});
+  window.__SCP = scp;
+  var root = document.getElementById('scp');
+  var bg = document.getElementById('scpBg'), card = document.getElementById('scpCard');
+  function bgTy() {
+    var m = /translateY\((-?\d*\.?\d+)/.exec(bg.style.transform || '');
+    return m ? parseFloat(m[1]) : 0;
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    var vh = window.innerHeight;
+    var narrow = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+
+    if (narrow) {
+      /* 5: T-M17 дзеркало */
+      window.scrollTo(0, root.offsetTop + vh * 0.6);
+      await delay(300);
+      report.mirror = {
+        mirror: scp.mirror === true,
+        bgSticky: Math.abs(bg.getBoundingClientRect().top) <= 2,
+        bgNoTransform: !bg.style.transform,
+        cardOver: parseInt(getComputedStyle(card).zIndex || '0', 10) >= 2
+      };
+      ok = report.mirror.mirror && report.mirror.bgSticky &&
+           report.mirror.bgNoTransform && report.mirror.cardOver;
+      report.errors = errs;
+      window.__LAB_OK__ = !!(ok && errs === 0);
+      console.log('[lab:sticky-card-parallax:mirror]', JSON.stringify(report));
+      return;
+    }
+
+    /* 1: вхід */
+    window.scrollTo(0, root.offsetTop - vh * 0.4);
+    await delay(300);
+    var p1 = scp.progress();
+    report.enter = { p: Math.round(p1 * 100) / 100, ty: Math.round(bgTy() * 10) / 10,
+                     ok: bgTy() < 0 };
+    ok = report.enter.ok && ok;
+
+    /* 2: mid — картка замерзла, фон поплив */
+    window.scrollTo(0, root.offsetTop + vh * 0.3);
+    await delay(300);
+    var cardTop1 = card.getBoundingClientRect().top;
+    var ty1 = bgTy(), pm1 = scp.progress();
+    window.scrollTo(0, root.offsetTop + vh * 0.7);
+    await delay(300);
+    var cardTop2 = card.getBoundingClientRect().top;
+    var ty2 = bgTy(), pm2 = scp.progress();
+    var exp1 = -40 + 80 * pm1, exp2 = -40 + 80 * pm2;
+    report.frozen = {
+      cardDelta: Math.round(Math.abs(cardTop2 - cardTop1)),
+      ty1: Math.round(ty1 * 10) / 10, exp1: Math.round(exp1 * 10) / 10,
+      ty2: Math.round(ty2 * 10) / 10, exp2: Math.round(exp2 * 10) / 10,
+      drift: Math.round((ty2 - ty1) * 10) / 10,
+      ok: Math.abs(cardTop2 - cardTop1) <= 2 && ty2 > ty1 &&
+          Math.abs(ty1 - exp1) < 6 && Math.abs(ty2 - exp2) < 6
+    };
+    ok = report.frozen.ok && ok;
+
+    /* 3: reversible */
+    window.scrollTo(0, root.offsetTop + vh * 0.3);
+    await delay(300);
+    report.reversible = { ty: Math.round(bgTy() * 10) / 10,
+                          ok: Math.abs(bgTy() - ty1) <= 1 };
+    ok = report.reversible.ok && ok;
+
+    report.cls = Math.round(cls * 1000) / 1000;
+    report.errors = errs;
+    ok = ok && cls < 0.1 && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:sticky-card-parallax]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

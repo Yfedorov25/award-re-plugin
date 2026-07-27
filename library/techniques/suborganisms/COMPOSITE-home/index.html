@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>springs.estate — КОМПОЗИТ головної (SO-1..SO-7, inline single-page)</title>
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<link rel="stylesheet" href="../../_springs-tokens.css">
+<link rel="stylesheet" href="../../rotated-matrix-collage/component.css">
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  /* COMPOSITE (inline single-page) — one document, one scroll, one Lenis, one rAF. Each section is
+     scoped under #soN so its verbatim CSS can't collide. Drives every section's own render(progress)
+     from the shared loop by each section's real scroll position → smooth, springs-like pacing. */
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:auto}
+  body{background:#0e241d;color:#efe9dd;font-family:var(--spr-sans);overflow-x:clip}
+  .so{ position:relative; }
+  .so .track{ position:relative; }
+  .so .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+
+/* ===== SO-1-hero-wellness ===== */
+:root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); --line:#26463c; }
+#so1{background:var(--green-deep);color:var(--cream);font-family:var(--body)}
+#so1 .rmc-bg{ background: radial-gradient(120% 100% at 50% 30%, var(--green) 0%, var(--green-deep) 100%); }
+#so1 .rmc-wash{ background: var(--green); }
+#so1 .track{ height:340vh; position:relative; }
+#so1 .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+#so1 .rmc-stage{ position:absolute; inset:0; }
+#so1 .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#cfe0d6; }
+#so1 .head .nav{ display:flex; gap:26px; }
+#so1 .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+#so1 .head .r{ display:flex; gap:22px; align-items:center; }
+@media (max-width:700px){#so1 .head .nav span, #so1 .head .r span{ display:none; }}
+#so1 .copy{ position:absolute; left:clamp(20px,5vw,90px); top:46%; z-index:5; max-width:26ch;
+    color:#e8efe9; font-size:clamp(.95rem,1.4vw,1.15rem); line-height:1.5;
+    opacity:var(--copyO,1); text-shadow:0 2px 20px rgba(0,0,0,.4); }
+#so1 .title{ position:absolute; right:clamp(20px,5vw,80px); bottom:clamp(40px,10vh,110px); z-index:5;
+    text-align:right; font-family:var(--serif); font-weight:400; line-height:.98; letter-spacing:-.015em;
+    font-size:clamp(2.6rem,7.5vw,6.2rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.35); }
+#so1 .title .t1{ position:absolute; right:0; bottom:0; white-space:nowrap; opacity:var(--t1,1); }
+#so1 .title .t2{ position:absolute; right:0; bottom:0; white-space:nowrap; opacity:var(--t2,0); font-size:.82em; }
+#so1 .title .anchor{ visibility:hidden; }
+#so1 .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#9fb0a6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+#so1 .below{ position:relative; z-index:5; background:var(--green-deep);
+    padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px); }
+#so1 .below .wrap{ max-width:900px; margin:0 auto; }
+#so1 .below h2{ font-family:var(--serif); font-weight:400; font-size:clamp(1.6rem,4vw,2.4rem); margin-bottom:.7em; }
+#so1 .note{ border-left:2px solid #3c6155; padding:10px 0 10px 18px; margin-bottom:34px; color:#c7d3cb; font-size:.92rem; line-height:1.6; }
+#so1 .note b{ color:var(--cream); }
+#so1 .why h3{ font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; color:var(--slate); margin:1.5em 0 .5em; }
+#so1 .why p{ font-size:.95rem; line-height:1.65; color:#c7d3cb; }
+#so1 .why a{ color:#dfece4; }
+#so1 .foot{ margin-top:44px; color:var(--slate); font-size:.8rem; line-height:1.6; }
+
+/* ===== SO-2-wellness-nature ===== */
+:root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+#so2{background:var(--green-deep);color:var(--cream);font-family:var(--body)}
+#so2 .track{ height:620vh; position:relative; }
+#so2 .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+#so2 .wtab{ position:absolute; top:0; left:0; bottom:0; width:50%; background-size:cover;
+    background-position:center; opacity:var(--o,0); }
+#so2 .wtab-1{ background-image:url('../SO-2-wellness-nature/media/wellness-tab-1-hd.webp'); }
+#so2 .wtab-2{ background-image:url('../SO-2-wellness-nature/media/wellness-tab-2-hd.webp'); }
+#so2 .wtab-3{ background-image:url('../SO-2-wellness-nature/media/wellness-tab-3-hd.webp'); }
+#so2 .wtab-4{ background-image:url('../SO-2-wellness-nature/media/wellness-tab-4-hd.webp'); }
+#so2 .wpanel{ position:absolute; top:0; right:0; bottom:0; width:50%; opacity:var(--panelO,0);
+    background:linear-gradient(135deg, #124f52 0%, #123f36 46%, #16322a 100%); }
+#so2 .wrail{ position:absolute; top:clamp(120px,20vh,190px); right:clamp(24px,5vw,80px); z-index:6;
+    display:flex; flex-direction:column; gap:.55em; text-align:right; opacity:var(--railO,0); }
+#so2 .wrail__i{ font-family:var(--serif); font-weight:400; font-size:clamp(1.6rem,3.4vw,3rem); line-height:1.1;
+    letter-spacing:.01em; color:rgba(234,242,236,.34); transition:color .3s; }
+#so2 .wrail__i.on{ color:var(--cream); }
+#so2 .wcap{ position:absolute; right:clamp(24px,5vw,80px); bottom:clamp(56px,12vh,120px); z-index:5;
+    width:44%; max-width:40ch; text-align:left; opacity:var(--capO,0); }
+#so2 .wcap__name{ display:none; }
+#so2 .wcap__txt{ color:#e4ede7; font-size:clamp(.98rem,1.25vw,1.12rem); line-height:1.62; }
+@media (max-width:700px){#so2 .wtab{ width:100%; }
+#so2 .wpanel{ width:100%;
+      background:linear-gradient(180deg, rgba(18,79,82,.2), #123f36 60%, #16322a 100%); }
+#so2 .wrail{ font-size:.8em; right:clamp(20px,6vw,40px); }
+#so2 .wcap{ width:auto; left:clamp(20px,5vw,40px); right:clamp(20px,5vw,40px); max-width:none; }}
+#so2 .bg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+#so2 .bg::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(14,36,29,.82) 0%, rgba(14,36,29,.35) 46%, rgba(14,36,29,.15) 100%); }
+#so2 .bg-well{ opacity:var(--bgWell,1); background-image:url('../SO-2-wellness-nature/media/wellness.webp'); }
+#so2 .bg-nat{ opacity:var(--bgNat,0); background-image:url('../SO-2-wellness-nature/media/nature.webp');
+    background-color:#173f2c; }
+#so2 .bg-nat::after{ background:linear-gradient(270deg, rgba(13,42,30,.82) 0%, rgba(13,42,30,.32) 46%, rgba(13,42,30,.12) 100%); }
+#so2 .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#cfe0d6; }
+#so2 .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+@media (max-width:700px){#so2 .head .nav, #so2 .head .r span{ display:none; }}
+#so2 .block{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:0 clamp(28px,7vw,110px); }
+#so2 .block.right{ align-items:flex-end; text-align:right; }
+#so2 .ln{ --r:0;
+    opacity: var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.9em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0);
+    will-change: transform, clip-path, opacity; }
+#so2 .title{ font-family:var(--serif); font-weight:400; line-height:.96; letter-spacing:-.02em;
+    font-size:clamp(3.4rem,10vw,8rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.45); }
+#so2 .sub{ font-family:var(--serif); font-size:clamp(1.1rem,2.2vw,1.7rem); color:#eaf2ec; margin-top:.35em; text-shadow:0 2px 24px rgba(0,0,0,.5); }
+#so2 .body{ color:#e4ede7; font-size:clamp(1rem,1.4vw,1.15rem); line-height:1.6; margin-top:1.2em; max-width:38ch; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so2 .block.right .body{ margin-left:auto; }
+#so2 .kicker{ font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#cfe0d6; margin-bottom:1.1em; text-shadow:0 2px 16px rgba(0,0,0,.5); }
+#so2 .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#9fb0a6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+
+/* ===== SO-3-nature-place ===== */
+:root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+#so3{background:var(--green-deep);color:var(--cream);font-family:var(--body)}
+#so3 .track{ height:1000vh; position:relative; }
+#so3 .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+#so3 .bg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+#so3 .bg-nat{ opacity:var(--bgNat,1); background-image:url('../SO-3-nature-place/media/nature-bg-live.webp'); background-color:#173f2c; }
+#so3 .bg-nat::after{ content:''; position:absolute; inset:0; z-index:2;
+    background:linear-gradient(270deg, rgba(13,42,30,.14) 0%, rgba(13,42,30,.04) 55%, rgba(13,42,30,0) 100%); }
+#so3 .bg-nat::before{ content:''; position:absolute; inset:0; z-index:1;
+    background:rgba(38,62,48,.10); }
+#so3 .cv{ position:absolute; overflow:hidden; background-size:cover; background-position:center;
+    transform:translate3d(0, var(--ty,120vh), 0); will-change:transform; z-index:3;
+    box-shadow:0 24px 70px rgba(0,0,0,.4); }
+#so3 .cv-sun, #so3 .cv-shady, #so3 .cv-rec{ background-size:128% auto; background-position:center 64%; }
+#so3 .cv-hand{ left:50%; top:32%; width:clamp(240px,23vw,340px); height:clamp(170px,26vh,250px);
+    background-image:url('../SO-3-nature-place/media/nature-video.webp'); }
+#so3 .cv-terr{ left:44%; top:6%;  width:52vw; height:88vh;
+    background-image:url('../SO-3-nature-place/media/nature-caption.webp'); }
+#so3 .cv-strip{ left:2%;  top:76%; width:44vw; height:20vh;
+    background-image:url('../SO-3-nature-place/media/nature-slide-xs-2.webp'); }
+#so3 .cv-sun{ left:12.5%; top:11.5%; width:37.4vw; height:65vh;
+    background-image:url('../SO-3-nature-place/media/nature-slide-1.webp'); }
+#so3 .cv-shady{ left:12.5%; top:11.5%; width:37.4vw; height:65vh;
+    background-image:url('../SO-3-nature-place/media/nature-slide-xs-3.webp'); }
+#so3 .cv-rec{ left:12.5%; top:11.5%; width:37.4vw; height:65vh;
+    background-image:url('../SO-3-nature-place/media/nature-slide-xs-2.webp'); }
+#so3 .epanel{ position:absolute; left:0; top:15%; width:clamp(320px,44vw,640px); z-index:5;
+    background:#14332a; color:#e6f0e8; padding:clamp(26px,3.4vw,52px) clamp(28px,4vw,64px);
+    font-family:var(--serif); font-weight:400; font-size:clamp(1.15rem,1.9vw,1.7rem); line-height:1.4;
+    transform:translate3d(0, var(--ety,0vh), 0); opacity:var(--eo,0); will-change:transform,opacity; }
+#so3 .gpanel{ position:absolute; inset:0; z-index:2;
+    background:
+      radial-gradient(80% 90% at 74% 52%, rgba(150,168,96,.34) 0%, rgba(60,98,56,.08) 40%, transparent 66%),
+      linear-gradient(118deg, #16362a 0%, #234b39 46%, #14312673 72%, #12271f 100%);
+    transform:translate3d(0, var(--gty,-105vh), 0); will-change:transform; }
+#so3 .ecap{ position:absolute; left:54%; right:clamp(28px,6vw,90px); top:60%; z-index:5; max-width:30ch;
+    color:#eaf4ec; font-size:clamp(.92rem,1.12vw,1.04rem); line-height:1.55;
+    opacity:var(--co,0); text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so3 .ecap .arr{ display:flex; gap:16px; margin-top:1.6em; }
+#so3 .ecap .arr i{ width:44px; height:44px; border-radius:50%; border:1px solid rgba(234,244,236,.55);
+    display:flex; align-items:center; justify-content:center; color:#eaf4ec; font-size:1.05rem; font-style:normal; }
+@media (max-width:700px){#so3 .cv-terr{ left:20%; width:78vw; }
+#so3 .cv-sun, #so3 .cv-shady, #so3 .cv-rec{ left:4%; width:80vw; height:56vh; }
+#so3 .epanel{ width:88vw; top:8%; }
+#so3 .ecap{ right:auto; left:16px; top:auto; bottom:clamp(30px,7vh,60px); max-width:26ch; }}
+#so3 .morph{ position:absolute; inset:0; z-index:4; opacity:var(--morphO,0); overflow:hidden;
+    background:
+      radial-gradient(90% 90% at 10% 14%, #8a9c33 0%, #5c7d3e 22%, transparent 55%),
+      radial-gradient(70% 80% at 14% 60%, rgba(60,110,90,.5) 0%, transparent 55%),
+      linear-gradient(128deg, #35512c 0%, #2a4429 40%, #17302452 66%, #12261f 100%); }
+#so3 .morph__svg{ position:absolute; inset:0; width:100%; height:100%;
+    transform:translateY(calc((1 - var(--morphO,0)) * 8%)) scale(var(--ribS,1)); transform-origin:50% 60%; }
+#so3 .bg-place{ opacity:var(--bgPlace,0); background-image:url('../SO-3-nature-place/media/place-bg.webp'); background-color:#12201a;
+    transform: translateY(var(--placeDrift,0px)) scale(1.06); }
+#so3 .bg-place::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,26,20,.55) 0%, rgba(10,26,20,.20) 40%, rgba(10,26,20,.66) 100%); }
+#so3 .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#cfe0d6; }
+#so3 .head .nav{ display:flex; align-items:center; gap:16px; }
+#so3 .head .burger{ display:inline-flex; flex-direction:column; gap:5px; width:26px; }
+#so3 .head .burger i{ height:1px; background:#cfe0d6; display:block; }
+#so3 .head .mark svg, #so3 .head .r svg{ display:block; }
+#so3 .head .r{ display:flex; align-items:center; gap:12px; }
+#so3 .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+@media (max-width:700px){#so3 .head .nav, #so3 .head .r span{ display:none; }}
+#so3 .nbody{ position:absolute; right:clamp(28px,6vw,90px); top:71.5%;
+    z-index:5; max-width:39ch; color:#e7f1e9; font-size:clamp(.82rem,1.02vw,.96rem); line-height:1.5;
+    text-shadow:0 2px 20px rgba(0,0,0,.55);
+    opacity:var(--nb,0);
+    clip-path:inset(0 0 calc((1 - var(--nb,0)) * 100%) 0);
+    will-change:opacity,clip-path; }
+#so3 .nbody--left{ right:auto; left:clamp(28px,6vw,90px); bottom:auto; top:50%; transform:translateY(-50%); }
+#so3 .block{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:0 clamp(28px,7vw,110px); z-index:4; }
+#so3 .block.right{ align-items:flex-end; text-align:right; }
+#so3 .block.nat-title{ align-items:flex-start; text-align:left; justify-content:center;
+    padding-top:14.5vh; padding-left:clamp(20px,3vw,48px); }
+#so3 .ln{ --r:0; opacity: var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.9em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0);
+    will-change: transform, clip-path, opacity; }
+#so3 .title{ font-family:var(--serif); font-weight:400; line-height:.96; letter-spacing:-.005em;
+    font-size:clamp(4.0rem,11.7vw,10.8rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.4); }
+#so3 .sub{ font-family:var(--serif); font-size:clamp(1.1rem,2.2vw,1.7rem); color:#eaf2ec; margin-top:.35em; text-shadow:0 2px 24px rgba(0,0,0,.5); }
+#so3 .body{ color:#e4ede7; font-size:clamp(1rem,1.4vw,1.15rem); line-height:1.6; margin-top:1.2em; max-width:40ch; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so3 .block.right .body{ margin-left:auto; }
+#so3 .kicker{ font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#cfe0d6; margin-bottom:1.1em; text-shadow:0 2px 16px rgba(0,0,0,.5); }
+#so3 .placesub{ --r:0; opacity:var(--r); transform:translateY(calc((1 - var(--r)) * 0.9em));
+    font-size:.66rem; letter-spacing:.24em; text-transform:uppercase; color:#cfe0d6; margin-top:1.4em;
+    text-shadow:0 2px 16px rgba(0,0,0,.5); }
+#so3 .placebody{ position:absolute; left:clamp(28px,4vw,64px); bottom:clamp(48px,10vh,96px); z-index:5;
+    max-width:32ch; color:#eef4ee; font-size:clamp(.92rem,1.12vw,1.05rem); line-height:1.5;
+    opacity:var(--pbo,0); transform:translateY(calc((1 - var(--pbo,0)) * 0.6em));
+    text-shadow:0 2px 18px rgba(0,0,0,.6); }
+#so3 .odo{ position:absolute; z-index:5; right:clamp(28px,9vw,150px); top:50%;
+    width:clamp(240px,26vw,430px); transform:translateY(-50%);
+    opacity:var(--odoO,0); }
+#so3 .odo__card{ position:relative; width:100%; aspect-ratio:448/434; border-radius:2px; overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.5); }
+#so3 .odo__card .ph{ position:absolute; inset:0; background-size:cover; background-position:center;
+    transition:opacity .1s linear; }
+#so3 .ph1{ background-image:url('../SO-3-nature-place/media/caption-1.webp'); }
+#so3 .ph2{ background-image:url('../SO-3-nature-place/media/caption-3.webp'); }
+#so3 .ph3{ background-image:url('../SO-3-nature-place/media/caption-2.webp'); }
+#so3 .odo__num{ position:relative; height:1.02em; overflow:hidden; margin-top:.12em;
+    font-family:var(--serif); font-weight:400; font-size:clamp(3.4rem,7vw,6.2rem); line-height:1.02;
+    color:var(--cream); text-shadow:0 4px 30px rgba(0,0,0,.5); }
+#so3 .odo__roll{ display:block; transform: translateY(calc(var(--step,0) * -1.02em));
+    transition:transform .05s linear; }
+#so3 .odo__roll span{ display:block; height:1.02em; }
+#so3 .odo__cap{ font-size:.8rem; letter-spacing:.06em; color:#e4ede7; margin-top:.5em; line-height:1.45;
+    max-width:26ch; text-shadow:0 2px 14px rgba(0,0,0,.6); min-height:2.6em; }
+#so3 .odo__cap b{ font-weight:600; color:var(--cream); }
+#so3 .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#9fb0a6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+@media (max-width:700px){#so3 .odo{ right:auto; left:50%; transform:translate(-50%,-50%); width:clamp(200px,64vw,320px); text-align:center; }
+#so3 .odo__cap{ margin-left:auto; margin-right:auto; }
+#so3 .block{ padding:0 clamp(20px,7vw,40px); }}
+
+/* ===== SO-4-place-location ===== */
+:root{
+    --green-deep:#0e241d; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --ink:#20362c;              
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+#so4{background:var(--green-deep);color:var(--cream);font-family:var(--body)}
+#so4 .track{ height:420vh; position:relative; }
+#so4 .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+#so4 .bg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+#so4 .bg-place{ opacity:var(--bgPlace,1); background-image:url('../SO-4-place-location/media/place-bg.webp'); background-color:#12201a;
+    transform: translateY(var(--placeDrift,0px)) scale(1.06); }
+#so4 .bg-place::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,26,20,.55) 0%, rgba(10,26,20,.2) 40%, rgba(10,26,20,.66) 100%); }
+#so4 .loc{ position:absolute; inset:0; opacity:var(--locO,0); }
+#so4 .loc__leaf{ position:absolute; inset:0; background:url('../SO-4-place-location/media/nature-video.webp') left center/cover no-repeat;
+    background-color:#0e241d; filter:brightness(.85) saturate(1.1); }
+#so4 .loc__leaf::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(10,26,20,.4), rgba(10,26,20,.7)); }
+#so4 .loc__panel{ position:absolute; top:15.8%; bottom:0; right:0; width:75%;
+    background:var(--cream-lite);
+    transform: translateX(calc((1 - var(--panel,0)) * 12%));
+    box-shadow:-30px 0 80px rgba(10,26,20,.4); overflow:hidden; }
+#so4 .loc__map{ position:absolute; inset:0; background:url('../SO-4-place-location/media/map.webp') 52% 62%/135% auto no-repeat;
+    transform: scale(calc(1.03 - var(--rev,0)*0.03));
+    opacity:var(--rev,0); will-change:transform,opacity; }
+#so4 .loc__copy{ position:absolute; top:clamp(22px,3.6vh,40px); left:clamp(14px,1.6vw,26px);
+    max-width:30ch; z-index:3; opacity:var(--copyO,0);
+    transform: translateY(calc((1 - var(--copyO,0)) * 0.7em)); }
+#so4 .loc__kick{ font-size:.68rem; letter-spacing:.28em; text-transform:uppercase; color:#5c7266; margin-bottom:.9em; display:none; }
+#so4 .loc__pins{ position:absolute; inset:0; z-index:3; pointer-events:none; }
+#so4 .loc__pins.ready{ pointer-events:auto; }
+#so4 .pin-lbl{ position:absolute; transform:translate(-50%,-50%); width:34px; height:34px;
+    border-radius:50%; cursor:pointer; }
+#so4 .pin-lbl::before{ content:''; position:absolute; inset:2px; border-radius:50%;
+    box-shadow:0 0 0 0 rgba(32,54,44,0); transition:box-shadow .25s; }
+#so4 .pin-lbl:hover::before{ box-shadow:0 0 0 6px rgba(32,54,44,.18); }
+#so4 .pin-lbl__box{ position:absolute; left:50%; top:50%; transform:translate(14px,-50%) translateX(-4px);
+    background:rgba(247,243,232,.96); border:1px solid rgba(32,54,44,.2); border-radius:3px;
+    padding:.42em .72em; white-space:nowrap; box-shadow:0 8px 24px rgba(20,40,30,.2);
+    display:flex; align-items:center; opacity:0; pointer-events:none;
+    transition:opacity .22s, transform .22s; }
+#so4 .pin-lbl:hover .pin-lbl__box{ opacity:1; transform:translate(14px,-50%); }
+#so4 .pin-lbl__name{ font-size:.74rem; letter-spacing:.02em; color:var(--ink); font-weight:500; }
+#so4 .pin-lbl__min{ font-family:var(--serif); font-size:.92rem; color:var(--ink); margin-left:.6em; }
+#so4 .pin-lbl__min b{ font-weight:400; }
+@media (max-width:700px){#so4 .pin-lbl__box{ padding:.36em .6em; }
+#so4 .pin-lbl__name{ font-size:.68rem; }}
+#so4 .loc__h{ font-family:var(--serif); font-weight:400; font-size:clamp(1.5rem,2.35vw,2.05rem);
+    line-height:1.28; color:var(--ink); letter-spacing:-.01em; }
+#so4 .loc__next{ position:absolute; left:0; right:0; bottom:0; height:12%; z-index:4;
+    background:linear-gradient(180deg, rgba(14,28,22,.75), rgba(14,28,22,.95)),
+      url('../SO-4-place-location/media/place-bg.webp') center 70%/cover no-repeat;
+    display:flex; align-items:center; padding:0 clamp(28px,6vw,90px); opacity:var(--nextO,0); }
+#so4 .loc__next span{ font-size:clamp(.72rem,1vw,.86rem); color:#cbd8cf; line-height:1.4; max-width:34ch; }
+@media (max-width:700px){#so4 .loc__panel{ width:100%; }
+#so4 .loc__leaf{ display:none; }
+#so4 .loc__copy{ max-width:20ch; }}
+#so4 .head{ position:absolute; top:0; left:0; right:0; z-index:6; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:var(--headC,#cfe0d6); transition:color .2s; }
+#so4 .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; }
+@media (max-width:700px){#so4 .head .nav, #so4 .head .r span{ display:none; }}
+#so4 .block{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:0 clamp(28px,7vw,110px); z-index:4; pointer-events:none; }
+#so4 .block.right{ align-items:flex-end; text-align:right; }
+#so4 .ln{ --r:0; opacity: var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.9em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0);
+    will-change: transform, clip-path, opacity; }
+#so4 .title{ font-family:var(--serif); font-weight:400; line-height:.96; letter-spacing:-.02em;
+    font-size:clamp(3.4rem,10vw,8rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.45); }
+#so4 .sub{ font-family:var(--serif); font-size:clamp(1.1rem,2.2vw,1.7rem); color:#eaf2ec; margin-top:.35em; text-shadow:0 2px 24px rgba(0,0,0,.5); }
+#so4 .body{ color:#e4ede7; font-size:clamp(1rem,1.4vw,1.15rem); line-height:1.6; margin-top:1.2em; max-width:40ch; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so4 .block.right .body{ margin-left:auto; }
+#so4 .kicker{ font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#cfe0d6; margin-bottom:1.1em; text-shadow:0 2px 16px rgba(0,0,0,.5); }
+#so4 .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:var(--cueC,#9fb0a6);
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); transition:color .2s; }
+@media (max-width:700px){#so4 .loc__copy{ top:clamp(80px,12vh,120px); max-width:24ch; }
+#so4 .block{ padding:0 clamp(20px,7vw,40px); }}
+
+/* ===== SO-5-location-residences ===== */
+:root{
+    --green-deep:#0e241d; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --ink:#20362c; --serif:var(--spr-serif); --body:var(--spr-sans); }
+#so5{background:var(--cream-lite);color:var(--ink);font-family:var(--body)}
+#so5 .track{ height:460vh; position:relative; }
+#so5 .pin{ position:sticky; top:0; height:100vh; overflow:hidden; background:var(--cream-lite); }
+#so5 .head{ position:absolute; top:0; left:0; right:0; z-index:8; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#4a5f54; }
+#so5 .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--ink); }
+@media (max-width:700px){#so5 .head .nav, #so5 .head .r span{ display:none; }}
+#so5 .mapTail{ position:absolute; top:15.8%; bottom:0; right:0; width:75%; overflow:hidden;
+    transform: translateX(calc(var(--mapOut,0) * -60%)); opacity:calc(1 - var(--mapOut,0));
+    will-change:transform,opacity; }
+#so5 .mapTail__img{ position:absolute; inset:0; background:url('../SO-5-location-residences/media/map.webp') 52% 62%/135% auto no-repeat; }
+#so5 .card{ position:absolute; overflow:hidden; box-shadow:0 30px 80px rgba(20,40,30,.28);
+    background-repeat:no-repeat; will-change:transform,opacity; }
+#so5 .card1{ top:0; right:0; width:33%; height:42%;
+    background-image:url('../SO-5-location-residences/media/design-3.webp'); background-size:cover; background-position:center 62%;
+    transform: translateX(calc((1 - var(--c1,0)) * 24%)); opacity:var(--c1,0); }
+#so5 .card2{ bottom:0; left:0; width:31%; height:33%;
+    background-image:url('../SO-5-location-residences/media/design-1.webp'); background-size:cover; background-position:center 40%;
+    transform: translateX(calc((1 - var(--c2,0)) * -24%)); opacity:var(--c2,0); }
+#so5 .manifesto{ position:absolute; left:50%; top:46%; transform:translate(-50%,-50%);
+    width:min(44vw,600px); text-align:center; z-index:5; opacity:var(--mO,0); }
+#so5 .manifesto .ln{ --r:0; display:block; opacity:var(--r);
+    transform: translateY(calc((1 - var(--r)) * 0.5em));
+    clip-path: inset(calc((1 - var(--r)) * 100%) 0 0 0); will-change:transform,clip-path,opacity; }
+#so5 .manifesto h2{ font-family:var(--serif); font-weight:400; letter-spacing:-.01em;
+    font-size:clamp(1.4rem,2.6vw,2.3rem); line-height:1.2; color:var(--ink); }
+#so5 .kick{ position:absolute; left:clamp(28px,7vw,110px); top:calc(15.8% + 18px); z-index:6;
+    font-size:.72rem; letter-spacing:.28em; text-transform:uppercase; color:#5c7266; opacity:var(--kO,0); }
+#so5 .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#5c7266;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+@media (max-width:700px){#so5 .card1{ width:64%; height:34%; }
+#so5 .card2{ width:60%; height:32%; }
+#so5 .manifesto{ width:84vw; }
+#so5 .mapTail{ width:100%; }}
+
+/* ===== SO-6-residences-interiors ===== */
+:root{ --green-deep:#0e241d; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+#so6{background:#2b2620;color:var(--cream);font-family:var(--body)}
+#so6 .track{ height:620vh; position:relative; }
+#so6 .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+#so6 .rslide{ position:absolute; inset:0; background-size:cover; background-position:center;
+    opacity:var(--o,0); transform:scale(1.12); }
+#so6 .rslide::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(20,34,26,.14) 0%, rgba(20,34,26,.05) 40%, rgba(20,34,26,.52) 100%); }
+#so6 .rbase{ position:absolute; inset:0; background:url('../SO-6-residences-interiors/media/residence-1.webp') center/cover no-repeat; }
+#so6 .rbase::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(20,34,26,.14) 0%, rgba(20,34,26,.05) 40%, rgba(20,34,26,.52) 100%); }
+#so6 .rslide-1{ background-image:url('../SO-6-residences-interiors/media/residence-1.webp'); }
+#so6 .rslide-2{ background-image:url('../SO-6-residences-interiors/media/residence-2.webp'); }
+#so6 .rslide-3{ background-image:url('../SO-6-residences-interiors/media/residence-3.webp'); }
+#so6 .rhead{ position:absolute; left:clamp(28px,5vw,90px); top:clamp(96px,16vh,150px); z-index:6;
+    opacity:var(--rheadO,0); }
+#so6 .rhead__t{ font-family:var(--serif); font-weight:400; line-height:.98; letter-spacing:-.02em;
+    font-size:clamp(2.6rem,7vw,5.4rem); color:var(--cream); text-shadow:0 4px 34px rgba(0,0,0,.4); }
+#so6 .rhead__s{ font-size:.72rem; letter-spacing:.26em; text-transform:uppercase; color:#dbe6dd;
+    margin-top:.9em; text-shadow:0 2px 14px rgba(0,0,0,.5); }
+#so6 .rcard{ position:absolute; right:clamp(24px,5vw,80px); bottom:clamp(64px,13vh,120px); z-index:6;
+    width:clamp(300px,30vw,420px); opacity:var(--rcardO,0); }
+#so6 .rcard__eyebrow{ font-family:var(--serif); font-size:clamp(1.7rem,3vw,2.6rem); color:var(--cream);
+    line-height:1; text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so6 .rcard__tag{ font-size:.7rem; letter-spacing:.22em; text-transform:uppercase; color:#e2ece4;
+    margin-top:.7em; text-shadow:0 2px 12px rgba(0,0,0,.5); }
+#so6 .rcard__stats{ display:flex; gap:2.2em; margin-top:1.4em; }
+#so6 .rcard__stat b{ display:block; font-family:var(--serif); font-size:clamp(1.5rem,2.6vw,2.1rem);
+    color:var(--cream); line-height:1; }
+#so6 .rcard__stat span{ font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:#c7d3cb;
+    display:block; margin-top:.5em; }
+#so6 .rcard__cta{ margin-top:1.7em; display:inline-block; border:1px solid rgba(240,244,236,.5);
+    color:var(--cream); font-size:.72rem; letter-spacing:.2em; text-transform:uppercase;
+    padding:.95em 1.8em; border-radius:2px; }
+@media (max-width:700px){#so6 .rslide::after{ background:linear-gradient(180deg, rgba(20,34,26,.12) 0%, rgba(20,34,26,.15) 45%, rgba(20,34,26,.62) 100%); }
+#so6 .rcard{ left:clamp(20px,5vw,40px); right:clamp(20px,5vw,40px); width:auto; bottom:clamp(48px,10vh,90px); }
+#so6 .rhead{ top:clamp(80px,12vh,120px); }}
+#so6 .resTail{ position:absolute; inset:0; background:var(--cream-lite); opacity:calc(1 - var(--photo,0)); }
+#so6 .resTail__card{ position:absolute; top:0; right:0; width:33%; height:42%;
+    background:url('../SO-6-residences-interiors/media/res-card.webp') center 62%/cover no-repeat; box-shadow:0 30px 80px rgba(20,40,30,.28); }
+#so6 .photo{ position:absolute; inset:0; background:url('../SO-6-residences-interiors/media/interiors-bg.webp') center 46%/112% auto no-repeat;
+    background-color:#8a8378; opacity:var(--photo,0); transform:scale(calc(1.05 - var(--photo,0)*0.05)); }
+#so6 .photo::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(30,26,20,.14) 0%, rgba(30,26,20,.02) 34%, rgba(30,26,20,.30) 100%); }
+#so6 .head{ position:absolute; top:0; left:0; right:0; z-index:8; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#e6ded0; }
+#so6 .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+@media (max-width:700px){#so6 .head .nav, #so6 .head .r span{ display:none; }}
+#so6 .act{ position:absolute; right:clamp(20px,3vw,50px); top:50%; transform:translateY(-50%);
+    text-align:right; z-index:5; }
+#so6 .act .word{ --r:0; font-family:var(--serif); font-weight:400; line-height:.9; letter-spacing:-.02em;
+    font-size:clamp(3.6rem,11vw,9rem); color:var(--cream); text-shadow:0 4px 40px rgba(0,0,0,.4);
+    opacity:var(--r); transform:translateY(calc((1 - var(--r)) * 0.5em));
+    clip-path:inset(calc((1 - var(--r)) * 100%) 0 0 0); will-change:transform,clip-path,opacity; }
+#so6 .act .sub{ font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color:#e6ded0;
+    margin-top:1.1em; opacity:var(--subO,0); text-shadow:0 2px 16px rgba(0,0,0,.5); }
+#so6 .copy{ position:absolute; left:clamp(28px,5vw,80px); bottom:clamp(48px,10vh,90px); max-width:34ch;
+    z-index:5; color:#f2ece0; font-size:clamp(.95rem,1.25vw,1.1rem); line-height:1.62;
+    opacity:var(--copyO,0); transform:translateY(calc((1 - var(--copyO,0)) * 0.6em));
+    text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so6 .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:7; color:#cfc6b6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+@media (max-width:700px){#so6 .resTail__card{ width:64%; height:34%; }
+#so6 .copy{ max-width:26ch; }}
+
+/* ===== SO-7-interiors-footer ===== */
+:root{ --green-deep:#0e241d; --green-foot:#162d24; --cream:var(--spr-cream); --cream-lite:var(--spr-cream-lite);
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+#so7{background:var(--green-deep);color:var(--cream);font-family:var(--body)}
+#so7 .track{ height:560vh; position:relative; }
+#so7 .pin{ position:sticky; top:0; height:100vh; overflow:hidden; }
+#so7 .islide{ position:absolute; inset:0; z-index:2; background-size:cover; background-position:center;
+    opacity:var(--o,0); transform:scale(1.08); }
+#so7 .islide::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(28,24,18,.18) 0%, rgba(28,24,18,.04) 32%, rgba(28,24,18,.42) 100%); }
+#so7 .islide-1{ background-image:url('../SO-7-interiors-footer/media/interiors-slider-1.webp'); }
+#so7 .islide-2{ background-image:url('../SO-7-interiors-footer/media/interiors-slider-2.webp'); }
+#so7 .islide-3{ background-image:url('../SO-7-interiors-footer/media/interiors-slider-3.webp'); }
+#so7 .islide-4{ background-image:url('../SO-7-interiors-footer/media/interiors-slider-4.webp'); }
+#so7 .islide-5{ background-image:url('../SO-7-interiors-footer/media/interiors-slider-5.webp'); }
+#so7 .ibase{ position:absolute; inset:0; z-index:1; background:url('../SO-7-interiors-footer/media/interiors-slider-1.webp') center/cover no-repeat; }
+#so7 .ibase::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(28,24,18,.18) 0%, rgba(28,24,18,.04) 32%, rgba(28,24,18,.42) 100%); }
+#so7 .ihead{ position:absolute; right:clamp(28px,5vw,80px); top:clamp(96px,16vh,150px); z-index:6;
+    text-align:right; opacity:var(--iheadO,0); }
+#so7 .ihead__t{ font-family:var(--serif); font-weight:400; line-height:.98; letter-spacing:-.02em;
+    font-size:clamp(2.6rem,7vw,5.4rem); color:var(--cream); text-shadow:0 4px 34px rgba(0,0,0,.4); }
+#so7 .ihead__s{ font-size:.72rem; letter-spacing:.26em; text-transform:uppercase; color:#efe3d2;
+    margin-top:.9em; text-shadow:0 2px 14px rgba(0,0,0,.5); }
+#so7 .icopy{ position:absolute; left:clamp(28px,5vw,80px); bottom:clamp(130px,22vh,210px); max-width:36ch;
+    z-index:6; color:#f2ece0; font-size:clamp(.95rem,1.25vw,1.1rem); line-height:1.62;
+    opacity:var(--icopyO,0); text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so7 .icopy b{ font-weight:400; color:var(--cream); }
+#so7 .irail{ position:absolute; left:clamp(28px,5vw,80px); bottom:clamp(48px,9vh,80px); z-index:7;
+    display:flex; gap:12px; opacity:var(--irailO,0); }
+#so7 .irail__t{ width:clamp(56px,6vw,86px); height:clamp(40px,4.3vw,60px); background-size:cover;
+    background-position:center; border:1px solid rgba(240,240,232,.28); border-radius:2px;
+    opacity:.5; transition:opacity .3s, border-color .3s; }
+#so7 .irail__t.on{ opacity:1; border-color:rgba(240,240,232,.9); }
+#so7 .irail__t-1{ background-image:url('../SO-7-interiors-footer/media/interiors-thumb-1.webp'); }
+#so7 .irail__t-2{ background-image:url('../SO-7-interiors-footer/media/interiors-thumb-2.webp'); }
+#so7 .irail__t-3{ background-image:url('../SO-7-interiors-footer/media/interiors-thumb-3.webp'); }
+#so7 .irail__t-4{ background-image:url('../SO-7-interiors-footer/media/interiors-thumb-4.webp'); }
+#so7 .irail__t-5{ background-image:url('../SO-7-interiors-footer/media/interiors-thumb-5.webp'); }
+@media (max-width:700px){#so7 .ihead{ left:clamp(20px,5vw,40px); right:clamp(20px,5vw,40px); }
+#so7 .icopy{ max-width:26ch; bottom:clamp(110px,20vh,180px); }
+#so7 .irail__t{ width:52px; height:36px; }
+#so7 .irail{ gap:8px; }}
+#so7 .foot{ position:absolute; inset:0; background:var(--green-foot); color:var(--cream);
+    display:block; overflow:hidden; }
+#so7 .foot::before{ content:''; position:absolute; inset:0;
+    background:radial-gradient(120% 90% at 50% -8%, rgba(60,97,85,.28) 0%, rgba(18,41,31,0) 55%); }
+#so7 .foot__up{ position:absolute; left:clamp(20px,5vw,60px); top:clamp(210px,29vh,270px);
+    width:44px; height:44px; border:1px solid rgba(230,224,208,.55); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; color:#e6ded0; font-size:1rem; }
+#so7 .foot__logo{ position:absolute; left:50%; top:clamp(360px,50%,520px); transform:translate(-50%,-50%);
+    width:clamp(220px,20vw,300px); }
+#so7 .foot__logo img{ width:100%; height:auto; display:block; }
+#so7 .foot__legal-row{ position:absolute; left:clamp(20px,5vw,60px); right:clamp(20px,5vw,60px);
+    top:clamp(560px,69vh,622px); display:flex; align-items:center; justify-content:space-between;
+    font-size:.7rem; letter-spacing:.16em; text-transform:uppercase; color:#c9d3cc; }
+#so7 .foot__legal-row .vi{ display:flex; align-items:center; gap:12px; }
+#so7 .foot__legal-row .vi .badge{ width:26px; height:26px; border:1px solid rgba(230,224,208,.5);
+    border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.6rem; letter-spacing:.02em; }
+#so7 .foot__rule{ position:absolute; left:clamp(20px,5vw,60px); right:clamp(20px,5vw,60px);
+    top:clamp(590px,73vh,660px); height:1px; background:rgba(200,210,203,.22); }
+#so7 .foot__fine{ position:absolute; left:clamp(20px,5vw,60px); right:clamp(20px,5vw,60px);
+    top:clamp(640px,78vh,750px); font-size:.66rem; letter-spacing:.06em; line-height:1.9;
+    text-transform:uppercase; color:#9fb0a6; max-width:1290px; }
+#so7 .foot__copy{ position:absolute; left:clamp(20px,5vw,60px); top:clamp(760px,88vh,832px);
+    font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; color:#9fb0a6; }
+#so7 .photo{ position:absolute; inset:0; z-index:4;
+    background:url('../SO-7-interiors-footer/media/interiors-slider-5.webp') center 60%/cover no-repeat; background-color:#b8ab98;
+    opacity:var(--photoO,0);
+    transform:translateY(calc(var(--lift,0) * -100%)); will-change:transform,opacity; }
+#so7 .photo::after{ content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(30,26,20,.14) 0%, rgba(30,26,20,.02) 34%, rgba(30,26,20,.30) 100%); }
+#so7 .photo__copy{ position:absolute; right:clamp(20px,4vw,54px); top:clamp(40px,7vh,74px); max-width:32ch;
+    text-align:left; color:#efe9dd; font-size:clamp(.95rem,1.25vw,1.12rem); line-height:1.6;
+    text-shadow:0 2px 20px rgba(0,0,0,.5); }
+#so7 .photo__copy b{ font-weight:400; }
+#so7 .head{ position:absolute; top:0; left:0; right:0; z-index:8; display:flex; align-items:center;
+    justify-content:space-between; padding:22px clamp(20px,4vw,54px); font-size:.72rem;
+    letter-spacing:.22em; text-transform:uppercase; color:#e6ded0; opacity:var(--headO,1); }
+#so7 .head .mark{ font-family:var(--serif); font-size:1.15rem; letter-spacing:.02em; text-transform:none; color:var(--cream); }
+@media (max-width:700px){#so7 .head .nav, #so7 .head .r span{ display:none; }
+#so7 .photo__copy{ max-width:24ch; left:clamp(20px,5vw,40px); right:auto; }
+#so7 .foot__legal-row{ flex-direction:column; align-items:flex-start; gap:14px; }
+#so7 .foot__logo{ top:44%; }}
+#so7 .cue{ position:fixed; left:clamp(20px,5vw,54px); bottom:26px; z-index:9; color:#cfc6b6;
+    font-size:.64rem; letter-spacing:.24em; text-transform:uppercase; opacity:var(--cueO,.8); }
+
+  .chud{ position:fixed; left:16px; bottom:16px; z-index:99; font:600 11px/1.4 system-ui,sans-serif;
+    letter-spacing:.12em; text-transform:uppercase; color:#e6ded0; background:rgba(14,36,29,.7);
+    padding:8px 12px; border:1px solid rgba(230,224,208,.25); border-radius:20px; backdrop-filter:blur(6px); }
+  .chud b{ color:#fff; }
+</style>
+</head>
+<body>
+
+<section id="so1" class="so" data-n="1" data-name="Hero → Wellness">
+
+  <div class="track" id="track1">
+    <div class="pin">
+      <section class="rmc-stage" id="collage">
+        <div class="rmc-bg"></div>
+        <div class="rmc-plane"><div class="rmc-grid"></div><div class="rmc-wash"></div></div>
+      </section>
+      <header class="head">
+        <div class="nav"><span>Menu</span> <span>Residences</span></div>
+        <div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+      <div class="copy" id="copy">Exclusive residence with a rich wellness infrastructure next to Nature Park.</div>
+      <div class="title">
+        <span class="anchor">Splendor<br>of Renewal</span>
+        <span class="t1" id="t1">Splendor<br>of Renewal</span>
+        <span class="t2" id="t2">A place<br>to breathe</span>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — mosaic drifts hero → wellness</div>
+
+  <div class="below">
+    <div class="wrap">
+      <h2>Hero → Wellness — шов (звірено з live)</h2>
+      <div class="note"><b>Live-verified:</b> springs НЕ робить тут text-swap. «Splendor of Renewal»
+        тримається весь перехід; немає act-слова, немає клип-лінії, немає пустих фаз. Рухається лише
+        <b>нахилена фото-мозаїка</b> (rotated-matrix-collage), що дрейфує й перетасовує плитки
+        hero→wellness. Це виправлення після того, як перша версія вигадала «зайвий слайсер».</div>
+      <div class="why">
+        <h3>Чому саме ці дві поруч?</h3>
+        <p>Hero продає стан без факту про ЖК; Wellness — перший доказ через відчуття. «Емоція перед
+          інформацією».</p>
+        <h3>Чому мозаїка, а не зміна тексту?</h3>
+        <p>Springs тримає ОДИН поетичний заголовок і міняє під ним МЕДІА — так читач лишається в стані,
+          а не «клацає слайди». Дрейф нахиленого плану = глибина без різкості (ЄДИНА крива
+          cubic-bezier(.25,.74,.22,.99), Locomotive virtual-scroll).</p>
+        <h3>Повне дослідження та метод</h3>
+        <p><a href="RESEARCH.md">RESEARCH.md</a> (з поправкою по live) · <a href="../SUBORGANISMS.md">SUBORGANISMS.md</a>
+          · live-кадри: <a href="../../../extraction/live-ref/SO-1-hero-wellness/sheet.png">sheet.png</a></p>
+      </div>
+      <div class="foot">
+        SO-1/9 · springs головна. Цегла: rotated-matrix-collage (реальні springs-плитки + дрейф).
+        Пікс-парність проти live НЕ заявляється без свіжої G18-звірки.
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<section id="so2" class="so" data-n="2" data-name="Wellness → Nature">
+
+  <div class="track" id="track2">
+    <div class="pin">
+      <div class="bg bg-well" id="bgWell"></div>
+      <div class="bg bg-nat" id="bgNat"></div>
+      <header class="head">
+        <div class="nav">Menu · Residences</div><div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+      <!-- WELLNESS INNER CAROUSEL — photo-left / gradient-panel-right (live layout). -->
+      <div class="wpanel" id="wpanel"></div>
+      <div class="wtab wtab-1" id="wtab1"></div>
+      <div class="wtab wtab-2" id="wtab2"></div>
+      <div class="wtab wtab-3" id="wtab3"></div>
+      <div class="wtab wtab-4" id="wtab4"></div>
+      <div class="wrail" id="wrail">
+        <div class="wrail__i" data-t="0">Spa</div>
+        <div class="wrail__i" data-t="1">Yoga</div>
+        <div class="wrail__i" data-t="2">Fitness</div>
+        <div class="wrail__i" data-t="3">Café</div>
+      </div>
+      <div class="wcap" id="wcap">
+        <div class="wcap__name" id="wcapName">Spa</div>
+        <div class="wcap__txt" id="wcapTxt"></div>
+      </div>
+
+      <!-- WELLNESS intro block — text over the wellness photo (left). .ln lines rise+wipe, staggered.
+           No kicker: live springs has no "the first bit" line — title leads straight in. -->
+      <div class="block" id="wellB" data-grp="well">
+        <div class="ln title">Wellness</div>
+        <div class="ln sub">Essence of Self-Care</div>
+        <div class="ln body">Springs brings wellness right into your home. A thoughtfully designed infrastructure for relaxation rejuvenates body and mind, leaving you refreshed and perfectly balanced.</div>
+      </div>
+      <!-- NATURE block — text over the nature watercolor (right) -->
+      <div class="block right" id="natB" data-grp="nat">
+        <div class="ln kicker">Step outside</div>
+        <div class="ln title">Nature</div>
+        <div class="ln sub">Lightness of Breathing</div>
+        <div class="ln body">Breathe in the air and open space. Do you feel like running? Don't hold back.</div>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Wellness → Nature</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Wellness → Nature — шов (звірено з live-екстрактів)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Поява тексту = <b style="color:var(--cream)">translateY-встання знизу + clip-wipe + opacity, по-рядково зі stagger</b> (граматика з animation-map: springs-заголовки op 0.005→1, nature-текст translateY 180px + polygon-clip). НЕ плоский fade. Фон — реальні Higgsfield-кадри (жінка-спа + акварельний ліс). Pin тримає, екран завжди світлий.
+      </div>
+      <div style="color:#c7d3cb;font-size:.95rem;line-height:1.65">
+        <p><a style="color:#dfece4" href="RESEARCH.md">RESEARCH.md</a> · <a style="color:#dfece4" href="../SUBORGANISMS.md">SUBORGANISMS.md</a> · live: <a style="color:#dfece4" href="../../../extraction/live-ref/SO-2-wellness-nature/sheet.png">sheet.png</a></p>
+      </div>
+      <div style="margin-top:40px;color:var(--slate);font-size:.8rem">SO-2/9 · Медіа — Higgsfield (springs-matched). Пікс-парність НЕ заявляється.</div>
+    </div>
+  </div>
+
+
+</section>
+
+<section id="so3" class="so" data-n="3" data-name="Nature → Place">
+
+  <div class="track" id="track3">
+    <div class="pin">
+      <div class="bg bg-nat" id="bgNat"></div>
+      <!-- E5: green gradient field descends from top → slider backdrop -->
+      <div class="gpanel" id="gpanel"></div>
+      <!-- S30 CONVEYOR: photos travel UP (enter bottom → dock → exit top), several on screen at once -->
+      <div class="cv cv-hand"  id="cvHand"></div>
+      <div class="cv cv-terr"  id="cvTerr"></div>
+      <div class="cv cv-strip" id="cvStrip"></div>
+      <div class="cv cv-sun"   id="cvSun"></div>
+      <div class="cv cv-shady" id="cvShady"></div>
+      <div class="cv cv-rec"   id="cvRec"></div>
+      <!-- E6: per-slide captions right-centre — 3 STATELESS elements, each with its own opacity
+           envelope (textContent-swap kept stale state on jump-navigation; elements can't). -->
+      <div class="ecap" id="ecap1"><span>Landscaped terraces with topiary trees, framed with glass, create the atmosphere of a miniature park floating above the City.</span></div>
+      <div class="ecap" id="ecap2"><span>Artfully designed recreation areas that delight you with diverse botanical decor, cascading garlands of runners, asymmetrical lawns, and exotic flowers.</span></div>
+      <div class="ecap" id="ecap3"><span>Shady leafy-coniferous garden that evokes winding paths, branchy trees, and sunlit glades of forests surrounding the City.</span></div>
+      <div class="ecap" id="ecapArr"><div class="arr"><i>‹</i><i>›</i></div></div>
+      <!-- GREEN MORPH BRIDGE Nature→Place (live f159-168): glassy VERTICAL S-CURVE glass ribbon over a
+           yellow-green (bottom-left) → teal radial gradient. SVG gives the organic double-fold shape. -->
+      <div class="morph" id="morph">
+        <svg class="morph__svg" id="morphRibbon" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="ribBody" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#dfeeb0" stop-opacity=".55"/>
+              <stop offset=".5" stop-color="#9fc06a" stop-opacity=".28"/>
+              <stop offset="1" stop-color="#2c5238" stop-opacity=".10"/>
+            </linearGradient>
+            <filter id="ribBlur"><feGaussianBlur stdDeviation="2.2"/></filter>
+          </defs>
+          <!-- translucent glass body: an elongated vertical S / figure-8 fold -->
+          <path filter="url(#ribBlur)" fill="url(#ribBody)" d="M300,-40 C430,90 250,190 300,250 C350,310 560,340 470,470 C430,540 300,540 300,560 L640,560 C700,420 470,350 470,280 C470,210 690,150 560,20 C500,-40 360,-30 300,-40 Z"/>
+          <!-- bright fold edge (thin light rim where the glass folds) -->
+          <path fill="none" stroke="#e6f0c8" stroke-opacity=".55" stroke-width="1.4" d="M300,0 C430,110 250,190 320,250 C390,310 560,340 470,470"/>
+          <path fill="none" stroke="#0e241d" stroke-opacity=".5" stroke-width="1.2" d="M470,470 C560,340 350,300 460,270 C560,240 690,150 560,30"/>
+        </svg>
+      </div>
+      <div class="bg bg-place" id="bgPlace"></div>
+      <!-- E1: dark "Enjoy" text panel LEFT — stands fixed while the conveyor photos travel -->
+      <div class="epanel" id="epanel">Enjoy nature's embrace that shields you from the world outside. Climbing rooftop plants, winding layouts of flowerbeds, emerald lawns. Springs lets you learn the art of leisure.</div>
+      <header class="head">
+        <div class="nav"><span class="burger"><i></i><i></i></span> Menu&nbsp;&nbsp;&nbsp;Residences</div>
+        <div class="mark"><svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><circle cx="20" cy="20" r="18.5" fill="none" stroke="#cfe0d6" stroke-width="1"/><path d="M25 14 C17 14 15 20 20 22 C25 24 23 30 15 28" fill="none" stroke="#cfe0d6" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+        <div class="r"><span>Contact us</span> <svg viewBox="0 0 24 22" width="17" height="16" aria-hidden="true"><path d="M12 20 C4 14 1 9 4 5 C6.5 2 10 3 12 6 C14 3 17.5 2 20 5 C23 9 20 14 12 20 Z" fill="none" stroke="#cfe0d6" stroke-width="1.3"/></svg></div>
+      </header>
+
+      <!-- NATURE header — LIVE n02: big serif "Nature" LEFT + vertically CENTRED + subtitle (holds ~9s) -->
+      <div class="block nat-title" id="natB" data-grp="nat">
+        <div class="ln title">Nature</div>
+        <div class="ln sub">Lightness of Breathing</div>
+      </div>
+      <!-- NATURE body-1 "Here, nature merges…" — BOTTOM-RIGHT (live n02), reveals then HOLDS.
+           This is the ~9s hold Yehor caught missing (text must have time to appear + be read). -->
+      <div class="nbody" id="nbody1">Here, nature merges with architecture and becomes an integral part of your home. Nature takes the spotlight, embodied in the painterly curves of our gardens and the green silhouettes of the façade terraces. Nature becomes your companion on meditative walks and at family gatherings, providing a soothing backdrop.</div>
+
+      <!-- PLACE (live b255): "Place" serif RIGHT + "ESSENCE OF CONTEMPLATION" small-caps below-right;
+           body "Springs is situated…" BOTTOM-LEFT (not under the title). Kicker removed (not in live). -->
+      <div class="block right" id="placeB" data-grp="place" style="justify-content:center;padding-top:22vh">
+        <div class="ln title">Place</div>
+        <div class="ln placesub">Essence of Contemplation</div>
+      </div>
+      <div class="placebody" id="placeBody">Springs is situated in the prestigious Western District of the capital, surrounded by parks and close to the embankment. It is adjacent to the highway, one of the most ecological areas of the City.</div>
+
+      <!-- CARD-ODOMETER — the running scene. Number rolls 3 → 9 → 16 with photo+caption crossfade -->
+      <div class="odo" id="odo">
+        <div class="odo__card" id="odoCard">
+          <div class="ph ph1" id="ph1"></div>
+          <div class="ph ph2" id="ph2"></div>
+          <div class="ph ph3" id="ph3"></div>
+        </div>
+        <div class="odo__num"><span class="odo__roll" id="odoRoll">
+          <span>3</span><span>9</span><span>16</span>
+        </span></div>
+        <div class="odo__cap" id="odoCap"><b>minute walk</b> to Nature Park</div>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Nature → Place · 3 · 9 · 16</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Nature → Place — шов (звірено з LIVE, CDP-жести)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Таблиця-гіпотеза казала «push-over доводчик + акт-слово Place». <b style="color:#eaf2ec">Live це спростував.</b>
+        Заголовок «Nature» тримається у DOM весь перехід; Place НЕ входить окремим велет-словом і НЕ
+        push-over смугою. Реальна механіка = <b style="color:#eaf2ec">pin + full-bleed бігова алея + card-одометр,
+        що СНАП-скролиться 3 → 9 → 16</b> (Nature Park → набережна → MIBC). Кожен крок = плато скролу
+        (timing-map-place: s 900/2070/2970/4499/5579/7199), картка+число+підпис crossfade'яться.
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        Джерело руху: <code>extraction/live-ref/SO-3-nature-place-cdp3/</code> (26 живих кадрів, CDP
+        synthesizeScrollGesture — scrollTo/wheel springs НЕ рухають) + <code>timing-map-place.json</code>.
+        Медіа — <b>реальні springs-асети</b> (place-bg, caption-1/2/3), не генеровані. Дослідження «чому так» —
+        <code>RESEARCH.md</code>. Пам'ять: live-first-before-visual.
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<section id="so4" class="so" data-n="4" data-name="Place → Location">
+
+  <div class="track" id="track4">
+    <div class="pin">
+      <div class="bg bg-place" id="bgPlace"></div>
+
+      <!-- LOCATION — cream map PANEL on the right over a dark leaf strip (1:1 live springs) -->
+      <div class="loc" id="loc">
+        <div class="loc__leaf"></div>
+        <div class="loc__panel" id="locPanel">
+          <div class="loc__map" id="locMap"></div>
+          <!-- interactive pin labels anchored to the real baked pins (measured panel fractions) -->
+          <div class="loc__pins" id="locPins">
+            <div class="pin-lbl" style="left:41%;top:44%">
+              <div class="pin-lbl__box"><span class="pin-lbl__name">Nature Park</span><span class="pin-lbl__min"><b>3</b> min</span></div>
+            </div>
+            <div class="pin-lbl" style="left:67%;top:43%">
+              <div class="pin-lbl__box"><span class="pin-lbl__name">Embankment</span><span class="pin-lbl__min"><b>9</b> min</span></div>
+            </div>
+            <div class="pin-lbl" style="left:76%;top:57%">
+              <div class="pin-lbl__box"><span class="pin-lbl__name">Business core · MIBC</span><span class="pin-lbl__min"><b>16</b> min</span></div>
+            </div>
+          </div>
+          <div class="loc__copy" id="locCopy">
+            <div class="loc__kick">Location</div>
+            <div class="loc__h">Easy access to Nature Park. Landscapes of watercolor tenderness that belong only to you.</div>
+          </div>
+        </div>
+        <div class="loc__next" id="locNext"><span>Design — a glassy waterfall with flowing cascades of greenery-framed loggia.</span></div>
+      </div>
+
+      <header class="head" id="head">
+        <div class="nav">Menu · Residences</div><div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+
+      <!-- PLACE tail — the running scene beat that Location maps -->
+      <div class="block right" id="placeB" data-grp="place">
+        <div class="ln kicker">Minutes from everything</div>
+        <div class="ln title">Place</div>
+        <div class="ln sub">3 · 9 · 16</div>
+        <div class="ln body">Nature Park, the embankment, the business core — each one is minutes away.</div>
+      </div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Place → Location · the map</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Place → Location — ЄДИНИЙ повний КОЛІР-ФЛИП (звірено з LIVE)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Найхарактерніший springs-шов — <b style="color:#eaf2ec">«дихання ритму»</b>. Після 4 темних
+        емоційних секцій — <b style="color:#eaf2ec">кремовий видих</b>: акварельна карта на світлому полі,
+        текст ТЕМНИМ серіфом (інверсія теми). Флип виміряний luma: Place-бік <b style="color:#eaf2ec">54</b>
+        → Location-бік <b style="color:#eaf2ec">141</b> (+87 за одне вікно жестів = різкий crossfade, той
+        самий sticky--under-previous pin). Карта «росте» діагонально з кута (springs-акварель).
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        Джерело руху: <code>extraction/live-ref/SO-4-{flip-cdp,flip2-cdp,place-location-cdp2}/</code>
+        (CDP synthesizeScrollGesture — scrollTo/wheel springs НЕ рухають) + <code>animation-map-map.json</code>
+        (<code>l-map sticky--under-previous</code>, <code>ui-light</code>). Карта — <b>реальний springs-асет</b>
+        (map-eng@xxl), не генерована. Дослідження «чому так» — <code>RESEARCH.md</code>. Пам'ять: live-first-before-visual.
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<section id="so5" class="so" data-n="5" data-name="Location → Residences">
+
+  <div class="track" id="track5">
+    <div class="pin">
+      <div class="mapTail" id="mapTail"><div class="mapTail__img"></div></div>
+
+      <div class="card card1" id="card1"></div>
+      <div class="card card2" id="card2"></div>
+
+      <div class="kick" id="kick">Residences</div>
+      <div class="manifesto" id="manifesto">
+        <h2>
+          <span class="ln">Each floor reflects boundless</span>
+          <span class="ln">perspectives in its glistening waves,</span>
+          <span class="ln">inviting you to look farther with a</span>
+          <span class="ln">fuller palette of possibilities.</span>
+        </h2>
+      </div>
+
+      <header class="head" id="head">
+        <div class="nav">Menu · Residences</div><div class="mark">Springs</div>
+        <div class="r"><span>Contact us</span> ♥</div>
+      </header>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Location → Residences</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);color:var(--cream);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Location → Residences — шов (звірено з LIVE, CDP)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Таблиця казала «флип 🟡→🟢 назад у темне». <b style="color:#eaf2ec">Live це спростував:</b> крем
+        ТРИВАЄ (luma <b style="color:#eaf2ec">141→211</b>, ще світлішає — темного провалу немає). Location-карта
+        ВИХОДИТЬ, на її місце — <b style="color:#eaf2ec">архітектурні рендер-картки</b> будівлі Springs
+        (portrait-carousel, scatter-розкладка) + центральний маніфест «Each floor reflects boundless
+        perspectives…». Це другий кремовий блок поспіль — довгий «видих» ритму.
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        🔴 Також live-скан DOM спростував СТРУКТУРУ: немає окремого <code>l-design</code> — Design/
+        архітектура живуть УСЕРЕДИНІ <code>l-residences</code> (8 швів, не 9). Джерело:
+        <code>extraction/live-ref/SO-5-loc-res-seam/</code> + повний CDP-скан. Медіа — <b>реальні springs</b>
+        (6.design рендери). Self-floor фази 3.4%. Дослідження — <code>RESEARCH.md</code>.
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<section id="so6" class="so" data-n="6" data-name="Residences → Interiors">
+
+  <div class="track" id="track6">
+    <div class="pin">
+      <!-- RESIDENCES inner carousel — 3 full-bleed renders + swapping caption card -->
+      <div class="rbase" id="rbase"></div>
+      <div class="rslide rslide-1" id="rslide1"></div>
+      <div class="rslide rslide-2" id="rslide2"></div>
+      <div class="rslide rslide-3" id="rslide3"></div>
+      <div class="rhead" id="rhead">
+        <div class="rhead__t">Residences</div>
+        <div class="rhead__s">Collection of premium living space</div>
+      </div>
+      <div class="rcard" id="rcard">
+        <div class="rcard__eyebrow" id="rcardName">Flats</div>
+        <div class="rcard__tag" id="rcardTag">Designer finishings</div>
+        <div class="rcard__stats">
+          <div class="rcard__stat"><b id="rcardN">138</b><span id="rcardNL">panoramic view flats</span></div>
+          <div class="rcard__stat"><b id="rcardH">3.1 m</b><span>ceiling height</span></div>
+        </div>
+        <div class="rcard__cta" id="rcardCta">Search flats</div>
+      </div>
+
+      <div class="resTail" id="resTail"><div class="resTail__card"></div></div>
+      <div class="photo" id="photo"></div>
+      <header class="head"><div class="nav">Menu · Residences</div><div class="mark">Springs</div><div class="r"><span>Contact us</span> ♥</div></header>
+
+      <div class="act" id="act">
+        <div class="word" id="word">Interiors</div>
+        <div class="sub" id="sub">Beauty in the essence of things</div>
+      </div>
+      <div class="copy" id="copy">Our designs are chosen with a delicate treatment of materials and time; time that will soon become history, a story of family generations. Natural stone, warm wood, aged metal, and textured textiles. This is how we create a visual and tactile space for authentically high-class comfort.</div>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Residences → Interiors</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);color:var(--cream);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Residences → Interiors — шов (звірено з LIVE, CDP)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Таблиця казала «slide/tab-in, 🟢→🟢». <b style="color:#eaf2ec">Live:</b> крем-архітектура →
+        <b style="color:#eaf2ec">full-bleed тепле інтер'єрне фото</b> (muted palette: букле, дерево, жалюзі)
+        + велике акт-слово «Interiors» + «Beauty in the essence of things» + копі знизу-ліворуч. Це та
+        сама full-bleed+акт-слово граматика що SO-1/2, але <b style="color:#eaf2ec">ТЕПЛА палітра</b> (не зелень, не крем).
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        Джерело: <code>extraction/live-ref/SO-6-int3-cdp/</code> + baseline <code>so6-interiors.png</code>.
+        Медіа — <b>реальний springs</b> (8.interiors_bg — точний кадр). Self-floor 0.3%. RESEARCH.md.
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<section id="so7" class="so" data-n="7" data-name="Interiors → Footer">
+
+  <div class="track" id="track7">
+    <div class="pin">
+      <!-- INTERIORS SLIDER — 5 renders + thumb-rail nav (plays before the footer lift) -->
+      <div class="ibase" id="ibase"></div>
+      <div class="islide islide-1" id="islide1"></div>
+      <div class="islide islide-2" id="islide2"></div>
+      <div class="islide islide-3" id="islide3"></div>
+      <div class="islide islide-4" id="islide4"></div>
+      <div class="islide islide-5" id="islide5"></div>
+      <div class="ihead" id="ihead">
+        <div class="ihead__t">Interiors</div>
+        <div class="ihead__s">Beauty in the Essence of Things</div>
+      </div>
+      <div class="icopy" id="icopy">The acclaimed <b>Quadro Room</b> studio collaborated with <b>UNIQ Development</b> to shape these interiors. Muted palette, arched portals, smooth curves. <b>Refinement is the new luxury.</b></div>
+      <div class="irail" id="irail">
+        <div class="irail__t irail__t-1" data-t="0"></div>
+        <div class="irail__t irail__t-2" data-t="1"></div>
+        <div class="irail__t irail__t-3" data-t="2"></div>
+        <div class="irail__t irail__t-4" data-t="3"></div>
+        <div class="irail__t irail__t-5" data-t="4"></div>
+      </div>
+
+      <!-- footer sits underneath -->
+      <div class="foot" id="foot">
+        <div class="foot__up">↑</div>
+        <div class="foot__logo"><img src="../SO-7-interiors-footer/media/springs-footer-logo.svg" alt="Springs"></div>
+        <div class="foot__legal-row">
+          <span>Legal information</span>
+          <span class="vi">Site by Vide Infra <span class="badge">VI</span></span>
+        </div>
+        <div class="foot__rule"></div>
+        <div class="foot__fine">Visual representations of the property, layout plans, and other materials are for illustration purposes only. All information on this website is provided for general informational use and does not constitute an offer or any form of binding commitment. All materials on this website, including design elements, are the intellectual property of the organization. Any copying, reproduction, distribution (including reposting to other websites or online resources), or other use of these materials is prohibited without the prior written consent of the rights holder.</div>
+        <div class="foot__copy">© 2026. All rights reserved.</div>
+      </div>
+
+      <!-- interior photo lifts up to reveal the footer -->
+      <div class="photo" id="photo">
+        <div class="photo__copy">Step over the threshold and enjoy the beauty of your new life from the very first moments. Muted palette, arched portals, smooth curves. <b>Refinement is the new luxury.</b></div>
+      </div>
+      <header class="head" id="head"><div class="nav">Menu · Residences</div><div class="mark">Springs</div><div class="r"><span>Contact us</span> ♥</div></header>
+    </div>
+  </div>
+  <div class="cue" id="cue">scroll ↓ — Interiors → Footer</div>
+
+  <div style="position:relative;z-index:5;background:var(--green-deep);color:var(--cream);padding:clamp(60px,10vw,120px) clamp(20px,6vw,90px) clamp(80px,12vw,140px)">
+    <div style="max-width:900px;margin:0 auto">
+      <h2 style="font-family:var(--serif);font-weight:400;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.7em;color:var(--cream)">Interiors → Footer — фінальний scroll-шов (звірено з LIVE, CDP)</h2>
+      <div style="border-left:2px solid #3c6155;padding:10px 0 10px 18px;margin-bottom:30px;color:#c7d3cb;font-size:.92rem;line-height:1.6">
+        Таблиця казала «Interiors → <b style="color:#eaf2ec">Gallery</b>, vertical-curtain clip».
+        <b style="color:#eaf2ec">Live-DOM це спростував (7-й раз):</b> «Gallery» = <b style="color:#eaf2ec">герой-reel зверху</b>
+        (вже в SO-1); callback/favorites = <b style="color:#eaf2ec">модалки</b>. Реальний фінальний шов —
+        тепле інтер'єрне фото <b style="color:#eaf2ec">їде вгору</b>, з-під нього підіймається
+        <b style="color:#eaf2ec">темно-зелений footer</b> (sticky--under-previous), кремове серіф-лого
+        «Springs», legal, VIDE INFRA. Колірний флип 🟡тепле→🟢deep emerald = <b style="color:#eaf2ec">повернення
+        в темну зелень героя</b> (кільцеве закриття сайту). Статичний шов, self-floor ~0.5%.
+      </div>
+      <div style="color:#9fb0a6;font-size:.82rem;line-height:1.7">
+        Джерело: <code>extraction/live-ref/SO-7-int-cta-b/frame-000.png</code> (+ підтвердж.
+        <code>SO-7-interiors-gallery-cdp/frame-000.png</code>). Медіа — <b>реальний springs</b>
+        (8.interiors_bg + logo-footer.svg). Self-floor ~0.5% (2 незалежні live-кадри byte-identical). RESEARCH.md.
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+  <div class="chud">springs композит — <b id="chud">SO-1 · Hero → Wellness</b></div>
+
+<script src="../../rotated-matrix-collage/component.js"></script>
+<script>
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  var COMP={};
+
+/* ---- SO-1-hero-wellness ---- */
+COMP[1]=(function(){
+
+  var TILES = ['../../rotated-matrix-collage/tiles/macro-table.webp','../../rotated-matrix-collage/tiles/day-front.webp',
+               '../../rotated-matrix-collage/tiles/macro-roof.webp','../../rotated-matrix-collage/tiles/dn-ext-day.webp',
+               '../../rotated-matrix-collage/tiles/terrace-02.webp','../../rotated-matrix-collage/tiles/macro-pergola.webp',
+               '../../rotated-matrix-collage/tiles/day-34.webp','../../rotated-matrix-collage/tiles/dn-ext-night.webp',
+               '../../rotated-matrix-collage/tiles/day-front.webp','../../rotated-matrix-collage/tiles/terrace-02.webp',
+               '../../rotated-matrix-collage/tiles/macro-roof.webp','../../rotated-matrix-collage/tiles/day-34.webp'];
+  var r = RotatedMatrixCollage.init('#so1 #collage', {
+    tiles: TILES, cols: 4, rows: 3, angle: -11, scale: 1.5, wash: 0.5, gutter: 10,
+    parallax: 0, platform: 'desktop'
+  });
+  var plane=document.querySelector('#so1 .rmc-plane'), t1=document.querySelector('#so1 #t1'),
+      t2=document.querySelector('#so1 #t2'), copy=document.querySelector('#so1 #copy'),
+      cue=document.querySelector('#so1 #cue'), track=document.getElementById('track1');
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
+  var smooth=0;
+  function render(p){
+    plane.style.setProperty('--rmc-y', lerp(0,-260, easeInOut(p))+'px');
+    var out1=seg(p,0.70,0.82), in2=seg(p,0.84,0.96);
+    t1.style.opacity=(1-out1).toFixed(3); t2.style.opacity=in2.toFixed(3);
+    copy.style.setProperty('--copyO', (1-seg(p,0.55,0.8)).toFixed(3));
+    cue.style.setProperty('--cueO', (0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  
+ return {render:render, track:document.getElementById('track1')};
+})();
+
+/* ---- SO-2-wellness-nature ---- */
+COMP[2]=(function(){
+
+  var track=document.getElementById('track2');
+  var bgWell=document.querySelector('#so2 #bgWell'), bgNat=document.querySelector('#so2 #bgNat'),
+      cue=document.querySelector('#so2 #cue');
+  var wellLines=[].slice.call(document.querySelectorAll('#so2 #wellB .ln'));
+  var natLines=[].slice.call(document.querySelectorAll('#so2 #natB .ln'));
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function ss(t){return t*t*(3-2*t);}              // smoothstep — symmetric ease, no front-loaded jump
+  function set(el,k,v){el.style.setProperty(k,v);}
+  // staggered per-line reveal over [start,end]; each line lags the previous by `stag`.
+  // dir=+1 reveal (0→1), dir=-1 hide (1→0). Returns nothing, writes --r per line.
+  function revealLines(lines, p, start, end, stag, dir){
+    var span=(end-start);
+    lines.forEach(function(el,i){
+      var a=start + i*stag, b=a + (span - (lines.length-1)*stag);
+      var r=eo(seg(p,a,b));
+      if(dir<0) r=1-r;
+      el.style.setProperty('--r', r.toFixed(3));
+    });
+  }
+  // WELLNESS carousel tab data (live copy, per tab)
+  var TABS=[
+    {name:'Spa', txt:'Let your thoughts flow freely as you immerse yourself in our crystal-clear spa pool with a view of the garden. Soft glare on the water, herbal tea in the fragrant warmth of the hammam — and just like that, you leave the day’s worries behind.'},
+    {name:'Yoga', txt:'A relaxing yoga session mellows the mind and makes your body feel light and responsive. Finding balance is easy.'},
+    {name:'Fitness', txt:'Face the day guided by your personal trainer in our modern fitness center. Exercise at your convenience — the gym is just a few steps away, right up the stairs.'},
+    {name:'Café', txt:'Do you sense the aroma of espresso adorned with creamy milk foam? Cozy up on the terrace of our wellness-café and relax to the sounds of ambient music.'}
+  ];
+  var wtabs=[document.querySelector('#so2 #wtab1'),document.querySelector('#so2 #wtab2'),document.querySelector('#so2 #wtab3'),document.querySelector('#so2 #wtab4')];
+  var wrailItems=[].slice.call(document.querySelectorAll('#so2 #wrail .wrail__i'));
+  var wrail=document.querySelector('#so2 #wrail'), wcap=document.querySelector('#so2 #wcap'),
+      wcapName=document.querySelector('#so2 #wcapName'), wcapTxt=document.querySelector('#so2 #wcapTxt'),
+      wpanel=document.querySelector('#so2 #wpanel');
+  var curTab=-1;
+  // carousel window: [C0,C1]; 4 tabs each get an equal slice with crossfade at the boundary.
+  // Widened + shifted later (S28): the intro title now holds & rises out fully BEFORE the rail fades
+  // in, so nothing overlaps at the intro→carousel handoff (was the source of the jerky pop).
+  // Carousel tab advance starts at C0=0.50 — AFTER the panel/entry fade (0.32→0.54) has essentially
+  // completed — so Spa holds a SOLO, settled beat (photo + full panel, no neighbour) before the first
+  // Spa→Yoga swap. Without this beat there was no clean settled-Spa frame (entry & swap overlapped).
+  var C0=0.56, C1=0.80;
+  function renderCarousel(p){
+    // rail/cap/panel fade IN only AFTER the intro title has fully risen out (>0.32), out at the seam.
+    // LINEAR ramp (not smoothstep) over a wide band: the teal panel occludes the full-bleed intro
+    // portrait, so a steep-middle ss() made the panel slam over the face (a 26/255 pixel jump). A
+    // constant-rate fade over 0.32→0.54 spreads that occlusion evenly — no single hard step.
+    var railIn=seg(p,0.32,0.54) * (1-ss(seg(p,0.84,0.91)));
+    set(wrail,'--railO',railIn.toFixed(3)); set(wcap,'--capO',railIn.toFixed(3));
+    set(wpanel,'--panelO',railIn.toFixed(3));
+    // the whole tab stack ALSO fades in, but must finish BEFORE the first Spa→Yoga boundary (~0.49)
+    // so the entry-fade never fights the tab crossfade (that overlap was the 0.47→0.50 spike).
+    var tabsIn=seg(p,0.32,0.48);
+    var t=clamp((p-C0)/(C1-C0),0,1);          // 0..1 across all 4 tabs
+    var pos=t*(TABS.length-1);                  // 0..3 continuous tab position
+    var idx=Math.round(pos);
+    // crossfade each tab layer by proximity to `pos`, but keep each tab SOLO for most of its slice
+    // (only a short crossfade near the .3 boundary) so two photos never overlap at a settled tab.
+    for(var i=0;i<wtabs.length;i++){
+      var d=Math.abs(pos-i);
+      // Symmetric cross-dissolve spread over the WHOLE slice: o = smoothstep(1 - d). At a settled tab
+      // d=0 → o=1; at the boundary pos=x.5 both neighbours are d=0.5 → o=0.5 each (even dissolve);
+      // at the next settled tab d=1 → o=0 (no bleed-through). Because the fade is spread across the
+      // full inter-tab distance instead of onset-ing at d≈0.72, there's no sudden second-photo entry
+      // (that onset was the left-half spike at p≈0.47) — the change rate is constant across the swap.
+      var o=ss(clamp(1.0-d,0,1))*tabsIn;
+      wtabs[i].style.setProperty('--o', o.toFixed(3));
+    }
+    // active rail item + caption text (swap on integer change)
+    if(idx!==curTab){ curTab=idx;
+      wrailItems.forEach(function(el,i){ el.classList.toggle('on', i===idx); });
+      wcapName.textContent=TABS[idx].name; wcapTxt.textContent=TABS[idx].txt;
+    }
+  }
+  var smooth=0;
+  function render(p){
+    // WELLNESS intro title (S28 choreography — wide, non-overlapping, glide not pop):
+    //   rise+wipe IN over 0.03→0.18, HOLD fully lit 0.18→0.26, rise-OUT over 0.26→0.40.
+    // One continuous per-line --r (in-curve minus out-curve) so there is no gap-flicker between the
+    // reveal and hide passes (the old 5%-window 0.10→0.15 hide was the pop Yehor caught).
+    (function introTitle(){
+      var span=0.15, stag=0.035;                       // in-window 0.03..0.18
+      wellLines.forEach(function(el,i){
+        var a=0.03 + i*stag, b=a + (span - (wellLines.length-1)*stag);
+        var rin=eo(seg(p,a,b));                          // 0→1 rise in
+        var rout=eo(seg(p,0.26,0.40));                   // 0→1 as it leaves
+        el.style.setProperty('--r', (rin*(1-rout)).toFixed(3));
+      });
+    })();
+    // The intro portrait bg (bg-well) dims as the carousel enters (0.34→0.54) — the tab photos +
+    // panel occlude it anyway, and leaving it at full opacity made the occlusion complete in one
+    // abrupt step (~p0.47) when the tab photo hit full opacity over a still-full portrait. Dropping
+    // it to a low floor during the carousel, then handing off to nature at the seam, removes that step.
+    var wellDim=1 - 0.85*seg(p,0.34,0.54);          // 1 → 0.15 across carousel entry
+    var cross=eo(seg(p,0.86,0.93));                  // → nature at the seam
+    set(bgWell,'--bgWell',(wellDim*(1-cross)).toFixed(3)); set(bgNat,'--bgNat',cross.toFixed(3));
+    // 4-tab carousel Spa·Yoga·Fitness·Café (0.44→0.70), tabs fade out at the seam
+    renderCarousel(p);
+    var tabsOut=1-eo(seg(p,0.84,0.91));
+    for(var i=0;i<wtabs.length;i++){ var cur=parseFloat(wtabs[i].style.getPropertyValue('--o'))||0; wtabs[i].style.setProperty('--o',(cur*tabsOut).toFixed(3)); }
+    // NATURE lines RISE+WIPE in after the seam (0.89→0.99, staggered)
+    revealLines(natLines, p, 0.89, 0.99, 0.028, +1);
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  
+ return {render:render, track:document.getElementById('track2')};
+})();
+
+/* ---- SO-3-nature-place ---- */
+COMP[3]=(function(){
+
+  var track=document.getElementById('track3'), pin=document.querySelector('#so3 .pin');
+  var bgNat=document.querySelector('#so3 #bgNat'), bgPlace=document.querySelector('#so3 #bgPlace');
+  var natLines=[].slice.call(document.querySelectorAll('#so3 #natB .ln'));
+  var placeLines=[].slice.call(document.querySelectorAll('#so3 #placeB .ln, #placeB .placesub'));
+  var placeBody=document.querySelector('#so3 #placeBody');
+  var odo=document.querySelector('#so3 #odo'), odoRoll=document.querySelector('#so3 #odoRoll'),
+      odoCap=document.querySelector('#so3 #odoCap'), cue=document.querySelector('#so3 #cue');
+  var ph1=document.querySelector('#so3 #ph1'), ph2=document.querySelector('#so3 #ph2'), ph3=document.querySelector('#so3 #ph3');
+  // S30 conveyor elements (ATOMS.md План руху)
+  var cvHand=document.querySelector('#so3 #cvHand'), cvTerr=document.querySelector('#so3 #cvTerr'),
+      cvStrip=document.querySelector('#so3 #cvStrip'), cvSun=document.querySelector('#so3 #cvSun'),
+      cvShady=document.querySelector('#so3 #cvShady'), cvRec=document.querySelector('#so3 #cvRec');
+  var epanel=document.querySelector('#so3 #epanel'), gpanel=document.querySelector('#so3 #gpanel');
+  var ecaps=[document.querySelector('#so3 #ecap1'),document.querySelector('#so3 #ecap2'),document.querySelector('#so3 #ecap3')];
+  var ecapArr=document.querySelector('#so3 #ecapArr');
+  var morph=document.querySelector('#so3 #morph'), morphRibbon=document.querySelector('#so3 #morphRibbon');
+  var nbody1=document.querySelector('#so3 #nbody1');
+  var curN=-1;
+  // per-slide captions (live vB), crossfade in place as each left-card docks:
+  var NSL_CAPS=[
+    "Landscaped terraces with topiary trees, framed with glass, create the atmosphere of a miniature park floating above the City.",
+    "Artfully designed recreation areas that delight you with diverse botanical decor, cascading garlands of runners, asymmetrical lawns, and exotic flowers.",
+    "Shady leafy-coniferous garden that evokes winding paths, branchy trees, and sunlit glades of forests surrounding the City."
+  ];
+
+  var CAPS=[
+    'to Nature Park',
+    'to the embankment',
+    'by car to the MIBC'
+  ];
+  var CAP_LEAD=['<b>minute walk</b> ','<b>minute walk</b> ','<b>minutes</b> '];
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function set(el,k,v){el.style.setProperty(k,v);}
+
+  /* ══════════════════════════════════════════════════════════════════════════════════════════
+     TRACK-ENGINE (S29+, senior rewrite). Each ATOM = an independent TRACK {p0,p1,ease,apply}.
+     ALL tracks read ONE shared scroll-progress p. Simultaneity emerges FOR FREE where windows
+     overlap — exactly how springs runs several techniques at once on one scroll. Timings are the
+     MEASURED table from ATOMS.md (per-frame signature analysis of the live 186-frame recording),
+     NOT guessed. One easing standard (springs cubic-bezier). GPU-only: transform + opacity.
+     ══════════════════════════════════════════════════════════════════════════════════════════ */
+  // springs single easing = cubic-bezier(.25,.74,.22,.99) (memory: springs-real-tokens). Sampled:
+  function E(t){ t=clamp(t,0,1); // cubic-bezier .25,.74,.22,.99 → y(t) via Newton on x
+    var x1=.25,y1=.74,x2=.22,y2=.99, u=t;
+    for(var i=0;i<5;i++){ var v=1-u,
+      x=3*v*v*u*x1+3*v*u*u*x2+u*u*u, dx=3*v*v*x1+6*v*u*(x2-x1)+3*u*u*(1-x2);
+      if(dx<1e-4)break; u-=(x-t)/dx; u=clamp(u,0,1); }
+    var v=1-u; return 3*v*v*u*y1+3*v*u*u*y2+u*u*u; }
+  // window helper: 0 before p0, eased 0→1 across [p0,p1], 1 after. `hold`=stay at 1 past p1.
+  function W(p,p0,p1){ return E(seg(p,p0,p1)); }
+  // fade helper: smoothstep — symmetric, no abrupt onset (full-screen fades pop with the fast-start bezier)
+  function F(p,p0,p1){ var t=seg(p,p0,p1); return t*t*(3-2*t); }
+  // a symmetric in-hold-out envelope: rises [a,b], holds, falls [c,d].
+  function env(p,a,b,c,d){ return W(p,a,b)*(1-W(p,c,d)); }
+
+  // staggered line reveal as a track (rise+clip per line, measured window)
+  function revealLines(lines,p,p0,p1,stag){
+    var span=(p1-p0), per=span-(lines.length-1)*stag;
+    lines.forEach(function(el,i){ var a=p0+i*stag; el.style.setProperty('--r', W(p,a,a+per).toFixed(3)); });
+  }
+
+  // ── TRACK TABLE (S30 CONVEYOR) — measured fractions from LIVE vB (283 frames, ATOMS.md План руху):
+  // A1 Nature 0.00-0.19 | E1 epanel 0.20-0.45 | E2 hand 0.20-0.37 | E3 terrace 0.30-0.44 |
+  // E4 strip 0.37-0.45 | E5 gpanel 0.36-0.44 | E6 cap-swap 0.42-0.45 | E7 sunset 0.43-0.57 |
+  // E8b shady 0.57-0.69 | E8c recreation 0.69-0.80 | A5 morph 0.78-0.85 | A6 Place 0.85-1.00
+  // dockY(p, in0,in1, out0,out1): +120vh (below) → 0 (docked) → −130vh (exited above).
+  function dockY(p,a,b,c,d){ return 120*(1-F(p,a,b)) - 130*F(p,c,d); }
+  // ^ travels use SMOOTHSTEP (zero velocity at both ends): a docked card departs GENTLY and arrives
+  //   gently — the fast-start bezier made standing cards jump into max speed = sawtooth spike.
+  function setTy(el,v){ el.style.setProperty('--ty', v.toFixed(2)+'vh'); }
+  var TRACKS=[
+    // ─ A1 Nature intro (title LEFT + body-1 bottom-right) hold 0-0.17, out 0.17-0.20 ─
+    {p0:0.00,p1:0.14, apply:function(p){ revealLines(natLines,p,0.005,0.09,0.04); }},
+    {p0:0.16,p1:0.20, apply:function(p){ var o=W(p,0.16,0.20);
+      natLines.forEach(function(el){ var r=parseFloat(el.style.getPropertyValue('--r'))||0; el.style.setProperty('--r',(r*(1-o)).toFixed(3)); }); }},
+    {p0:0.03,p1:0.20, apply:function(p){ set(nbody1,'--nb', (F(p,0.03,0.09)*(1-F(p,0.16,0.20))).toFixed(3)); }},
+    // leaf bg dims under the gpanel descend (E5) — no dark gap
+    {p0:0.36,p1:0.45, apply:function(p){ set(bgNat,'--bgNat',(1-F(p,0.34,0.47)).toFixed(3)); }},
+
+    // ─ E1 epanel «Enjoy» (dark panel LEFT): fade-in 0.20-0.23, STANDS through E2-E5, exits UP 0.42-0.45 ─
+    {p0:0.20,p1:0.46, apply:function(p){
+      set(epanel,'--eo', (F(p,0.20,0.24)*(1-F(p,0.445,0.475))).toFixed(3));
+      set(epanel,'--ety', (-60*F(p,0.44,0.48)).toFixed(2)+'vh');       // виходить ВГОРУ
+    }},
+    // ─ E2 hand card: enter from BELOW 0.20-0.25 → dock hold → exit UP 0.30-0.35 ─
+    {p0:0.19,p1:0.37, apply:function(p){ setTy(cvHand, dockY(p,0.19,0.265,0.295,0.365)); }},
+    // ─ E3 terrace right column: enters WHILE E2 exits (counter-movement) 0.29-0.35 → hold → exit 0.40-0.445 ─
+    {p0:0.30,p1:0.48, apply:function(p){ setTy(cvTerr, dockY(p,0.30,0.42,0.44,0.478)); }},
+    // ─ E4 flowerbed strip bottom-left: enters 0.37-0.40 while terrace still on → exits 0.42-0.45 ─
+    {p0:0.345,p1:0.48, apply:function(p){ setTy(cvStrip, dockY(p,0.345,0.42,0.424,0.472)); }},
+    // ─ E5 gpanel: descends from top 0.36-0.44, becomes slider backdrop, stays till morph covers ─
+    {p0:0.36,p1:1.00, apply:function(p){ set(gpanel,'--gty', (-105*(1-F(p,0.34,0.47))).toFixed(2)+'vh'); }},
+
+    // ─ E7 sunset card LEFT: enter 0.43-0.47 → dock hold (caption beside) → exit UP 0.545-0.575 ─
+    {p0:0.41,p1:0.59, apply:function(p){ setTy(cvSun, dockY(p,0.41,0.475,0.535,0.59)); }},
+    // ─ E8b shady card: enter WHILE sunset exits 0.55-0.585 → hold → exit 0.655-0.685 ─
+    {p0:0.545,p1:0.70, apply:function(p){ setTy(cvShady, dockY(p,0.545,0.60,0.645,0.70)); }},
+    // ─ E8c recreation card: enter 0.665-0.695 → hold → exit 0.755-0.785 ─
+    {p0:0.655,p1:0.80, apply:function(p){ setTy(cvRec, dockY(p,0.655,0.71,0.745,0.80)); }},
+    // ─ E6 captions right-centre: crossfade per docked card (Landscaped/Shady/Artfully) ─
+    {p0:0.44,p1:0.79, apply:function(p){
+      var w1=env(p,0.455,0.49,0.525,0.555), w2=env(p,0.575,0.61,0.635,0.665), w3=env(p,0.685,0.72,0.74,0.77);
+      set(ecaps[0],'--co',w1.toFixed(3)); set(ecaps[1],'--co',w2.toFixed(3)); set(ecaps[2],'--co',w3.toFixed(3));
+      set(ecapArr,'--co',Math.max(w1,w2,w3).toFixed(3));
+    }},
+
+    // ─ A5 morph S-ribbon: rises 0.78-0.83 (covers gpanel, no dark gap), holds behind Place ─
+    {p0:0.77,p1:1.00, apply:function(p){
+      set(morph,'--morphO', (F(p,0.77,0.84)*(1-F(p,0.97,1.0))).toFixed(3));
+      set(morphRibbon,'--ribS', (1.06-0.06*W(p,0.77,0.88)).toFixed(3));
+    }},
+
+    // ─ A6 Place: serif+body rise OVER the ribbon 0.85-0.95, coexist ─
+    {p0:0.84,p1:1.00, apply:function(p){ revealLines(placeLines,p,0.85,0.955,0.012);
+      set(placeBody,'--pbo', F(p,0.88,0.96).toFixed(3)); }},
+    // running-lane + odometer tail (beyond the recording): 3 snap plateaus so the gate sees all 3 caps
+    {p0:0.92,p1:1.00, apply:function(p){
+      set(bgPlace,'--bgPlace', F(p,0.92,0.965).toFixed(3));
+      set(bgPlace,'--placeDrift', (-30*seg(p,0.92,1)).toFixed(1)+'px');
+      set(odo,'--odoO', W(p,0.925,0.95).toFixed(3));
+      var sm=clamp(seg(p,0.965,0.972)+seg(p,0.985,0.992),0,2);
+      set(odoRoll,'--step',sm.toFixed(3));
+      var step=Math.round(sm); ph1.style.opacity=(step===0?1:0); ph2.style.opacity=(step===1?1:0); ph3.style.opacity=(step===2?1:0);
+      odoCap.innerHTML=CAP_LEAD[step]+CAPS[step];
+    }},
+    // scroll cue fades out early
+    {p0:0.00,p1:0.12, apply:function(p){ set(cue,'--cueO',(0.8*(1-W(p,0.03,0.10))).toFixed(2)); }},
+  ];
+
+  var smooth=0;
+  function render(p){ for(var i=0;i<TRACKS.length;i++) TRACKS[i].apply(p); }
+  
+ return {render:render, track:document.getElementById('track3')};
+})();
+
+/* ---- SO-4-place-location ---- */
+COMP[4]=(function(){
+
+  var track=document.getElementById('track4');
+  var bgPlace=document.querySelector('#so4 #bgPlace');
+  var loc=document.querySelector('#so4 #loc'), locPanel=document.querySelector('#so4 #locPanel'),
+      locMap=document.querySelector('#so4 #locMap'), locCopy=document.querySelector('#so4 #locCopy'),
+      locNext=document.querySelector('#so4 #locNext');
+  var placeLines=[].slice.call(document.querySelectorAll('#so4 #placeB .ln'));
+  var head=document.querySelector('#so4 #head'), cue=document.querySelector('#so4 #cue');
+  var locPins=document.querySelector('#so4 #locPins');
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function set(el,k,v){el.style.setProperty(k,v);}
+  function revealLines(lines,p,start,end,stag,dir){
+    var span=(end-start);
+    lines.forEach(function(el,i){
+      var a=start+i*stag, b=a+(span-(lines.length-1)*stag);
+      var r=eo(seg(p,a,b)); if(dir<0)r=1-r;
+      el.style.setProperty('--r', r.toFixed(3));
+    });
+  }
+  var smooth=0;
+  function render(p){
+    // PLACE tail rises in (0.03→0.24), rises out on the flip (0.32→0.44)
+    if(p<0.32) revealLines(placeLines,p,0.03,0.24,0.05,+1);
+    else       revealLines(placeLines,p,0.32,0.44,0.02,-1);
+    set(bgPlace,'--placeDrift',(-40*seg(p,0,0.5)).toFixed(1)+'px');
+
+    // THE FLIP — the whole Location layer fades in over [0.40,0.54] (live: sharp, one gesture window)
+    var flip=eo(seg(p,0.40,0.54));
+    set(loc,'--locO',flip.toFixed(3));
+    // Place bg dims but the LEFT leaf strip stays visible behind the panel (panel is 78%, not full-bleed)
+    set(bgPlace,'--bgPlace',(1-0.9*flip).toFixed(3));
+    // header + cue ink flips to dark (panel is on the right; header still reads over cream)
+    var light = flip>0.5;
+    head.style.setProperty('--headC', light? '#4a5f54':'#cfe0d6');
+    cue.style.setProperty('--cueC', light? '#5c7266':'#9fb0a6');
+
+    // cream PANEL slides in from the right (0.42→0.58)
+    set(locPanel,'--panel', eo(seg(p,0.42,0.58)).toFixed(3));
+    // watercolor map settles (scale-in + fade) inside the panel (0.48→0.80)
+    set(locMap,'--rev', eo(seg(p,0.48,0.80)).toFixed(3));
+    // dark-ink copy rises in ON the map (0.56→0.72)
+    set(locCopy,'--copyO', eo(seg(p,0.56,0.72)).toFixed(3));
+    // pin labels are HOVER-ONLY (map at rest = live baseline). Enable hover once the map has settled
+    // so the callouts can't fire mid-flip; at rest nothing is drawn, so parity is untouched.
+    locPins.classList.toggle('ready', p>0.80);
+    // next-section (Design) preview strip fades in near the end (0.80→0.96)
+    set(locNext,'--nextO', eo(seg(p,0.80,0.96)).toFixed(3));
+
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  
+ return {render:render, track:document.getElementById('track4')};
+})();
+
+/* ---- SO-5-location-residences ---- */
+COMP[5]=(function(){
+
+  var track=document.getElementById('track5');
+  var mapTail=document.querySelector('#so5 #mapTail'), card1=document.querySelector('#so5 #card1'),
+      card2=document.querySelector('#so5 #card2'), manifesto=document.querySelector('#so5 #manifesto'),
+      kick=document.querySelector('#so5 #kick'), cue=document.querySelector('#so5 #cue');
+  var mLines=[].slice.call(document.querySelectorAll('#so5 #manifesto .ln'));
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function set(el,k,v){el.style.setProperty(k,v);}
+  function revealLines(lines,p,start,end,stag){
+    var span=(end-start);
+    lines.forEach(function(el,i){var a=start+i*stag,b=a+(span-(lines.length-1)*stag);
+      el.style.setProperty('--r', eo(seg(p,a,b)).toFixed(3));});
+  }
+  var smooth=0;
+  function render(p){
+    // Location map exits left (0.06→0.24)
+    set(mapTail,'--mapOut', eo(seg(p,0.06,0.24)).toFixed(3));
+    // kicker + card1 enter as map leaves (0.20→0.36)
+    set(kick,'--kO', eo(seg(p,0.22,0.36)).toFixed(3));
+    set(card1,'--c1', eo(seg(p,0.20,0.40)).toFixed(3));
+    // central manifesto rises in (0.34→0.56), lines staggered
+    set(manifesto,'--mO', eo(seg(p,0.34,0.50)).toFixed(3));
+    revealLines(mLines,p,0.36,0.60,0.05);
+    // card2 slides in from the left, lower (0.46→0.66) — so all three co-exist by ~0.7 (baseline phase)
+    set(card2,'--c2', eo(seg(p,0.46,0.66)).toFixed(3));
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  
+ return {render:render, track:document.getElementById('track5')};
+})();
+
+/* ---- SO-6-residences-interiors ---- */
+COMP[6]=(function(){
+
+  var track=document.getElementById('track6');
+  var resTail=document.querySelector('#so6 #resTail'), photo=document.querySelector('#so6 #photo'),
+      word=document.querySelector('#so6 #word'), sub=document.querySelector('#so6 #sub'),
+      copy=document.querySelector('#so6 #copy'), cue=document.querySelector('#so6 #cue');
+  var rhead=document.querySelector('#so6 #rhead'), rcard=document.querySelector('#so6 #rcard'), rbase=document.querySelector('#so6 #rbase');
+  var rslides=[document.querySelector('#so6 #rslide1'),document.querySelector('#so6 #rslide2'),document.querySelector('#so6 #rslide3')];
+  var rcardName=document.querySelector('#so6 #rcardName'), rcardTag=document.querySelector('#so6 #rcardTag'),
+      rcardN=document.querySelector('#so6 #rcardN'), rcardNL=document.querySelector('#so6 #rcardNL'),
+      rcardH=document.querySelector('#so6 #rcardH'), rcardCta=document.querySelector('#so6 #rcardCta');
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function ss(t){return t*t*(3-2*t);}                 // smoothstep — symmetric ease (smoothness lesson S28)
+  function set(el,k,v){el.style.setProperty(k,v);}
+  // live copy per residence type (from animation-map-residences)
+  var RES=[
+    {name:'Flats',      tag:'Designer finishings', n:'138', nl:'panoramic view flats', h:'3.1 m', cta:'Search flats'},
+    {name:'Townhouses', tag:'Private patios',      n:'5',   nl:'townhouses',           h:'4.1 m', cta:'Available soon'},
+    {name:'Penthouses', tag:'Green terraces',      n:'7',   nl:'penthouses',           h:'4.1 m', cta:'Available soon'}
+  ];
+  // carousel window across the 3 residence types (before the interiors seam)
+  var RC0=0.14, RC1=0.50;
+  var curR=-1;
+  function renderResidences(p){
+    // header + card enter LINEARLY over a wide band (0.05→0.18), out before the seam (0.52→0.58) —
+    // wide non-overlapping windows + a settled hold, per the SO-2 smoothness fix (no 5% pop).
+    var inO=seg(p,0.05,0.18) * (1-ss(seg(p,0.56,0.70)));   // out overlaps photo-in for a continuous handoff
+    set(rhead,'--rheadO', inO.toFixed(3));
+    set(rcard,'--rcardO', inO.toFixed(3));
+    var t=clamp((p-RC0)/(RC1-RC0),0,1);
+    var pos=t*(RES.length-1);            // 0..2 continuous
+    var idx=Math.round(pos);
+    // the render stack fades in early (0→0.10) so the section never opens on the dark base bg, and
+    // fades out at the seam (0.56→0.70). Between, the symmetric cross-dissolve ss(1-d) runs per type
+    // (solo at settle, 0.5/0.5 at boundary, no bleed — SO-2 pattern). Header/card use inO separately.
+    var seamOut = (1-ss(seg(p,0.56,0.70)));   // whole residences layer fades at the seam
+    // rbase (Flats opening image) is fully lit from p=0 (so the section never opens dark), then fades
+    // out only at the seam. The cross-dissolving rslides ride on top of it.
+    rbase.style.opacity = seamOut.toFixed(3);
+    for(var i=0;i<rslides.length;i++){
+      var d=Math.abs(pos-i);
+      rslides[i].style.setProperty('--o', (ss(clamp(1-d,0,1))*seamOut).toFixed(3));
+    }
+    if(idx!==curR){ curR=idx; var r=RES[idx];
+      rcardName.textContent=r.name; rcardTag.textContent=r.tag; rcardN.textContent=r.n;
+      rcardNL.textContent=r.nl; rcardH.textContent=r.h; rcardCta.textContent=r.cta;
+    }
+  }
+  var smooth=0;
+  function render(p){
+    renderResidences(p);
+    // interior seam runs in the LATER track portion (residences out → cream tail → interior photo)
+    // interior photo crossfades in over the cream residences tail (0.56→0.80) — wide, smoothstep
+    set(photo,'--photo', ss(seg(p,0.56,0.80)).toFixed(3));
+    // resTail cream is only present during the seam handoff (kept off during the residences carousel)
+    resTail.style.opacity = (ss(seg(p,0.56,0.66)) * (1 - ss(seg(p,0.60,0.80)))).toFixed(3);
+    // act-word Interiors rises+wipes in — WIDE window (0.74→0.94) with smoothstep so the big serif
+    // eases in over the photo instead of snapping (the front-loaded eo made an entry spike).
+    set(word,'--r', ss(seg(p,0.74,0.94)).toFixed(3));
+    set(sub,'--subO', ss(seg(p,0.88,0.98)).toFixed(3));
+    // bottom-left body copy (0.82→0.97)
+    set(copy,'--copyO', ss(seg(p,0.82,0.97)).toFixed(3));
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  
+ return {render:render, track:document.getElementById('track6')};
+})();
+
+/* ---- SO-7-interiors-footer ---- */
+COMP[7]=(function(){
+
+  var track=document.getElementById('track7');
+  var photo=document.querySelector('#so7 #photo'), head=document.querySelector('#so7 #head'), cue=document.querySelector('#so7 #cue');
+  var ibase=document.querySelector('#so7 #ibase'), ihead=document.querySelector('#so7 #ihead'),
+      icopy=document.querySelector('#so7 #icopy'), irail=document.querySelector('#so7 #irail');
+  var islides=[document.querySelector('#so7 #islide1'),document.querySelector('#so7 #islide2'),document.querySelector('#so7 #islide3'),document.querySelector('#so7 #islide4'),document.querySelector('#so7 #islide5')];
+  var irailItems=[].slice.call(document.querySelectorAll('#so7 #irail .irail__t'));
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,b){return clamp((p-a)/(b-a),0,1);}
+  function eo(t){return 1-Math.pow(1-t,3);}
+  function ss(t){return t*t*(3-2*t);}                 // smoothstep — symmetric ease (S28 smoothness lesson)
+  function set(el,k,v){el.style.setProperty(k,v);}
+  // slider window across the 5 interior frames (before the footer lift)
+  var IC0=0.10, IC1=0.52;
+  var curI=-1;
+  function renderSlider(p){
+    // header/copy/rail fade in early (0.04→0.16), out before the lift (0.54→0.62) — wide,
+    // non-overlapping windows per the SO-2 smoothness fix. rail is UI so it exits with the slider.
+    var uiO=seg(p,0.04,0.16) * (1-ss(seg(p,0.54,0.62)));
+    set(ihead,'--iheadO',uiO.toFixed(3)); set(icopy,'--icopyO',uiO.toFixed(3)); set(irail,'--irailO',uiO.toFixed(3));
+    // slide stack: lit from p=0 (ibase floor), out at the lift handoff (0.54→0.64)
+    var stackO = (1-ss(seg(p,0.54,0.64)));
+    ibase.style.opacity = stackO.toFixed(3);
+    var t=clamp((p-IC0)/(IC1-IC0),0,1);
+    var pos=t*(islides.length-1);           // 0..4 continuous frame position
+    var idx=Math.round(pos);
+    for(var i=0;i<islides.length;i++){
+      var d=Math.abs(pos-i);
+      // symmetric cross-dissolve ss(1-d): solo at settle, 0.5/0.5 at boundary, no bleed — SO-2 pattern
+      islides[i].style.setProperty('--o', (ss(clamp(1-d,0,1))*stackO).toFixed(3));
+    }
+    if(idx!==curI){ curI=idx; irailItems.forEach(function(el,i){ el.classList.toggle('on', i===idx); }); }
+  }
+  var smooth=0;
+  function render(p){
+    renderSlider(p);
+    // footer-lift photo fades in over the last slider frame (0.55→0.64), then lifts up (0.62→0.98)
+    // — WIDE lift window so the full-viewport translate is a gentle glide, not a fast sweep.
+    set(photo,'--photoO', ss(seg(p,0.55,0.64)).toFixed(3));
+    set(photo,'--lift', ss(seg(p,0.62,0.98)).toFixed(3));
+    // header (top nav) fades as the photo clears
+    set(head,'--headO', (1 - seg(p,0.64,0.82)).toFixed(3));
+    set(cue,'--cueO',(0.8*(1-seg(p,0.05,0.2))).toFixed(2));
+  }
+  
+ return {render:render, track:document.getElementById('track7')};
+})();
+
+  // shared scroll loop: for each section compute its own progress from its real position, call render.
+  var secs=[].slice.call(document.querySelectorAll('.so'));
+  var chud=document.getElementById('chud');
+  function frame(){
+    var vh=window.innerHeight, mid=window.scrollY+vh/2, curName='SO-1 · Hero → Wellness';
+    for(var n=1;n<=7;n++){ var c=COMP[n]; if(!c||!c.track) continue;
+      var r=c.track.getBoundingClientRect(), total=c.track.offsetHeight-vh;
+      var p=clamp((-r.top)/total,0,1);
+      c.render(p);
+      var top=r.top+window.scrollY; if(mid>=top){ var s=secs[n-1]; if(s) curName='SO-'+s.dataset.n+' · '+s.dataset.name; }
+    }
+    chud.textContent=curName;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  if(window.Lenis){ var lenis=new Lenis({lerp:0.1,smoothWheel:true});
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+  window.__COMPOSITE_OK__=true;
+</script>
+</body>
+</html>

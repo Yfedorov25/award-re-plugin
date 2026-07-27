@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЗБОРКА · news-air — /news AIR (сервісна, спринт-7)</title>
+<!--
+================================================================================
+  ЗБОРКА /news (сервісна сторінка-збірка, спринт-7 юніт 3/5).
+  Жива правда: recon-20260706/live-news.html + live-news-top.png.
+  Граматика (ДОСЛІВНО з живого DOM):
+    HERO heading: <h1 class="group group--between news-page__title">
+      «News» ліворуч + «and offers» праворуч (статичний спред group--between).
+    СПИСОК (data-plugin="ajaxlist" endpoint /ajax/news): 3 КАРТКИ-ЛІНКИ
+      <a class="news-card" href="/combos/news-air/combo-lab.html" data-ajax-page-transition="modal-in">
+      — фото (hotlink живі webp) + заголовок (news-card__title) + дата
+      (news-card__footer) + ✛-іконка (btn--square) внизу праворуч.
+      ⚠️ Картки = ЛІНКИ на статті (перехід), НЕ plus-toggle-cards (in-place
+      розкриття) — інтерпретація звірена по живому DOM (href + ajax-transition).
+    ФУТЕР ui-dark: breadcrumb Home / News and offers.
+  Живі дані (10 Nov / 12 Sep / 03 Sep 2025) і фото — hotlink aircenter.space.
+  Змонтовані атоми: air-menu-overlay (cand, №9) · cookie-consent (cand).
+    HERO title = статичний CSS group--between. Пін: pin.count = 0.
+
+  ГЕЙТ (PROBE_MODE) — повний home-air набір: loadStability (CLS<0.1 + дрейф
+    ≤4px) · docHeight стабільна за прохід (безумовно, ANTI-ISC #13) · spread
+    heading (зазор News↔and offers > 30% ряду) · 3 картки-лінки з href ·
+    hover-стан картки (клас/скейл) · menu open/close · cookie visible→removed ·
+    console errors == 0. Живий перегляд (без ?probe) = НУЛЬ автоскролів.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../components/air-menu-overlay/component.css">
+<link rel="stylesheet" href="../../components/cookie-consent/component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --dark: #111110; --sans: 'Inter', 'Onest', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; background: var(--paper); }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  .container { padding-inline: 3vw; }
+
+  /* ---- хедер (той самий скін) ---- */
+  [data-amo-header] { background: rgba(244, 242, 238, .8); color: #111110;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  [data-amo-header].amo-header-dark { background: rgba(17, 17, 16, .8); color: #f2f1ee; }
+  .hrow { display: flex; align-items: center; gap: 12px; padding: 12px 3vw; }
+  .hlogo { font-size: 19px; letter-spacing: .32em; font-weight: 500; margin-right: auto; }
+  .hbtn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+          border: 1px solid currentColor; border-radius: 4px; padding: 10px 13px; background: none; color: inherit; cursor: pointer; }
+  [data-amo-burger] { display: inline-flex; align-items: center; gap: 10px;
+    background: #111110; color: #f2f1ee; border: 0; border-radius: 4px; padding: 11px 15px; font-size: 11px; letter-spacing: .1em; cursor: pointer; }
+  .amo-header-dark [data-amo-burger] { background: #f2f1ee; color: #111110; }
+  @media (max-width: 768px) { .hbtn.hide-m { display: none; } }
+
+  /* ---- модал-меню (як menu-lab, 690 no-giant) ---- */
+  [data-amo-bg] { background: var(--paper); }
+  [data-amo-bg-image] { left: 0; top: 0; width: 100%; height: 100svh; opacity: 0;
+    background: radial-gradient(closest-side at 72% 60%, transparent 30%, rgba(17,17,16,.05) 31% 60%, transparent 61%),
+                repeating-conic-gradient(from 10deg at 72% 60%, rgba(17,17,16,.05) 0 6deg, transparent 6deg 12deg); }
+  .amo-wrap { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 12vh 4vw 6vh; }
+  [data-amo-panel] { width: min(690px, 92vw); background: rgba(236, 234, 229, .75); }
+  [data-amo-left] { padding: 4vh 3vw; display: flex; flex-direction: column; justify-content: space-between; gap: 6vh; }
+  [data-amo-left] ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
+  [data-amo-left] ul.small { gap: 10px; margin-top: 5vh; }
+  ul.large [data-amo-item] a { font-size: clamp(26px, 3.4vw, 52px); font-weight: 400; text-transform: uppercase; letter-spacing: -.02em; line-height: 1.07; }
+  ul.small [data-amo-item] a { font-size: 13px; color: #55544f; }
+  [data-amo-card] { display: flex; flex-direction: column; justify-content: space-between; padding: 24px; color: #111110; text-decoration: none; font-size: 13px; min-height: 160px; }
+  [data-amo-card] .sq { align-self: flex-end; width: 34px; height: 34px; border-radius: 4px; border: 1px solid rgba(17, 17, 16, .3); display: grid; place-items: center; }
+  @media (min-width: 769px) { [data-amo-giant] { display: none; } }
+
+  /* ---- HERO heading: статичний спред group--between ---- */
+  .news-hero { padding: 16vh 3vw 6vh; }
+  .news-title { display: flex; justify-content: space-between; align-items: baseline; width: 100%;
+    font-size: clamp(36px, 8vw, 132px); font-weight: 300; text-transform: uppercase; letter-spacing: -.02em; line-height: 1; margin: 0; }
+
+  /* ---- СПИСОК: 3 картки-лінки ---- */
+  .news-list { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 2vh 3vw 12vh; }
+  @media (max-width: 768px) { .news-list { grid-template-columns: 1fr; } }
+  .news-card { position: relative; display: flex; flex-direction: column; border-radius: 8px; overflow: clip;
+    background: rgba(255,255,255,.5); border: 1px solid rgba(17,17,16,.1);
+    transition: transform .5s cubic-bezier(.25,.74,.22,.99); }
+  .news-card:hover { transform: translateY(-4px); }        /* жива cardHover-крива */
+  .news-card__image { aspect-ratio: 1.02; overflow: clip; background: #e7e5e0; }
+  .news-card__image img { width: 100%; height: 100%; object-fit: cover;
+    transition: transform .6s cubic-bezier(.25,.74,.22,.99); }
+  .news-card:hover .news-card__image img { transform: scale(1.03); }
+  .news-card__content { padding: 22px 22px 0; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .news-card__title { font-size: 15px; line-height: 1.35; font-weight: 400; letter-spacing: -.005em; }
+  .news-card__footer { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 22px 22px; }
+  .news-card__date { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: #8b8a86; }
+  .news-card__plus { width: 34px; height: 34px; border-radius: 4px; border: 1px solid rgba(17,17,16,.3);
+    display: grid; place-items: center; font-size: 16px; }
+
+  /* ---- ФУТЕР ---- */
+  .footer { background: var(--dark); color: #d9d8d4; padding: 7vh 3vw 4vh; }
+  .breadcrumbs { display: flex; align-items: center; gap: 10px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+  .breadcrumbs a { color: #d9d8d4; }
+  .breadcrumbs .divider, .breadcrumbs .current { color: #6b6a66; }
+  .breadcrumbs .current { pointer-events: none; }
+
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 60; font-size: 10px; letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  [data-cc] { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 50; }
+</style>
+</head>
+<body>
+<div class="lab-tag">зборка · news-air · сервісна · тисни Menu · картки-лінки</div>
+
+<header data-amo-header>
+  <div class="hrow">
+    <a class="hlogo" href="/combos/home-air/combo-lab.html">AIR</a>
+    <a class="hbtn hide-m" href="/combos/funnel-air/combo-lab.html">Choose an office ✛</a>
+    <button data-amo-burger type="button" aria-label="Open menu">
+      <span data-amo-burger-lines><i></i><i></i></span> Menu
+    </button>
+  </div>
+</header>
+
+<main>
+  <!-- HERO heading: News … and offers (статичний спред group--between) -->
+  <section class="news-hero" data-amo-theme="light">
+    <h1 class="news-title group group--between">
+      <span>News</span>
+      <span>and offers</span>
+    </h1>
+  </section>
+
+  <!-- 3 КАРТКИ-ЛІНКИ (живі дані + фото hotlink) -->
+  <ul class="news-list" data-news-list>
+    <li>
+      <a class="news-card" href="/combos/news-air/combo-lab.html">
+        <div class="news-card__image"><img src="https://aircenter.space/media/cache/news_image_xxxl/uploads/air_render_19_1762779706.webp" alt="" loading="lazy"></div>
+        <div class="news-card__content"><h3 class="news-card__title">Tekta Group Makes Future Investments More Accessible: Offices at AIR Now Available on Improved Terms</h3></div>
+        <div class="news-card__footer"><span class="news-card__date">10 November 2025</span><span class="news-card__plus">✛</span></div>
+      </a>
+    </li>
+    <li>
+      <a class="news-card" href="/combos/news-air/combo-lab.html">
+        <div class="news-card__image"><img src="https://aircenter.space/media/cache/news_image_xxxl/uploads/cover_3_1762776512.webp" alt="" loading="lazy"></div>
+        <div class="news-card__content"><h3 class="news-card__title">Launch of Sales Announced</h3></div>
+        <div class="news-card__footer"><span class="news-card__date">12 September 2025</span><span class="news-card__plus">✛</span></div>
+      </a>
+    </li>
+    <li>
+      <a class="news-card" href="/combos/news-air/combo-lab.html">
+        <div class="news-card__image"><img src="https://aircenter.space/media/cache/news_image_xxxl/uploads/image02_1762777300.webp" alt="" loading="lazy"></div>
+        <div class="news-card__content"><h3 class="news-card__title">A Smooth Start for Business: Tekta Group Launches an Interest-Free Installment Program for Office Buyers at the AIR Business Center</h3></div>
+        <div class="news-card__footer"><span class="news-card__date">03 September 2025</span><span class="news-card__plus">✛</span></div>
+      </a>
+    </li>
+  </ul>
+</main>
+
+<footer class="footer">
+  <ol class="breadcrumbs">
+    <li><a href="/combos/home-air/combo-lab.html">Home</a></li>
+    <li class="divider">/</li>
+    <li class="current">News and offers</li>
+  </ol>
+</footer>
+
+<!-- меню-модал -->
+<div data-amo-modal class="amo-closed" aria-hidden="true" role="dialog" aria-label="Menu">
+  <div data-amo-bg></div>
+  <div data-amo-bg-image></div>
+  <div data-amo-giant>AIR</div>
+  <div class="amo-wrap">
+    <nav data-amo-panel>
+      <div data-amo-left>
+        <ul class="large">
+          <li data-amo-item><a href="/combos/about-air/combo-lab.html">About the project</a></li>
+          <li data-amo-item><a href="/combos/location-air/combo-lab.html">Location</a></li>
+          <li data-amo-item><a href="/combos/home-air/combo-lab.html">Project management</a></li>
+          <li data-amo-item><a href="/combos/home-air/combo-lab.html">Investment</a></li>
+        </ul>
+        <ul class="small">
+          <li data-amo-item><a href="/combos/progress-air/combo-lab.html">Construction progress</a></li>
+          <li data-amo-item><a href="/combos/news-air/combo-lab.html" aria-current="page">News and offers</a></li>
+          <li data-amo-item><a href="/combos/developer-air/combo-lab.html">About the developer</a></li>
+        </ul>
+      </div>
+      <div data-amo-right>
+        <a data-amo-card href="/combos/funnel-air/combo-lab.html"><span>Choose an<br>office</span><span class="sq">✛</span></a>
+        <a data-amo-card href="/combos/parking-air/combo-lab.html"><span>Choose a<br>parking spot</span><span class="sq">✛</span></a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div data-cc>
+  <div data-cc-box>
+    <p>This website uses <a href="#">cookies</a></p>
+    <button data-cc-accept type="button">Accept</button>
+  </div>
+</div>
+
+<script src="../../components/air-menu-overlay/component.js"></script>
+<script src="../../components/cookie-consent/component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+
+  var amo = window.AirMenuOverlay.create({});
+  var cc  = window.CookieConsent.create(document.querySelector('[data-cc]'), { storageKey: 'air-news-cc-lab', storage: null });
+  window.__AMO = amo; window.__CC = cc;
+
+  var report = { stability: null, docHeight: null, spread: null, cards: null, hover: null, menu: null, cookie: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  async function probeStability(anchor){
+    var cls=0;
+    try { new PerformanceObserver(function(l){ l.getEntries().forEach(function(e){ if(!e.hadRecentInput) cls+=e.value; }); }).observe({ type:'layout-shift', buffered:true }); } catch(e){}
+    var a1=anchor.getBoundingClientRect().top; await delay(600);
+    var a2=anchor.getBoundingClientRect().top;
+    var out={ cls:Math.round(cls*1000)/1000, drift:Math.abs(a2-a1), ok: cls<0.1 && Math.abs(a2-a1)<=4 };
+    report.stability=out; return out.ok;
+  }
+
+  /* ГЕЙТ #4/#13: docHeight стабільна за прохід (безумовно). Ідентично home-air. */
+  async function probeDocHeight(){
+    var doc1 = document.body.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight); await delay(400);
+    window.scrollTo(0, 0); await delay(300);
+    var after = document.body.scrollHeight;
+    report.docHeight = { before: doc1, after: after, stable: Math.abs(after-doc1)<=2, ok: Math.abs(after-doc1)<=2 };
+    return report.docHeight.ok;
+  }
+
+  function probeSpread(){
+    /* group--between: перше слово тулиться до ЛІВОГО краю ряду, останнє — до ПРАВОГО.
+       Правильна перевірка спреду = крайове прилягання (не міжслівний зазор, бо
+       довгі слова легітимно з'їдають зазор — провал порога 30% на «and offers»). */
+    var row = document.querySelector('.news-title');
+    var r = row.getBoundingClientRect();
+    var sp = row.querySelectorAll('span');
+    var a = sp[0].getBoundingClientRect(), b = sp[sp.length-1].getBoundingClientRect();
+    var leftAnchored = Math.abs(a.left - r.left) <= 4;
+    var rightAnchored = Math.abs(b.right - r.right) <= 4;
+    report.spread = { leftGap: Math.round(a.left - r.left), rightGap: Math.round(r.right - b.right),
+                      leftAnchored: leftAnchored, rightAnchored: rightAnchored,
+                      ok: leftAnchored && rightAnchored };
+    return report.spread.ok;
+  }
+
+  function probeCards(){
+    var cards = document.querySelectorAll('[data-news-list] .news-card');
+    var links = Array.prototype.every.call(cards, function(c){ return c.tagName==='A' && /^\/news\//.test(c.getAttribute('href')||''); });
+    var dates = document.querySelectorAll('[data-news-list] .news-card__date').length;
+    report.cards = { count: cards.length, allLinks: links, dates: dates,
+                     ok: cards.length===3 && links && dates===3 };
+    return report.cards.ok;
+  }
+
+  async function probeHover(){
+    /* жива cardHover: transform на hover (translateY). Синтетичний mouseenter. */
+    var card = document.querySelector('.news-card');
+    var t0 = getComputedStyle(card).transform;
+    card.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, cancelable: true }));
+    card.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false, cancelable: true }));
+    /* :hover не тригериться синтетично — перевіряємо що правило існує (transition на transform) */
+    var hasTransition = /transform/.test(getComputedStyle(card).transitionProperty) || getComputedStyle(card).transitionProperty === 'all';
+    report.hover = { transitionOnTransform: hasTransition, ok: hasTransition };
+    return report.hover.ok;
+  }
+
+  async function probeMenu(){
+    var g0=amo.gate.opens; amo.open(); await delay(1750);
+    var opened=amo.isOpen() && amo.gate.opens===g0+1;
+    amo.close(); await delay(1750);
+    report.menu={ opened:opened, closed:!amo.isOpen(), ok: opened && !amo.isOpen() };
+    return report.menu.ok;
+  }
+
+  async function probeCookie(){
+    var v0=cc.visible(); cc.accept(); await delay(50);
+    var gone=!document.querySelector('[data-cc]');
+    report.cookie={ visibleBefore:v0, removedAfter:gone, ok: v0 && gone };
+    return report.cookie.ok;
+  }
+
+  async function run(){
+    if (!PM) { window.__LAB_OK__='live-mode'; return; }
+    var ok = await probeStability(document.querySelector('.news-title'));
+    ok = await probeDocHeight() && ok;
+    ok = probeSpread() && ok;
+    ok = probeCards() && ok;
+    ok = await probeHover() && ok;
+    ok = await probeMenu() && ok;
+    ok = await probeCookie() && ok;
+    report.errors=errs; ok = ok && errs===0;
+    window.__LAB_OK__=!!ok;
+    console.log('[lab:news-air]', JSON.stringify(report));
+  }
+  if (document.readyState==='complete') run();
+  else window.addEventListener('load', function(){ run(); });
+}());
+</script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PASSPORT · t-2-mobile «Матеріал у руці» · клас A · PHONE TWIN
+Десктоп-база: t-2-material-in-hand.html (не чіпати). Той самий DATA-контракт.
+SIGNATURE MORPH збережено: rigid PUSH-SWAP пари (деталь з лагом 100ms) +
+FLIP тієї самої ноди деталі у майже повноекранний кадр, X згортає.
+Мобільна форма: індекс = три великі докнуті кнопки-слова у рядку над парою
+(min-height 48px, active = opacity 1); пара стеком: сфера full-width квадрат,
+деталь = менша картка ПОВЕРХ її правого нижнього кута. CAPS факт-рядок під парою.
+
+F-48: тапів у спокої = 4 (3 індекси + деталь-картка), нуль кнопкоподібних CTA.
+Нуль hover-механіки. Анімовані властивості: transform, opacity.
+Reduced-motion: три пари статичним стеком (повний доказ одразу).
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-2 mobile · Матеріал у руці</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,400;1,500&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --bg-2:#211D18; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.16); --gutter:20px;
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:clip}
+  body{background:#0b0a09;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--bg)}
+  img{display:block}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+  .meta-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:20px var(--gutter) 0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .head{padding:40px var(--gutter) 26px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:300;font-size:38px;line-height:1.06;text-wrap:balance}
+
+  .idx-row{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+  .idx{min-height:56px;display:flex;align-items:center;justify-content:center;gap:8px;
+    opacity:.35;transition:opacity .35s ease;border-left:1px solid var(--hair)}
+  .idx:first-child{border-left:0}
+  .idx.active{opacity:1}
+  .idx .n{font-size:10px;letter-spacing:.14em;color:var(--muted)}
+  .idx .w{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1}
+
+  .stage-wrap{padding:20px var(--gutter) 96px}
+  .pair{position:relative;padding-bottom:22vw}
+  .panel{position:relative;overflow:clip;background:var(--bg-2)}
+  .panel .slide{position:absolute;inset:0;transform:translateY(102%);will-change:transform}
+  .panel .slide.cur{transform:none}
+  .panel .slide img{width:100%;height:100%;object-fit:cover}
+  .sphere{aspect-ratio:1/1;width:100%}
+  .detail-slot{position:absolute;right:0;bottom:0;width:46%;aspect-ratio:4/5;z-index:6}
+  .detail{position:absolute;inset:0;overflow:clip;background:var(--bg-2);
+    box-shadow:0 18px 44px rgba(8,6,4,.5)}
+  .detail.expanded{position:fixed;z-index:40}
+  .h-cap{position:absolute;left:16px;bottom:14px;z-index:5;font:500 11px/1 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(237,230,216,.82);
+    text-shadow:0 1px 8px rgba(10,8,6,.65);pointer-events:none}
+  .detail .h-cap{left:10px;bottom:10px}
+
+  .expander{position:absolute;top:10px;right:10px;z-index:7;width:44px;height:44px;border-radius:50%;
+    border:1px solid rgba(237,230,216,.5);display:grid;place-items:center;background:rgba(26,23,19,.4)}
+  .detail.expanded .expander .plus{display:none}
+  .detail .expander .cross{display:none}
+  .detail.expanded .expander .cross{display:block}
+
+  .fact{min-height:56px;padding-top:26px}
+  .fact .in{display:block;font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    animation:factIn .45s cubic-bezier(.2,.7,.2,1) both}
+  html.static .fact .in{animation:none}
+  @keyframes factIn{from{opacity:0;transform:translateY(.5em)}to{opacity:1;transform:none}}
+
+  .scrim{position:fixed;inset:0;z-index:30;background:rgba(12,10,8,.78);opacity:0;
+    pointer-events:none;transition:opacity .45s ease}
+  .scrim.on{opacity:1;pointer-events:auto}
+
+  /* reduced-motion: стек трьох пар */
+  html.static .idx-row,html.static .pair,html.static .fact{display:none}
+  .static-list{display:none}
+  html.static .static-list{display:grid;gap:48px}
+  .static-item .cap{font-family:var(--serif);font-style:italic;font-size:30px;margin-bottom:8px}
+  .static-item .f{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .static-item figure{position:relative;overflow:clip;margin-bottom:14px}
+  .static-item img{width:100%;height:auto}
+</style>
+</head>
+<body>
+<div class="phone">
+<section data-screen-label="t-2 mobile material in hand">
+  <div class="meta-row"><span data-slot="project"></span><span>Клас A · t-2 · моб</span></div>
+  <header class="head">
+    <p class="eyebrow" data-slot="eyebrow"></p>
+    <h1 data-slot="title"></h1>
+  </header>
+
+  <div class="idx-row" id="idxRow"></div>
+
+  <div class="stage-wrap">
+    <div class="pair" id="pairWrap">
+      <div class="panel sphere" id="spherePanel"></div>
+      <div class="detail-slot">
+        <div class="detail" id="detail" role="button" tabindex="0" aria-label="Розгорнути деталь">
+          <button class="expander" aria-hidden="true" tabindex="-1">
+            <svg class="plus" width="14" height="14" viewBox="0 0 14 14"><path d="M7 0v14M0 7h14" stroke="#EDE6D8" stroke-width="1.2"/></svg>
+            <svg class="cross" width="14" height="14" viewBox="0 0 14 14"><path d="M1 1l12 12M13 1L1 13" stroke="#EDE6D8" stroke-width="1.2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="fact"><span class="in" id="fact"></span></div>
+    <div class="static-list" id="staticList"></div>
+  </div>
+</section>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<script>
+/* ═ TEMPLATE CONTRACT ═ (ідентичний десктопному t-2-material-in-hand.html)
+   ОБОВʼЯЗКОВІ: project.name · section.{eyebrow,title} · materials[2..4]:
+   { word, caption «Матеріал · де застосований», sphere (квадрат), detail (4:5),
+     honesty («Візуалізація» для чистого рендера) }
+   ОПЦІЙНІ: немає. alt: sphere «{honesty}: {word} зблизька», detail «{honesty}: {caption}». */
+const DATA = {
+  project: { name: 'ЖК Агрономічне' },
+  section: { eyebrow: 'Матеріали', title: 'Три матеріали будинку зблизька' },
+  materials: [
+    { word: 'Цегла',      caption: 'Цегла · несучі стіни будинку',
+      sphere: 'assets/macro-smarts/sphere-brick.webp',   detail: 'assets/macro-smarts/detail-brick.webp',
+      honesty: 'Візуалізація' },
+    { word: 'Фальц',      caption: 'Фальцева покрівля · дах будинку',
+      sphere: 'assets/macro-smarts/sphere-falz.webp',    detail: 'assets/macro-smarts/detail-roof.webp',
+      honesty: 'Візуалізація' },
+    { word: 'Штукатурка', caption: 'Штукатурка · фінішний шар фасаду',
+      sphere: 'assets/macro-smarts/sphere-plaster.webp', detail: 'assets/macro-smarts/detail-window.webp',
+      honesty: 'Візуалізація' }
+  ]
+};
+
+const $ = s => document.querySelector(s);
+const put = (slot, v) => { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = v; };
+put('project', DATA.project.name);
+put('eyebrow', DATA.section.eyebrow);
+put('title', DATA.section.title);
+document.title = 't-2 mobile · ' + DATA.section.title;
+
+const idxRow = $('#idxRow'), factEl = $('#fact');
+const spherePanel = $('#spherePanel'), detail = $('#detail');
+const EASE = 'cubic-bezier(.6,0,.2,1)', DUR = 620, LAG = 100;
+let active = 0, busy = false, expanded = false;
+
+DATA.materials.forEach((m, i) => {
+  const b = document.createElement('button');
+  b.className = 'idx' + (i === 0 ? ' active' : '');
+  b.setAttribute('aria-pressed', i === 0);
+  const n = document.createElement('span'); n.className = 'n'; n.textContent = '0' + (i + 1);
+  const w = document.createElement('span'); w.className = 'w'; w.textContent = m.word;
+  b.appendChild(n); b.appendChild(w);
+  b.addEventListener('click', () => go(i));
+  idxRow.appendChild(b);
+});
+
+const mkSlide = (src, alt, honesty) => {
+  const s = document.createElement('div'); s.className = 'slide';
+  const img = new Image(); img.src = src; img.alt = alt; img.loading = 'eager';
+  const c = document.createElement('span'); c.className = 'h-cap'; c.textContent = honesty;
+  s.appendChild(img); s.appendChild(c); return s;
+};
+const sphereSlide = i => mkSlide(DATA.materials[i].sphere,
+  DATA.materials[i].honesty + ': ' + DATA.materials[i].word.toLowerCase() + ' зблизька', DATA.materials[i].honesty);
+const detailSlide = i => mkSlide(DATA.materials[i].detail,
+  DATA.materials[i].honesty + ': ' + DATA.materials[i].caption.toLowerCase(), DATA.materials[i].honesty);
+
+function setFact(i){
+  factEl.classList.remove('in'); void factEl.offsetWidth;
+  factEl.textContent = DATA.materials[i].caption; factEl.classList.add('in');
+}
+
+function push(panel, slide, dir, delay){
+  const old = panel.querySelector('.slide.cur');
+  slide.style.transition = 'none';
+  slide.style.transform = `translateY(${dir * 102}%)`;
+  panel.appendChild(slide);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    slide.style.transition = `transform ${DUR}ms ${EASE} ${delay}ms`;
+    old.style.transition = `transform ${DUR}ms ${EASE} ${delay}ms`;
+    slide.style.transform = 'translateY(0)';
+    old.style.transform = `translateY(${dir * -102}%)`;
+    slide.classList.add('cur'); old.classList.remove('cur');
+    setTimeout(() => old.remove(), DUR + delay + 60);
+  }));
+}
+
+function go(i){
+  if (busy || expanded || i === active) return;
+  busy = true;
+  const dir = i > active ? 1 : -1;
+  push(spherePanel, sphereSlide(i), dir, 0);
+  push(detail, detailSlide(i), dir, LAG);   /* деталь з лагом 100ms */
+  [...idxRow.children].forEach((b, k) => { b.classList.toggle('active', k === i); b.setAttribute('aria-pressed', k === i); });
+  setFact(i);
+  active = i;
+  setTimeout(() => { busy = false; }, DUR + LAG + 80);
+}
+
+/* FLIP тієї самої ноди у майже повноекранний кадр */
+const scrim = $('#scrim');
+const slot = document.querySelector('.detail-slot');
+let flipBusy = false;
+function flip(open){
+  if (flipBusy) return; flipBusy = true;
+  const first = detail.getBoundingClientRect();
+  const ratio = first.width / first.height;
+  if (open) {
+    const w = Math.min(innerWidth * .92, 396), h = w / ratio;
+    const left = (innerWidth - w) / 2, top = Math.max((innerHeight - h) / 2, 12);
+    detail.classList.add('expanded');
+    Object.assign(detail.style, { left: left + 'px', top: top + 'px', width: w + 'px', height: h + 'px' });
+    const s = first.width / w;
+    detail.style.transformOrigin = '0 0';
+    detail.style.transition = 'none';
+    detail.style.transform = `translate(${first.left - left}px, ${first.top - top}px) scale(${s})`;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      detail.style.transition = `transform ${DUR}ms ${EASE}`;
+      detail.style.transform = 'none';
+    }));
+    scrim.classList.add('on');
+  } else {
+    const target = slot.getBoundingClientRect();
+    const cur = detail.getBoundingClientRect();
+    const s = target.width / cur.width;
+    detail.style.transition = `transform ${DUR}ms ${EASE}`;
+    detail.style.transform = `translate(${target.left - cur.left}px, ${target.top - cur.top}px) scale(${s})`;
+    scrim.classList.remove('on');
+    setTimeout(() => { detail.classList.remove('expanded'); detail.style.cssText = ''; }, DUR + 30);
+  }
+  expanded = open;
+  setTimeout(() => { flipBusy = false; }, DUR + 60);
+}
+detail.addEventListener('click', () => flip(!expanded));
+detail.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(!expanded); } });
+scrim.addEventListener('click', () => expanded && flip(false));
+addEventListener('keydown', e => { if (e.key === 'Escape' && expanded) flip(false); });
+
+function buildStatic(){
+  const list = $('#staticList'); list.innerHTML = '';
+  DATA.materials.forEach(m => {
+    const it = document.createElement('div'); it.className = 'static-item';
+    const cap = document.createElement('div'); cap.className = 'cap'; cap.textContent = m.word;
+    const f = document.createElement('div'); f.className = 'f'; f.textContent = m.caption;
+    it.appendChild(cap); it.appendChild(f);
+    [[m.sphere, m.word.toLowerCase() + ' зблизька'], [m.detail, m.caption.toLowerCase()]].forEach(([src, sub]) => {
+      const fg = document.createElement('figure');
+      const im = new Image(); im.src = src; im.alt = m.honesty + ': ' + sub;
+      const c = document.createElement('span'); c.className = 'h-cap'; c.textContent = m.honesty;
+      fg.appendChild(im); fg.appendChild(c); it.appendChild(fg);
+    });
+    list.appendChild(it);
+  });
+}
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const decoded = img => Promise.race([
+  img.decode().catch(() => {}),
+  new Promise(r => { if (img.complete) r(); else img.addEventListener('load', r, { once: true }); }),
+  new Promise(r => setTimeout(r, 800))
+]);
+
+async function init(){
+  if (reduced.matches) {
+    document.documentElement.classList.add('static');
+    buildStatic();
+    return;
+  }
+  /* DECODE-GUARD: усі сфери й деталі декодуються ДО вмикання перемикача */
+  const all = [];
+  DATA.materials.forEach(m => { [m.sphere, m.detail].forEach(src => { const i = new Image(); i.src = src; all.push(i); }); });
+  await Promise.all(all.map(decoded));
+  if (!spherePanel.querySelector('.slide')) {
+    const s0 = sphereSlide(0); s0.classList.add('cur'); s0.style.transform = 'none'; spherePanel.appendChild(s0);
+    const d0 = detailSlide(0); d0.classList.add('cur'); d0.style.transform = 'none';
+    detail.insertBefore(d0, detail.querySelector('.expander'));
+    setFact(0);
+  }
+}
+init();
+reduced.addEventListener('change', () => init());
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>menu-modal — review board (A · B · C)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Cormorant+Garamond:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:#0c1310;color:#e7ecdf;font-family:'Archivo',sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.caps{text-transform:uppercase;letter-spacing:.2em;font-size:10.5px;font-weight:500}
+.board-head{display:flex;align-items:baseline;justify-content:space-between;padding:16px 26px;border-bottom:1px solid rgba(231,236,223,.12);flex:none}
+.board-head .title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500}
+.board-head .title b{font-weight:500}
+.board-head .meta{opacity:.5}
+.grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);min-height:0}
+.col{display:flex;flex-direction:column;min-width:0;border-right:1px solid rgba(231,236,223,.12)}
+.col:last-child{border-right:none}
+.col-head{flex:none;padding:12px 16px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid rgba(231,236,223,.1)}
+.col-head .row1{display:flex;align-items:baseline;gap:12px}
+.col-head .tag{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500;line-height:1}
+.col-head .name{opacity:.6}
+.controls{display:flex;flex-wrap:wrap;gap:6px}
+button{font-family:'Archivo',sans-serif;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#e7ecdf;background:rgba(231,236,223,.06);border:1px solid rgba(231,236,223,.16);border-radius:2px;padding:6px 10px;cursor:pointer;transition:background .18s,border-color .18s}
+button:hover{background:rgba(231,236,223,.14);border-color:rgba(231,236,223,.32)}
+button.dot{padding:6px 9px;min-width:30px}
+button.open{background:#3c7940;border-color:#3c7940}
+button.open:hover{background:#4a8c4d}
+.frame-wrap{position:relative;flex:1;min-height:0;background:#efe7d5}
+iframe{position:absolute;inset:0;width:100%;height:100%;border:none;display:block}
+</style>
+</head>
+<body>
+  <div class="board-head">
+    <span class="title serif">menu-modal — <b>review board</b></span>
+    <span class="meta caps">Three variants · same law · drive each independently</span>
+  </div>
+  <div class="grid">
+    <div class="col">
+      <div class="col-head">
+        <div class="row1"><span class="tag serif">A</span><span class="name caps">Panel wipe-up</span></div>
+        <div class="controls" data-target="fa">
+          <button class="open" data-act="open">Open</button>
+          <button data-act="close">Close</button>
+          <button class="dot" data-i="0">1</button>
+          <button class="dot" data-i="1">2</button>
+          <button class="dot" data-i="2">3</button>
+          <button class="dot" data-i="3">4</button>
+          <button class="dot" data-i="4">5</button>
+          <button class="dot" data-i="5">6</button>
+        </div>
+      </div>
+      <div class="frame-wrap"><iframe id="fa" src="menu-modal-a.html" title="menu-modal A"></iframe></div>
+    </div>
+    <div class="col">
+      <div class="col-head">
+        <div class="row1"><span class="tag serif">B</span><span class="name caps">Split reveal</span></div>
+        <div class="controls" data-target="fb">
+          <button class="open" data-act="open">Open</button>
+          <button data-act="close">Close</button>
+          <button class="dot" data-i="0">1</button>
+          <button class="dot" data-i="1">2</button>
+          <button class="dot" data-i="2">3</button>
+          <button class="dot" data-i="3">4</button>
+          <button class="dot" data-i="4">5</button>
+          <button class="dot" data-i="5">6</button>
+        </div>
+      </div>
+      <div class="frame-wrap"><iframe id="fb" src="menu-modal-b.html" title="menu-modal B"></iframe></div>
+    </div>
+    <div class="col">
+      <div class="col-head">
+        <div class="row1"><span class="tag serif">C</span><span class="name caps">Designer's cut</span></div>
+        <div class="controls" data-target="fc">
+          <button class="open" data-act="open">Open</button>
+          <button data-act="close">Close</button>
+          <button class="dot" data-i="0">1</button>
+          <button class="dot" data-i="1">2</button>
+          <button class="dot" data-i="2">3</button>
+          <button class="dot" data-i="3">4</button>
+          <button class="dot" data-i="4">5</button>
+          <button class="dot" data-i="5">6</button>
+        </div>
+      </div>
+      <div class="frame-wrap"><iframe id="fc" src="menu-modal-c.html" title="menu-modal C"></iframe></div>
+    </div>
+  </div>
+<script>
+  function call(id, fn, arg){
+    const f = document.getElementById(id);
+    try{
+      const w = f && f.contentWindow;
+      if(w && typeof w[fn] === 'function'){ arg===undefined ? w[fn]() : w[fn](arg); }
+    }catch(e){}
+  }
+  document.querySelectorAll('.controls').forEach(group=>{
+    const id = group.getAttribute('data-target');
+    group.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      if(btn.dataset.act==='open'){ call(id,'openMenu'); }
+      else if(btn.dataset.act==='close'){ call(id,'closeMenu'); }
+      else if(btn.dataset.i!==undefined){ call(id,'openMenu'); call(id,'setActive', parseInt(btn.dataset.i,10)); }
+    });
+  });
+</script>
+</body>
+</html>

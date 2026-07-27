@@ -1,0 +1,11 @@
+import { resolveChromium } from './token-extractor.mjs';
+const chromium = await resolveChromium();
+const b = await chromium.launch();
+const page = await (await b.newContext({viewport:{width:1440,height:900}})).newPage();
+await page.goto('http://localhost:8879/suborganisms/SO-3-nature-place/index.html',{waitUntil:'networkidle'});
+await page.waitForFunction(()=>window.__SO3_OK__===true,{timeout:8000}).catch(()=>{});
+const r=await page.evaluate(()=>{window.render(0.82);
+  const e=document.getElementById('runners').getBoundingClientRect();
+  return {xL:(e.left/1440*100).toFixed(1),xR:((e.left+e.width)/1440*100).toFixed(1),w:(e.width/1440*100).toFixed(1),yT:(e.top/900*100).toFixed(1),yB:((e.top+e.height)/900*100).toFixed(1)};});
+console.log('OUR runners:',JSON.stringify(r));
+await b.close();

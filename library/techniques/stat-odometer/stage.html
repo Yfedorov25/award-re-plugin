@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>stat-odometer · stage</title>
+<link rel="stylesheet" href="../_springs-tokens.css">
+<link rel="stylesheet" href="component.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<style>
+  :root{ --green:#16322a; --green-deep:#0e241d; --cream:var(--spr-cream); --slate:#9fb0a6;
+    --serif:var(--spr-serif); --body:var(--spr-sans); }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--green-deep);color:var(--cream);font-family:var(--body);min-height:100%}
+  /* BOTH platforms PIN now (springs mobile stat = pinned-scroll, not auto-slider).
+     Tall wrapper gives the scroll length; the stage sticks on screen while scroll
+     drives the 4 mechanics. Content does NOT scroll away on either platform. */
+  .pin-wrap{ position:relative; }
+  .so-stage{ position:sticky; top:0; height:100vh !important; }
+  /* composition: content column over the bg */
+  .so-content{ position:absolute; z-index:2; left:0; top:0; height:100%; display:flex; flex-direction:column;
+    justify-content:center; padding:clamp(24px,6vw,90px); max-width:100%; }
+  .so-eyebrow{ font-size:.7rem; letter-spacing:.32em; text-transform:uppercase; color:var(--cream); opacity:.8; margin-bottom:clamp(12px,2vh,22px); }
+  .so-num-window{ font-family:var(--serif); font-weight:400; font-size:clamp(3.4rem,13vw,9rem); height:1em; --so-row:1em; }
+  .so-num{ height:1em; }
+  .so-label{ margin-top:.1em; font-family:var(--serif); font-weight:400; font-size:clamp(1.5rem,6vw,3.2rem); color:var(--cream); }
+  .so-progress{ max-width:min(320px,70%); background:rgba(236,228,211,.18); }
+  .so-progress__fill{ background:var(--cream); }
+  .badge{ position:fixed; top:10px; left:10px; z-index:9; font-family:ui-monospace,Menlo,monospace;
+    font-size:.62rem; letter-spacing:.06em; color:#7fd8b0; background:rgba(8,22,17,.72);
+    border:1px solid #26463c; border-radius:999px; padding:4px 10px; pointer-events:none; }
+  .so-bg::after{ background:linear-gradient(90deg, rgba(14,36,29,.72) 0%, rgba(14,36,29,.25) 55%, transparent 100%); }
+</style>
+</head>
+<body>
+  <div class="badge" id="badge">…</div>
+  <div class="pin-wrap" id="pinwrap">
+    <section class="so-stage" id="stage">
+      <div class="so-bg"></div>
+      <div class="so-content">
+        <div class="so-eyebrow">QUADRO · квартал у цифрах</div>
+        <span class="so-num-window"><span class="so-num-col"></span></span>
+        <div class="so-label"></div>
+        <div class="so-progress"><span class="so-progress__fill"></span></div>
+      </div>
+      <!-- steps: engine reads data-* and builds bg + numeral + label -->
+      <div class="so-step" data-num="6"  data-label="резиденцій" data-bg="img/s1.webp" hidden></div>
+      <div class="so-step" data-num="12" data-label="планувань"  data-bg="img/s2.webp" hidden></div>
+      <div class="so-step" data-num="24" data-label="терас"      data-bg="img/s3.webp" hidden></div>
+      <div class="so-step" data-num="48" data-label="дерев"      data-bg="img/s4.webp" hidden></div>
+    </section>
+  </div>
+
+<script src="engine.js"></script>
+<script src="component.js"></script>
+<script>
+  var r = StatOdometerDual.init('#stage', { platform: 'auto' });
+  var badge = document.getElementById('badge');
+  badge.textContent = r.platform === 'desktop' ? 'desktop · scroll-pin' : 'mobile · scroll-pin';
+  // BOTH platforms pin: tall wrap (N steps) so the sticky stage stays on screen while
+  // scroll drives the 4 mechanics. +1 viewport so the last step is reachable.
+  var n = (r.count || 4) - 1;
+  document.getElementById('pinwrap').style.height = ((n + 1) * 100) + 'vh';
+  if (window.Lenis) { var lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+    requestAnimationFrame(function raf(t){ lenis.raf(t); requestAnimationFrame(raf); }); }
+</script>
+</body>
+</html>

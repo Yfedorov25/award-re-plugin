@@ -1,0 +1,36 @@
+/* ============================================================
+   ROTATED-MATRIX-COLLAGE · component.css  (dual-platform)
+   A grid of photo tiles rotated as one rigid plane, a unifying colour wash over it.
+   The rigid pose (rotate+scale) is a css var; drift only writes --rmc-y (translateY),
+   so BOTH platform drivers touch the same one property. Plane scale must over-cover
+   the viewport after rotation.
+   ============================================================ */
+
+.rmc-stage { position: relative; width: 100%; height: 100vh; overflow: hidden; }
+
+/* solid bg behind the mosaic (the green field) */
+.rmc-bg { position: absolute; inset: 0; z-index: 0; }
+
+/* THE PLANE — rotated + scaled as one rigid body; the drift writes --rmc-y only.
+   translateY FIRST so it composes on top of the rigid rotate+scale pose. */
+.rmc-plane {
+  position: absolute; inset: -20%; z-index: 1; transform-origin: 50% 50%;
+  --rmc-y: 0px; --rmc-rot: -9deg; --rmc-scale: 1.4;
+  transform: translateY(var(--rmc-y)) rotate(var(--rmc-rot)) scale(var(--rmc-scale));
+  will-change: transform; backface-visibility: hidden;
+}
+.rmc-grid { position: absolute; inset: 0; }
+.rmc-tile { position: relative; overflow: hidden; }
+.rmc-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* the unifying colour WASH over the mosaic — INSIDE the plane (transforms with it),
+   so the mix-blend is baked into one static plane (the allowed mix-blend spot). */
+.rmc-wash { position: absolute; inset: 0; z-index: 2; mix-blend-mode: multiply; pointer-events: none; }
+
+/* content (title + eyebrow) above the plane */
+.rmc-content { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; }
+
+/* reduced-motion: no drift on either platform; the rotated mosaic just rests */
+@media (prefers-reduced-motion: reduce) {
+  .rmc-plane { transform: rotate(var(--rmc-rot)) scale(var(--rmc-scale)); }
+}

@@ -1,0 +1,82 @@
+/* LOCMAP-ENGINE · component.css
+   Award-grade location map styling, harvested 1:1 from apps/smarts location + apps/quadro infra.
+   SVG fill/stroke/opacity + transform/stroke-dashoffset only. NO WebGL. Tokenised so any palette drops in. */
+
+:root {
+  --lm-ink: #f3f1ec;          /* map foreground (cream) */
+  --lm-bg-1: #161410;         /* map field gradient inner */
+  --lm-bg-2: #0b0a08;         /* map field gradient outer + road casing */
+  --lm-accent: #b06a4f;       /* brick — the property + active state */
+  --lm-accent-soft: #c98a72;
+  --lm-lit: 236,178,118;      /* warm lit-window rgb */
+}
+
+.lm__stage { position: relative; overflow: clip;
+  background: radial-gradient(120% 100% at 40% 30%, var(--lm-bg-1), var(--lm-bg-2)); }
+.lm__map { width: 100%; height: 100%; display: block; }
+
+/* green / water */
+.lm-gw--green { fill: rgba(140,170,130,0.05); }
+.lm-gw--water { fill: rgba(120,150,190,0.07); }
+
+/* buildings + deterministic lit windows (nocturnal life) */
+.lm-bld { fill: rgba(243,241,236,0.04); stroke: rgba(243,241,236,0.04); stroke-width: 0.7; }
+.lm-bld--lit { fill: rgba(var(--lm-lit),0.22); stroke: rgba(var(--lm-lit),0.18); animation: lmFlick 5.5s ease-in-out infinite; }
+.lm-bld--lit:nth-child(3n) { animation-delay: 1.8s; }
+.lm-bld--lit:nth-child(5n) { animation-delay: 3.2s; }
+
+/* road hierarchy — casing (under) + stroke (over), dual width per rank */
+.lm-rdc { fill: none; stroke: var(--lm-bg-2); stroke-linecap: round; stroke-linejoin: round; }
+.lm-rd  { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.lm-rd--hwy   { stroke: rgba(243,241,236,0.4);  stroke-width: 7; }   .lm-rdc--hwy   { stroke-width: 11; }
+.lm-rd--main  { stroke: rgba(201,138,114,0.65); stroke-width: 5; }   .lm-rdc--main  { stroke-width: 9; }
+.lm-rd--mid   { stroke: rgba(243,241,236,0.2);  stroke-width: 3.4; } .lm-rdc--mid   { stroke-width: 6; }
+.lm-rd--minor { stroke: rgba(243,241,236,0.13); stroke-width: 2.2; } .lm-rdc--minor { stroke-width: 4; }
+.lm-rd--faint { stroke: rgba(243,241,236,0.05); stroke-width: 1.2; } .lm-rdc--faint { display: none; }
+.lm-rdname { fill: rgba(243,241,236,0.4); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; }
+
+/* property parcel + dual pulse + tag */
+.lm-parcel { fill: url(#lmHatch); stroke: var(--lm-accent-soft); stroke-width: 1.6; }
+.lm-pulse  { fill: none; stroke: var(--lm-accent-soft); stroke-width: 1.3; opacity: 0; }
+.lm.is-born .lm-pulse { animation: lmPulse 3s cubic-bezier(0.25,0.46,0.45,0.94) infinite; }
+.lm.is-born .lm-pulse--2 { animation-delay: 1.5s; }
+.lm-sitetag { fill: var(--lm-ink); font-size: 12.5px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+
+/* walking ring */
+.lm-ring  { fill: none; stroke: rgba(243,241,236,0.22); stroke-width: 1.2; stroke-dasharray: 5 7; }
+.lm-ringt { fill: rgba(243,241,236,0.45); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+/* numbered POIs */
+.lm-pt { cursor: pointer; }
+.lm-pt .lm-hit { fill: transparent; stroke: none; }   /* 44px coarse tap zone */
+.lm-pt circle { fill: #1d1813; stroke: rgba(201,138,114,0.8); stroke-width: 1.4; transition: fill 0.3s, stroke 0.3s; }
+.lm-pt text { fill: var(--lm-ink); font-size: 11.5px; font-weight: 600; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.lm-pt:hover circle, .lm-pt.is-on circle { fill: var(--lm-accent); stroke: var(--lm-ink); }
+.lm-pt.is-dim { opacity: 0.3; }
+
+/* Dijkstra route + walker + live timer */
+.lm-route  { fill: none; stroke: var(--lm-accent-soft); stroke-width: 3.2; stroke-dasharray: 8 8; }
+.lm-walker { fill: var(--lm-ink); stroke: var(--lm-accent); stroke-width: 2; }
+.lm-livet  { fill: var(--lm-ink); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; }
+.lm-livebg { fill: rgba(16,19,26,0.85); stroke: rgba(201,138,114,0.5); stroke-width: 1; }
+
+/* INFRA mode (quadro): category pins + centroid cluster badge */
+.lm-infra { fill: rgba(243,241,236,0.5); }
+.lm-cluster__bg { fill: var(--lm-accent); }
+.lm-cluster__n  { fill: #fff; font-size: 12px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+
+/* side list (host markup) */
+.lm-row { display: grid; grid-template-columns: 2.4ch 1fr auto; gap: 0.8rem; align-items: baseline;
+  padding: 0.7rem 0; border-bottom: 1px solid rgba(243,241,236,0.08); cursor: pointer; color: var(--lm-ink); }
+.lm-row .n { color: var(--lm-accent-soft); font-variant-numeric: tabular-nums; }
+.lm-row .nm { font-weight: 500; }
+.lm-row .tm { font-size: 0.8rem; opacity: 0.65; font-variant-numeric: tabular-nums; }
+.lm-row:hover, .lm-row.is-on { background: rgba(243,241,236,0.04); }
+.lm-row.is-on .n { color: var(--lm-accent); }
+
+@keyframes lmFlick { 0%,100% { opacity: 0.5; } 45% { opacity: 1; } 70% { opacity: 0.65; } }
+@keyframes lmPulse { 0% { transform: scale(0.5); opacity: 0.7; } 100% { transform: scale(2.4); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lm-bld--lit, .lm.is-born .lm-pulse { animation: none; }
+}

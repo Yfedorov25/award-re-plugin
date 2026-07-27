@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB · pin-release-seam · T-510 (замерзає і віддає скрол)</title>
+<!--
+================================================================================
+  LAB: pin-release-seam — T-510 pin-then-release ланцюг.
+  Контракт: живий shared.js AIR — sticky-підкладка (секція A замерзає),
+  наступна B наїжджає ПОВЕРХ; A-контент тікає вгору вдвічі повільніше
+  (HalfUnderNext: 0→−75svh, t²), B-контент визирає з −50svh. На тачі
+  паралакс вимкнено (enableTouch:false), sticky-наїзд живе.
+
+  ГЕЙТ (PROBE_MODE):
+  1. структура: рама 200vh існує, при скролі всередині рами A.top == 0
+     (замерзла) ±2px;
+  2. mid-наїзд (p≈0.5): B перекриває нижню ~половину в'юпорта; A-контент
+     зсунутий ВГОРУ (translateY < 0, ≈ −t²·75svh ±20%); B-контент
+     зсунутий вгору відносно панелі (наплив, < 0);
+  3. reversible: скрол назад до p=0 → зсуви шарів = 0 (±1px), A знову
+     повний екран;
+  4. вузький в'юпорт (перевіряється окремим прогоном 390px):
+     staticParallax:true — шари БЕЗ transform, sticky живе;
+  5. transform-only: CLS < 0.1; console errors == 0.
+  Живий перегляд (без ?probe): скроль — нуль автоскролів.
+================================================================================
+-->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="component.css">
+<style>
+  :root { --paper: #f4f2ee; --ink: #111110; --sans: 'Inter', system-ui, -apple-system, sans-serif; }
+  * { margin: 0; box-sizing: border-box; }
+  html { overflow-anchor: none; scroll-behavior: auto; overflow-x: clip; }
+  body { font-family: var(--sans); background: var(--paper); color: var(--ink); }
+  .lab-tag { position: fixed; bottom: 10px; left: 12px; z-index: 20; font-size: 10px;
+             letter-spacing: .14em; color: #999; text-transform: uppercase; pointer-events: none; }
+  .intro, .outro { min-height: 90vh; display: flex; align-items: center; padding: 0 6vw; color: #6b6b68; }
+  #secA { background: #161616; color: #f2f1ee; display: flex; align-items: center; }
+  #secA .inner { padding: 0 6vw; }
+  #secA h2 { font-size: clamp(28px, 4vw, 56px); font-weight: 300; max-width: 24ch; margin-bottom: 2.4vh; }
+  #secA p { font-size: 15px; color: #c9c7c2; max-width: 44ch; line-height: 1.55; }
+  #secB { background: var(--paper); min-height: 100vh; display: flex; align-items: center; }
+  #secB .inner { padding: 0 6vw; }
+  #secB .kicker { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+                  color: #6b6b68; margin-bottom: 2.4vh; }
+  #secB .num { font-size: clamp(48px, 5.9vw, 92px); font-weight: 300; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="lab-tag">lab · pin-release-seam · t-510 · скроль</div>
+
+<section class="intro"><p>… скроль униз: темна секція замерзне і віддасть скрол …</p></section>
+
+<section id="secA">
+  <div class="inner">
+    <h2>Житла тут будують більше, ніж магазинів.</h2>
+    <p>Цей розрив і є ваш прибуток. Секція замерзла: наступна наїжджає поверх, а цей текст тікає вгору вдвічі повільніше.</p>
+  </div>
+</section>
+
+<section id="secB">
+  <div class="inner">
+    <p class="kicker">Умови без дрібного шрифту</p>
+    <div class="num">22 800</div>
+    <p style="margin-top:1.4vh;color:#6b6b68;font-size:13px">доларів · вхід з ремонтом під ключ</p>
+  </div>
+</section>
+
+<section class="outro"><p>… кінець проби …</p></section>
+
+<script src="component.js"></script>
+<script>
+(function () {
+  'use strict';
+  var errs = 0, NET_RE = /net::|Failed to load resource|ERR_/i;
+  window.addEventListener('error', function (ev) {
+    if (!NET_RE.test(String((ev && ev.message) || ''))) errs++;
+  });
+  window.__LAB_ERRORS = function () { return errs; };
+
+  var PM = !!(navigator.webdriver || /[?&]probe\b/.test(location.search));
+  var report = { frozen: null, mid: null, reversible: null, touch: null, errors: null };
+  window.__LAB_REPORT = report;
+  function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  var prs = window.PinReleaseSeam.create('#secA', '#secB', {});
+  window.__PRS = prs;
+  var A = document.getElementById('secA'), B = document.getElementById('secB');
+  var layerA = A.firstElementChild, layerB = B.firstElementChild;
+  function ty(el) {
+    var m = /translateY\((-?\d*\.?\d+)/.exec(el.style.transform || '');
+    return m ? parseFloat(m[1]) : 0;
+  }
+
+  async function run() {
+    if (!PM) { window.__LAB_OK__ = 'live-mode'; return; }
+    var ok = true;
+    var vh = window.innerHeight;
+    var narrow = window.matchMedia('(pointer: coarse), (max-width: 768px)').matches;
+
+    var cls = 0;
+    try {
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) { if (!e.hadRecentInput) cls += e.value; });
+      }).observe({ type: 'layout-shift', buffered: true });
+    } catch (e) {}
+
+    if (narrow) {
+      /* 4: тач-гілка — sticky живе, паралакс вимкнено */
+      var frame = document.querySelector('.prs__frame');
+      var goal = frame.offsetTop + vh * 0.5;
+      window.scrollTo(0, goal);
+      await delay(300);
+      report.touch = {
+        staticParallax: prs.staticParallax === true,
+        frozen: Math.abs(A.getBoundingClientRect().top) <= 2,
+        layerAty: ty(layerA), layerBty: ty(layerB)
+      };
+      ok = report.touch.staticParallax && report.touch.frozen &&
+           report.touch.layerAty === 0 && report.touch.layerBty === 0;
+      report.errors = errs;
+      window.__LAB_OK__ = !!(ok && errs === 0);
+      console.log('[lab:pin-release-seam:touch]', JSON.stringify(report));
+      return;
+    }
+
+    /* 1: заморозка */
+    var frame = document.querySelector('.prs__frame');
+    window.scrollTo(0, frame.offsetTop + vh * 0.25);
+    await delay(300);
+    report.frozen = { frameH: Math.round(frame.offsetHeight / vh * 100) / 100,
+                      Atop: Math.round(A.getBoundingClientRect().top),
+                      ok: frame.offsetHeight >= vh * 1.98 && Math.abs(A.getBoundingClientRect().top) <= 2 };
+    ok = report.frozen.ok && ok;
+
+    /* 2: mid-наїзд p≈0.5 */
+    window.scrollTo(0, frame.offsetTop + vh * 0.5);
+    await delay(350);
+    var p = prs.progress();
+    var bTop = B.getBoundingClientRect().top;
+    var aTy = ty(layerA), bTy = ty(layerB);
+    var expectA = -(p * p) * 75; /* t² × releaseShift, у svh ≈ vh */
+    report.mid = { p: Math.round(p * 100) / 100, bTopVh: Math.round(bTop / vh * 100),
+                   aTy: Math.round(aTy * 10) / 10, expA: Math.round(expectA * 10) / 10,
+                   bTy: Math.round(bTy * 10) / 10,
+                   ok: p > 0.3 && p < 0.7 && bTop < vh * 0.7 && aTy < -2 &&
+                       Math.abs(aTy - expectA) < Math.abs(expectA) * 0.2 + 2 && bTy < -2 };
+    ok = report.mid.ok && ok;
+
+    /* 3: reversible */
+    window.scrollTo(0, Math.max(0, frame.offsetTop - vh * 0.02));
+    await delay(350);
+    report.reversible = { aTy: ty(layerA), bTy: Math.round(ty(layerB) * 10) / 10,
+                          ok: Math.abs(ty(layerA)) <= 1 };
+    ok = report.reversible.ok && ok;
+
+    report.cls = Math.round(cls * 1000) / 1000;
+    report.errors = errs;
+    ok = ok && cls < 0.1 && errs === 0;
+    window.__LAB_OK__ = !!ok;
+    console.log('[lab:pin-release-seam]', JSON.stringify(report));
+  }
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', function () { run(); });
+}());
+</script>
+</body>
+</html>

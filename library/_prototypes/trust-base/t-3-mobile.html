@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+PASSPORT · t-3-mobile «Менше року: одометр» · клас A · PHONE TWIN
+Десктоп-база: t-3-less-than-a-year.html (не чіпати). Той самий DATA-контракт.
+SIGNATURE MORPH збережено: одометр digit-strip, квантований, write-on-change.
+Мобільна форма: стадії ПОВНИМ КАДРОМ (contained на всю ширину, без кропу,
+аспект камери 1920:815), рил під кадром clamp 96-130px, слово юніта під ним,
+підпис стадії нижче. Пін-ранвей 260dvh.
+
+STAGE MAP: dwell / XFADE-1 0.25-0.35 / dwell / XFADE-2 0.58-0.68 / BEAT 0.85 / dwell.
+F-48: тапів у спокої = 0. Один хінт відсутній навмисно (рух видно одразу).
+Анімовані властивості: transform (рил), opacity (кросфейди, підписи).
+Reduced-motion: render(1) статично.
+═══════════════════════════════════════════════════════════════════════════════
+-->
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>t-3 mobile · Менше року</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,400&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1A1713; --ink:#EDE6D8; --muted:#A2988A; --accent:#AC7E65;
+    --hair:rgba(237,230,216,.16); --gutter:20px;
+    --serif:'Cormorant',Georgia,serif; --sans:'Golos Text',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{overflow-x:clip}
+  body{background:#0b0a09;font-family:var(--sans);font-size:16px;line-height:1.55;color:var(--ink);-webkit-font-smoothing:antialiased}
+  .phone{width:100%;max-width:430px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:clip;background:var(--bg)}
+  img{display:block}
+
+  .meta-row{display:flex;justify-content:space-between;align-items:baseline;
+    padding:20px var(--gutter) 0;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .head{padding:40px var(--gutter) 32px}
+  .eyebrow{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:300;font-size:40px;line-height:1.05;text-wrap:balance}
+
+  .pin{height:260dvh;position:relative}
+  html.static .pin{height:auto}
+  .stick{position:sticky;top:0;height:100dvh;overflow:clip;background:var(--bg);
+    display:flex;flex-direction:column;justify-content:center;gap:30px;
+    padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+  html.static .stick{position:relative;height:100dvh}
+  .stages{position:relative;width:100%;aspect-ratio:1920/815;flex:none}
+  .stages img{position:absolute;inset:0;width:100%;height:100%}
+  .stages img.s1,.stages img.s2{opacity:0}
+  .h-cap{position:absolute;left:16px;bottom:14px;z-index:5;font:500 11px/1 var(--sans);
+    letter-spacing:.14em;text-transform:uppercase;color:rgba(237,230,216,.82);
+    text-shadow:0 1px 8px rgba(10,8,6,.65)}
+
+  .stat{display:grid;place-items:center;text-align:center}
+  .stat-inner{display:grid;justify-items:center;gap:10px}
+  .reel{height:1em;overflow:clip;font-family:var(--serif);font-weight:300;font-size:clamp(96px,36vw,140px);line-height:1}
+  .reel .strip{transition:transform .55s cubic-bezier(.3,0,.2,1);will-change:transform}
+  html.static .reel .strip{transition:none}
+  .reel .strip span{display:block;height:1em}
+  .unit .u{font-family:var(--serif);font-weight:300;font-size:30px;line-height:1}
+  .unit .s{margin-top:10px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,230,216,.75)}
+
+  .capline{display:flex;justify-content:center}
+  .capline .in{display:inline-block;font-family:var(--serif);font-size:22px;
+    animation:capIn .45s cubic-bezier(.2,.7,.2,1) both}
+  html.static .capline .in{animation:none}
+  @keyframes capIn{from{opacity:0;transform:translateY(.35em)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="phone">
+<section data-screen-label="t-3 mobile less than a year">
+  <div class="meta-row"><span data-slot="project"></span><span>Клас A · t-3 · моб</span></div>
+  <header class="head">
+    <p class="eyebrow" data-slot="eyebrow"></p>
+    <h1 data-slot="title"></h1>
+  </header>
+
+  <div class="pin" id="pin">
+    <div class="stick">
+      <div class="stages" id="stages">
+        <span class="h-cap" id="hcap"></span>
+      </div>
+      <div class="stat">
+        <div class="stat-inner">
+          <div class="reel"><div class="strip" id="strip"></div></div>
+          <div class="unit">
+            <div class="u" id="unitWord"></div>
+            <div class="s" data-slot="sub"></div>
+          </div>
+        </div>
+      </div>
+      <div class="capline"><span class="in" id="capline"></span></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<script>
+/* ═ TEMPLATE CONTRACT ═ (ідентичний десктопному t-3-less-than-a-year.html)
+   ОБОВʼЯЗКОВІ: project.name · section.{eyebrow,title} · stages[3] (src, caption,
+   honesty) · finale.caption · odometer.{finalValue, unitForms[3], sub}
+   ОПЦІЙНІ: немає. Одна величина на рилі: тільки місяці. */
+const DATA = {
+  project: { name: 'ЖК Агрономічне' },
+  section: { eyebrow: 'Будівництво', title: 'Менше року від старту до ключів' },
+  stages: [
+    { src: 'assets/build-smarts/build-stage-0.webp', caption: 'Червень 2026 · ділянка',
+      honesty: 'Візуалізація · ділянка, червень 2026' },
+    { src: 'assets/build-smarts/build-stage-1.webp', caption: 'Осінь 2026 · каркас',
+      honesty: 'Візуалізація · каркас, осінь 2026' },
+    { src: 'assets/build-smarts/build-stage-2.webp', caption: 'Кінець 2026 · фасади',
+      honesty: 'Візуалізація · фасади, кінець 2026' }
+  ],
+  finale: { caption: '2 квартал 2027 · ключі' },
+  odometer: { finalValue: 9, unitForms: ['місяць','місяці','місяців'], sub: 'від старту до ключів' }
+};
+
+const $ = s => document.querySelector(s);
+const put = (slot, v) => { const el = document.querySelector(`[data-slot="${slot}"]`); if (el) el.textContent = v; };
+put('project', DATA.project.name);
+put('eyebrow', DATA.section.eyebrow);
+put('title', DATA.section.title);
+put('sub', DATA.odometer.sub);
+
+const stagesEl = $('#stages');
+const stageEls = DATA.stages.map((st, i) => {
+  const img = new Image();
+  img.src = st.src; img.alt = st.honesty.replace(' · ', ': ');
+  img.className = 's' + i; img.loading = 'eager';
+  stagesEl.insertBefore(img, stagesEl.querySelector('.h-cap')); return img;
+});
+
+const strip = $('#strip');
+for (let d = 0; d <= 9; d++) { const s = document.createElement('span'); s.textContent = d; strip.appendChild(s); }
+const plural = n => DATA.odometer.unitForms[n === 1 ? 0 : (n >= 2 && n <= 4 ? 1 : 2)];
+
+const seg = (p, a, b) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+const X1 = [0.25, 0.35], X2 = [0.58, 0.68], BEAT = 0.85;
+let lastM = -1, lastCap = -1, lastH = -1;
+const capline = $('#capline'), hcap = $('#hcap'), unitWord = $('#unitWord');
+const captions = [DATA.stages[0].caption, DATA.stages[1].caption, DATA.stages[2].caption, DATA.finale.caption];
+
+function render(p){
+  stageEls[1].style.opacity = seg(p, X1[0], X1[1]);
+  stageEls[2].style.opacity = seg(p, X2[0], X2[1]);
+  const lp = Math.min(1, p / BEAT);
+  const F = DATA.odometer.finalValue;
+  const mQ = lp >= 1 ? F : Math.floor(lp * F);
+  if (mQ !== lastM) { strip.style.transform = `translateY(${-mQ}em)`; unitWord.textContent = plural(mQ); lastM = mQ; }
+  const cap = p >= BEAT ? 3 : p >= X2[1] ? 2 : p >= X1[1] ? 1 : 0;
+  if (cap !== lastCap) { capline.classList.remove('in'); void capline.offsetWidth; capline.textContent = captions[cap]; capline.classList.add('in'); lastCap = cap; }
+  const h = p >= X2[0] ? 2 : p >= X1[0] ? 1 : 0;
+  if (h !== lastH) { hcap.textContent = DATA.stages[h].honesty; lastH = h; }
+}
+
+window.__zeroBlankProbe = function(){
+  for (let p = 0; p <= 1.001; p += 0.02) { render(p);
+    if (getComputedStyle(stageEls[0]).opacity !== '1') return { ok: false, p }; }
+  return { ok: true };
+};
+
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const decoded = img => Promise.race([
+  img.decode().catch(() => {}),
+  new Promise(r => { if (img.complete) r(); else img.addEventListener('load', r, { once: true }); }),
+  new Promise(r => setTimeout(r, 800))
+]);
+
+async function init(){
+  /* DECODE-GUARD: стадії декодуються ДО створення тригера */
+  await Promise.all(stageEls.map(decoded));
+
+  if (reduced.matches) {
+    document.documentElement.classList.add('static');
+    requestAnimationFrame(() => requestAnimationFrame(() => render(1)));
+    return;
+  }
+
+  const pin = $('#pin');
+  let start = 0, len = 1;
+  const measure = () => { const r = pin.getBoundingClientRect(); start = r.top + scrollY; len = pin.offsetHeight - innerHeight; };
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    measure(); render(0);
+    let raf = null;
+    const loop = () => { raf = null; render(Math.min(1, Math.max(0, (scrollY - start) / len))); };
+    addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(loop); }, { passive: true });
+    addEventListener('resize', () => { measure(); loop(); });
+    loop();
+  }));
+}
+init();
+reduced.addEventListener('change', () => init());
+</script>
+</body>
+</html>
