@@ -61,7 +61,16 @@ function claimsInnerSectionDone(text) {
   const INNER = /(нутро|карусель|слайдер|картк|композиц|темп|hover-пін|під-організм|suborganism|SO-\d|модалк|перехід|поєднан|section inner|inner section|нутра)/i;
   if (!INNER.test(t)) return false;
   // honest reports (negations / "not done" / "needs eye") are allowed
-  const NEG = /(\bне\b|нема|немає|\bnot\b|нужно|треба|ще не|поки не|needs-eye|needs eye|потребу|не 1|не готов|видаю неготове|неготове|провал|fail|розбіжн|відмінност|collision|налазить|розсинхрон|не заявля|не досяга)/i;
+    /* 🔴 S60-c ФІКС ДВОХ БАГІВ (знайшла паралельна сесія, підтверджено прогоном):
+     1. `\b` у JavaScript рахує ТІЛЬКИ ASCII, тому `\bне\b` НІКОЛИ не спрацьовував на
+        кирилиці: node -e 'console.log(/\bне\b/.test(" не "))' дає false. Через це захист від
+        false-positive був мертвий, і хук блокував чесні звіти українською («Секція hero.
+        Я не робив звірку»), а водночас пропускав ствердження без слова-заперечення.
+        Заміна: юнікод-межа (?<![\p{L}\p{N}]) ... (?![\p{L}\p{N}]) з флагом `u`.
+     2. слово `parity` стояло І в списку заяв, І в списку візуального контексту, тому
+        речення «піксельної parity немає» блокувало САМЕ СЕБЕ. Прибрано зі списку заяв:
+        у контексті воно лишається, як ознака візуальної роботи. */
+const NEG = new RegExp('((?<![\\p{L}\\p{N}])не(?![\\p{L}\\p{N}])|нема|немає|(?<![\\p{L}\\p{N}])not(?![\\p{L}\\p{N}])|нужно|треба|ще не|поки не|needs-eye|needs eye|потребу|не 1|не готов|видаю неготове|неготове|провал|fail|розбіжн|відмінност|collision|налазить|розсинхрон|не заявля|не досяга)', 'iu');
   if (NEG.test(t)) return false;
   // quoting THIS gate's own message must not recurse
   if (/videoparitygate|g22|video-parity/i.test(t)) return false;
